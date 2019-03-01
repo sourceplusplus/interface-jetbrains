@@ -19,6 +19,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 ## 0.2.0 (alpha)
 
  - H2 database storage ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Local bundled Source++ Core in Source++ Plugin ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Application/environment switching ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Scala support ![](../../images/roadmap/Source++-Plugin-blue.svg)
