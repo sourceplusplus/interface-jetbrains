@@ -42,7 +42,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.6.0 (alpha)
 
- - Apache SkyWalking .NET & JetBrains Rider integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Apache SkyWalking .NET & JetBrains Rider integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
 
 ## 1.0.0
 
