@@ -6,7 +6,6 @@
 
 <p align="center">
   <a href="https://travis-ci.com/CodeBrig/Source"><img src="https://travis-ci.com/CodeBrig/Source.svg?token=ss9XQPnrp2cb7kvLpwGX&branch=master"/></a>
-  <a href="https://github.com/CodeBrig/Source/releases"><img src="https://img.shields.io/github/release/CodeBrig/Source.svg?style=flat"/></a>
   <a href="https://gitter.im/sourceplusplus"><img src="https://badges.gitter.im/Join Chat.svg"/></a>
   <a href="https://github.com/CodeBrig/Source/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2-blue.svg?style=flat"/></a>
 </p>
