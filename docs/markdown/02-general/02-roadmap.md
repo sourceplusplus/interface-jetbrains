@@ -21,7 +21,6 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - H2 database storage ![](../../images/roadmap/Source++-Core-blue.svg)
  - Local bundled Source++ Core in Source++ Plugin ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Application/environment switching ![](../../images/roadmap/Source++-Tooltip-blue.svg)
- - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Scala support ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Min/max response time in quick stats ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Ability to switch overview graph ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
@@ -30,13 +29,17 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
  - Pinpoint integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
  - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
- - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
 
 ## 0.4.0 (alpha)
 
- - stagemonitor integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
 
 ## 0.5.0 (alpha)
+
+ - stagemonitor integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+
+## 0.6.0 (alpha)
 
  - Apache SkyWalking .NET & JetBrains Rider integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
 
