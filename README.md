@@ -31,6 +31,10 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 > 4. No websites or dashboards necessary to debug complex asynchronous runtime issues (just look at and follow through your actual source code)
 > 5. AI-based pair programming is going to be pretty cool when we get it right
 
+## Architectural Overview
+
+![](docs/images/Source%2B%2B%20Architectural%20Overview-v0.1.0-alpha.gif)
+
 ## Getting Started
 
 ### Prerequisites
@@ -57,10 +61,6 @@ Install a JetBrains IDE if you don’t already have one.
 5. Click `OK` in the `Settings` dialog and restart your IDE.
 
 After installation you will need to configure the Source++ Plugin (see [Configure Plugin](https://sourceplusplus.com/knowledge/introduction/configure-plugin/)).
-
-## Architectural Overview
-
-![](docs/images/Source%2B%2B%20Architectural%20Overview-v0.1.0-alpha.gif)
 
 ## Code Structure
 
