@@ -1,0 +1,14 @@
+{
+  "artifact": {
+    "properties": {
+      "app_uuid": {
+        "type": "keyword",
+        "index": true
+      },
+      "config.endpoint_name": {
+        "type": "keyword",
+        "index": true
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+apply plugin: 'groovy'
+
+group = 'com.sourceplusplus.plugin'
+archivesBaseName = 'source-plugin-commons'
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    compile project(":api")
+    compile project(":tooltip")
+    compile 'io.vertx:vertx-web:3.6.3'
+    compile 'io.vertx:vertx-tcp-eventbus-bridge:3.6.3'
+}

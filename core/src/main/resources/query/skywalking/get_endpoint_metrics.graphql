@@ -1,0 +1,98 @@
+{
+    getEndpointThroughputTrend: getLinearIntValues(metric: {
+          name: "endpoint_cpm"
+          id: "$endpointId"
+        }, duration: {
+            start: "$durationStart",
+            end: "$durationEnd",
+            step: $durationStep
+    }) {
+      values {
+        value
+      }
+    }
+    getEndpointResponseTimeTrend: getLinearIntValues(metric: {
+          name: "endpoint_avg"
+          id: "$endpointId"
+        }, duration: {
+            start: "$durationStart",
+            end: "$durationEnd",
+            step: $durationStep
+    }) {
+      values {
+        value
+      }
+    }
+    getEndpointSLATrend: getLinearIntValues(metric: {
+          name: "endpoint_sla"
+          id: "$endpointId"
+        }, duration: {
+            start: "$durationStart",
+            end: "$durationEnd",
+            step: $durationStep
+    }) {
+      values {
+        value
+      }
+    }
+    getEndpointResponseTimeP99Trend: getLinearIntValues(metric: {
+          name: "endpoint_p99"
+          id: "$endpointId"
+        }, duration: {
+            start: "$durationStart",
+            end: "$durationEnd",
+            step: $durationStep
+    }) {
+      values {
+        value
+      }
+    }
+    getEndpointResponseTimeP95Trend: getLinearIntValues(metric: {
+          name: "endpoint_p95"
+          id: "$endpointId"
+        }, duration: {
+            start: "$durationStart",
+            end: "$durationEnd",
+            step: $durationStep
+    }) {
+      values {
+        value
+      }
+    }
+    getEndpointResponseTimeP90Trend: getLinearIntValues(metric: {
+          name: "endpoint_p90"
+          id: "$endpointId"
+        }, duration: {
+            start: "$durationStart",
+            end: "$durationEnd",
+            step: $durationStep
+    }) {
+      values {
+        value
+      }
+    }
+    getEndpointResponseTimeP75Trend: getLinearIntValues(metric: {
+          name: "endpoint_p75"
+          id: "$endpointId"
+        }, duration: {
+            start: "$durationStart",
+            end: "$durationEnd",
+            step: $durationStep
+    }) {
+      values {
+        value
+      }
+    }
+    getEndpointResponseTimeP50Trend: getLinearIntValues(metric: {
+          name: "endpoint_p50"
+          id: "$endpointId"
+        }, duration: {
+            start: "$durationStart",
+            end: "$durationEnd",
+            step: $durationStep
+    }) {
+      values {
+        value
+      }
+    }
+}

@@ -1,0 +1,21 @@
+{
+  "core": {
+    "host": "localhost",
+    "port": 8080,
+    "ssl": false,
+    "jks_path": null,
+    "jks_password": null,
+    "secure_mode": false,
+    "api_key": null,
+    "bridge_port": 7000,
+    "subscription_inactive_limit": 15
+  },
+  "skywalking.oap": {
+    "host": "localhost",
+    "port": 12800
+  },
+  "elasticsearch": {
+    "host": "localhost",
+    "port": 9200
+  }
+}

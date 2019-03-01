@@ -1,0 +1,10 @@
+{
+    getAllServices(duration: {
+      start: "$durationStart",
+      end: "$durationEnd",
+      step: $durationStep
+    }) {
+      key: id
+      label: name
+    }
+}

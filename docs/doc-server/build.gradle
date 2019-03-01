@@ -1,0 +1,62 @@
+apply plugin: 'application'
+apply plugin: 'groovy'
+
+applicationName = 'source-doc-server'
+archivesBaseName = 'source-doc-server'
+mainClassName = 'com.sourceplusplus.docserver.DocServerBootstrap'
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.1'
+    compile 'io.vertx:vertx-web:3.6.3'
+    compile 'io.vertx:vertx-web-client:3.6.3'
+    compile group: 'net.jodah', name: 'expiringmap', version: '0.5.9'
+}
+
+task createProperties(dependsOn: processResources) {
+    doLast {
+        new File("$buildDir/resources/main/source-doc-server_build.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = project.version.toString()
+            p['build_date'] = new Date().toInstant().toString()
+            p.store w, null
+        }
+    }
+}
+classes {
+    dependsOn createProperties
+}
+
+groovydoc {
+    link 'https://vertx.io/docs/apidocs/', 'io.vertx.'
+    link 'https://download.oracle.com/javase/8/docs/api/', 'java.'
+    link 'http://docs.groovy-lang.org/latest/html/gapi/', 'groovy.', 'org.codehaus.groovy.'
+    use = true
+    def majorMinorVersion = project.version.toString().substring(0, project.version.toString().lastIndexOf("."))
+    windowTitle = "Source++ $majorMinorVersion"
+    docTitle = "Source++ $majorMinorVersion"
+    footer = "Generated: " + java.time.Instant.now()
+
+    groovyClasspath = project(":core").groovydoc.groovyClasspath
+    classpath += project(":core").sourceSets.main.output
+    classpath += project(":api").sourceSets.main.output
+    source = ['../../agent/jvm-agent/src/main/java',
+              '../../api/src/main/java',
+              '../../core/src/main/groovy',
+              //'../../plugin/jetbrains-plugin/src/main/groovy',
+              '../../plugin/source-plugin-commons/src/main/groovy',
+              '../../tooltip/src/main/groovy',
+              '../../api/build/generated/source/apt/main']
+
+    finalizedBy "updateGroovydocStylesheet"
+}
+
+task updateGroovydocStylesheet {
+    doLast {
+        def stylesheet = file('build/docs/groovydoc/stylesheet.css').text
+        stylesheet = stylesheet.replace("#db4800", "#e1483b")
+        stylesheet = stylesheet.replace("#f2f2f2;", "#182d34; color: white;")
+        file('build/docs/groovydoc/stylesheet.css').text = ""
+        file('build/docs/groovydoc/stylesheet.css') << stylesheet
+    }
+}

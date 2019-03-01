@@ -1,0 +1,18 @@
+sudo: required
+
+language: java
+
+services:
+  - docker
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.4.2
+
+before_install:
+ - chmod +x gradlew
+
+before_cache:
+  - rm -rf $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+    - $HOME/.gradle/caches/modules-2
+    - $HOME/.gradle/wrapper/

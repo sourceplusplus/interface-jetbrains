@@ -1,0 +1,54 @@
+version: '3.3'
+services:
+  source-core:
+    container_name: source-core
+    hostname: source-core
+    build:
+      context: .
+      dockerfile: Dockerfile-source-core
+    ports:
+    - "8080:8080"
+    #- "5005:5005"
+    restart: on-failure
+    depends_on:
+    - es-server
+  skywalking-oap:
+    container_name: skywalking-oap
+    hostname: skywalking-oap
+    build:
+      context: .
+      dockerfile: Dockerfile-skywalking-oap
+    ports:
+    - "11799:11799"
+    - "12799:12799"
+    #- "5005:5005"
+    restart: on-failure
+    depends_on:
+    - es-server
+    links:
+    - es-server
+    #environment:
+    #- JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5006
+  es-server:
+    image: blacktop/elasticsearch:6.5.3
+    container_name: es-server
+    hostname: es-server
+    ports:
+    - "9200:9200"
+    - "9300:9300"
+    cap_add:
+    - IPC_LOCK
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    command: -E cluster.name=es-skywalking -E path.data=data -E path.logs=logs -E network.host=0.0.0.0 -E node.name=node-1
+#  redis:
+#    container_name: sourceweb_redis
+#    hostname: redis
+#    image: redis
+#    ports:
+#    - "6379:6379"

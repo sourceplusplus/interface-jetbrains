@@ -1,0 +1,5 @@
+{
+  "host": "source-doc-server",
+  "port": 80,
+  "base.path": "https://api.github.com/repos/CodeBrig/test_doc/contents"
+}

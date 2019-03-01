@@ -1,0 +1,6 @@
+{
+    searchEndpoint(serviceId: "$serviceId", keyword: "", limit: 1000) {
+      key: id
+      label: name
+    }
+}

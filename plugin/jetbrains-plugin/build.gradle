@@ -1,0 +1,43 @@
+plugins {
+    id "org.jetbrains.intellij" version "0.3.12"
+}
+
+apply plugin: 'groovy'
+intellij {
+    pluginName 'jetbrains-source-plugin'
+    plugins = ["Groovy", "Kotlin", "properties"]
+}
+
+group = 'com.sourceplusplus.plugin'
+archivesBaseName = 'jetbrains-source-plugin'
+
+dependencies {
+    compile project(":api")
+    compile project(":tooltip")
+    compile project(":plugin:source-plugin-commons")
+    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    compile group: 'com.googlecode.wicked-charts', name: 'highcharts-wrapper', version: '2.0.1'
+}
+
+task updatePluginAgent(dependsOn: [":agent:jvm-agent:buildAgent"]) {
+    doLast {
+        copy {
+            from '../../tooltip/src/main/resources'
+            into 'build/resources/main'
+        }
+        copy {
+            from '../../agent/lib/skywalking'
+            into 'build/resources/main'
+        }
+        file("build/resources/main/").mkdirs()
+        file("build/resources/main/source-agent-$version" + ".jar").delete()
+        file("build/resources/main/source-agent-$version" + ".jar") <<
+                file("../../agent/jvm-agent/build/libs/source-agent-$version" + ".jar").bytes
+    }
+}
+compileJava.mustRunAfter updatePluginAgent
+runIde.dependsOn updatePluginAgent
+buildPlugin.dependsOn updatePluginAgent
+//todo: doesn't build api 49mb vs 50.01mb

@@ -1,0 +1,15 @@
+{
+  "bridge_host": "localhost",
+  "bridge_port": 7529,
+  "bridge_ssl": false,
+  "jks_path": null,
+  "jks_password": null,
+  "api": {
+    "version": "v1",
+    "host": "localhost",
+    "port": 8080,
+    "ssl": false,
+    "key": null
+  },
+  "artifact_subscriptions": []
+}

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Source++</title>
+    <link rel="stylesheet" type="text/css" href="../semantic.min.css">
+    <!--<style>-->
+        <!--body {-->
+            <!--margin-left: -10%;-->
+            <!--margin-top: -4%;-->
+            <!-- -webkit-transform: scale(0.80);-->
+            <!-- -moz-transform: scale(0.80);-->
+            <!--transform: scale(0.80);-->
+        <!--}-->
+    <!--</style>-->
+</head>
+<body>
+<div id="sidebar" class="ui left visible vertical thin sidebar">
+    <div id="navigation-toggle" class="ui top borderless menu">
+        <div class="item">
+            <i id="icon_toggle" class="large red long arrow left icon"></i>
+            <span>HIDE</span>
+        </div>
+    </div>
+    <div id="navigation" class="ui fluid inverted vertical borderless menu">
+        <a id="overview_link" href="overview.html" class="item">
+            <i class="large dashboard icon"></i>
+            <span>OVERVIEW</span>
+        </a>
+        <a id="traces_link" href="#" class="active item">
+            <i class="large red code icon"></i>
+            <span>TRACES</span>
+        </a>
+        <span class="item"></span>
+        <span class="item"></span>
+        <span class="item"></span>
+        <span class="item"></span>
+    </div>
+</div>
+<div id="main-grid" style="height: 100%; background-color: #f4f4f4; overflow-y: scroll; overflow-x: hidden;"
+     class="ui very compact stretched grid pusher">
+    <div class="wide column">
+        <div class="column" style="background-color: #f4f4f4; flex-grow: 0">
+            <div class="ui menu">
+                <a onclick="goBackToLatestTraces(true)" id="latest_traces_header" class="item active">
+                    Latest Traces
+                </a>
+                <a onclick="goBackToTraceStack()" style="visibility: hidden" id="trace_stack_header" class="item">
+                    Trace Stack
+                </a>
+                <a style="visibility: hidden" id="span_info_header" class="item">
+                    Span Info
+                </a>
+                <!--<div class="right menu">-->
+                    <!--<div class="item">-->
+                        <!--<div class="ui transparent icon input">-->
+                            <!--<input type="text" placeholder="Search...">-->
+                            <!--<i class="search link icon"></i>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
+            </div>
+        </div>
+        <div id="trace_bar" class="column" style="background-color: #f3f4f5; max-height: 49px">
+            <div class="ui form" style="padding-left: 6px; padding-top: 6px">
+                <div class="inline fields">
+                    <span>
+                        <div id="traces_span" class="field">
+                            <label>Start</label>
+                            <input id="traces_start_field" type="text" style="width: 210px" readonly>
+                            <label>Stop</label>
+                            <input id="traces_stop_field" type="text" style="width: 210px" readonly>
+                            <label id="traces_total_label">Total: 0</label>
+                        </div>
+                    </span>
+
+                    <span id="trace_stack_span" style="display: none;">
+                        <div class="field">
+                            <label>Trace Id</label>
+                            <input id="trace_id_field" type="text" style="width: 210px" readonly>
+                            <label>Occurred</label>
+                            <input id="time_occurred_field" type="text" style="width: 210px" readonly>
+                        </div>
+                    </span>
+                    <span id="segment_id_span" style="display: none;">
+                        <div class="field">
+                            <label>Segment Id</label>
+                            <input id="segment_id_field" type="text" readonly>
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <table style="margin-top: 0" id="top_trace_table" class="ui celled striped table unstackable">
+            <thead>
+            <tr>
+                <th>Operation</th>
+                <th style="text-align: center">Occurred</th>
+                <th style="text-align: center">Exec</th>
+                <th style="text-align: center">Status</th>
+            </tr>
+            </thead>
+            <tbody id="trace_table">
+            </tbody>
+        </table>
+        <table id="trace_stack_table" style="visibility: hidden; margin-top: 0"
+               class="ui celled striped table unstackable">
+            <thead>
+            <tr>
+                <th>Operation</th>
+                <th style="text-align: center">Exec</th>
+                <th style="text-align: center">Exec (%)</th>
+            </tr>
+            </thead>
+            <tbody id="stack_table">
+            </tbody>
+        </table>
+        <div id="span_info_panel" style="visibility: hidden; margin-top: 0; padding: 0; background-color: #f3f4f5"
+             class="ui raised segment">
+            <div class="ui segments">
+                <div class="ui segment">
+                    <p>
+                        Start time: <span id="span_info_start_time"></span>
+                        (<span id="span_info_start_trace_time" class="trace_time"></span>)
+                    </p>
+                    <p>
+                        Start time: <span id="span_info_end_time"></span>
+                        (<span id="span_info_end_trace_time" class="trace_time"></span>)
+                    </p>
+                </div>
+                <div class="ui secondary segment" id="span_tag_div">
+                    <p>
+                    <table id="span_tag_table" style="margin-top: 0" class="ui celled striped table unstackable">
+                        <thead>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tag_table">
+                        </tbody>
+                    </table>
+                    </p>
+                </div>
+                <div class="ui secondary segment" id="span_log_div">
+                    <p>
+                    <table id="log_tag_table" style="margin-top: 0" class="ui celled striped table unstackable">
+                        <thead>
+                        <tr>
+                            <th>Data</th>
+                        </tr>
+                        </thead>
+                        <tbody id="log_table">
+                        </tbody>
+                    </table>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script src="../jquery-3.1.1.min.js"></script>
+<script src="../semantic.min.js"></script>
+<script src="../moment.min.js"></script>
+<script src="../sockjs.min.js"></script>
+<script src='../vertx-eventbus.min.js'></script>
+<script src='../source_plugin_bridge.js'></script>
+<script src='../toggle.js'></script>
+<script src='js/traces.js'></script>
+</body>
+</html>

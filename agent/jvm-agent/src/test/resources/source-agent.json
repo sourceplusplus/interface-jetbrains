@@ -1,0 +1,36 @@
+{
+  "enabled": true,
+  "test_mode": true,
+  "log_level": "debug",
+  "application": {
+    "app_name": null,
+    "app_uuid": null,
+    "application_source_code": {
+      "packages": [
+        "com/sourceplusplus/agent.*"
+      ]
+    }
+  },
+  "api": {
+    "version": "v1",
+    "host": "localhost",
+    "port": 8080,
+    "ssl": false,
+    "key": null
+  },
+  "skywalking": {
+    "enabled": true,
+    "tracing_enabled": true,
+    "sample_n_per_3_secs": -1,
+    "span_limit_per_segment": 300,
+    "output_enhanced_classes": false,
+    "backend_service": "localhost:11799",
+    "plugins": {
+    }
+  },
+  "plugin-bridge": {
+    "enabled": false,
+    "host": "localhost",
+    "port": 7000
+  }
+}

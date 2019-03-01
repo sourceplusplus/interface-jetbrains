@@ -1,0 +1,124 @@
+<p align="center">
+  <img src="docs/images/source_plus_plus_logo.png" width="450px" title="Source++">
+</p>
+
+*<p align="center">Open-source Automated Programming Assistant</p>*
+
+<p align="center">
+  <a href="https://travis-ci.com/CodeBrig/Source"><img src="https://travis-ci.com/CodeBrig/Source.svg?token=ss9XQPnrp2cb7kvLpwGX&branch=master"/></a>
+  <a href="https://github.com/CodeBrig/Source/releases"><img src="https://img.shields.io/github/release/CodeBrig/Source.svg?style=flat"/></a>
+  <a href="https://gitter.im/sourceplusplus"><img src="https://badges.gitter.im/Join Chat.svg"/></a>
+  <a href="https://github.com/CodeBrig/Source/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2-blue.svg?style=flat"/></a>
+</p>
+
+<p align="center">
+  <a href="https://sourceplusplus.com">Website</a> ::
+  <a href="https://sourceplusplus.com/knowledge">Knowledge Base</a> ::
+  <a href="https://sourceplusplus.com/knowledge/general/roadmap">Roadmap</a>
+</p>
+
+---
+
+## Introduction
+
+Source++ is an open-source automated programming assistant with runtime-aware and context-aware functionality. Source++ is an observant-only programming assistant and aims to bridge application performance management (APM) solutions and the software developer's integrated development environment (IDE) to enable tighter feedback loops.
+
+Source++ will not write source code for you. Source++ can be used to help debug and prevent runtime issues by providing contextualized behavior about your source code throughout development. Future versions of Source++ aspire to provide additional AI-based pair programming features.
+
+### Why?
+> 1. To enable developers easy access to feedback-driven development methodologies
+> 2. APMs often lack tight integration with actual development of the source code they monitor
+> 3. Source code comprehension can be improved by providing an extra dimension of behavior linked with said source code (ie. being able to visualize how a particular method acts in certain environments vs. locally)
+> 4. No websites or dashboards necessary to debug complex asynchronous runtime issues (just look at and follow through your actual source code)
+> 5. AI-based pair programming is going to be pretty cool when we get it right
+
+## Getting Started
+
+### Prerequisites
+
+- Supported APMs: [Apache SkyWalking](https://github.com/apache/incubator-skywalking)
+- Supported IDEs: JetBrains
+- Supported OSes: Linux, macOS, and Windows
+
+### Installation
+
+#### Downloading the IDE
+
+Install a JetBrains IDE if you don’t already have one.
+
+-  [Download IntelliJ IDEA](https://www.jetbrains.com/idea/download/)
+- Or [find another JetBrains product](https://www.jetbrains.com/products.html)
+
+#### Install the Source++ Plugin
+
+1. Press `Ctrl+Alt+S` to open the `Settings` dialog and then go to `Plugins`.
+2. Click the `Install JetBrains plugin`.
+3. In the dialog that opens, search for `Source++`.
+4. Press `Install`.
+5. Click `OK` in the `Settings` dialog and restart your IDE.
+
+After installation you will need to configure the Source++ Plugin (see [Configure Plugin](https://sourceplusplus.com/knowledge/introduction/configure-plugin/)).
+
+## Architectural Overview
+
+![](docs/images/Source%2B%2B%20Architectural%20Overview-v0.1.0-alpha.gif)
+
+## Code Structure
+
+| Module                        | Description                                              | Language    |
+| ----------------------------- | -------------------------------------------------------- | ----------- |
+| :agent:jvm-agent              | Used to activate and configure APMs' JVM agents          | Java 8+     |
+| :api                          | Holds common data models and communication clients       | Java 8+     |
+| :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.4+ |
+| :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.4+ |
+| :plugin:source-plugin-commons | Common Source++ Plugin functionality                     | Groovy 2.4+ |
+| :tooltip                      | Used to visually display contextualized artifact data    | Groovy 2.4+ |
+
+## Building/Testing
+
+#### Run all Source++ tests:
+```
+./gradlew test
+```
+
+####  Build Source++ Agent:
+```
+./gradlew buildAgent
+```
+
+#### Build Source++ Plugin:
+```
+./gradlew buildPlugin
+```
+
+#### Run Source++ Core (in Docker):
+```
+./gradlew runCore
+```
+
+#### Run Source++ Plugin (in JetBrains IDE):
+```
+./gradlew runIde
+```
+
+## Documentation
+
+For full documentation, visit the [knowledge base](https://sourceplusplus.com/knowledge).
+
+## Roadmap
+
+To know what is going on, see the [roadmap](https://sourceplusplus.com/knowledge/general/roadmap).
+
+## Contributing
+
+Feel free to open issues on just about anything related to Source++.
+
+## Attribution
+
+This project was highly influenced by [PerformanceHat](https://github.com/sealuzh/PerformanceHat). Thanks for the insights
+that made this possible.
+
+## License
+
+[Apache License 2.0](https://github.com/CodeBrig/Source/blob/master/LICENSE)
+

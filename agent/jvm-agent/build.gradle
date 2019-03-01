@@ -1,0 +1,51 @@
+group = 'com.sourceplusplus.agent'
+archivesBaseName = 'source-agent'
+
+dependencies {
+    testCompile group: 'com.ea.agentloader', name: 'ea-agent-loader', version: '1.0.3'
+    testCompile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
+    testCompile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
+    testCompile group: 'io.opentracing', name: 'opentracing-api', version: '0.30.0'
+
+    compile project(":api")
+    compile files('../lib/skywalking-agent.jar')
+    compile group: 'org.tinylog', name: 'tinylog', version: '1.3.2'
+    compile group: 'org.ow2.asm', name: 'asm', version: '5.2'
+    compile group: 'org.ow2.asm', name: 'asm-commons', version: '5.2'
+    compile(group: 'org.mutabilitydetector', name: 'asm-nonclassloadingextensions', version: '1.0-rc1') {
+        exclude group: 'org.ow2.asm', module: 'asm-debug-all'
+    }
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.2'
+}
+
+task buildAgent(type: Jar, dependsOn: ['compileJava']) {
+    from files(sourceSets.main.output)
+    from(configurations.runtime.asFileTree.files.collect { zipTree(it) }) {
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
+        exclude 'META-INF/services/com.fasterxml.jackson.databind.Module'
+        exclude 'META-INF/maven/com.google.code.gson/gson/pom.properties'
+        exclude 'META-INF/maven/com.google.code.gson/gson/pom.xml'
+        exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
+        exclude 'META-INF/*'
+    }
+
+    manifest {
+        attributes 'Premain-Class': 'com.sourceplusplus.agent.SourceAgent'
+        attributes 'Can-Redefine-Classes': 'true'
+        attributes 'Can-Retransform-Classes': 'true'
+    }
+}
+buildAgent.mustRunAfter jar
+
+test {
+    jvmArgs '-javaagent:../lib/source-agent-manifest.jar'
+
+    dependsOn ":core:buildAndMove", ":core:startDocker"
+    finalizedBy ":core:stopDocker"
+}

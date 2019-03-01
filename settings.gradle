@@ -1,0 +1,7 @@
+include ":agent:jvm-agent"
+include "api"
+include "core"
+include ":docs:doc-server"
+include ":plugin:jetbrains-plugin"
+include ":plugin:source-plugin-commons"
+include "tooltip"

@@ -1,0 +1,7 @@
+{
+  "host": "localhost",
+  "port": 80,
+  "base.path": "https://api.github.com/repos/CodeBrig/Source/contents/docs/markdown",
+  "version": "master",
+  "access_token": null
+}
