@@ -24,6 +24,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Scala support ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Min/max response time in quick stats ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Ability to switch overview graph ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
+ - View artifact slowest traces ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
 
 ## 0.3.0 (alpha)
 
