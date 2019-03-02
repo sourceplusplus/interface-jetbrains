@@ -34,13 +34,17 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.4.0 (alpha)
 
- - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Switch to source code parsing with Babelfish ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
 
 ## 0.5.0 (alpha)
 
- - stagemonitor integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
 
 ## 0.6.0 (alpha)
+
+ - stagemonitor integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+
+## 0.7.0 (alpha)
 
  - Apache SkyWalking .NET & JetBrains Rider integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
 
