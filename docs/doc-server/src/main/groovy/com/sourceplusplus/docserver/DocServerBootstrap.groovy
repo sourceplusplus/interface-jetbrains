@@ -65,40 +65,67 @@ class DocServerBootstrap extends AbstractVerticle {
 
     @Override
     void start(Future<Void> fut) throws Exception {
+        def serveLocalFiles = false
+        def basePath = config().getString("base.path")
+        if (!basePath.contains("http")) {
+            serveLocalFiles = true
+        }
+
         def router = createRouter()
         def client = WebClient.create(vertx)
         router.get().handler({ ctx ->
-            def url = config().getString("base.path") + ctx.request().uri() + "?1=1"
-            if (config().getString("version")) {
-                url += "&ref=" + config().getString("version")
-            }
-            if (config().getString("access_token")) {
-                url += "&access_token=" + config().getString("access_token")
-            }
-            log.info("Serving: " + ctx.request().uri())
+            if (serveLocalFiles) {
+                def url = config().getString("base.path") + ctx.request().uri()
+                log.info("Serving: " + ctx.request().uri())
 
-            def cachedValue = DOC_CACHE.get(url)
-            if (cachedValue != null) {
-                ctx.response().setStatusCode(200)
-                        .end(Json.encodePrettily(cachedValue))
-                log.info("Served cached: " + ctx.request().uri())
+                def cachedValue = DOC_CACHE.get(url)
+                if (cachedValue != null) {
+                    ctx.response().setStatusCode(200)
+                            .end(Json.encodePrettily(cachedValue))
+                    log.info("Served cached: " + ctx.request().uri())
+                } else {
+                    def markdownText = new File(url).text
+                    def response = new JsonObject()
+                    response.put("content", updateMarkdownLinks(markdownText).bytes.encodeBase64() as String)
+                    DOC_CACHE.put(url, response)
+
+                    ctx.response().setStatusCode(200)
+                            .end(Json.encodePrettily(response))
+                    log.info("Served: " + ctx.request().uri())
+                }
             } else {
-                client.getAbs(url).send({
-                    if (it.succeeded()) {
-                        def response = it.result().bodyAsJsonObject()
-                        def content = new String(response.getString("content").decodeBase64())
-                        response.put("content", updateMarkdownLinks(content).bytes.encodeBase64() as String)
-                        DOC_CACHE.put(url, response)
+                def url = config().getString("base.path") + ctx.request().uri() + "?1=1"
+                if (config().getString("version")) {
+                    url += "&ref=" + config().getString("version")
+                }
+                if (config().getString("access_token")) {
+                    url += "&access_token=" + config().getString("access_token")
+                }
+                log.info("Serving: " + ctx.request().uri())
 
-                        ctx.response().setStatusCode(200)
-                                .end(Json.encodePrettily(response))
-                        log.info("Served: " + ctx.request().uri())
-                    } else {
-                        log.error("Failed to get markdown", it.cause())
-                        ctx.response().setStatusCode(500)
-                                .end(it.cause().message)
-                    }
-                })
+                def cachedValue = DOC_CACHE.get(url)
+                if (cachedValue != null) {
+                    ctx.response().setStatusCode(200)
+                            .end(Json.encodePrettily(cachedValue))
+                    log.info("Served cached: " + ctx.request().uri())
+                } else {
+                    client.getAbs(url).send({
+                        if (it.succeeded()) {
+                            def response = it.result().bodyAsJsonObject()
+                            def content = new String(response.getString("content").decodeBase64())
+                            response.put("content", updateMarkdownLinks(content).bytes.encodeBase64() as String)
+                            DOC_CACHE.put(url, response)
+
+                            ctx.response().setStatusCode(200)
+                                    .end(Json.encodePrettily(response))
+                            log.info("Served: " + ctx.request().uri())
+                        } else {
+                            log.error("Failed to get markdown", it.cause())
+                            ctx.response().setStatusCode(500)
+                                    .end(it.cause().message)
+                        }
+                    })
+                }
             }
         })
 
