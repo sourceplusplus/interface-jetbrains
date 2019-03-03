@@ -21,20 +21,19 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - H2 database storage ![](../../images/roadmap/Source++-Core-blue.svg)
  - Local bundled Source++ Core in Source++ Plugin ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Application/environment switching ![](../../images/roadmap/Source++-Tooltip-blue.svg)
- - Scala support ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Min/max response time in quick stats ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Ability to switch overview graph ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - View artifact slowest traces ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
 
 ## 0.3.0 (alpha)
 
- - Pinpoint integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
- - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
- - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
+ - Switch to source code parsing with Babelfish ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
 
 ## 0.4.0 (alpha)
 
- - Switch to source code parsing with Babelfish ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
+ - Pinpoint integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
 
 ## 0.5.0 (alpha)
 
