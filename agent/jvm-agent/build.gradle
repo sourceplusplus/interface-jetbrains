@@ -30,7 +30,10 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.2'
 }
 
-task buildAgent(type: Jar, dependsOn: ['compileJava']) {
+task prepareAgent(type: Jar, dependsOn: ['compileJava']) {
+    mustRunAfter "jar"
+
+    archiveName = "source-agent-$version" + "_prepare.jar"
     from files(sourceSets.main.output)
     from(configurations.runtime.asFileTree.files.collect { zipTree(it) })
 
@@ -40,12 +43,11 @@ task buildAgent(type: Jar, dependsOn: ['compileJava']) {
         attributes 'Can-Retransform-Classes': 'true'
     }
 }
-buildAgent.mustRunAfter jar
 
-task buildExternalAgent(type: JavaExec) {
-    dependsOn "buildAgent"
+task prepareExternalAgent(type: JavaExec) {
+    dependsOn "prepareAgent"
     doFirst {
-        def agentUri = URI.create("jar:file://" + file("build/libs/source-agent-$version" + ".jar").absolutePath)
+        def agentUri = URI.create("jar:file://" + file("build/libs/source-agent-$version" + "_prepare.jar").absolutePath)
         def agentFilesystem
         try {
             agentFilesystem = FileSystems.newFileSystem(agentUri, ["create": "false"])
@@ -85,19 +87,20 @@ task buildExternalAgent(type: JavaExec) {
             "jarjar-1.4.1.jar",
             "process",
             "jarjar_rules.txt",
-            "build/libs/source-agent-$version" + ".jar",
-            "build/libs/source-agent-$version" + "_external.jar"
+            "build/libs/source-agent-$version" + "_prepare.jar",
+            "build/libs/source-agent-$version" + "_prepare_external.jar"
     ]
 }
 
-task buildDistributionAgent(type: proguard.gradle.ProGuardTask) {
-    dependsOn "buildExternalAgent"
+task buildAgent(type: proguard.gradle.ProGuardTask) {
+    dependsOn "prepareExternalAgent"
     configuration 'proguard.txt'
-    injars "build/libs/source-agent-$version" + "_external.jar"
-    outjars "build/libs/source-agent-$version" + "_dist.jar"
+    injars "build/libs/source-agent-$version" + "_prepare_external.jar"
+    outjars "build/libs/source-agent-$version" + ".jar"
 
     doLast {
-        file("build/libs/source-agent-$version" + "_external.jar").delete()
+        file("build/libs/source-agent-$version" + "_prepare.jar").delete()
+        file("build/libs/source-agent-$version" + "_prepare_external.jar").delete()
     }
 }
 
