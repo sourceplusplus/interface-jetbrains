@@ -287,7 +287,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 def endpointId = vertx.sharedData().getLocalMap("skywalking_pending_endpoints")
                         .get(span.endpointName()) as String
                 if (endpointId) {
-                    if (i + 1 <= spans.size()) {
+                    if (i + 1 < spans.size()) {
                         def nextSpan = spans.get(i + 1)
                         if (nextSpan.artifactQualifiedName()) {
                             def fut = Future.future()
