@@ -10,7 +10,7 @@ import org.pmw.tinylog.Logger;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.0
+ * @version 0.1.1
  * @since 0.1.0
  */
 public class GenericClassAdapter extends ClassVisitor {
