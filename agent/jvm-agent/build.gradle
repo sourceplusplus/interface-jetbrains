@@ -1,3 +1,15 @@
+import java.nio.file.*
+import java.nio.file.attribute.BasicFileAttributes
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.sf.proguard:proguard-gradle:5.3.3'
+    }
+}
+
 group = 'com.sourceplusplus.agent'
 archivesBaseName = 'source-agent'
 
@@ -20,20 +32,7 @@ dependencies {
 
 task buildAgent(type: Jar, dependsOn: ['compileJava']) {
     from files(sourceSets.main.output)
-    from(configurations.runtime.asFileTree.files.collect { zipTree(it) }) {
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/INDEX.LIST'
-        exclude 'META-INF/io.netty.versions.properties'
-        exclude 'META-INF/services/com.fasterxml.jackson.databind.Module'
-        exclude 'META-INF/maven/com.google.code.gson/gson/pom.properties'
-        exclude 'META-INF/maven/com.google.code.gson/gson/pom.xml'
-        exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
-        exclude 'META-INF/*'
-    }
+    from(configurations.runtime.asFileTree.files.collect { zipTree(it) })
 
     manifest {
         attributes 'Premain-Class': 'com.sourceplusplus.agent.SourceAgent'
@@ -42,6 +41,65 @@ task buildAgent(type: Jar, dependsOn: ['compileJava']) {
     }
 }
 buildAgent.mustRunAfter jar
+
+task buildExternalAgent(type: JavaExec) {
+    dependsOn "buildAgent"
+    doFirst {
+        def agentUri = URI.create("jar:file://" + file("build/libs/source-agent-$version" + ".jar").absolutePath)
+        def agentFilesystem
+        try {
+            agentFilesystem = FileSystems.newFileSystem(agentUri, ["create": "false"])
+        } catch (all) {
+            agentFilesystem = FileSystems.getFileSystem(agentUri)
+        }
+
+        Files.walkFileTree(agentFilesystem.getPath("/"), new SimpleFileVisitor<Path>() {
+            @Override
+            FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (file.toString().startsWith("/META-INF/") &&
+                        !file.toString().startsWith("/META-INF/MANIFEST.MF") &&
+                        !file.toString().startsWith("/META-INF/services/org.apache.skywalking.apm.agent.")) {
+                    Files.delete(file)
+                }
+                //todo: remove this stuff if unnecessary
+//                else if (file.toString().startsWith("/assets/") ||
+//                        file.toString().startsWith("/common/") ||
+//                        file.toString().startsWith("/junit/") ||
+//                        file.toString().startsWith("/language-agent/") ||
+//                        file.toString().startsWith("/language-agent-v2/") ||
+//                        file.toString().startsWith("/register/") ||
+//                        file.toString().startsWith("/service-mesh-probe/")) {
+//                    Files.delete(file)
+//                }
+                if (file.toString() == "/LICENSE.txt" || file.toString() == "/LICENSE-junit.txt") {
+                    Files.delete(file)
+                }
+                return FileVisitResult.CONTINUE
+            }
+        })
+        agentFilesystem.close()
+    }
+
+    main = "-jar"
+    args = [
+            "jarjar-1.4.1.jar",
+            "process",
+            "jarjar_rules.txt",
+            "build/libs/source-agent-$version" + ".jar",
+            "build/libs/source-agent-$version" + "_external.jar"
+    ]
+}
+
+task buildDistributionAgent(type: proguard.gradle.ProGuardTask) {
+    dependsOn "buildExternalAgent"
+    configuration 'proguard.txt'
+    injars "build/libs/source-agent-$version" + "_external.jar"
+    outjars "build/libs/source-agent-$version" + "_dist.jar"
+
+    doLast {
+        file("build/libs/source-agent-$version" + "_external.jar").delete()
+    }
+}
 
 test {
     jvmArgs '-javaagent:../lib/source-agent-manifest.jar'
