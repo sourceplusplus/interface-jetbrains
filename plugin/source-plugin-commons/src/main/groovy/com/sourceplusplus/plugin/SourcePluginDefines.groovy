@@ -11,7 +11,7 @@ import java.awt.*
  */
 interface SourcePluginDefines {
 
-    public static String VERSION = "0.1.0" //todo: dynamic
+    public static String VERSION = "0.1.1" //todo: dynamic
 
     public static String DISPLAY_NAME = "Source++"
     public static String FULL_TEXT_NAME = "SourcePlusPlus"

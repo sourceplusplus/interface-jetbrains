@@ -8,6 +8,7 @@ import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.components.ServiceManager
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.SourcePluginDefines
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import com.sourceplusplus.tooltip.display.TooltipUI
@@ -46,9 +47,9 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         }
         if (!patched.getAndSet(true) && PluginBootstrap.sourcePlugin != null) {
             log.info("Patching Source++ Agent for executing program...")
-            URL inputUrl = getClass().getResource("/source-agent-0.1.0.jar") //todo: dynamic version
+            URL inputUrl = getClass().getResource("/source-agent-" + SourcePluginDefines.VERSION + ".jar")
             File destDir = File.createTempDir()
-            agentFile = new File(destDir, "source-agent-0.1.0.jar") //todo: dynamic version
+            agentFile = new File(destDir, "source-agent-" + SourcePluginDefines.VERSION + ".jar")
             FileUtils.copyURLToFile(inputUrl, agentFile)
             agentFile.deleteOnExit()
             destDir.deleteOnExit()
