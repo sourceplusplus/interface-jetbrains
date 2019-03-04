@@ -8,6 +8,7 @@
 -keepattributes Exceptions,InnerClasses,Signature,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
 
 -ignorewarnings
+-dontwarn
 
 -keep class com.sourceplusplus.** { *; }
 -keep class org.apache.skywalking.** { *; }

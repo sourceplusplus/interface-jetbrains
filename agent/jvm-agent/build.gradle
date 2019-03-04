@@ -32,6 +32,8 @@ dependencies {
 
 task prepareAgent(type: Jar, dependsOn: ['compileJava']) {
     mustRunAfter "jar"
+    inputs.files(sourceSets.main.allSource, configurations.runtime.asFileTree.files)
+    outputs.file file("build/libs/source-agent-$version" + "_prepare.jar")
 
     archiveName = "source-agent-$version" + "_prepare.jar"
     from files(sourceSets.main.output)
@@ -46,8 +48,14 @@ task prepareAgent(type: Jar, dependsOn: ['compileJava']) {
 
 task prepareExternalAgent(type: JavaExec) {
     dependsOn "prepareAgent"
+    inputs.file file("build/libs/source-agent-$version" + "_prepare.jar")
+    outputs.file file("build/libs/source-agent-$version" + "_prepare_external.jar")
+
     doFirst {
-        def agentUri = URI.create("jar:file://" + file("build/libs/source-agent-$version" + "_prepare.jar").absolutePath)
+        file("build/libs/source-agent-$version" + "_prepare_copy.jar").delete()
+        Files.copy(file("build/libs/source-agent-$version" + "_prepare.jar").toPath(),
+                file("build/libs/source-agent-$version" + "_prepare_copy.jar").toPath())
+        def agentUri = URI.create("jar:file://" + file("build/libs/source-agent-$version" + "_prepare_copy.jar").absolutePath)
         def agentFilesystem
         try {
             agentFilesystem = FileSystems.newFileSystem(agentUri, ["create": "false"])
@@ -87,21 +95,22 @@ task prepareExternalAgent(type: JavaExec) {
             "jarjar-1.4.1.jar",
             "process",
             "jarjar_rules.txt",
-            "build/libs/source-agent-$version" + "_prepare.jar",
+            "build/libs/source-agent-$version" + "_prepare_copy.jar",
             "build/libs/source-agent-$version" + "_prepare_external.jar"
     ]
+    doLast {
+        file("build/libs/source-agent-$version" + "_prepare_copy.jar").delete()
+    }
 }
 
 task buildAgent(type: proguard.gradle.ProGuardTask) {
     dependsOn "prepareExternalAgent"
+    inputs.file file("build/libs/source-agent-$version" + "_prepare_external.jar")
+    outputs.file file("build/libs/source-agent-$version" + ".jar")
+
     configuration 'proguard.txt'
     injars "build/libs/source-agent-$version" + "_prepare_external.jar"
     outjars "build/libs/source-agent-$version" + ".jar"
-
-    doLast {
-        file("build/libs/source-agent-$version" + "_prepare.jar").delete()
-        file("build/libs/source-agent-$version" + "_prepare_external.jar").delete()
-    }
 }
 
 test {
