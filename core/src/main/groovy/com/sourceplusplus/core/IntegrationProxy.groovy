@@ -40,10 +40,10 @@ class IntegrationProxy extends AbstractVerticle {
             })
         }).listen(11800, {
             if (it.succeeded()) {
-                log.info("Skywalking OAP gRPC proxy started")
+                log.info("SkyWalking OAP gRPC proxy started")
                 fut.complete()
             } else {
-                log.error("Failed to start Skywalking OAP gRPC proxy")
+                log.error("Failed to start SkyWalking OAP gRPC proxy")
                 it.cause().printStackTrace()
                 System.exit(-1)
             }

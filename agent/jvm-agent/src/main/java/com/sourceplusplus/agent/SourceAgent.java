@@ -127,7 +127,7 @@ public class SourceAgent {
             Config.Agent.SPAN_LIMIT_PER_SEGMENT = SourceAgentConfig.current.spanLimitPerSegment;
             Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.backendService;
             System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
-            Logger.info("Using Skywalking host: " + SourceAgentConfig.current.backendService);
+            Logger.info("Using SkyWalking host: " + SourceAgentConfig.current.backendService);
 
             if (SourceAgentConfig.current.testMode) {
                 Logger.info("Test mode enabled");
@@ -142,7 +142,7 @@ public class SourceAgent {
                     System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
                     SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
 
-                    Logger.info("Waiting for Skywalking to finish setup");
+                    Logger.info("Waiting for Apache SkyWalking to finish setup");
                     while (true) {
                         if (RemoteDownstreamConfig.Agent.SERVICE_ID != DictionaryUtil.nullValue()
                                 && RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID != DictionaryUtil.nullValue()) {
@@ -153,7 +153,7 @@ public class SourceAgent {
                         } catch (InterruptedException e) {
                         }
                     }
-                    Logger.info("Skywalking initialized");
+                    Logger.info("Apache SkyWalking initialized");
                 }
             }
 

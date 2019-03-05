@@ -68,7 +68,7 @@ class SkywalkingIntegration extends AbstractVerticle {
     }
 
     void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler) {
-        log.info("Getting all Skywalking services. Start: " + start + " - End: " + end)
+        log.info("Getting all SkyWalking services. Start: " + start + " - End: " + end)
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_ALL_SERVICES
                 .replace('$durationStart', DATE_TIME_FORMATTER_SECONDS.format(start))
@@ -83,14 +83,14 @@ class SkywalkingIntegration extends AbstractVerticle {
             } else {
                 def result = new JsonObject(it.result().bodyAsString())
                         .getJsonObject("data").getJsonArray("getAllServices")
-                log.info("Got all Skywalking services: " + result)
+                log.info("Got all SkyWalking services: " + result)
                 handler.handle(Future.succeededFuture(result))
             }
         })
     }
 
     void getServiceEndpoints(String serviceId, Handler<AsyncResult<JsonArray>> handler) {
-        log.info("Getting Skywalking service endpoints for service id: " + serviceId)
+        log.info("Getting SkyWalking service endpoints for service id: " + serviceId)
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_SERVICE_ENDPOINTS
                 .replace('$serviceId', serviceId)
@@ -103,7 +103,7 @@ class SkywalkingIntegration extends AbstractVerticle {
             } else {
                 def result = new JsonObject(it.result().bodyAsString())
                         .getJsonObject("data").getJsonArray("searchEndpoint")
-                log.info("Got Skywalking service endpoints: " + result)
+                log.info("Got SkyWalking service endpoints: " + result)
                 handler.handle(Future.succeededFuture(result))
             }
         })
@@ -111,7 +111,7 @@ class SkywalkingIntegration extends AbstractVerticle {
 
     void getEndpointMetrics(String endpointId, ArtifactMetricQuery metricQuery,
                             Handler<AsyncResult<ArtifactMetricResult>> handler) {
-        log.debug("Getting Skywalking endpoint metrics: " + Objects.requireNonNull(metricQuery))
+        log.debug("Getting SkyWalking endpoint metrics: " + Objects.requireNonNull(metricQuery))
         def graphqlQuery = new JsonObject()
         if ("second".equalsIgnoreCase(metricQuery.step())) {
             graphqlQuery.put("query", GET_ENDPOINT_METRICS
@@ -216,14 +216,14 @@ class SkywalkingIntegration extends AbstractVerticle {
                         .stop(metricQuery.stop())
                         .step(metricQuery.step())
                         .artifactMetrics(artifactMetrics).build()
-                log.debug("Got Skywalking endpoint metrics: " + artifactMetricResult)
+                log.debug("Got SkyWalking endpoint metrics: " + artifactMetricResult)
                 handler.handle(Future.succeededFuture(artifactMetricResult))
             }
         })
     }
 
     void getSkywalkingTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
-        log.info("Getting Skywalking traces: " + Objects.requireNonNull(traceQuery))
+        log.info("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_LATEST_TRACES
                 .replace('$endpointId', traceQuery.endpointId())
@@ -251,7 +251,7 @@ class SkywalkingIntegration extends AbstractVerticle {
                         .total(result.getInteger("total"))
                         .build()
 
-                log.info("Got Skywalking traces. Traces: {} - Total: {}",
+                log.info("Got SkyWalking traces. Traces: {} - Total: {}",
                         traceQueryResult.traces().size(), traceQueryResult.total())
                 handler.handle(Future.succeededFuture(traceQueryResult))
             }
@@ -266,7 +266,7 @@ class SkywalkingIntegration extends AbstractVerticle {
 
     void getSkywalkingTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
                                  Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
-        log.info("Getting Skywalking trace spans: " + Objects.requireNonNull(spanQuery))
+        log.info("Getting SkyWalking trace spans: " + Objects.requireNonNull(spanQuery))
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_TRACE_STACK
                 .replace('$globalTraceId', spanQuery.traceId())
@@ -367,7 +367,7 @@ class SkywalkingIntegration extends AbstractVerticle {
                                 .traceSpans(traceSpanList)
                                 .total(spanList.size())
                                 .build()
-                        log.info("Got Skywalking trace spans: " + traceSpanQueryResult.total())
+                        log.info("Got SkyWalking trace spans: " + traceSpanQueryResult.total())
                         handler.handle(Future.succeededFuture(traceSpanQueryResult))
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))

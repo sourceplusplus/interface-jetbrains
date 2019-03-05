@@ -124,7 +124,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     }
 
     private void searchForNewEndpoints(Handler<AsyncResult<Void>> handler) {
-        log.debug("Searching for new Skywalking service endpoints")
+        log.debug("Searching for new SkyWalking service endpoints")
         skywalking.getAllServices(Instant.now().minus(7, ChronoUnit.DAYS), Instant.now(), "MINUTE", {
             if (it.succeeded()) {
                 def futures = []

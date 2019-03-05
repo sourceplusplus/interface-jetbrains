@@ -38,12 +38,12 @@
 | bridge_port                 | 7000      | Port used by plugin/tooltip to connect to core's eventbus    |
 | subscription_inactive_limit | 15        | Minutes necessary of inactive to prune artifact subscriptions (-1 to disable) |
 
-## Skywalking OAP Settings
+## SkyWalking OAP Settings
 
 | Property | Value     | Description                                              |
 | -------- | --------- | -------------------------------------------------------- |
-| host     | localhost | The address of the Skywalking OAP instance to connect to |
-| port     | 12800     | The port of the Skywalking OAP instance to connect to    |
+| host     | localhost | The address of the SkyWalking OAP instance to connect to |
+| port     | 12800     | The port of the SkyWalking OAP instance to connect to    |
 
 
 ## Elasticsearch Settings
