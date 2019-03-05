@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory
 
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import java.util.regex.Pattern
 
 /**
  * Displays traces (and the underlying spans) for a given source code artifact.
@@ -37,6 +38,7 @@ class TracesTab extends AbstractVerticle {
     public static final String CLICKED_GO_BACK_TO_LATEST_TRACES = "ClickedGoBackToLatestTraces"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
+    private static final Pattern QUALIFIED_NAME_PATTERN = Pattern.compile('.+\\..+\\(.*\\)')
     private final Map<String, TracesTabRepresentation> representationCache = new ConcurrentHashMap<>()
     private final SourceCoreClient coreClient
     private final boolean pluginAvailable
@@ -301,7 +303,7 @@ class TracesTab extends AbstractVerticle {
             traces.add(it.withPrettyDuration(humanReadableDuration(Duration.ofMillis(it.duration()))))
         }
         artifactTraceResult = artifactTraceResult.withTraces(traces)
-                .withArtifactSimpleName(removePackageAndClassName(artifactTraceResult.artifactQualifiedName()))
+                .withArtifactSimpleName(removePackageAndClassName(removePackageNames(artifactTraceResult.artifactQualifiedName())))
 
         representationCache.putIfAbsent(artifactTraceResult.appUuid() + "-" + artifactTraceResult.artifactQualifiedName(), new TracesTabRepresentation())
         def representation = representationCache.get(artifactTraceResult.appUuid() + "-" + artifactTraceResult.artifactQualifiedName())
@@ -327,8 +329,13 @@ class TracesTab extends AbstractVerticle {
                     .rootArtifactQualifiedName(rootArtifactQualifiedName)
                     .timeTook(timeTook)
                     .totalTracePercent((totalTime == 0) ? 0d : timeTookMs / totalTime * 100.0d)
+
+            //detect if operation name is really an artifact name
+            if (QUALIFIED_NAME_PATTERN.matcher(span.endpointName()).matches()) {
+                spanInfo.span(span = span.withArtifactQualifiedName(span.endpointName()))
+            }
             if (span.artifactQualifiedName()) {
-                spanInfo.operationName(removePackageAndClassName(span.artifactQualifiedName()))
+                spanInfo.operationName(removePackageAndClassName(removePackageNames(span.artifactQualifiedName())))
             } else {
                 spanInfo.operationName(span.endpointName())
             }
@@ -339,11 +346,23 @@ class TracesTab extends AbstractVerticle {
 
     static String removePackageNames(String qualifiedMethodName) {
         if (!qualifiedMethodName || qualifiedMethodName.indexOf('.') == -1) return qualifiedMethodName
+        def className = qualifiedMethodName.substring(0, qualifiedMethodName.substring(
+                0, qualifiedMethodName.indexOf("(")).lastIndexOf("."))
+        if (className.contains('$')) {
+            className = className.substring(0, className.indexOf('$'))
+        }
+
         def arguments = qualifiedMethodName.substring(qualifiedMethodName.indexOf("("))
         def argArray = arguments.substring(1, arguments.length() - 1).split(",")
         def argText = "("
         for (def i = 0; i < argArray.length; i++) {
-            argText += argArray[i].substring(argArray[i].lastIndexOf(".") + 1)
+            def qualifiedArgument = argArray[i]
+            def newArgText = qualifiedArgument.substring(qualifiedArgument.lastIndexOf(".") + 1)
+            if (qualifiedArgument.startsWith(className + '$')) {
+                newArgText = qualifiedArgument.substring(qualifiedArgument.lastIndexOf('$') + 1)
+            }
+            argText += newArgText
+
             if ((i + 1) < argArray.length) {
                 argText += ","
             }
@@ -351,13 +370,19 @@ class TracesTab extends AbstractVerticle {
         argText += ")"
 
         def methodNameArr = qualifiedMethodName.substring(0, qualifiedMethodName.indexOf("(")).split('\\.')
-        return methodNameArr[methodNameArr.length - 2] + '.' + methodNameArr[methodNameArr.length - 1] + argText
+        if (methodNameArr.length == 1) {
+            return methodNameArr[0] + argText
+        } else {
+            return methodNameArr[methodNameArr.length - 2] + '.' + methodNameArr[methodNameArr.length - 1] + argText
+        }
     }
 
     static removePackageAndClassName(String qualifiedMethodName) {
-        if (!qualifiedMethodName || qualifiedMethodName.indexOf('.') == -1) return qualifiedMethodName
-        def methodNameArr = qualifiedMethodName.split('\\.')
-        return methodNameArr[methodNameArr.length - 1]
+        if (!qualifiedMethodName || qualifiedMethodName.indexOf('.') == -1 || qualifiedMethodName.indexOf('(') == -1) {
+            return qualifiedMethodName
+        }
+        return qualifiedMethodName.substring(qualifiedMethodName.substring(
+                0, qualifiedMethodName.indexOf("(")).lastIndexOf(".") + 1)
     }
 
     static String humanReadableDuration(Duration duration) {
