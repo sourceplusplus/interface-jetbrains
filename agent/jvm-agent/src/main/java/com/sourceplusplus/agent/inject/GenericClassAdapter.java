@@ -28,13 +28,18 @@ public class GenericClassAdapter extends ClassVisitor {
         className = name;
     }
 
-    public MethodVisitor visitMethod(int access, String name, String desc,
-                                     String signature, String[] exceptions) {
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-        if (!("main".equals(name) && "([Ljava/lang/String;)V".equals(desc))) {
-            Logger.debug("Injecting method: " + name);
-            mv = new SourceApplicationInjector(Opcodes.ASM5, mv, access, name, desc, className);
+        //skip main methods
+        if ("main".equals(name) && "([Ljava/lang/String;)V".equals(desc)) {
+            return mv;
         }
-        return mv;
+        //skip generated Apache SkyWalking methods
+        if (name.equals("getSkyWalkingDynamicField")) {
+            return mv;
+        }
+
+        Logger.debug("Injecting method: " + name);
+        return new SourceApplicationInjector(Opcodes.ASM5, mv, access, name, desc, className);
     }
 }
