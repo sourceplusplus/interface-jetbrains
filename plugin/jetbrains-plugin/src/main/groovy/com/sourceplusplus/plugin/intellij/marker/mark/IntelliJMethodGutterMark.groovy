@@ -212,7 +212,7 @@ class IntelliJMethodGutterMark extends GutterMark {
                             if (it.name) {
                                 attributeMap.put(it.name, (it.expression as ULiteralExpression).value)
                             } else {
-                                attributeMap.put("value", (it.expression as ULiteralExpression).value)
+                                log.warn("Unknown annotation expression: " + it)
                             }
                         }
                         annotations.add(new SourceMethodAnnotation(qualifiedName, attributeMap))
