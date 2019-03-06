@@ -2,6 +2,7 @@
   "enabled": true,
   "test_mode": false,
   "log_level": "info",
+  "log_location": null,
   "application": {
     "app_name": null,
     "app_uuid": null,

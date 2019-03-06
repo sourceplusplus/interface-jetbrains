@@ -124,8 +124,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         }
 
         if (agentFile != null) {
-            javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath="
-                    + agentFile.parentFile.absolutePath)
+            javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath")
             log.info("Attached Source++ Agent to executing program")
         }
     }
@@ -144,6 +143,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
     static void modifyAgentSettings(Path src, Path dst) throws IOException {
         def agentConfig = new JsonObject(Files.newInputStream(src).getText())
 
+        agentConfig.put("log_location", agentFile.parentFile.absolutePath)
         agentConfig.getJsonObject("application").put("app_uuid", SourcePluginConfig.current.appUuid)
         agentConfig.getJsonObject("api").put("host", SourcePluginConfig.current.apiHost)
         agentConfig.getJsonObject("api").put("port", SourcePluginConfig.current.apiPort)

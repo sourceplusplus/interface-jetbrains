@@ -106,9 +106,10 @@ public class SourceAgent {
             throw new IllegalStateException("Source++ Agent already initialized");
         } else {
             loadConfiguration();
-            if (agentArgs != null && !agentArgs.isEmpty()) {
+            if (SourceAgentConfig.current.logLocation != null) {
+                File logFile = new File(SourceAgentConfig.current.logLocation, "source-agent.log");
                 Configurator.defaultConfig()
-                        .writer(new FileWriter(agentArgs + "/source-agent.log"))
+                        .writer(new FileWriter(logFile.getAbsolutePath()))
                         .level(Level.valueOf(SourceAgentConfig.current.logLevel))
                         .formatPattern("[AGENT] - {message}")
                         .activate();
