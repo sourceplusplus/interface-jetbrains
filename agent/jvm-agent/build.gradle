@@ -30,6 +30,21 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.2'
 }
 
+task createProperties(dependsOn: processResources) {
+    doLast {
+        new File("$buildDir/resources/main/source-agent_build.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = project.version.toString()
+            p['apache_skywalking_version'] = project.APACHE_SKYWALKING_VERSION.toString()
+            p['build_date'] = new Date().toInstant().toString()
+            p.store w, null
+        }
+    }
+}
+classes {
+    dependsOn createProperties
+}
+
 task prepareAgent(type: Jar, dependsOn: ['compileJava']) {
     mustRunAfter "jar"
     inputs.files(sourceSets.main.allSource, configurations.runtime.asFileTree.files)

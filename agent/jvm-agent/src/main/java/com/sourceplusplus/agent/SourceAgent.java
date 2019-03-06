@@ -26,6 +26,7 @@ import org.pmw.tinylog.writers.FileWriter;
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,6 +41,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * @since 0.1.0
  */
 public class SourceAgent {
+
+    public static final ResourceBundle BUILD = ResourceBundle.getBundle("source-agent_build");
 
     private static final ScheduledExecutorService workScheduler = Executors.newScheduledThreadPool(1, r -> {
         Thread t = Executors.defaultThreadFactory().newThread(r);
@@ -111,6 +114,7 @@ public class SourceAgent {
                         .activate();
             }
             SourceAgent.instrumentation = instrumentation;
+            Logger.info("Build: " + BUILD.getString("build_date"));
 
             coreClient = new SourceCoreClient(
                     SourceAgentConfig.current.apiHost, SourceAgentConfig.current.apiPort, SourceAgentConfig.current.apiSslEnabled);
