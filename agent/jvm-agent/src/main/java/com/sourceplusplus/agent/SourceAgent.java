@@ -106,9 +106,7 @@ public class SourceAgent {
             throw new IllegalStateException("Source++ Agent already initialized");
         } else {
             loadConfiguration();
-            if (SourceAgentConfig.current.appUuid == null) {
-                throw new RuntimeException("Missing application UUID in Source++ Agent configuration");
-            } else if (SourceAgentConfig.current.logLocation != null) {
+            if (SourceAgentConfig.current.logLocation != null) {
                 File logFile = new File(SourceAgentConfig.current.logLocation, "source-agent.log");
                 Configurator.defaultConfig()
                         .writer(new FileWriter(logFile.getAbsolutePath()))
@@ -145,6 +143,9 @@ public class SourceAgent {
                 SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
             } else {
                 if (SourceAgentConfig.current.skywalkingEnabled) {
+                    if (SourceAgentConfig.current.appUuid == null) {
+                        throw new RuntimeException("Missing application UUID in Source++ Agent configuration");
+                    }
                     Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
                     System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
                     SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
