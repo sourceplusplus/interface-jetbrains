@@ -7,7 +7,7 @@
     "app_uuid": null,
     "application_source_code": {
       "packages": [
-        "com/sourceplusplus/agent.*"
+        "com/sourceplusplus/agent/.*"
       ]
     }
   },
