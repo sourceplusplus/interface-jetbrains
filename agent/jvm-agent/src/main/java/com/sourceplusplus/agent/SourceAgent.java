@@ -106,7 +106,9 @@ public class SourceAgent {
             throw new IllegalStateException("Source++ Agent already initialized");
         } else {
             loadConfiguration();
-            if (SourceAgentConfig.current.logLocation != null) {
+            if (SourceAgentConfig.current.appUuid == null) {
+                throw new RuntimeException("Missing application UUID in Source++ Agent configuration");
+            } else if (SourceAgentConfig.current.logLocation != null) {
                 File logFile = new File(SourceAgentConfig.current.logLocation, "source-agent.log");
                 Configurator.defaultConfig()
                         .writer(new FileWriter(logFile.getAbsolutePath()))
