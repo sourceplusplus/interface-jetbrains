@@ -14,6 +14,8 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourceCoreConfig
 import com.sourceplusplus.api.model.error.SourceAPIError
+import com.sourceplusplus.api.model.info.IntegrationInfo
+import com.sourceplusplus.api.model.info.IntegrationType
 import com.sourceplusplus.api.model.info.SourceCoreInfo
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.*
@@ -66,6 +68,7 @@ class CoreBootstrap extends AbstractVerticle {
     public static final ResourceBundle BUILD = ResourceBundle.getBundle("source-core_build")
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
+    private static final Set<IntegrationInfo> ACTIVE_INTEGRATIONS = new HashSet<>()
     private ElasticsearchDAO elastic
 
     static void main(String[] args) {
@@ -176,6 +179,9 @@ class CoreBootstrap extends AbstractVerticle {
         def artifactAPI = new ArtifactAPI(v1ApiRouter, elastic)
         vertx.deployVerticle(artifactAPI, new DeploymentOptions().setConfig(config()))
 
+        ACTIVE_INTEGRATIONS.add(IntegrationInfo.builder()
+                .name("Apache SkyWalking").type(IntegrationType.APM)
+                .version(BUILD.getString("apache_skywalking_version")).build())
         def skywalking = new SkywalkingIntegration(artifactAPI, elastic, config().getJsonObject("skywalking.oap"))
         vertx.deployVerticle(skywalking)
         vertx.deployVerticle(new MetricAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, elastic, skywalking))
@@ -207,6 +213,7 @@ class CoreBootstrap extends AbstractVerticle {
             def coreInfo = SourceCoreInfo.builder()
                     .version(version)
                     .config(SourceCoreConfig.current)
+                    .integrations(ACTIVE_INTEGRATIONS)
             if (version != "dev") {
                 coreInfo.buildDate(Instant.parse(BUILD.getString("build_date")))
             }

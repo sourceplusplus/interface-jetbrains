@@ -10,6 +10,7 @@ import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
+import java.util.List;
 
 /**
  * todo: description
@@ -30,6 +31,8 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
     Instant buildDate();
 
     SourceCoreConfig config();
+
+    List<IntegrationInfo> integrations();
 
     @Value.Check
     default void validate() {
