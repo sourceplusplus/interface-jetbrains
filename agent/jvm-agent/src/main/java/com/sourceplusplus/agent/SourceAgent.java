@@ -230,31 +230,34 @@ public class SourceAgent {
         InputStream configInputStream;
         String environmentConfigFile = System.getenv("SOURCE_CONFIG");
         if (environmentConfigFile != null) {
-            try {
-                configInputStream = new FileInputStream(new File(environmentConfigFile));
-            } catch (FileNotFoundException e) {
-                Logger.error(e, "Failed to find agent config file: " + environmentConfigFile);
-                throw new RuntimeException(e);
-            }
+            configInputStream = getConfigInputStream(environmentConfigFile);
         } else {
-            String systemConfigFile = System.getProperty("SOURCE_CONFIG");
-            if (systemConfigFile != null) {
-                try {
-                    configInputStream = new FileInputStream(new File(systemConfigFile));
-                } catch (FileNotFoundException e) {
-                    Logger.error(e, "Failed to find agent config file: " + systemConfigFile);
-                    throw new RuntimeException(e);
-                }
-            } else {
-                configInputStream = Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("source-agent.json");
-            }
+            configInputStream = getConfigInputStream(System.getProperty("SOURCE_CONFIG"));
         }
         String configData = convertStreamToString(configInputStream);
         SourceAgentConfig.current.applyConfig(new JsonObject(configData));
         try {
             configInputStream.close();
         } catch (IOException e) {
+        }
+    }
+
+    private static InputStream getConfigInputStream(String configFileLocationOrName) {
+        if (configFileLocationOrName != null) {
+            File configFile = new File(configFileLocationOrName);
+            if (configFile.exists()) {
+                try {
+                    return new FileInputStream(configFile);
+                } catch (FileNotFoundException e) {
+                    Logger.error(e, "Failed to find agent config file: " + configFile);
+                    throw new RuntimeException(e);
+                }
+            } else {
+                return Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream(configFileLocationOrName);
+            }
+        } else {
+            return Thread.currentThread().getContextClassLoader().getResourceAsStream("source-agent.json");
         }
     }
 
