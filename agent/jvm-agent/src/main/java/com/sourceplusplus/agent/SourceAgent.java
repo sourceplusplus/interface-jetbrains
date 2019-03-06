@@ -225,17 +225,27 @@ public class SourceAgent {
 
     private static void loadConfiguration() {
         InputStream configInputStream;
-        String configFile = System.getProperty("SOURCE_CONFIG");
-        if (configFile != null) {
+        String environmentConfigFile = System.getenv("SOURCE_CONFIG");
+        if (environmentConfigFile != null) {
             try {
-                configInputStream = new FileInputStream(new File(configFile));
+                configInputStream = new FileInputStream(new File(environmentConfigFile));
             } catch (FileNotFoundException e) {
-                Logger.error(e, "Failed to find agent config file: " + configFile);
+                Logger.error(e, "Failed to find agent config file: " + environmentConfigFile);
                 throw new RuntimeException(e);
             }
         } else {
-            configInputStream = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("source-agent.json");
+            String systemConfigFile = System.getProperty("SOURCE_CONFIG");
+            if (systemConfigFile != null) {
+                try {
+                    configInputStream = new FileInputStream(new File(systemConfigFile));
+                } catch (FileNotFoundException e) {
+                    Logger.error(e, "Failed to find agent config file: " + systemConfigFile);
+                    throw new RuntimeException(e);
+                }
+            } else {
+                configInputStream = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("source-agent.json");
+            }
         }
         String configData = convertStreamToString(configInputStream);
         SourceAgentConfig.current.applyConfig(new JsonObject(configData));
