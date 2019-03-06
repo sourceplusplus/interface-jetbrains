@@ -13,7 +13,7 @@
   },
   "api": {
     "version": "v1",
-    "host": "source-core",
+    "host": "localhost",
     "port": 8080,
     "ssl": false,
     "key": null
@@ -24,7 +24,7 @@
     "sample_n_per_3_secs": -1,
     "span_limit_per_segment": 300,
     "output_enhanced_classes": false,
-    "backend_service": "skywalking-oap:11800",
+    "backend_service": "localhost:11800",
     "plugins": {
     }
   },
