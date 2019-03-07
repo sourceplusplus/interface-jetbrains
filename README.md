@@ -80,7 +80,7 @@ After installation you will need to configure the Source++ Plugin (see [Configur
 ./gradlew test
 ```
 
-####  Build Source++ Agent:
+#### Build Source++ Agent:
 ```
 ./gradlew buildAgent
 ```
