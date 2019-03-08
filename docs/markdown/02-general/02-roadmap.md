@@ -48,7 +48,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
  - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
 
-## 0.6.0 (alpha)
+## 0.6.0 (beta)
 
 > Additional APM/IDE integrations
 
