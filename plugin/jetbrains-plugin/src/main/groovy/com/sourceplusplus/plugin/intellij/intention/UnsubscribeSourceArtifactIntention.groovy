@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
 
+import static com.sourceplusplus.plugin.PluginBootstrap.*
+
 /**
  * Intention used to unsubscribe from source code artifacts.
  * Artifacts currently supported:
@@ -50,12 +52,12 @@ class UnsubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
 
     @Override
     boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
-        if (PluginBootstrap.sourcePlugin == null) return false
+        if (sourcePlugin == null) return false
         while (element != null) {
             def uMethod = UastContextKt.toUElement(element)
             if (uMethod instanceof UMethod) {
                 def qualifiedName = IntelliUtils.getArtifactQualifiedName(uMethod)
-                def sourceMark = PluginBootstrap.sourcePlugin.getSourceMark(qualifiedName)
+                def sourceMark = sourcePlugin.getSourceMark(qualifiedName)
                 if (sourceMark != null && sourceMark.artifactSubscribed) {
                     return true
                 }
@@ -85,7 +87,7 @@ class UnsubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
                 .artifactQualifiedName(artifactQualifiedName)
                 .removeAllArtifactSubscriptions(true)
                 .build()
-        PluginBootstrap.sourcePlugin.vertx.eventBus().send(
+        sourcePlugin.vertx.eventBus().send(
                 PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
     }
 }

@@ -51,7 +51,7 @@ class SubscribedSourceArtifactMarkProvider extends LineMarkerProviderDescriptor 
     }
 
     private LineMarkerInfo<PsiElement> determineLineMarkInfo(PsiElement element) {
-        def activeMarkers = PluginBootstrap.sourcePlugin?.activeSourceFileMarkers
+        def activeMarkers = PluginBootstrap.sourcePlugin?.availableSourceFileMarkers
         if (activeMarkers == null) return null
         def owner = getAnnotationOwner(element)
         if (owner == null) return null

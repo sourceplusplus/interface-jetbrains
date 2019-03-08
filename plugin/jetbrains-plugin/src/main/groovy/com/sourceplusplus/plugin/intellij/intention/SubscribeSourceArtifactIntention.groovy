@@ -20,6 +20,8 @@ import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
 
+import static com.sourceplusplus.plugin.PluginBootstrap.*
+
 /**
  * Intention used to subscribe to source code artifacts.
  * Artifacts currently supported:
@@ -54,12 +56,12 @@ class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
 
     @Override
     boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
-        if (PluginBootstrap.sourcePlugin == null) return false
+        if (sourcePlugin == null) return false
         while (element != null) {
             def uMethod = UastContextKt.toUElement(element)
             if (uMethod instanceof UMethod) {
                 def qualifiedName = IntelliUtils.getArtifactQualifiedName(uMethod)
-                def sourceMark = PluginBootstrap.sourcePlugin.getSourceMark(qualifiedName)
+                def sourceMark = sourcePlugin.getSourceMark(qualifiedName)
                 if (sourceMark != null && !sourceMark.artifactSubscribed) {
                     return true
                 }
@@ -97,7 +99,7 @@ class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
                 .artifactQualifiedName(artifactQualifiedName)
                 .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
                 .metricTypes(metricTypes).build()
-        PluginBootstrap.sourcePlugin.vertx.eventBus().send(
+        sourcePlugin.vertx.eventBus().send(
                 PluginArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, metricSubscribeRequest)
 
         //subscribe to traces
@@ -106,7 +108,7 @@ class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
                 .artifactQualifiedName(artifactQualifiedName)
                 .orderType(TraceOrderType.LATEST_TRACES)
                 .build()
-        PluginBootstrap.sourcePlugin.vertx.eventBus().send(
+        sourcePlugin.vertx.eventBus().send(
                 PluginArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, traceSubscribeRequest)
     }
 }

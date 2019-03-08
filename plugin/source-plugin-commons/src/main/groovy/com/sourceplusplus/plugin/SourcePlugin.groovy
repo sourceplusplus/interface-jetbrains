@@ -29,7 +29,7 @@ class SourcePlugin {
     public static final String SOURCE_FILE_MARKER_ACTIVATED = "SourceFileMarkerActivated"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private final Set<SourceFileMarker> activeSourceFileMarkers = Sets.newConcurrentHashSet()
+    private final Set<SourceFileMarker> availableSourceFileMarkers = Sets.newConcurrentHashSet()
     private final SourceCoreClient coreClient
     private final Vertx vertx
 
@@ -55,13 +55,13 @@ class SourcePlugin {
     }
 
     void refreshActiveSourceFileMarkers() {
-        activeSourceFileMarkers.each {
+        availableSourceFileMarkers.each {
             it.refresh()
         }
     }
 
     void activateSourceFileMarker(SourceFileMarker sourceFileMarker) {
-        if (activeSourceFileMarkers.add(Objects.requireNonNull(sourceFileMarker))) {
+        if (availableSourceFileMarkers.add(Objects.requireNonNull(sourceFileMarker))) {
             def sourceMarks = sourceFileMarker.createSourceMarks()
             sourceFileMarker.setSourceMarks(sourceMarks)
             sourceFileMarker.refresh()
@@ -71,7 +71,7 @@ class SourcePlugin {
     }
 
     void deactivateSourceFileMarker(SourceFileMarker sourceFileMarker) {
-        if (activeSourceFileMarkers.remove(Objects.requireNonNull(sourceFileMarker))) {
+        if (availableSourceFileMarkers.remove(Objects.requireNonNull(sourceFileMarker))) {
             def sourceMarks = sourceFileMarker.getSourceMarks()
 
             log.info("Deactivated source file marker: {} - Mark count: {}", sourceFileMarker, sourceMarks.size())
@@ -89,21 +89,21 @@ class SourcePlugin {
 
     @Nullable
     SourceFileMarker getSourceFileMarker(String qualifiedClassName) {
-        return activeSourceFileMarkers.find {
+        return availableSourceFileMarkers.find {
             it.sourceFile.qualifiedClassName == qualifiedClassName
         }
     }
 
     @Nullable
     SourceFileMarker getSourceFileMarker(PluginSourceFile sourceFile) {
-        return activeSourceFileMarkers.find {
+        return availableSourceFileMarkers.find {
             it.sourceFile == sourceFile
         }
     }
 
     @NotNull
-    Set<SourceFileMarker> getActiveSourceFileMarkers() {
-        return Sets.newHashSet(activeSourceFileMarkers)
+    Set<SourceFileMarker> getAvailableSourceFileMarkers() {
+        return Sets.newHashSet(availableSourceFileMarkers)
     }
 
     @NotNull
@@ -114,7 +114,7 @@ class SourcePlugin {
     @Nullable
     SourceMark getSourceMark(String artifactQualifiedName) {
         def sourceMark = null
-        activeSourceFileMarkers.each {
+        availableSourceFileMarkers.each {
             if (sourceMark == null) {
                 sourceMark = it.getSourceMark(artifactQualifiedName)
             }

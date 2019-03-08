@@ -49,9 +49,19 @@
             <descriptionDirectoryName>SubscribeSourceArtifact</descriptionDirectoryName>
         </intentionAction>
         <intentionAction>
+            <className>com.sourceplusplus.plugin.intellij.intention.SubscribeFileSourceArtifactsIntention</className>
+            <category>Source++ Artifact</category>
+            <descriptionDirectoryName>SubscribeFileSourceArtifacts</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
             <className>com.sourceplusplus.plugin.intellij.intention.UnsubscribeSourceArtifactIntention</className>
             <category>Source++ Artifact</category>
             <descriptionDirectoryName>UnsubscribeSourceArtifact</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <className>com.sourceplusplus.plugin.intellij.intention.UnsubscribeFileSourceArtifactsIntention</className>
+            <category>Source++ Artifact</category>
+            <descriptionDirectoryName>UnsubscribeFileSourceArtifacts</descriptionDirectoryName>
         </intentionAction>
     </extensions>
 </idea-plugin>
