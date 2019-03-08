@@ -32,12 +32,22 @@ dependencies {
 
 task createProperties(dependsOn: processResources) {
     doLast {
-        new File("$buildDir/resources/main/source-agent_build.properties").withWriter { w ->
-            Properties p = new Properties()
-            p['version'] = project.version.toString()
-            p['apache_skywalking_version'] = project.APACHE_SKYWALKING_VERSION.toString()
-            p['build_date'] = new Date().toInstant().toString()
-            p.store w, null
+        boolean writeProperties = true
+        def agentBuildFile = new File("$buildDir/resources/main/source-agent_build.properties")
+        if (agentBuildFile.exists()) {
+            def props = new Properties()
+            props.load(agentBuildFile.newInputStream())
+            writeProperties = props.getProperty("version") != project.version.toString()
+        }
+
+        if (writeProperties) {
+            agentBuildFile.withWriter { w ->
+                Properties p = new Properties()
+                p['version'] = project.version.toString()
+                p['apache_skywalking_version'] = project.APACHE_SKYWALKING_VERSION.toString()
+                p['build_date'] = new Date().toInstant().toString()
+                p.store w, null
+            }
         }
     }
 }
