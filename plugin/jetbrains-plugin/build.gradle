@@ -21,12 +21,29 @@ dependencies {
     compile group: 'com.googlecode.wicked-charts', name: 'highcharts-wrapper', version: '2.0.1'
 }
 
-task updatePluginAgent(dependsOn: [":agent:jvm-agent:buildAgent"]) {
+task createProperties(dependsOn: processResources) {
+    doLast {
+        new File("$buildDir/resources/main/source-plugin_build.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = project.version.toString()
+            p['build_date'] = new Date().toInstant().toString()
+            p['ide'] = 'jetbrains'
+            p.store w, null
+        }
+    }
+}
+classes {
+    dependsOn createProperties
+}
+
+task updatePluginResources(dependsOn: [":agent:jvm-agent:buildAgent"]) {
     doLast {
         copy {
             from '../../tooltip/src/main/resources'
             into 'build/resources/main'
         }
+        file("build/resources/main/source-tooltip_build.properties").delete()
+
         copy {
             from '../../agent/lib/skywalking'
             into 'build/resources/main'
@@ -37,7 +54,7 @@ task updatePluginAgent(dependsOn: [":agent:jvm-agent:buildAgent"]) {
                 file("../../agent/jvm-agent/build/libs/source-agent-$version" + ".jar").bytes
     }
 }
-compileJava.mustRunAfter updatePluginAgent
-runIde.dependsOn updatePluginAgent
-buildPlugin.dependsOn updatePluginAgent
+compileJava.mustRunAfter updatePluginResources
+runIde.dependsOn updatePluginResources
+buildPlugin.dependsOn updatePluginResources
 //todo: doesn't build api 49mb vs 50.01mb
