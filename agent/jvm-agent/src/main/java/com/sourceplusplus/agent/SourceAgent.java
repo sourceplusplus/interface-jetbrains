@@ -4,7 +4,6 @@ import com.sourceplusplus.agent.inject.ClassFileTransformerImpl;
 import com.sourceplusplus.agent.intercept.logger.SourceLoggerResolver;
 import com.sourceplusplus.agent.sync.ArtifactTraceSubscriptionSync;
 import com.sourceplusplus.api.client.SourceCoreClient;
-import com.sourceplusplus.api.client.SourcePluginClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.config.SourceAgentConfig;
 import io.vertx.core.json.JsonObject;
@@ -50,7 +49,6 @@ public class SourceAgent {
         return t;
     });
     private static SourceCoreClient coreClient;
-    private static SourcePluginClient pluginClient;
     private static Instrumentation instrumentation;
     private static ArtifactTraceSubscriptionSync traceSubscriptionSync;
 
@@ -209,16 +207,6 @@ public class SourceAgent {
     @Contract(pure = true)
     public static SourceCoreClient coreClient() {
         return coreClient;
-    }
-
-    @Contract(pure = true)
-    public static SourcePluginClient pluginClient() {
-        return pluginClient;
-    }
-
-    @Contract(pure = true)
-    public static boolean isPluginClientConnected() {
-        return pluginClient != null;
     }
 
     @Contract(pure = true)
