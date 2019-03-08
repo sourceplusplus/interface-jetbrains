@@ -1,4 +1,4 @@
-# 0.1.1-alpha (2019-03-08)
+# 0.1.1-alpha (2019-03-07)
 
 - Externalized Source++ Agent dependencies (via jarjar)
 - Added intentions for subscribing/unsubscribing to/from all artifacts in a file
