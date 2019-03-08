@@ -1,7 +1,7 @@
 package com.sourceplusplus.api.bridge;
 
 /**
- * todo: description
+ * Includes the endpoints which can be bridged from Source++ Core to Source++ Plugin.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.1.1

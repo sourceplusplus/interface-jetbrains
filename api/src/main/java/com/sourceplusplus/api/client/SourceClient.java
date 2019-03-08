@@ -11,7 +11,7 @@ import io.vertx.core.json.Json;
 import java.util.UUID;
 
 /**
- * todo: description
+ * A common client interface for the various Source++ components.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.1.1
