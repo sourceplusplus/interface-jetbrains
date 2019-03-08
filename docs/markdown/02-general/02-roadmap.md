@@ -18,7 +18,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.2.0 (alpha)
 
-> Focus: Bundled and configurable local environment setup
+> Focus: Seamless local developer environment setup
 
  - H2 database storage ![](../../images/roadmap/Source++-Core-blue.svg)
  - Local bundled Source++ Core in Source++ Plugin ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
@@ -30,7 +30,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.3.0 (alpha)
 
-> Focus: Language-agnostic parsing
+> Focus: Language-agnostic source code parsing
 
  - Switch to source code parsing with Babelfish ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
@@ -50,17 +50,18 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.6.0 (alpha)
 
-> Additional APM/IDE support
+> Additional APM/IDE integrations
 
  - stagemonitor integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
  - Pinpoint integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
-
-## 0.7.0 (alpha)
-
-> Additional APM/IDE support
-
  - Apache SkyWalking .NET & JetBrains Rider integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
 
+## 0.7.0+ (alpha)
+
+> Offline source code analysis & real-time augmentations
+
 ## 1.0.0
+
+> AI-based pair programming solution
 
  - Offline source code analysis (source code augmentations) ![](../../images/roadmap/Source++-Core-blue.svg)
