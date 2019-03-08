@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 import javax.swing.*
 
 /**
- * todo: description
+ * InspectionToolProvider for the primary source mark inspection.
  *
  * @version 0.1.1
  * @since 0.1.0

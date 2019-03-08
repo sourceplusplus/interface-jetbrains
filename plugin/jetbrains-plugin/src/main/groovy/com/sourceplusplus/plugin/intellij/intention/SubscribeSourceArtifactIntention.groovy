@@ -21,7 +21,9 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
 
 /**
- * todo: description
+ * Intention used to subscribe to source code artifacts.
+ * Artifacts currently supported:
+ *  - methods
  *
  * @version 0.1.1
  * @since 0.1.0

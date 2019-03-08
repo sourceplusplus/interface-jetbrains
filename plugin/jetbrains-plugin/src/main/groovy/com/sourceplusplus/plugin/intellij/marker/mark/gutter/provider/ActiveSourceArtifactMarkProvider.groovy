@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 import javax.swing.*
 
 /**
- * todo: description
+ * Provides the visual rendering for 'Active' source marks located in the IDE gutter.
  *
  * @version 0.1.1
  * @since 0.1.0
