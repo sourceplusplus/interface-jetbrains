@@ -2,7 +2,7 @@
     <id>com.sourceplusplus.plugin.intellij</id>
     <name>Source++</name>
     <version>0.1.1-alpha</version>
-    <vendor email="support@sourceplusplus.com" url="https://sourceplusplus.com">CodeBrig, LLC.</vendor>
+    <vendor email="support@sourceplusplus.com" url="https://sourceplusplus.com">Source++ Team</vendor>
 
     <description><![CDATA[
       Open-source automated programming assistant with runtime-aware and context-aware functionality
