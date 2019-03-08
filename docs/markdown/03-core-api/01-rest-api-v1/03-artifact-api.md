@@ -21,6 +21,7 @@ The Artifact API allows you to retrieve, update, and unsubscribe from source cod
 
 # Create Source Artifact
 **Endpoint [POST]**: [/applications/:appUuid/artifacts](https://api.sourceplusplus.com/v1/applications/:appUuid/artifacts)
+
 **Description**: Register a source code artifact.
 
 **Request [SourceArtifact]**:
@@ -39,6 +40,7 @@ The Artifact API allows you to retrieve, update, and unsubscribe from source cod
 
 # Get Application Artifacts
 **Endpoint [POST]**: [/applications/:appUuid/artifacts](https://api.sourceplusplus.com/v1/applications/:appUuid/artifacts)
+
 **Description**: Register a source code artifact.
 
 **Request [SourceArtifact]**:
@@ -67,6 +69,7 @@ n/a
 
 # Get Source Artifact
 **Endpoint [GET]**: [/applications/:appUuid/artifacts/:artifactQualifiedName](https://api.sourceplusplus.com/v1/applications/:appUuid/artifacts/:artifactQualifiedName)
+
 **Description**: Get source code artifact.
 
 **Request**:
@@ -93,6 +96,7 @@ n/a
 
 # Update Source Artifact Configuration
 **Endpoint [PUT]**: [/applications/:appUuid/artifacts/:artifactQualifiedName/configuration](https://api.sourceplusplus.com/v1/applications/:appUuid/artifacts/:artifactQualifiedName/config)
+
 **Description**: Update source artifact configuration.
 
 **Request [SourceArtifactConfig]**:
@@ -111,6 +115,7 @@ n/a
 
 # Get Source Artifact Configuration
 **Endpoint [GET]**: [/applications/:appUuid/artifacts/:artifactQualifiedName/configuration](https://api.sourceplusplus.com/v1/applications/:appUuid/artifacts/:artifactQualifiedName/configuration)
+
 **Description**: Get source code artifact configuration.
 
 **Request**:
@@ -127,6 +132,7 @@ n/a
 
 # Get Source Artifact Subscriptions
 **Endpoint [GET]**: [/applications/:appUuid/artifacts/:artifactQualifiedName/subscriptions](https://api.sourceplusplus.com/v1/applications/:appUuid/artifacts/:artifactQualifiedName/subscriptions)
+
 **Description**: Get source code artifact subscriptions.
 
 **Request**:
