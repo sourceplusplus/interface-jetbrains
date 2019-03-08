@@ -63,5 +63,3 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 ## 1.0.0
 
 > AI-based pair programming solution
-
- - Offline source code analysis (source code augmentations) ![](../../images/roadmap/Source++-Core-blue.svg)
