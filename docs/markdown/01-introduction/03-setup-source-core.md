@@ -2,7 +2,7 @@ In order to setup Source++ Core you will need:
 
  * [Java](https://www.oracle.com/java/)
  * [Elasticsearch](https://www.elastic.co/products/elasticsearch)
- * [Apache Skywalking OAP](https://skywalking.apache.org/)
+ * [Apache SkyWalking OAP](https://skywalking.apache.org/)
 
 # Install Java (JDK 8)
 ```sh
@@ -27,7 +27,7 @@ curl -XGET 'localhost:9200'
 
 Once the above doesn't return `connection refused` you may continue setup.
 
-# Download Apache Skywalking OAP
+# Download Apache SkyWalking OAP
 ```sh
 cd /opt
 wget https://www-eu.apache.org/dist/incubator/skywalking/6.0.0-GA/apache-skywalking-apm-incubating-6.0.0-GA.tar.gz
@@ -37,15 +37,15 @@ rm apache-skywalking-apm-incubating-6.0.0-GA.tar
 mv apache-skywalking-apm-incubating apache-skywalking
 ```
 
-Note: You may want to adjust the timezone and other settings of the Apache Skywalking OAP server ([setup guide](https://github.com/apache/incubator-skywalking/blob/master/docs/en/setup/backend/backend-ui-setup.md)).
+Note: You may want to adjust the timezone and other settings of the Apache SkyWalking OAP server ([setup guide](https://github.com/apache/incubator-skywalking/blob/master/docs/en/setup/backend/backend-ui-setup.md)).
 
-## Start Apache Skywalking OAP
+## Start Apache SkyWalking OAP
 ```sh
 cd /opt/apache-skywalking/bin
 ./oapService.sh
 ```
 
-Apache Skywalking OAP may take some time to boot. You can verify when it's available by using:
+Apache SkyWalking OAP may take some time to boot. You can verify when it's available by using:
 ```sh
 curl -XGET 'localhost:12800'
 ```
@@ -55,10 +55,10 @@ Once the above doesn't return `connection refused` you can continue setup.
 # Download Source++ Core
 ```sh
 cd /opt
-wget https://github.com/CodeBrig/Source/releases/download/v0.1.0-alpha/source-core-0.1.0.tar
-tar -xvf source-core-0.1.0.tar
-rm source-core-0.1.0.tar
-mv source-core-0.1.0 source-core
+wget https://github.com/CodeBrig/Source/releases/download/v0.1.1-alpha/source-core-0.1.1.tar
+tar -xvf source-core-0.1.1.tar
+rm source-core-0.1.1.tar
+mv source-core-0.1.1 source-core
 ```
 
 ## Start Source++ Core

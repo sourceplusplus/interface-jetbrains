@@ -8,6 +8,7 @@ import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.components.ServiceManager
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.SourcePluginDefines
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import com.sourceplusplus.tooltip.display.TooltipUI
@@ -28,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * todo: description
  *
- * @version 0.1.0
+ * @version 0.1.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -46,9 +47,9 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         }
         if (!patched.getAndSet(true) && PluginBootstrap.sourcePlugin != null) {
             log.info("Patching Source++ Agent for executing program...")
-            URL inputUrl = getClass().getResource("/source-agent-0.1.0.jar") //todo: dynamic version
+            URL inputUrl = getClass().getResource("/source-agent-" + SourcePluginDefines.VERSION + ".jar")
             File destDir = File.createTempDir()
-            agentFile = new File(destDir, "source-agent-0.1.0.jar") //todo: dynamic version
+            agentFile = new File(destDir, "source-agent-" + SourcePluginDefines.VERSION + ".jar")
             FileUtils.copyURLToFile(inputUrl, agentFile)
             agentFile.deleteOnExit()
             destDir.deleteOnExit()
@@ -123,8 +124,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         }
 
         if (agentFile != null) {
-            javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath="
-                    + agentFile.parentFile.absolutePath)
+            javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath")
             log.info("Attached Source++ Agent to executing program")
         }
     }
@@ -143,6 +143,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
     static void modifyAgentSettings(Path src, Path dst) throws IOException {
         def agentConfig = new JsonObject(Files.newInputStream(src).getText())
 
+        agentConfig.put("log_location", agentFile.parentFile.absolutePath)
         agentConfig.getJsonObject("application").put("app_uuid", SourcePluginConfig.current.appUuid)
         agentConfig.getJsonObject("api").put("host", SourcePluginConfig.current.apiHost)
         agentConfig.getJsonObject("api").put("port", SourcePluginConfig.current.apiPort)

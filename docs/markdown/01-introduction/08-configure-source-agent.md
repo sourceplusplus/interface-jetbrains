@@ -5,8 +5,8 @@
   "enabled": true,
   "test_mode": false,
   "log_level": "info",
+  "log_location": null,
   "application": {
-    "app_name": null,
     "app_uuid": null,
     "application_source_code": {
       "packages": []
@@ -36,17 +36,17 @@
 
 ## General Settings
 
-| Property  | Value | Description                       |
-| --------- | ----- | --------------------------------- |
-| enabled   | true  | Enable/disable Source++ Agent     |
-| test_mode | false | Includes additional output        |
-| log_level | info  | Log level to use throughout agent |
+| Property     | Value | Description                       |
+| ------------ | ----- | --------------------------------- |
+| enabled      | true  | Enable/disable Source++ Agent     |
+| test_mode    | false | Includes additional output        |
+| log_level    | info  | Log level to use throughout agent |
+| log_location | null  | The directory to write logs to    |
 
 ## Application Settings
 
 | Property                | Value | Description                        |
 | ----------------------- | ----- | ---------------------------------- |
-| app_name                | null  | The application name               |
 | app_uuid                | null  | The application UUID               |
 | application_source_code | null  | Represents the packages to monitor |
 

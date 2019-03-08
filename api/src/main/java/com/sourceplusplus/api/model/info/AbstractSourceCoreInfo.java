@@ -10,12 +10,13 @@ import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
+import java.util.List;
 
 /**
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.0
+ * @version 0.1.1
  * @since 0.1.0
  */
 @SourceStyle
@@ -30,6 +31,8 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
     Instant buildDate();
 
     SourceCoreConfig config();
+
+    List<IntegrationInfo> integrations();
 
     @Value.Check
     default void validate() {

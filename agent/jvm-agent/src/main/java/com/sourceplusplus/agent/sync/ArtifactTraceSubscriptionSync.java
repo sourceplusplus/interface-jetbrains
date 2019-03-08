@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.0
+ * @version 0.1.1
  * @since 0.1.0
  */
 public class ArtifactTraceSubscriptionSync implements Runnable {
@@ -35,7 +35,7 @@ public class ArtifactTraceSubscriptionSync implements Runnable {
     @Override
     public void run() {
         if (enabled && readyForWork.getAndSet(false)) {
-            Logger.debug("Getting application subscriptions. - App uuid: " + SourceAgentConfig.current.appUuid);
+            Logger.trace("Getting application subscriptions. - App uuid: " + SourceAgentConfig.current.appUuid);
             List<SourceApplicationSubscription> subscriptions = coreClient.getApplicationSubscriptions(
                     SourceAgentConfig.current.appUuid, true);
 
@@ -58,7 +58,7 @@ public class ArtifactTraceSubscriptionSync implements Runnable {
                     return false;
                 }
             });
-            Logger.debug("Tracing artifacts: " + String.join(",", TRACE_ARTIFACTS));
+            Logger.trace("Tracing artifacts: " + String.join(",", TRACE_ARTIFACTS));
 
             readyForWork.set(true);
         }

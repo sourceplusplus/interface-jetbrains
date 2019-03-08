@@ -4,7 +4,6 @@ import com.sourceplusplus.agent.inject.ClassFileTransformerImpl;
 import com.sourceplusplus.agent.intercept.logger.SourceLoggerResolver;
 import com.sourceplusplus.agent.sync.ArtifactTraceSubscriptionSync;
 import com.sourceplusplus.api.client.SourceCoreClient;
-import com.sourceplusplus.api.client.SourcePluginClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.config.SourceAgentConfig;
 import io.vertx.core.json.JsonObject;
@@ -26,6 +25,7 @@ import org.pmw.tinylog.writers.FileWriter;
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,10 +36,12 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.0
+ * @version 0.1.1
  * @since 0.1.0
  */
 public class SourceAgent {
+
+    public static final ResourceBundle BUILD = ResourceBundle.getBundle("source-agent_build");
 
     private static final ScheduledExecutorService workScheduler = Executors.newScheduledThreadPool(1, r -> {
         Thread t = Executors.defaultThreadFactory().newThread(r);
@@ -47,7 +49,6 @@ public class SourceAgent {
         return t;
     });
     private static SourceCoreClient coreClient;
-    private static SourcePluginClient pluginClient;
     private static Instrumentation instrumentation;
     private static ArtifactTraceSubscriptionSync traceSubscriptionSync;
 
@@ -103,14 +104,16 @@ public class SourceAgent {
             throw new IllegalStateException("Source++ Agent already initialized");
         } else {
             loadConfiguration();
-            if (agentArgs != null && !agentArgs.isEmpty()) {
+            if (SourceAgentConfig.current.logLocation != null) {
+                File logFile = new File(SourceAgentConfig.current.logLocation, "source-agent.log");
                 Configurator.defaultConfig()
-                        .writer(new FileWriter(agentArgs + "/source-agent.log"))
+                        .writer(new FileWriter(logFile.getAbsolutePath()))
                         .level(Level.valueOf(SourceAgentConfig.current.logLevel))
                         .formatPattern("[AGENT] - {message}")
                         .activate();
             }
             SourceAgent.instrumentation = instrumentation;
+            Logger.info("Build: " + BUILD.getString("build_date"));
 
             coreClient = new SourceCoreClient(
                     SourceAgentConfig.current.apiHost, SourceAgentConfig.current.apiPort, SourceAgentConfig.current.apiSslEnabled);
@@ -127,7 +130,7 @@ public class SourceAgent {
             Config.Agent.SPAN_LIMIT_PER_SEGMENT = SourceAgentConfig.current.spanLimitPerSegment;
             Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.backendService;
             System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
-            Logger.info("Using Skywalking host: " + SourceAgentConfig.current.backendService);
+            Logger.info("Using SkyWalking host: " + SourceAgentConfig.current.backendService);
 
             if (SourceAgentConfig.current.testMode) {
                 Logger.info("Test mode enabled");
@@ -138,11 +141,14 @@ public class SourceAgent {
                 SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
             } else {
                 if (SourceAgentConfig.current.skywalkingEnabled) {
+                    if (SourceAgentConfig.current.appUuid == null) {
+                        throw new RuntimeException("Missing application UUID in Source++ Agent configuration");
+                    }
                     Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
                     System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
                     SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
 
-                    Logger.info("Waiting for Skywalking to finish setup");
+                    Logger.info("Waiting for Apache SkyWalking to finish setup");
                     while (true) {
                         if (RemoteDownstreamConfig.Agent.SERVICE_ID != DictionaryUtil.nullValue()
                                 && RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID != DictionaryUtil.nullValue()) {
@@ -153,7 +159,7 @@ public class SourceAgent {
                         } catch (InterruptedException e) {
                         }
                     }
-                    Logger.info("Skywalking initialized");
+                    Logger.info("Apache SkyWalking initialized");
                 }
             }
 
@@ -204,39 +210,42 @@ public class SourceAgent {
     }
 
     @Contract(pure = true)
-    public static SourcePluginClient pluginClient() {
-        return pluginClient;
-    }
-
-    @Contract(pure = true)
-    public static boolean isPluginClientConnected() {
-        return pluginClient != null;
-    }
-
-    @Contract(pure = true)
     public static ArtifactTraceSubscriptionSync getTraceSubscriptionSync() {
         return traceSubscriptionSync;
     }
 
     private static void loadConfiguration() {
         InputStream configInputStream;
-        String configFile = System.getProperty("SOURCE_CONFIG");
-        if (configFile != null) {
-            try {
-                configInputStream = new FileInputStream(new File(configFile));
-            } catch (FileNotFoundException e) {
-                Logger.error(e, "Failed to find agent config file: " + configFile);
-                throw new RuntimeException(e);
-            }
+        String environmentConfigFile = System.getenv("SOURCE_CONFIG");
+        if (environmentConfigFile != null) {
+            configInputStream = getConfigInputStream(environmentConfigFile);
         } else {
-            configInputStream = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("source-agent.json");
+            configInputStream = getConfigInputStream(System.getProperty("SOURCE_CONFIG"));
         }
         String configData = convertStreamToString(configInputStream);
         SourceAgentConfig.current.applyConfig(new JsonObject(configData));
         try {
             configInputStream.close();
         } catch (IOException e) {
+        }
+    }
+
+    private static InputStream getConfigInputStream(String configFileLocationOrName) {
+        if (configFileLocationOrName != null) {
+            File configFile = new File(configFileLocationOrName);
+            if (configFile.exists()) {
+                try {
+                    return new FileInputStream(configFile);
+                } catch (FileNotFoundException e) {
+                    Logger.error(e, "Failed to find agent config file: " + configFile);
+                    throw new RuntimeException(e);
+                }
+            } else {
+                return Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream(configFileLocationOrName);
+            }
+        } else {
+            return Thread.currentThread().getContextClassLoader().getResourceAsStream("source-agent.json");
         }
     }
 

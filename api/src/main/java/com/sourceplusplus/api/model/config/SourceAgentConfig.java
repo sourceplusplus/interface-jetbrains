@@ -21,7 +21,7 @@ import java.util.Objects;
  * Holds the current configuration used by the agent
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.0
+ * @version 0.1.1
  * @since 0.1.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -39,13 +39,12 @@ public final class SourceAgentConfig {
     public volatile Boolean skywalkingEnabled;
     public volatile Boolean tracingEnabled;
     public volatile String appUuid;
-    //public volatile String jvmUuid;
     public volatile String logLevel;
+    public volatile String logLocation;
     public volatile Boolean testMode;
     public volatile Boolean outputEnhancedClasses;
     public volatile Integer sampleNPer3Secs;
     public volatile Integer spanLimitPerSegment;
-    public volatile String appName;
     public volatile String backendService;
     public volatile List<String> packages;
     public volatile String pluginHost;
@@ -56,12 +55,12 @@ public final class SourceAgentConfig {
     public void applyConfig(JsonObject config) {
         JsonObject agentConfig = Objects.requireNonNull(config);
         if (agentConfig.containsKey("enabled")) agentEnabled = agentConfig.getBoolean("enabled");
-        if (agentConfig.containsKey("log_level")) logLevel = agentConfig.getString("log_level").toUpperCase();
         if (agentConfig.containsKey("test_mode")) testMode = agentConfig.getBoolean("test_mode");
+        if (agentConfig.containsKey("log_level")) logLevel = agentConfig.getString("log_level").toUpperCase();
+        if (agentConfig.containsKey("log_location")) logLocation = agentConfig.getString("log_location");
 
         JsonObject applicationConfig = agentConfig.getJsonObject("application");
         if (applicationConfig != null) {
-            if (applicationConfig.containsKey("app_name")) appName = applicationConfig.getString("app_name");
             if (applicationConfig.containsKey("app_uuid")) appUuid = applicationConfig.getString("app_uuid");
 
             JsonObject sourceCodeConfig = applicationConfig.getJsonObject("application_source_code");
@@ -126,13 +125,13 @@ public final class SourceAgentConfig {
             gen.writeStartObject();
 
             if (value.agentEnabled != null) gen.writeBooleanField("enabled", value.agentEnabled);
+            if (value.testMode != null) gen.writeBooleanField("testMode", value.testMode);
             if (value.logLevel != null) gen.writeStringField("log_level", value.logLevel);
+            if (value.logLocation != null) gen.writeStringField("log_location", value.logLocation);
 
             gen.writeFieldName("application");
             gen.writeStartObject();
-            if (value.appName != null) gen.writeStringField("app_name", value.appName);
             if (value.appUuid != null) gen.writeStringField("app_uuid", value.appUuid);
-
 
             gen.writeFieldName("application_source_code");
             gen.writeStartObject();
