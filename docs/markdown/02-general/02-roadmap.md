@@ -56,7 +56,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Pinpoint integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
  - Apache SkyWalking .NET & JetBrains Rider integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
 
-## 0.7.0+ (alpha)
+## 0.7.0+ (beta)
 
 > Offline source code analysis & real-time augmentations
 
