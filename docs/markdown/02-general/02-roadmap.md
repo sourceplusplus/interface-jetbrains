@@ -18,6 +18,8 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.2.0 (alpha)
 
+> Focus: Bundled and configurable local environment setup
+
  - H2 database storage ![](../../images/roadmap/Source++-Core-blue.svg)
  - Local bundled Source++ Core in Source++ Plugin ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Application/environment switching ![](../../images/roadmap/Source++-Tooltip-blue.svg)
@@ -28,24 +30,34 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.3.0 (alpha)
 
+> Focus: Language-agnostic parsing
+
  - Switch to source code parsing with Babelfish ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
 
 ## 0.4.0 (alpha)
 
- - Pinpoint integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+> Focus: Automatic artifact monitoring
+
  - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
 
 ## 0.5.0 (alpha)
+
+> Focus: Source code behavior predictions
 
  - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
 
 ## 0.6.0 (alpha)
 
+> Additional APM/IDE support
+
  - stagemonitor integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Pinpoint integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
 
 ## 0.7.0 (alpha)
+
+> Additional APM/IDE support
 
  - Apache SkyWalking .NET & JetBrains Rider integration ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
 
