@@ -37,7 +37,7 @@ public class ArtifactTraceSubscriptionSync implements Runnable {
         if (enabled && readyForWork.getAndSet(false)) {
             Logger.trace("Getting application subscriptions. - App uuid: " + SourceAgentConfig.current.appUuid);
             List<SourceApplicationSubscription> subscriptions = coreClient.getApplicationSubscriptions(
-                    SourceAgentConfig.current.appUuid, true);
+                    SourceAgentConfig.current.appUuid, false);
 
             Set<String> currentTraceSubscriptions = new HashSet<>();
             for (SourceApplicationSubscription subscription : subscriptions) {

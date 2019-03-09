@@ -138,7 +138,7 @@ class ApplicationAPI extends AbstractVerticle {
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
             return
         }
-        def includeAutomatic = routingContext.request().getParam("includeAutomatic") as boolean
+        def includeAutomatic = Boolean.valueOf(routingContext.request().getParam("includeAutomatic"))
 
         getApplicationSubscriptions(appUuid, includeAutomatic, {
             if (it.succeeded()) {
@@ -160,15 +160,25 @@ class ApplicationAPI extends AbstractVerticle {
                 if (includeAutomatic) {
                     elasticsearch.findArtifactBySubscribeAutomatically(appUuid, {
                         if (it.succeeded()) {
-                            def result = it.result()
-                            result.each {
-                                subscribers.add(SourceApplicationSubscription.builder()
-                                        .artifactQualifiedName(it.artifactQualifiedName())
-                                        .subscribers(-1)
-                                        .automaticSubscription(true)
-                                        .build())
+                            def mergeMap = new HashMap<String, SourceApplicationSubscription.Builder>()
+                            subscribers.each {
+                                mergeMap.putIfAbsent(it.artifactQualifiedName(),
+                                        SourceApplicationSubscription.builder().from(it))
                             }
-                            handler.handle(Future.succeededFuture(subscribers))
+                            it.result().each {
+                                if (mergeMap.containsKey(it.artifactQualifiedName())) {
+                                    mergeMap.get(it.artifactQualifiedName()).automaticSubscription(true)
+                                } else {
+                                    mergeMap.putIfAbsent(it.artifactQualifiedName(),
+                                            SourceApplicationSubscription.builder()
+                                                    .artifactQualifiedName(it.artifactQualifiedName())
+                                                    .subscribers(0)
+                                                    .automaticSubscription(true))
+                                }
+                            }
+
+                            def mergedSubscriptions = mergeMap.collect { it.value.build() } as Set
+                            handler.handle(Future.succeededFuture(mergedSubscriptions))
                         } else {
                             handler.handle(Future.failedFuture(it.cause()))
                         }
