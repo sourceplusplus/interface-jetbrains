@@ -157,15 +157,16 @@ class ApplicationAPI extends AbstractVerticle {
             if (it.succeeded()) {
                 def subscribers = Json.decodeValue(it.result().body() as String,
                         new TypeReference<Set<SourceApplicationSubscription>>() {})
-                if (includeAutomatic) {
-                    elasticsearch.findArtifactBySubscribeAutomatically(appUuid, {
-                        if (it.succeeded()) {
+                elasticsearch.findArtifactBySubscribeAutomatically(appUuid, {
+                    if (it.succeeded()) {
+                        def automaticSubscriptions = it.result()
+                        if (includeAutomatic) {
                             def mergeMap = new HashMap<String, SourceApplicationSubscription.Builder>()
                             subscribers.each {
                                 mergeMap.putIfAbsent(it.artifactQualifiedName(),
                                         SourceApplicationSubscription.builder().from(it))
                             }
-                            it.result().each {
+                            automaticSubscriptions.each {
                                 if (mergeMap.containsKey(it.artifactQualifiedName())) {
                                     mergeMap.get(it.artifactQualifiedName()).automaticSubscription(true)
                                 } else {
@@ -180,12 +181,17 @@ class ApplicationAPI extends AbstractVerticle {
                             def mergedSubscriptions = mergeMap.collect { it.value.build() } as Set
                             handler.handle(Future.succeededFuture(mergedSubscriptions))
                         } else {
-                            handler.handle(Future.failedFuture(it.cause()))
+                            subscribers.removeIf { sub ->
+                                automaticSubscriptions.find {
+                                    sub.artifactQualifiedName() == it.artifactQualifiedName()
+                                } != null
+                            }
+                            handler.handle(Future.succeededFuture(subscribers))
                         }
-                    })
-                } else {
-                    handler.handle(Future.succeededFuture(subscribers))
-                }
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
