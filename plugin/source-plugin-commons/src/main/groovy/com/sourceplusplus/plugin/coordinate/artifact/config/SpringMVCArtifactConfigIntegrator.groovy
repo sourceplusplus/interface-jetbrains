@@ -21,6 +21,10 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
 
     private static final String REQUEST_MAPPING_QUALIFIED_NAMES = Sets.newHashSet([
             "org.springframework.web.bind.annotation.GetMapping",
+            "org.springframework.web.bind.annotation.PostMapping",
+            "org.springframework.web.bind.annotation.PutMapping",
+            "org.springframework.web.bind.annotation.DeleteMapping",
+            "org.springframework.web.bind.annotation.PatchMapping",
             "org.springframework.web.bind.annotation.RequestMapping"
     ])
     private static final Logger log = LoggerFactory.getLogger(this.name)
