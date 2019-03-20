@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
  */
 class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
 
-    private static final String REQUEST_MAPPING_QUALIFIED_NAMES = Sets.newHashSet([
+    private static final String SPRING_WEB_ANNOTATIONS = Sets.newHashSet([
             "org.springframework.web.bind.annotation.GetMapping",
             "org.springframework.web.bind.annotation.PostMapping",
             "org.springframework.web.bind.annotation.PutMapping",
@@ -42,7 +42,7 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
             if (mark.isMethodMark()) {
                 mark.getMethodAnnotations({
                     it.result().findAll {
-                        REQUEST_MAPPING_QUALIFIED_NAMES.contains(it.qualifiedName)
+                        SPRING_WEB_ANNOTATIONS.contains(it.qualifiedName)
                     }.each {
                         def requestUrl = it.attributeMap.get("value") as String
                         PluginBootstrap.sourcePlugin.coreClient.createArtifactConfig(
