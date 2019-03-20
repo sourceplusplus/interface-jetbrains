@@ -9,7 +9,7 @@
     ]]></description>
 
     <idea-version since-build="162"/>
-    <depends>org.intellij.groovy</depends>
+    <depends optional="true">org.intellij.groovy</depends>
     <depends optional="true">org.jetbrains.kotlin</depends>
 
     <application-components>
