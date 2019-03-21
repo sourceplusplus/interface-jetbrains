@@ -12,7 +12,7 @@ The Trace API allows you to store and retrieve distributed traces. You can use t
 | Method | Address                                                      | Description                         |
 | ------ | ------------------------------------------------------------ | ----------------------------------- |
 | GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName/traces](#get-artifact-traces) | Get traces for source artifact      |
-| GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans](#get-artifact-trace-span) | Get trace spans for source artifact |
+| GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans](#get-artifact-trace-spans) | Get trace spans for source artifact |
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
