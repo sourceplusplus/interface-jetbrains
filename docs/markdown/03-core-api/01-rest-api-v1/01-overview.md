@@ -32,6 +32,6 @@ The following table lists all methods that are accessible through the REST API.
 | GET    | [/applications/:appUuid/artifacts](02-application-api.md/#get-application-artifacts) | Get application-wide source artifacts |
 | GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName](03-artifact-api.md/#get-source-artifact) | Get source artifact                   |
 | GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName/traces](05-trace-api.md/#get-artifact-traces) | Get traces for source artifact        |
-| GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans](05-trace-api.md/#get-artifact-trace-span) | Get trace spans for source artifact   |
+| GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans](05-trace-api.md/#get-artifact-trace-spans) | Get trace spans for source artifact   |
 | GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName/config](03-artifact-api.md/#get-source-artifact-configuration) | Get source artifact configuration     |
 | GET    | [/applications/:appUuid/artifacts/:artifactQualifiedName/subscriptions](03-artifact-api.md/#get-source-artifact-subscriptions) | Get source artifact's subscriptions   |
