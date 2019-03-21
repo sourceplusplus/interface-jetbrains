@@ -187,6 +187,9 @@ class DocServerBootstrap extends AbstractVerticle {
 
     private String updateMarkdownLinks(String currentUrl, String markdownText) {
         currentUrl = currentUrl.replace(config().getString("base.path"), "")
+        if (currentUrl.contains("?")) {
+            currentUrl = currentUrl.substring(0, currentUrl.indexOf("?"))
+        }
         def currentDirectory = ""
         currentUrl.split("/").each {
             if (it && !it.endsWith(".md")) {
