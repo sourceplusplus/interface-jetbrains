@@ -6,8 +6,8 @@ At a minimum it is recommended to dedicate at least 4GB of RAM and 20GB of hard 
 
 - [Setup Source++ Core](./03-setup-source-core.md)
 - [Configure Source++ Core](./04-configure-source-core.md)
-- [Setup Source++ Plugin](./05-setup-source-plugin.md)
-- [Connect Source++ Plugin](./06-connect-source-plugin.md)
+- [Install Source++ Plugin](./05-install-source-plugin.md)
+- [Configure Source++ Plugin](./06-configure-source-plugin.md)
 - [Attach Source++ Agent](./07-attach-source-agent.md)
 - [Configure Source++ Agent](./08-configure-source-agent.md)
 - [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)
