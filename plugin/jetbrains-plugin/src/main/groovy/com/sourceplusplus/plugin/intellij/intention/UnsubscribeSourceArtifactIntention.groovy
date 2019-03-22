@@ -8,7 +8,6 @@ import com.intellij.psi.PsiFile
 import com.intellij.util.IncorrectOperationException
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import org.jetbrains.annotations.NotNull

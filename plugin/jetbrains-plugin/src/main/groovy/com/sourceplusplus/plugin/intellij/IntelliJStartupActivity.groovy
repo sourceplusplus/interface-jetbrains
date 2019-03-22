@@ -22,7 +22,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiManager
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourcePluginConfig
@@ -196,33 +195,19 @@ class IntelliJStartupActivity implements StartupActivity {
 
             @Override
             void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-                if (SourcePluginConfig.current.appUuid == null) {
-                    log.warn("No App UUID found. Ignoring file closed")
-                    return
-                }
-
-                def psiFile
-                try {
-                    psiFile = PsiManager.getInstance(source.project).findFile(file)
-                } catch (Throwable all) {
-                    log.error("Failed to find file: $file", all)
-                    return
-                }
-                if (psiFile == IntelliJInspectionProvider.lastFileOpened) {
-                    IntelliJInspectionProvider.lastFileOpened = null
-                }
-                if (psiFile instanceof PsiClassOwner) {
-                    log.debug("Source code file closed: {}", file)
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        void run() {
-                            def fileMarker = psiFile.getVirtualFile().getUserData(IntelliJSourceFileMarker.KEY)
-                            if (fileMarker != null) {
-                                psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, null)
-                                sourcePlugin.vertx.eventBus().send(FileClosedTracker.ADDRESS, fileMarker)
-                            }
+                log.debug("Source code file closed: {}", file)
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    void run() {
+                        def fileMarker = file.getUserData(IntelliJSourceFileMarker.KEY)
+                        if (fileMarker != null) {
+                            file.putUserData(IntelliJSourceFileMarker.KEY, null)
+                            sourcePlugin.vertx.eventBus().send(FileClosedTracker.ADDRESS, fileMarker)
                         }
-                    })
+                    }
+                })
+                if (file == IntelliJInspectionProvider.lastFileOpened?.virtualFile) {
+                    IntelliJInspectionProvider.lastFileOpened = null
                 }
             }
         })

@@ -6,7 +6,6 @@ import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
-import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.marker.mark.GutterMark
 import io.vertx.core.AbstractVerticle
@@ -15,6 +14,8 @@ import org.slf4j.LoggerFactory
 
 import java.time.Instant
 import java.util.concurrent.TimeUnit
+
+import static com.sourceplusplus.plugin.PluginBootstrap.sourcePlugin
 
 /**
  * Keeps track of all artifact subscriptions.
@@ -37,7 +38,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     void start() throws Exception {
         //todo: change to just subscriber
         //subscribe to automatic subscriptions
-        PluginBootstrap.sourcePlugin.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.appUuid, true, {
+        sourcePlugin.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.appUuid, true, {
             if (it.succeeded()) {
                 it.result().each {
                     if (it.automaticSubscription()) {
@@ -51,7 +52,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
         //keep subscriptions alive
         vertx.setPeriodic(TimeUnit.MINUTES.toMillis(5), {
-            PluginBootstrap.sourcePlugin.coreClient.refreshSubscriberApplicationSubscriptions(
+            sourcePlugin.coreClient.refreshSubscriberApplicationSubscriptions(
                     SourcePluginConfig.current.appUuid, {
                 if (it.succeeded()) {
                     log.debug("Refreshed subscriptions")
@@ -64,9 +65,29 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         //refresh markers when the become available
         vertx.eventBus().consumer(SourcePlugin.SOURCE_FILE_MARKER_ACTIVATED, {
             def qualifiedClassName = it.body() as String
+
+            //current subscriptions
+            sourcePlugin.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.appUuid, false, {
+                if (it.succeeded()) {
+                    it.result().findAll { it.artifactQualifiedName().startsWith(qualifiedClassName) }.each {
+                        if (SourcePluginConfig.current.methodGutterMarksEnabled) {
+                            def gutterMark = sourcePlugin.getSourceMark(it.artifactQualifiedName()) as GutterMark
+                            if (gutterMark != null && !gutterMark.artifactSubscribed) {
+                                gutterMark.artifactSubscribed = true
+                                gutterMark.subscribeTime = Instant.now()
+                                gutterMark.sourceFileMarker.refresh()
+                            }
+                        }
+                    }
+                } else {
+                    log.error("Failed to get application subscriptions", it.cause())
+                }
+            })
+
+            //pending data available/subscriptions
             PENDING_DATA_AVAILABLE.findAll { it.startsWith(qualifiedClassName) }.each {
                 if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                    def gutterMark = PluginBootstrap.sourcePlugin.getSourceMark(it) as GutterMark
+                    def gutterMark = sourcePlugin.getSourceMark(it) as GutterMark
                     if (gutterMark != null && !gutterMark.artifactDataAvailable) {
                         gutterMark.artifactDataAvailable = true
                         gutterMark.sourceFileMarker.refresh()
@@ -76,7 +97,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             }
             PENDING_SUBSCRIBED.findAll { it.startsWith(qualifiedClassName) }.each {
                 if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                    def gutterMark = PluginBootstrap.sourcePlugin.getSourceMark(it) as GutterMark
+                    def gutterMark = sourcePlugin.getSourceMark(it) as GutterMark
                     if (gutterMark != null && !gutterMark.artifactSubscribed) {
                         gutterMark.artifactSubscribed = true
                         gutterMark.subscribeTime = Instant.now()
@@ -91,7 +112,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
             if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                def gutterMark = PluginBootstrap.sourcePlugin.getSourceMark(
+                def gutterMark = sourcePlugin.getSourceMark(
                         artifactMetricResult.artifactQualifiedName()) as GutterMark
                 if (gutterMark != null && !gutterMark.artifactDataAvailable) {
                     gutterMark.artifactDataAvailable = true
@@ -108,11 +129,11 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def request = resp.body() as ArtifactSubscribeRequest
             log.info("Sending artifact subscription request: " + request)
 
-            PluginBootstrap.sourcePlugin.coreClient.subscribeToArtifact(request, {
+            sourcePlugin.coreClient.subscribeToArtifact(request, {
                 if (it.succeeded()) {
                     resp.reply(request)
 
-                    def gutterMark = PluginBootstrap.sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
+                    def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
                     if (gutterMark != null && !gutterMark.artifactSubscribed) {
                         gutterMark.artifactSubscribed = true
                         gutterMark.subscribeTime = Instant.now()
@@ -132,12 +153,12 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def request = resp.body() as SourceArtifactUnsubscribeRequest
             log.info("Sending artifact unsubscription request: " + request)
 
-            PluginBootstrap.sourcePlugin.coreClient.unsubscribeFromArtifact(request, {
+            sourcePlugin.coreClient.unsubscribeFromArtifact(request, {
                 if (it.succeeded()) {
                     resp.reply(request)
                     PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
 
-                    def gutterMark = PluginBootstrap.sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
+                    def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
                     if (gutterMark != null && gutterMark.artifactSubscribed) {
                         gutterMark.artifactSubscribed = false
                         gutterMark.unsubscribeTime = Instant.now()

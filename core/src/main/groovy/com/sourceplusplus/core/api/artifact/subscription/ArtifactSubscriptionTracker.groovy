@@ -326,7 +326,12 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                     .artifactQualifiedName(unsubRequest.artifactQualifiedName()).build()
 
             def artifactSubscribers = artifactSubscriptions.get(appArtifact)
-            artifactSubscribers?.get(unsubRequest.subscriberClientId)?.subscriptionAccess?.clear()
+            if (artifactSubscribers) {
+                artifactSubscribers.remove(unsubRequest.subscriberClientId)
+                if (artifactSubscribers.isEmpty()) {
+                    artifactSubscriptions.remove(appArtifact)
+                }
+            }
             request.reply(true)
         } else {
             throw new IllegalArgumentException("Invalid unsubscribe request: " + unsubRequest)
