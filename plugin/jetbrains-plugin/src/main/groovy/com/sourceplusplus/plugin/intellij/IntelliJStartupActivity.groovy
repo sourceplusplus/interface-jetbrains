@@ -195,7 +195,7 @@ class IntelliJStartupActivity implements StartupActivity {
 
             @Override
             void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-                log.debug("Source code file closed: {}", file)
+                log.debug("File closed: {}", file)
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     void run() {
