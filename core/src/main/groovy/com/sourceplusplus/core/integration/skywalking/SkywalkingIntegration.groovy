@@ -43,27 +43,39 @@ class SkywalkingIntegration extends AbstractVerticle {
             "query/skywalking/get_latest_traces.graphql"), Charsets.UTF_8)
     private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
-    private static final DateTimeFormatter DATE_TIME_FORMATTER_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss")
-            .withZone(ZoneId.of("UTC"))
-    private static final DateTimeFormatter DATE_TIME_FORMATTER_MINUTES = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
-            .withZone(ZoneId.of("UTC"))
     private final ArtifactAPI artifactAPI
     private final ElasticsearchDAO elasticsearch
-    private final String skywalkingOAPHost
-    private final int skywalkingOAPPort
+    private DateTimeFormatter DATE_TIME_FORMATTER_MINUTES
+    private DateTimeFormatter DATE_TIME_FORMATTER_SECONDS
+    private String skywalkingOAPHost
+    private int skywalkingOAPPort
     private WebClient webClient
 
-    SkywalkingIntegration(ArtifactAPI artifactAPI, ElasticsearchDAO elasticsearch, JsonObject skywalkingOAPConfig) {
+    SkywalkingIntegration(ArtifactAPI artifactAPI, ElasticsearchDAO elasticsearch) {
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.elasticsearch = Objects.requireNonNull(elasticsearch)
-        skywalkingOAPHost = Objects.requireNonNull(skywalkingOAPConfig).getString("host")
-        skywalkingOAPPort = skywalkingOAPConfig.getInteger("port")
     }
 
     @Override
     void start() throws Exception {
-        webClient = WebClient.create(Objects.requireNonNull(vertx))
-        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, artifactAPI))
+        def timezone = config().getString("timezone")
+        if (timezone) {
+            DATE_TIME_FORMATTER_MINUTES = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
+                    .withZone(ZoneId.of(timezone))
+            DATE_TIME_FORMATTER_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss")
+                    .withZone(ZoneId.of(timezone))
+        } else {
+            DATE_TIME_FORMATTER_MINUTES = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
+                    .withZone(ZoneId.systemDefault())
+            DATE_TIME_FORMATTER_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss")
+                    .withZone(ZoneId.systemDefault())
+        }
+        skywalkingOAPHost = Objects.requireNonNull(config().getString("host"))
+        skywalkingOAPPort = Objects.requireNonNull(config().getInteger("port"))
+
+        webClient = WebClient.create(vertx)
+        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, artifactAPI),
+                new DeploymentOptions().setConfig(config()))
         log.info("{} started", getClass().getSimpleName())
     }
 

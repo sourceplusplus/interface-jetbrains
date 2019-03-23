@@ -182,8 +182,9 @@ class CoreBootstrap extends AbstractVerticle {
         ACTIVE_INTEGRATIONS.add(IntegrationInfo.builder()
                 .name("Apache SkyWalking").type(IntegrationType.APM)
                 .version(BUILD.getString("apache_skywalking_version")).build())
-        def skywalking = new SkywalkingIntegration(artifactAPI, elastic, config().getJsonObject("skywalking.oap"))
-        vertx.deployVerticle(skywalking)
+        def skywalking = new SkywalkingIntegration(artifactAPI, elastic)
+        vertx.deployVerticle(skywalking, new DeploymentOptions().setConfig(
+                config().getJsonObject("integrations").getJsonObject("skywalking")))
         vertx.deployVerticle(new MetricAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, elastic, skywalking))
         vertx.deployVerticle(new TraceAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, skywalking))
 

@@ -37,8 +37,6 @@ rm apache-skywalking-apm-incubating-6.0.0-GA.tar
 mv apache-skywalking-apm-incubating apache-skywalking
 ```
 
-Note: You may want to adjust the timezone and other settings of the Apache SkyWalking OAP server ([setup guide](https://github.com/apache/incubator-skywalking/blob/master/docs/en/setup/backend/backend-ui-setup.md)).
-
 ## Start Apache SkyWalking OAP
 ```sh
 cd /opt/apache-skywalking/bin
