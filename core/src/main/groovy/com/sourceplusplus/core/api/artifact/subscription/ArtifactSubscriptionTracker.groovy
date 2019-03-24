@@ -53,7 +53,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
-        if (config().getJsonObject("core").getInteger("subscription_inactive_limit") > 0) {
+        if (config().getJsonObject("core").getInteger("subscription_inactive_limit_minutes") > 0) {
             vertx.setPeriodic(TimeUnit.SECONDS.toMillis(10), {
                 removeInactiveArtifactSubscriptions()
             })
@@ -142,7 +142,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
     private void removeInactiveArtifactSubscriptions() {
         log.debug("Removing inactivate artifact subscriptions")
-        def inactiveLimit = config().getJsonObject("core").getInteger("subscription_inactive_limit")
+        def inactiveLimit = config().getJsonObject("core").getInteger("subscription_inactive_limit_minutes")
         elasticsearchDAO.getArtifactSubscriptions({
             if (it.succeeded()) {
                 def futures = []

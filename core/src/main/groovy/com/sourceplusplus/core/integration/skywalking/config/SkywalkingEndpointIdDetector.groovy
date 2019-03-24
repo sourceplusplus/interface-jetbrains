@@ -82,7 +82,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 log.error("Failed to search for new endpoints", it.cause())
             }
         })
-        vertx.setPeriodic(TimeUnit.SECONDS.toMillis(30), {
+        vertx.setPeriodic(TimeUnit.SECONDS.toMillis(config().getInteger("endpoint_detection_interval_seconds")), {
             searchForNewEndpoints({
                 if (it.failed()) {
                     it.cause().printStackTrace()

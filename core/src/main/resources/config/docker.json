@@ -8,7 +8,7 @@
     "secure_mode": false,
     "api_key": null,
     "bridge_port": 7000,
-    "subscription_inactive_limit": 15
+    "subscription_inactive_limit_minutes": 15
   },
   "elasticsearch": {
     "host": "es-server",
@@ -18,7 +18,8 @@
     "skywalking": {
       "host": "skywalking-oap",
       "port": 12799,
-      "timezone": null
+      "timezone": null,
+      "endpoint_detection_interval_seconds": 15
     }
   }
 }
