@@ -1,0 +1,18 @@
+{
+  "artifact_subscription": {
+    "properties": {
+      "subscriber_uuid": {
+        "type": "keyword",
+        "index": true
+      },
+      "app_uuid": {
+        "type": "keyword",
+        "index": true
+      },
+      "artifact_qualified_name": {
+        "type": "keyword",
+        "index": true
+      }
+    }
+  }
+}

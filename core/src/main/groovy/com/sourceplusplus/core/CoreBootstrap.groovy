@@ -223,8 +223,9 @@ class CoreBootstrap extends AbstractVerticle {
 
         v1ApiRouter.get("/registerIP").handler({
             def ipAddress = it.request().remoteAddress().host()
-            log.info("Registered IP address: " + ipAddress)
-            IntegrationProxy.ALLOWED_IP_ADDRESSES.add(ipAddress)
+            if (IntegrationProxy.ALLOWED_IP_ADDRESSES.add(ipAddress)) {
+                log.info("Registered IP address: " + ipAddress)
+            }
             it.response().setStatusCode(200)
                     .end(Json.encode(new JsonArray(IntegrationProxy.ALLOWED_IP_ADDRESSES.asList())))
         })

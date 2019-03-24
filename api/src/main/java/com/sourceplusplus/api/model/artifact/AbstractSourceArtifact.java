@@ -38,7 +38,4 @@ public interface AbstractSourceArtifact extends SourceMessage {
 
     @Nullable
     SourceArtifactConfig config();
-
-//    @Nullable
-//    SourceArtifactVersion version();
 }

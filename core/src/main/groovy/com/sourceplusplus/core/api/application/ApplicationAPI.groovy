@@ -3,7 +3,7 @@ package com.sourceplusplus.core.api.application
 import com.fasterxml.jackson.core.type.TypeReference
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
-import com.sourceplusplus.api.model.artifact.SubscriberSourceArtifactSubscription
+import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
@@ -83,14 +83,14 @@ class ApplicationAPI extends AbstractVerticle {
     }
 
     void getSubscriberApplicationSubscriptions(String appUuid, String subscriberUuid,
-                                               Handler<AsyncResult<List<SubscriberSourceArtifactSubscription>>> handler) {
+                                               Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
         def message = new JsonObject()
         message.put("app_uuid", appUuid)
         message.put('subscriber_uuid', subscriberUuid)
         vertx.eventBus().send(ArtifactSubscriptionTracker.GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS, message, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture(Json.decodeValue(it.result().body().toString(),
-                        new TypeReference<List<SubscriberSourceArtifactSubscription>>() {
+                        new TypeReference<List<SourceArtifactSubscription>>() {
                         })))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 
+import java.io.Serializable;
+
 /**
  * todo: description
  *
@@ -12,7 +14,7 @@ import io.vertx.core.eventbus.MessageCodec;
  * @since 0.1.0
  */
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public interface SourceMessage {
+public interface SourceMessage extends Serializable {
 
     static MessageCodec messageCodec(Class type) {
         return new MessageCodec() {

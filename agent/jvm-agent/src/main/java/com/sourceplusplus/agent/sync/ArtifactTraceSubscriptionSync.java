@@ -35,6 +35,7 @@ public class ArtifactTraceSubscriptionSync implements Runnable {
     @Override
     public void run() {
         if (enabled && readyForWork.getAndSet(false)) {
+            coreClient.registerIP(); //in-case core went down
             Logger.trace("Getting application subscriptions. - App uuid: " + SourceAgentConfig.current.appUuid);
             List<SourceApplicationSubscription> subscriptions = coreClient.getApplicationSubscriptions(
                     SourceAgentConfig.current.appUuid, false);
