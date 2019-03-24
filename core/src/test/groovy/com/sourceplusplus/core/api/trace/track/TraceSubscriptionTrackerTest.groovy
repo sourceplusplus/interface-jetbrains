@@ -10,7 +10,7 @@ import io.vertx.ext.unit.TestSuite
 import org.junit.Test
 
 /**
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -64,6 +64,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
             })
         }).test("verify_subscribed_to_artifact_traces", { test ->
             def async = test.async()
+            coreClient.refreshStorage()
             coreClient.getSubscriberApplicationSubscriptions(application.appUuid(), {
                 if (it.failed()) {
                     test.fail(it.cause())
@@ -72,8 +73,8 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
                 def subscriptions = it.result()
                 test.assertEquals(1, subscriptions.size())
                 test.assertEquals("com.company.TestClass.testMethod()", subscriptions.get(0).artifactQualifiedName())
-                test.assertEquals(1, subscriptions.get(0).subscriptionAccess().size())
-                test.assertEquals(SourceArtifactSubscriptionType.TRACES, subscriptions.get(0).subscriptionAccess().keySet()[0])
+                test.assertEquals(1, subscriptions.get(0).subscriptionLastAccessed().size())
+                test.assertEquals(SourceArtifactSubscriptionType.TRACES, subscriptions.get(0).subscriptionLastAccessed().keySet()[0])
                 async.countDown()
             })
         }).run().awaitSuccess()
@@ -106,12 +107,15 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
                     .appUuid(application.appUuid())
                     .addRemoveOrderTypes(TraceOrderType.LATEST_TRACES)
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
+
+            coreClient.refreshStorage()
             coreClient.unsubscribeFromArtifactTraces(unsubTraceRequest, {
                 if (it.failed()) {
                     test.fail(it.cause())
                 }
                 test.assertTrue(it.result())
 
+                coreClient.refreshStorage()
                 coreClient.getApplicationSubscriptions(application.appUuid(), true, {
                     if (it.failed()) {
                         test.fail(it.cause())

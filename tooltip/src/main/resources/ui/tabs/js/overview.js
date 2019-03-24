@@ -2,13 +2,15 @@ if (!pluginAvailable) {
     $('#traces_link').attr('href', "traces.html" + window.location.search);
 }
 
+Highcharts.setOptions({
+    global: {
+        useUTC: false
+    }
+});
 var chartUi = Highcharts.chart('container', {
     chart: {
         type: 'spline',
         animation: false
-    },
-    time: {
-        useUTC: false
     },
     credits: {
         enabled: false

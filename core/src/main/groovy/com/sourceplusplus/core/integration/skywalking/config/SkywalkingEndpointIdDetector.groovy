@@ -24,7 +24,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
 /**
  * todo: description
  *
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -82,7 +82,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 log.error("Failed to search for new endpoints", it.cause())
             }
         })
-        vertx.setPeriodic(TimeUnit.SECONDS.toMillis(30), {
+        vertx.setPeriodic(TimeUnit.SECONDS.toMillis(config().getInteger("endpoint_detection_interval_seconds")), {
             searchForNewEndpoints({
                 if (it.failed()) {
                     it.cause().printStackTrace()

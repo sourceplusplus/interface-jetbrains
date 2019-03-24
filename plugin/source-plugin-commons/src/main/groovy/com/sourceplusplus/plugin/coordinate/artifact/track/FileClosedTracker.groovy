@@ -1,15 +1,16 @@
 package com.sourceplusplus.plugin.coordinate.artifact.track
 
-import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import io.vertx.core.AbstractVerticle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
+
 /**
  * todo: description
  *
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -25,8 +26,7 @@ class FileClosedTracker extends AbstractVerticle {
             def closedFileMarker = (SourceFileMarker) messageHandler.body()
 
             log.debug("Closed file: " + closedFileMarker.sourceFile)
-            PluginBootstrap.sourcePlugin.deactivateSourceFileMarker(closedFileMarker)
-            //todo: remove source artifact subscriptions for file
+            sourcePlugin.deactivateSourceFileMarker(closedFileMarker)
         })
         log.info("{} started", getClass().getSimpleName())
     }

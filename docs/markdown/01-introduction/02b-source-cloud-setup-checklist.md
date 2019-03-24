@@ -4,8 +4,8 @@ For more information, please visit: [Source++ Cloud Hosting](https://sourceplusp
 # Source++ Cloud Checklist
 
 - [Purchase Source++ Cloud](https://sourceplusplus.com/hosting.html)
-- [Setup Source++ Plugin](./05-setup-source-plugin.md)
-- [Connect Source++ Plugin](./06-connect-source-plugin.md)
+- [Install Source++ Plugin](./05-install-source-plugin.md)
+- [Configure Source++ Plugin](./06-configure-source-plugin.md)
 - [Attach Source++ Agent](./07-attach-source-agent.md)
 - [Configure Source++ Agent](./08-configure-source-agent.md)
 - [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)

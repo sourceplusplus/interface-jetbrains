@@ -14,7 +14,7 @@ import java.time.Instant;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  */
 @SourceStyle
@@ -38,7 +38,4 @@ public interface AbstractSourceArtifact extends SourceMessage {
 
     @Nullable
     SourceArtifactConfig config();
-
-//    @Nullable
-//    SourceArtifactVersion version();
 }

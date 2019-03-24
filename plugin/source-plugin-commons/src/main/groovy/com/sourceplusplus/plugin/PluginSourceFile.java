@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  */
 public class PluginSourceFile implements MessageCodec<PluginSourceFile, PluginSourceFile> {
@@ -60,21 +60,6 @@ public class PluginSourceFile implements MessageCodec<PluginSourceFile, PluginSo
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PluginSourceFile that = (PluginSourceFile) o;
-        return Objects.equals(file, that.file) &&
-                Objects.equals(qualifiedClassName, that.qualifiedClassName) &&
-                Objects.equals(sourceMethods, that.sourceMethods);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(file, qualifiedClassName, sourceMethods);
-    }
-
-    @Override
     public void encodeToWire(Buffer buffer, PluginSourceFile pluginSourceFile) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -97,5 +82,18 @@ public class PluginSourceFile implements MessageCodec<PluginSourceFile, PluginSo
     @Override
     public byte systemCodecID() {
         return -1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PluginSourceFile that = (PluginSourceFile) o;
+        return Objects.equals(file, that.file) && Objects.equals(qualifiedClassName, that.qualifiedClassName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(file, qualifiedClassName);
     }
 }

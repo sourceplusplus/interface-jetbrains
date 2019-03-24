@@ -8,14 +8,18 @@
     "secure_mode": false,
     "api_key": null,
     "bridge_port": 7000,
-    "subscription_inactive_limit": 15
-  },
-  "skywalking.oap": {
-    "host": "skywalking-oap",
-    "port": 12799
+    "subscription_inactive_limit_minutes": 15
   },
   "elasticsearch": {
     "host": "es-server",
     "port": 9200
+  },
+  "integrations": {
+    "skywalking": {
+      "host": "skywalking-oap",
+      "port": 12799,
+      "timezone": null,
+      "endpoint_detection_interval_seconds": 15
+    }
   }
 }

@@ -3,7 +3,7 @@ package com.sourceplusplus.core.api.artifact
 import com.fasterxml.jackson.core.type.TypeReference
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
-import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriber
+import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
@@ -30,7 +30,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
  *
  * todo: artifact caching
  *
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -64,7 +64,9 @@ class ArtifactAPI extends AbstractVerticle {
         baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/subscriptions")
                 .handler(this.&getSourceArtifactSubscriptionsRoute)
 
-        vertx.deployVerticle(new ArtifactSubscriptionTracker(this), new DeploymentOptions().setConfig(config()))
+        def subscriptionTracker = new ArtifactSubscriptionTracker(this)
+        subscriptionTracker.storage = elasticsearch
+        vertx.deployVerticle(subscriptionTracker, new DeploymentOptions().setConfig(config()))
         log.info("{} started", getClass().getSimpleName())
     }
 
@@ -91,11 +93,11 @@ class ArtifactAPI extends AbstractVerticle {
     }
 
     void getSourceArtifactSubscriptions(ApplicationArtifact applicationArtifact,
-                                        Handler<AsyncResult<List<SourceArtifactSubscriber>>> handler) {
+                                        Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
         vertx.eventBus().send(ArtifactSubscriptionTracker.GET_ARTIFACT_SUBSCRIPTIONS, applicationArtifact, {
             if (it.succeeded()) {
                 def subscribers = Json.decodeValue(it.result().body() as String,
-                        new TypeReference<List<SourceArtifactSubscriber>>() {})
+                        new TypeReference<List<SourceArtifactSubscription>>() {})
                 handler.handle(Future.succeededFuture(subscribers))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))

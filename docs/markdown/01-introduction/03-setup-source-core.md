@@ -37,8 +37,6 @@ rm apache-skywalking-apm-incubating-6.0.0-GA.tar
 mv apache-skywalking-apm-incubating apache-skywalking
 ```
 
-Note: You may want to adjust the timezone and other settings of the Apache SkyWalking OAP server ([setup guide](https://github.com/apache/incubator-skywalking/blob/master/docs/en/setup/backend/backend-ui-setup.md)).
-
 ## Start Apache SkyWalking OAP
 ```sh
 cd /opt/apache-skywalking/bin
@@ -55,10 +53,10 @@ Once the above doesn't return `connection refused` you can continue setup.
 # Download Source++ Core
 ```sh
 cd /opt
-wget https://github.com/CodeBrig/Source/releases/download/v0.1.1-alpha/source-core-0.1.1.tar
-tar -xvf source-core-0.1.1.tar
-rm source-core-0.1.1.tar
-mv source-core-0.1.1 source-core
+wget https://github.com/CodeBrig/Source/releases/download/v0.1.2-alpha/source-core-0.1.2.tar
+tar -xvf source-core-0.1.2.tar
+rm source-core-0.1.2.tar
+mv source-core-0.1.2 source-core
 ```
 
 ## Start Source++ Core

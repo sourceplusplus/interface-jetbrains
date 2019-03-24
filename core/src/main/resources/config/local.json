@@ -8,14 +8,18 @@
     "secure_mode": false,
     "api_key": null,
     "bridge_port": 7000,
-    "subscription_inactive_limit": 15
-  },
-  "skywalking.oap": {
-    "host": "localhost",
-    "port": 12800
+    "subscription_inactive_limit_minutes": 15
   },
   "elasticsearch": {
     "host": "localhost",
     "port": 9200
+  },
+  "integrations": {
+    "skywalking": {
+      "host": "localhost",
+      "port": 12799,
+      "timezone": null,
+      "endpoint_detection_interval_seconds": 15
+    }
   }
 }

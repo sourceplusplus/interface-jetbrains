@@ -7,13 +7,15 @@ import com.sourceplusplus.api.model.SourceStyle;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
+import java.util.Map;
 
 /**
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.1
- * @since 0.1.0
+ * @version 0.1.2
+ * @since 0.1.2
  */
 @SourceStyle
 @Value.Immutable
@@ -22,7 +24,11 @@ import javax.annotation.Nullable;
 public interface AbstractSourceArtifactSubscription extends SourceMessage {
 
     @Nullable
-    SourceArtifactSubscriptionType type();
+    String appUuid();
 
-    int subscribers();
+    String artifactQualifiedName();
+
+    String subscriberUuid();
+
+    Map<SourceArtifactSubscriptionType, Instant> subscriptionLastAccessed();
 }

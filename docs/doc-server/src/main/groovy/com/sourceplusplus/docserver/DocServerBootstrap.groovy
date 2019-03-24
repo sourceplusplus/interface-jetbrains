@@ -18,11 +18,13 @@ import org.slf4j.LoggerFactory
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 /**
  * todo: description
  *
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -86,7 +88,7 @@ class DocServerBootstrap extends AbstractVerticle {
                 } else {
                     def markdownText = new File(url).text
                     def response = new JsonObject()
-                    response.put("content", updateMarkdownLinks(markdownText).bytes.encodeBase64() as String)
+                    response.put("content", updateMarkdownLinks(url, markdownText).bytes.encodeBase64() as String)
                     DOC_CACHE.put(url, response)
 
                     ctx.response().setStatusCode(200)
@@ -113,7 +115,7 @@ class DocServerBootstrap extends AbstractVerticle {
                         if (it.succeeded()) {
                             def response = it.result().bodyAsJsonObject()
                             def content = new String(response.getString("content").decodeBase64())
-                            response.put("content", updateMarkdownLinks(content).bytes.encodeBase64() as String)
+                            response.put("content", updateMarkdownLinks(url, content).bytes.encodeBase64() as String)
                             DOC_CACHE.put(url, response)
 
                             ctx.response().setStatusCode(200)
@@ -183,48 +185,55 @@ class DocServerBootstrap extends AbstractVerticle {
         return router.mountSubRouter("/v1", router)
     }
 
-    private static String updateMarkdownLinks(String markdownText) {
-        replaces.each { markdownText = markdownText.replace(it.key, it.value) }
+    private String updateMarkdownLinks(String currentUrl, String markdownText) {
+        currentUrl = currentUrl.replace(config().getString("base.path"), "")
+        if (currentUrl.contains("?")) {
+            currentUrl = currentUrl.substring(0, currentUrl.indexOf("?"))
+        }
+        def currentDirectory = ""
+        currentUrl.split("/").each {
+            if (it && !it.endsWith(".md")) {
+                if (currentDirectory) {
+                    currentDirectory += "/"
+                }
+                currentDirectory += it.substring(it.indexOf("-") + 1)
+            }
+        }
+
+        def matcher = markdownText =~ "(\\[.+\\])\\(((?!http).+\\.md)\\/(.+\\))"
+        matcher.each {
+            def match = it as String[]
+            String absoluteLink = makeLinkAbsolute(currentDirectory, match[1] + "(" + match[2] + ")")
+            absoluteLink = absoluteLink.substring(0, absoluteLink.length() - 1) + match[3]
+            markdownText = markdownText.replaceAll(Pattern.quote(match[0]), Matcher.quoteReplacement(absoluteLink))
+        }
+        markdownText.findAll("(\\[.+\\])(\\((?!http).+\\.md\\))").each {
+            markdownText = markdownText.replaceAll(Pattern.quote(it),
+                    Matcher.quoteReplacement(makeLinkAbsolute(currentDirectory, it)))
+        }
         return markdownText
+    }
+
+    private String makeLinkAbsolute(String currentDirectory, String linkText) {
+        String altText = linkText.substring(1, linkText.indexOf("]"))
+        String link = linkText.substring(linkText.lastIndexOf("(") + 1, linkText.length() - 1)
+        if (linkText.contains("../")) {
+            link = link.replaceAll("\\.\\./", "")
+            String parentDir = link.split("/")[0]
+            parentDir = parentDir.substring(parentDir.indexOf("-") + 1)
+            link = link.split("/")[1]
+            link = link.substring(link.indexOf("-") + 1, link.length() - 3)
+            return "[$altText](" + config().getString("base.url") + "/knowledge/$parentDir/$link)"
+        } else {
+            link = link.replaceAll("\\./", "")
+            link = link.substring(link.indexOf("-") + 1, link.length() - 3)
+            return "[$altText](" + config().getString("base.url") + "/knowledge/$currentDirectory/$link)"
+        }
     }
 
     private static Handler<RoutingContext> getFailureHandler() {
         return {
             RoutingContext ctx -> log.error("Request failed", ctx.failure())
         }
-    }
-
-    //todo: smarter (too static and only work for introduction section)
-    private static final Map<String, String> replaces = new HashMap<>()
-    static {
-        replaces.put("./01-getting-started.md", "../getting-started")
-        replaces.put("./02a-self-hosted-checklist.md", "../self-hosted-setup-checklist")
-        replaces.put("./02b-source-cloud-checklist.md", "../source-cloud-setup-checklist")
-        replaces.put("./03-setup-source-core.md", "../setup-core")
-        replaces.put("./04-configure-source-core.md", "../configure-core")
-        replaces.put("./05-install-source-plugin.md", "../install-plugin")
-        replaces.put("./06-configure-source-plugin.md", "../configure-plugin")
-        replaces.put("./07-attach-source-agent.md", "../attach-agent")
-        replaces.put("./08-configure-source-agent.md", "../configure-agent")
-        replaces.put("./09-subscribe-to-artifact.md", "../subscribe-to-artifact")
-
-        replaces.put("(#create-application)", "(../application-api/#create-application)")
-        replaces.put("(#update-application)", "(../application-api/#update-application)")
-        replaces.put("(#refresh-subscriber-subscriptions)", "(../application-api/#refresh-subscriber-subscriptions)")
-        replaces.put("(#create-source-artifact)", "(../artifact-api/#create-source-artifact)")
-        replaces.put("(#update-source-artifact-configuration)", "(../artifact-api/#update-source-artifact-configuration)")
-        replaces.put("(#unsubscribe-source-artifact-subscriptions)", "(../artifact-api/#unsubscribe-source-artifact-subscriptions)")
-        replaces.put("(#subscribe-artifact-metrics)", "(../metric-api/#subscribe-artifact-metrics)")
-        replaces.put("(#unsubscribe-artifact-metrics)", "(../metric-api/#unsubscribe-artifact-metrics)")
-        replaces.put("(#subscribe-artifact-traces)", "(../trace-api/#subscribe-artifact-traces)")
-        replaces.put("(#unsubscribe-artifact-traces)", "(../trace-api/#unsubscribe-artifact-traces)")
-        replaces.put("(#get-application)", "(../application-api/#get-application)")
-        replaces.put("(#get-application-subscriptions)", "(../application-api/#get-application-subscriptions)")
-        replaces.put("(#get-application-artifacts)", "(../artifact-api/#get-application-artifacts)")
-        replaces.put("(#get-source-artifact)", "(../artifact-api/#get-source-artifact)")
-        replaces.put("(#get-artifact-traces)", "(../trace-api/#get-artifact-traces)")
-        replaces.put("(#get-artifact-trace-span)", "(../trace-api/#get-artifact-trace-span)")
-        replaces.put("(#get-source-artifact-configuration)", "(../artifact-api/#get-source-artifact-configuration)")
-        replaces.put("(#get-source-artifact-subscriptions)", "(../artifact-api/#get-source-artifact-subscriptions)")
     }
 }

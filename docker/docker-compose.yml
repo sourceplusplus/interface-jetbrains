@@ -46,9 +46,3 @@ services:
         soft: 65536
         hard: 65536
     command: -E cluster.name=es-skywalking -E path.data=data -E path.logs=logs -E network.host=0.0.0.0 -E node.name=node-1
-#  redis:
-#    container_name: sourceweb_redis
-#    hostname: redis
-#    image: redis
-#    ports:
-#    - "6379:6379"

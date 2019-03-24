@@ -59,7 +59,7 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE
 /**
  * todo: description
  *
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -138,7 +138,7 @@ class CoreBootstrap extends AbstractVerticle {
 
         //start services
         log.info("Booting Source++ Core services...")
-        elastic = new ElasticsearchDAO(config().getJsonObject("elasticsearch"))
+        elastic = new ElasticsearchDAO(vertx.eventBus(), config().getJsonObject("elasticsearch"))
 
         def baseRouter = createRouter()
         def v1ApiRouter = Router.router(vertx)
@@ -182,8 +182,9 @@ class CoreBootstrap extends AbstractVerticle {
         ACTIVE_INTEGRATIONS.add(IntegrationInfo.builder()
                 .name("Apache SkyWalking").type(IntegrationType.APM)
                 .version(BUILD.getString("apache_skywalking_version")).build())
-        def skywalking = new SkywalkingIntegration(artifactAPI, elastic, config().getJsonObject("skywalking.oap"))
-        vertx.deployVerticle(skywalking)
+        def skywalking = new SkywalkingIntegration(artifactAPI, elastic)
+        vertx.deployVerticle(skywalking, new DeploymentOptions().setConfig(
+                config().getJsonObject("integrations").getJsonObject("skywalking")))
         vertx.deployVerticle(new MetricAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, elastic, skywalking))
         vertx.deployVerticle(new TraceAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, skywalking))
 
@@ -222,8 +223,9 @@ class CoreBootstrap extends AbstractVerticle {
 
         v1ApiRouter.get("/registerIP").handler({
             def ipAddress = it.request().remoteAddress().host()
-            log.info("Registered IP address: " + ipAddress)
-            IntegrationProxy.ALLOWED_IP_ADDRESSES.add(ipAddress)
+            if (IntegrationProxy.ALLOWED_IP_ADDRESSES.add(ipAddress)) {
+                log.info("Registered IP address: " + ipAddress)
+            }
             it.response().setStatusCode(200)
                     .end(Json.encode(new JsonArray(IntegrationProxy.ALLOWED_IP_ADDRESSES.asList())))
         })

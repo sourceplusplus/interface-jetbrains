@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.1.1
+ * @version 0.1.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -23,19 +23,19 @@ class IntegrationProxy extends AbstractVerticle {
     @Override
     void start(Future<Void> fut) throws Exception {
         //todo: no hardcoding
-        vertx.createNetServer().connectHandler({ socket ->
-            vertx.createNetClient().connect(11799, "localhost", { result ->
-                if (result.succeeded()) {
-                    log.debug("Connection request from IP address: " + socket.remoteAddress())
+        vertx.createNetServer().connectHandler({ clientSocket ->
+            vertx.createNetClient().connect(11799, "localhost", { serverSocket ->
+                if (serverSocket.succeeded()) {
+                    log.debug("Connection request from IP address: " + clientSocket.remoteAddress())
 
-                    if (ALLOWED_IP_ADDRESSES.contains(socket.remoteAddress().host())) {
-                        new SocketProxy(socket, result.result()).proxy()
+                    if (ALLOWED_IP_ADDRESSES.contains(clientSocket.remoteAddress().host())) {
+                        new SocketProxy(clientSocket, serverSocket.result()).proxy()
                     } else {
-                        log.warn("Rejected starting proxy for IP address: " + socket.remoteAddress())
+                        log.warn("Rejected starting proxy for IP address: " + clientSocket.remoteAddress())
                     }
                 } else {
-                    log.error(result.cause().getMessage(), result.cause())
-                    socket.close()
+                    log.error(serverSocket.cause().getMessage(), serverSocket.cause())
+                    clientSocket.close()
                 }
             })
         }).listen(11800, {
@@ -66,25 +66,28 @@ class IntegrationProxy extends AbstractVerticle {
         }
 
         void proxy() {
-            serverSocket.closeHandler({ clientSocket.close() })
-            clientSocket.closeHandler({ serverSocket.close() })
+            log.info("TCP proxy established. Client: {} - Server: {}",
+                    clientSocket.remoteAddress(), serverSocket.remoteAddress())
+            serverSocket.closeHandler({
+                log.info("Server closed proxy connection")
+                clientToServerPump.stop()
+                serverToClientPump.stop()
+                clientSocket.close()
+            })
+            clientSocket.closeHandler({
+                log.info("Client closed proxy connection")
+                serverToClientPump.stop()
+                serverToClientPump.stop()
+                serverSocket.close()
+            })
             serverSocket.exceptionHandler({
-                log.error(it.getMessage(), it)
-                close()
+                log.error("Server threw error: " + it.getMessage(), it)
             })
             clientSocket.exceptionHandler({
-                log.error(it.getMessage(), it)
-                close()
+                log.error("Client threw error: " + it.getMessage(), it)
             })
             clientToServerPump.start()
             serverToClientPump.start()
-        }
-
-        void close() {
-            clientToServerPump.stop()
-            serverToClientPump.stop()
-            clientSocket.close()
-            serverSocket.close()
         }
     }
 }
