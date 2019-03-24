@@ -2,7 +2,7 @@
   "enabled": true,
   "test_mode": true,
   "log_level": "debug",
-  "log_location": null,
+  "log_location": "logs/",
   "application": {
     "app_uuid": null,
     "application_source_code": {
