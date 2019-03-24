@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class ElasticsearchDAO {
+class ElasticsearchDAO extends AbstractSourceStorage {
 
     public static final String REFRESH_STORAGE = "REFRESH_STORAGE"
 
@@ -150,6 +150,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void createApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler) {
         def createApplication = new JsonObject(Json.encode(application))
         createApplication.remove("create_request") //todo: smarter
@@ -175,6 +176,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void updateApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler) {
         def updatedApplication = new JsonObject(Json.encode(application))
         updatedApplication.remove("create_request") //todo: smarter
@@ -213,6 +215,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         def get = new Get.Builder(SPP_INDEX + "_application", Objects.requireNonNull(appUuid))
                 .type("application").build()
@@ -242,6 +245,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void createArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
         def index = new Index.Builder(Json.encode(artifact)).index(SPP_INDEX + "_artifact")
                 .type("artifact")
@@ -263,6 +267,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void updateArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
         def update = new Update.Builder(new JsonObject().put("doc", new JsonObject(Json.encode(artifact))).toString())
                 .index(SPP_INDEX + "_artifact")
@@ -297,6 +302,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void getArtifact(String appUuid, String artifactQualifiedName,
                      Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         def get = new Get.Builder(SPP_INDEX + "_artifact", URLEncoder.encode(appUuid + "-" + artifactQualifiedName))
@@ -330,6 +336,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void findArtifactByEndpointName(String appUuid, String endpointName,
                                     Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         String query = '{\n' +
@@ -373,6 +380,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void findArtifactByEndpointId(String appUuid, String endpointId,
                                   Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         String query = '{\n' +
@@ -416,6 +424,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void findArtifactBySubscribeAutomatically(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         String query = '{\n' +
                 '  "query": {\n' +
@@ -461,6 +470,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
         String query = '{\n' +
                 '    "query": {\n' +
@@ -501,6 +511,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void getApplicationArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         String query = '{\n' +
                 '  "query": {\n' +
@@ -545,7 +556,9 @@ class ElasticsearchDAO {
         })
     }
 
-    void getArtifactSubscriptions(String appUuid, String artifactQualifiedName, Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+    @Override
+    void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,
+                                  Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
         String query = '{\n' +
                 '  "query": {\n' +
                 '    "bool": {\n' +
@@ -590,6 +603,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void getSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid,
                                             Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
         String query = '{\n' +
@@ -636,6 +650,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void getArtifactSubscriptions(Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
         String query = '{\n' +
                 '  "query": {\n' +
@@ -679,6 +694,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void updateArtifactSubscription(SourceArtifactSubscription subscription,
                                     Handler<AsyncResult<SourceArtifactSubscription>> handler) {
         def jsonSubscription = new JsonObject().put("doc", new JsonObject(Json.encode(subscription)))
@@ -722,6 +738,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void deleteArtifactSubscription(SourceArtifactSubscription subscription, Handler<AsyncResult<Void>> handler) {
         def delete = new Delete.Builder(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName())).index(SPP_INDEX + "_artifact_subscription")
                 .type("artifact_subscription")
@@ -748,6 +765,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void setArtifactSubscription(SourceArtifactSubscription subscription,
                                  Handler<AsyncResult<SourceArtifactSubscription>> handler) {
         def index = new Index.Builder(Json.encode(subscription)).index(SPP_INDEX + "_artifact_subscription")
@@ -775,6 +793,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void getArtifactSubscription(String subscriberUuid, String appUuid, String artifactQualifiedName,
                                  Handler<AsyncResult<Optional<SourceArtifactSubscription>>> handler) {
         String query = '{\n' +
@@ -821,6 +840,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void getApplicationSubscriptions(String appUuid,
                                      Handler<AsyncResult<List<SourceApplicationSubscription>>> handler) {
         String query = '{\n' +
@@ -874,6 +894,7 @@ class ElasticsearchDAO {
         })
     }
 
+    @Override
     void refreshDatabase(Handler<AsyncResult<Void>> handler) {
         log.info("Refreshing storage")
         client.executeAsync(new Refresh.Builder().build(), new JestResultHandler() {
