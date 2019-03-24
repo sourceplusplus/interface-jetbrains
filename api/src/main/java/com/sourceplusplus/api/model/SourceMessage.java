@@ -10,7 +10,7 @@ import java.io.Serializable;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.2
+ * @version 0.2.0
  * @since 0.1.0
  */
 @JsonInclude(value = JsonInclude.Include.NON_NULL)

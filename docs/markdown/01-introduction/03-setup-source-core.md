@@ -53,10 +53,10 @@ Once the above doesn't return `connection refused` you can continue setup.
 # Download Source++ Core
 ```sh
 cd /opt
-wget https://github.com/CodeBrig/Source/releases/download/v0.1.2-alpha/source-core-0.1.2.tar
-tar -xvf source-core-0.1.2.tar
-rm source-core-0.1.2.tar
-mv source-core-0.1.2 source-core
+wget https://github.com/CodeBrig/Source/releases/download/v0.2.0-alpha/source-core-0.2.0.tar
+tar -xvf source-core-0.2.0.tar
+rm source-core-0.2.0.tar
+mv source-core-0.2.0 source-core
 ```
 
 ## Start Source++ Core

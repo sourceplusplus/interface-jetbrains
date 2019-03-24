@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory
 /**
  * Used to bootstrap the Source++ Plugin.
  *
- * @version 0.1.2
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
