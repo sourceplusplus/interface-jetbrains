@@ -36,6 +36,8 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 
 ![](docs/images/Source%2B%2B%20Architectural%20Overview-v0.1.0-alpha.gif)
 
+---
+
 ![](docs/images/Source%2B%2B%20Artitecture%20(v0.3.0-alpha).gif)
 
 ## Getting Started
