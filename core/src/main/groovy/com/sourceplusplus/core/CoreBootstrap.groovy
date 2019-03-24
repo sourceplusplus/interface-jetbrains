@@ -138,7 +138,7 @@ class CoreBootstrap extends AbstractVerticle {
 
         //start services
         log.info("Booting Source++ Core services...")
-        elastic = new ElasticsearchDAO(config().getJsonObject("elasticsearch"))
+        elastic = new ElasticsearchDAO(vertx.eventBus(), config().getJsonObject("elasticsearch"))
 
         def baseRouter = createRouter()
         def v1ApiRouter = Router.router(vertx)

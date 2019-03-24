@@ -34,7 +34,10 @@ public class SourceCoreClient implements SourceClient {
     private static final String PING_ENDPOINT = "/ping";
     private static final String INFO_ENDPOINT = String.format("/%s/info", SPP_API_VERSION);
     private static final String REGISTER_IP_ENDPOINT = String.format("/%s/registerIP", SPP_API_VERSION);
-    private static final String SEARCH_FOR_NEW_ENDPOINTS = String.format("/%s/admin/integrations/skywalking/searchForNewEndpoints", SPP_API_VERSION);
+    private static final String REFRESH_STORAGE = String.format(
+            "/%s/admin/storage/refresh", SPP_API_VERSION);
+    private static final String SEARCH_FOR_NEW_ENDPOINTS = String.format(
+            "/%s/admin/integrations/skywalking/searchForNewEndpoints", SPP_API_VERSION);
     private static final String CREATE_APPLICATION_ENDPOINT = String.format(
             "/%s/applications", SPP_API_VERSION);
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
@@ -134,6 +137,22 @@ public class SourceCoreClient implements SourceClient {
         try (Response response = client.newCall(request.build()).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("Failed to register IP");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean refreshStorage() {
+        String url = sppUrl + REFRESH_STORAGE;
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            if (response.isSuccessful()) {
+                return true;
+            } else {
+                throw new IllegalStateException("Unknown response: " + response.body().string());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

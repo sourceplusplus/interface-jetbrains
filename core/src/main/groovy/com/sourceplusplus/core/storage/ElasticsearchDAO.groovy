@@ -13,10 +13,12 @@ import io.searchbox.client.JestResultHandler
 import io.searchbox.client.config.HttpClientConfig
 import io.searchbox.core.*
 import io.searchbox.indices.CreateIndex
+import io.searchbox.indices.Refresh
 import io.searchbox.indices.mapping.PutMapping
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
+import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.slf4j.Logger
@@ -33,6 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class ElasticsearchDAO {
 
+    public static final String REFRESH_STORAGE = "REFRESH_STORAGE"
+
     private static final String SOURCE_ARTIFACT_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
             "config/elasticsearch/artifact_index_mappings.json"), Charsets.UTF_8)
     private static final String SOURCE_ARTIFACT_SUBSCRIPTION_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
@@ -43,9 +47,14 @@ class ElasticsearchDAO {
     private final int elasticSearchPort
     private final JestClient client
 
-    ElasticsearchDAO(JsonObject config) {
+    ElasticsearchDAO(EventBus eventBus, JsonObject config) {
         this.elasticSearchHost = config.getString("host")
         this.elasticSearchPort = config.getInteger("port")
+        eventBus.consumer(REFRESH_STORAGE).handler({ msg ->
+            refreshDatabase({
+                msg.reply(it.succeeded())
+            })
+        })
 
         JestClientFactory factory = new JestClientFactory()
         factory.setHttpClientConfig(new HttpClientConfig
@@ -581,7 +590,8 @@ class ElasticsearchDAO {
         })
     }
 
-    void getSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid, Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+    void getSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid,
+                                            Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
         String query = '{\n' +
                 '  "query": {\n' +
                 '    "bool": {\n' +
@@ -859,6 +869,24 @@ class ElasticsearchDAO {
             @Override
             void failed(Exception ex) {
                 log.error("Failed to get all artifacts for application: " + appUuid, ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
+    }
+
+    void refreshDatabase(Handler<AsyncResult<Void>> handler) {
+        log.info("Refreshing storage")
+        client.executeAsync(new Refresh.Builder().build(), new JestResultHandler() {
+
+            @Override
+            void completed(Object result) {
+                log.info("Refreshed storage")
+                handler.handle(Future.succeededFuture())
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to refresh database", ex)
                 handler.handle(Future.failedFuture(ex))
             }
         })

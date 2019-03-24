@@ -64,6 +64,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
             })
         }).test("verify_subscribed_to_artifact_traces", { test ->
             def async = test.async()
+            coreClient.refreshStorage()
             coreClient.getSubscriberApplicationSubscriptions(application.appUuid(), {
                 if (it.failed()) {
                     test.fail(it.cause())
@@ -106,12 +107,15 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
                     .appUuid(application.appUuid())
                     .addRemoveOrderTypes(TraceOrderType.LATEST_TRACES)
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
+
+            coreClient.refreshStorage()
             coreClient.unsubscribeFromArtifactTraces(unsubTraceRequest, {
                 if (it.failed()) {
                     test.fail(it.cause())
                 }
                 test.assertTrue(it.result())
 
+                coreClient.refreshStorage()
                 coreClient.getApplicationSubscriptions(application.appUuid(), true, {
                     if (it.failed()) {
                         test.fail(it.cause())
