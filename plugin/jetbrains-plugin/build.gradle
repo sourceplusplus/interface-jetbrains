@@ -57,4 +57,3 @@ task updatePluginResources(dependsOn: [":agent:jvm-agent:buildAgent"]) {
 compileJava.mustRunAfter updatePluginResources
 runIde.dependsOn updatePluginResources
 buildPlugin.dependsOn updatePluginResources
-//todo: doesn't build api 49mb vs 50.01mb
