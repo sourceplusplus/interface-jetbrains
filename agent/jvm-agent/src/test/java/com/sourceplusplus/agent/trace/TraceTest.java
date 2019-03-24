@@ -35,6 +35,7 @@ public class TraceTest extends ActiveSourceAgentTest {
         //todo: force flush of traces to core (currently just looping long enough for it to happen organically)
 
         coreClient.searchForNewEndpoints();
+        coreClient.refreshStorage();
         TraceQueryResult result = coreClient.getTraces(application.appUuid(),
                 JavaTestClass.class.getName() + ".staticMethod()", TraceOrderType.LATEST_TRACES);
         assertNotNull(result);
