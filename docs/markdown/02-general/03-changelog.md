@@ -1,3 +1,7 @@
+# 0.1.3-alpha (2019-03-25)
+
+- Fixed `core.integrations.skywalking.port` to point to `12800` instead of `12799`
+
 # 0.1.2-alpha (2019-03-24)
 
 - Improved Source++ Core ability to reconnect when in secure mode
