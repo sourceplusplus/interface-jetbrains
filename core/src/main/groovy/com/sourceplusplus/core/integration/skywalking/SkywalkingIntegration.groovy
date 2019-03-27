@@ -80,7 +80,7 @@ class SkywalkingIntegration extends AbstractVerticle {
     }
 
     void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler) {
-        log.info("Getting all SkyWalking services. Start: " + start + " - End: " + end)
+        log.debug("Getting all SkyWalking services. Start: " + start + " - End: " + end)
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_ALL_SERVICES
                 .replace('$durationStart', DATE_TIME_FORMATTER_SECONDS.format(start))
@@ -95,7 +95,7 @@ class SkywalkingIntegration extends AbstractVerticle {
             } else {
                 def result = new JsonObject(it.result().bodyAsString())
                         .getJsonObject("data").getJsonArray("getAllServices")
-                log.info("Got all SkyWalking services: " + result)
+                log.debug("Got all SkyWalking services: " + result)
                 handler.handle(Future.succeededFuture(result))
             }
         })
