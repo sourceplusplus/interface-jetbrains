@@ -36,4 +36,9 @@ public interface AbstractSourceApplicationSubscription extends SourceMessage {
     default boolean automaticSubscription() {
         return false;
     }
+
+    @Value.Default
+    default boolean forceSubscription() {
+        return false;
+    }
 }
