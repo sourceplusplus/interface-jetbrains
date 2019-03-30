@@ -60,10 +60,12 @@ task prepareAgent(type: Jar, dependsOn: ['compileJava']) {
     inputs.files(sourceSets.main.allSource, configurations.runtime.asFileTree.files)
     outputs.file file("build/libs/source-agent-$version" + "_prepare.jar")
 
-    archiveName = "source-agent-$version" + "_prepare.jar"
+    def runtimeFileSet = new HashSet<File>(configurations.runtime.asFileTree.files)
+    runtimeFileSet.add(file("../../api/build/libs/source-api-$version" + ".jar"))
+    from(runtimeFileSet.collect { zipTree(it) })
     from files(sourceSets.main.output)
-    from(configurations.runtime.asFileTree.files.collect { zipTree(it) })
 
+    archiveName = "source-agent-$version" + "_prepare.jar"
     manifest {
         attributes 'Premain-Class': 'com.sourceplusplus.agent.SourceAgent'
         attributes 'Can-Redefine-Classes': 'true'
@@ -136,6 +138,9 @@ task buildAgent(type: proguard.gradle.ProGuardTask) {
     configuration 'proguard.txt'
     injars "build/libs/source-agent-$version" + "_prepare_external.jar"
     outjars "build/libs/source-agent-$version" + ".jar"
+}
+build {
+    finalizedBy buildAgent
 }
 
 test {
