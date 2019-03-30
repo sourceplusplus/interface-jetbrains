@@ -19,6 +19,14 @@ import org.jetbrains.annotations.Nullable
 @State(name = "Source++", storages = [@Storage(file = '$APP_CONFIG$/Source++.xml')])
 class PluginSettingsComponent implements ApplicationComponent, PersistentStateComponent<SourcePluginConfig> {
 
+    @Override
+    void disposeComponent() {
+    }
+
+    @Override
+    void initComponent() {
+    }
+
     @NotNull
     @Override
     String getComponentName() {
