@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://sourceplusplus.com">Website</a> ::
-  <a href="https://sourceplusplus.com/knowledge">Knowledge Base</a> ::
+  <a href="https://github.com/CodeBrig/Source/tree/master/docs/markdown">Knowledge Base</a> ::
   <a href="https://github.com/CodeBrig/Source/blob/master/docs/markdown/02-general/02-roadmap.md">Roadmap</a>
 </p>
 
