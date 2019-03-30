@@ -8,7 +8,7 @@
       Open-source automated programming assistant with runtime-aware and context-aware functionality
     ]]></description>
 
-    <idea-version since-build="162"/>
+    <idea-version since-build="171"/>
     <depends optional="true">org.intellij.groovy</depends>
     <depends optional="true">org.jetbrains.kotlin</depends>
 
