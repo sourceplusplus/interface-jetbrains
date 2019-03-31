@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://sourceplusplus.com">Website</a> ::
-  <a href="https://sourceplusplus.com/knowledge">Knowledge Base</a> ::
+  <a href="https://github.com/CodeBrig/Source/tree/master/docs/markdown">Knowledge Base</a> ::
   <a href="https://github.com/CodeBrig/Source/blob/master/docs/markdown/02-general/02-roadmap.md">Roadmap</a>
 </p>
 
@@ -35,6 +35,10 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 ## Architectural Overview
 
 ![](docs/images/Source%2B%2B%20Architectural%20Overview-v0.1.0-alpha.gif)
+
+---
+
+![](docs/images/Source%2B%2B%20Artitecture%20(v0.3.0-alpha).gif)
 
 ## Getting Started
 

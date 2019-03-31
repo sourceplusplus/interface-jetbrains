@@ -68,14 +68,42 @@ chartUi.setSize(450, 125); //todo: not hardcode this
 
 var currentTimeFrame = "LAST_15_MINUTES";
 eb.onopen = function () {
+    var clearOverviewHandler = 'ClearOverview';
     var displayCardHandler = 'DisplayCard';
     var updateChartHandler = 'UpdateChart';
     var displayStatsHandler = 'DisplayStats';
     if (!pluginAvailable) {
+        clearOverviewHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + clearOverviewHandler;
         displayCardHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + displayCardHandler;
         updateChartHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + updateChartHandler;
         displayStatsHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + displayStatsHandler;
     }
+    eb.registerHandler(clearOverviewHandler, function (error, message) {
+        $('#quick_stats_min').text("n/a");
+        $('#quick_stats_max').text("n/a");
+        $('#quick_stats_p99').text("n/a");
+        $('#quick_stats_p95').text("n/a");
+        $('#quick_stats_p90').text("n/a");
+        $('#quick_stats_p75').text("n/a");
+        $('#quick_stats_p50').text("n/a");
+
+        var cards = ["card_throughput_average", "card_responsetime_average", "card_servicelevelagreement_average"];
+        for (var i = 0; i < cards.length; i++) {
+            var name = cards[i];
+            document.getElementById(name + '_header').textContent = "n/a";
+            for (var z = 1; z <= 15; z++) {
+                $('#' + name + '_bar_' + z).css('height', '0%');
+            }
+        }
+
+        for (var i = 0; i < chartUi.series.length; i++) {
+            var series = chartUi.series[i];
+            while (series.data.length > 0) {
+                series.data[0].remove(true);
+            }
+        }
+        chartUi.redraw();
+    });
     eb.registerHandler(displayCardHandler, function (error, message) {
         //eb.send('TooltipLogger', 'Displaying card: ' + JSON.stringify(message));
         // console.log('Displaying card: ' + JSON.stringify(message));

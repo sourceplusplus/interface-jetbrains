@@ -1,3 +1,15 @@
+# 0.1.4-alpha (2019-03-30)
+
+- Fixed issue with overview tab not being updated when viewing an artifact with no data
+- Added `forceSubscribe` to SourceArtifactConfig
+- Improved ability to find Source++ Plugin in JetBrains Plugins Repository
+- Improved ability to create automatic builds
+- Improved error message for incorrect API token when connecting to Source++ Core
+
+# 0.1.3-alpha (2019-03-25)
+
+- Fixed `core.integrations.skywalking.port` to point to `12800` instead of `12799`
+
 # 0.1.2-alpha (2019-03-24)
 
 - Improved Source++ Core ability to reconnect when in secure mode

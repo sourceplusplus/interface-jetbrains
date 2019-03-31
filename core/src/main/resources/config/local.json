@@ -17,7 +17,7 @@
   "integrations": {
     "skywalking": {
       "host": "localhost",
-      "port": 12799,
+      "port": 12800,
       "timezone": null,
       "endpoint_detection_interval_seconds": 15
     }
