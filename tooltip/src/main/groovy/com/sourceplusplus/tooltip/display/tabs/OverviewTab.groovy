@@ -114,6 +114,8 @@ class OverviewTab extends AbstractVerticle {
             if (artifactMetricResult != null) {
                 log.info("Updating overview stats from cache for artifact: " + TooltipViewTracker.viewingTooltipArtifact)
                 updateStats(artifactMetricResult)
+            } else {
+                vertx.eventBus().publish("ClearOverview", new JsonObject())
             }
         })
 

@@ -5,10 +5,11 @@
     <vendor email="support@sourceplusplus.com" url="https://sourceplusplus.com">Source++ Team</vendor>
 
     <description><![CDATA[
-      Open-source automated programming assistant with runtime-aware and context-aware functionality
+        Source++ (SourcePlusPlus) is an open-source automated programming assistant with runtime-aware and context-aware functionality.
+        Source++ is a strictly observant programming assistant and aims to integrate APM solutions with the IDE for tighter feedback loops.
     ]]></description>
 
-    <idea-version since-build="162"/>
+    <idea-version since-build="171"/>
     <depends optional="true">org.intellij.groovy</depends>
     <depends optional="true">org.jetbrains.kotlin</depends>
 
