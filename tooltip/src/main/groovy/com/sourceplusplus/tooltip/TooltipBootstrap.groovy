@@ -48,7 +48,7 @@ import java.nio.charset.StandardCharsets
  * The tooltip is able to fetch and display runtime behavior without interacting with the Source++ Plugin.
  * This allows the tooltip to be independently outside the IDE.
  *
- * @version 0.1.3
+ * @version 0.1.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -168,12 +168,12 @@ class TooltipBootstrap extends AbstractVerticle {
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, artifactTraceResult)
             })
 
-            //register any automatic subscriptions
+            //register any forced subscriptions
             def subscriptions = config().getJsonArray("artifact_subscriptions")
             for (int i = 0; i < subscriptions.size(); i++) {
                 def sub = subscriptions.getJsonObject(i)
-                if (sub.getBoolean("automatic_subscription", false)) {
-                    def artifactConfig = SourceArtifactConfig.builder().subscribeAutomatically(true).build()
+                if (sub.getBoolean("force_subscribe", false)) {
+                    def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
                     coreClient.createArtifactConfig(sub.getString("app_uuid"), sub.getString("artifact_qualified_name"), artifactConfig, {
                         if (it.failed()) {
                             log.error("Failed to create artifact config", it.cause())
