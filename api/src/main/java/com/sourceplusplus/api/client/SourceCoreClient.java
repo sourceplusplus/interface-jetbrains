@@ -1,6 +1,7 @@
 package com.sourceplusplus.api.client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sourceplusplus.api.APIException;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription;
 import com.sourceplusplus.api.model.artifact.*;
@@ -11,6 +12,8 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import okhttp3.*;
 
 import java.net.URLEncoder;
@@ -23,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * Used to communicate with Source++ Core.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.3
+ * @version 0.1.4
  * @since 0.1.0
  */
 public class SourceCoreClient implements SourceClient {
@@ -123,7 +126,12 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceCoreInfo.class)));
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceCoreInfo.class)));
+            } else {
+                handler.handle(extractAPIException(responseBody));
+            }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
         }
@@ -609,5 +617,14 @@ public class SourceCoreClient implements SourceClient {
         if (apiKey != null) {
             request.addHeader("Authorization", "Bearer " + apiKey);
         }
+    }
+
+    private <T> Future<T> extractAPIException(String responseBody) {
+        JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
+        String[] strErrors = new String[errors.size()];
+        for (int i = 0; i < errors.size(); i++) {
+            strErrors[i] = errors.getString(i);
+        }
+        return Future.failedFuture(new APIException(strErrors));
     }
 }

@@ -14,7 +14,7 @@ import java.util.Set;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.3
+ * @version 0.1.4
  * @since 0.1.0
  */
 @SourceStyle
@@ -34,6 +34,11 @@ public interface AbstractSourceApplicationSubscription extends SourceMessage {
 
     @Value.Default
     default boolean automaticSubscription() {
+        return false;
+    }
+
+    @Value.Default
+    default boolean forceSubscription() {
         return false;
     }
 }

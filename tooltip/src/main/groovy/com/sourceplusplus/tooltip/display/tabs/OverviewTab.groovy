@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap
  *  - Minimum/Maximum response time
  *  - Average SLA
  *
- * @version 0.1.3
+ * @version 0.1.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -114,6 +114,8 @@ class OverviewTab extends AbstractVerticle {
             if (artifactMetricResult != null) {
                 log.info("Updating overview stats from cache for artifact: " + TooltipViewTracker.viewingTooltipArtifact)
                 updateStats(artifactMetricResult)
+            } else {
+                vertx.eventBus().publish("ClearOverview", new JsonObject())
             }
         })
 

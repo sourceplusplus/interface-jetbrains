@@ -27,7 +27,7 @@ import java.util.regex.Pattern
 /**
  * todo: description
  *
- * @version 0.1.3
+ * @version 0.1.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -160,34 +160,31 @@ class ApplicationAPI extends AbstractVerticle {
                 elasticsearch.findArtifactBySubscribeAutomatically(appUuid, {
                     if (it.succeeded()) {
                         def automaticSubscriptions = it.result()
-                        if (includeAutomatic) {
-                            def mergeMap = new HashMap<String, SourceApplicationSubscription.Builder>()
-                            subscribers.each {
-                                mergeMap.putIfAbsent(it.artifactQualifiedName(),
-                                        SourceApplicationSubscription.builder().from(it))
-                            }
-                            automaticSubscriptions.each {
-                                if (mergeMap.containsKey(it.artifactQualifiedName())) {
-                                    mergeMap.get(it.artifactQualifiedName()).automaticSubscription(true)
-                                } else {
-                                    mergeMap.putIfAbsent(it.artifactQualifiedName(),
-                                            SourceApplicationSubscription.builder()
-                                                    .artifactQualifiedName(it.artifactQualifiedName())
-                                                    .subscribers(0)
-                                                    .automaticSubscription(true))
-                                }
-                            }
-
-                            def mergedSubscriptions = mergeMap.collect { it.value.build() } as Set
-                            handler.handle(Future.succeededFuture(mergedSubscriptions))
-                        } else {
-                            subscribers.removeIf { sub ->
-                                automaticSubscriptions.find {
-                                    sub.artifactQualifiedName() == it.artifactQualifiedName()
-                                } != null
-                            }
-                            handler.handle(Future.succeededFuture(subscribers))
+                        def mergeMap = new HashMap<String, SourceApplicationSubscription.Builder>()
+                        subscribers.each {
+                            mergeMap.putIfAbsent(it.artifactQualifiedName(),
+                                    SourceApplicationSubscription.builder().from(it))
                         }
+                        automaticSubscriptions.each {
+                            if (mergeMap.containsKey(it.artifactQualifiedName())) {
+                                mergeMap.get(it.artifactQualifiedName())
+                                        .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically()))
+                                        .forceSubscription(Boolean.valueOf(it.config().forceSubscribe()))
+                            } else {
+                                mergeMap.putIfAbsent(it.artifactQualifiedName(),
+                                        SourceApplicationSubscription.builder()
+                                                .artifactQualifiedName(it.artifactQualifiedName())
+                                                .subscribers(0)
+                                                .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically()))
+                                                .forceSubscription(Boolean.valueOf(it.config().forceSubscribe())))
+                            }
+                        }
+
+                        def mergedSubscriptions = mergeMap.collect { it.value.build() } as Set
+                        if (!includeAutomatic) {
+                            mergedSubscriptions.removeIf { Boolean.valueOf(it.automaticSubscription()) }
+                        }
+                        handler.handle(Future.succeededFuture(mergedSubscriptions))
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
                     }

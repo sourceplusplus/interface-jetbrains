@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * todo: description
  *
- * @version 0.1.3
+ * @version 0.1.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -418,14 +418,21 @@ class ElasticsearchDAO {
 
     void findArtifactBySubscribeAutomatically(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         String query = '{\n' +
-                '  "query": {\n' +
-                '    "bool": {\n' +
-                '      "must": [\n' +
-                '        { "term": { "app_uuid": "' + appUuid + '" }},\n' +
-                '        { "match": { "config.subscribe_automatically": true }}\n' +
-                '      ]\n' +
-                '    }\n' +
-                '  }\n' +
+                '   "query":{\n' +
+                '      "bool":{\n' +
+                '         "must":[\n' +
+                '            { "term":{ "app_uuid":"' + appUuid + '" } },\n' +
+                '            {\n' +
+                '               "bool":{\n' +
+                '                  "should":[\n' +
+                '                     { "match":{ "config.subscribe_automatically":true } },\n' +
+                '                     { "match":{ "config.force_subscribe":true } }\n' +
+                '                  ]\n' +
+                '               }\n' +
+                '            }\n' +
+                '         ]\n' +
+                '      }\n' +
+                '   }\n' +
                 '}'
         def search = new Search.Builder(query)
                 .addIndex(SPP_INDEX + "_artifact")

@@ -4,6 +4,7 @@ plugins {
 
 apply plugin: 'groovy'
 intellij {
+    updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
     plugins = ["Groovy", "Kotlin", "properties"]
 }
