@@ -10,7 +10,7 @@ import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
 import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
 import com.sourceplusplus.core.integration.skywalking.SkywalkingIntegration
-import com.sourceplusplus.core.storage.ElasticsearchDAO
+import com.sourceplusplus.core.storage.AbstractSourceStorage
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -34,15 +34,15 @@ class MetricAPI extends AbstractVerticle {
     private final SharedData sharedData
     private final Router baseRouter
     private final ArtifactAPI artifactAPI
-    private final ElasticsearchDAO elasticsearch
+    private final AbstractSourceStorage storage
     private final SkywalkingIntegration skywalkingIntegration
 
-    MetricAPI(SharedData sharedData, Router baseRouter, ArtifactAPI artifactAPI, ElasticsearchDAO elasticsearch,
+    MetricAPI(SharedData sharedData, Router baseRouter, ArtifactAPI artifactAPI, AbstractSourceStorage storage,
               SkywalkingIntegration skywalkingIntegration) {
         this.sharedData = Objects.requireNonNull(sharedData)
         this.baseRouter = Objects.requireNonNull(baseRouter)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
-        this.elasticsearch = Objects.requireNonNull(elasticsearch)
+        this.storage = Objects.requireNonNull(storage)
         this.skywalkingIntegration = Objects.requireNonNull(skywalkingIntegration)
     }
 

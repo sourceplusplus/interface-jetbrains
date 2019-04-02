@@ -28,7 +28,9 @@ import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.api.metric.MetricAPI
 import com.sourceplusplus.core.api.trace.TraceAPI
 import com.sourceplusplus.core.integration.skywalking.SkywalkingIntegration
+import com.sourceplusplus.core.storage.AbstractSourceStorage
 import com.sourceplusplus.core.storage.ElasticsearchDAO
+import com.sourceplusplus.core.storage.H2DAO
 import io.vertx.core.*
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
@@ -69,7 +71,7 @@ class CoreBootstrap extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Set<IntegrationInfo> ACTIVE_INTEGRATIONS = new HashSet<>()
-    private ElasticsearchDAO elastic
+    private AbstractSourceStorage storage
 
     static void main(String[] args) {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
@@ -138,7 +140,19 @@ class CoreBootstrap extends AbstractVerticle {
 
         //start services
         log.info("Booting Source++ Core services...")
-        elastic = new ElasticsearchDAO(vertx.eventBus(), config().getJsonObject("elasticsearch"))
+        def storageConfig = config().getJsonObject("storage")
+        switch (storageConfig.getString("type")) {
+            case "elasticsearch":
+                log.info("Using storage: Elasticsearch")
+                storage = new ElasticsearchDAO(vertx.eventBus(), storageConfig.getJsonObject("elasticsearch"))
+                break
+            case "h2":
+                log.info("Using storage: H2")
+                storage = new H2DAO(vertx, storageConfig.getJsonObject("h2"))
+                break
+            default:
+                throw new IllegalArgumentException("Unknown storage type: " + storageConfig.getString("type"))
+        }
 
         def baseRouter = createRouter()
         def v1ApiRouter = Router.router(vertx)
@@ -174,18 +188,18 @@ class CoreBootstrap extends AbstractVerticle {
         //start APIs
         log.info("Booting Source++ Core APIs...")
         vertx.deployVerticle(new AdminAPI(v1ApiRouter))
-        vertx.deployVerticle(new ApplicationAPI(v1ApiRouter, elastic))
+        vertx.deployVerticle(new ApplicationAPI(v1ApiRouter, storage))
 
-        def artifactAPI = new ArtifactAPI(v1ApiRouter, elastic)
+        def artifactAPI = new ArtifactAPI(v1ApiRouter, storage)
         vertx.deployVerticle(artifactAPI, new DeploymentOptions().setConfig(config()))
 
         ACTIVE_INTEGRATIONS.add(IntegrationInfo.builder()
                 .name("Apache SkyWalking").type(IntegrationType.APM)
                 .version(BUILD.getString("apache_skywalking_version")).build())
-        def skywalking = new SkywalkingIntegration(artifactAPI, elastic)
+        def skywalking = new SkywalkingIntegration(artifactAPI, storage)
         vertx.deployVerticle(skywalking, new DeploymentOptions().setConfig(
                 config().getJsonObject("integrations").getJsonObject("skywalking")))
-        vertx.deployVerticle(new MetricAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, elastic, skywalking))
+        vertx.deployVerticle(new MetricAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, storage, skywalking))
         vertx.deployVerticle(new TraceAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, skywalking))
 
         //start core HTTP server

@@ -7,7 +7,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
-import com.sourceplusplus.core.storage.ElasticsearchDAO
+import com.sourceplusplus.core.storage.AbstractSourceStorage
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
@@ -41,11 +41,11 @@ class ApplicationAPI extends AbstractVerticle {
     private final static List<String> ANIMAL_NAMES =
             IOUtils.readLines(ApplicationAPI.getResourceAsStream("/appname_gen/animal-list.txt"), "UTF-8")
     private final Router baseRouter
-    private final ElasticsearchDAO elasticsearch
+    private final AbstractSourceStorage storage
 
-    ApplicationAPI(Router baseRouter, ElasticsearchDAO elasticsearch) {
+    ApplicationAPI(Router baseRouter, AbstractSourceStorage storage) {
         this.baseRouter = baseRouter
-        this.elasticsearch = elasticsearch
+        this.storage = storage
     }
 
     @Override
@@ -157,7 +157,7 @@ class ApplicationAPI extends AbstractVerticle {
             if (it.succeeded()) {
                 def subscribers = Json.decodeValue(it.result().body() as String,
                         new TypeReference<Set<SourceApplicationSubscription>>() {})
-                elasticsearch.findArtifactBySubscribeAutomatically(appUuid, {
+                storage.findArtifactBySubscribeAutomatically(appUuid, {
                     if (it.succeeded()) {
                         def automaticSubscriptions = it.result()
                         def mergeMap = new HashMap<String, SourceApplicationSubscription.Builder>()
@@ -232,7 +232,7 @@ class ApplicationAPI extends AbstractVerticle {
     void updateApplication(SourceApplication updateRequest, Handler<AsyncResult<SourceApplication>> handler) {
         log.info(String.format("Updating application. App uuid: %s - App name: %s",
                 updateRequest.appUuid(), updateRequest.appName()))
-        elasticsearch.updateApplication(updateRequest, handler)
+        storage.updateApplication(updateRequest, handler)
     }
 
     private void createApplicationRoute(RoutingContext routingContext) {
@@ -281,7 +281,7 @@ class ApplicationAPI extends AbstractVerticle {
                                     .withIsUpdateRequest(null)
                             log.info(String.format("Creating application. App uuid: %s - App name: %s",
                                     createRequest.appUuid(), createRequest.appName()))
-                            elasticsearch.createApplication(createRequest, handler)
+                            storage.createApplication(createRequest, handler)
                         }
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
@@ -296,7 +296,7 @@ class ApplicationAPI extends AbstractVerticle {
                     .withIsUpdateRequest(null)
             log.info(String.format("Creating application. App uuid: %s - App name: %s",
                     createRequest.appUuid(), createRequest.appName()))
-            elasticsearch.createApplication(createRequest, handler)
+            storage.createApplication(createRequest, handler)
         }
     }
 
@@ -330,7 +330,7 @@ class ApplicationAPI extends AbstractVerticle {
      */
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         log.info("Getting application. App uuid: {}", appUuid)
-        elasticsearch.getApplication(appUuid, handler)
+        storage.getApplication(appUuid, handler)
     }
 
     private void getApplicationsRoute(RoutingContext routingContext) {
@@ -347,7 +347,7 @@ class ApplicationAPI extends AbstractVerticle {
 
     void getApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
         log.info("Getting all applications")
-        elasticsearch.getAllApplications(handler)
+        storage.getAllApplications(handler)
     }
 
     /**

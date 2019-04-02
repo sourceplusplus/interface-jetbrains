@@ -10,7 +10,7 @@ import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.skywalking.config.SkywalkingEndpointIdDetector
-import com.sourceplusplus.core.storage.ElasticsearchDAO
+import com.sourceplusplus.core.storage.AbstractSourceStorage
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -44,16 +44,16 @@ class SkywalkingIntegration extends AbstractVerticle {
     private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
     private final ArtifactAPI artifactAPI
-    private final ElasticsearchDAO elasticsearch
+    private final AbstractSourceStorage storage
     private DateTimeFormatter DATE_TIME_FORMATTER_MINUTES
     private DateTimeFormatter DATE_TIME_FORMATTER_SECONDS
     private String skywalkingOAPHost
     private int skywalkingOAPPort
     private WebClient webClient
 
-    SkywalkingIntegration(ArtifactAPI artifactAPI, ElasticsearchDAO elasticsearch) {
+    SkywalkingIntegration(ArtifactAPI artifactAPI, AbstractSourceStorage storage) {
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
-        this.elasticsearch = Objects.requireNonNull(elasticsearch)
+        this.storage = Objects.requireNonNull(storage)
     }
 
     @Override

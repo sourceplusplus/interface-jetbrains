@@ -7,7 +7,7 @@ import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
 import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
-import com.sourceplusplus.core.storage.ElasticsearchDAO
+import com.sourceplusplus.core.storage.AbstractSourceStorage
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
@@ -41,14 +41,14 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private final ArtifactAPI artifactAPI
-    private ElasticsearchDAO elasticsearchDAO
+    private AbstractSourceStorage storage
 
     ArtifactSubscriptionTracker(ArtifactAPI artifactAPI) {
         this.artifactAPI = artifactAPI
     }
 
-    void setStorage(ElasticsearchDAO elasticsearchDAO) {
-        this.elasticsearchDAO = elasticsearchDAO
+    void setStorage(AbstractSourceStorage storage) {
+        this.storage = storage
     }
 
     @Override
@@ -69,7 +69,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
         })
         vertx.eventBus().consumer(GET_ARTIFACT_SUBSCRIPTIONS, { msg ->
             def appArtifact = msg.body() as ApplicationArtifact
-            elasticsearchDAO.getArtifactSubscriptions(appArtifact.appUuid(), appArtifact.artifactQualifiedName(), {
+            storage.getArtifactSubscriptions(appArtifact.appUuid(), appArtifact.artifactQualifiedName(), {
                 if (it.succeeded()) {
                     msg.reply(Json.encode(it.result()))
                 } else {
@@ -80,7 +80,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
         })
         vertx.eventBus().consumer(GET_APPLICATION_SUBSCRIPTIONS, { msg ->
             def appUuid = msg.body() as String
-            elasticsearchDAO.getApplicationSubscriptions(appUuid, {
+            storage.getApplicationSubscriptions(appUuid, {
                 if (it.succeeded()) {
                     msg.reply(Json.encode(it.result()))
                 } else {
@@ -94,7 +94,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             def appUuid = request.getString("app_uuid")
             def subscriberUuid = request.getString("subscriber_uuid")
 
-            elasticsearchDAO.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
+            storage.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
                 if (it.succeeded()) {
                     def futures = []
                     def subscriberSubscriptions = it.result()
@@ -107,7 +107,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
                         def future = Future.future()
                         futures.add(future)
-                        elasticsearchDAO.setArtifactSubscription(it.withSubscriptionLastAccessed(updatedAccess), future.completer())
+                        storage.setArtifactSubscription(it.withSubscriptionLastAccessed(updatedAccess), future.completer())
                     }
                     CompositeFuture.all(futures).setHandler({
                         if (it.succeeded()) {
@@ -128,7 +128,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             def appUuid = request.getString("app_uuid")
             def subscriberUuid = request.getString("subscriber_uuid")
 
-            elasticsearchDAO.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
+            storage.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
                 if (it.succeeded()) {
                     msg.reply(new JsonArray(Json.encode(it.result())))
                 } else {
@@ -143,7 +143,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     private void removeInactiveArtifactSubscriptions() {
         log.debug("Removing inactivate artifact subscriptions")
         def inactiveLimit = config().getJsonObject("core").getInteger("subscription_inactive_limit_minutes")
-        elasticsearchDAO.getArtifactSubscriptions({
+        storage.getArtifactSubscriptions({
             if (it.succeeded()) {
                 def futures = []
                 it.result().each { sub ->
@@ -159,10 +159,10 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                     def future = Future.future()
                     futures.add(future)
                     if (updatedSubscriptions.isEmpty()) {
-                        elasticsearchDAO.deleteArtifactSubscription(sub, future.completer())
+                        storage.deleteArtifactSubscription(sub, future.completer())
                     } else if (updated) {
                         sub = sub.withSubscriptionLastAccessed(updatedSubscriptions)
-                        elasticsearchDAO.setArtifactSubscription(sub, future.completer())
+                        storage.setArtifactSubscription(sub, future.completer())
                     }
                 }
                 CompositeFuture.all(futures).setHandler({
@@ -212,7 +212,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 .artifactQualifiedName(request.body().artifactQualifiedName())
                 .putSubscriptionLastAccessed(request.body().type, Instant.now())
                 .build()
-        elasticsearchDAO.updateArtifactSubscription(artifactSubscription, {
+        storage.updateArtifactSubscription(artifactSubscription, {
             if (it.succeeded()) {
                 switch (request.body().type) {
                     case SourceArtifactSubscriptionType.METRICS:
@@ -243,7 +243,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 if (it.succeeded()) {
                     def removeArtifactSubscriber = it.result().body()
                     if (removeArtifactSubscriber) {
-                        elasticsearchDAO.getArtifactSubscription(metricUnsubRequest.subscriberClientId,
+                        storage.getArtifactSubscription(metricUnsubRequest.subscriberClientId,
                                 metricUnsubRequest.appUuid(), metricUnsubRequest.artifactQualifiedName(), {
                             if (it.succeeded()) {
                                 if (it.result().isPresent()) {
@@ -252,7 +252,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                     updatedAccess.remove(SourceArtifactSubscriptionType.METRICS)
 
                                     if (updatedAccess.isEmpty()) {
-                                        elasticsearchDAO.deleteArtifactSubscription(subscription, {
+                                        storage.deleteArtifactSubscription(subscription, {
                                             if (it.succeeded()) {
                                                 request.reply(true)
                                             } else {
@@ -262,7 +262,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                         })
                                     } else {
                                         subscription = subscription.withSubscriptionLastAccessed(updatedAccess)
-                                        elasticsearchDAO.setArtifactSubscription(subscription, {
+                                        storage.setArtifactSubscription(subscription, {
                                             if (it.succeeded()) {
                                                 request.reply(true)
                                             } else {
@@ -293,7 +293,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 if (it.succeeded()) {
                     def removeArtifactSubscriber = it.result().body()
                     if (removeArtifactSubscriber) {
-                        elasticsearchDAO.getArtifactSubscription(traceUnsubRequest.subscriberClientId,
+                        storage.getArtifactSubscription(traceUnsubRequest.subscriberClientId,
                                 traceUnsubRequest.appUuid(), traceUnsubRequest.artifactQualifiedName(), {
                             if (it.succeeded()) {
                                 if (it.result().isPresent()) {
@@ -302,7 +302,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                     updatedAccess.remove(SourceArtifactSubscriptionType.TRACES)
 
                                     if (updatedAccess.isEmpty()) {
-                                        elasticsearchDAO.deleteArtifactSubscription(subscription, {
+                                        storage.deleteArtifactSubscription(subscription, {
                                             if (it.succeeded()) {
                                                 request.reply(true)
                                             } else {
@@ -312,7 +312,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                         })
                                     } else {
                                         subscription = subscription.withSubscriptionLastAccessed(updatedAccess)
-                                        elasticsearchDAO.setArtifactSubscription(subscription, {
+                                        storage.setArtifactSubscription(subscription, {
                                             if (it.succeeded()) {
                                                 request.reply(true)
                                             } else {
@@ -338,11 +338,11 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 }
             })
         } else if (unsubRequest instanceof SourceArtifactUnsubscribeRequest) {
-            elasticsearchDAO.getArtifactSubscription(unsubRequest.subscriberClientId, unsubRequest.appUuid(),
+            storage.getArtifactSubscription(unsubRequest.subscriberClientId, unsubRequest.appUuid(),
                     unsubRequest.artifactQualifiedName(), {
                 if (it.succeeded()) {
                     if (it.result().isPresent()) {
-                        elasticsearchDAO.deleteArtifactSubscription(it.result().get(), {
+                        storage.deleteArtifactSubscription(it.result().get(), {
                             if (it.succeeded()) {
                                 request.reply(true)
                             } else {

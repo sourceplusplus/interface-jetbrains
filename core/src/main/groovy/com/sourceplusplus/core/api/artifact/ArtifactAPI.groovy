@@ -9,7 +9,7 @@ import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
-import com.sourceplusplus.core.storage.ElasticsearchDAO
+import com.sourceplusplus.core.storage.AbstractSourceStorage
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -41,11 +41,11 @@ class ArtifactAPI extends AbstractVerticle {
             .expiration(1, TimeUnit.MINUTES).build()
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private final Router baseRouter
-    private final ElasticsearchDAO elasticsearch
+    private final AbstractSourceStorage storage
 
-    ArtifactAPI(Router baseRouter, ElasticsearchDAO elasticsearch) {
+    ArtifactAPI(Router baseRouter, AbstractSourceStorage storage) {
         this.baseRouter = baseRouter
-        this.elasticsearch = elasticsearch
+        this.storage = storage
     }
 
     @Override
@@ -65,7 +65,7 @@ class ArtifactAPI extends AbstractVerticle {
                 .handler(this.&getSourceArtifactSubscriptionsRoute)
 
         def subscriptionTracker = new ArtifactSubscriptionTracker(this)
-        subscriptionTracker.storage = elasticsearch
+        subscriptionTracker.storage = storage
         vertx.deployVerticle(subscriptionTracker, new DeploymentOptions().setConfig(config()))
         log.info("{} started", getClass().getSimpleName())
     }
@@ -203,7 +203,7 @@ class ArtifactAPI extends AbstractVerticle {
                         }
                         artifact = artifact.withConfig(newConfig)
                     }
-                    elasticsearch.updateArtifact(artifact, {
+                    storage.updateArtifact(artifact, {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
                                     .artifactQualifiedName(artifact.artifactQualifiedName()).build()
@@ -214,7 +214,7 @@ class ArtifactAPI extends AbstractVerticle {
                 } else {
                     //create
                     artifact = artifact.withCreateDate(now).withLastUpdated(now)
-                    elasticsearch.createArtifact(artifact, {
+                    storage.createArtifact(artifact, {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
                                     .artifactQualifiedName(artifact.artifactQualifiedName()).build()
@@ -250,7 +250,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     void getApplicationSourceArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         log.info("Getting all of application's source artifacts. App UUID: {}", appUuid)
-        elasticsearch.getApplicationArtifacts(appUuid, handler)
+        storage.getApplicationArtifacts(appUuid, handler)
     }
 
     private void getSourceArtifactRoute(RoutingContext routingContext) {
@@ -286,13 +286,13 @@ class ArtifactAPI extends AbstractVerticle {
     void getSourceArtifactByEndpointName(String appUuid, String endpointName,
                                          Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         log.info("Getting source artifact. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
-        elasticsearch.findArtifactByEndpointName(appUuid, endpointName, handler)
+        storage.findArtifactByEndpointName(appUuid, endpointName, handler)
     }
 
     void getSourceArtifactByEndpointId(String appUuid, String endpointId,
                                        Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         log.info("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
-        elasticsearch.findArtifactByEndpointId(appUuid, endpointId, handler)
+        storage.findArtifactByEndpointId(appUuid, endpointId, handler)
     }
 
     private createOrUpdateSourceArtifactConfigRoute(RoutingContext routingContext) {
@@ -393,7 +393,7 @@ class ArtifactAPI extends AbstractVerticle {
         } else {
             log.info("Getting source artifact from storage. App UUID: {} - Artifact qualified name: {}",
                     appUuid, artifactQualifiedName)
-            elasticsearch.getArtifact(appUuid, artifactQualifiedName, {
+            storage.getArtifact(appUuid, artifactQualifiedName, {
                 if (it.failed()) {
                     handler.handle(Future.failedFuture(it.cause()))
                 } else {
