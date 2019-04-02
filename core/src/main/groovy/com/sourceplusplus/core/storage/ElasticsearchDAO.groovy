@@ -246,6 +246,47 @@ class ElasticsearchDAO extends AbstractSourceStorage {
     }
 
     @Override
+    void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
+        String query = '{\n' +
+                '    "query": {\n' +
+                '        "match_all": {}\n' +
+                '    }\n' +
+                '}'
+        def search = new Search.Builder(query)
+                .addIndex(SPP_INDEX + "_application")
+                .build()
+
+        client.executeAsync(search, new JestResultHandler<SearchResult>() {
+
+            @Override
+            void completed(SearchResult result) {
+                if (result.succeeded || result.responseCode == 404) {
+                    def results = result.getSourceAsStringList()
+                    if (results == null || results.isEmpty()) {
+                        log.debug(String.format("Could not find any applications"))
+                        handler.handle(Future.succeededFuture(new ArrayList<>()))
+                    } else {
+                        def rtnList = new ArrayList<SourceApplication>()
+                        results.each {
+                            rtnList.add(Json.decodeValue(it, SourceApplication.class))
+                        }
+                        handler.handle(Future.succeededFuture(rtnList))
+                    }
+                } else {
+                    log.error(result.errorMessage)
+                    handler.handle(Future.failedFuture(result.errorMessage))
+                }
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to get all applications", ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
+    }
+
+    @Override
     void createArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
         def index = new Index.Builder(Json.encode(artifact)).index(SPP_INDEX + "_artifact")
                 .type("artifact")
@@ -472,47 +513,6 @@ class ElasticsearchDAO extends AbstractSourceStorage {
             @Override
             void failed(Exception ex) {
                 log.error("Failed to search for artifact by endpoint name", ex)
-                handler.handle(Future.failedFuture(ex))
-            }
-        })
-    }
-
-    @Override
-    void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
-        String query = '{\n' +
-                '    "query": {\n' +
-                '        "match_all": {}\n' +
-                '    }\n' +
-                '}'
-        def search = new Search.Builder(query)
-                .addIndex(SPP_INDEX + "_application")
-                .build()
-
-        client.executeAsync(search, new JestResultHandler<SearchResult>() {
-
-            @Override
-            void completed(SearchResult result) {
-                if (result.succeeded || result.responseCode == 404) {
-                    def results = result.getSourceAsStringList()
-                    if (results == null || results.isEmpty()) {
-                        log.debug(String.format("Could not find any applications"))
-                        handler.handle(Future.succeededFuture(new ArrayList<>()))
-                    } else {
-                        def rtnList = new ArrayList<SourceApplication>()
-                        results.each {
-                            rtnList.add(Json.decodeValue(it, SourceApplication.class))
-                        }
-                        handler.handle(Future.succeededFuture(rtnList))
-                    }
-                } else {
-                    log.error(result.errorMessage)
-                    handler.handle(Future.failedFuture(result.errorMessage))
-                }
-            }
-
-            @Override
-            void failed(Exception ex) {
-                log.error("Failed to get all applications", ex)
                 handler.handle(Future.failedFuture(ex))
             }
         })

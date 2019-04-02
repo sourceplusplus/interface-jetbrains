@@ -39,6 +39,8 @@ class H2DAO extends AbstractSourceStorage {
             "storage/h2/queries/update_application.sql"), Charsets.UTF_8)
     private static final String GET_APPLICATION = Resources.toString(Resources.getResource(
             "storage/h2/queries/get_application.sql"), Charsets.UTF_8)
+    private static final String GET_ALL_APPLICATIONS = Resources.toString(Resources.getResource(
+            "storage/h2/queries/get_all_applications.sql"), Charsets.UTF_8)
     final JDBCClient client
 
     H2DAO(Vertx vertx, JsonObject config) {
@@ -107,7 +109,9 @@ class H2DAO extends AbstractSourceStorage {
 
     @Override
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
-        client.query(GET_APPLICATION, {
+        def params = new JsonArray()
+        params.add(appUuid)
+        client.queryWithParams(GET_APPLICATION, params, {
             if (it.succeeded()) {
                 def results = it.result().results
                 if (!results.isEmpty()) {
@@ -124,6 +128,32 @@ class H2DAO extends AbstractSourceStorage {
                 } else {
                     handler.handle(Future.succeededFuture(Optional.empty()))
                 }
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    @Override
+    void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
+        client.query(GET_ALL_APPLICATIONS, {
+            if (it.succeeded()) {
+                def applications = new ArrayList<SourceApplication>()
+                def results = it.result().results
+                if (!results.isEmpty()) {
+                    results.each { existingApp ->
+                        def sourceApplication = SourceApplication.builder()
+                                .appUuid(existingApp.getString(0))
+                                .appName(existingApp.getString(1))
+                                .createDate(Instant.parse(existingApp.getString(2)))
+                        if (existingApp.getString(3)) {
+                            sourceApplication.agentConfig(Json.decodeValue(
+                                    existingApp.getString(3), SourceAgentConfig.class))
+                        }
+                        applications.add(sourceApplication.build())
+                    }
+                }
+                handler.handle(Future.succeededFuture(applications))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -160,11 +190,6 @@ class H2DAO extends AbstractSourceStorage {
 
     @Override
     void findArtifactBySubscribeAutomatically(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
-
-    }
-
-    @Override
-    void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
 
     }
 

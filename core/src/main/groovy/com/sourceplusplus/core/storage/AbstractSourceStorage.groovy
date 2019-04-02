@@ -22,6 +22,8 @@ abstract class AbstractSourceStorage {
 
     abstract void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler)
 
+    abstract void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler)
+
     abstract void createArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler)
 
     abstract void updateArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler)
@@ -37,8 +39,6 @@ abstract class AbstractSourceStorage {
 
     abstract void findArtifactBySubscribeAutomatically(String appUuid,
                                                        Handler<AsyncResult<List<SourceArtifact>>> handler)
-
-    abstract void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler)
 
     abstract void getApplicationArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler)
 
