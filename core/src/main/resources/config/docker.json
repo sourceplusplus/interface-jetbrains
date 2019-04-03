@@ -10,9 +10,12 @@
     "bridge_port": 7000,
     "subscription_inactive_limit_minutes": 15
   },
-  "elasticsearch": {
-    "host": "es-server",
-    "port": 9200
+  "storage": {
+    "type": "h2",
+    "elasticsearch": {
+      "host": "es-server",
+      "port": 9200
+    }
   },
   "integrations": {
     "skywalking": {
