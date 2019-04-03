@@ -667,4 +667,9 @@ class H2DAO extends AbstractSourceStorage {
     void refreshDatabase(Handler<AsyncResult<Void>> handler) {
         handler.handle(Future.succeededFuture())
     }
+
+    @Override
+    boolean needsManualRefresh() {
+        return false
+    }
 }

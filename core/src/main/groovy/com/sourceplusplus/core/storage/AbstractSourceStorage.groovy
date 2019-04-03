@@ -65,4 +65,6 @@ abstract class AbstractSourceStorage {
                                               Handler<AsyncResult<List<SourceApplicationSubscription>>> handler)
 
     abstract void refreshDatabase(Handler<AsyncResult<Void>> handler)
+
+    abstract boolean needsManualRefresh()
 }

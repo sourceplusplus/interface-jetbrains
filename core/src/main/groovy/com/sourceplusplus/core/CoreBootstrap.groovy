@@ -187,7 +187,7 @@ class CoreBootstrap extends AbstractVerticle {
 
         //start APIs
         log.info("Booting Source++ Core APIs...")
-        vertx.deployVerticle(new AdminAPI(v1ApiRouter))
+        vertx.deployVerticle(new AdminAPI(v1ApiRouter, storage))
         vertx.deployVerticle(new ApplicationAPI(v1ApiRouter, storage))
 
         def artifactAPI = new ArtifactAPI(v1ApiRouter, storage)

@@ -919,4 +919,9 @@ class ElasticsearchDAO extends AbstractSourceStorage {
             }
         })
     }
+
+    @Override
+    boolean needsManualRefresh() {
+        return true
+    }
 }
