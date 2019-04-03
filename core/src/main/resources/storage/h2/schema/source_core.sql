@@ -16,7 +16,7 @@ CREATE TABLE source_artifact (
   module_name             VARCHAR,
   component               VARCHAR,
   endpoint_name           VARCHAR,
-  endpoint_id             INT,
+  endpoint_id             VARCHAR,
   PRIMARY KEY(app_uuid, artifact_qualified_name)
 );
 
@@ -26,5 +26,5 @@ CREATE TABLE source_artifact_subscription (
   artifact_qualified_name VARCHAR NOT NULL,
   subscription_type       VARCHAR NOT NULL,
   last_accessed           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(subscriber_uuid, app_uuid, artifact_qualified_name)
+  PRIMARY KEY(subscriber_uuid, app_uuid, artifact_qualified_name, subscription_type)
 );

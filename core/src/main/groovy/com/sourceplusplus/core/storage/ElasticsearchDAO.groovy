@@ -883,7 +883,7 @@ class ElasticsearchDAO extends AbstractSourceStorage {
                             def appSubscription = applicationSubscriptions.get(subscription.artifactQualifiedName())
                             appSubscription.subscribers(subscriptionCounts.get(subscription.artifactQualifiedName())
                                     .getAndIncrement())
-                            appSubscription.types(subscription.subscriptionLastAccessed().keySet())
+                            appSubscription.addAllTypes(subscription.subscriptionLastAccessed().keySet())
                         }
                         handler.handle(Future.succeededFuture(applicationSubscriptions.values().collect { it.build() }))
                     }
