@@ -27,7 +27,8 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Ability to switch overview graph ([#18](https://github.com/CodeBrig/Source/issues/18)) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - View artifact slowest traces ([#19](https://github.com/CodeBrig/Source/issues/19)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Configurable environment setup (via Docker) in Source++ Plugin ([#20](https://github.com/CodeBrig/Source/issues/20)) ![](../../images/roadmap/Source++-Plugin-blue.svg)
-
+ - Responsive Source++ Tooltip UI ([#44](https://github.com/CodeBrig/Source/issues/44)) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
+ 
 ## 0.3.0 (alpha)
 
 > Focus: Language-agnostic source code parsing
