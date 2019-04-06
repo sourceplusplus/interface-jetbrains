@@ -189,7 +189,7 @@ public class SourceAgent {
                     daemonThread.setDaemon(true);
                     daemonThread.start();
                 } else {
-                    throw new IllegalStateException("Count not find application: " + SourceAgentConfig.current.appUuid);
+                    throw new IllegalStateException("Could not find application: " + SourceAgentConfig.current.appUuid);
                 }
             } else {
                 throw new IllegalStateException("Source++ Agent configuration is missing appUuid");
