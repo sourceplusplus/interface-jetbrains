@@ -173,10 +173,36 @@ class TooltipBootstrap extends AbstractVerticle {
             for (int i = 0; i < subscriptions.size(); i++) {
                 def sub = subscriptions.getJsonObject(i)
                 if (sub.getBoolean("force_subscribe", false)) {
-                    def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                    coreClient.createArtifactConfig(sub.getString("app_uuid"), sub.getString("artifact_qualified_name"), artifactConfig, {
-                        if (it.failed()) {
-                            log.error("Failed to create artifact config", it.cause())
+                    //make sure application exists first (create if necessary), then subscribe
+                    coreClient.getApplication(sub.getString("app_uuid"), {
+                        if (it.succeeded()) {
+                            if (it.result().isPresent()) {
+                                def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
+                                coreClient.createArtifactConfig(sub.getString("app_uuid"),
+                                        sub.getString("artifact_qualified_name"), artifactConfig, {
+                                    if (it.failed()) {
+                                        log.error("Failed to create artifact config", it.cause())
+                                    }
+                                })
+                            } else {
+                                def createApplication = SourceApplication.builder().isCreateRequest(true)
+                                        .appUuid(sub.getString("app_uuid")).build()
+                                coreClient.createApplication(createApplication, {
+                                    if (it.succeeded()) {
+                                        def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
+                                        coreClient.createArtifactConfig(sub.getString("app_uuid"),
+                                                sub.getString("artifact_qualified_name"), artifactConfig, {
+                                            if (it.failed()) {
+                                                log.error("Failed to create artifact config", it.cause())
+                                            }
+                                        })
+                                    } else {
+                                        log.error("Failed to create application", it.cause())
+                                    }
+                                })
+                            }
+                        } else {
+                            log.error("Failed to get application", it.cause())
                         }
                     })
                 }
