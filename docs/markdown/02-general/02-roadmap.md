@@ -36,6 +36,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Trace service detection and custom tooltip displays ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
  - Browser-based control panel 
+ - Artifact, endpoint, log, trace searching functionality
 
 ## 0.4.0 (alpha)
 
