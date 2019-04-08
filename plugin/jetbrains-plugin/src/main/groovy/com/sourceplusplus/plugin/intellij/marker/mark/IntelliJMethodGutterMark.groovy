@@ -15,6 +15,7 @@ import com.intellij.psi.PsiLiteral
 import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
+import com.intellij.util.ui.JBUI
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.plugin.PluginSourceFile
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.render.SourceArtifactGutterMarkRenderer
@@ -99,6 +100,7 @@ class IntelliJMethodGutterMark extends GutterMark {
                 JBPopupFactory popupFactory = JBPopupFactory.getInstance()
                 BalloonImpl balloon = popupFactory
                         .createBalloonBuilder(TooltipUI.tooltipUI)
+                        .setBorderInsets(JBUI.emptyInsets())
                         .setDialogMode(true)
                         .setFillColor(JBColor.background())
                         .setAnimationCycle(1)
@@ -108,8 +110,8 @@ class IntelliJMethodGutterMark extends GutterMark {
 
                 Point tooltipPoint = editor.visualPositionToXY(editor.offsetToVisualPosition(
                         editor.document.getLineStartOffset(lineNumber)))
-                tooltipPoint.x = tooltipPoint.x + 370 as int
-                tooltipPoint.y = tooltipPoint.y - 145 as int
+                tooltipPoint.x = tooltipPoint.x + 380 as int
+                tooltipPoint.y = tooltipPoint.y - 125 as int
 
                 showingTooltipWindow.set(true)
                 buildingTooltipUI.getAndSet(false)
@@ -297,8 +299,8 @@ class IntelliJMethodGutterMark extends GutterMark {
 
         @Override
         void mouseMoved(MouseEvent e2) {
-            //10 pixels on x coord puts mouse past gap
-            if (currentShowingBalloon != null && e2.point.x > 10 && IntelliJMethodGutterMark.tooltipId.get() == tooltipId) {
+            //13 pixels on x coord puts mouse past gutter
+            if (currentShowingBalloon != null && e2.point.x > 13 && IntelliJMethodGutterMark.tooltipId.get() == tooltipId) {
                 currentShowingBalloon.hide()
                 currentShowingBalloon = null
             }

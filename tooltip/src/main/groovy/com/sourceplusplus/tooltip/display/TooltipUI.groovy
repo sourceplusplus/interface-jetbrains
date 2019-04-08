@@ -41,7 +41,7 @@ class TooltipUI {
     @NotNull
     static JComponent getTooltipUI() {
         JFXPanel fxPanel = new JFXPanel()
-        fxPanel.setPreferredSize(new Dimension(725, 275)) //580, 220
+        fxPanel.setPreferredSize(new Dimension(775, 250))
 
         Platform.setImplicitExit(false)
         Platform.runLater({

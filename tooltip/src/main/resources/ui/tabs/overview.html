@@ -1,160 +1,137 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Source++</title>
-    <link rel="stylesheet" type="text/css" href="../semantic.min.css">
-    <!--<style>-->
-        <!--body {-->
-            <!--margin-left: -10%;-->
-            <!--margin-top: -4%;-->
-            <!-- -webkit-transform: scale(0.80);-->
-            <!-- -moz-transform: scale(0.80);-->
-            <!--transform: scale(0.80);-->
-        <!--}-->
-    <!--</style>-->
+    <meta charset="UTF-8">
+    <title>Overview</title>
+    <link rel='stylesheet' href='../semantic.min.css'>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="amCharts/core.js"></script>
+    <script src="amCharts/charts.js"></script>
+    <script src="amCharts/themes/animated.js"></script>
 </head>
-<body>
-<div id="sidebar" class="ui left visible vertical thin sidebar">
-    <div id="navigation-toggle" class="ui top borderless menu">
-        <div class="item">
-            <i id="icon_toggle" class="large red long arrow left icon"></i>
-            <span>HIDE</span>
+<body style="overflow-y: hidden">
+<div class="ui sidebar vertical left menu overlay visible very thin icon spp_blue"
+     style="-webkit-transition-duration: 0.1s; overflow: visible !important;">
+    <div class="ui accordion displaynone">
+        <a class="item openbtn" style="background-color: white; height: 45px !important;">Close menu</a>
+        <a class="item active_tab">Dashboard</a>
+
+        <div class="title item inactive_tab">
+            <i class="dropdown icon"></i> Traces
+        </div>
+        <div class="content">
+            <a id="sidebar_traces_link_latest" class="item sidebar_sub_text_color" href="traces.html">Latest</a>
+            <a id="sidebar_traces_link_slowest" class="item sidebar_sub_text_color" href="traces.html">Slowest</a>
         </div>
     </div>
-    <div id="navigation" class="ui fluid inverted vertical borderless menu">
-        <a id="overview_link" href="#" class="active item">
-            <i class="large red dashboard icon"></i>
-            <span>OVERVIEW</span>
-        </a>
-        <a id="traces_link" href="traces.html" class="item">
-            <i class="large code icon"></i>
-            <span>TRACES</span>
-        </a>
-        <span class="item"></span>
-        <span class="item"></span>
-        <span class="item"></span>
+    <div class="ui dropdown item openbtn" style="color: white">
+        <i class="icon demo-icon content"></i>
+    </div>
+    <a class="ui dropdown item active_tab"><i class="icon demo-icon dashboard"></i></a>
+    <div class="ui dropdown item inactive_tab">
+        <z class="displaynone">Traces</z>
+        <i class="icon demo-icon code"></i>
+
+        <div class="menu">
+            <a id="traces_link_latest" class="item" href="traces.html">Latest</a>
+            <a id="traces_link_slowest" class="item" href="traces.html">Slowest</a>
+        </div>
     </div>
 </div>
-<div id="main-grid" class="ui very compact stretched two column grid pusher">
-    <div class="eleven wide column">
-        <div id="dropdown-menu" class="ui top borderless menu">
-            <div id="dropdown" style="max-width: 220px" class="ui fluid dropdown item">
-                <i class="clock icon"></i>
-                <div id="current_metric_time_frame" class="text">LAST 15 MINUTES</div>
-                <i style="font-size:1em" class="red dropdown icon"></i>
-                <div class="menu">
-                    <div onclick="updateTime('last_15_minutes')" class="item">LAST 15 MINUTES</div>
-                    <div onclick="updateTime('last_30_minutes')" class="item">LAST 30 MINUTES</div>
-                    <div onclick="updateTime('last_hour')" class="item">LAST HOUR</div>
-                </div>
-            </div>
-        </div>
-        <div id="cards" class="ui left floated centered cards">
-            <div class="card">
-                <div class="center aligned content">
-                    <div class="header"><span id="card_throughput_average_header">n/a</span></div>
-                    <div class="meta"><span id="card_throughput_average_meta">AVG THROUGHPUT</span></div>
-                    <div class="red mini-graph-bars">
-                        <div id="card_throughput_average_bar_1" class="bar bar-1" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_2" class="bar bar-2" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_3" class="bar bar-3" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_4" class="bar bar-4" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_5" class="bar bar-5" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_6" class="bar bar-6" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_7" class="bar bar-7" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_8" class="bar bar-8" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_9" class="bar bar-9" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_10" class="bar bar-10" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_11" class="bar bar-11" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_12" class="bar bar-12" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_13" class="bar bar-13" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_14" class="bar bar-14" style="height: 0%;"></div>
-                        <div id="card_throughput_average_bar_15" class="bar bar-15" style="height: 0%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="center aligned content">
-                    <div class="header"><span id="card_responsetime_average_header">n/a</span></div>
-                    <div class="meta"><span id="card_responsetime_average_meta">AVG RESP TIME</span></div>
-                    <div class="red mini-graph-bars">
-                        <div id="card_responsetime_average_bar_1" class="bar bar-1" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_2" class="bar bar-2" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_3" class="bar bar-3" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_4" class="bar bar-4" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_5" class="bar bar-5" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_6" class="bar bar-6" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_7" class="bar bar-7" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_8" class="bar bar-8" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_9" class="bar bar-9" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_10" class="bar bar-10" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_11" class="bar bar-11" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_12" class="bar bar-12" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_13" class="bar bar-13" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_14" class="bar bar-14" style="height: 0%;"></div>
-                        <div id="card_responsetime_average_bar_15" class="bar bar-15" style="height: 0%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="center aligned content">
-                    <div class="header"><span id="card_servicelevelagreement_average_header">n/a</span></div>
-                    <div class="meta"><span id="card_servicelevelagreement_average_meta">AVG SLA</span></div>
-                    <div class="red mini-graph-bars">
-                        <div id="card_servicelevelagreement_average_bar_1" class="bar bar-1" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_2" class="bar bar-2" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_3" class="bar bar-3" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_4" class="bar bar-4" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_5" class="bar bar-5" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_6" class="bar bar-6" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_7" class="bar bar-7" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_8" class="bar bar-8" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_9" class="bar bar-9" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_10" class="bar bar-10" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_11" class="bar bar-11" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_12" class="bar bar-12" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_13" class="bar bar-13" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_14" class="bar bar-14" style="height: 0%;"></div>
-                        <div id="card_servicelevelagreement_average_bar_15" class="bar bar-15" style="height: 0%;"></div>
+<div class="pusher">
+    <div class="ui menu fixed asd marginlefting middle aligned content"
+         style="border-radius: 0!important; border: 0; margin-left: 260px; -webkit-transition-duration: 0.1s; height: 45px; line-height: 45px; align-content:center;">
+        <div class="ui sidebar horizontal top menu fixed overlay visible very thin icon spp_blue"
+             style="-webkit-transition-duration: 0.1s; overflow: visible !important;">
+            <div class="marginlefting" style="height: 45px; line-height: 45px; align-content:center;">
+                <div class="ui icon top left pointing dropdown">
+                    <i class="clock icon spp_red_color" style="font-size: 20px; margin-top: -2px"></i>
+                    <div class="menu" style="margin-top: 0 !important;">
+                        <div onclick="updateTime('last_5_minutes')" class="item">LAST 5 MINUTES</div>
+                        <div onclick="updateTime('last_15_minutes')" class="item active">LAST 15 MINUTES</div>
+                        <div onclick="updateTime('last_30_minutes')" class="item">LAST 30 MINUTES</div>
+                        <div onclick="updateTime('last_hour')" class="item">LAST HOUR</div>
+                        <div onclick="updateTime('last_3_hours')" class="item">LAST 3 HOURS</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="container" class="card" style="width: 100%"></div>
     </div>
-    <div id="absolute-relative-menu" class="five wide column">
-        <div class="ui top borderless secondary one item pointing menu">
-            <a id="speed_tab" class="active item">Response Time</a>
-            <!--<a id="frequency_tab" class="item">Plugins</a>-->
+    <div class="ui padded equal height grid background_color" style="min-height: 100vh; margin-left: 60px !important">
+        <div class="twelve wide stretched column">
+            <div class="ui equal height grid">
+                <div class="one column row" style="padding-top: 7px; padding-bottom: 0">
+                    <div class="column" style="padding-left: 0; padding-right: 0">
+                        <div id="chartdiv" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="quick_application_stats" class="ui container">
-            <div id="quick_stats">
-                <!--<div class="ui segment">-->
-                    <!--<p style="margin-bottom: 5px">Max: <span id="quick_stats_max">n/a</span></p>-->
-                    <!--<p style="margin-bottom: 0px">Min: <span id="quick_stats_min">n/a</span></p>-->
-                <!--</div>-->
-                <div class="ui segment">
-                    <p style="margin-bottom: 5px">99% < <span id="quick_stats_p99">n/a</span></p>
-                    <p style="margin-bottom: 5px">95% < <span id="quick_stats_p95">n/a</span></p>
-                    <p style="margin-bottom: 5px">90% < <span id="quick_stats_p90">n/a</span></p>
-                    <p style="margin-bottom: 5px">75% < <span id="quick_stats_p75">n/a</span></p>
-                    <p style="margin-bottom: 0px">50% < <span id="quick_stats_p50">n/a</span></p>
+        <div class="four wide stretched column middle aligned">
+            <div class="ui divided link items" style="font-size: 10px">
+                <div class="item">
+                    <div class="ui mini statistic">
+                        <div id="card_throughput_average_header" class="value" style="text-align: left">
+                            n/a
+                        </div>
+                        <div class="label">
+                            AVG THROUGHPUT
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="ui mini statistic">
+                        <div id="card_responsetime_average_header" class="value spp_red_color" style="text-align: left">
+                            n/a
+                        </div>
+                        <div class="label spp_red_color">
+                            AVG RESP TIME
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="ui mini statistic">
+                        <div id="card_servicelevelagreement_average_header" class="value" style="text-align: left">
+                            n/a
+                        </div>
+                        <div class="label">
+                            AVG SLA
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script src="../highcharts.min.js"></script>
+<script src='../jquery-3.1.1.min.js'></script>
+<script src='../semantic.min.js'></script>
+<script>
+    $(document).ready(function () {
+        $('.ui.dropdown').dropdown();
+        $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
+    });
+
+    $(".openbtn").on("click", function () {
+        $(".ui.sidebar").toggleClass("very thin icon");
+        $(".asd").toggleClass("marginlefting");
+        $(".sidebar z").toggleClass("displaynone");
+        $(".ui.accordion").toggleClass("displaynone");
+        $(".ui.dropdown.item").toggleClass("displaynone");
+        $(".hide_on_toggle").toggleClass("displaynone");
+        $(".pusher").toggleClass("dimmed");
+
+        $(".logo").find('img').toggle();
+
+    });
+    $('.ui.accordion').accordion({
+        selector: {}
+    });
+</script>
 <!--<script src="../themes/default/assets/charts/gray.js"></script>-->
-<script src="../jquery-3.1.1.min.js"></script>
-<script src="../semantic.min.js"></script>
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>
 <script src='../source_plugin_bridge.js'></script>
-<script src='../toggle.js'></script>
 <script src='js/overview.js'></script>
 </body>
 </html>

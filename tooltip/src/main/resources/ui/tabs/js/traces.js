@@ -1,5 +1,11 @@
 if (!pluginAvailable) {
     $('#overview_link').attr('href', "overview.html" + window.location.search);
+    $('#sidebar_overview_link').attr('href', "overview.html" + window.location.search);
+
+    $('#traces_link_latest').attr('href', "traces.html" + window.location.search);
+    $('#traces_link_slowest').attr('href', "traces.html" + window.location.search);
+    $('#sidebar_traces_link_latest').attr('href', "traces.html" + window.location.search);
+    $('#sidebar_traces_link_slowest').attr('href', "traces.html" + window.location.search);
 }
 
 $('#dropdown').dropdown();
@@ -60,7 +66,7 @@ eb.onopen = function () {
                 var occurred = moment(Number(trace.start));
                 var now = moment();
                 var timeOccurredDuration = moment.duration(now.diff(occurred));
-                rowHtml += '<td class="trace_time" id="trace_time_' + htmlTraceId + '" class="collapsing" data-value="' + trace.start + '" style="text-align: center">'
+                rowHtml += '<td class="trace_time collapsing" id="trace_time_' + htmlTraceId + '" data-value="' + trace.start + '" style="text-align: center">'
                     + getPrettyDuration(timeOccurredDuration) + '</td>';
                 rowHtml += '<td class="collapsing">' + trace.pretty_duration + '</td>';
 
@@ -140,10 +146,12 @@ function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, seg
     $('#segment_id_span').css('display', 'unset');
     $('#trace_stack_span').css('display', 'none');
 
-    $('#trace_stack_header').removeClass('active');
-    $('#latest_traces_header').removeClass('active');
+    $('#trace_stack_header').removeClass('active_tab');
+    $('#latest_traces_header').removeClass('active_tab');
+    $('#trace_stack_header').addClass('inactive_tab');
+    $('#latest_traces_header').addClass('inactive_tab');
 
-    $('#span_info_header').addClass('active');
+    $('#span_info_header').addClass('active_tab');
     $('#span_info_header').css('visibility', 'visible');
 }
 
@@ -176,12 +184,13 @@ function displaySpanInfo(spanInfo) {
         }
     }
     if (gotTags) {
-        $('#span_tag_div').css('display', 'unset');
+        $("#span_tag_div").removeClass("displaynone");
     } else {
-        $('#span_tag_div').css('display', 'none');
+        $("#span_tag_div").addClass("displaynone");
     }
 
     var gotLogs = false;
+    $('#log_table').empty();
     spanInfo.logs.forEach(function (log) {
         gotLogs = true;
         var rowHtml = '<tr><td style="white-space: nowrap">';
@@ -195,9 +204,9 @@ function displaySpanInfo(spanInfo) {
         $('#log_table').append(rowHtml);
     });
     if (gotLogs) {
-        $('#span_log_div').css('display', 'unset');
+        $("#span_log_div").removeClass("displaynone");
     } else {
-        $('#span_log_div').css('display', 'none');
+        $("#span_log_div").addClass("displaynone");
     }
 }
 
@@ -216,11 +225,13 @@ function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId)
     $('#trace_stack_table').css('visibility', 'visible');
     $('#traces_span').css('display', 'none');
 
-    $('#latest_traces_header').removeClass('active');
-    $('#trace_stack_header').addClass('active');
+    $('#latest_traces_header').removeClass('active_tab');
+    $('#latest_traces_header').addClass('inactive_tab');
+    $('#trace_stack_header').addClass('active_tab');
+    $('#trace_stack_header').removeClass('inactive_tab');
     $('#trace_stack_header').css('visibility', 'visible');
 
-    $('#span_info_header').removeClass('active');
+    $('#span_info_header').removeClass('active_tab');
     $('#span_info_header').css('visibility', 'hidden');
 }
 
@@ -257,14 +268,16 @@ function displayTraceStack(traceStack) {
 
 function goBackToLatestTraces(userClicked) {
     $('#span_info_panel').css('display', 'none');
-    $('#latest_traces_header').addClass('active');
+    $('#latest_traces_header').addClass('active_tab');
+    $('#latest_traces_header').removeClass('inactive_tab');
     $('#top_trace_table').css('display', '');
     $('#trace_stack_table').css('visibility', 'hidden');
     $('#traces_span').css('display', 'unset');
     $('#trace_stack_span').css('display', 'none');
     $('#segment_id_span').css('display', 'none');
 
-    $('#trace_stack_header').removeClass('active');
+    $('#trace_stack_header').addClass('inactive_tab');
+    $('#trace_stack_header').removeClass('active_tab');
     $('#trace_stack_header').css('visibility', 'hidden');
     $('#span_info_header').removeClass('active');
     $('#span_info_header').css('visibility', 'hidden');
@@ -284,7 +297,8 @@ function goBackToTraceStack() {
     $('#segment_id_span').css('display', 'none');
     $('#trace_stack_span').css('display', 'unset');
 
-    $('#trace_stack_header').addClass('active');
+    $('#trace_stack_header').removeClass('inactive_tab');
+    $('#trace_stack_header').addClass('active_tab');
     $('#trace_stack_header').css('visibility', 'visible');
     $('#span_info_header').removeClass('active');
     $('#span_info_header').css('visibility', 'hidden');
