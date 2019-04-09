@@ -8,8 +8,6 @@ if (!pluginAvailable) {
     $('#sidebar_traces_link_slowest').attr('href', "traces.html" + window.location.search);
 }
 
-$('#dropdown').dropdown();
-
 var timeFrame = localStorage.getItem('spp.metric_time_frame');
 if (timeFrame) {
     if (timeFrame === 'last_minute') {
@@ -71,9 +69,9 @@ eb.onopen = function () {
                 rowHtml += '<td class="collapsing">' + trace.pretty_duration + '</td>';
 
                 if (trace.error) {
-                    rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 175%"><i class="bug red icon"></i></td></tr>';
+                    rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="bug red icon"></i></td></tr>';
                 } else {
-                    rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 175%"><i class="check circle outline icon"></i></td></tr>';
+                    rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
                 }
                 $('#trace_table').append(rowHtml);
             }
@@ -85,14 +83,14 @@ eb.onopen = function () {
     eb.registerHandler('DisplayInnerTraceStack', function (error, message) {
         eb.send('TooltipLogger', 'Displaying inner trace stack: ' + JSON.stringify(message));
         console.log('Displaying inner trace stack: ' + JSON.stringify(message));
-        goBackToTraceStack();
+        goBackToTraceStack(false);
         $('#stack_table tr').remove();
 
         viewingInnerTrace = true;
         if (message.body.inner_level > 0) {
-            $('#latest_traces_header').text('Parent Stack');
+            $('#latest_traces_header_text').text('Parent Stack');
         } else {
-            $('#latest_traces_header').text('Latest Traces');
+            $('#latest_traces_header_text').text('Latest Traces');
         }
 
         var traceStack = message.body.trace_stack;
@@ -125,7 +123,7 @@ eb.onopen = function () {
     });
 
     eb.registerHandler('ClearSpanInfo', function (error, message) {
-        goBackToTraceStack();
+        goBackToTraceStack(false);
     });
 
     eb.send('TracesTabOpened', {});
@@ -139,7 +137,7 @@ function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, seg
         eb.send('TooltipLogger', 'Displaying trace span info: ' + JSON.stringify(message));
         console.log('Displaying trace span info: ' + JSON.stringify(message));
         var spanInfo = message.body;
-        displaySpanInfo(spanInfo)
+        displaySpanInfo(spanInfo);
     });
     $('#top_trace_table').css('display', 'none');
     $('#trace_stack_table').css('visibility', 'visible');
@@ -152,6 +150,7 @@ function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, seg
     $('#latest_traces_header').addClass('inactive_tab');
 
     $('#span_info_header').addClass('active_tab');
+    $('#span_info_header').removeClass('inactive_tab');
     $('#span_info_header').css('visibility', 'visible');
 }
 
@@ -227,6 +226,7 @@ function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId)
 
     $('#latest_traces_header').removeClass('active_tab');
     $('#latest_traces_header').addClass('inactive_tab');
+
     $('#trace_stack_header').addClass('active_tab');
     $('#trace_stack_header').removeClass('inactive_tab');
     $('#trace_stack_header').css('visibility', 'visible');
@@ -237,11 +237,11 @@ function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId)
 
 function displayTraceStack(traceStack) {
     eb.send('TooltipLogger', 'Displaying trace stack: ' + traceStack);
-    goBackToTraceStack();
+    goBackToTraceStack(false);
     $('#stack_table tr').remove();
 
     viewingInnerTrace = false;
-    $('#latest_traces_header').text('Latest Traces');
+    $('#latest_traces_header_text').text('Latest Traces');
 
     $('#trace_id_field').val(traceStack[0].span.trace_id);
     $('#time_occurred_field').val(moment(Number(traceStack[0].span.start_time)).format());
@@ -267,6 +267,10 @@ function displayTraceStack(traceStack) {
 }
 
 function goBackToLatestTraces(userClicked) {
+    if ($('#latest_traces_header').hasClass('active_tab')) {
+        $('#latest_traces_header').dropdown({on: null}).dropdown('toggle');
+    }
+
     $('#span_info_panel').css('display', 'none');
     $('#latest_traces_header').addClass('active_tab');
     $('#latest_traces_header').removeClass('inactive_tab');
@@ -279,7 +283,9 @@ function goBackToLatestTraces(userClicked) {
     $('#trace_stack_header').addClass('inactive_tab');
     $('#trace_stack_header').removeClass('active_tab');
     $('#trace_stack_header').css('visibility', 'hidden');
-    $('#span_info_header').removeClass('active');
+
+    $('#span_info_header').addClass('inactive_tab');
+    $('#span_info_header').removeClass('active_tab');
     $('#span_info_header').css('visibility', 'hidden');
 
     if (userClicked && viewingInnerTrace) {
@@ -288,7 +294,11 @@ function goBackToLatestTraces(userClicked) {
     }
 }
 
-function goBackToTraceStack() {
+function goBackToTraceStack(userClicked) {
+    if (userClicked && $('#trace_stack_header').hasClass('active_tab')) {
+        $('#trace_stack_header').dropdown({on: null}).dropdown('toggle');
+    }
+
     $('#latest_traces_header').removeClass('active');
     $('#span_info_panel').css('display', 'none');
     $('#top_trace_table').css('display', 'none');
@@ -300,6 +310,7 @@ function goBackToTraceStack() {
     $('#trace_stack_header').removeClass('inactive_tab');
     $('#trace_stack_header').addClass('active_tab');
     $('#trace_stack_header').css('visibility', 'visible');
+
     $('#span_info_header').removeClass('active');
     $('#span_info_header').css('visibility', 'hidden');
 }

@@ -40,57 +40,51 @@
 <div class="pusher">
     <div class="ui menu borderless marginlefting spp_blue"
          style="border-radius: 0 !important; border: 0; -webkit-transition-duration: 0.1s; height: 45px; margin-bottom: 0">
-        <a id="latest_traces_header" onclick="goBackToLatestTraces(true)" class="item active_tab">
-            Latest Traces
+        <a id="latest_traces_header" onclick="goBackToLatestTraces(true)" class="ui item dropdown active_tab">
+            <span id="latest_traces_header_text">Latest Traces</span>
+            <div id="latest_traces_menu" class="menu">
+                <div class="ui input item">
+                    <i class="play icon spp_blue_color"></i>
+                    <input id="traces_start_field" type="text" style="width: 210px" readonly>
+                </div>
+                <div class="ui input item">
+                    <i class="stop icon spp_red_color"></i>
+                    <input id="traces_stop_field" type="text" style="width: 210px" readonly>
+                </div>
+                <div class="divider"></div>
+                <div class="ui input item" style="text-align: center">
+                    <label id="traces_total_label">Total: 0</label>
+                </div>
+            </div>
         </a>
-        <a id="trace_stack_header" onclick="goBackToTraceStack()" class="item" style="visibility: hidden">
-            Trace Stack
+        <a id="trace_stack_header" onclick="goBackToTraceStack(true)" class="ui item dropdown"
+           style="visibility: hidden">
+            <span id="trace_stack_header_text">Trace Stack</span>
+            <div id="trace_stack_menu" class="menu">
+                <div class="ui input item">
+                    <i class="fingerprint icon"></i>
+                    <input id="trace_id_field" type="text" style="width: 210px" readonly>
+                </div>
+                <div class="ui input item">
+                    <i class="clock outline icon"></i>
+                    <input id="time_occurred_field" type="text" style="width: 210px" readonly>
+                </div>
+            </div>
         </a>
-        <a id="span_info_header" class="item" style="visibility: hidden">
-            Span Info
+        <a id="span_info_header" class="ui item dropdown" style="visibility: hidden">
+            <span id="span_info_header_text">Span Info</span>
         </a>
         <div class="right menu">
         </div>
     </div>
     <div class="wide column marginlefting">
-        <div id="trace_bar" class="column" style="background-color: #f3f4f5">
-            <div class="ui form" style="padding-left: 6px;">
-                <div class="inline fields" style="height: 45px; margin-bottom: 0">
-                    <span>
-                        <div id="traces_span" class="field">
-                            <label>Start</label>
-                            <input id="traces_start_field" type="text" style="width: 210px" readonly>
-                            <label>Stop</label>
-                            <input id="traces_stop_field" type="text" style="width: 210px" readonly>
-                            <label id="traces_total_label">Total: 0</label>
-                        </div>
-                    </span>
-
-                    <span id="trace_stack_span" style="display: none;">
-                        <div class="field">
-                            <label>Trace Id</label>
-                            <input id="trace_id_field" type="text" style="width: 210px" readonly>
-                            <label>Occurred</label>
-                            <input id="time_occurred_field" type="text" style="width: 210px" readonly>
-                        </div>
-                    </span>
-                    <span id="segment_id_span" style="display: none;">
-                        <div class="field">
-                            <label>Segment Id</label>
-                            <input id="segment_id_field" type="text" readonly>
-                        </div>
-                    </span>
-                </div>
-            </div>
-        </div>
-
         <table style="margin-top: 0" id="top_trace_table" class="ui celled striped table unstackable">
             <thead>
             <tr>
-                <th>Operation</th>
-                <th style="text-align: center">Occurred</th>
-                <th style="text-align: center">Exec</th>
-                <th style="text-align: center">Status</th>
+                <th style="padding-top: 5px; padding-bottom: 5px">Operation</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Occurred</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Exec</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Status</th>
             </tr>
             </thead>
             <tbody id="trace_table">
@@ -100,9 +94,9 @@
                class="ui celled striped table unstackable">
             <thead>
             <tr>
-                <th>Operation</th>
-                <th style="text-align: center">Exec</th>
-                <th style="text-align: center">Exec (%)</th>
+                <th style="padding-top: 5px; padding-bottom: 5px">Operation</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Exec</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Exec (%)</th>
             </tr>
             </thead>
             <tbody id="stack_table">
@@ -151,10 +145,8 @@
 <script src='../semantic.min.js'></script>
 <script>
     $(document).ready(function () {
-        $('.ui.dropdown').dropdown()
-        $('.ui.sidebar').sidebar('setting', 'transition', 'overlay')
+        $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
     });
-
     $(".openbtn").on("click", function () {
         $(".ui.sidebar").toggleClass("very thin icon");
         $(".asd").toggleClass("marginlefting");
