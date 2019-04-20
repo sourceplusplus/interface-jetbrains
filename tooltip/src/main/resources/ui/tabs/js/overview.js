@@ -5,197 +5,101 @@ if (!pluginAvailable) {
     $('#sidebar_traces_link_slowest').attr('href', "traces.html" + window.location.search);
 }
 
-//am4core.useTheme(am4themes_animated);
+var series0 = {
+    name: '99th percentile',
+    type: 'line',
+    color: "#e1483b",
+    hoverAnimation: false,
+    symbol: 'circle',
+    symbolSize: 8,
+    showSymbol: true,
+    areaStyle: {},
+    data: []
+};
 
-// Create chart instance
-var chart = am4core.create("chartdiv", am4charts.XYChart);
-//chart.padding(0, 0, 0, 0);
-chart.hiddenState.properties.opacity = 0;
-chart.zoomOutButton.disabled = true;
+var series1 = {
+    name: '95th percentile',
+    type: 'line',
+    color: "#e1483b",
+    showSymbol: false,
+    hoverAnimation: false,
+    areaStyle: {},
+    data: []
+};
 
-// Increase contrast by taking evey second color
-chart.colors.step = 2;
+var series2 = {
+    name: '90th percentile',
+    type: 'line',
+    color: "#e1483b",
+    showSymbol: false,
+    hoverAnimation: false,
+    areaStyle: {},
+    data: []
+};
 
-// Create axes
-var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-dateAxis.renderer.minGridDistance = 50;
-dateAxis.renderer.inside = true;
-dateAxis.renderer.axisFills.template.disabled = true;
-dateAxis.renderer.ticks.template.disabled = true;
-dateAxis.cursorTooltipEnabled = false;
+var series3 = {
+    name: '75th percentile',
+    type: 'line',
+    color: "#e1483b",
+    showSymbol: false,
+    hoverAnimation: false,
+    areaStyle: {},
+    data: []
+};
 
-var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+var series4 = {
+    name: '50th percentile',
+    type: 'line',
+    color: "#e1483b",
+    showSymbol: false,
+    hoverAnimation: false,
+    areaStyle: {},
+    data: []
+};
 
-// Create series
-function createAxisAndSeries(series, field, name, opposite, bullet) {
-    series.dataFields.valueY = field;
-    series.dataFields.dateX = "date";
-    series.strokeWidth = 2;
-    series.yAxis = valueAxis;
-    series.name = name;
-    series.fill = "#e1483b";
+var overviewChart = echarts.init(document.getElementById('overview_chart'));
+window.onresize = function () {
+    overviewChart.resize();
+};
 
-    //series.tooltipText = "{valueY}[/]";
-    series.tooltip.background.cornerRadius = 20;
-    series.tooltip.background.strokeOpacity = 0;
-    series.tooltip.pointerOrientation = "vertical";
-    series.tooltip.label.minWidth = 40;
-    series.tooltip.label.minHeight = 40;
-    series.tooltip.label.textAlign = "middle";
-    series.tooltip.label.textValign = "middle";
-    series.tensionX = 0.8;
-
-    series.fillOpacity = 1;
-    var gradient = new am4core.LinearGradient();
-    gradient.addColor(chart.colors.getIndex(0), 0.2);
-    gradient.addColor(chart.colors.getIndex(0), 0);
-    //series.fill = am4core.color("#e1483b");
-    series.stroke = am4core.color("#182d34");
-
-    var interfaceColors = new am4core.InterfaceColorSet();
-
-    // var bullet = series.bullets.push(new am4charts.CircleBullet());
-    // bullet.circle.strokeWidth = 2;
-    // bullet.circle.radius = 4;
-    // bullet.circle.fill = am4core.color("#182d34");
-    //
-    // var bullethover = bullet.states.create("hover");
-    // bullethover.properties.scale = 1.3;
-
-    valueAxis.renderer.line.strokeOpacity = 1;
-    valueAxis.renderer.line.strokeWidth = 2;
-    valueAxis.renderer.line.stroke = series.stroke;
-    valueAxis.renderer.labels.template.fill = series.stroke;
-    valueAxis.renderer.opposite = opposite;
-    valueAxis.renderer.grid.template.disabled = true;
-    valueAxis.cursorTooltipEnabled = true;
-
-    // bullet at the front of the line
-    var bullet = series.createChild(am4charts.CircleBullet);
-    bullet.circle.radius = 3;
-    bullet.fillOpacity = 1;
-    bullet.fill = am4core.color("#182d34");
-    bullet.isMeasured = false;
-
-    series.events.on("validated", function () {
-        if (series.dataItems.last) {
-            bullet.moveTo(series.dataItems.last.point);
-            bullet.validatePosition();
+var overviewChartOptions = {
+    grid: {
+        top: 20,
+        bottom: 30,
+        left: 55,
+        right: 0,
+    },
+    tooltip: {
+        trigger: 'axis',
+        formatter: function (params) {
+            params = params[0];
+            return moment(params.value[0]).format('LTS') + ' : ' + params.value[1] + "ms";
+        },
+        axisPointer: {
+            animation: false
         }
-    });
-}
-
-var series0 = chart.series.push(new am4charts.LineSeries());
-createAxisAndSeries(series0, "0", "Visits", false, "circle");
-
-var series1 = chart.series.push(new am4charts.LineSeries());
-createAxisAndSeries(series1, "1", "Hits", false, "rectangle");
-
-var series2 = chart.series.push(new am4charts.LineSeries());
-createAxisAndSeries(series2, "2", "Hits", false, "rectangle");
-
-var series3 = chart.series.push(new am4charts.LineSeries());
-createAxisAndSeries(series3, "3", "Hits", false, "rectangle");
-
-var series4 = chart.series.push(new am4charts.LineSeries());
-createAxisAndSeries(series4, "4", "Hits", false, "rectangle");
-
-
-// Add legend
-//chart.legend = new am4charts.Legend();
-
-// Add cursor
-chart.cursor = new am4charts.XYCursor();
-chart.cursor.behavior = "none";
-// valueAxis.renderer.ticks.template.disabled = true;
-//
-// var series = chart.series.push(new am4charts.LineSeries());
-// series.dataFields.dateX = "date";
-// series.dataFields.valueY = "value";
-// series.interpolationDuration = 500;
-// series.defaultState.transitionDuration = 0;
-// series.tensionX = 0.8;
-//
-// chart.events.on("datavalidated", function () {
-//     dateAxis.zoom({start: 1 / 15, end: 1.2}, false, true);
-// });
-//
-// dateAxis.interpolationDuration = 500;
-// dateAxis.rangeChangeDuration = 500;
-//
-// document.addEventListener("visibilitychange", function () {
-//     if (document.hidden) {
-//         // if (interval) {
-//         //    // clearInterval(interval);
-//         // }
-//     }
-//     else {
-//         //startInterval();
-//     }
-// }, false);
-//
-// // // add data
-// // var interval;
-// //
-// // function startInterval() {
-// //     interval = setInterval(function () {
-// //         visits =
-// //             visits + Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 5);
-// //         var lastdataItem = series.dataItems.getIndex(series.dataItems.length - 1);
-// //         if (lastdataItem) {
-// //             chart.addData(
-// //                 {date: new Date(lastdataItem.dateX.getTime() + 1000), value: visits},
-// //                 1
-// //             );
-// //         } else {
-// //             chart.addData(
-// //                 {date: new Date(), value: visits},
-// //                 1
-// //             );
-// //         }
-// //     }, 1000);
-// // }
-// //
-// // startInterval();
-//
-// // all the below is optional, makes some fancy effects
-// // gradient fill of the series
-// series.fillOpacity = 1;
-// var gradient = new am4core.LinearGradient();
-// gradient.addColor(chart.colors.getIndex(0), 0.2);
-// gradient.addColor(chart.colors.getIndex(0), 0);
-// series.fill = am4core.color("#e1483b");
-// series.stroke = am4core.color("#182d34");
-//
-// // this makes date axis labels to fade out
-// // dateAxis.renderer.labels.template.adapter.add("fillOpacity", function (fillOpacity, target) {
-// //     var dataItem = target.dataItem;
-// //     return dataItem.position;
-// // })
-//
-// // need to set this, otherwise fillOpacity is not changed and not set
-// // dateAxis.events.on("validated", function () {
-// //     am4core.iter.each(dateAxis.renderer.labels.iterator(), function (label) {
-// //         label.fillOpacity = label.fillOpacity;
-// //     })
-// // })
-//
-// // this makes date axis labels which are at equal minutes to be rotated
-// dateAxis.renderer.labels.template.adapter.add("rotation", function (rotation, target) {
-//     var dataItem = target.dataItem;
-//     if (dataItem.date && dataItem.date.getTime() == am4core.time.round(new Date(dataItem.date.getTime()), "minute").getTime()) {
-//         target.verticalCenter = "middle";
-//         target.horizontalCenter = "left";
-//         return -90;
-//     }
-//     else {
-//         target.verticalCenter = "bottom";
-//         target.horizontalCenter = "middle";
-//         return 0;
-//     }
-// })
-//
-
+    },
+    xAxis: {
+        type: 'time',
+        splitLine: {
+            show: true
+        },
+        axisLabel: {
+            formatter: function (value) {
+                return moment(value).format('LT');
+            }
+        }
+    },
+    yAxis: {
+        type: 'value',
+        boundaryGap: [0, '100%'],
+        splitLine: {
+            show: false
+        }
+    },
+    series: [series0, series1, series2, series3, series4]
+};
+overviewChart.setOption(overviewChartOptions);
 
 var currentTimeFrame = "LAST_15_MINUTES";
 eb.onopen = function () {
@@ -227,13 +131,9 @@ eb.onopen = function () {
             }
         }
 
-        for (var i = 0; i < chartUi.series.length; i++) {
-            var series = chartUi.series[i];
-            while (series.data.length > 0) {
-                series.data[0].remove(true);
-            }
-        }
-        chartUi.redraw();
+        overviewChart.setOption({
+            series: []
+        })
     });
     eb.registerHandler(displayCardHandler, function (error, message) {
         //eb.send('TooltipLogger', 'Displaying card: ' + JSON.stringify(message));
@@ -267,8 +167,12 @@ eb.onopen = function () {
                 var time = moment.unix(seriesData.times[z]).valueOf();
 
                 list.push({
-                    date: time,
-                    [seriesData.series_index]: value
+                    value: [time, value],
+                    itemStyle: {
+                        normal: {
+                            color: '#182d34',
+                        }
+                    }
                 });
             }
         }
@@ -283,7 +187,9 @@ eb.onopen = function () {
         } else if (seriesData.series_index == 4) {
             series4.data = list;
         }
-        chart.validateData();
+        overviewChart.setOption({
+            series: [series0, series1, series2, series3, series4]
+        })
     });
     eb.registerHandler(displayStatsHandler, function (error, message) {
         //eb.send('TooltipLogger', 'Displaying stats: ' + JSON.stringify(message));
@@ -338,11 +244,15 @@ function updateTime(interval) {
     localStorage.setItem('spp.metric_time_frame', interval);
     eb.send('SetMetricTimeFrame', {value: interval});
 
-    if (interval === 'last_15_minutes') {
+    if (interval === 'last_5_minutes') {
+        $('#current_metric_time_frame').text('LAST 5 MINUTES');
+    } else if (interval === 'last_15_minutes') {
         $('#current_metric_time_frame').text('LAST 15 MINUTES');
     } else if (interval === 'last_30_minutes') {
         $('#current_metric_time_frame').text('LAST 30 MINUTES');
     } else if (interval === 'last_hour') {
         $('#current_metric_time_frame').text('LAST HOUR');
+    } else if (interval === 'last_3_hours') {
+        $('#current_metric_time_frame').text('LAST 3 HOURS');
     }
 }

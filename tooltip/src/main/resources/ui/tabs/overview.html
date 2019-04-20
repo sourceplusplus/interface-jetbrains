@@ -5,9 +5,7 @@
     <title>Overview</title>
     <link rel='stylesheet' href='../semantic.min.css'>
     <link rel="stylesheet" href="css/style.css">
-    <script src="amCharts/core.js"></script>
-    <script src="amCharts/charts.js"></script>
-    <script src="amCharts/themes/animated.js"></script>
+    <script src="eCharts/echarts.min.js"></script>
 </head>
 <body style="overflow-y: hidden">
 <div class="ui sidebar vertical left menu overlay visible very thin icon spp_blue"
@@ -55,6 +53,14 @@
                     </div>
                 </div>
             </div>
+            <div class="right menu" style="height: 45px; line-height: 45px; align-content:center;">
+                <a id="current_page" href="#" target="_blank">
+                    <i class="external link icon spp_red_color" style="font-size: 20px; margin-top: -2px"></i>
+                </a>
+                <script>
+                    document.getElementById("current_page").href = window.location.href;
+                </script>
+            </div>
         </div>
     </div>
     <div class="ui padded equal height grid background_color" style="min-height: 100vh; margin-left: 60px !important">
@@ -62,7 +68,7 @@
             <div class="ui equal height grid">
                 <div class="one column row" style="padding-top: 7px; padding-bottom: 0">
                     <div class="column" style="padding-left: 0; padding-right: 0">
-                        <div id="chartdiv" style="height: 100%;"></div>
+                        <div id="overview_chart" style="height: 100%;"></div>
                     </div>
                 </div>
             </div>
