@@ -1,14 +1,8 @@
 package com.sourceplusplus.tooltip.display
 
 import com.sourceplusplus.api.model.config.SourceTooltipConfig
-import groovy.io.FileType
+import com.teamdev.jxbrowser.chromium.swing.BrowserView
 import io.vertx.core.Vertx
-import javafx.application.Platform
-import javafx.embed.swing.JFXPanel
-import javafx.scene.Group
-import javafx.scene.Scene
-import javafx.scene.web.WebEngine
-import javafx.scene.web.WebView
 import org.apache.commons.io.FileUtils
 import org.jetbrains.annotations.NotNull
 import org.slf4j.Logger
@@ -18,6 +12,7 @@ import javax.swing.*
 import java.awt.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -33,50 +28,45 @@ class TooltipUI {
     public static final String TOOLTIP_READY = "TooltipReady"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private static Scene scene
+    private static final AtomicBoolean tooltipReady = new AtomicBoolean()
     private static File uiDirectory
     private static Vertx vertx
-    private static WebEngine webEngine
+    private static BrowserView view
 
     @NotNull
     static JComponent getTooltipUI() {
-        JFXPanel fxPanel = new JFXPanel()
-        fxPanel.setPreferredSize(new Dimension(775, 250))
+        if (!tooltipReady.getAndSet(true)) {
+            view = new BrowserView()
+            view.setPreferredSize(new Dimension(775, 250))
+            view.browser.setSize(775, 250)
+            view.browser.loadURL(createScene())
 
-        Platform.setImplicitExit(false)
-        Platform.runLater({
-            if (scene == null) {
-                scene = createScene()
-                vertx.eventBus().publish(TOOLTIP_READY, true)
-            }
-            fxPanel.setScene(scene)
-        })
-        return fxPanel
+            vertx.eventBus().publish(TOOLTIP_READY, true)
+        }
+        return view
     }
 
     static void updateTheme(boolean dark) {
-        if (dark) {
-            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
-            tabsFolder.eachFile(FileType.FILES, {
-                def updatedHtml = it.text
-                        .replaceAll('<!--<script src="../themes/default/assets/charts/gray.js"></script>-->', '<script src="../themes/default/assets/charts/gray.js"></script>')
-                        .replaceAll("semantic.min.css", "semantic_dark.min.css")
-                it.text = ""
-                it << updatedHtml
-            })
-        } else {
-            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
-            tabsFolder.eachFile(FileType.FILES, {
-                def updatedHtml = it.text
-                        .replaceAll('<script src="../themes/default/assets/charts/gray.js"></script>', '<!--<script src="../themes/default/assets/charts/gray.js"></script>-->')
-                        .replaceAll("semantic_dark.min.css", "semantic.min.css")
-                it.text = ""
-                it << updatedHtml
-            })
-        }
-        Platform.runLater({
-            webEngine.reload()
-        })
+//        if (dark) {
+//            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
+//            tabsFolder.eachFile(FileType.FILES, {
+//                def updatedHtml = it.text
+//                        .replace('<!--<script src="../themes/default/assets/charts/gray.js"></script>-->', '<script src="../themes/default/assets/charts/gray.js"></script>')
+//                        .replace("semantic.min.css", "semantic_dark.min.css")
+//                it.text = ""
+//                it << updatedHtml
+//            })
+//        } else {
+//            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
+//            tabsFolder.eachFile(FileType.FILES, {
+//                def updatedHtml = it.text
+//                        .replace('<script src="../themes/default/assets/charts/gray.js"></script>', '<!--<script src="../themes/default/assets/charts/gray.js"></script>-->')
+//                        .replace("semantic_dark.min.css", "semantic.min.css")
+//                it.text = ""
+//                it << updatedHtml
+//            })
+//        }
+//        view.browser.reload()
     }
 
     static void preloadTooltipUI(Vertx vertx) {
@@ -84,21 +74,13 @@ class TooltipUI {
         getTooltipUI()
     }
 
-    private static Scene createScene() {
-        log.debug("Creating tooltip scene")
-        Scene scene = new Scene(new Group())
-        WebView browser = new WebView()
-        webEngine = browser.getEngine()
-
+    private static String createScene() {
         uiDirectory = File.createTempDir()
         uiDirectory.deleteOnExit()
 
         def url = TooltipUI.class.getResource("/ui")
         extract(url, "/ui", uiDirectory.absolutePath)
         log.debug("Using tooltip ui directory: " + uiDirectory.absolutePath)
-
-        webEngine.load("file:///" + uiDirectory.absolutePath + "/tabs/overview.html")
-        scene.setRoot(browser)
 
         def bridgePort = SourceTooltipConfig.current.pluginUIPort
         def bridgeFile = new File(uiDirectory.absolutePath + "/source_plugin_bridge.js").toPath()
@@ -110,7 +92,7 @@ class TooltipUI {
             }
         }
         Files.write(bridgeFile, fileContent, StandardCharsets.UTF_8)
-        return scene
+        return "file:///" + uiDirectory.absolutePath + "/tabs/overview.html"
     }
 
     static void extract(URL dirURL, String sourceDirectory, String writeDirectory) throws IOException {

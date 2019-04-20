@@ -9,9 +9,11 @@ package com.sourceplusplus.api.model;
  */
 public enum QueryTimeFrame {
 
+    LAST_5_MINUTES(5),
     LAST_15_MINUTES(15),
     LAST_30_MINUTES(30),
-    LAST_HOUR(60);
+    LAST_HOUR(60),
+    LAST_3_HOURS(60 * 3);
 
     private final int minutes;
 

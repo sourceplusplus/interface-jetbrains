@@ -103,7 +103,7 @@ class IntelliJMethodGutterMark extends GutterMark {
                         .setBorderInsets(JBUI.emptyInsets())
                         .setDialogMode(true)
                         .setFillColor(JBColor.background())
-                        .setAnimationCycle(1)
+                        .setAnimationCycle(0)
                         .createBalloon() as BalloonImpl
                 Disposer.register(editor.project, balloon)
                 balloon.addListener(new TooltipPopupListener(vertx, tooltipId))

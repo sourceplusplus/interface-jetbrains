@@ -5,6 +5,10 @@ applicationName = 'source-tooltip'
 archivesBaseName = 'source-tooltip'
 mainClassName = 'com.sourceplusplus.tooltip.TooltipBootstrap'
 
+ext {
+    jxBrowserVersion = '6.23.1'
+}
+
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
@@ -12,6 +16,8 @@ dependencies {
     compile group: 'com.googlecode.wicked-charts', name: 'highcharts-wrapper', version: '2.0.1'
     compile 'io.vertx:vertx-web:3.6.3'
     compile 'io.vertx:vertx-tcp-eventbus-bridge:3.6.3'
+    compile "com.teamdev.jxbrowser:jxbrowser-cross-platform:${jxBrowserVersion}"
+    runtime files('../license.jar')
     compile project(":api")
 }
 
