@@ -29,12 +29,12 @@ class PortalUI {
     public static final String PORTAL_READY = "PortalReady"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private static final AtomicBoolean portalReady = new AtomicBoolean()
     private static final Map<Integer, PortalUI> portalUIMap = new ConcurrentHashMap<>()
     private static final AtomicInteger portalIdIndex = new AtomicInteger()
     private static File uiDirectory
     private static Vertx vertx
-    private static BrowserView view
+    private final AtomicBoolean portalReady = new AtomicBoolean()
+    private BrowserView view
     private final int portalId
     private boolean externalPortal
 
@@ -57,7 +57,7 @@ class PortalUI {
     }
 
     @NotNull
-    static JComponent getPortalUI() {
+    JComponent getPortalUI() {
         if (!portalReady.getAndSet(true)) {
             view = new BrowserView()
             view.setPreferredSize(new java.awt.Dimension(775, 250))
@@ -68,7 +68,7 @@ class PortalUI {
             }
             view.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/overview.html")
 
-            vertx.eventBus().publish(PORTAL_READY, true)
+            vertx.eventBus().publish(PORTAL_READY, portalId)
         }
         return view
     }
