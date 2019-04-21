@@ -168,30 +168,31 @@ class PortalBootstrap extends AbstractVerticle {
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, artifactTraceResult)
             })
 
-            //register any forced subscriptions
+            //register subscriptions
             def subscriptions = config().getJsonArray("artifact_subscriptions")
             for (int i = 0; i < subscriptions.size(); i++) {
                 def sub = subscriptions.getJsonObject(i)
+                def appUuid = sub.getString("app_uuid")
+                def artifactQualifiedName = sub.getString("artifact_qualified_name")
+
                 if (sub.getBoolean("force_subscribe", false)) {
                     //make sure application exists first (create if necessary), then subscribe
-                    coreClient.getApplication(sub.getString("app_uuid"), {
+                    coreClient.getApplication(appUuid, {
                         if (it.succeeded()) {
                             if (it.result().isPresent()) {
                                 def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                                coreClient.createArtifactConfig(sub.getString("app_uuid"),
-                                        sub.getString("artifact_qualified_name"), artifactConfig, {
+                                coreClient.createArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                     if (it.failed()) {
                                         log.error("Failed to create artifact config", it.cause())
                                     }
                                 })
                             } else {
                                 def createApplication = SourceApplication.builder().isCreateRequest(true)
-                                        .appUuid(sub.getString("app_uuid")).build()
+                                        .appUuid(appUuid).build()
                                 coreClient.createApplication(createApplication, {
                                     if (it.succeeded()) {
                                         def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                                        coreClient.createArtifactConfig(sub.getString("app_uuid"),
-                                                sub.getString("artifact_qualified_name"), artifactConfig, {
+                                        coreClient.createArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                             if (it.failed()) {
                                                 log.error("Failed to create artifact config", it.cause())
                                             }
@@ -206,6 +207,10 @@ class PortalBootstrap extends AbstractVerticle {
                         }
                     })
                 }
+
+                //register portal
+                SourcePortal.getPortal(SourcePortal.registerPortalId(appUuid))
+                        .portalUI.viewingPortalArtifact = artifactQualifiedName
             }
         }
 
