@@ -12,7 +12,9 @@ import javax.swing.*
 import java.awt.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -29,9 +31,31 @@ class PortalUI {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final AtomicBoolean portalReady = new AtomicBoolean()
+    private static final Map<Integer, PortalUI> portalUIMap = new ConcurrentHashMap<>()
+    private static final AtomicInteger portalIdIndex = new AtomicInteger()
     private static File uiDirectory
     private static Vertx vertx
     private static BrowserView view
+    private final int portalId
+    private boolean externalPortal
+
+    void close() {
+        view.browser.dispose()
+    }
+
+    static int registerPortalId() {
+        int portalId = portalIdIndex.incrementAndGet()
+        portalUIMap.put(portalId, new PortalUI())
+        return portalId
+    }
+
+//    static List<PortalUI> getNonExternalPortals() {
+//        return portalUIMap.values().findAll { it.externalPortal }
+//    }
+
+    static PortalUI getPortal(int portalId) {
+        return portalUIMap.get(portalId)
+    }
 
     @NotNull
     static JComponent getPortalUI() {
@@ -39,7 +63,11 @@ class PortalUI {
             view = new BrowserView()
             view.setPreferredSize(new Dimension(775, 250))
             view.browser.setSize(775, 250)
-            view.browser.loadURL(createScene())
+
+            if (uiDirectory == null) {
+                createScene()
+            }
+            view.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/overview.html")
 
             vertx.eventBus().publish(PORTAL_READY, true)
         }
@@ -71,10 +99,11 @@ class PortalUI {
 
     static void preloadPortalUI(Vertx vertx) {
         this.vertx = vertx
-        getPortalUI()
+        //createScene()
+       // getPortalUI()
     }
 
-    private static String createScene() {
+    private static void createScene() {
         uiDirectory = File.createTempDir()
         uiDirectory.deleteOnExit()
 
@@ -92,7 +121,7 @@ class PortalUI {
             }
         }
         Files.write(bridgeFile, fileContent, StandardCharsets.UTF_8)
-        return "file:///" + uiDirectory.absolutePath + "/tabs/overview.html"
+        //return
     }
 
     static void extract(URL dirURL, String sourceDirectory, String writeDirectory) throws IOException {
