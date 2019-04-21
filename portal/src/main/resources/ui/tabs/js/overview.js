@@ -101,6 +101,8 @@ overviewChart.setOption(overviewChartOptions);
 
 var currentTimeFrame = "LAST_15_MINUTES";
 eb.onopen = function () {
+    console.log("Source++ bridge connected");
+
     var clearOverviewHandler = 'ClearOverview';
     var displayCardHandler = 'DisplayCard';
     var updateChartHandler = 'UpdateChart';

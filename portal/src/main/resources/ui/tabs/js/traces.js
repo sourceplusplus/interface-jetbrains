@@ -21,6 +21,8 @@ if (timeFrame) {
 
 var viewingInnerTrace = false;
 eb.onopen = function () {
+    console.log("Source++ bridge connected");
+
     //remind plugin of the current metric time frame
     var timeFrame = localStorage.getItem('spp.metric_time_frame');
     if (timeFrame) {
