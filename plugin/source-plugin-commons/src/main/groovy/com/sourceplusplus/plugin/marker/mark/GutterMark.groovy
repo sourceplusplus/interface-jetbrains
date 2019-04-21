@@ -1,7 +1,7 @@
 package com.sourceplusplus.plugin.marker.mark
 
 import com.sourceplusplus.plugin.marker.SourceFileMarker
-import com.sourceplusplus.portal.display.PortalUI
+import com.sourceplusplus.portal.SourcePortal
 import org.jetbrains.annotations.NotNull
 
 import java.util.concurrent.atomic.AtomicBoolean
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 abstract class GutterMark extends SourceMark {
 
     final AtomicBoolean showingPortalWindow = new AtomicBoolean()
-    final int portalId = PortalUI.registerPortalId()
+    final int portalId = SourcePortal.registerPortalId()
 
     GutterMark(@NotNull SourceFileMarker sourceFileMarker) {
         super(sourceFileMarker)

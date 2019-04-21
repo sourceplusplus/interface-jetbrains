@@ -9,11 +9,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.*
+import java.awt.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -29,8 +28,6 @@ class PortalUI {
     public static final String PORTAL_READY = "PortalReady"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private static final Map<Integer, PortalUI> portalUIMap = new ConcurrentHashMap<>()
-    private static final AtomicInteger portalIdIndex = new AtomicInteger()
     private static File uiDirectory
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()
@@ -38,30 +35,23 @@ class PortalUI {
     private final int portalId
     private boolean externalPortal
 
+    PortalUI(int portalId) {
+        this.portalId = portalId
+    }
+
     void close() {
         view.browser.dispose()
     }
 
-    static int registerPortalId() {
-        int portalId = portalIdIndex.incrementAndGet()
-        portalUIMap.put(portalId, new PortalUI())
-        return portalId
-    }
-
-    static List<PortalUI> getNonExternalPortals() {
-        return portalUIMap.values().findAll { it.externalPortal }
-    }
-
-    static PortalUI getPortal(int portalId) {
-        return portalUIMap.get(portalId)
-    }
-
     @NotNull
-    JComponent getPortalUI() {
+    JComponent getUIComponent() {
         if (!portalReady.getAndSet(true)) {
             view = new BrowserView()
-            view.setPreferredSize(new java.awt.Dimension(775, 250))
+            view.setPreferredSize(new Dimension(775, 250))
             view.browser.setSize(775, 250)
+            view.browser.addConsoleListener({
+                log.info("[PORTAL_CONSOLE] - " + it)
+            })
 
             if (uiDirectory == null) {
                 createScene()

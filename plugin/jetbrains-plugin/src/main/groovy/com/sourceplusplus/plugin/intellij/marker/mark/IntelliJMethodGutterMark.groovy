@@ -22,8 +22,8 @@ import com.sourceplusplus.plugin.intellij.marker.mark.gutter.render.SourceArtifa
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import com.sourceplusplus.plugin.marker.mark.GutterMark
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
+import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
-import com.sourceplusplus.portal.display.PortalUI
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
@@ -41,7 +41,6 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.List
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * todo: description
@@ -98,7 +97,7 @@ class IntelliJMethodGutterMark extends GutterMark {
 
                 JBPopupFactory popupFactory = JBPopupFactory.getInstance()
                 BalloonImpl balloon = popupFactory
-                        .createBalloonBuilder(PortalUI.getPortal(portalId).portalUI)
+                        .createBalloonBuilder(SourcePortal.getPortal(portalId).portalUI.UIComponent)
                         .setBorderInsets(JBUI.emptyInsets())
                         .setDialogMode(true)
                         .setFillColor(JBColor.background())
