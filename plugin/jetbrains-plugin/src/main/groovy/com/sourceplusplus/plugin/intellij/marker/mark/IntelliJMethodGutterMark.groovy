@@ -62,7 +62,6 @@ class IntelliJMethodGutterMark extends GutterMark {
     private final SourceArtifact sourceMethod
     private UMethod psiMethod
     private final SourceArtifactGutterMarkRenderer gutterMarkRenderer
-    private static AtomicInteger portalId = new AtomicInteger(0)
 
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, SourceArtifact sourceMethod, UMethod psiMethod) {
         super(sourceFileMarker)
@@ -90,12 +89,12 @@ class IntelliJMethodGutterMark extends GutterMark {
             return
         }
 
+        final int portalId = portalId
         vertx.eventBus().send(PortalViewTracker.UPDATE_PORTAL_ARTIFACT, getArtifactQualifiedName())
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             void run() {
                 closePortalIfOpen()
-                def portalId = portalId.incrementAndGet()
 
                 JBPopupFactory popupFactory = JBPopupFactory.getInstance()
                 BalloonImpl balloon = popupFactory
@@ -244,23 +243,23 @@ class IntelliJMethodGutterMark extends GutterMark {
     private class PortalPopupListener implements JBPopupListener {
 
         private final Vertx vertx
-        private final long portalId
+        private final int portalId
 
-        PortalPopupListener(Vertx vertx, long portalId) {
+        PortalPopupListener(Vertx vertx, int portalId) {
             this.vertx = Objects.requireNonNull(vertx)
             this.portalId = portalId
         }
 
         @Override
         void beforeShown(LightweightWindowEvent event1) {
-            if (IntelliJMethodGutterMark.portalId.get() == portalId) {
+            if (IntelliJMethodGutterMark.this.portalId == portalId) {
                 vertx.eventBus().publish(PortalViewTracker.OPENED_PORTAL, IntelliJMethodGutterMark.this.sourceMethod)
             }
         }
 
         @Override
         void onClosed(LightweightWindowEvent event1) {
-            if (IntelliJMethodGutterMark.portalId.get() == portalId) {
+            if (IntelliJMethodGutterMark.this.portalId == portalId) {
                 vertx.eventBus().publish(PortalViewTracker.CLOSED_PORTAL, IntelliJMethodGutterMark.this.sourceMethod)
                 IntelliJMethodGutterMark.this.showingPortalWindow.set(false)
                 currentShowingBalloon = null
@@ -270,15 +269,15 @@ class IntelliJMethodGutterMark extends GutterMark {
 
     private class PortalVisibleAreaListener implements VisibleAreaListener {
 
-        private final long portalId
+        private final int portalId
 
-        PortalVisibleAreaListener(long portalId) {
+        PortalVisibleAreaListener(int portalId) {
             this.portalId = portalId
         }
 
         @Override
         void visibleAreaChanged(VisibleAreaEvent e) {
-            if (currentShowingBalloon != null && IntelliJMethodGutterMark.portalId.get() == portalId) {
+            if (currentShowingBalloon != null && IntelliJMethodGutterMark.this.portalId == portalId) {
                 currentShowingBalloon.hide()
                 currentShowingBalloon = null
             }
@@ -287,9 +286,9 @@ class IntelliJMethodGutterMark extends GutterMark {
 
     private class PortalMouseMotionListener implements MouseMotionListener {
 
-        private final long portalId
+        private final int portalId
 
-        PortalMouseMotionListener(long portalId) {
+        PortalMouseMotionListener(int portalId) {
             this.portalId = portalId
         }
 
@@ -300,7 +299,7 @@ class IntelliJMethodGutterMark extends GutterMark {
         @Override
         void mouseMoved(MouseEvent e2) {
             //13 pixels on x coord puts mouse past gutter
-            if (currentShowingBalloon != null && e2.point.x > 13 && IntelliJMethodGutterMark.portalId.get() == portalId) {
+            if (currentShowingBalloon != null && e2.point.x > 13 && IntelliJMethodGutterMark.this.portalId == portalId) {
                 currentShowingBalloon.hide()
                 currentShowingBalloon = null
             }
