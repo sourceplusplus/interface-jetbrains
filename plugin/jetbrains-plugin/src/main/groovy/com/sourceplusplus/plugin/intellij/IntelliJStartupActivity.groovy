@@ -290,7 +290,8 @@ class IntelliJStartupActivity implements StartupActivity {
             it.qualifiedName
         }.toArray(new String[0])[0] //todo: better (this probably doesn't work with inner classes)
 
-        def sourceFile = new PluginSourceFile(new File(psiFile.virtualFile.toString()), className)
+        def sourceFile = new PluginSourceFile(new File(psiFile.virtualFile.toString()),
+                SourcePluginConfig.current.appUuid, className)
         def fileMarker = new IntelliJSourceFileMarker(psiFile, sourceFile)
         psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, fileMarker)
 

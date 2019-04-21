@@ -28,6 +28,7 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
@@ -89,7 +90,10 @@ class IntelliJMethodGutterMark extends GutterMark {
         }
 
         final int portalId = portalId
-        vertx.eventBus().send(PortalViewTracker.UPDATE_PORTAL_ARTIFACT, getArtifactQualifiedName())
+        vertx.eventBus().send(PortalViewTracker.UPDATE_PORTAL_ARTIFACT,
+                new JsonObject().put("portal_id", portalId)
+                        .put("artifact_qualified_name", getArtifactQualifiedName())
+        )
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             void run() {
@@ -252,14 +256,20 @@ class IntelliJMethodGutterMark extends GutterMark {
         @Override
         void beforeShown(LightweightWindowEvent event1) {
             if (IntelliJMethodGutterMark.this.portalId == portalId) {
-                vertx.eventBus().publish(PortalViewTracker.OPENED_PORTAL, IntelliJMethodGutterMark.this.sourceMethod)
+                vertx.eventBus().publish(PortalViewTracker.OPENED_PORTAL,
+                        new JsonObject().put("portal_id", portalId).put("artifact_qualified_name",
+                                IntelliJMethodGutterMark.this.sourceMethod.artifactQualifiedName())
+                )
             }
         }
 
         @Override
         void onClosed(LightweightWindowEvent event1) {
             if (IntelliJMethodGutterMark.this.portalId == portalId) {
-                vertx.eventBus().publish(PortalViewTracker.CLOSED_PORTAL, IntelliJMethodGutterMark.this.sourceMethod)
+                vertx.eventBus().publish(PortalViewTracker.CLOSED_PORTAL,
+                        new JsonObject().put("portal_id", portalId).put("artifact_qualified_name",
+                                IntelliJMethodGutterMark.this.sourceMethod.artifactQualifiedName())
+                )
                 IntelliJMethodGutterMark.this.showingPortalWindow.set(false)
                 currentShowingBalloon = null
             }

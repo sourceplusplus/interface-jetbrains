@@ -2,6 +2,7 @@ package com.sourceplusplus.portal.coordinate.track
 
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.artifact.SourceArtifact
+import com.sourceplusplus.portal.SourcePortal
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
 import org.slf4j.Logger
@@ -28,9 +29,6 @@ class PortalViewTracker extends AbstractVerticle {
     public static final String UPDATED_METRIC_TIME_FRAME = "UpdatedMetricTimeFrame"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    public static String viewingPortalArtifact //todo: better
-    public static QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
-    public static String viewingTab //todo: impl (and then better)
 
     @Override
     void start() throws Exception {
@@ -57,22 +55,35 @@ class PortalViewTracker extends AbstractVerticle {
         })
 
         vertx.eventBus().consumer(UPDATE_PORTAL_ARTIFACT, {
-            if (((String) it.body()) != viewingPortalArtifact) {
-                viewingPortalArtifact = (String) it.body()
-                vertx.eventBus().publish(CHANGED_PORTAL_ARTIFACT, viewingPortalArtifact)
+            def request = JsonObject.mapFrom(it.body())
+            def portalId = request.getInteger("portal_id")
+            def artifactQualifiedName = request.getString("artifact_qualified_name")
+
+            def portal = SourcePortal.getPortal(portalId)
+            if (artifactQualifiedName != portal.portalUI.viewingPortalArtifact) {
+                portal.portalUI.viewingPortalArtifact = artifactQualifiedName
+                vertx.eventBus().publish(CHANGED_PORTAL_ARTIFACT,
+                        new JsonObject().put("portal_id", portalId)
+                                .put("artifact_qualified_name", artifactQualifiedName)
+                )
             }
         })
         vertx.eventBus().consumer("SetMetricTimeFrame", {
             def message = JsonObject.mapFrom(it.body())
-            def metricTimeFrame = QueryTimeFrame.valueOf(message.getString("value").toUpperCase())
-            if (metricTimeFrame != currentMetricTimeFrame) {
-                log.debug("Metric time frame updated to: " + (currentMetricTimeFrame = metricTimeFrame))
-                vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME, currentMetricTimeFrame.toString())
+            def portal = SourcePortal.getPortal(message.getInteger("portal_id"))
+            def metricTimeFrame = QueryTimeFrame.valueOf(message.getString("metric_time_frame").toUpperCase())
+
+            if (metricTimeFrame != portal.portalUI.currentMetricTimeFrame) {
+                log.debug("Metric time frame updated to: " + (portal.portalUI.currentMetricTimeFrame = metricTimeFrame))
+                vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME,
+                        new JsonObject().put("portal_id", portal.portalId)
+                                .put("metric_time_frame", portal.portalUI.currentMetricTimeFrame.toString())
+                )
             }
         })
 
-        log.debug("Initial time frame set to: " + currentMetricTimeFrame)
-        vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME, currentMetricTimeFrame.toString())
+        //log.debug("Initial time frame set to: " + currentMetricTimeFrame)
+        //vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME, currentMetricTimeFrame.toString())
         log.info("{} started", getClass().getSimpleName())
     }
 }

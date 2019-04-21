@@ -16,10 +16,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 abstract class GutterMark extends SourceMark {
 
     final AtomicBoolean showingPortalWindow = new AtomicBoolean()
-    final int portalId = SourcePortal.registerPortalId()
+    final int portalId
 
     GutterMark(@NotNull SourceFileMarker sourceFileMarker) {
         super(sourceFileMarker)
+        this.portalId = SourcePortal.registerPortalId(sourceFileMarker.sourceFile.appUuid)
     }
 
     int getPortalId() {

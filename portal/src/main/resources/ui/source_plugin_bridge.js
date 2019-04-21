@@ -1,21 +1,16 @@
 var eb = new EventBus('http://localhost:7529/eventbus');
 eb.enableReconnect(true);
 
-var getPluginAvailable = findGetParameter("plugin_available");
+var getPortalId = findGetParameter("portal_id");
 var getAppUuid = findGetParameter("app_uuid");
-var getSubscribedArtifactQualifiedName = findGetParameter("subscribed_artifact_qualified_name");
-var pluginAvailable = (getPluginAvailable) ? getPluginAvailable == 'true' : true;
+var portalId = (getPortalId) ? parseInt(getPortalId) : 1;
 var appUuid = (getAppUuid) ? getAppUuid : null;
-var subscribedArtifactQualifiedName = (getSubscribedArtifactQualifiedName) ? getSubscribedArtifactQualifiedName : null;
 var traceOrderType = findGetParameter("order_type");
 if (traceOrderType) {
     traceOrderType = traceOrderType.toUpperCase();
 }
 
-var mainGetQuery = '?plugin_available=' + getPluginAvailable + '&app_uuid=' + getAppUuid + '&subscribed_artifact_qualified_name=' + getSubscribedArtifactQualifiedName;
-if (!getPluginAvailable) {
-    mainGetQuery = "?1=1";
-}
+var mainGetQuery = '?portal_id=' + portalId + '&app_uuid=' + appUuid;
 
 function findGetParameter(parameterName) {
     var result = null,

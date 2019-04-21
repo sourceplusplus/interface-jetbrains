@@ -14,6 +14,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.MetricType
+import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
@@ -67,12 +68,16 @@ class OverviewTab extends AbstractVerticle {
         //refresh with stats from cache (if avail)
         vertx.eventBus().consumer(OVERVIEW_TAB_OPENED, {
             log.info("Overview tab opened")
+
             if (pluginAvailable) {
-                if (PortalViewTracker.viewingPortalArtifact) {
-                    def artifactMetricResult = metricResultCache.get(PortalViewTracker.viewingPortalArtifact
-                            + PortalViewTracker.currentMetricTimeFrame)
+                def portalId = (it.body() as JsonObject).getInteger("portal_id")
+                def portal = SourcePortal.getPortal(portalId)
+
+                if (portal.portalUI.viewingPortalArtifact) {
+                    def artifactMetricResult = metricResultCache.get(portal.portalUI.viewingPortalArtifact
+                            + portal.portalUI.currentMetricTimeFrame)
                     if (artifactMetricResult != null) {
-                        log.info("Updating overview stats from cache for artifact: " + PortalViewTracker.viewingPortalArtifact)
+                        log.info("Updating overview stats from cache for artifact: " + portal.portalUI.viewingPortalArtifact)
                         updateStats(artifactMetricResult)
                     }
                 }
@@ -96,53 +101,50 @@ class OverviewTab extends AbstractVerticle {
             def artifactMetricResult = it.body() as ArtifactMetricResult
             metricResultCache.put(artifactMetricResult.artifactQualifiedName()
                     + artifactMetricResult.timeFrame(), artifactMetricResult)
-
-            if (pluginAvailable) {
-                if (artifactMetricResult.timeFrame() != PortalViewTracker.currentMetricTimeFrame) {
-                    return
-                } else if (artifactMetricResult.artifactQualifiedName() != PortalViewTracker.viewingPortalArtifact) {
-                    return
-                }
-            }
             updateStats(artifactMetricResult)
         })
 
         //refresh with stats from cache (if avail) on portal opened
         vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
-            def artifactMetricResult = metricResultCache.get(PortalViewTracker.viewingPortalArtifact
-                    + PortalViewTracker.currentMetricTimeFrame)
+            def request = JsonObject.mapFrom(it.body())
+            def portal = SourcePortal.getPortal(request.getInteger("portal_id"))
+
+            def artifactMetricResult = metricResultCache.get(portal.portalUI.viewingPortalArtifact
+                    + portal.portalUI.currentMetricTimeFrame)
             if (artifactMetricResult != null) {
-                log.info("Updating overview stats from cache for artifact: " + PortalViewTracker.viewingPortalArtifact)
+                log.info("Updating overview stats from cache for artifact: " + portal.portalUI.viewingPortalArtifact)
                 updateStats(artifactMetricResult)
             } else {
-                vertx.eventBus().publish("ClearOverview", new JsonObject())
+                vertx.eventBus().publish(portal.appUuid + "-" + portal.portalId + "-ClearOverview", new JsonObject())
             }
         })
 
         vertx.eventBus().consumer(PortalViewTracker.UPDATED_METRIC_TIME_FRAME, {
+            def request = JsonObject.mapFrom(it.body())
+
             if (pluginAvailable) {
-                if (PortalViewTracker.viewingPortalArtifact == null) {
+                def portal = SourcePortal.getPortal(request.getInteger("portal_id"))
+                if (portal.portalUI.viewingPortalArtifact == null) {
                     return
                 }
 
                 //refresh with stats from cache (if avail)
-                def artifactMetricResult = metricResultCache.get(PortalViewTracker.viewingPortalArtifact
-                        + PortalViewTracker.currentMetricTimeFrame)
+                def artifactMetricResult = metricResultCache.get(portal.portalUI.viewingPortalArtifact
+                        + portal.portalUI.currentMetricTimeFrame)
                 if (artifactMetricResult != null) {
-                    log.info("Updating overview stats from cache for artifact: " + PortalViewTracker.viewingPortalArtifact)
+                    log.info("Updating overview stats from cache for artifact: " + portal.portalUI.viewingPortalArtifact)
                     updateStats(artifactMetricResult)
                 }
 
                 //subscribe (re-subscribe) to get latest stats
-                def timeFrame = QueryTimeFrame.valueOf(it.body() as String)
-                def request = ArtifactMetricSubscribeRequest.builder()
+                def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
                         .appUuid(SourcePortalConfig.current.appUuid)
-                        .artifactQualifiedName(PortalViewTracker.viewingPortalArtifact)
-                        .timeFrame(timeFrame)
+                        .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
+                        .timeFrame(portal.portalUI.currentMetricTimeFrame)
                         .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
-                coreClient.subscribeToArtifact(request, {
+                coreClient.subscribeToArtifact(subscribeRequest, {
                     if (it.succeeded()) {
-                        log.info("Successfully subscribed to metrics with request: " + request)
+                        log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
                     } else {
                         log.error("Failed to subscribe to artifact metrics", it.cause())
                     }
@@ -155,14 +157,14 @@ class OverviewTab extends AbstractVerticle {
                 for (int i = 0; i < subscriptions.size(); i++) {
                     def sub = subscriptions.getJsonObject(i)
                     QueryTimeFrame.values().each {
-                        def request = ArtifactMetricSubscribeRequest.builder()
+                        def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
                                 .appUuid(sub.getString("app_uuid"))
                                 .artifactQualifiedName(sub.getString("artifact_qualified_name"))
                                 .timeFrame(it)
                                 .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
-                        coreClient.subscribeToArtifact(request, {
+                        coreClient.subscribeToArtifact(subscribeRequest, {
                             if (it.succeeded()) {
-                                log.info("Successfully subscribed to metrics with request: " + request)
+                                log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
                             } else {
                                 log.error("Failed to subscribe to artifact metrics", it.cause())
                             }
@@ -190,8 +192,6 @@ class OverviewTab extends AbstractVerticle {
     }
 
     private void updateSplineGraph(ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
-        def appUuid = metricResult.appUuid()
-        def artifactQualifiedName = metricResult.artifactQualifiedName()
         def times = new ArrayList<Instant>()
         def current = metricResult.start()
         times.add(current)
@@ -230,10 +230,11 @@ class OverviewTab extends AbstractVerticle {
                 .timeFrame(metricResult.timeFrame())
                 .addSeriesData(seriesDataBuilder.build())
                 .build()
-        if (pluginAvailable) {
-            vertx.eventBus().publish("UpdateChart", new JsonObject(Json.encode(splintChart)))
-        } else {
-            vertx.eventBus().publish("$appUuid-$artifactQualifiedName-UpdateChart",
+
+        SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
+            def portalId = it.portalId
+            def appUuid = it.appUuid
+            vertx.eventBus().publish("$appUuid-$portalId-UpdateChart",
                     new JsonObject(Json.encode(splintChart)))
         }
     }
@@ -264,19 +265,15 @@ class OverviewTab extends AbstractVerticle {
                 return
         }
 
-        if (pluginAvailable) {
-            vertx.eventBus().publish("DisplayStats", new JsonObject(Json.encode(formattedStats.build())))
-        } else {
-            def appUuid = metricResult.appUuid()
-            def artifactQualifiedName = metricResult.artifactQualifiedName()
-            vertx.eventBus().publish("$appUuid-$artifactQualifiedName-DisplayStats",
+        SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
+            def appUuid = it.appUuid
+            def portalId = it.portalId
+            vertx.eventBus().publish("$appUuid-$portalId-DisplayStats",
                     new JsonObject(Json.encode(formattedStats.build())))
         }
     }
 
     private void updateCard(ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
-        def appUuid = metricResult.appUuid()
-        def artifactQualifiedName = metricResult.artifactQualifiedName()
         def histogram = new Histogram(new UniformReservoir(artifactMetrics.values().size()))
         def metricArr = new ArrayList<Integer>()
         if (artifactMetrics.values().size() == 60) {
@@ -313,10 +310,10 @@ class OverviewTab extends AbstractVerticle {
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            if (pluginAvailable) {
-                vertx.eventBus().publish("DisplayCard", new JsonObject(Json.encode(barTrendCard)))
-            } else {
-                vertx.eventBus().publish("$appUuid-$artifactQualifiedName-DisplayCard",
+            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
+                def appUuid = it.appUuid
+                def portalId = it.portalId
+                vertx.eventBus().publish("$appUuid-$portalId-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
         } else if (artifactMetrics.metricType() == MetricType.ResponseTime_Average) {
@@ -326,10 +323,10 @@ class OverviewTab extends AbstractVerticle {
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            if (pluginAvailable) {
-                vertx.eventBus().publish("DisplayCard", new JsonObject(Json.encode(barTrendCard)))
-            } else {
-                vertx.eventBus().publish("$appUuid-$artifactQualifiedName-DisplayCard",
+            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
+                def appUuid = it.appUuid
+                def portalId = it.portalId
+                vertx.eventBus().publish("$appUuid-$portalId-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
         } else if (artifactMetrics.metricType() == MetricType.ServiceLevelAgreement_Average) {
@@ -339,10 +336,10 @@ class OverviewTab extends AbstractVerticle {
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            if (pluginAvailable) {
-                vertx.eventBus().publish("DisplayCard", new JsonObject(Json.encode(barTrendCard)))
-            } else {
-                vertx.eventBus().publish("$appUuid-$artifactQualifiedName-DisplayCard",
+            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
+                def appUuid = it.appUuid
+                def portalId = it.portalId
+                vertx.eventBus().publish("$appUuid-$portalId-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
         } else {

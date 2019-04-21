@@ -1,6 +1,10 @@
 package com.sourceplusplus.portal.display
 
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
+import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.portal.display.tabs.representation.OverviewTabRepresentation
+import com.sourceplusplus.portal.display.tabs.representation.TracesTabRepresentation
 import com.teamdev.jxbrowser.chromium.swing.BrowserView
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
@@ -31,12 +35,29 @@ class PortalUI {
     private static File uiDirectory
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()
-    private BrowserView view
     private final int portalId
+    private final BrowserView view
+    private final OverviewTabRepresentation overviewTabRepresentation
+    private final TracesTabRepresentation tracesTabRepresentation
     private boolean externalPortal
+
+    public String viewingPortalArtifact //todo: better
+    public QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
+    public String viewingTab //todo: impl (and then better)
 
     PortalUI(int portalId) {
         this.portalId = portalId
+        this.view = new BrowserView()
+        this.overviewTabRepresentation = new OverviewTabRepresentation()
+        this.tracesTabRepresentation = new TracesTabRepresentation()
+    }
+
+    OverviewTabRepresentation getOverviewTabRepresentation() {
+        return overviewTabRepresentation
+    }
+
+    TracesTabRepresentation getTracesTabRepresentation() {
+        return tracesTabRepresentation
     }
 
     void close() {
@@ -46,7 +67,6 @@ class PortalUI {
     @NotNull
     JComponent getUIComponent() {
         if (!portalReady.getAndSet(true)) {
-            view = new BrowserView()
             view.setPreferredSize(new Dimension(775, 250))
             view.browser.setSize(775, 250)
             view.browser.addConsoleListener({
@@ -56,7 +76,8 @@ class PortalUI {
             if (uiDirectory == null) {
                 createScene()
             }
-            view.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/overview.html")
+            view.browser.loadURL("file:///" + uiDirectory.absolutePath
+                    + "/tabs/overview.html?portal_id=$portalId&app_uuid=" + SourcePortal.getPortal(portalId).appUuid)
 
             vertx.eventBus().publish(PORTAL_READY, portalId)
         }

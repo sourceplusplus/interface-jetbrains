@@ -103,17 +103,12 @@ var currentTimeFrame = "LAST_15_MINUTES";
 eb.onopen = function () {
     console.log("Source++ bridge connected");
 
-    var clearOverviewHandler = 'ClearOverview';
-    var displayCardHandler = 'DisplayCard';
-    var updateChartHandler = 'UpdateChart';
-    var displayStatsHandler = 'DisplayStats';
-    if (!pluginAvailable) {
-        clearOverviewHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + clearOverviewHandler;
-        displayCardHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + displayCardHandler;
-        updateChartHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + updateChartHandler;
-        displayStatsHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + displayStatsHandler;
-    }
+    var clearOverviewHandler = appUuid + "-" + portalId + '-ClearOverview';
+    var displayCardHandler = appUuid + "-" + portalId + '-DisplayCard';
+    var updateChartHandler = appUuid + "-" + portalId + '-UpdateChart';
+    var displayStatsHandler = appUuid + "-" + portalId + '-DisplayStats';
     eb.registerHandler(clearOverviewHandler, function (error, message) {
+        console.log("Clearing overview");
         $('#quick_stats_min').text("n/a");
         $('#quick_stats_max').text("n/a");
         $('#quick_stats_p99').text("n/a");
@@ -217,7 +212,7 @@ eb.onopen = function () {
         eb.send('PortalLogger', 'Set initial time frame to: ' + timeFrame);
     }
 
-    eb.send('OverviewTabOpened', {});
+    eb.send('OverviewTabOpened', {'portal_id': portalId});
 };
 
 $('#dropdown').dropdown();
@@ -242,7 +237,7 @@ $('#frequency_tab').click(function () {
 function updateTime(interval) {
     currentTimeFrame = interval.toUpperCase();
     localStorage.setItem('spp.metric_time_frame', interval);
-    eb.send('SetMetricTimeFrame', {value: interval});
+    eb.send('SetMetricTimeFrame', {'portal_id': portalId, 'metric_time_frame': interval});
 
     if (interval === 'last_5_minutes') {
         $('#current_metric_time_frame').text('LAST 5 MINUTES');

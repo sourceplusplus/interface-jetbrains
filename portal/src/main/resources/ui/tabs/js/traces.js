@@ -29,10 +29,7 @@ eb.onopen = function () {
         updateTime(timeFrame);
     }
 
-    var displayTracesHandler = 'DisplayTraces';
-    if (!pluginAvailable) {
-        displayTracesHandler = appUuid + "-" + subscribedArtifactQualifiedName + "-" + displayTracesHandler;
-    }
+    var displayTracesHandler = appUuid + "-" + portalId + '-DisplayTraces';
     eb.registerHandler(displayTracesHandler, function (error, message) {
         var traceResult = message.body;
         if (traceResult.order_type != traceOrderType) {
@@ -124,19 +121,20 @@ eb.onopen = function () {
         }
     });
 
-    eb.registerHandler('ClearTraceStack', function (error, message) {
+    eb.registerHandler(appUuid + '-' + portalId + '-ClearTraceStack', function (error, message) {
         goBackToLatestTraces(false);
     });
 
-    eb.registerHandler('ClearSpanInfo', function (error, message) {
+    eb.registerHandler(appUuid + '-' + portalId + '-ClearSpanInfo', function (error, message) {
         goBackToTraceStack(false);
     });
 
-    eb.send('TracesTabOpened', {});
+    eb.send('TracesTabOpened', {'portal_id': portalId});
 };
 
 function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, segmentId, spanId) {
     eb.send('ClickedDisplaySpanInfo', {
+        'portal_id': portalId,
         'app_uuid': appUuid, 'artifact_qualified_name': rootArtifactQualifiedName,
         'trace_id': traceId, 'segment_id': segmentId, 'span_id': spanId
     }, function (error, message) {
@@ -217,6 +215,7 @@ function displaySpanInfo(spanInfo) {
 
 function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId) {
     eb.send('ClickedDisplayTraceStack', {
+        'portal_id': portalId,
         'app_uuid': appUuid,
         'artifact_qualified_name': artifactQualifiedName,
         'trace_id': globalTraceId
@@ -292,7 +291,7 @@ function goBackToLatestTraces(userClicked) {
 
     if (userClicked && viewingInnerTrace) {
         viewingInnerTrace = false;
-        eb.send('ClickedGoBackToLatestTraces', {});
+        eb.send('ClickedGoBackToLatestTraces', {'portal_id': portalId});
     }
 }
 
@@ -315,7 +314,7 @@ function goBackToTraceStack(userClicked) {
 
 function updateTime(interval) {
     localStorage.setItem('spp.metric_time_frame', interval);
-    eb.send('SetMetricTimeFrame', {value: interval});
+    eb.send('SetMetricTimeFrame', {'portal_id': portalId, 'metric_time_frame': interval});
 }
 
 function getPrettyDuration(duration) {
