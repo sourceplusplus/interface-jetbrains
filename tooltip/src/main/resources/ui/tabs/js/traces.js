@@ -1,12 +1,10 @@
-if (!pluginAvailable) {
-    $('#overview_link').attr('href', "overview.html" + window.location.search);
-    $('#sidebar_overview_link').attr('href', "overview.html" + window.location.search);
+$('#overview_link').attr('href', "overview.html" + mainGetQuery);
+$('#sidebar_overview_link').attr('href', "overview.html" + mainGetQuery);
 
-    $('#traces_link_latest').attr('href', "traces.html" + window.location.search);
-    $('#traces_link_slowest').attr('href', "traces.html" + window.location.search);
-    $('#sidebar_traces_link_latest').attr('href', "traces.html" + window.location.search);
-    $('#sidebar_traces_link_slowest').attr('href', "traces.html" + window.location.search);
-}
+$('#traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
+$('#traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
+$('#sidebar_traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
+$('#sidebar_traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
 
 var timeFrame = localStorage.getItem('spp.metric_time_frame');
 if (timeFrame) {
@@ -35,6 +33,12 @@ eb.onopen = function () {
     }
     eb.registerHandler(displayTracesHandler, function (error, message) {
         var traceResult = message.body;
+        if (traceResult.order_type != traceOrderType) {
+            // console.log("Ignoring card for time frame: " + card.time_frame
+            //     + " - Current time frame: " + currentTimeFrame);
+            return
+        }
+
         var appUuid = traceResult.app_uuid;
         eb.send('TooltipLogger', 'Displaying traces - Size: ' + traceResult.traces.length);
         // console.log('Displaying traces - Size: ' + traceResult.traces.length);

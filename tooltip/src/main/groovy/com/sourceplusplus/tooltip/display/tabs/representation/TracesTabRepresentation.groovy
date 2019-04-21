@@ -10,11 +10,9 @@ class TracesTabRepresentation {
     int innerLevel = 0
     boolean innerTrace
     String rootArtifactQualifiedName
-    //JsonArray traceStack
     ArtifactTraceResult artifactTraceResult
     JsonArray innerTraceStack
     private final Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
-
 
     void cacheTraceStack(String traceId, JsonArray traceStack) {
         traceStacks.put(traceId, traceStack)

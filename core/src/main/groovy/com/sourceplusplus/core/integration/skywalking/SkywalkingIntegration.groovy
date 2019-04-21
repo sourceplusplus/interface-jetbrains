@@ -41,6 +41,8 @@ class SkywalkingIntegration extends AbstractVerticle {
             "query/skywalking/get_endpoint_metrics.graphql"), Charsets.UTF_8)
     private static final String GET_LATEST_TRACES = Resources.toString(Resources.getResource(
             "query/skywalking/get_latest_traces.graphql"), Charsets.UTF_8)
+    private static final String GET_SLOWEST_TRACES = Resources.toString(Resources.getResource(
+            "query/skywalking/get_slowest_traces.graphql"), Charsets.UTF_8)
     private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
     private final ArtifactAPI artifactAPI
@@ -237,12 +239,21 @@ class SkywalkingIntegration extends AbstractVerticle {
     void getSkywalkingTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
         log.info("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
         def graphqlQuery = new JsonObject()
-        graphqlQuery.put("query", GET_LATEST_TRACES
-                .replace('$endpointId', traceQuery.endpointId())
-                .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
-                .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
-                .replace('$queryDurationStep', traceQuery.durationStep())
-        )
+        if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
+            graphqlQuery.put("query", GET_LATEST_TRACES
+                    .replace('$endpointId', traceQuery.endpointId())
+                    .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
+                    .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
+                    .replace('$queryDurationStep', traceQuery.durationStep())
+            )
+        } else {
+            graphqlQuery.put("query", GET_SLOWEST_TRACES
+                    .replace('$endpointId', traceQuery.endpointId())
+                    .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
+                    .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
+                    .replace('$queryDurationStep', traceQuery.durationStep())
+            )
+        }
 
         webClient.post(skywalkingOAPPort, skywalkingOAPHost,
                 "/graphql").sendJsonObject(graphqlQuery, {

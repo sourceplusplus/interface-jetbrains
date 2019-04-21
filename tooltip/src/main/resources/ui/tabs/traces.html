@@ -151,6 +151,10 @@
 <script src='../semantic.min.js'></script>
 <script>
     $(document).ready(function () {
+        $('.ui.dropdown').dropdown();
+        $('#latest_traces_header').dropdown({on: null});
+        $('#trace_stack_header').dropdown({on: 'hover'});
+
         $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
     });
     $(".openbtn").on("click", function () {
@@ -168,9 +172,6 @@
     $('.ui.accordion').accordion({
         selector: {}
     });
-
-    $('#latest_traces_header').dropdown({on: 'hover'});
-    $('#trace_stack_header').dropdown({on: 'hover'});
 </script>
 <!--<script src="../themes/default/assets/charts/gray.js"></script>-->
 <script src="../moment.min.js"></script>

@@ -12,7 +12,6 @@ import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceOrderType
-import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import org.jetbrains.annotations.NotNull
@@ -106,7 +105,7 @@ class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
         def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
                 .appUuid(SourcePluginConfig.current.appUuid)
                 .artifactQualifiedName(artifactQualifiedName)
-                .orderType(TraceOrderType.LATEST_TRACES)
+                .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                 .build()
         sourcePlugin.vertx.eventBus().send(
                 PluginArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, traceSubscribeRequest)

@@ -106,7 +106,7 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
                     def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
                             .appUuid(SourcePluginConfig.current.appUuid)
                             .artifactQualifiedName(it.artifactQualifiedName)
-                            .orderType(TraceOrderType.LATEST_TRACES)
+                            .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                             .build()
                     sourcePlugin.vertx.eventBus().send(
                             PluginArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, traceSubscribeRequest)

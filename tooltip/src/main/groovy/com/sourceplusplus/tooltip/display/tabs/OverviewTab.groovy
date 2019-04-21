@@ -99,7 +99,7 @@ class OverviewTab extends AbstractVerticle {
 
             if (pluginAvailable) {
                 if (artifactMetricResult.timeFrame() != TooltipViewTracker.currentMetricTimeFrame) {
-                    return //todo: unsub?
+                    return
                 } else if (artifactMetricResult.artifactQualifiedName() != TooltipViewTracker.viewingTooltipArtifact) {
                     return
                 }

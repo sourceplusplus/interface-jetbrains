@@ -28,7 +28,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
         }).test("subscribe_to_artifact_traces", { test ->
             def async = test.async()
             def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                    .orderType(TraceOrderType.LATEST_TRACES)
+                    .addOrderTypes(TraceOrderType.LATEST_TRACES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(traceSubscribeRequest, {
@@ -52,7 +52,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
             })
 
             def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                    .orderType(TraceOrderType.LATEST_TRACES)
+                    .addOrderTypes(TraceOrderType.LATEST_TRACES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(traceSubscribeRequest, {
@@ -91,7 +91,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
             })
 
             def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                    .orderType(TraceOrderType.LATEST_TRACES)
+                    .addOrderTypes(TraceOrderType.LATEST_TRACES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(traceSubscribeRequest, {

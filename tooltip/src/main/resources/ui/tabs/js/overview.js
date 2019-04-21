@@ -1,9 +1,7 @@
-if (!pluginAvailable) {
-    $('#traces_link_latest').attr('href', "traces.html" + window.location.search);
-    $('#traces_link_slowest').attr('href', "traces.html" + window.location.search);
-    $('#sidebar_traces_link_latest').attr('href', "traces.html" + window.location.search);
-    $('#sidebar_traces_link_slowest').attr('href', "traces.html" + window.location.search);
-}
+$('#traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
+$('#traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
+$('#sidebar_traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
+$('#sidebar_traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
 
 var series0 = {
     name: '99th percentile',

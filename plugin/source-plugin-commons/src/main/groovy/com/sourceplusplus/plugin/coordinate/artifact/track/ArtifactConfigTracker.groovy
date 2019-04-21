@@ -49,7 +49,7 @@ class ArtifactConfigTracker extends AbstractVerticle {
                 def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
                         .appUuid(sourceArtifact.appUuid())
                         .artifactQualifiedName(sourceArtifact.artifactQualifiedName())
-                        .orderType(TraceOrderType.LATEST_TRACES)
+                        .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                         .build()
                 vertx.eventBus().send(PluginArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, traceSubscribeRequest)
             }

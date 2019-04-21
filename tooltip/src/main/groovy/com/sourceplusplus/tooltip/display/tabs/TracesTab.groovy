@@ -261,11 +261,11 @@ class TracesTab extends AbstractVerticle {
                     return
                 }
 
-                //subscribe (re-subscribe) to get latest traces
+                //subscribe (re-subscribe) to traces
                 def request = ArtifactTraceSubscribeRequest.builder()
                         .appUuid(SourceTooltipConfig.current.appUuid)
                         .artifactQualifiedName(TooltipViewTracker.viewingTooltipArtifact)
-                        .orderType(TraceOrderType.LATEST_TRACES)
+                        .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                         .build()
                 coreClient.subscribeToArtifact(request, {
                     if (it.succeeded()) {
@@ -275,14 +275,14 @@ class TracesTab extends AbstractVerticle {
                     }
                 })
             } else {
-                //subscribe (re-subscribe) to get latest traces
+                //subscribe (re-subscribe) to traces
                 def subscriptions = config().getJsonArray("artifact_subscriptions")
                 for (int i = 0; i < subscriptions.size(); i++) {
                     def sub = subscriptions.getJsonObject(i)
                     def request = ArtifactTraceSubscribeRequest.builder()
                             .appUuid(sub.getString("app_uuid"))
                             .artifactQualifiedName(sub.getString("artifact_qualified_name"))
-                            .orderType(TraceOrderType.LATEST_TRACES)
+                            .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                             .build()
                     coreClient.subscribeToArtifact(request, {
                         if (it.succeeded()) {

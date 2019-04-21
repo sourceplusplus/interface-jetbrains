@@ -62,4 +62,9 @@ public interface AbstractTraceQuery {
 
     @Nullable
     String durationStep();
+
+    @Value.Default
+    default TraceOrderType orderType() {
+        return TraceOrderType.LATEST_TRACES;
+    }
 }

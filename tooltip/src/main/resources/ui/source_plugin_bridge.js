@@ -7,6 +7,15 @@ var getSubscribedArtifactQualifiedName = findGetParameter("subscribed_artifact_q
 var pluginAvailable = (getPluginAvailable) ? getPluginAvailable == 'true' : true;
 var appUuid = (getAppUuid) ? getAppUuid : null;
 var subscribedArtifactQualifiedName = (getSubscribedArtifactQualifiedName) ? getSubscribedArtifactQualifiedName : null;
+var traceOrderType = findGetParameter("order_type");
+if (traceOrderType) {
+    traceOrderType = traceOrderType.toUpperCase();
+}
+
+var mainGetQuery = '?plugin_available=' + getPluginAvailable + '&app_uuid=' + getAppUuid + '&subscribed_artifact_qualified_name=' + getSubscribedArtifactQualifiedName;
+if (!getPluginAvailable) {
+    mainGetQuery = "?1=1";
+}
 
 function findGetParameter(parameterName) {
     var result = null,

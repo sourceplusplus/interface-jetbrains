@@ -46,7 +46,14 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                 def artifactTraceTimeFrames = it.value
 
                 artifactTraceTimeFrames.each {
-                    publishLatestTraces(applicationArtifact, it)
+                    switch (it) {
+                        case TraceOrderType.LATEST_TRACES:
+                            publishLatestTraces(applicationArtifact)
+                            break
+                        case TraceOrderType.SLOWEST_TRACES:
+                            publishSlowestTraces(applicationArtifact)
+                            break
+                    }
                 }
             }
         })
@@ -57,9 +64,20 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                     .appUuid(request.appUuid())
                     .artifactQualifiedName(request.artifactQualifiedName()).build()
             traceSubscriptions.putIfAbsent(appArtifact, Sets.newConcurrentHashSet())
-            traceSubscriptions.get(appArtifact).add(request.orderType())
+            request.orderTypes().each {
+                traceSubscriptions.get(appArtifact).add(it)
+            }
 
-            publishLatestTraces(appArtifact, request.orderType())
+            request.orderTypes().each {
+                switch (it) {
+                    case TraceOrderType.LATEST_TRACES:
+                        publishLatestTraces(appArtifact)
+                        break
+                    case TraceOrderType.SLOWEST_TRACES:
+                        publishSlowestTraces(appArtifact)
+                        break
+                }
+            }
             it.reply(true)
         })
         vertx.eventBus().consumer(UNSUBSCRIBE_FROM_ARTIFACT_TRACES, {
@@ -96,8 +114,8 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
      * @param appArtifact
      * @param timeFrame
      */
-    private void publishLatestTraces(ApplicationArtifact appArtifact, TraceOrderType timeFrame) {
-        def traceQuery = TraceQuery.builder()
+    private void publishLatestTraces(ApplicationArtifact appArtifact) {
+        def traceQuery = TraceQuery.builder().orderType(TraceOrderType.LATEST_TRACES)
                 .appUuid(appArtifact.appUuid())
                 .artifactQualifiedName(appArtifact.artifactQualifiedName())
                 .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
@@ -107,12 +125,12 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {
-                    log.info("No new traces to publish for artifact: " + appArtifact.artifactQualifiedName())
+                    log.info("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
                 } else {
                     def traceResult = ArtifactTraceResult.builder()
                             .appUuid(appArtifact.appUuid())
                             .artifactQualifiedName(appArtifact.artifactQualifiedName())
-                            .timeFrame(timeFrame)
+                            .orderType(traceQuery.orderType())
                             .start(traceQuery.durationStart())
                             .stop(traceQuery.durationStop())
                             .step(traceQuery.durationStep())
@@ -121,7 +139,47 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                             .build()
                     vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address,
                             new JsonObject(Json.encode(traceResult)))
-                    log.debug("Published updated traces for artifact: " + traceResult.artifactQualifiedName())
+                    log.debug("Published latest traces for artifact: " + traceResult.artifactQualifiedName())
+                }
+            } else {
+                it.cause().printStackTrace()
+            }
+        })
+    }
+
+    /**
+     * Finds the slowest 10 traces for the given ApplicationArtifact and publishes to subscribers.
+     * Will look back as far as 30 days.
+     *
+     * @param appArtifact
+     * @param timeFrame
+     */
+    private void publishSlowestTraces(ApplicationArtifact appArtifact) {
+        def traceQuery = TraceQuery.builder().orderType(TraceOrderType.SLOWEST_TRACES)
+                .appUuid(appArtifact.appUuid())
+                .artifactQualifiedName(appArtifact.artifactQualifiedName())
+                .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
+                .durationStop(Instant.now())
+                .durationStep("SECOND").build()
+        traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
+            if (it.succeeded()) {
+                def traceQueryResult = it.result()
+                if (traceQueryResult.traces().isEmpty()) {
+                    log.info("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
+                } else {
+                    def traceResult = ArtifactTraceResult.builder()
+                            .appUuid(appArtifact.appUuid())
+                            .artifactQualifiedName(appArtifact.artifactQualifiedName())
+                            .orderType(traceQuery.orderType())
+                            .start(traceQuery.durationStart())
+                            .stop(traceQuery.durationStop())
+                            .step(traceQuery.durationStep())
+                            .traces(traceQueryResult.traces())
+                            .total(traceQueryResult.total())
+                            .build()
+                    vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address,
+                            new JsonObject(Json.encode(traceResult)))
+                    log.debug("Published slowest traces for artifact: " + traceResult.artifactQualifiedName())
                 }
             } else {
                 it.cause().printStackTrace()

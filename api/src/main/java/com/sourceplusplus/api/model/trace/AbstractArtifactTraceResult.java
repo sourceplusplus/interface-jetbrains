@@ -34,7 +34,7 @@ public interface AbstractArtifactTraceResult extends SourceMessage {
     @Nullable
     String artifactSimpleName();
 
-    TraceOrderType timeFrame();
+    TraceOrderType orderType();
 
     Instant start();
 

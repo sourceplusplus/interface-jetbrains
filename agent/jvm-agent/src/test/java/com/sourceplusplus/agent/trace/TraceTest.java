@@ -23,7 +23,7 @@ public class TraceTest extends ActiveSourceAgentTest {
         usingAppUuid(application.appUuid());
 
         ArtifactTraceSubscribeRequest subscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                .orderType(TraceOrderType.LATEST_TRACES)
+                .addOrderTypes(TraceOrderType.LATEST_TRACES)
                 .appUuid(application.appUuid())
                 .artifactQualifiedName(JavaTestClass.class.getName() + ".staticMethod()").build();
         assertTrue(coreClient.subscribeToArtifact(subscribeRequest));
