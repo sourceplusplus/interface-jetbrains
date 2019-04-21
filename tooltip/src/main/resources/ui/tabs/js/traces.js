@@ -144,12 +144,12 @@ function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, seg
     $('#segment_id_span').css('display', 'unset');
     $('#trace_stack_span').css('display', 'none');
 
-    $('#trace_stack_header').removeClass('active_tab');
-    $('#latest_traces_header').removeClass('active_tab');
+    $('#trace_stack_header').removeClass('active_sub_tab');
+    $('#latest_traces_header').removeClass('active_sub_tab');
     $('#trace_stack_header').addClass('inactive_tab');
     $('#latest_traces_header').addClass('inactive_tab');
 
-    $('#span_info_header').addClass('active_tab');
+    $('#span_info_header').addClass('active_sub_tab');
     $('#span_info_header').removeClass('inactive_tab');
     $('#span_info_header').css('visibility', 'visible');
 }
@@ -224,14 +224,14 @@ function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId)
     $('#trace_stack_table').css('visibility', 'visible');
     $('#traces_span').css('display', 'none');
 
-    $('#latest_traces_header').removeClass('active_tab');
+    $('#latest_traces_header').removeClass('active_sub_tab');
     $('#latest_traces_header').addClass('inactive_tab');
 
-    $('#trace_stack_header').addClass('active_tab');
+    $('#trace_stack_header').addClass('active_sub_tab');
     $('#trace_stack_header').removeClass('inactive_tab');
     $('#trace_stack_header').css('visibility', 'visible');
 
-    $('#span_info_header').removeClass('active_tab');
+    $('#span_info_header').removeClass('active_sub_tab');
     $('#span_info_header').css('visibility', 'hidden');
 }
 
@@ -267,12 +267,8 @@ function displayTraceStack(traceStack) {
 }
 
 function goBackToLatestTraces(userClicked) {
-    if ($('#latest_traces_header').hasClass('active_tab')) {
-        $('#latest_traces_header').dropdown({on: null}).dropdown('toggle');
-    }
-
     $('#span_info_panel').css('display', 'none');
-    $('#latest_traces_header').addClass('active_tab');
+    $('#latest_traces_header').addClass('active_sub_tab');
     $('#latest_traces_header').removeClass('inactive_tab');
     $('#top_trace_table').css('display', '');
     $('#trace_stack_table').css('visibility', 'hidden');
@@ -281,11 +277,11 @@ function goBackToLatestTraces(userClicked) {
     $('#segment_id_span').css('display', 'none');
 
     $('#trace_stack_header').addClass('inactive_tab');
-    $('#trace_stack_header').removeClass('active_tab');
+    $('#trace_stack_header').removeClass('active_sub_tab');
     $('#trace_stack_header').css('visibility', 'hidden');
 
     $('#span_info_header').addClass('inactive_tab');
-    $('#span_info_header').removeClass('active_tab');
+    $('#span_info_header').removeClass('active_sub_tab');
     $('#span_info_header').css('visibility', 'hidden');
 
     if (userClicked && viewingInnerTrace) {
@@ -295,10 +291,6 @@ function goBackToLatestTraces(userClicked) {
 }
 
 function goBackToTraceStack(userClicked) {
-    if (userClicked && $('#trace_stack_header').hasClass('active_tab')) {
-        $('#trace_stack_header').dropdown({on: null}).dropdown('toggle');
-    }
-
     $('#latest_traces_header').removeClass('active');
     $('#span_info_panel').css('display', 'none');
     $('#top_trace_table').css('display', 'none');
@@ -308,7 +300,7 @@ function goBackToTraceStack(userClicked) {
     $('#trace_stack_span').css('display', 'unset');
 
     $('#trace_stack_header').removeClass('inactive_tab');
-    $('#trace_stack_header').addClass('active_tab');
+    $('#trace_stack_header').addClass('active_sub_tab');
     $('#trace_stack_header').css('visibility', 'visible');
 
     $('#span_info_header').removeClass('active');

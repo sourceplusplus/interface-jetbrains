@@ -36,6 +36,10 @@
     background-color: #122329 !important;
 }
 
+.active_sub_tab {
+    color: #e1483b !important;
+}
+
 .inactive_tab {
     color: #506970 !important;
 }

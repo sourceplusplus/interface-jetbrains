@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Traces</title>
+    <title>Traces - Source++</title>
     <link rel='stylesheet' href='../semantic.min.css'>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -38,9 +38,9 @@
     </div>
 </div>
 <div class="pusher">
-    <div class="ui menu borderless marginlefting spp_blue"
+    <div class="ui menu borderless marginlefting background_color"
          style="border-radius: 0 !important; border: 0; -webkit-transition-duration: 0.1s; height: 45px; margin-bottom: 0">
-        <a id="latest_traces_header" onclick="goBackToLatestTraces(true)" class="ui item dropdown active_tab">
+        <a id="latest_traces_header" onclick="goBackToLatestTraces(true)" class="ui item dropdown active_sub_tab">
             <span id="latest_traces_header_text">Latest Traces</span>
             <div id="latest_traces_menu" class="menu">
                 <div class="ui input item">
@@ -74,7 +74,13 @@
         <a id="span_info_header" class="ui item dropdown" style="visibility: hidden">
             <span id="span_info_header_text">Span Info</span>
         </a>
-        <div class="right menu">
+        <div class="right menu" style="height: 45px; line-height: 45px; align-content:center;">
+            <a id="current_page" href="#" target="_blank">
+                <i class="external link icon spp_red_color" style="font-size: 20px; margin-top: -2px"></i>
+            </a>
+            <script>
+                document.getElementById("current_page").href = window.location.href;
+            </script>
         </div>
     </div>
     <div class="wide column marginlefting">
@@ -162,6 +168,9 @@
     $('.ui.accordion').accordion({
         selector: {}
     });
+
+    $('#latest_traces_header').dropdown({on: 'hover'});
+    $('#trace_stack_header').dropdown({on: 'hover'});
 </script>
 <!--<script src="../themes/default/assets/charts/gray.js"></script>-->
 <script src="../moment.min.js"></script>
