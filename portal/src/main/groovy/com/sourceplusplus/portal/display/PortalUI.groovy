@@ -9,7 +9,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.*
-import java.awt.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.concurrent.ConcurrentHashMap
@@ -49,9 +48,9 @@ class PortalUI {
         return portalId
     }
 
-//    static List<PortalUI> getNonExternalPortals() {
-//        return portalUIMap.values().findAll { it.externalPortal }
-//    }
+    static List<PortalUI> getNonExternalPortals() {
+        return portalUIMap.values().findAll { it.externalPortal }
+    }
 
     static PortalUI getPortal(int portalId) {
         return portalUIMap.get(portalId)
@@ -61,7 +60,7 @@ class PortalUI {
     static JComponent getPortalUI() {
         if (!portalReady.getAndSet(true)) {
             view = new BrowserView()
-            view.setPreferredSize(new Dimension(775, 250))
+            view.setPreferredSize(new java.awt.Dimension(775, 250))
             view.browser.setSize(775, 250)
 
             if (uiDirectory == null) {
@@ -99,8 +98,6 @@ class PortalUI {
 
     static void preloadPortalUI(Vertx vertx) {
         this.vertx = vertx
-        //createScene()
-       // getPortalUI()
     }
 
     private static void createScene() {
@@ -121,7 +118,6 @@ class PortalUI {
             }
         }
         Files.write(bridgeFile, fileContent, StandardCharsets.UTF_8)
-        //return
     }
 
     static void extract(URL dirURL, String sourceDirectory, String writeDirectory) throws IOException {
