@@ -18,7 +18,7 @@ ext {
 
 dependencies {
     compile project(":api")
-    compile project(":tooltip")
+    compile project(":portal")
     compile project(":plugin:source-plugin-commons")
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
@@ -46,10 +46,10 @@ classes {
 task updatePluginResources(dependsOn: [":agent:jvm-agent:buildAgent"]) {
     doLast {
         copy {
-            from '../../tooltip/src/main/resources'
+            from '../../portal/src/main/resources'
             into 'build/resources/main'
         }
-        file("build/resources/main/source-tooltip_build.properties").delete()
+        file("build/resources/main/source-portal_build.properties").delete()
 
         copy {
             from '../../agent/lib/skywalking'

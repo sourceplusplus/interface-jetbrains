@@ -45,7 +45,7 @@ groovydoc {
               '../../core/src/main/groovy',
               //'../../plugin/jetbrains-plugin/src/main/groovy',
               '../../plugin/source-plugin-commons/src/main/groovy',
-              '../../tooltip/src/main/groovy',
+              '../../portal/src/main/groovy',
               '../../api/build/generated/source/apt/main']
 
     finalizedBy "updateGroovydocStylesheet"

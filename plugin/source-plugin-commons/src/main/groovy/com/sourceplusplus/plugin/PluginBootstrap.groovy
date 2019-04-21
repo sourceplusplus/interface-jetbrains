@@ -10,14 +10,14 @@ import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.api.model.config.SourceTooltipConfig
+import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
-import com.sourceplusplus.tooltip.TooltipBootstrap
+import com.sourceplusplus.portal.PortalBootstrap
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
 import org.modellwerkstatt.javaxbus.EventBus
@@ -45,7 +45,7 @@ class PluginBootstrap extends AbstractVerticle {
         log.info("Source++ Plugin activated. App UUID: " + SourcePluginConfig.current.appUuid)
         registerCodecs()
         vertx.deployVerticle(new PluginCoordinator())
-        vertx.deployVerticle(new TooltipBootstrap(sourcePlugin.coreClient, true))
+        vertx.deployVerticle(new PortalBootstrap(sourcePlugin.coreClient, true))
 
         def pluginEventBus = EventBus.create(SourcePluginConfig.current.apiHost, SourcePluginConfig.current.apiBridgePort)
         pluginEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
@@ -62,14 +62,14 @@ class PluginBootstrap extends AbstractVerticle {
         })
 
         //start plugin ui bridge
-        sourcePlugin.startTooltipUIBridge({
+        sourcePlugin.startPortalUIBridge({
             if (it.failed()) {
-                log.error("Failed to start tooltip ui bridge", it.cause())
+                log.error("Failed to start portal ui bridge", it.cause())
                 throw new RuntimeException(it.cause())
             } else {
                 log.info("PluginBootstrap started")
-                SourceTooltipConfig.current.pluginUIPort = it.result().actualPort()
-                log.info("Using tooltip ui bridge port: " + SourceTooltipConfig.current.pluginUIPort)
+                SourcePortalConfig.current.pluginUIPort = it.result().actualPort()
+                log.info("Using portal ui bridge port: " + SourcePortalConfig.current.pluginUIPort)
             }
         })
     }

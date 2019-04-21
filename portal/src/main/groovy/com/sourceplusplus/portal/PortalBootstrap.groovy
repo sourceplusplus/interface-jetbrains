@@ -1,4 +1,4 @@
-package com.sourceplusplus.tooltip
+package com.sourceplusplus.portal
 
 import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -13,16 +13,16 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.api.model.config.SourceTooltipConfig
+import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
-import com.sourceplusplus.tooltip.coordinate.track.TooltipViewTracker
-import com.sourceplusplus.tooltip.display.TooltipUI
-import com.sourceplusplus.tooltip.display.tabs.OverviewTab
-import com.sourceplusplus.tooltip.display.tabs.TracesTab
+import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
+import com.sourceplusplus.portal.display.PortalUI
+import com.sourceplusplus.portal.display.tabs.OverviewTab
+import com.sourceplusplus.portal.display.tabs.TracesTab
 import io.vertx.core.*
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
@@ -43,16 +43,16 @@ import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
 
 /**
- * Used to bootstrap the Source++ Tooltip.
+ * Used to bootstrap the Source++ Portal.
  *
- * The tooltip is able to fetch and display runtime behavior without interacting with the Source++ Plugin.
- * This allows the tooltip to be independently outside the IDE.
+ * The portal is able to fetch and display runtime behavior without interacting with the Source++ Plugin.
+ * This allows the portal to be independently outside the IDE.
  *
  * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class TooltipBootstrap extends AbstractVerticle {
+class PortalBootstrap extends AbstractVerticle {
 
     //todo: fix https://github.com/CodeBrig/Source/issues/1 and remove static block below
     static {
@@ -65,7 +65,7 @@ class TooltipBootstrap extends AbstractVerticle {
         org.apache.log4j.Logger.getLogger("com.sourceplusplus").addAppender(console)
     }
 
-    public static final MetricRegistry tooltipMetrics = new MetricRegistry()
+    public static final MetricRegistry portalMetrics = new MetricRegistry()
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private final SourceCoreClient coreClient
     private final boolean pluginAvailable
@@ -94,9 +94,9 @@ class TooltipBootstrap extends AbstractVerticle {
 //        }
 
         def appUuid = configJSON.getString("app_uuid")
-        SourceTooltipConfig.current.appUuid = appUuid
+        SourcePortalConfig.current.appUuid = appUuid
         //def artifactQualifiedName = configJSON.getString("artifact_qualified_name")
-        //TooltipViewTracker.viewingTooltipArtifact = artifactQualifiedName
+        //PortalViewTracker.viewingPortalArtifact = artifactQualifiedName
         def apiConfig = configJSON.getJsonObject("api")
 
         def coreClient = new SourceCoreClient(
@@ -105,11 +105,11 @@ class TooltipBootstrap extends AbstractVerticle {
             coreClient.setApiKey(apiConfig.getString("key"))
         }
 
-        Vertx.vertx(vertxOptions).deployVerticle(new TooltipBootstrap(coreClient, false),
+        Vertx.vertx(vertxOptions).deployVerticle(new PortalBootstrap(coreClient, false),
                 new DeploymentOptions().setConfig(configJSON))
     }
 
-    TooltipBootstrap(SourceCoreClient coreClient, boolean pluginAvailable) {
+    PortalBootstrap(SourceCoreClient coreClient, boolean pluginAvailable) {
         this.coreClient = Objects.requireNonNull(coreClient)
         this.pluginAvailable = pluginAvailable
     }
@@ -117,15 +117,15 @@ class TooltipBootstrap extends AbstractVerticle {
     @Override
     void start(Future<Void> startFuture) throws Exception {
         if (pluginAvailable) {
-            TooltipUI.preloadTooltipUI(vertx)
-            SourceTooltipConfig.current.appUuid = SourcePluginConfig.current.appUuid
+            PortalUI.preloadPortalUI(vertx)
+            SourcePortalConfig.current.appUuid = SourcePluginConfig.current.appUuid
         } else {
             registerCodecs()
             SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
-            BridgeOptions tooltipBridgeOptions = new BridgeOptions()
+            BridgeOptions portalBridgeOptions = new BridgeOptions()
                     .addInboundPermitted(new PermittedOptions().setAddressRegex(".+"))
                     .addOutboundPermitted(new PermittedOptions().setAddressRegex(".+"))
-            sockJSHandler.bridge(tooltipBridgeOptions)
+            sockJSHandler.bridge(portalBridgeOptions)
 
             Router router = Router.router(vertx)
             router.route("/eventbus/*").handler(sockJSHandler)
@@ -137,10 +137,10 @@ class TooltipBootstrap extends AbstractVerticle {
                 ).requestHandler(router.&accept)
                         .listen(config().getInteger("bridge_port"), config().getString("bridge_host"), {
                     if (it.succeeded()) {
-                        log.info("Started tooltip ui bridge (using SSL). Using port: " + it.result().actualPort())
+                        log.info("Started portal ui bridge (using SSL). Using port: " + it.result().actualPort())
                     } else {
                         it.cause().printStackTrace()
-                        log.error("Failed to start tooltip bridge (using SSL)", it.cause())
+                        log.error("Failed to start portal bridge (using SSL)", it.cause())
                         System.exit(-1)
                     }
                 })
@@ -148,17 +148,17 @@ class TooltipBootstrap extends AbstractVerticle {
                 vertx.createHttpServer().requestHandler(router.&accept).listen(config().getInteger("bridge_port"),
                         config().getString("bridge_host"), {
                     if (it.succeeded()) {
-                        log.info("Started tooltip ui bridge. Using port: " + it.result().actualPort())
+                        log.info("Started portal ui bridge. Using port: " + it.result().actualPort())
                     } else {
                         it.cause().printStackTrace()
-                        log.error("Failed to start tooltip bridge", it.cause())
+                        log.error("Failed to start portal bridge", it.cause())
                         System.exit(-1)
                     }
                 })
             }
 
             def apiConfig = config().getJsonObject("api")
-            def coreEventBus = EventBus.create(apiConfig.getString("host"), SourceTooltipConfig.current.apiBridgePort)
+            def coreEventBus = EventBus.create(apiConfig.getString("host"), SourcePortalConfig.current.apiBridgePort)
             coreEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
                 def artifactMetricResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactMetricResult.class)
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, artifactMetricResult)
@@ -219,15 +219,15 @@ class TooltipBootstrap extends AbstractVerticle {
         CompositeFuture.all(overviewTabFut, tracesTabFut).setHandler({
             if (it.succeeded()) {
                 //track
-                vertx.deployVerticle(new TooltipViewTracker(), new DeploymentOptions()
+                vertx.deployVerticle(new PortalViewTracker(), new DeploymentOptions()
                         .setWorker(true), startFuture.completer())
             } else {
                 startFuture.fail(it.cause())
             }
         })
 
-        vertx.eventBus().consumer("TooltipLogger", {
-            log.info("[TOOLTIP] - " + it.body())
+        vertx.eventBus().consumer("PortalLogger", {
+            log.info("[PORTAL] - " + it.body())
         })
         log.info("{} started", getClass().getSimpleName())
     }

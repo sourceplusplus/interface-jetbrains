@@ -1,11 +1,11 @@
-package com.sourceplusplus.tooltip.display.tabs
+package com.sourceplusplus.portal.display.tabs
 
 import com.codahale.metrics.Histogram
 import com.codahale.metrics.UniformReservoir
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.QueryTimeFrame
-import com.sourceplusplus.api.model.config.SourceTooltipConfig
+import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.BarTrendCard
 import com.sourceplusplus.api.model.internal.FormattedQuickStats
 import com.sourceplusplus.api.model.internal.SplineChart
@@ -14,7 +14,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.MetricType
-import com.sourceplusplus.tooltip.coordinate.track.TooltipViewTracker
+import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -68,11 +68,11 @@ class OverviewTab extends AbstractVerticle {
         vertx.eventBus().consumer(OVERVIEW_TAB_OPENED, {
             log.info("Overview tab opened")
             if (pluginAvailable) {
-                if (TooltipViewTracker.viewingTooltipArtifact) {
-                    def artifactMetricResult = metricResultCache.get(TooltipViewTracker.viewingTooltipArtifact
-                            + TooltipViewTracker.currentMetricTimeFrame)
+                if (PortalViewTracker.viewingPortalArtifact) {
+                    def artifactMetricResult = metricResultCache.get(PortalViewTracker.viewingPortalArtifact
+                            + PortalViewTracker.currentMetricTimeFrame)
                     if (artifactMetricResult != null) {
-                        log.info("Updating overview stats from cache for artifact: " + TooltipViewTracker.viewingTooltipArtifact)
+                        log.info("Updating overview stats from cache for artifact: " + PortalViewTracker.viewingPortalArtifact)
                         updateStats(artifactMetricResult)
                     }
                 }
@@ -98,46 +98,46 @@ class OverviewTab extends AbstractVerticle {
                     + artifactMetricResult.timeFrame(), artifactMetricResult)
 
             if (pluginAvailable) {
-                if (artifactMetricResult.timeFrame() != TooltipViewTracker.currentMetricTimeFrame) {
+                if (artifactMetricResult.timeFrame() != PortalViewTracker.currentMetricTimeFrame) {
                     return
-                } else if (artifactMetricResult.artifactQualifiedName() != TooltipViewTracker.viewingTooltipArtifact) {
+                } else if (artifactMetricResult.artifactQualifiedName() != PortalViewTracker.viewingPortalArtifact) {
                     return
                 }
             }
             updateStats(artifactMetricResult)
         })
 
-        //refresh with stats from cache (if avail) on tooltip opened
-        vertx.eventBus().consumer(TooltipViewTracker.OPENED_TOOLTIP, {
-            def artifactMetricResult = metricResultCache.get(TooltipViewTracker.viewingTooltipArtifact
-                    + TooltipViewTracker.currentMetricTimeFrame)
+        //refresh with stats from cache (if avail) on portal opened
+        vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
+            def artifactMetricResult = metricResultCache.get(PortalViewTracker.viewingPortalArtifact
+                    + PortalViewTracker.currentMetricTimeFrame)
             if (artifactMetricResult != null) {
-                log.info("Updating overview stats from cache for artifact: " + TooltipViewTracker.viewingTooltipArtifact)
+                log.info("Updating overview stats from cache for artifact: " + PortalViewTracker.viewingPortalArtifact)
                 updateStats(artifactMetricResult)
             } else {
                 vertx.eventBus().publish("ClearOverview", new JsonObject())
             }
         })
 
-        vertx.eventBus().consumer(TooltipViewTracker.UPDATED_METRIC_TIME_FRAME, {
+        vertx.eventBus().consumer(PortalViewTracker.UPDATED_METRIC_TIME_FRAME, {
             if (pluginAvailable) {
-                if (TooltipViewTracker.viewingTooltipArtifact == null) {
+                if (PortalViewTracker.viewingPortalArtifact == null) {
                     return
                 }
 
                 //refresh with stats from cache (if avail)
-                def artifactMetricResult = metricResultCache.get(TooltipViewTracker.viewingTooltipArtifact
-                        + TooltipViewTracker.currentMetricTimeFrame)
+                def artifactMetricResult = metricResultCache.get(PortalViewTracker.viewingPortalArtifact
+                        + PortalViewTracker.currentMetricTimeFrame)
                 if (artifactMetricResult != null) {
-                    log.info("Updating overview stats from cache for artifact: " + TooltipViewTracker.viewingTooltipArtifact)
+                    log.info("Updating overview stats from cache for artifact: " + PortalViewTracker.viewingPortalArtifact)
                     updateStats(artifactMetricResult)
                 }
 
                 //subscribe (re-subscribe) to get latest stats
                 def timeFrame = QueryTimeFrame.valueOf(it.body() as String)
                 def request = ArtifactMetricSubscribeRequest.builder()
-                        .appUuid(SourceTooltipConfig.current.appUuid)
-                        .artifactQualifiedName(TooltipViewTracker.viewingTooltipArtifact)
+                        .appUuid(SourcePortalConfig.current.appUuid)
+                        .artifactQualifiedName(PortalViewTracker.viewingPortalArtifact)
                         .timeFrame(timeFrame)
                         .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
                 coreClient.subscribeToArtifact(request, {

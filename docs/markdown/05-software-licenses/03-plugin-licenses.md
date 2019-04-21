@@ -1,6 +1,6 @@
 # Overview
 
-The Source++ Plugin is used to connect the developer's IDE to Source++ as well as the coordination and display of the Source++ Tooltip.
+The Source++ Plugin is used to connect the developer's IDE to Source++ as well as the coordination and display of the Source++ Portal.
 
 # Dependencies
 

@@ -40,7 +40,7 @@ eb.onopen = function () {
         }
 
         var appUuid = traceResult.app_uuid;
-        eb.send('TooltipLogger', 'Displaying traces - Size: ' + traceResult.traces.length);
+        eb.send('PortalLogger', 'Displaying traces - Size: ' + traceResult.traces.length);
         // console.log('Displaying traces - Size: ' + traceResult.traces.length);
         $('#trace_table tr').remove();
 
@@ -85,7 +85,7 @@ eb.onopen = function () {
     });
 
     eb.registerHandler('DisplayInnerTraceStack', function (error, message) {
-        eb.send('TooltipLogger', 'Displaying inner trace stack: ' + JSON.stringify(message));
+        eb.send('PortalLogger', 'Displaying inner trace stack: ' + JSON.stringify(message));
         console.log('Displaying inner trace stack: ' + JSON.stringify(message));
         goBackToTraceStack(false);
         $('#stack_table tr').remove();
@@ -138,7 +138,7 @@ function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, seg
         'app_uuid': appUuid, 'artifact_qualified_name': rootArtifactQualifiedName,
         'trace_id': traceId, 'segment_id': segmentId, 'span_id': spanId
     }, function (error, message) {
-        eb.send('TooltipLogger', 'Displaying trace span info: ' + JSON.stringify(message));
+        eb.send('PortalLogger', 'Displaying trace span info: ' + JSON.stringify(message));
         console.log('Displaying trace span info: ' + JSON.stringify(message));
         var spanInfo = message.body;
         displaySpanInfo(spanInfo);
@@ -159,7 +159,7 @@ function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, seg
 }
 
 function displaySpanInfo(spanInfo) {
-    eb.send('TooltipLogger', 'Displaying span info: ' + spanInfo);
+    eb.send('PortalLogger', 'Displaying span info: ' + spanInfo);
     $('#trace_stack_table').css('display', 'none');
     $('#trace_stack_table').css('visibility', 'hidden');
     $('#span_info_panel').css('display', '');
@@ -219,7 +219,7 @@ function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId)
         'artifact_qualified_name': artifactQualifiedName,
         'trace_id': globalTraceId
     }, function (error, message) {
-        eb.send('TooltipLogger', 'Displaying trace stack: ' + JSON.stringify(message));
+        eb.send('PortalLogger', 'Displaying trace stack: ' + JSON.stringify(message));
         console.log('Displaying trace stack: ' + JSON.stringify(message));
         var traceStack = message.body;
         displayTraceStack(traceStack);
@@ -240,7 +240,7 @@ function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId)
 }
 
 function displayTraceStack(traceStack) {
-    eb.send('TooltipLogger', 'Displaying trace stack: ' + traceStack);
+    eb.send('PortalLogger', 'Displaying trace stack: ' + traceStack);
     goBackToTraceStack(false);
     $('#stack_table tr').remove();
 

@@ -1,4 +1,4 @@
-package com.sourceplusplus.tooltip.display.tabs.representation
+package com.sourceplusplus.portal.display.tabs.representation
 
 import com.sourceplusplus.api.model.trace.ArtifactTraceResult
 import groovy.transform.Canonical

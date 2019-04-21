@@ -10,7 +10,7 @@ import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import com.sourceplusplus.plugin.source.navigate.ArtifactNavigator
-import com.sourceplusplus.tooltip.coordinate.track.TooltipViewTracker
+import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
 import org.slf4j.Logger
@@ -38,9 +38,9 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
         vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT, { message ->
             def artifactQualifiedName = message.body() as String
             ApplicationManager.getApplication().invokeLater({
-                IntelliJMethodGutterMark.closeTooltipIfOpen()
+                IntelliJMethodGutterMark.closePortalIfOpen()
                 navigateTo(artifactQualifiedName)
-                vertx.eventBus().send(TooltipViewTracker.UPDATE_TOOLTIP_ARTIFACT, artifactQualifiedName)
+                vertx.eventBus().send(PortalViewTracker.UPDATE_PORTAL_ARTIFACT, artifactQualifiedName)
 
                 def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark
                 if (sourceMark != null) {
@@ -68,7 +68,7 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
         ApplicationManager.getApplication().invokeLater({
             ApplicationManager.getApplication().runReadAction({
                 def editor = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject).getSelectedTextEditor()
-                mark.displayTooltip(vertx, editor, false)
+                mark.displayPortal(vertx, editor, false)
             })
         })
     }

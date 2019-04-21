@@ -11,7 +11,7 @@ import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePluginDefines
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
-import com.sourceplusplus.tooltip.display.TooltipUI
+import com.sourceplusplus.portal.display.PortalUI
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.apache.commons.io.FileUtils
@@ -61,13 +61,13 @@ class SourceAgentPatcher extends JavaProgramPatcher {
             def pluginsUrl = SourceAgentPatcher.class.getResource("/plugins")
             def pluginsDir = new File(destDir, "plugins")
             pluginsDir.mkdir()
-            TooltipUI.extract(pluginsUrl, "/plugins", pluginsDir.absolutePath)
+            PortalUI.extract(pluginsUrl, "/plugins", pluginsDir.absolutePath)
 
             //extract activations
             def activationsUrl = SourceAgentPatcher.class.getResource("/activations")
             def activationsDir = new File(destDir, "activations")
             activationsDir.mkdir()
-            TooltipUI.extract(activationsUrl, "/activations", activationsDir.absolutePath)
+            PortalUI.extract(activationsUrl, "/activations", activationsDir.absolutePath)
 
             //redirect agent logs to console
             def logFile = new File(destDir.absolutePath + File.separator + "source-agent.log")

@@ -1,65 +1,65 @@
-package com.sourceplusplus.tooltip.coordinate.track
+package com.sourceplusplus.portal.coordinate.track
 
-import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.QueryTimeFrame
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * Used to track the current viewable state of the Source++ Tooltip.
+ * Used to track the current viewable state of the Source++ Portal.
  *
  * Recognizes and produces messages for the following events:
  *  - user hovered over S++ icon
- *  - user opened/closed tooltip
+ *  - user opened/closed portal
  *
  * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class TooltipViewTracker extends AbstractVerticle {
+class PortalViewTracker extends AbstractVerticle {
 
-    public static final String UPDATE_TOOLTIP_ARTIFACT = "UpdateTooltipArtifact"
-    public static final String CAN_OPEN_TOOLTIP = "CanOpenTooltip"
-    public static final String OPENED_TOOLTIP = "OpenedTooltip"
-    public static final String CLOSED_TOOLTIP = "ClosedTooltip"
-    public static final String CHANGED_TOOLTIP_ARTIFACT = "ChangedTooltipArtifact"
+    public static final String UPDATE_PORTAL_ARTIFACT = "UpdatePortalArtifact"
+    public static final String CAN_OPEN_PORTAL = "CanOpenPortal"
+    public static final String OPENED_PORTAL = "OpenedPortal"
+    public static final String CLOSED_PORTAL = "ClosedPortal"
+    public static final String CHANGED_PORTAL_ARTIFACT = "ChangedPortalArtifact"
     public static final String UPDATED_METRIC_TIME_FRAME = "UpdatedMetricTimeFrame"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    public static String viewingTooltipArtifact //todo: better
+    public static String viewingPortalArtifact //todo: better
     public static QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
     public static String viewingTab //todo: impl (and then better)
 
     @Override
     void start() throws Exception {
-        //user wants to open tooltip
-        vertx.eventBus().consumer(CAN_OPEN_TOOLTIP, { messageHandler ->
+        //user wants to open portal
+        vertx.eventBus().consumer(CAN_OPEN_PORTAL, { messageHandler ->
             messageHandler.reply(true)
         })
 
-        //user opened tooltip
-        vertx.eventBus().consumer(OPENED_TOOLTIP, {
+        //user opened portal
+        vertx.eventBus().consumer(OPENED_PORTAL, {
             if (it.body() instanceof SourceArtifact) {
                 def artifact = it.body() as SourceArtifact
-                log.info("Showing IDE tooltip for source artifact: {}", artifact.artifactQualifiedName())
+                log.info("Showing Source++ Portal for artifact: {}", artifact.artifactQualifiedName())
                 //todo: reset ui if artifact different than last artifact
             }
         })
 
-        //user closed tooltip
-        vertx.eventBus().consumer(CLOSED_TOOLTIP, {
+        //user closed portal
+        vertx.eventBus().consumer(CLOSED_PORTAL, {
             if (it.body() instanceof SourceArtifact) {
                 def artifact = it.body() as SourceArtifact
-                log.info("Hiding IDE tooltip for source artifact: {}", artifact.artifactQualifiedName())
+                log.info("Hiding Source++ Portal for artifact: {}", artifact.artifactQualifiedName())
             }
         })
 
-        vertx.eventBus().consumer(UPDATE_TOOLTIP_ARTIFACT, {
-            if (((String) it.body()) != viewingTooltipArtifact) {
-                viewingTooltipArtifact = (String) it.body()
-                vertx.eventBus().publish(CHANGED_TOOLTIP_ARTIFACT, viewingTooltipArtifact)
+        vertx.eventBus().consumer(UPDATE_PORTAL_ARTIFACT, {
+            if (((String) it.body()) != viewingPortalArtifact) {
+                viewingPortalArtifact = (String) it.body()
+                vertx.eventBus().publish(CHANGED_PORTAL_ARTIFACT, viewingPortalArtifact)
             }
         })
         vertx.eventBus().consumer("SetMetricTimeFrame", {

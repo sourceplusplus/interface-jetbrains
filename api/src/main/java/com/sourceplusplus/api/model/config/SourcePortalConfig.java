@@ -9,17 +9,17 @@ import java.util.Objects;
  * @version 0.2.0
  * @since 0.1.0
  */
-public class SourceTooltipConfig {
+public class SourcePortalConfig {
 
-    public static final SourceTooltipConfig current = new SourceTooltipConfig();
+    public static final SourcePortalConfig current = new SourcePortalConfig();
     public volatile int apiBridgePort = 7000;
     public volatile String appUuid = null;
     public volatile int pluginUIPort = -1;
 
-    private SourceTooltipConfig() {
+    private SourcePortalConfig() {
     }
 
-    public void applyConfig(SourceTooltipConfig config) {
+    public void applyConfig(SourcePortalConfig config) {
         Objects.requireNonNull(config);
         appUuid = config.appUuid;
         pluginUIPort = config.pluginUIPort;

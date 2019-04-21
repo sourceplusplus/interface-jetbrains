@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 abstract class GutterMark extends SourceMark {
 
-    final AtomicBoolean showingTooltipWindow = new AtomicBoolean()
+    final AtomicBoolean showingPortalWindow = new AtomicBoolean()
 
     GutterMark(@NotNull SourceFileMarker sourceFileMarker) {
         super(sourceFileMarker)

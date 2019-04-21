@@ -6,7 +6,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceOrderType
-import com.sourceplusplus.tooltip.coordinate.track.TooltipViewTracker
+import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import io.vertx.core.AbstractVerticle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,7 +41,7 @@ class ArtifactConfigTracker extends AbstractVerticle {
                 def request = ArtifactMetricSubscribeRequest.builder()
                         .appUuid(sourceArtifact.appUuid())
                         .artifactQualifiedName(sourceArtifact.artifactQualifiedName())
-                        .timeFrame(TooltipViewTracker.currentMetricTimeFrame)
+                        .timeFrame(PortalViewTracker.currentMetricTimeFrame)
                         .metricTypes(metricTypes).build()
                 vertx.eventBus().send(PluginArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, request)
 

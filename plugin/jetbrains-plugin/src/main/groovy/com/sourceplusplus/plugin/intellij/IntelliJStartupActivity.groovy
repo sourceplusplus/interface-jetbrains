@@ -38,8 +38,8 @@ import com.sourceplusplus.plugin.intellij.settings.connect.ConnectDialogWrapper
 import com.sourceplusplus.plugin.intellij.source.navigate.IntelliJArtifactNavigator
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
-import com.sourceplusplus.tooltip.coordinate.track.TooltipViewTracker
-import com.sourceplusplus.tooltip.display.TooltipUI
+import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
+import com.sourceplusplus.portal.display.PortalUI
 import io.vertx.core.Vertx
 import org.apache.log4j.AppenderSkeleton
 import org.apache.log4j.ConsoleAppender
@@ -94,13 +94,13 @@ class IntelliJStartupActivity implements StartupActivity {
             protected void append(LoggingEvent loggingEvent) {
                 Object message = loggingEvent.message
                 if (loggingEvent.level.isGreaterOrEqual(Level.WARN)) {
-                    if (message.toString().startsWith("[TOOLTIP]")) {
+                    if (message.toString().startsWith("[PORTAL]")) {
                         consoleView.print(message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
                     } else {
                         consoleView.print("[PLUGIN] - " + message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
                     }
                 } else if (loggingEvent.level.isGreaterOrEqual(Level.INFO)) {
-                    if (message.toString().startsWith("[TOOLTIP]")) {
+                    if (message.toString().startsWith("[PORTAL]")) {
                         consoleView.print(message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
                     } else {
                         consoleView.print("[PLUGIN] - " + message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
@@ -235,19 +235,19 @@ class IntelliJStartupActivity implements StartupActivity {
             }
         })
 
-        sourcePlugin.vertx.eventBus().consumer(TooltipUI.TOOLTIP_READY, {
-            //set tooltip theme
+        sourcePlugin.vertx.eventBus().consumer(PortalUI.PORTAL_READY, {
+            //set portal theme
             UIManager.addPropertyChangeListener({
                 if (it.newValue instanceof IntelliJLaf) {
-                    TooltipUI.updateTheme(false)
+                    PortalUI.updateTheme(false)
                 } else {
-                    TooltipUI.updateTheme(true)
+                    PortalUI.updateTheme(true)
                 }
             })
             if (UIManager.lookAndFeel instanceof IntelliJLaf) {
-                TooltipUI.updateTheme(false)
+                PortalUI.updateTheme(false)
             } else {
-                TooltipUI.updateTheme(true)
+                PortalUI.updateTheme(true)
             }
         })
     }
@@ -297,7 +297,7 @@ class IntelliJStartupActivity implements StartupActivity {
         //activate any source code markings
         sourcePlugin.activateSourceFileMarker(fileMarker)
 
-        //display gutter mark tooltips on hover over gutter mark
+        //display gutter mark portals on hover over gutter mark
         def editor = FileEditorManager.getInstance(psiFile.project).getSelectedTextEditor()
         if (editor) {
             editor.addEditorMouseMotionListener(editorMouseMotionListener = makeMouseMotionListener(
@@ -334,10 +334,10 @@ class IntelliJStartupActivity implements StartupActivity {
                     e.consume()
                 }
 
-                vertx.eventBus().send(TooltipViewTracker.CAN_OPEN_TOOLTIP,
+                vertx.eventBus().send(PortalViewTracker.CAN_OPEN_PORTAL,
                         gutterMark.sourceMethod.artifactQualifiedName(), {
                     if (it.result().body() == true) {
-                        gutterMark.displayTooltip(vertx, editor, true)
+                        gutterMark.displayPortal(vertx, editor, true)
                     }
                 })
             }

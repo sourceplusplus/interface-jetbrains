@@ -20,19 +20,19 @@ The Source++ Agent is used to monitor and gather application data. The agent rel
 
 ## Source++ Core
 
-The Source++ Core is the central component used to coordinate the Source++ Agent as well as keep the Source++ Plugin and Source++ Tooltip in sync with desired application data. The core also relies heavily on Apache SkyWalking and requires an Apache SkyWalking OAP server to function. The core is the only component in Source++ which must remain consistently online and available.
+The Source++ Core is the central component used to coordinate the Source++ Agent as well as keep the Source++ Plugin and Source++ Portal in sync with desired application data. The core also relies heavily on Apache SkyWalking and requires an Apache SkyWalking OAP server to function. The core is the only component in Source++ which must remain consistently online and available.
 
-## Source++ Tooltip
+## Source++ Portal
 
-The Source++ Tooltip is the most visual portion of Source++. The tooltip is used to display relevant runtime statistics next to the associated source code artifact. 
+The Source++ Portal is the most visual portion of Source++. The portal is used to display relevant runtime statistics next to the associated source code artifact. 
 
-The tooltip currently contains two tabs:
+The portal currently contains two tabs:
 
  - Overview
  - Traces
 
 ### Overview
-![](../../images/tooltip/overview_last_15_minutes.png)
+![](../../images/portal/overview_last_15_minutes.png)
 
 The overview tab displays general artifact statistics to gather an overall view of the artifact's runtime behavior. On this tab you can view:
 
@@ -43,10 +43,10 @@ The overview tab displays general artifact statistics to gather an overall view 
  - Average SLA
 
 ### Traces
-![](../../images/tooltip/latest_traces.png)
+![](../../images/portal/latest_traces.png)
 
 The traces tab is used to navigate gathered distributed traces. The traces tab displays the latest traces which a given source artifact created. 
 
 ## Source++ Plugin
 
-The Source++ Plugin is used to connect the developer's IDE to Source++ as well as the coordination and display of the Source++ Tooltip.
+The Source++ Plugin is used to connect the developer's IDE to Source++ as well as the coordination and display of the Source++ Portal.

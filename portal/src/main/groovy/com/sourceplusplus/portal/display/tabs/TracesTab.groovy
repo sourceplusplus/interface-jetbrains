@@ -1,15 +1,15 @@
-package com.sourceplusplus.tooltip.display.tabs
+package com.sourceplusplus.portal.display.tabs
 
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.api.model.config.SourceTooltipConfig
+import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.InnerTraceStackInfo
 import com.sourceplusplus.api.model.internal.TraceSpanInfo
 import com.sourceplusplus.api.model.trace.*
-import com.sourceplusplus.tooltip.TooltipBootstrap
-import com.sourceplusplus.tooltip.coordinate.track.TooltipViewTracker
-import com.sourceplusplus.tooltip.display.tabs.representation.TracesTabRepresentation
+import com.sourceplusplus.portal.PortalBootstrap
+import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
+import com.sourceplusplus.portal.display.tabs.representation.TracesTabRepresentation
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -55,7 +55,7 @@ class TracesTab extends AbstractVerticle {
             log.info("Traces tab opened")
             if (pluginAvailable) {
                 def representation = representationCache.get(
-                        SourcePluginConfig.current.appUuid + "-" + TooltipViewTracker.viewingTooltipArtifact)
+                        SourcePluginConfig.current.appUuid + "-" + PortalViewTracker.viewingPortalArtifact)
                 if (representation && representation.artifactTraceResult) {
                     vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, representation.artifactTraceResult)
                 }
@@ -84,7 +84,7 @@ class TracesTab extends AbstractVerticle {
             def representation = representationCache.get(artifactTraceResult.appUuid() + "-" + artifactTraceResult.artifactQualifiedName())
 
             if (!pluginAvailable
-                    || artifactTraceResult.artifactQualifiedName() == TooltipViewTracker.viewingTooltipArtifact) {
+                    || artifactTraceResult.artifactQualifiedName() == PortalViewTracker.viewingPortalArtifact) {
                 def displayTracesAddress = "DisplayTraces"
                 if (!pluginAvailable) {
                     displayTracesAddress = artifactTraceResult.appUuid() + "-" + artifactTraceResult.artifactQualifiedName() + "-$displayTracesAddress"
@@ -96,16 +96,16 @@ class TracesTab extends AbstractVerticle {
             }
         })
 
-        //user viewing tooltip under new artifact
-        vertx.eventBus().consumer(TooltipViewTracker.CHANGED_TOOLTIP_ARTIFACT, {
+        //user viewing portal under new artifact
+        vertx.eventBus().consumer(PortalViewTracker.CHANGED_PORTAL_ARTIFACT, {
             vertx.eventBus().send("ClearTraceStack", new JsonObject())
         })
 
         //populate with latest traces from cache (if avail) on switch to traces
-        vertx.eventBus().consumer(TooltipViewTracker.OPENED_TOOLTIP, {
-            if (TooltipViewTracker.viewingTooltipArtifact != null) {
-                representationCache.putIfAbsent(SourcePluginConfig.current.appUuid + "-" + TooltipViewTracker.viewingTooltipArtifact, new TracesTabRepresentation())
-                def representation = representationCache.get(SourcePluginConfig.current.appUuid + "-" + TooltipViewTracker.viewingTooltipArtifact)
+        vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
+            if (PortalViewTracker.viewingPortalArtifact != null) {
+                representationCache.putIfAbsent(SourcePluginConfig.current.appUuid + "-" + PortalViewTracker.viewingPortalArtifact, new TracesTabRepresentation())
+                def representation = representationCache.get(SourcePluginConfig.current.appUuid + "-" + PortalViewTracker.viewingPortalArtifact)
                 if (representation.innerTrace) {
                     def innerTraceStackInfo = InnerTraceStackInfo.builder()
                             .innerLevel(representation.innerLevel)
@@ -138,8 +138,8 @@ class TracesTab extends AbstractVerticle {
         })
 
         vertx.eventBus().consumer(CLICKED_GO_BACK_TO_LATEST_TRACES, {
-            representationCache.putIfAbsent(SourcePluginConfig.current.appUuid + "-" + TooltipViewTracker.viewingTooltipArtifact, new TracesTabRepresentation())
-            def representation = representationCache.get(SourcePluginConfig.current.appUuid + "-" + TooltipViewTracker.viewingTooltipArtifact)
+            representationCache.putIfAbsent(SourcePluginConfig.current.appUuid + "-" + PortalViewTracker.viewingPortalArtifact, new TracesTabRepresentation())
+            def representation = representationCache.get(SourcePluginConfig.current.appUuid + "-" + PortalViewTracker.viewingPortalArtifact)
             if (representation.rootArtifactQualifiedName == null) {
                 representation.innerTrace = false
                 representation.innerLevel = 0
@@ -156,8 +156,8 @@ class TracesTab extends AbstractVerticle {
             def appUuid = spanInfoRequest.getString("app_uuid")
             def artifactQualifiedName = spanInfoRequest.getString("artifact_qualified_name")
             if (pluginAvailable) {
-                //todo: why artifactQualifiedName != TooltipViewTracker.viewingTooltipArtifact (at least on navigate trace)
-                artifactQualifiedName = TooltipViewTracker.viewingTooltipArtifact
+                //todo: why artifactQualifiedName != PortalViewTracker.viewingPortalArtifact (at least on navigate trace)
+                artifactQualifiedName = PortalViewTracker.viewingPortalArtifact
             }
             representationCache.putIfAbsent(appUuid + "-" + artifactQualifiedName, new TracesTabRepresentation())
             def representation = representationCache.get(appUuid + "-" + artifactQualifiedName)
@@ -173,7 +173,7 @@ class TracesTab extends AbstractVerticle {
                 if (span.getInteger("span_id") == spanInfoRequest.getInteger("span_id")) {
                     def spanArtifactQualifiedName = span.getString("artifact_qualified_name")
                     if (spanArtifactQualifiedName == null
-                            || spanArtifactQualifiedName == TooltipViewTracker.viewingTooltipArtifact
+                            || spanArtifactQualifiedName == PortalViewTracker.viewingPortalArtifact
                             || !pluginAvailable) {
                         messageHandler.reply(span)
                         log.info("Displayed trace span info: " + span)
@@ -187,26 +187,26 @@ class TracesTab extends AbstractVerticle {
                                         .traceId(spanInfoRequest.getString("trace_id")).build()
 
                                 //todo: cache
-                                coreClient.getTraceSpans(SourceTooltipConfig.current.appUuid,
-                                        TooltipViewTracker.viewingTooltipArtifact, spanStackQuery, {
+                                coreClient.getTraceSpans(SourcePortalConfig.current.appUuid,
+                                        PortalViewTracker.viewingPortalArtifact, spanStackQuery, {
                                     if (it.failed()) {
                                         log.error("Failed to get trace spans", it.cause())
                                     } else {
                                         def queryResult = it.result()
                                         def innerLevel = representation.innerLevel + 1
-                                        representationCache.putIfAbsent(SourceTooltipConfig.current.appUuid + "-" + spanArtifactQualifiedName, new TracesTabRepresentation())
-                                        representation = representationCache.get(SourceTooltipConfig.current.appUuid + "-" + spanArtifactQualifiedName)
+                                        representationCache.putIfAbsent(SourcePortalConfig.current.appUuid + "-" + spanArtifactQualifiedName, new TracesTabRepresentation())
+                                        representation = representationCache.get(SourcePortalConfig.current.appUuid + "-" + spanArtifactQualifiedName)
 
                                         if (span.getString("type") == "Exit"
                                                 && queryResult.traceSpans().get(0).type() == "Entry") {
                                             innerLevel = 0
                                         } else {
-                                            representation.rootArtifactQualifiedName = TooltipViewTracker.viewingTooltipArtifact
+                                            representation.rootArtifactQualifiedName = PortalViewTracker.viewingPortalArtifact
                                         }
                                         representation.innerTrace = true
                                         representation.innerLevel = innerLevel
                                         representation.innerTraceStack = handleTraceStack(
-                                                SourceTooltipConfig.current.appUuid, TooltipViewTracker.viewingTooltipArtifact, queryResult)
+                                                SourcePortalConfig.current.appUuid, PortalViewTracker.viewingPortalArtifact, queryResult)
                                         vertx.eventBus().send("NavigateToArtifact", spanArtifactQualifiedName)
                                     }
                                 })
@@ -222,7 +222,7 @@ class TracesTab extends AbstractVerticle {
 
         //query core for trace stack (or get from cache)
         vertx.eventBus().consumer(GET_TRACE_STACK, { messageHandler ->
-            def timer = TooltipBootstrap.tooltipMetrics.timer(GET_TRACE_STACK)
+            def timer = PortalBootstrap.portalMetrics.timer(GET_TRACE_STACK)
             def context = timer.time()
             def request = messageHandler.body() as JsonObject
             def appUuid = request.getString("app_uuid")
@@ -255,16 +255,16 @@ class TracesTab extends AbstractVerticle {
             }
         })
 
-        vertx.eventBus().consumer(TooltipViewTracker.UPDATED_METRIC_TIME_FRAME, {
+        vertx.eventBus().consumer(PortalViewTracker.UPDATED_METRIC_TIME_FRAME, {
             if (pluginAvailable) {
-                if (TooltipViewTracker.viewingTooltipArtifact == null) {
+                if (PortalViewTracker.viewingPortalArtifact == null) {
                     return
                 }
 
                 //subscribe (re-subscribe) to traces
                 def request = ArtifactTraceSubscribeRequest.builder()
-                        .appUuid(SourceTooltipConfig.current.appUuid)
-                        .artifactQualifiedName(TooltipViewTracker.viewingTooltipArtifact)
+                        .appUuid(SourcePortalConfig.current.appUuid)
+                        .artifactQualifiedName(PortalViewTracker.viewingPortalArtifact)
                         .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                         .build()
                 coreClient.subscribeToArtifact(request, {
@@ -310,7 +310,7 @@ class TracesTab extends AbstractVerticle {
         representation.artifactTraceResult = artifactTraceResult
 
         if (!pluginAvailable
-                || TooltipViewTracker.viewingTooltipArtifact == artifactTraceResult.artifactQualifiedName()) {
+                || PortalViewTracker.viewingPortalArtifact == artifactTraceResult.artifactQualifiedName()) {
             vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, artifactTraceResult)
         }
     }

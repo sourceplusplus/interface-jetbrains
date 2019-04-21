@@ -134,7 +134,7 @@ eb.onopen = function () {
         })
     });
     eb.registerHandler(displayCardHandler, function (error, message) {
-        //eb.send('TooltipLogger', 'Displaying card: ' + JSON.stringify(message));
+        //eb.send('PortalLogger', 'Displaying card: ' + JSON.stringify(message));
         // console.log('Displaying card: ' + JSON.stringify(message));
         var card = message.body;
         if (card.time_frame != currentTimeFrame) {
@@ -150,7 +150,7 @@ eb.onopen = function () {
         }
     });
     eb.registerHandler(updateChartHandler, function (error, message) {
-        //eb.send('TooltipLogger', 'Updating chart: ' + JSON.stringify(message));
+        //eb.send('PortalLogger', 'Updating chart: ' + JSON.stringify(message));
         // console.log('Updating chart: ' + JSON.stringify(message));
         var chartData = message.body;
         if (chartData.time_frame != currentTimeFrame) {
@@ -190,7 +190,7 @@ eb.onopen = function () {
         })
     });
     eb.registerHandler(displayStatsHandler, function (error, message) {
-        //eb.send('TooltipLogger', 'Displaying stats: ' + JSON.stringify(message));
+        //eb.send('PortalLogger', 'Displaying stats: ' + JSON.stringify(message));
         // console.log('Displaying stats: ' + JSON.stringify(message));
         var stats = message.body;
         if (stats.time_frame != currentTimeFrame) {
@@ -212,7 +212,7 @@ eb.onopen = function () {
     if (timeFrame !== null) {
         updateTime(timeFrame);
         console.log('Set initial time frame to: ' + timeFrame);
-        eb.send('TooltipLogger', 'Set initial time frame to: ' + timeFrame);
+        eb.send('PortalLogger', 'Set initial time frame to: ' + timeFrame);
     }
 
     eb.send('OverviewTabOpened', {});

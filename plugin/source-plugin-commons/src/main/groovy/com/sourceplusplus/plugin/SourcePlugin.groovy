@@ -42,12 +42,12 @@ class SourcePlugin {
         vertx.deployVerticle(new PluginBootstrap(this))
     }
 
-    void startTooltipUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
+    void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
-        BridgeOptions tooltipBridgeOptions = new BridgeOptions()
+        BridgeOptions portalBridgeOptions = new BridgeOptions()
                 .addInboundPermitted(new PermittedOptions().setAddressRegex(".+"))
                 .addOutboundPermitted(new PermittedOptions().setAddressRegex(".+"))
-        sockJSHandler.bridge(tooltipBridgeOptions)
+        sockJSHandler.bridge(portalBridgeOptions)
 
         Router router = Router.router(vertx)
         router.route("/eventbus/*").handler(sockJSHandler)

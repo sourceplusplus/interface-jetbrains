@@ -1,9 +1,9 @@
 apply plugin: 'groovy'
 apply plugin: 'application'
 
-applicationName = 'source-tooltip'
-archivesBaseName = 'source-tooltip'
-mainClassName = 'com.sourceplusplus.tooltip.TooltipBootstrap'
+applicationName = 'source-portal'
+archivesBaseName = 'source-portal'
+mainClassName = 'com.sourceplusplus.portal.PortalBootstrap'
 
 ext {
     jxBrowserVersion = '6.23.1'
@@ -23,7 +23,7 @@ dependencies {
 
 task createProperties(dependsOn: processResources) {
     doLast {
-        new File("$buildDir/resources/main/source-tooltip_build.properties").withWriter { w ->
+        new File("$buildDir/resources/main/source-portal_build.properties").withWriter { w ->
             Properties p = new Properties()
             p['version'] = project.version.toString()
             p['build_date'] = new Date().toInstant().toString()

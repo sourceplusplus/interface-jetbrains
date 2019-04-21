@@ -1,6 +1,6 @@
-package com.sourceplusplus.tooltip.display
+package com.sourceplusplus.portal.display
 
-import com.sourceplusplus.api.model.config.SourceTooltipConfig
+import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.teamdev.jxbrowser.chromium.swing.BrowserView
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
@@ -17,31 +17,31 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 /**
- * Used to render the Source++ Tooltip's Semantic UI HTML files as a JFXPanel.
+ * Used to render the Source++ Portal's Semantic UI HTML files as a JFXPanel.
  *
  * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class TooltipUI {
+class PortalUI {
 
-    public static final String TOOLTIP_READY = "TooltipReady"
+    public static final String PORTAL_READY = "PortalReady"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private static final AtomicBoolean tooltipReady = new AtomicBoolean()
+    private static final AtomicBoolean portalReady = new AtomicBoolean()
     private static File uiDirectory
     private static Vertx vertx
     private static BrowserView view
 
     @NotNull
-    static JComponent getTooltipUI() {
-        if (!tooltipReady.getAndSet(true)) {
+    static JComponent getPortalUI() {
+        if (!portalReady.getAndSet(true)) {
             view = new BrowserView()
             view.setPreferredSize(new Dimension(775, 250))
             view.browser.setSize(775, 250)
             view.browser.loadURL(createScene())
 
-            vertx.eventBus().publish(TOOLTIP_READY, true)
+            vertx.eventBus().publish(PORTAL_READY, true)
         }
         return view
     }
@@ -69,20 +69,20 @@ class TooltipUI {
 //        view.browser.reload()
     }
 
-    static void preloadTooltipUI(Vertx vertx) {
+    static void preloadPortalUI(Vertx vertx) {
         this.vertx = vertx
-        getTooltipUI()
+        getPortalUI()
     }
 
     private static String createScene() {
         uiDirectory = File.createTempDir()
         uiDirectory.deleteOnExit()
 
-        def url = TooltipUI.class.getResource("/ui")
+        def url = PortalUI.class.getResource("/ui")
         extract(url, "/ui", uiDirectory.absolutePath)
-        log.debug("Using tooltip ui directory: " + uiDirectory.absolutePath)
+        log.debug("Using portal ui directory: " + uiDirectory.absolutePath)
 
-        def bridgePort = SourceTooltipConfig.current.pluginUIPort
+        def bridgePort = SourcePortalConfig.current.pluginUIPort
         def bridgeFile = new File(uiDirectory.absolutePath + "/source_plugin_bridge.js").toPath()
         def fileContent = new ArrayList<>(Files.readAllLines(bridgeFile, StandardCharsets.UTF_8))
         for (int i = 0; i < fileContent.size(); i++) {
