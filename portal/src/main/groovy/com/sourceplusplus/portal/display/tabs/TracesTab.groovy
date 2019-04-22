@@ -32,7 +32,7 @@ class TracesTab extends AbstractVerticle {
     public static final String GET_TRACE_STACK = "GetTraceStack"
     public static final String CLICKED_DISPLAY_TRACE_STACK = "ClickedDisplayTraceStack"
     public static final String CLICKED_DISPLAY_SPAN_INFO = "ClickedDisplaySpanInfo"
-    public static final String CLICKED_GO_BACK_TO_LATEST_TRACES = "ClickedGoBackToLatestTraces"
+    public static final String CLICKED_GO_BACK_TO_TRACES = "ClickedGoBackToTraces"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Pattern QUALIFIED_NAME_PATTERN = Pattern.compile('.+\\..+\\(.*\\)')
@@ -135,7 +135,7 @@ class TracesTab extends AbstractVerticle {
             })
         })
 
-        vertx.eventBus().consumer(CLICKED_GO_BACK_TO_LATEST_TRACES, {
+        vertx.eventBus().consumer(CLICKED_GO_BACK_TO_TRACES, {
             def portalId = (it.body() as JsonObject).getInteger("portal_id")
             def representation = SourcePortal.getPortal(portalId).interface.tracesView
             if (representation.rootArtifactQualifiedName == null) {

@@ -19,6 +19,12 @@ if (timeFrame) {
     }
 }
 
+if (traceOrderType == 'LATEST_TRACES') {
+    $('#latest_traces_header_text').text('Latest Traces');
+} else if (traceOrderType == 'SLOWEST_TRACES') {
+    $('#latest_traces_header_text').text('Slowest Traces');
+}
+
 var viewingInnerTrace = false;
 eb.onopen = function () {
     console.log("Source++ bridge connected");
@@ -93,7 +99,11 @@ eb.onopen = function () {
         if (message.body.inner_level > 0) {
             $('#latest_traces_header_text').text('Parent Stack');
         } else {
-            $('#latest_traces_header_text').text('Latest Traces');
+            if (traceOrderType == 'LATEST_TRACES') {
+                $('#latest_traces_header_text').text('Latest Traces');
+            } else if (traceOrderType == 'SLOWEST_TRACES') {
+                $('#latest_traces_header_text').text('Slowest Traces');
+            }
         }
 
         var traceStack = message.body.trace_stack;
@@ -122,7 +132,7 @@ eb.onopen = function () {
     });
 
     eb.registerHandler(appUuid + '-' + portalId + '-ClearTraceStack', function (error, message) {
-        goBackToLatestTraces(false);
+        goBackToTraces(false);
     });
 
     eb.registerHandler(appUuid + '-' + portalId + '-ClearSpanInfo', function (error, message) {
@@ -246,7 +256,11 @@ function displayTraceStack(traceStack) {
     $('#stack_table tr').remove();
 
     viewingInnerTrace = false;
-    $('#latest_traces_header_text').text('Latest Traces');
+    if (traceOrderType == 'LATEST_TRACES') {
+        $('#latest_traces_header_text').text('Latest Traces');
+    } else if (traceOrderType == 'SLOWEST_TRACES') {
+        $('#latest_traces_header_text').text('Slowest Traces');
+    }
 
     $('#trace_id_field').val(traceStack[0].span.trace_id);
     $('#time_occurred_field').val(moment(Number(traceStack[0].span.start_time)).format());
@@ -271,7 +285,7 @@ function displayTraceStack(traceStack) {
     }
 }
 
-function goBackToLatestTraces(userClicked) {
+function goBackToTraces(userClicked) {
     $('#span_info_panel').css('display', 'none');
     $('#latest_traces_header').addClass('active_sub_tab');
     $('#latest_traces_header').removeClass('inactive_tab');
@@ -291,7 +305,7 @@ function goBackToLatestTraces(userClicked) {
 
     if (userClicked && viewingInnerTrace) {
         viewingInnerTrace = false;
-        eb.send('ClickedGoBackToLatestTraces', {'portal_id': portalId});
+        eb.send('ClickedGoBackToTraces', {'portal_id': portalId});
     }
 }
 
