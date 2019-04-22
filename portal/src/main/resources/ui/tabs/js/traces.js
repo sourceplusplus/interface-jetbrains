@@ -345,29 +345,42 @@ function updateTime(interval) {
 }
 
 function getPrettyDuration(duration, decimalPlaces) {
+    var prettyDuration = null;
+    var postText = null;
     if (duration.months() > 0) {
         var months = duration.weeks();
         duration = duration.subtract(months, 'months');
-        return months + "mo " + (Math.round(duration.asWeeks() * 10) / 10).toFixed(decimalPlaces) + "w ago"
+        prettyDuration = months + "mo " + (Math.round(duration.asWeeks() * 10) / 10).toFixed(decimalPlaces);
+        postText = "w ago";
     } else if (duration.weeks() > 0) {
         var weeks = duration.weeks();
         duration = duration.subtract(weeks, 'weeks');
-        return weeks + "w " + (Math.round(duration.asDays() * 10) / 10).toFixed(decimalPlaces) + "d ago"
+        prettyDuration = weeks + "w " + (Math.round(duration.asDays() * 10) / 10).toFixed(decimalPlaces);
+        postText = "d ago";
     } else if (duration.days() > 0) {
         var days = duration.hours();
         duration = duration.subtract(days, 'days');
-        return days + "d " + (Math.round(duration.asHours() * 10) / 10).toFixed(decimalPlaces) + "h ago"
+        prettyDuration = days + "d " + (Math.round(duration.asHours() * 10) / 10).toFixed(decimalPlaces);
+        postText = "h ago";
     } else if (duration.hours() > 0) {
         var hours = duration.hours();
         duration = duration.subtract(hours, 'hours');
-        return hours + "h " + (Math.round(duration.asMinutes() * 10) / 10).toFixed(decimalPlaces) + "m ago"
+        prettyDuration = hours + "h " + (Math.round(duration.asMinutes() * 10) / 10).toFixed(decimalPlaces);
+        postText = "m ago";
     } else if (duration.minutes() > 0) {
         var minutes = duration.minutes();
         duration = duration.subtract(minutes, 'minutes');
-        return minutes + "m " + (Math.round(duration.asSeconds() * 10) / 10).toFixed(decimalPlaces) + "s ago"
+        prettyDuration = minutes + "m " + (Math.round(duration.asSeconds() * 10) / 10).toFixed(decimalPlaces);
+        postText = "s ago";
     } else {
-        return (Math.round(duration.asSeconds() * 10) / 10).toFixed(decimalPlaces) + "s ago"
+        prettyDuration = (Math.round(duration.asSeconds() * 10) / 10).toFixed(decimalPlaces);
+        postText = "s ago";
     }
+
+    if (prettyDuration.endsWith(".0")) {
+        prettyDuration = prettyDuration.substr(0, prettyDuration.length - 2)
+    }
+    return prettyDuration + postText;
 }
 
 $("input[type='text']").on("click", function () {
