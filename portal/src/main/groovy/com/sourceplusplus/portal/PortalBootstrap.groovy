@@ -164,7 +164,7 @@ class PortalBootstrap extends AbstractVerticle {
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, artifactMetricResult)
             })
             coreEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
-                def artifactTraceResult = Json.decodeValue(it.bodyAsMJson.toString().replace("time_frame", "order_type"), ArtifactTraceResult.class)
+                def artifactTraceResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactTraceResult.class)
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, artifactTraceResult)
             })
 
