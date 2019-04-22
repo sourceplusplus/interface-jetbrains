@@ -283,7 +283,13 @@ function displayTraceStack(traceStack) {
 
         rowHtml += '<td class="collapsing">' + spanInfo.time_took + '</td>';
         rowHtml += '<td><div class="ui red progress" id="trace_bar_' + i + '" style="margin: 0">';
-        rowHtml += '<div class="bar"></div></div></td></tr>';
+        rowHtml += '<div class="bar"></div></div></td>';
+
+        if (span.error) {
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="bug red icon"></i></td></tr>';
+        } else {
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
+        }
         $('#stack_table').append(rowHtml);
 
         $('#trace_bar_' + i).progress({
