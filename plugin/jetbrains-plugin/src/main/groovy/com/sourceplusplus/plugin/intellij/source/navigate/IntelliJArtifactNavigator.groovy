@@ -38,15 +38,10 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
         })
         vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT, { message ->
             def request = message.body() as JsonObject
-            int portalId = request.getInteger("portal_id")
-            def artifactQualifiedName = request.getString("artifact_qualified_name")
+            def artifactQualifiedName = request.getString("artifact_qualified_name") //todo: remove, get from portal
             ApplicationManager.getApplication().invokeLater({
                 IntelliJMethodGutterMark.closePortalIfOpen()
                 navigateTo(artifactQualifiedName)
-                vertx.eventBus().send(PortalViewTracker.UPDATE_PORTAL_ARTIFACT,
-                        new JsonObject().put("portal_id", portalId)
-                                .put("artifact_qualified_name", artifactQualifiedName)
-                )
 
                 def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark
                 if (sourceMark != null) {

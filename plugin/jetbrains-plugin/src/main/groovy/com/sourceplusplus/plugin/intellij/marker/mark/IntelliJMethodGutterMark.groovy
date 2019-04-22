@@ -17,6 +17,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
 import com.sourceplusplus.api.model.artifact.SourceArtifact
+import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginSourceFile
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.render.SourceArtifactGutterMarkRenderer
 import com.sourceplusplus.plugin.marker.SourceFileMarker
@@ -62,6 +63,7 @@ class IntelliJMethodGutterMark extends GutterMark {
     private final SourceArtifact sourceMethod
     private UMethod psiMethod
     private final SourceArtifactGutterMarkRenderer gutterMarkRenderer
+    private final int portalId
 
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, SourceArtifact sourceMethod, UMethod psiMethod) {
         super(sourceFileMarker)
@@ -69,6 +71,7 @@ class IntelliJMethodGutterMark extends GutterMark {
         this.sourceMethod = sourceMethod
         this.psiMethod = psiMethod
         this.gutterMarkRenderer = new SourceArtifactGutterMarkRenderer(this)
+        this.portalId = SourcePortal.registerPortalId(SourcePluginConfig.current.appUuid, sourceMethod.artifactQualifiedName())
     }
 
     static void closePortalIfOpen() {
@@ -90,10 +93,6 @@ class IntelliJMethodGutterMark extends GutterMark {
         }
 
         final int portalId = portalId
-        vertx.eventBus().send(PortalViewTracker.UPDATE_PORTAL_ARTIFACT,
-                new JsonObject().put("portal_id", portalId)
-                        .put("artifact_qualified_name", getArtifactQualifiedName())
-        )
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             void run() {
@@ -151,6 +150,11 @@ class IntelliJMethodGutterMark extends GutterMark {
         } catch (PsiInvalidElementAccessException ex) {
             return false
         }
+    }
+
+    @Override
+    int getPortalId() {
+        return portalId
     }
 
     /**

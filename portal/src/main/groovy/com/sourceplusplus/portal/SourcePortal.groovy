@@ -27,16 +27,31 @@ class SourcePortal implements Closeable {
         this.appUuid = appUuid
     }
 
+    static Optional<SourcePortal> getInternalPortal(String appUuid, String artifactQualifiedName) {
+        return Optional.ofNullable(portalMap.values().find {
+            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName &&
+                    !it.interface.externalPortal
+        })
+    }
+
+    static List<SourcePortal> getExternalPortals(String appUuid, String artifactQualifiedName) {
+        return portalMap.values().findAll {
+            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName &&
+                    it.interface.externalPortal
+        }
+    }
+
     static List<SourcePortal> getPortals(String appUuid, String artifactQualifiedName) {
         return portalMap.values().findAll {
             it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName
         }
     }
 
-    static int registerPortalId(String appUuid) {
+    static int registerPortalId(String appUuid, String artifactQualifiedName) {
         int portalId = portalIdIndex.incrementAndGet()
-        def portal = new SourcePortal(portalId, appUuid)
+        def portal = new SourcePortal(portalId, Objects.requireNonNull(appUuid))
         portal.portalUI = new PortalInterface(portalId)
+        portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalId, portal)
         return portalId
@@ -54,7 +69,7 @@ class SourcePortal implements Closeable {
         return portalId
     }
 
-    String getAppUuid(){
+    String getAppUuid() {
         return appUuid
     }
 

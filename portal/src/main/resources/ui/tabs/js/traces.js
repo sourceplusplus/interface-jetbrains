@@ -36,6 +36,7 @@ eb.onopen = function () {
     }
 
     var displayTracesHandler = appUuid + "-" + portalId + '-DisplayTraces';
+    var displayInnerTracesHandler = appUuid + "-" + portalId + '-DisplayInnerTraceStack';
     eb.registerHandler(displayTracesHandler, function (error, message) {
         var traceResult = message.body;
         if (traceResult.order_type != traceOrderType) {
@@ -89,7 +90,7 @@ eb.onopen = function () {
         $('#traces_captured').text(traceResult.traces.length);
     });
 
-    eb.registerHandler('DisplayInnerTraceStack', function (error, message) {
+    eb.registerHandler(displayInnerTracesHandler, function (error, message) {
         eb.send('PortalLogger', 'Displaying inner trace stack: ' + JSON.stringify(message));
         console.log('Displaying inner trace stack: ' + JSON.stringify(message));
         goBackToTraceStack(false);
@@ -150,22 +151,28 @@ function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, seg
     }, function (error, message) {
         eb.send('PortalLogger', 'Displaying trace span info: ' + JSON.stringify(message));
         console.log('Displaying trace span info: ' + JSON.stringify(message));
-        var spanInfo = message.body;
-        displaySpanInfo(spanInfo);
+
+        var response = message.body;
+        if (!response.triggered_navigation) {
+            $('#top_trace_table').css('display', 'none');
+            $('#trace_stack_table').css('visibility', 'visible');
+            $('#segment_id_span').css('display', 'unset');
+            $('#trace_stack_span').css('display', 'none');
+
+            $('#trace_stack_header').removeClass('active_sub_tab');
+            $('#latest_traces_header').removeClass('active_sub_tab');
+            $('#trace_stack_header').addClass('inactive_tab');
+            $('#latest_traces_header').addClass('inactive_tab');
+
+            $('#span_info_header').addClass('active_sub_tab');
+            $('#span_info_header').removeClass('inactive_tab');
+            $('#span_info_header').css('visibility', 'visible');
+
+            displaySpanInfo(response.span);
+        } else {
+            console.log('Span info click triggered navigation');
+        }
     });
-    $('#top_trace_table').css('display', 'none');
-    $('#trace_stack_table').css('visibility', 'visible');
-    $('#segment_id_span').css('display', 'unset');
-    $('#trace_stack_span').css('display', 'none');
-
-    $('#trace_stack_header').removeClass('active_sub_tab');
-    $('#latest_traces_header').removeClass('active_sub_tab');
-    $('#trace_stack_header').addClass('inactive_tab');
-    $('#latest_traces_header').addClass('inactive_tab');
-
-    $('#span_info_header').addClass('active_sub_tab');
-    $('#span_info_header').removeClass('inactive_tab');
-    $('#span_info_header').css('visibility', 'visible');
 }
 
 function displaySpanInfo(spanInfo) {

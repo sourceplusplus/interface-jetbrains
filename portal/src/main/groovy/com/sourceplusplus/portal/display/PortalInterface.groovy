@@ -64,6 +64,10 @@ class PortalInterface {
         browser.browser.dispose()
     }
 
+    boolean getExternalPortal() {
+        return externalPortal
+    }
+
     @NotNull
     JComponent getUIComponent() {
         if (!portalReady.getAndSet(true)) {
