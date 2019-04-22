@@ -1,11 +1,18 @@
 package com.sourceplusplus.portal
 
-import com.sourceplusplus.portal.display.PortalUI
+import com.sourceplusplus.portal.display.PortalInterface
 import groovy.transform.Canonical
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
+/**
+ * todo: description
+ *
+ * @version 0.2.0
+ * @since 0.2.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ */
 @Canonical
 class SourcePortal implements Closeable {
 
@@ -13,7 +20,7 @@ class SourcePortal implements Closeable {
     private static final AtomicInteger portalIdIndex = new AtomicInteger()
     private final int portalId
     private final String appUuid
-    private PortalUI portalUI
+    private PortalInterface portalUI
 
     private SourcePortal(int portalId, String appUuid) {
         this.portalId = portalId
@@ -22,14 +29,14 @@ class SourcePortal implements Closeable {
 
     static List<SourcePortal> getPortals(String appUuid, String artifactQualifiedName) {
         return portalMap.values().findAll {
-            it.appUuid == appUuid && it.portalUI.viewingPortalArtifact == artifactQualifiedName
+            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName
         }
     }
 
     static int registerPortalId(String appUuid) {
         int portalId = portalIdIndex.incrementAndGet()
         def portal = new SourcePortal(portalId, appUuid)
-        portal.portalUI = new PortalUI(portalId)
+        portal.portalUI = new PortalInterface(portalId)
 
         portalMap.put(portalId, portal)
         return portalId
@@ -39,7 +46,7 @@ class SourcePortal implements Closeable {
         return portalMap.get(portalId)
     }
 
-    PortalUI getPortalUI() {
+    PortalInterface getInterface() {
         return portalUI
     }
 

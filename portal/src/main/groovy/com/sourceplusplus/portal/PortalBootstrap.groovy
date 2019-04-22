@@ -20,7 +20,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
-import com.sourceplusplus.portal.display.PortalUI
+import com.sourceplusplus.portal.display.PortalInterface
 import com.sourceplusplus.portal.display.tabs.OverviewTab
 import com.sourceplusplus.portal.display.tabs.TracesTab
 import io.vertx.core.*
@@ -117,7 +117,7 @@ class PortalBootstrap extends AbstractVerticle {
     @Override
     void start(Future<Void> startFuture) throws Exception {
         if (pluginAvailable) {
-            PortalUI.preloadPortalUI(vertx)
+            PortalInterface.preloadPortalUI(vertx)
             SourcePortalConfig.current.appUuid = SourcePluginConfig.current.appUuid
         } else {
             registerCodecs()
@@ -164,7 +164,7 @@ class PortalBootstrap extends AbstractVerticle {
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, artifactMetricResult)
             })
             coreEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
-                def artifactTraceResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactTraceResult.class)
+                def artifactTraceResult = Json.decodeValue(it.bodyAsMJson.toString().replace("time_frame", "order_type"), ArtifactTraceResult.class)
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, artifactTraceResult)
             })
 
@@ -210,7 +210,7 @@ class PortalBootstrap extends AbstractVerticle {
 
                 //register portal
                 SourcePortal.getPortal(SourcePortal.registerPortalId(appUuid))
-                        .portalUI.viewingPortalArtifact = artifactQualifiedName
+                        .interface.viewingPortalArtifact = artifactQualifiedName
             }
         }
 

@@ -101,7 +101,7 @@ class IntelliJMethodGutterMark extends GutterMark {
 
                 JBPopupFactory popupFactory = JBPopupFactory.getInstance()
                 BalloonImpl balloon = popupFactory
-                        .createBalloonBuilder(SourcePortal.getPortal(portalId).portalUI.UIComponent)
+                        .createBalloonBuilder(SourcePortal.getPortal(portalId).interface.UIComponent)
                         .setBorderInsets(JBUI.emptyInsets())
                         .setDialogMode(true)
                         .setFillColor(JBColor.background())

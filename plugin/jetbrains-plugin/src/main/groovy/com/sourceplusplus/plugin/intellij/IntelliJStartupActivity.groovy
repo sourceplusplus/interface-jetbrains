@@ -39,7 +39,7 @@ import com.sourceplusplus.plugin.intellij.source.navigate.IntelliJArtifactNaviga
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
-import com.sourceplusplus.portal.display.PortalUI
+import com.sourceplusplus.portal.display.PortalInterface
 import io.vertx.core.Vertx
 import org.apache.log4j.AppenderSkeleton
 import org.apache.log4j.ConsoleAppender
@@ -235,19 +235,19 @@ class IntelliJStartupActivity implements StartupActivity {
             }
         })
 
-        sourcePlugin.vertx.eventBus().consumer(PortalUI.PORTAL_READY, {
+        sourcePlugin.vertx.eventBus().consumer(PortalInterface.PORTAL_READY, {
             //set portal theme
             UIManager.addPropertyChangeListener({
                 if (it.newValue instanceof IntelliJLaf) {
-                    PortalUI.updateTheme(false)
+                    PortalInterface.updateTheme(false)
                 } else {
-                    PortalUI.updateTheme(true)
+                    PortalInterface.updateTheme(true)
                 }
             })
             if (UIManager.lookAndFeel instanceof IntelliJLaf) {
-                PortalUI.updateTheme(false)
+                PortalInterface.updateTheme(false)
             } else {
-                PortalUI.updateTheme(true)
+                PortalInterface.updateTheme(true)
             }
         })
     }

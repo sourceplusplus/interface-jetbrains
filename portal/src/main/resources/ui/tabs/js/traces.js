@@ -129,7 +129,7 @@ eb.onopen = function () {
         goBackToTraceStack(false);
     });
 
-    eb.send('TracesTabOpened', {'portal_id': portalId});
+    eb.send('TracesTabOpened', {'portal_id': portalId, 'trace_order_type': traceOrderType});
 };
 
 function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, segmentId, spanId) {

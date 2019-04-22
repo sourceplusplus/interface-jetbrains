@@ -51,11 +51,14 @@ class TracesTab extends AbstractVerticle {
             log.info("Traces tab opened")
 
             if (pluginAvailable) {
-                def portalId = (it.body() as JsonObject).getInteger("portal_id")
+                def message = JsonObject.mapFrom(it.body())
+                def portalId = message.getInteger("portal_id")
                 def portal = SourcePortal.getPortal(portalId)
+                portal.interface.tracesView.orderType = TraceOrderType.valueOf(
+                        message.getString("trace_order_type").toUpperCase())
 
-                if (portal.portalUI.tracesTabRepresentation.artifactTraceResult) {
-                    vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, portal.portalUI.tracesTabRepresentation.artifactTraceResult)
+                if (portal.interface.tracesView.artifactTraceResult) {
+                    vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, portal.interface.tracesView.artifactTraceResult)
                 }
             } else {
                 def subscriptions = config().getJsonArray("artifact_subscriptions")
@@ -65,8 +68,8 @@ class TracesTab extends AbstractVerticle {
                     def artifactQualifiedName = sub.getString("artifact_qualified_name")
 
                     SourcePortal.getPortals(appUuid, artifactQualifiedName).each {
-                        if (it.portalUI.tracesTabRepresentation.artifactTraceResult) {
-                            vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, it.portalUI.tracesTabRepresentation.artifactTraceResult)
+                        if (it.interface.tracesView.artifactTraceResult) {
+                            vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, it.interface.tracesView.artifactTraceResult)
                         }
                     }
                 }
@@ -80,11 +83,10 @@ class TracesTab extends AbstractVerticle {
         vertx.eventBus().consumer(UPDATE_DISPLAYED_TRACES, {
             def artifactTraceResult = it.body() as ArtifactTraceResult
             SourcePortal.getPortals(artifactTraceResult.appUuid(), artifactTraceResult.artifactQualifiedName()).each {
-                def representation = it.portalUI.tracesTabRepresentation
                 if (!pluginAvailable
-                        || artifactTraceResult.artifactQualifiedName() == it.portalUI.viewingPortalArtifact) {
+                        || artifactTraceResult.artifactQualifiedName() == it.interface.viewingPortalArtifact) {
                     vertx.eventBus().publish(it.appUuid + "-" + it.portalId + "-DisplayTraces",
-                            new JsonObject(Json.encode(representation.artifactTraceResult = artifactTraceResult)))
+                            new JsonObject(Json.encode(artifactTraceResult)))
                     log.info("Displayed traces for artifact: " + artifactTraceResult.artifactQualifiedName()
                             + " - Trace size: " + artifactTraceResult.traces().size())
                 }
@@ -100,8 +102,8 @@ class TracesTab extends AbstractVerticle {
         //populate with latest traces from cache (if avail) on switch to traces
         vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
             def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getInteger("portal_id"))
-            if (portal.portalUI.viewingPortalArtifact != null) {
-                def representation = portal.portalUI.tracesTabRepresentation
+            if (portal.interface.viewingPortalArtifact != null) {
+                def representation = portal.interface.tracesView
                 if (representation.innerTrace) {
                     def innerTraceStackInfo = InnerTraceStackInfo.builder()
                             .innerLevel(representation.innerLevel)
@@ -135,7 +137,7 @@ class TracesTab extends AbstractVerticle {
 
         vertx.eventBus().consumer(CLICKED_GO_BACK_TO_LATEST_TRACES, {
             def portalId = (it.body() as JsonObject).getInteger("portal_id")
-            def representation = SourcePortal.getPortal(portalId).portalUI.tracesTabRepresentation
+            def representation = SourcePortal.getPortal(portalId).interface.tracesView
             if (representation.rootArtifactQualifiedName == null) {
                 representation.innerTrace = false
                 representation.innerLevel = 0
@@ -154,7 +156,7 @@ class TracesTab extends AbstractVerticle {
 
             def portalId = spanInfoRequest.getInteger("portal_id")
             def portal = SourcePortal.getPortal(portalId)
-            def representation = portal.portalUI.tracesTabRepresentation
+            def representation = portal.interface.tracesView
             def traceStack
             if (representation.innerTrace) {
                 traceStack = representation.innerTraceStack
@@ -167,7 +169,7 @@ class TracesTab extends AbstractVerticle {
                 if (span.getInteger("span_id") == spanInfoRequest.getInteger("span_id")) {
                     def spanArtifactQualifiedName = span.getString("artifact_qualified_name")
                     if (spanArtifactQualifiedName == null
-                            || spanArtifactQualifiedName == portal.portalUI.viewingPortalArtifact
+                            || spanArtifactQualifiedName == portal.interface.viewingPortalArtifact
                             || !pluginAvailable) {
                         messageHandler.reply(span)
                         log.info("Displayed trace span info: " + span)
@@ -229,7 +231,7 @@ class TracesTab extends AbstractVerticle {
                     artifactQualifiedName, globalTraceId)
 
             def portal = SourcePortal.getPortal(portalId)
-            def representation = portal.portalUI.tracesTabRepresentation
+            def representation = portal.interface.tracesView
             def traceStack = representation.getTraceStack(globalTraceId)
             if (traceStack != null) {
                 log.trace("Got trace spans: $globalTraceId from cache - Stack size: " + traceStack.size())
@@ -256,14 +258,14 @@ class TracesTab extends AbstractVerticle {
             if (pluginAvailable) {
                 def portalId = (it.body() as JsonObject).getInteger("portal_id")
                 def portal = SourcePortal.getPortal(portalId)
-                if (portal.portalUI.viewingPortalArtifact == null) {
+                if (portal.interface.viewingPortalArtifact == null) {
                     return
                 }
 
                 //subscribe (re-subscribe) to traces
                 def request = ArtifactTraceSubscribeRequest.builder()
                         .appUuid(portal.appUuid)
-                        .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
+                        .artifactQualifiedName(portal.interface.viewingPortalArtifact)
                         .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                         .build()
                 coreClient.subscribeToArtifact(request, {
@@ -305,10 +307,10 @@ class TracesTab extends AbstractVerticle {
                 .withArtifactSimpleName(removePackageAndClassName(removePackageNames(artifactTraceResult.artifactQualifiedName())))
 
         SourcePortal.getPortals(artifactTraceResult.appUuid(), artifactTraceResult.artifactQualifiedName()).each {
-            def representation = it.portalUI.tracesTabRepresentation
-            representation.artifactTraceResult = artifactTraceResult
+            def representation = it.interface.tracesView
+            representation.cacheArtifactTraceResult(artifactTraceResult)
 
-            if (!pluginAvailable || it.portalUI.viewingPortalArtifact == artifactTraceResult.artifactQualifiedName()) {
+            if (!pluginAvailable || it.interface.viewingPortalArtifact == artifactTraceResult.artifactQualifiedName()) {
                 vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, artifactTraceResult)
             }
         }

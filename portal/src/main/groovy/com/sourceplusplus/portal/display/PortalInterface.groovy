@@ -3,8 +3,8 @@ package com.sourceplusplus.portal.display
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.display.tabs.representation.OverviewTabRepresentation
-import com.sourceplusplus.portal.display.tabs.representation.TracesTabRepresentation
+import com.sourceplusplus.portal.display.tabs.views.OverviewView
+import com.sourceplusplus.portal.display.tabs.views.TracesView
 import com.teamdev.jxbrowser.chromium.swing.BrowserView
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
@@ -27,7 +27,7 @@ import java.util.zip.ZipFile
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class PortalUI {
+class PortalInterface {
 
     public static final String PORTAL_READY = "PortalReady"
 
@@ -36,52 +36,52 @@ class PortalUI {
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()
     private final int portalId
-    private final BrowserView view
-    private final OverviewTabRepresentation overviewTabRepresentation
-    private final TracesTabRepresentation tracesTabRepresentation
+    private final BrowserView browser
+    private final OverviewView overviewView
+    private final TracesView tracesView
     private boolean externalPortal
 
     public String viewingPortalArtifact //todo: better
     public QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
     public String viewingTab //todo: impl (and then better)
 
-    PortalUI(int portalId) {
+    PortalInterface(int portalId) {
         this.portalId = portalId
-        this.view = new BrowserView()
-        this.overviewTabRepresentation = new OverviewTabRepresentation()
-        this.tracesTabRepresentation = new TracesTabRepresentation()
+        this.browser = new BrowserView()
+        this.overviewView = new OverviewView()
+        this.tracesView = new TracesView(this)
     }
 
-    OverviewTabRepresentation getOverviewTabRepresentation() {
-        return overviewTabRepresentation
+    OverviewView getOverviewView() {
+        return overviewView
     }
 
-    TracesTabRepresentation getTracesTabRepresentation() {
-        return tracesTabRepresentation
+    TracesView getTracesView() {
+        return tracesView
     }
 
     void close() {
-        view.browser.dispose()
+        browser.browser.dispose()
     }
 
     @NotNull
     JComponent getUIComponent() {
         if (!portalReady.getAndSet(true)) {
-            view.setPreferredSize(new Dimension(775, 250))
-            view.browser.setSize(775, 250)
-            view.browser.addConsoleListener({
+            browser.setPreferredSize(new Dimension(775, 250))
+            browser.browser.setSize(775, 250)
+            browser.browser.addConsoleListener({
                 log.info("[PORTAL_CONSOLE] - " + it)
             })
 
             if (uiDirectory == null) {
                 createScene()
             }
-            view.browser.loadURL("file:///" + uiDirectory.absolutePath
+            browser.browser.loadURL("file:///" + uiDirectory.absolutePath
                     + "/tabs/overview.html?portal_id=$portalId&app_uuid=" + SourcePortal.getPortal(portalId).appUuid)
 
             vertx.eventBus().publish(PORTAL_READY, portalId)
         }
-        return view
+        return browser
     }
 
     static void updateTheme(boolean dark) {
@@ -115,7 +115,7 @@ class PortalUI {
         uiDirectory = File.createTempDir()
         uiDirectory.deleteOnExit()
 
-        def url = PortalUI.class.getResource("/ui")
+        def url = PortalInterface.class.getResource("/ui")
         extract(url, "/ui", uiDirectory.absolutePath)
         log.debug("Using portal ui directory: " + uiDirectory.absolutePath)
 

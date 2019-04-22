@@ -60,8 +60,8 @@ class PortalViewTracker extends AbstractVerticle {
             def artifactQualifiedName = request.getString("artifact_qualified_name")
 
             def portal = SourcePortal.getPortal(portalId)
-            if (artifactQualifiedName != portal.portalUI.viewingPortalArtifact) {
-                portal.portalUI.viewingPortalArtifact = artifactQualifiedName
+            if (artifactQualifiedName != portal.interface.viewingPortalArtifact) {
+                portal.interface.viewingPortalArtifact = artifactQualifiedName
                 vertx.eventBus().publish(CHANGED_PORTAL_ARTIFACT,
                         new JsonObject().put("portal_id", portalId)
                                 .put("artifact_qualified_name", artifactQualifiedName)
@@ -73,11 +73,11 @@ class PortalViewTracker extends AbstractVerticle {
             def portal = SourcePortal.getPortal(message.getInteger("portal_id"))
             def metricTimeFrame = QueryTimeFrame.valueOf(message.getString("metric_time_frame").toUpperCase())
 
-            if (metricTimeFrame != portal.portalUI.currentMetricTimeFrame) {
-                log.debug("Metric time frame updated to: " + (portal.portalUI.currentMetricTimeFrame = metricTimeFrame))
+            if (metricTimeFrame != portal.interface.currentMetricTimeFrame) {
+                log.debug("Metric time frame updated to: " + (portal.interface.currentMetricTimeFrame = metricTimeFrame))
                 vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME,
                         new JsonObject().put("portal_id", portal.portalId)
-                                .put("metric_time_frame", portal.portalUI.currentMetricTimeFrame.toString())
+                                .put("metric_time_frame", portal.interface.currentMetricTimeFrame.toString())
                 )
             }
         })

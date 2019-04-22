@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory
 import java.text.DecimalFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Displays general source code artifact statistics.
@@ -56,7 +55,6 @@ class OverviewTab extends AbstractVerticle {
              MetricType.ResponseTime_50Percentile]
     private final SourceCoreClient coreClient
     private final boolean pluginAvailable
-    private final Map<String, ArtifactMetricResult> metricResultCache = new ConcurrentHashMap<>()
 
     OverviewTab(SourceCoreClient coreClient, boolean pluginAvailable) {
         this.coreClient = Objects.requireNonNull(coreClient)
@@ -73,11 +71,11 @@ class OverviewTab extends AbstractVerticle {
                 def portalId = (it.body() as JsonObject).getInteger("portal_id")
                 def portal = SourcePortal.getPortal(portalId)
 
-                if (portal.portalUI.viewingPortalArtifact) {
-                    def artifactMetricResult = metricResultCache.get(portal.portalUI.viewingPortalArtifact
-                            + portal.portalUI.currentMetricTimeFrame)
+                if (portal.interface.viewingPortalArtifact) {
+                    def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(
+                            portal.interface.viewingPortalArtifact + portal.interface.currentMetricTimeFrame)
                     if (artifactMetricResult != null) {
-                        log.info("Updating overview stats from cache for artifact: " + portal.portalUI.viewingPortalArtifact)
+                        log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
                         updateStats(artifactMetricResult)
                     }
                 }
@@ -85,13 +83,16 @@ class OverviewTab extends AbstractVerticle {
                 def subscriptions = config().getJsonArray("artifact_subscriptions")
                 for (int i = 0; i < subscriptions.size(); i++) {
                     def sub = subscriptions.getJsonObject(i)
+                    def appUuid = sub.getString("app_uuid")
                     def artifactQualifiedName = sub.getString("artifact_qualified_name")
 
-                    QueryTimeFrame.values().each {
-                        def artifactMetricResult = metricResultCache.get(artifactQualifiedName + it)
-                        if (artifactMetricResult != null) {
-                            log.info("Updating overview stats from cache for artifact: " + artifactQualifiedName)
-                            updateStats(artifactMetricResult)
+                    SourcePortal.getPortals(appUuid, artifactQualifiedName).each { portal ->
+                        QueryTimeFrame.values().each {
+                            def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(artifactQualifiedName + it)
+                            if (artifactMetricResult != null) {
+                                log.info("Updating overview stats from cache for artifact: " + artifactQualifiedName)
+                                updateStats(artifactMetricResult)
+                            }
                         }
                     }
                 }
@@ -99,9 +100,11 @@ class OverviewTab extends AbstractVerticle {
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
-            metricResultCache.put(artifactMetricResult.artifactQualifiedName()
-                    + artifactMetricResult.timeFrame(), artifactMetricResult)
-            updateStats(artifactMetricResult)
+            SourcePortal.getPortals(artifactMetricResult.appUuid(), artifactMetricResult.artifactQualifiedName()).each {
+                it.interface.overviewView.metricResultCache.put(artifactMetricResult.artifactQualifiedName()
+                        + artifactMetricResult.timeFrame(), artifactMetricResult)
+                updateStats(artifactMetricResult)
+            }
         })
 
         //refresh with stats from cache (if avail) on portal opened
@@ -109,10 +112,10 @@ class OverviewTab extends AbstractVerticle {
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getInteger("portal_id"))
 
-            def artifactMetricResult = metricResultCache.get(portal.portalUI.viewingPortalArtifact
-                    + portal.portalUI.currentMetricTimeFrame)
+            def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(portal.interface.viewingPortalArtifact
+                    + portal.interface.currentMetricTimeFrame)
             if (artifactMetricResult != null) {
-                log.info("Updating overview stats from cache for artifact: " + portal.portalUI.viewingPortalArtifact)
+                log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
                 updateStats(artifactMetricResult)
             } else {
                 vertx.eventBus().publish(portal.appUuid + "-" + portal.portalId + "-ClearOverview", new JsonObject())
@@ -124,23 +127,23 @@ class OverviewTab extends AbstractVerticle {
 
             if (pluginAvailable) {
                 def portal = SourcePortal.getPortal(request.getInteger("portal_id"))
-                if (portal.portalUI.viewingPortalArtifact == null) {
+                if (portal.interface.viewingPortalArtifact == null) {
                     return
                 }
 
                 //refresh with stats from cache (if avail)
-                def artifactMetricResult = metricResultCache.get(portal.portalUI.viewingPortalArtifact
-                        + portal.portalUI.currentMetricTimeFrame)
+                def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(portal.interface.viewingPortalArtifact
+                        + portal.interface.currentMetricTimeFrame)
                 if (artifactMetricResult != null) {
-                    log.info("Updating overview stats from cache for artifact: " + portal.portalUI.viewingPortalArtifact)
+                    log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
                     updateStats(artifactMetricResult)
                 }
 
                 //subscribe (re-subscribe) to get latest stats
                 def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
                         .appUuid(SourcePortalConfig.current.appUuid)
-                        .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
-                        .timeFrame(portal.portalUI.currentMetricTimeFrame)
+                        .artifactQualifiedName(portal.interface.viewingPortalArtifact)
+                        .timeFrame(portal.interface.currentMetricTimeFrame)
                         .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
                 coreClient.subscribeToArtifact(subscribeRequest, {
                     if (it.succeeded()) {
@@ -150,7 +153,7 @@ class OverviewTab extends AbstractVerticle {
                     }
                 })
             } else {
-                metricResultCache.values().each { updateStats(it) }
+                //portal.interface.overviewTabRepresentation.metricResultCache.values().each { updateStats(it) }
 
                 //subscribe (re-subscribe) to get latest stats
                 def subscriptions = config().getJsonArray("artifact_subscriptions")
