@@ -267,7 +267,11 @@ class SkywalkingIntegration extends AbstractVerticle {
                 for (int i = 0; i < traces.size(); i++) {
                     traceList.add(Json.decodeValue(traces.getJsonObject(i).toString(), Trace.class))
                 }
-                traceList.sort({ it.start() })
+                if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
+                    traceList.sort({ it.start() })
+                } else if (traceQuery.orderType() == TraceOrderType.SLOWEST_TRACES) {
+                    traceList.sort({ it.duration() })
+                }
 
                 def traceQueryResult = TraceQueryResult.builder()
                         .traces(traceList)

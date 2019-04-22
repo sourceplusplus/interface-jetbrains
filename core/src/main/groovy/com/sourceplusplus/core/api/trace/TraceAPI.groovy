@@ -212,7 +212,11 @@ class TraceAPI extends AbstractVerticle {
                                     (it.result().list() as List<TraceQueryResult>).each {
                                         totalTraces.addAll(it.traces())
                                     }
-                                    totalTraces.sort({ it.start() })
+                                    if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
+                                        totalTraces.sort({ it.start() })
+                                    } else if (traceQuery.orderType() == TraceOrderType.SLOWEST_TRACES) {
+                                        totalTraces.sort({ it.duration() })
+                                    }
 
                                     def finalResult = TraceQueryResult.builder()
                                             .addAllTraces(totalTraces)
