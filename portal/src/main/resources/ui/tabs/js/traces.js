@@ -75,7 +75,7 @@ eb.onopen = function () {
                 var now = moment();
                 var timeOccurredDuration = moment.duration(now.diff(occurred));
                 rowHtml += '<td class="trace_time collapsing" id="trace_time_' + htmlTraceId + '" data-value="' + trace.start + '" style="text-align: center">'
-                    + getPrettyDuration(timeOccurredDuration) + '</td>';
+                    + getPrettyDuration(timeOccurredDuration, 1) + '</td>';
                 rowHtml += '<td class="collapsing">' + trace.pretty_duration + '</td>';
 
                 if (trace.error) {
@@ -338,29 +338,29 @@ function updateTime(interval) {
     eb.send('SetMetricTimeFrame', {'portal_id': portalId, 'metric_time_frame': interval});
 }
 
-function getPrettyDuration(duration) {
+function getPrettyDuration(duration, decimalPlaces) {
     if (duration.months() > 0) {
         var months = duration.weeks();
         duration = duration.subtract(months, 'months');
-        return months + "mo " + (Math.round(duration.asWeeks() * 10) / 10).toFixed(2) + "w ago"
+        return months + "mo " + (Math.round(duration.asWeeks() * 10) / 10).toFixed(decimalPlaces) + "w ago"
     } else if (duration.weeks() > 0) {
         var weeks = duration.weeks();
         duration = duration.subtract(weeks, 'weeks');
-        return weeks + "w " + (Math.round(duration.asDays() * 10) / 10).toFixed(2) + "d ago"
+        return weeks + "w " + (Math.round(duration.asDays() * 10) / 10).toFixed(decimalPlaces) + "d ago"
     } else if (duration.days() > 0) {
         var days = duration.hours();
         duration = duration.subtract(days, 'days');
-        return days + "d " + (Math.round(duration.asHours() * 10) / 10).toFixed(2) + "h ago"
+        return days + "d " + (Math.round(duration.asHours() * 10) / 10).toFixed(decimalPlaces) + "h ago"
     } else if (duration.hours() > 0) {
         var hours = duration.hours();
         duration = duration.subtract(hours, 'hours');
-        return hours + "h " + (Math.round(duration.asMinutes() * 10) / 10).toFixed(2) + "m ago"
+        return hours + "h " + (Math.round(duration.asMinutes() * 10) / 10).toFixed(decimalPlaces) + "m ago"
     } else if (duration.minutes() > 0) {
         var minutes = duration.minutes();
         duration = duration.subtract(minutes, 'minutes');
-        return minutes + "m " + (Math.round(duration.asSeconds() * 10) / 10).toFixed(2) + "s ago"
+        return minutes + "m " + (Math.round(duration.asSeconds() * 10) / 10).toFixed(decimalPlaces) + "s ago"
     } else {
-        return (Math.round(duration.asSeconds() * 10) / 10).toFixed(2) + "s ago"
+        return (Math.round(duration.asSeconds() * 10) / 10).toFixed(decimalPlaces) + "s ago"
     }
 }
 
@@ -374,7 +374,7 @@ function updateOccurredLabels() {
             var occurred = moment(Number(traceTime.dataset["value"]));
             var now = moment();
             var timeOccurredDuration = moment.duration(now.diff(occurred));
-            traceTime.innerText = getPrettyDuration(timeOccurredDuration);
+            traceTime.innerText = getPrettyDuration(timeOccurredDuration, 1);
         }
     });
 }
