@@ -52,6 +52,14 @@ class PortalInterface {
         this.tracesView = new TracesView(this)
     }
 
+    void loadPage(String page) {
+        if (!portalReady.getAndSet(true)) {
+            initPortal()
+        }
+        browser.browser.loadURL("file:///" + uiDirectory.absolutePath
+                + "/tabs/" + page + "?portal_id=$portalId&app_uuid=" + SourcePortal.getPortal(portalId).appUuid)
+    }
+
     OverviewView getOverviewView() {
         return overviewView
     }
@@ -71,21 +79,25 @@ class PortalInterface {
     @NotNull
     JComponent getUIComponent() {
         if (!portalReady.getAndSet(true)) {
-            browser.setPreferredSize(new Dimension(775, 250))
-            browser.browser.setSize(775, 250)
-            browser.browser.addConsoleListener({
-                log.info("[PORTAL_CONSOLE] - " + it)
-            })
-
-            if (uiDirectory == null) {
-                createScene()
-            }
-            browser.browser.loadURL("file:///" + uiDirectory.absolutePath
-                    + "/tabs/overview.html?portal_id=$portalId&app_uuid=" + SourcePortal.getPortal(portalId).appUuid)
-
-            vertx.eventBus().publish(PORTAL_READY, portalId)
+            initPortal()
         }
         return browser
+    }
+
+    private void initPortal() {
+        browser.setPreferredSize(new Dimension(775, 250))
+        browser.browser.setSize(775, 250)
+        browser.browser.addConsoleListener({
+            log.info("[PORTAL_CONSOLE] - " + it)
+        })
+
+        if (uiDirectory == null) {
+            createScene()
+        }
+        browser.browser.loadURL("file:///" + uiDirectory.absolutePath
+                + "/tabs/overview.html?portal_id=$portalId&app_uuid=" + SourcePortal.getPortal(portalId).appUuid)
+
+        vertx.eventBus().publish(PORTAL_READY, portalId)
     }
 
     static void updateTheme(boolean dark) {

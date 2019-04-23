@@ -10,7 +10,7 @@ import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import com.sourceplusplus.plugin.source.navigate.ArtifactNavigator
-import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
+import com.sourceplusplus.portal.SourcePortal
 import io.vertx.core.json.JsonObject
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
@@ -38,9 +38,12 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
         })
         vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT, { message ->
             def request = message.body() as JsonObject
+            def portal = SourcePortal.getPortal(request.getInteger("portal_id"))
             def artifactQualifiedName = request.getString("artifact_qualified_name") //todo: remove, get from portal
             ApplicationManager.getApplication().invokeLater({
                 IntelliJMethodGutterMark.closePortalIfOpen()
+
+                portal.interface.loadPage("traces.html")
                 navigateTo(artifactQualifiedName)
 
                 def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark

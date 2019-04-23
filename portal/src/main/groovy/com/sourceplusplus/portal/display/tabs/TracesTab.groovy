@@ -10,6 +10,7 @@ import com.sourceplusplus.portal.PortalBootstrap
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import io.vertx.core.AbstractVerticle
+import io.vertx.core.eventbus.Message
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -52,15 +53,7 @@ class TracesTab extends AbstractVerticle {
             log.info("Traces tab opened")
 
             if (pluginAvailable) {
-                def message = JsonObject.mapFrom(it.body())
-                def portalId = message.getInteger("portal_id")
-                def portal = SourcePortal.getPortal(portalId)
-                portal.interface.tracesView.orderType = TraceOrderType.valueOf(
-                        message.getString("trace_order_type").toUpperCase())
-
-                if (portal.interface.tracesView.artifactTraceResult) {
-                    vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, portal.interface.tracesView.artifactTraceResult)
-                }
+                triggerPortalOpened(it)
             } else {
                 def subscriptions = config().getJsonArray("artifact_subscriptions")
                 for (int i = 0; i < subscriptions.size(); i++) {
@@ -102,22 +95,7 @@ class TracesTab extends AbstractVerticle {
 
         //populate with latest traces from cache (if avail) on switch to traces
         vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
-            def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getInteger("portal_id"))
-            if (portal.interface.viewingPortalArtifact != null) {
-                def representation = portal.interface.tracesView
-                if (representation.innerTrace) {
-                    def innerTraceStackInfo = InnerTraceStackInfo.builder()
-                            .innerLevel(representation.innerLevel)
-                            .traceStack(representation.innerTraceStack).build()
-                    vertx.eventBus().publish(portal.appUuid + "-" + portal.portalId + "-DisplayInnerTraceStack",
-                            new JsonObject(Json.encode(innerTraceStackInfo))
-                    )
-                    log.info("Displayed inner trace stack. Stack size: " + representation.innerTraceStack.size())
-                }
-                if (representation.artifactTraceResult != null) {
-                    vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, representation.artifactTraceResult)
-                }
-            }
+            triggerPortalOpened(it)
         })
 
         //user clicked into trace stack
@@ -306,6 +284,23 @@ class TracesTab extends AbstractVerticle {
             }
         })
         log.info("{} started", getClass().getSimpleName())
+    }
+
+    private void triggerPortalOpened(Message<Object> it) {
+        def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getInteger("portal_id"))
+        def representation = portal.interface.tracesView
+        if (representation.innerTrace) {
+            def innerTraceStackInfo = InnerTraceStackInfo.builder()
+                    .innerLevel(representation.innerLevel)
+                    .traceStack(representation.innerTraceStack).build()
+            vertx.eventBus().publish(portal.appUuid + "-" + portal.portalId + "-DisplayInnerTraceStack",
+                    new JsonObject(Json.encode(innerTraceStackInfo))
+            )
+            log.info("Displayed inner trace stack. Stack size: " + representation.innerTraceStack.size())
+        }
+        if (representation.artifactTraceResult != null) {
+            vertx.eventBus().send(UPDATE_DISPLAYED_TRACES, representation.artifactTraceResult)
+        }
     }
 
     private void handleArtifactTraceResult(ArtifactTraceResult artifactTraceResult) {
