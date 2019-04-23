@@ -27,6 +27,7 @@ class PortalViewTracker extends AbstractVerticle {
     public static final String CLOSED_PORTAL = "ClosedPortal"
     public static final String CHANGED_PORTAL_ARTIFACT = "ChangedPortalArtifact"
     public static final String UPDATED_METRIC_TIME_FRAME = "UpdatedMetricTimeFrame"
+    public static final String CLICKED_VIEW_AS_EXTERNAL_PORTAL = "ClickedViewAsExternalPortal"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
 
@@ -35,6 +36,12 @@ class PortalViewTracker extends AbstractVerticle {
         //user wants to open portal
         vertx.eventBus().consumer(CAN_OPEN_PORTAL, { messageHandler ->
             messageHandler.reply(true)
+        })
+
+        //user wants a new external portal
+        vertx.eventBus().consumer(CLICKED_VIEW_AS_EXTERNAL_PORTAL, { messageHandler ->
+            def portal = SourcePortal.getPortal(JsonObject.mapFrom(messageHandler.body()).getString("portal_uuid"))
+            messageHandler.reply(new JsonObject().put("portal_uuid", portal.clone().portalUuid))
         })
 
         //user opened portal

@@ -75,4 +75,9 @@ class SourcePortal implements Closeable {
     void close() throws IOException {
         portalUI.close()
     }
+
+    @Override
+    SourcePortal clone() {
+        return getPortal(register(appUuid, portalUI.viewingPortalArtifact))
+    }
 }

@@ -24,3 +24,11 @@ function findGetParameter(parameterName) {
         });
     return result;
 }
+
+function clickedViewAsExternalPortal() {
+    eb.send('ClickedViewAsExternalPortal', {
+        'portal_uuid': portalUuid
+    }, function (error, message) {
+        window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid, '_blank');
+    });
+}
