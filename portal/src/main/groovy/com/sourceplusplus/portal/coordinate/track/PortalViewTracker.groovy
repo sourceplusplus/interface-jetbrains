@@ -56,27 +56,27 @@ class PortalViewTracker extends AbstractVerticle {
 
         vertx.eventBus().consumer(UPDATE_PORTAL_ARTIFACT, {
             def request = JsonObject.mapFrom(it.body())
-            def portalId = request.getInteger("portal_id")
+            def portalUuid = request.getString("portal_uuid")
             def artifactQualifiedName = request.getString("artifact_qualified_name")
 
-            def portal = SourcePortal.getPortal(portalId)
+            def portal = SourcePortal.getPortal(portalUuid)
             if (artifactQualifiedName != portal.interface.viewingPortalArtifact) {
                 portal.interface.viewingPortalArtifact = artifactQualifiedName
                 vertx.eventBus().publish(CHANGED_PORTAL_ARTIFACT,
-                        new JsonObject().put("portal_id", portalId)
+                        new JsonObject().put("portal_uuid", portalUuid)
                                 .put("artifact_qualified_name", artifactQualifiedName)
                 )
             }
         })
         vertx.eventBus().consumer("SetMetricTimeFrame", {
             def message = JsonObject.mapFrom(it.body())
-            def portal = SourcePortal.getPortal(message.getInteger("portal_id"))
+            def portal = SourcePortal.getPortal(message.getString("portal_uuid"))
             def metricTimeFrame = QueryTimeFrame.valueOf(message.getString("metric_time_frame").toUpperCase())
 
             if (metricTimeFrame != portal.interface.currentMetricTimeFrame) {
                 log.debug("Metric time frame updated to: " + (portal.interface.currentMetricTimeFrame = metricTimeFrame))
                 vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME,
-                        new JsonObject().put("portal_id", portal.portalId)
+                        new JsonObject().put("portal_uuid", portal.portalUuid)
                                 .put("metric_time_frame", portal.interface.currentMetricTimeFrame.toString())
                 )
             }

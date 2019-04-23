@@ -103,10 +103,10 @@ var currentTimeFrame = "LAST_15_MINUTES";
 eb.onopen = function () {
     console.log("Source++ bridge connected");
 
-    var clearOverviewHandler = appUuid + "-" + portalId + '-ClearOverview';
-    var displayCardHandler = appUuid + "-" + portalId + '-DisplayCard';
-    var updateChartHandler = appUuid + "-" + portalId + '-UpdateChart';
-    var displayStatsHandler = appUuid + "-" + portalId + '-DisplayStats';
+    var clearOverviewHandler = portalUuid + '-ClearOverview';
+    var displayCardHandler = portalUuid + '-DisplayCard';
+    var updateChartHandler = portalUuid + '-UpdateChart';
+    var displayStatsHandler = portalUuid + '-DisplayStats';
     eb.registerHandler(clearOverviewHandler, function (error, message) {
         console.log("Clearing overview");
         $('#quick_stats_min').text("n/a");
@@ -212,7 +212,7 @@ eb.onopen = function () {
         eb.send('PortalLogger', 'Set initial time frame to: ' + timeFrame);
     }
 
-    eb.send('OverviewTabOpened', {'portal_id': portalId});
+    eb.send('OverviewTabOpened', {'portal_uuid': portalUuid});
 };
 
 $('#dropdown').dropdown();
@@ -237,7 +237,7 @@ $('#frequency_tab').click(function () {
 function updateTime(interval) {
     currentTimeFrame = interval.toUpperCase();
     localStorage.setItem('spp.metric_time_frame', interval);
-    eb.send('SetMetricTimeFrame', {'portal_id': portalId, 'metric_time_frame': interval});
+    eb.send('SetMetricTimeFrame', {'portal_uuid': portalUuid, 'metric_time_frame': interval});
 
     if (interval === 'last_5_minutes') {
         $('#current_metric_time_frame').text('LAST 5 MINUTES');

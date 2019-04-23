@@ -63,7 +63,7 @@ class IntelliJMethodGutterMark extends GutterMark {
     private final SourceArtifact sourceMethod
     private UMethod psiMethod
     private final SourceArtifactGutterMarkRenderer gutterMarkRenderer
-    private final int portalId
+    private final String portalUuid
 
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, SourceArtifact sourceMethod, UMethod psiMethod) {
         super(sourceFileMarker)
@@ -71,7 +71,7 @@ class IntelliJMethodGutterMark extends GutterMark {
         this.sourceMethod = sourceMethod
         this.psiMethod = psiMethod
         this.gutterMarkRenderer = new SourceArtifactGutterMarkRenderer(this)
-        this.portalId = SourcePortal.registerPortalId(SourcePluginConfig.current.appUuid, sourceMethod.artifactQualifiedName())
+        this.portalUuid = SourcePortal.register(SourcePluginConfig.current.appUuid, sourceMethod.artifactQualifiedName())
     }
 
     static void closePortalIfOpen() {
@@ -92,7 +92,7 @@ class IntelliJMethodGutterMark extends GutterMark {
             return
         }
 
-        final int portalId = portalId
+        final String portalUuid = this.portalUuid
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             void run() {
@@ -100,14 +100,14 @@ class IntelliJMethodGutterMark extends GutterMark {
 
                 JBPopupFactory popupFactory = JBPopupFactory.getInstance()
                 BalloonImpl balloon = popupFactory
-                        .createBalloonBuilder(SourcePortal.getPortal(portalId).interface.UIComponent)
+                        .createBalloonBuilder(SourcePortal.getPortal(portalUuid).interface.UIComponent)
                         .setBorderInsets(JBUI.emptyInsets())
                         .setDialogMode(true)
                         .setFillColor(JBColor.background())
                         .setAnimationCycle(0)
                         .createBalloon() as BalloonImpl
                 Disposer.register(editor.project, balloon)
-                balloon.addListener(new PortalPopupListener(vertx, portalId))
+                balloon.addListener(new PortalPopupListener(vertx, portalUuid))
 
                 Point portalPoint = editor.visualPositionToXY(editor.offsetToVisualPosition(
                         editor.document.getLineStartOffset(lineNumber)))
@@ -127,16 +127,16 @@ class IntelliJMethodGutterMark extends GutterMark {
                 //dispose popup when mouse hovers off portal
                 if (hideOnMouseMotion) {
                     editor.contentComponent.addMouseMotionListener(
-                            mouseMotionListener = new PortalMouseMotionListener(portalId))
+                            mouseMotionListener = new PortalMouseMotionListener(portalUuid))
                 }
 
                 if (hideOnMouseMotion) {
                     //dispose popup when code has been scrolled
-                    editor.scrollingModel.addVisibleAreaListener(new PortalVisibleAreaListener(portalId))
+                    editor.scrollingModel.addVisibleAreaListener(new PortalVisibleAreaListener(portalUuid))
                 } else {
                     //todo: smarter; it thinks it was scrolled after jumping to method; added delay :/
                     vertx.setTimer(1000, {
-                        editor.scrollingModel.addVisibleAreaListener(new PortalVisibleAreaListener(portalId))
+                        editor.scrollingModel.addVisibleAreaListener(new PortalVisibleAreaListener(portalUuid))
                     })
                 }
             }
@@ -153,8 +153,8 @@ class IntelliJMethodGutterMark extends GutterMark {
     }
 
     @Override
-    int getPortalId() {
-        return portalId
+    String getPortalUuid() {
+        return portalUuid
     }
 
     /**
@@ -250,18 +250,18 @@ class IntelliJMethodGutterMark extends GutterMark {
     private class PortalPopupListener implements JBPopupListener {
 
         private final Vertx vertx
-        private final int portalId
+        private final String portalUuid
 
-        PortalPopupListener(Vertx vertx, int portalId) {
+        PortalPopupListener(Vertx vertx, String portalUuid) {
             this.vertx = Objects.requireNonNull(vertx)
-            this.portalId = portalId
+            this.portalUuid = portalUuid
         }
 
         @Override
         void beforeShown(LightweightWindowEvent event1) {
-            if (IntelliJMethodGutterMark.this.portalId == portalId) {
+            if (IntelliJMethodGutterMark.this.portalUuid == portalUuid) {
                 vertx.eventBus().publish(PortalViewTracker.OPENED_PORTAL,
-                        new JsonObject().put("portal_id", portalId).put("artifact_qualified_name",
+                        new JsonObject().put("portal_uuid", portalUuid).put("artifact_qualified_name",
                                 IntelliJMethodGutterMark.this.sourceMethod.artifactQualifiedName())
                 )
             }
@@ -269,9 +269,9 @@ class IntelliJMethodGutterMark extends GutterMark {
 
         @Override
         void onClosed(LightweightWindowEvent event1) {
-            if (IntelliJMethodGutterMark.this.portalId == portalId) {
+            if (IntelliJMethodGutterMark.this.portalUuid == portalUuid) {
                 vertx.eventBus().publish(PortalViewTracker.CLOSED_PORTAL,
-                        new JsonObject().put("portal_id", portalId).put("artifact_qualified_name",
+                        new JsonObject().put("portal_uuid", portalUuid).put("artifact_qualified_name",
                                 IntelliJMethodGutterMark.this.sourceMethod.artifactQualifiedName())
                 )
                 IntelliJMethodGutterMark.this.showingPortalWindow.set(false)
@@ -282,15 +282,15 @@ class IntelliJMethodGutterMark extends GutterMark {
 
     private class PortalVisibleAreaListener implements VisibleAreaListener {
 
-        private final int portalId
+        private final String portalUuid
 
-        PortalVisibleAreaListener(int portalId) {
-            this.portalId = portalId
+        PortalVisibleAreaListener(String portalUuid) {
+            this.portalUuid = portalUuid
         }
 
         @Override
         void visibleAreaChanged(VisibleAreaEvent e) {
-            if (currentShowingBalloon != null && IntelliJMethodGutterMark.this.portalId == portalId) {
+            if (currentShowingBalloon != null && IntelliJMethodGutterMark.this.portalUuid == portalUuid) {
                 currentShowingBalloon.hide()
                 currentShowingBalloon = null
             }
@@ -299,10 +299,10 @@ class IntelliJMethodGutterMark extends GutterMark {
 
     private class PortalMouseMotionListener implements MouseMotionListener {
 
-        private final int portalId
+        private final String portalUuid
 
-        PortalMouseMotionListener(int portalId) {
-            this.portalId = portalId
+        PortalMouseMotionListener(String portalUuid) {
+            this.portalUuid = portalUuid
         }
 
         @Override
@@ -312,7 +312,7 @@ class IntelliJMethodGutterMark extends GutterMark {
         @Override
         void mouseMoved(MouseEvent e2) {
             //13 pixels on x coord puts mouse past gutter
-            if (currentShowingBalloon != null && e2.point.x > 13 && IntelliJMethodGutterMark.this.portalId == portalId) {
+            if (currentShowingBalloon != null && e2.point.x > 13 && IntelliJMethodGutterMark.this.portalUuid == portalUuid) {
                 currentShowingBalloon.hide()
                 currentShowingBalloon = null
             }

@@ -2,7 +2,6 @@ package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
-import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
 import com.teamdev.jxbrowser.chromium.swing.BrowserView
@@ -35,7 +34,7 @@ class PortalInterface {
     private static File uiDirectory
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()
-    private final int portalId
+    private final String portalUuid
     private final BrowserView browser
     private final OverviewView overviewView
     private final TracesView tracesView
@@ -45,8 +44,8 @@ class PortalInterface {
     public QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
     public String viewingTab //todo: impl (and then better)
 
-    PortalInterface(int portalId) {
-        this.portalId = portalId
+    PortalInterface(String portalUuid) {
+        this.portalUuid = portalUuid
         this.browser = new BrowserView()
         this.overviewView = new OverviewView()
         this.tracesView = new TracesView(this)
@@ -56,8 +55,7 @@ class PortalInterface {
         if (!portalReady.getAndSet(true)) {
             initPortal()
         }
-        browser.browser.loadURL("file:///" + uiDirectory.absolutePath
-                + "/tabs/" + page + "?portal_id=$portalId&app_uuid=" + SourcePortal.getPortal(portalId).appUuid)
+        browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid")
     }
 
     OverviewView getOverviewView() {
@@ -94,10 +92,8 @@ class PortalInterface {
         if (uiDirectory == null) {
             createScene()
         }
-        browser.browser.loadURL("file:///" + uiDirectory.absolutePath
-                + "/tabs/overview.html?portal_id=$portalId&app_uuid=" + SourcePortal.getPortal(portalId).appUuid)
-
-        vertx.eventBus().publish(PORTAL_READY, portalId)
+        browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
+        vertx.eventBus().publish(PORTAL_READY, portalUuid)
     }
 
     static void updateTheme(boolean dark) {

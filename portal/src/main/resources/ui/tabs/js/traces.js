@@ -35,8 +35,8 @@ eb.onopen = function () {
         updateTime(timeFrame);
     }
 
-    var displayTracesHandler = appUuid + "-" + portalId + '-DisplayTraces';
-    var displayInnerTracesHandler = appUuid + "-" + portalId + '-DisplayInnerTraceStack';
+    var displayTracesHandler = portalUuid + '-DisplayTraces';
+    var displayInnerTracesHandler = portalUuid + '-DisplayInnerTraceStack';
     eb.registerHandler(displayTracesHandler, function (error, message) {
         var traceResult = message.body;
         if (traceResult.order_type != traceOrderType) {
@@ -132,20 +132,20 @@ eb.onopen = function () {
         }
     });
 
-    eb.registerHandler(appUuid + '-' + portalId + '-ClearTraceStack', function (error, message) {
+    eb.registerHandler(appUuid + '-' + portalUuid + '-ClearTraceStack', function (error, message) {
         goBackToTraces(false);
     });
 
-    eb.registerHandler(appUuid + '-' + portalId + '-ClearSpanInfo', function (error, message) {
+    eb.registerHandler(appUuid + '-' + portalUuid + '-ClearSpanInfo', function (error, message) {
         goBackToTraceStack(false);
     });
 
-    eb.send('TracesTabOpened', {'portal_id': portalId, 'trace_order_type': traceOrderType});
+    eb.send('TracesTabOpened', {'portal_uuid': portalUuid, 'trace_order_type': traceOrderType});
 };
 
 function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, segmentId, spanId) {
     eb.send('ClickedDisplaySpanInfo', {
-        'portal_id': portalId,
+        'portal_uuid': portalUuid,
         'app_uuid': appUuid, 'artifact_qualified_name': rootArtifactQualifiedName,
         'trace_id': traceId, 'segment_id': segmentId, 'span_id': spanId
     }, function (error, message) {
@@ -232,7 +232,7 @@ function displaySpanInfo(spanInfo) {
 
 function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId) {
     eb.send('ClickedDisplayTraceStack', {
-        'portal_id': portalId,
+        'portal_uuid': portalUuid,
         'app_uuid': appUuid,
         'artifact_qualified_name': artifactQualifiedName,
         'trace_id': globalTraceId
@@ -318,7 +318,7 @@ function goBackToTraces(userClicked) {
 
     if (userClicked && viewingInnerTrace) {
         viewingInnerTrace = false;
-        eb.send('ClickedGoBackToTraces', {'portal_id': portalId});
+        eb.send('ClickedGoBackToTraces', {'portal_uuid': portalUuid});
     }
 }
 
@@ -341,7 +341,7 @@ function goBackToTraceStack(userClicked) {
 
 function updateTime(interval) {
     localStorage.setItem('spp.metric_time_frame', interval);
-    eb.send('SetMetricTimeFrame', {'portal_id': portalId, 'metric_time_frame': interval});
+    eb.send('SetMetricTimeFrame', {'portal_uuid': portalUuid, 'metric_time_frame': interval});
 }
 
 function getPrettyDuration(duration, decimalPlaces) {

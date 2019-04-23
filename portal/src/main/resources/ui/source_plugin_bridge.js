@@ -1,16 +1,16 @@
 var eb = new EventBus('http://localhost:7529/eventbus');
 eb.enableReconnect(true);
 
-var getPortalId = findGetParameter("portal_id");
+var getPortalUuid = findGetParameter("portal_uuid");
 var getAppUuid = findGetParameter("app_uuid");
-var portalId = (getPortalId) ? parseInt(getPortalId) : 1;
+var portalUuid = (getPortalUuid) ? getPortalUuid : null;
 var appUuid = (getAppUuid) ? getAppUuid : null;
 var traceOrderType = findGetParameter("order_type");
 if (traceOrderType) {
     traceOrderType = traceOrderType.toUpperCase();
 }
 
-var mainGetQuery = '?portal_id=' + portalId + '&app_uuid=' + appUuid;
+var mainGetQuery = '?portal_uuid=' + portalUuid;
 
 function findGetParameter(parameterName) {
     var result = null,

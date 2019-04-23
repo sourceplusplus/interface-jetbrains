@@ -68,8 +68,8 @@ class OverviewTab extends AbstractVerticle {
             log.info("Overview tab opened")
 
             if (pluginAvailable) {
-                def portalId = (it.body() as JsonObject).getInteger("portal_id")
-                def portal = SourcePortal.getPortal(portalId)
+                def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
+                def portal = SourcePortal.getPortal(portalUuid)
 
                 if (portal.interface.viewingPortalArtifact) {
                     def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(
@@ -110,7 +110,7 @@ class OverviewTab extends AbstractVerticle {
         //refresh with stats from cache (if avail) on portal opened
         vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
             def request = JsonObject.mapFrom(it.body())
-            def portal = SourcePortal.getPortal(request.getInteger("portal_id"))
+            def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
 
             def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(portal.interface.viewingPortalArtifact
                     + portal.interface.currentMetricTimeFrame)
@@ -118,7 +118,7 @@ class OverviewTab extends AbstractVerticle {
                 log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
                 updateStats(artifactMetricResult)
             } else {
-                vertx.eventBus().publish(portal.appUuid + "-" + portal.portalId + "-ClearOverview", new JsonObject())
+                vertx.eventBus().publish(portal.portalUuid + "-ClearOverview", new JsonObject())
             }
         })
 
@@ -126,7 +126,7 @@ class OverviewTab extends AbstractVerticle {
             def request = JsonObject.mapFrom(it.body())
 
             if (pluginAvailable) {
-                def portal = SourcePortal.getPortal(request.getInteger("portal_id"))
+                def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
                 if (portal.interface.viewingPortalArtifact == null) {
                     return
                 }
@@ -235,9 +235,8 @@ class OverviewTab extends AbstractVerticle {
                 .build()
 
         SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-            def portalId = it.portalId
-            def appUuid = it.appUuid
-            vertx.eventBus().publish("$appUuid-$portalId-UpdateChart",
+            def portalUuid = it.portalUuid
+            vertx.eventBus().publish("$portalUuid-UpdateChart",
                     new JsonObject(Json.encode(splintChart)))
         }
     }
@@ -269,9 +268,8 @@ class OverviewTab extends AbstractVerticle {
         }
 
         SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-            def appUuid = it.appUuid
-            def portalId = it.portalId
-            vertx.eventBus().publish("$appUuid-$portalId-DisplayStats",
+            def portalUuid = it.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayStats",
                     new JsonObject(Json.encode(formattedStats.build())))
         }
     }
@@ -314,9 +312,8 @@ class OverviewTab extends AbstractVerticle {
                     .barGraphData(percents as double[])
                     .build()
             SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def appUuid = it.appUuid
-                def portalId = it.portalId
-                vertx.eventBus().publish("$appUuid-$portalId-DisplayCard",
+                def portalUuid = it.portalUuid
+                vertx.eventBus().publish("$portalUuid-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
         } else if (artifactMetrics.metricType() == MetricType.ResponseTime_Average) {
@@ -327,9 +324,8 @@ class OverviewTab extends AbstractVerticle {
                     .barGraphData(percents as double[])
                     .build()
             SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def appUuid = it.appUuid
-                def portalId = it.portalId
-                vertx.eventBus().publish("$appUuid-$portalId-DisplayCard",
+                def portalUuid = it.portalUuid
+                vertx.eventBus().publish("$portalUuid-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
         } else if (artifactMetrics.metricType() == MetricType.ServiceLevelAgreement_Average) {
@@ -340,9 +336,8 @@ class OverviewTab extends AbstractVerticle {
                     .barGraphData(percents as double[])
                     .build()
             SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def appUuid = it.appUuid
-                def portalId = it.portalId
-                vertx.eventBus().publish("$appUuid-$portalId-DisplayCard",
+                def portalUuid = it.portalUuid
+                vertx.eventBus().publish("$portalUuid-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
         } else {

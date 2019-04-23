@@ -4,7 +4,6 @@ import com.sourceplusplus.portal.display.PortalInterface
 import groovy.transform.Canonical
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * todo: description
@@ -16,14 +15,13 @@ import java.util.concurrent.atomic.AtomicInteger
 @Canonical
 class SourcePortal implements Closeable {
 
-    private static final Map<Integer, SourcePortal> portalMap = new ConcurrentHashMap<>()
-    private static final AtomicInteger portalIdIndex = new AtomicInteger()
-    private final int portalId
+    private static final Map<String, SourcePortal> portalMap = new ConcurrentHashMap<>()
+    private final String portalUuid
     private final String appUuid
     private PortalInterface portalUI
 
-    private SourcePortal(int portalId, String appUuid) {
-        this.portalId = portalId
+    private SourcePortal(String portalUuid, String appUuid) {
+        this.portalUuid = portalUuid
         this.appUuid = appUuid
     }
 
@@ -47,26 +45,26 @@ class SourcePortal implements Closeable {
         }
     }
 
-    static int registerPortalId(String appUuid, String artifactQualifiedName) {
-        int portalId = portalIdIndex.incrementAndGet()
-        def portal = new SourcePortal(portalId, Objects.requireNonNull(appUuid))
-        portal.portalUI = new PortalInterface(portalId)
+    static String register(String appUuid, String artifactQualifiedName) {
+        def portalUuid = UUID.randomUUID().toString()
+        def portal = new SourcePortal(portalUuid, Objects.requireNonNull(appUuid))
+        portal.portalUI = new PortalInterface(portalUuid)
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
-        portalMap.put(portalId, portal)
-        return portalId
+        portalMap.put(portalUuid, portal)
+        return portalUuid
     }
 
-    static SourcePortal getPortal(int portalId) {
-        return portalMap.get(portalId)
+    static SourcePortal getPortal(String portalUuid) {
+        return portalMap.get(portalUuid)
     }
 
     PortalInterface getInterface() {
         return portalUI
     }
 
-    int getPortalId() {
-        return portalId
+    String getPortalUuid() {
+        return portalUuid
     }
 
     String getAppUuid() {
