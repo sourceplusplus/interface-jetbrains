@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.display
 
+import com.google.common.base.Joiner
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
@@ -38,7 +39,6 @@ class PortalInterface {
     private final BrowserView browser
     private final OverviewView overviewView
     private final TracesView tracesView
-    private boolean externalPortal
 
     public String viewingPortalArtifact //todo: better
     public QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
@@ -52,10 +52,19 @@ class PortalInterface {
     }
 
     void loadPage(String page) {
+        loadPage(page, [:])
+    }
+
+    void loadPage(String page, Map<String, String> queryParams) {
         if (!portalReady.getAndSet(true)) {
             initPortal()
         }
-        browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid")
+
+        def userQuery = Joiner.on("&").withKeyValueSeparator("=").join(queryParams)
+        if (userQuery) {
+            userQuery = "&$userQuery"
+        }
+        browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
     }
 
     OverviewView getOverviewView() {
@@ -70,16 +79,17 @@ class PortalInterface {
         browser.browser.dispose()
     }
 
-    boolean getExternalPortal() {
-        return externalPortal
-    }
-
     @NotNull
     JComponent getUIComponent() {
         if (!portalReady.getAndSet(true)) {
             initPortal()
         }
         return browser
+    }
+
+    void cloneViews(PortalInterface portalInterface) {
+        this.overviewView.cloneView(portalInterface.overviewView)
+        this.tracesView.cloneView(portalInterface.tracesView)
     }
 
     private void initPortal() {

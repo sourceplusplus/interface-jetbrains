@@ -18,4 +18,9 @@ class OverviewView {
     Map<String, ArtifactMetricResult> getMetricResultCache() {
         return metricResultCache
     }
+
+    void cloneView(OverviewView view) {
+        metricResultCache.clear()
+        metricResultCache.putAll(view.metricResultCache)
+    }
 }

@@ -18,24 +18,24 @@ class SourcePortal implements Closeable {
     private static final Map<String, SourcePortal> portalMap = new ConcurrentHashMap<>()
     private final String portalUuid
     private final String appUuid
+    private final boolean external
     private PortalInterface portalUI
 
-    private SourcePortal(String portalUuid, String appUuid) {
+    private SourcePortal(String portalUuid, String appUuid, boolean external) {
         this.portalUuid = portalUuid
         this.appUuid = appUuid
+        this.external = external
     }
 
     static Optional<SourcePortal> getInternalPortal(String appUuid, String artifactQualifiedName) {
         return Optional.ofNullable(portalMap.values().find {
-            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName &&
-                    !it.interface.externalPortal
+            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && !it.external
         })
     }
 
     static List<SourcePortal> getExternalPortals(String appUuid, String artifactQualifiedName) {
         return portalMap.values().findAll {
-            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName &&
-                    it.interface.externalPortal
+            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && it.external
         }
     }
 
@@ -45,9 +45,9 @@ class SourcePortal implements Closeable {
         }
     }
 
-    static String register(String appUuid, String artifactQualifiedName) {
+    static String register(String appUuid, String artifactQualifiedName, boolean external) {
         def portalUuid = UUID.randomUUID().toString()
-        def portal = new SourcePortal(portalUuid, Objects.requireNonNull(appUuid))
+        def portal = new SourcePortal(portalUuid, Objects.requireNonNull(appUuid), external)
         portal.portalUI = new PortalInterface(portalUuid)
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
@@ -76,8 +76,13 @@ class SourcePortal implements Closeable {
         portalUI.close()
     }
 
-    @Override
-    SourcePortal clone() {
-        return getPortal(register(appUuid, portalUI.viewingPortalArtifact))
+    boolean isExternal() {
+        return external
+    }
+
+    SourcePortal createExternalPortal() {
+        def portalClone = getPortal(register(appUuid, portalUI.viewingPortalArtifact, true))
+        portalClone.portalUI.cloneViews(this.interface)
+        return portalClone
     }
 }

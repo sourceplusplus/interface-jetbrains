@@ -41,7 +41,7 @@ class PortalViewTracker extends AbstractVerticle {
         //user wants a new external portal
         vertx.eventBus().consumer(CLICKED_VIEW_AS_EXTERNAL_PORTAL, { messageHandler ->
             def portal = SourcePortal.getPortal(JsonObject.mapFrom(messageHandler.body()).getString("portal_uuid"))
-            messageHandler.reply(new JsonObject().put("portal_uuid", portal.clone().portalUuid))
+            messageHandler.reply(new JsonObject().put("portal_uuid", portal.createExternalPortal().portalUuid))
         })
 
         //user opened portal

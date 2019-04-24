@@ -71,7 +71,7 @@ class IntelliJMethodGutterMark extends GutterMark {
         this.sourceMethod = sourceMethod
         this.psiMethod = psiMethod
         this.gutterMarkRenderer = new SourceArtifactGutterMarkRenderer(this)
-        this.portalUuid = SourcePortal.register(SourcePluginConfig.current.appUuid, sourceMethod.artifactQualifiedName())
+        this.portalUuid = SourcePortal.register(SourcePluginConfig.current.appUuid, sourceMethod.artifactQualifiedName(), false)
     }
 
     static void closePortalIfOpen() {

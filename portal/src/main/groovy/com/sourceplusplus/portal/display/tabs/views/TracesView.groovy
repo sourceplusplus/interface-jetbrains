@@ -46,4 +46,20 @@ class TracesView {
     JsonArray getTraceStack(String traceId) {
         return traceStacks.get(traceId)
     }
+
+    void cloneView(TracesView view) {
+        traceResultCache.clear()
+        traceStacks.clear()
+        traceResultCache.putAll(view.traceResultCache)
+        traceStacks.putAll(view.traceStacks)
+        innerLevel = view.innerLevel
+        innerTrace = view.innerTrace
+        rootArtifactQualifiedName = view.rootArtifactQualifiedName
+        if (view.innerTraceStack) {
+            innerTraceStack = new JsonArray().addAll(view.innerTraceStack)
+        } else {
+            innerTraceStack = null
+        }
+        orderType = view.orderType
+    }
 }

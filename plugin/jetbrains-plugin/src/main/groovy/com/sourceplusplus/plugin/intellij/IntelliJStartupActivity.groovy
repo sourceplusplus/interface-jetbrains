@@ -68,7 +68,6 @@ class IntelliJStartupActivity implements StartupActivity {
     static {
         ConsoleAppender console = new ConsoleAppender()
         console.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"))
-        console.setThreshold(Level.DEBUG)
         console.activateOptions()
 
         org.apache.log4j.Logger.rootLogger.loggerRepository.resetConfiguration()

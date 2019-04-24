@@ -43,7 +43,7 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
             ApplicationManager.getApplication().invokeLater({
                 IntelliJMethodGutterMark.closePortalIfOpen()
 
-                portal.interface.loadPage("traces.html")
+                portal.interface.loadPage("traces.html", ["order_type": portal.interface.tracesView.orderType.toString()])
                 navigateTo(artifactQualifiedName)
 
                 def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark

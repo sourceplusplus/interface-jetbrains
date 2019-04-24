@@ -156,9 +156,9 @@ class TracesTab extends AbstractVerticle {
                 def span = traceStack.getJsonObject(i).getJsonObject("span")
                 if (span.getInteger("span_id") == spanInfoRequest.getInteger("span_id")) {
                     def spanArtifactQualifiedName = span.getString("artifact_qualified_name")
-                    if (spanArtifactQualifiedName == null
-                            || spanArtifactQualifiedName == portal.interface.viewingPortalArtifact
-                            || !pluginAvailable) {
+                    if (portal.external
+                            || spanArtifactQualifiedName == null
+                            || spanArtifactQualifiedName == portal.interface.viewingPortalArtifact) {
                         messageHandler.reply(new JsonObject().put("triggered_navigation", false).put("span", span))
                         log.info("Displayed trace span info: " + span)
                     } else {
