@@ -142,7 +142,7 @@ class PortalInterface {
         log.debug("Using portal ui directory: " + uiDirectory.absolutePath)
 
         def bridgePort = SourcePortalConfig.current.pluginUIPort
-        def bridgeFile = new File(uiDirectory.absolutePath + "/source_plugin_bridge.js").toPath()
+        def bridgeFile = new File(uiDirectory.absolutePath + "/source_eventbus_bridge.js").toPath()
         def fileContent = new ArrayList<>(Files.readAllLines(bridgeFile, StandardCharsets.UTF_8))
         for (int i = 0; i < fileContent.size(); i++) {
             if (fileContent.get(i) == "var eb = new EventBus('http://localhost:7529/eventbus');") {

@@ -40,7 +40,7 @@
 <div class="pusher">
     <div class="ui menu borderless marginlefting background_color"
          style="border-radius: 0 !important; border: 0; -webkit-transition-duration: 0.1s; height: 45px; margin-bottom: 0">
-        <a id="latest_traces_header" onclick="goBackToTraces(true)" class="ui item dropdown active_sub_tab">
+        <a id="latest_traces_header" onclick="clickedBackToTraces()" class="ui item dropdown active_sub_tab">
             <span id="latest_traces_header_text">Latest Traces</span>
             <div id="latest_traces_menu" class="menu">
                 <div class="ui input item">
@@ -57,7 +57,7 @@
                 </div>
             </div>
         </a>
-        <a id="trace_stack_header" onclick="goBackToTraceStack(true)" class="ui item dropdown"
+        <a id="trace_stack_header" onclick="clickedBackToTraceStack()" class="ui item dropdown"
            style="visibility: hidden">
             <span id="trace_stack_header_text">Trace Stack</span>
             <div id="trace_stack_menu" class="menu">
@@ -175,7 +175,8 @@
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>
-<script src='../source_plugin_bridge.js'></script>
+<script src='../source_eventbus_bridge.js'></script>
 <script src='js/traces.js'></script>
+<script src='js/views/traces_view.js'></script>
 </body>
 </html>

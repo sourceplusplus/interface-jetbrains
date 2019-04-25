@@ -24,8 +24,12 @@ class TracesView {
     int innerLevel = 0
     boolean innerTrace
     String rootArtifactQualifiedName
+    JsonArray traceStack
     JsonArray innerTraceStack
     TraceOrderType orderType = TraceOrderType.LATEST_TRACES
+    ViewType viewType = ViewType.TRACES
+    String traceId
+    int spanId
 
     TracesView(PortalInterface portalInterface) {
         this.portalInterface = portalInterface
@@ -55,11 +59,21 @@ class TracesView {
         innerLevel = view.innerLevel
         innerTrace = view.innerTrace
         rootArtifactQualifiedName = view.rootArtifactQualifiedName
+        if (view.traceStack) {
+            traceStack = new JsonArray().addAll(view.traceStack)
+        } else {
+            traceStack = null
+        }
         if (view.innerTraceStack) {
             innerTraceStack = new JsonArray().addAll(view.innerTraceStack)
         } else {
             innerTraceStack = null
         }
         orderType = view.orderType
+        viewType = view.viewType
+    }
+
+    static enum ViewType {
+        TRACES, TRACE_STACK, SPAN_INFO
     }
 }
