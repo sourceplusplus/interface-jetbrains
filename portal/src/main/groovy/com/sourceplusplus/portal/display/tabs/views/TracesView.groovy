@@ -71,6 +71,8 @@ class TracesView {
         }
         orderType = view.orderType
         viewType = view.viewType
+        traceId = view.traceId
+        spanId = view.spanId
     }
 
     static enum ViewType {

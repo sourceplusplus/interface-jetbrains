@@ -22,12 +22,6 @@ eb.onopen = function () {
     eb.registerHandler(portalUuid + '-DisplayInnerTraceStack', function (error, message) {
         displayInnerTraces(message);
     });
-    eb.registerHandler(portalUuid + '-ClearTraceStack', function (error, message) {
-        goBackToTraces(false);
-    });
-    eb.registerHandler(portalUuid + '-ClearSpanInfo', function (error, message) {
-        goBackToTraceStack(false);
-    });
     eb.registerHandler(portalUuid + '-DisplayTraceStack', function (error, message) {
         eb.send('PortalLogger', 'Displaying trace stack: ' + JSON.stringify(message));
         console.log('Displaying trace stack: ' + JSON.stringify(message));

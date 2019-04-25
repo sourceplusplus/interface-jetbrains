@@ -51,7 +51,6 @@ function displayTraces(traceResult) {
     $('#span_info_header').removeClass('active_sub_tab');
     $('#span_info_header').css('visibility', 'hidden');
 
-
     var appUuid = traceResult.app_uuid;
     eb.send('PortalLogger', 'Displaying traces - Size: ' + traceResult.traces.length);
     // console.log('Displaying traces - Size: ' + traceResult.traces.length);
@@ -98,6 +97,35 @@ function displayTraces(traceResult) {
 }
 
 function displayInnerTraces(message) {
+    $('#latest_traces_header').removeClass('active');
+    $('#span_info_panel').css('display', 'none');
+    $('#top_trace_table').css('display', 'none');
+    $('#trace_stack_table').css('display', '');
+    $('#trace_stack_table').css('visibility', 'visible');
+    $('#segment_id_span').css('display', 'none');
+    $('#trace_stack_span').css('display', 'unset');
+
+    $('#trace_stack_header').removeClass('inactive_tab');
+    $('#trace_stack_header').addClass('active_sub_tab');
+    $('#trace_stack_header').css('visibility', 'visible');
+
+    $('#span_info_header').removeClass('active');
+    $('#span_info_header').css('visibility', 'hidden');
+
+    $('#top_trace_table').css('display', 'none');
+    $('#trace_stack_table').css('visibility', 'visible');
+    $('#traces_span').css('display', 'none');
+
+    $('#latest_traces_header').removeClass('active_sub_tab');
+    $('#latest_traces_header').addClass('inactive_tab');
+
+    $('#trace_stack_header').addClass('active_sub_tab');
+    $('#trace_stack_header').removeClass('inactive_tab');
+    $('#trace_stack_header').css('visibility', 'visible');
+
+    $('#span_info_header').removeClass('active_sub_tab');
+    $('#span_info_header').css('visibility', 'hidden');
+
     eb.send('PortalLogger', 'Displaying inner trace stack: ' + JSON.stringify(message));
     console.log('Displaying inner trace stack: ' + JSON.stringify(message));
     $('#stack_table tr').remove();
@@ -145,6 +173,7 @@ function displaySpanInfo(spanInfo) {
     $('#segment_id_span').css('display', 'unset');
     $('#trace_stack_span').css('display', 'none');
 
+    $('#trace_stack_header').css('visibility', 'visible');
     $('#trace_stack_header').removeClass('active_sub_tab');
     $('#latest_traces_header').removeClass('active_sub_tab');
     $('#trace_stack_header').addClass('inactive_tab');

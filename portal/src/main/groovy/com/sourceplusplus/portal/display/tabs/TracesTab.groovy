@@ -11,7 +11,6 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.tabs.views.TracesView
 import io.vertx.core.AbstractVerticle
-import io.vertx.core.eventbus.Message
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -63,7 +62,7 @@ class TracesTab extends AbstractVerticle {
                     //user possibly changed current trace order type; todo: create event
                     portal.interface.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
                 }
-                triggerPortalOpened(it)
+                updateUI(portal)
             } else {
                 def subscriptions = config().getJsonArray("artifact_subscriptions")
                 for (int i = 0; i < subscriptions.size(); i++) {
@@ -85,13 +84,14 @@ class TracesTab extends AbstractVerticle {
 
         //user viewing portal under new artifact
         vertx.eventBus().consumer(PortalViewTracker.CHANGED_PORTAL_ARTIFACT, {
-            def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
-            vertx.eventBus().send(portal.portalUuid + "-ClearTraceStack", new JsonObject())
+//            def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
+//            vertx.eventBus().send(portal.portalUuid + "-ClearTraceStack", new JsonObject())
         })
 
         //populate with latest traces from cache (if avail) on switch to traces
         vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
-            triggerPortalOpened(it)
+            def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
+            updateUI(portal)
         })
 
         //user clicked into trace stack
@@ -256,12 +256,21 @@ class TracesTab extends AbstractVerticle {
     }
 
     private void displayTraceStack(SourcePortal portal) {
-        def traceId = portal.interface.tracesView.traceId
-        def traceStack = portal.interface.tracesView.traceStack
+        def representation = portal.interface.tracesView
+        def traceId = representation.traceId
+        def traceStack = representation.traceStack
+
         if (traceStack && !traceStack.isEmpty()) {
-            vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_TRACE_STACK",
-                    portal.interface.tracesView.traceStack)
+            vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_TRACE_STACK", representation.traceStack)
             log.info("Displayed trace stack for id: $traceId - Stack size: " + traceStack.size())
+        } else if (representation.innerTrace && representation.viewType != TracesView.ViewType.SPAN_INFO) {
+            def innerTraceStackInfo = InnerTraceStackInfo.builder()
+                    .innerLevel(representation.innerLevel)
+                    .traceStack(representation.innerTraceStack).build()
+            vertx.eventBus().publish(portal.portalUuid + "-DisplayInnerTraceStack",
+                    new JsonObject(Json.encode(innerTraceStackInfo))
+            )
+            log.info("Displayed inner trace stack. Stack size: " + representation.innerTraceStack.size())
         }
     }
 
@@ -320,6 +329,7 @@ class TracesTab extends AbstractVerticle {
                                     } else {
                                         spanTracesView.rootArtifactQualifiedName = portal.interface.viewingPortalArtifact
                                     }
+                                    spanTracesView.viewType = TracesView.ViewType.TRACE_STACK
                                     spanTracesView.innerTrace = true
                                     spanTracesView.innerLevel = innerLevel
                                     spanTracesView.innerTraceStack = handleTraceStack(
@@ -336,22 +346,6 @@ class TracesTab extends AbstractVerticle {
                     })
                 }
             }
-        }
-    }
-
-    private void triggerPortalOpened(Message<Object> it) {
-        def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
-        def representation = portal.interface.tracesView
-        if (representation.innerTrace && representation.viewType != TracesView.ViewType.SPAN_INFO) {
-            def innerTraceStackInfo = InnerTraceStackInfo.builder()
-                    .innerLevel(representation.innerLevel)
-                    .traceStack(representation.innerTraceStack).build()
-            vertx.eventBus().publish(portal.portalUuid + "-DisplayInnerTraceStack",
-                    new JsonObject(Json.encode(innerTraceStackInfo))
-            )
-            log.info("Displayed inner trace stack. Stack size: " + representation.innerTraceStack.size())
-        } else if (representation.artifactTraceResult != null) {
-            updateUI(portal)
         }
     }
 
