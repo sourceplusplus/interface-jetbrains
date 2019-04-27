@@ -75,6 +75,10 @@ class ConfigurationTab extends AbstractTab {
 
     @Override
     void updateUI(SourcePortal portal) {
+        if (portal.interface.currentTab != thisTab) {
+            return
+        }
+
         coreClient.getArtifact(portal.appUuid, portal.interface.viewingPortalArtifact, {
             if (it.succeeded()) {
                 vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_ARTIFACT_CONFIGURATION",

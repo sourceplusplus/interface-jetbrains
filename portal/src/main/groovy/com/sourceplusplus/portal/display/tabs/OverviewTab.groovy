@@ -104,6 +104,10 @@ class OverviewTab extends AbstractTab {
     }
 
     void updateUI(SourcePortal portal) {
+        if (portal.interface.currentTab != thisTab) {
+            return
+        }
+
         def artifactMetricResult = portal.interface.overviewView.metricResult
         if (artifactMetricResult) {
             if (log.traceEnabled) {
