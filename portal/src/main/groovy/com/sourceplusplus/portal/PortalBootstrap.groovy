@@ -225,7 +225,7 @@ class PortalBootstrap extends AbstractVerticle {
         def configurationTabFut = Future.future()
         vertx.deployVerticle(new OverviewTab(coreClient), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), overviewTabFut.completer())
-        vertx.deployVerticle(new TracesTab(coreClient, pluginAvailable), new DeploymentOptions()
+        vertx.deployVerticle(new TracesTab(coreClient), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), tracesTabFut.completer())
         vertx.deployVerticle(new ConfigurationTab(coreClient, pluginAvailable), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), configurationTabFut.completer())

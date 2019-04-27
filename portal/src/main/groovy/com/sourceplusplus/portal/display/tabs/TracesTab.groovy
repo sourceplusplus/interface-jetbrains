@@ -41,12 +41,10 @@ class TracesTab extends AbstractTab {
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Pattern QUALIFIED_NAME_PATTERN = Pattern.compile('.+\\..+\\(.*\\)')
     private final SourceCoreClient coreClient
-    private final boolean pluginAvailable
 
-    TracesTab(SourceCoreClient coreClient, boolean pluginAvailable) {
+    TracesTab(SourceCoreClient coreClient) {
         super(PortalTab.Traces)
         this.coreClient = Objects.requireNonNull(coreClient)
-        this.pluginAvailable = pluginAvailable
     }
 
     @Override
