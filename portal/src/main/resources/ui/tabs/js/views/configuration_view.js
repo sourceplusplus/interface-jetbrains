@@ -13,10 +13,10 @@ function updateArtifactConfigurationTable(artifact) {
         $('#artifact_auto_subscribe').text('true');
 
         if (artifact.config.force_subscribe) {
-            $('#force_subscribe_toggle').checkbox("check");
+            $('#force_subscribe_toggle').checkbox("set checked");
         }
     } else {
         $('#artifact_auto_subscribe').text('false');
-        $('#force_subscribe_toggle').checkbox("uncheck");
+        $('#force_subscribe_toggle').checkbox("set unchecked");
     }
 }

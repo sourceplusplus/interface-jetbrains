@@ -49,9 +49,15 @@ class ConfigurationTab extends AbstractTab {
         })
 
         vertx.eventBus().consumer(UPDATE_ARTIFACT_FORCE_SUBSCRIBE, {
-            log.info("Updating artifact force subscribe")
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
+            if (!updateConfigurationPermitted) {
+                log.warn("Rejected artifact force subscribe update")
+                updateUI(portal)
+                return
+            }
+
+            log.info("Updating artifact force subscribe")
             def config = SourceArtifactConfig.builder()
                     .forceSubscribe(request.getBoolean("force_subscribe"))
                     .build()

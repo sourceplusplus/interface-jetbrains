@@ -2,6 +2,8 @@ package com.sourceplusplus.portal
 
 import com.sourceplusplus.portal.display.PortalInterface
 import groovy.transform.Canonical
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -14,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 @Canonical
 class SourcePortal implements Closeable {
+
+    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     private static final Map<String, SourcePortal> portalMap = new ConcurrentHashMap<>()
     private final String portalUuid
@@ -60,6 +64,7 @@ class SourcePortal implements Closeable {
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalUuid, portal)
+        log.info("Registered new Source++ Portal. Portal uuid: $portalUuid - App uuid: $appUuid - Artifact: $artifactQualifiedName")
         return portalUuid
     }
 
