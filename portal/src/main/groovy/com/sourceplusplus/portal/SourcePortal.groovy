@@ -54,10 +54,7 @@ class SourcePortal implements Closeable {
     }
 
     static String register(String appUuid, String artifactQualifiedName, boolean external) {
-        return register(UUID.randomUUID().toString(), appUuid, artifactQualifiedName, external)
-    }
-
-    static String register(String portalUuid, String appUuid, String artifactQualifiedName, boolean external) {
+        def portalUuid = UUID.randomUUID().toString()
         def portal = new SourcePortal(portalUuid, Objects.requireNonNull(appUuid), external)
         portal.portalUI = new PortalInterface(portalUuid)
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)

@@ -210,12 +210,7 @@ class PortalBootstrap extends AbstractVerticle {
                 }
 
                 //register portal
-                if (sub.getString("portal_uuid")) {
-                    SourcePortal.getPortal(SourcePortal.register(sub.getString("portal_uuid"),
-                            appUuid, artifactQualifiedName, true))
-                } else {
-                    SourcePortal.getPortal(SourcePortal.register(appUuid, artifactQualifiedName, true))
-                }
+                SourcePortal.getPortal(SourcePortal.register(appUuid, artifactQualifiedName, true))
             }
         }
 
