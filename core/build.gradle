@@ -47,24 +47,24 @@ task runCore {
     dependsOn "startDocker"
 
     doLast {
-        file("docker/source-core-" + version + ".zip").delete()
-        file("../docker/source-core-" + version + ".zip").delete()
+        file("docker/local/source-core-" + version + ".zip").delete()
+        file("../docker/local/source-core-" + version + ".zip").delete()
     }
 }
 
 task buildAndMove {
     dependsOn ":core:distZip"
     doLast {
-        file("core/build/distributions/source-core-" + version + ".zip").renameTo(file("docker/source-core-" + version + ".zip"))
-        file("../core/build/distributions/source-core-" + version + ".zip").renameTo(file("../docker/source-core-" + version + ".zip"))
+        file("core/build/distributions/source-core-" + version + ".zip").renameTo(file("docker/local/source-core-" + version + ".zip"))
+        file("../core/build/distributions/source-core-" + version + ".zip").renameTo(file("../docker/local/source-core-" + version + ".zip"))
     }
 }
 
 task startDocker {
     dependsOn ":composeUp"
     doFirst {
-        file("docker/source-core-" + version + ".zip").delete()
-        file("../docker/source-core-" + version + ".zip").delete()
+        file("docker/local/source-core-" + version + ".zip").delete()
+        file("../docker/local/source-core-" + version + ".zip").delete()
     }
 }
 startDocker.mustRunAfter buildAndMove
@@ -72,8 +72,8 @@ startDocker.mustRunAfter buildAndMove
 task stopDocker {
     dependsOn ":composeDown"
     doLast {
-        file("docker/source-core-" + version + ".zip").delete()
-        file("../docker/source-core-" + version + ".zip").delete()
+        file("docker/local/source-core-" + version + ".zip").delete()
+        file("../docker/local/source-core-" + version + ".zip").delete()
     }
 }
 
