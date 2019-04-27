@@ -1,7 +1,13 @@
+$('#overview_link').attr('href', "overview.html" + mainGetQuery);
+$('#sidebar_overview_link').attr('href', "overview.html" + mainGetQuery);
+
 $('#traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
 $('#traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
 $('#sidebar_traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
 $('#sidebar_traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
+
+$('#configuration_link').attr('href', "configuration.html" + mainGetQuery);
+$('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuery);
 
 var series0 = {
     name: '99th percentile',
@@ -214,25 +220,6 @@ eb.onopen = function () {
 
     eb.send('OverviewTabOpened', {'portal_uuid': portalUuid});
 };
-
-$('#dropdown').dropdown();
-
-$('#speed_stats').show();
-$('#frequency_stats').hide();
-
-$('#speed_tab').click(function () {
-    $('#speed_stats').show();
-    $('#frequency_stats').hide();
-    $('#frequency_tab').removeClass('active');
-    $('#speed_tab').addClass('active');
-});
-
-$('#frequency_tab').click(function () {
-    $('#frequency_stats').show();
-    $('#speed_stats').hide();
-    $('#speed_tab').removeClass('active');
-    $('#frequency_tab').addClass('active');
-});
 
 function updateTime(interval) {
     currentTimeFrame = interval.toUpperCase();
