@@ -11,5 +11,8 @@
     "ssl": false,
     "key": null
   },
+  "permissions": {
+    "update_artifact_configuration": false
+  },
   "artifact_subscriptions": []
 }

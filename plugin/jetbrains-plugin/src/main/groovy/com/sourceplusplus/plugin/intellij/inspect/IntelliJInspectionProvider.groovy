@@ -1,6 +1,5 @@
 package com.sourceplusplus.plugin.intellij.inspect
 
-import com.google.common.collect.Sets
 import com.intellij.codeInsight.daemon.GroupNames
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool
 import com.intellij.codeInspection.InspectionToolProvider
@@ -31,7 +30,6 @@ class IntelliJInspectionProvider extends AbstractBaseJavaLocalInspectionTool imp
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     public static PsiFile lastFileOpened
-    public static final Set<PsiClassOwner> PENDING_FILE_VISITS = Sets.newConcurrentHashSet()
 
     @NotNull
     @Override
@@ -43,7 +41,6 @@ class IntelliJInspectionProvider extends AbstractBaseJavaLocalInspectionTool imp
         }
         if (SourcePluginConfig.current.appUuid == null) {
             log.warn("No App UUID found. Ignoring file visit")
-            PENDING_FILE_VISITS.add(holder.file as PsiClassOwner)
             return super.buildVisitor(holder, isOnTheFly, session)
         }
 
