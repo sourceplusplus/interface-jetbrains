@@ -1,5 +1,6 @@
 package com.sourceplusplus.plugin.intellij
 
+import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerImpl
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.notification.Notification
@@ -222,18 +223,6 @@ class IntelliJStartupActivity implements StartupActivity {
         //register coordinators
         sourcePlugin.vertx.deployVerticle(new IntelliJArtifactNavigator())
 
-        //todo: better
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            void run() {
-                IntelliJInspectionProvider.PENDING_FILE_VISITS.removeIf({
-                    log.debug("Visited by file: {} - Pending: true", it.virtualFile)
-                    coordinateSourceFileOpened(sourcePlugin, it)
-                    return true
-                })
-            }
-        })
-
         sourcePlugin.vertx.eventBus().consumer(PortalInterface.PORTAL_READY, {
             //set portal theme
             UIManager.addPropertyChangeListener({
@@ -249,6 +238,7 @@ class IntelliJStartupActivity implements StartupActivity {
                 PortalInterface.updateTheme(true)
             }
         })
+        DaemonCodeAnalyzerImpl.getInstance(currentProject).restart()
     }
 
     private static void doApplicationSettingsDialog(Project project, SourceCoreClient coreClient) {

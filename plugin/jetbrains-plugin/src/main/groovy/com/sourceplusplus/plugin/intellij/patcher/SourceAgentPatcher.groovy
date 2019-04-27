@@ -45,7 +45,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
             log.info("Skipped patching program. Agent patcher is disabled.")
             return
         }
-        if (!patched.getAndSet(true) && PluginBootstrap.sourcePlugin != null) {
+        if (PluginBootstrap.sourcePlugin != null && !patched.getAndSet(true)) {
             log.info("Patching Source++ Agent for executing program...")
             URL inputUrl = getClass().getResource("/source-agent-" + SourcePluginDefines.VERSION + ".jar")
             File destDir = File.createTempDir()
