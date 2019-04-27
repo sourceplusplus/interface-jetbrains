@@ -403,8 +403,8 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void createArtifactConfig(String appUuid, String artifactQualifiedName, SourceArtifactConfig createRequest,
-                                     Handler<AsyncResult<SourceArtifactConfig>> handler) {
+    public void createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName, SourceArtifactConfig createRequest,
+                                             Handler<AsyncResult<SourceArtifactConfig>> handler) {
         String url = sppUrl + CONFIGURE_SOURCE_ARTIFACT_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":artifactQualifiedName", URLEncoder.encode(artifactQualifiedName));
@@ -419,8 +419,8 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public SourceArtifactConfig createArtifactConfig(String appUuid, String artifactQualifiedName,
-                                                     SourceArtifactConfig createRequest) {
+    public SourceArtifactConfig createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName,
+                                                             SourceArtifactConfig createRequest) {
         String url = sppUrl + CONFIGURE_SOURCE_ARTIFACT_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":artifactQualifiedName", URLEncoder.encode(artifactQualifiedName));

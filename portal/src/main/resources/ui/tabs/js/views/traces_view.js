@@ -304,11 +304,6 @@ function displayTraceStack(traceStack) {
     }
 }
 
-function updateTime(interval) {
-    localStorage.setItem('spp.metric_time_frame', interval);
-    eb.send('SetMetricTimeFrame', {'portal_uuid': portalUuid, 'metric_time_frame': interval});
-}
-
 function updateOccurredLabels() {
     $('.trace_time').each(function (i, traceTime) {
         if (traceTime.dataset["value"]) {

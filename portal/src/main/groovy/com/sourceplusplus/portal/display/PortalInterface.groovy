@@ -1,8 +1,8 @@
 package com.sourceplusplus.portal.display
 
 import com.google.common.base.Joiner
-import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
+import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
 import com.teamdev.jxbrowser.chromium.swing.BrowserView
@@ -36,26 +36,25 @@ class PortalInterface {
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()
     private final String portalUuid
-    private final BrowserView browser
     private final OverviewView overviewView
     private final TracesView tracesView
-
-    public String viewingPortalArtifact //todo: better
-    public QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
-    public String viewingTab //todo: impl (and then better)
+    private final ConfigurationView configurationView
+    private BrowserView browser
+    public String viewingPortalArtifact
+    public PortalTab currentTab = PortalTab.Overview
 
     PortalInterface(String portalUuid) {
         this.portalUuid = portalUuid
-        this.browser = new BrowserView()
-        this.overviewView = new OverviewView()
+        this.overviewView = new OverviewView(this)
         this.tracesView = new TracesView(this)
+        this.configurationView = new ConfigurationView()
     }
 
-    void loadPage(String page) {
-        loadPage(page, [:])
+    void loadPage(PortalTab tab) {
+        loadPage(tab, [:])
     }
 
-    void loadPage(String page, Map<String, String> queryParams) {
+    void loadPage(PortalTab tab, Map<String, String> queryParams) {
         if (!portalReady.getAndSet(true)) {
             initPortal()
         }
@@ -64,6 +63,8 @@ class PortalInterface {
         if (userQuery) {
             userQuery = "&$userQuery"
         }
+
+        def page = tab.name().toLowerCase() + ".html"
         browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
     }
 
@@ -93,6 +94,7 @@ class PortalInterface {
     }
 
     private void initPortal() {
+        browser = new BrowserView()
         browser.setPreferredSize(new Dimension(775, 250))
         browser.browser.setSize(775, 250)
         browser.browser.addConsoleListener({

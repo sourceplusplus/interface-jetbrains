@@ -5,7 +5,6 @@ import com.codahale.metrics.UniformReservoir
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.QueryTimeFrame
-import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.BarTrendCard
 import com.sourceplusplus.api.model.internal.FormattedQuickStats
 import com.sourceplusplus.api.model.internal.SplineChart
@@ -15,8 +14,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
-import io.vertx.core.AbstractVerticle
+import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.slf4j.Logger
@@ -41,7 +39,7 @@ import java.time.temporal.ChronoUnit
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class OverviewTab extends AbstractVerticle {
+class OverviewTab extends AbstractTab {
 
     public static final String OVERVIEW_TAB_OPENED = "OverviewTabOpened"
 
@@ -54,142 +52,78 @@ class OverviewTab extends AbstractVerticle {
              MetricType.ResponseTime_90Percentile, MetricType.ResponseTime_75Percentile,
              MetricType.ResponseTime_50Percentile]
     private final SourceCoreClient coreClient
-    private final boolean pluginAvailable
 
-    OverviewTab(SourceCoreClient coreClient, boolean pluginAvailable) {
+    OverviewTab(SourceCoreClient coreClient) {
+        super(PortalTab.Overview)
         this.coreClient = Objects.requireNonNull(coreClient)
-        this.pluginAvailable = pluginAvailable
     }
 
     @Override
     void start() throws Exception {
+        super.start()
+
         //refresh with stats from cache (if avail)
         vertx.eventBus().consumer(OVERVIEW_TAB_OPENED, {
             log.info("Overview tab opened")
-
-            if (pluginAvailable) {
-                def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
-                def portal = SourcePortal.getPortal(portalUuid)
-
-                if (portal.interface.viewingPortalArtifact) {
-                    def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(
-                            portal.interface.viewingPortalArtifact + portal.interface.currentMetricTimeFrame)
-                    if (artifactMetricResult != null) {
-                        log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
-                        updateStats(artifactMetricResult)
-                    }
-                }
-            } else {
-                def subscriptions = config().getJsonArray("artifact_subscriptions")
-                for (int i = 0; i < subscriptions.size(); i++) {
-                    def sub = subscriptions.getJsonObject(i)
-                    def appUuid = sub.getString("app_uuid")
-                    def artifactQualifiedName = sub.getString("artifact_qualified_name")
-
-                    SourcePortal.getPortals(appUuid, artifactQualifiedName).each { portal ->
-                        QueryTimeFrame.values().each {
-                            def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(artifactQualifiedName + it)
-                            if (artifactMetricResult != null) {
-                                log.info("Updating overview stats from cache for artifact: " + artifactQualifiedName)
-                                updateStats(artifactMetricResult)
-                            }
-                        }
-                    }
-                }
-            }
+            def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
+            def portal = SourcePortal.getPortal(portalUuid)
+            portal.interface.currentTab = PortalTab.Overview
+            updateUI(portal)
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
             SourcePortal.getPortals(artifactMetricResult.appUuid(), artifactMetricResult.artifactQualifiedName()).each {
-                it.interface.overviewView.metricResultCache.put(artifactMetricResult.artifactQualifiedName()
-                        + artifactMetricResult.timeFrame(), artifactMetricResult)
-                updateStats(artifactMetricResult)
+                it.interface.overviewView.cacheMetricResult(artifactMetricResult)
+                updateUI(it)
             }
         })
 
-        //refresh with stats from cache (if avail) on portal opened
-        vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
+        vertx.eventBus().consumer("SetMetricTimeFrame", {
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
+            def view = portal.interface.overviewView
+            view.timeFrame = QueryTimeFrame.valueOf(request.getString("metric_time_frame").toUpperCase())
+            log.info("Overview time frame set to: " + view.timeFrame)
+            updateUI(portal)
 
-            def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(portal.interface.viewingPortalArtifact
-                    + portal.interface.currentMetricTimeFrame)
-            if (artifactMetricResult != null) {
-                log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
-                updateStats(artifactMetricResult)
-            } else {
-                vertx.eventBus().publish(portal.portalUuid + "-ClearOverview", new JsonObject())
-            }
-        })
-
-        vertx.eventBus().consumer(PortalViewTracker.UPDATED_METRIC_TIME_FRAME, {
-            def request = JsonObject.mapFrom(it.body())
-
-            if (pluginAvailable) {
-                def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
-                if (portal.interface.viewingPortalArtifact == null) {
-                    return
+            //subscribe (re-subscribe) to get latest stats
+            def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
+                    .appUuid(portal.appUuid)
+                    .artifactQualifiedName(portal.interface.viewingPortalArtifact)
+                    .timeFrame(view.timeFrame)
+                    .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
+            coreClient.subscribeToArtifact(subscribeRequest, {
+                if (it.succeeded()) {
+                    log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
+                } else {
+                    log.error("Failed to subscribe to artifact metrics", it.cause())
                 }
-
-                //refresh with stats from cache (if avail)
-                def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(portal.interface.viewingPortalArtifact
-                        + portal.interface.currentMetricTimeFrame)
-                if (artifactMetricResult != null) {
-                    log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
-                    updateStats(artifactMetricResult)
-                }
-
-                //subscribe (re-subscribe) to get latest stats
-                def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
-                        .appUuid(SourcePortalConfig.current.appUuid)
-                        .artifactQualifiedName(portal.interface.viewingPortalArtifact)
-                        .timeFrame(portal.interface.currentMetricTimeFrame)
-                        .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
-                coreClient.subscribeToArtifact(subscribeRequest, {
-                    if (it.succeeded()) {
-                        log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
-                    } else {
-                        log.error("Failed to subscribe to artifact metrics", it.cause())
-                    }
-                })
-            } else {
-                //portal.interface.overviewTabRepresentation.metricResultCache.values().each { updateStats(it) }
-
-                //subscribe (re-subscribe) to get latest stats
-                def subscriptions = config().getJsonArray("artifact_subscriptions")
-                for (int i = 0; i < subscriptions.size(); i++) {
-                    def sub = subscriptions.getJsonObject(i)
-                    QueryTimeFrame.values().each {
-                        def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
-                                .appUuid(sub.getString("app_uuid"))
-                                .artifactQualifiedName(sub.getString("artifact_qualified_name"))
-                                .timeFrame(it)
-                                .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
-                        coreClient.subscribeToArtifact(subscribeRequest, {
-                            if (it.succeeded()) {
-                                log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
-                            } else {
-                                log.error("Failed to subscribe to artifact metrics", it.cause())
-                            }
-                        })
-                    }
-                }
-            }
+            })
         })
         log.info("{} started", getClass().getSimpleName())
     }
 
-    private void updateStats(ArtifactMetricResult artifactMetricResult) {
-        log.debug(String.format("Artifact metrics updated. App uuid: %s - Artifact qualified name: %s - Time frame: %s",
-                artifactMetricResult.appUuid(), artifactMetricResult.artifactQualifiedName(), artifactMetricResult.timeFrame()))
-        artifactMetricResult.artifactMetrics().each {
-            updateQuickStats(artifactMetricResult, it)
-            if (it.metricType() in CARD_METRIC_TYPES) {
-                updateCard(artifactMetricResult, it)
-            } else if (it.metricType() in SPLINE_CHART_METRIC_TYPES) {
-                updateSplineGraph(artifactMetricResult, it)
-            } else {
-                throw new UnsupportedOperationException("Invalid metric type: " + it)
+    void updateUI(SourcePortal portal) {
+        if (portal.interface.currentTab != thisTab) {
+            return
+        }
+
+        def artifactMetricResult = portal.interface.overviewView.metricResult
+        if (artifactMetricResult) {
+            if (log.traceEnabled) {
+                log.trace(String.format("Artifact metrics updated. Portal uuid: %s - App uuid: %s - Artifact qualified name: %s - Time frame: %s",
+                        portal.portalUuid, artifactMetricResult.appUuid(), artifactMetricResult.artifactQualifiedName(), artifactMetricResult.timeFrame()))
+            }
+
+            artifactMetricResult.artifactMetrics().each {
+                updateQuickStats(artifactMetricResult, it)
+                if (it.metricType() in CARD_METRIC_TYPES) {
+                    updateCard(artifactMetricResult, it)
+                } else if (it.metricType() in SPLINE_CHART_METRIC_TYPES) {
+                    updateSplineGraph(artifactMetricResult, it)
+                } else {
+                    throw new UnsupportedOperationException("Invalid metric type: " + it)
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.sourceplusplus.portal.coordinate.track
 
-import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.portal.SourcePortal
 import io.vertx.core.AbstractVerticle
@@ -26,7 +25,6 @@ class PortalViewTracker extends AbstractVerticle {
     public static final String OPENED_PORTAL = "OpenedPortal"
     public static final String CLOSED_PORTAL = "ClosedPortal"
     public static final String CHANGED_PORTAL_ARTIFACT = "ChangedPortalArtifact"
-    public static final String UPDATED_METRIC_TIME_FRAME = "UpdatedMetricTimeFrame"
     public static final String CLICKED_VIEW_AS_EXTERNAL_PORTAL = "ClickedViewAsExternalPortal"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
@@ -75,22 +73,6 @@ class PortalViewTracker extends AbstractVerticle {
                 )
             }
         })
-        vertx.eventBus().consumer("SetMetricTimeFrame", {
-            def message = JsonObject.mapFrom(it.body())
-            def portal = SourcePortal.getPortal(message.getString("portal_uuid"))
-            def metricTimeFrame = QueryTimeFrame.valueOf(message.getString("metric_time_frame").toUpperCase())
-
-            if (metricTimeFrame != portal.interface.currentMetricTimeFrame) {
-                log.debug("Metric time frame updated to: " + (portal.interface.currentMetricTimeFrame = metricTimeFrame))
-                vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME,
-                        new JsonObject().put("portal_uuid", portal.portalUuid)
-                                .put("metric_time_frame", portal.interface.currentMetricTimeFrame.toString())
-                )
-            }
-        })
-
-        //log.debug("Initial time frame set to: " + currentMetricTimeFrame)
-        //vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME, currentMetricTimeFrame.toString())
         log.info("{} started", getClass().getSimpleName())
     }
 }

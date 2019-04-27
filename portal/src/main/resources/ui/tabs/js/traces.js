@@ -6,15 +6,12 @@ $('#traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_ty
 $('#sidebar_traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
 $('#sidebar_traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
 
+$('#configuration_link').attr('href', "configuration.html" + mainGetQuery);
+$('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuery);
+
 var viewingInnerTrace = false;
 eb.onopen = function () {
     console.log("Source++ bridge connected");
-
-    //remind plugin of the current metric time frame
-    var timeFrame = localStorage.getItem('spp.metric_time_frame');
-    if (timeFrame) {
-        updateTime(timeFrame);
-    }
 
     eb.registerHandler(portalUuid + '-DisplayTraces', function (error, message) {
         displayTraces(message.body);

@@ -11,6 +11,7 @@ import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import com.sourceplusplus.plugin.source.navigate.ArtifactNavigator
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.json.JsonObject
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
@@ -43,7 +44,7 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
             ApplicationManager.getApplication().invokeLater({
                 IntelliJMethodGutterMark.closePortalIfOpen()
 
-                portal.interface.loadPage("traces.html", ["order_type": portal.interface.tracesView.orderType.toString()])
+                portal.interface.loadPage(PortalTab.Traces, ["order_type": portal.interface.tracesView.orderType.toString()])
                 navigateTo(artifactQualifiedName)
 
                 def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark

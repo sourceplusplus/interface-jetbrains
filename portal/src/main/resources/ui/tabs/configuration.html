@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuration - Source++</title>
+    <link rel='stylesheet' href='../semantic.min.css'>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="overflow-y: hidden">
+<div class="ui sidebar vertical left menu overlay visible very thin icon spp_blue"
+     style="-webkit-transition-duration: 0.1s; overflow: visible !important;">
+    <div class="ui accordion displaynone">
+        <a class="item openbtn" style="background-color: white; height: 45px !important;">Close menu</a>
+        <a id="sidebar_overview_link" class="item inactive_tab" href="overview.html">Dashboard</a>
+
+        <div class="title item inactive_tab">
+            <i class="dropdown icon"></i> Traces
+        </div>
+        <div class="content">
+            <a id="sidebar_traces_link_latest" class="item sidebar_sub_text_color" href="traces.html">Latest</a>
+            <a id="sidebar_traces_link_slowest" class="item sidebar_sub_text_color" href="traces.html">Slowest</a>
+        </div>
+
+        <a class="item active_tab">Configuration</a>
+    </div>
+    <div class="ui dropdown item openbtn" style="color: white">
+        <i class="icon demo-icon content"></i>
+    </div>
+    <a id="overview_link" class="ui item hide_on_toggle" href="configuration.html">
+        <i class="icon dashboard inactive_tab"></i>
+    </a>
+    <div class="ui dropdown item inactive_tab">
+        <z class="displaynone">Traces</z>
+        <i class="icon demo-icon code"></i>
+
+        <div class="menu">
+            <a id="traces_link_latest" class="item" href="traces.html">Latest</a>
+            <a id="traces_link_slowest" class="item" href="traces.html">Slowest</a>
+        </div>
+    </div>
+    <a class="ui dropdown item active_tab"><i class="icon configure"></i></a>
+</div>
+<div class="pusher" style="height: 100%">
+    <div class="ui menu marginlefting aligned content"
+         style="border-radius: 0!important; border: 0; align-content: center;">
+        <div class="ui sidebar horizontal top menu fixed overlay visible very thin icon background_color"
+             style="overflow: visible !important;">
+            <div class="right menu" style="height: 45px; line-height: 45px; align-content:center;">
+                <a id="current_page_external" href="#" onclick="clickedViewAsExternalPortal()">
+                    <i class="external link icon spp_red_color" style="font-size: 20px; margin-top: -2px"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="ui grid marginlefting" style="min-height: 100%">
+        <div class="six wide column" style="min-height: 100%">
+
+            <div class="ui form">
+                <div class="ui segment">
+                    <div class="field">
+                        <div class="ui toggle checkbox" id="force_subscribe_toggle">
+                            <input type="checkbox" tabindex="0" class="hidden">
+                            <label>Force subscription</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ten wide column background_color" style="min-height: 100%">
+            <div class="ui segments" style="margin-right: 10px; background-color: white">
+                <table class="ui small very compact very basic collapsing celled table"
+                       style="padding: 0 !important; margin-left: 10px">
+                    <tbody>
+                    <tr>
+                        <td>
+                            <h4 class="ui header">
+                                <div class="content">Qualified Name</div>
+                            </h4>
+                        </td>
+                        <td id="artifact_qualified_name"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h4 class="ui header">
+                                <div class="content">Create Date</div>
+                            </h4>
+                        </td>
+                        <td id="artifact_create_date"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h4 class="ui header">
+                                <div class="content">Last Updated</div>
+                            </h4>
+                        </td>
+                        <td id="artifact_last_updated"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h4 class="ui header">
+                                <div class="content">Endpoint</div>
+                            </h4>
+                        </td>
+                        <td id="artifact_endpoint"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h4 class="ui header">
+                                <div class="content">Auto-subscribe</div>
+                            </h4>
+                        </td>
+                        <td id="artifact_auto_subscribe"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src='../jquery-3.1.1.min.js'></script>
+<script src='../semantic.min.js'></script>
+<script>
+    $('.ui.checkbox').checkbox({
+        onChecked: function () {
+            toggledForceSubscription(true);
+        },
+        onUnchecked: function () {
+            toggledForceSubscription(false);
+        }
+    });
+
+    $(document).ready(function () {
+        $('.ui.dropdown').dropdown();
+        $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
+    });
+
+    $(".openbtn").on("click", function () {
+        $(".ui.sidebar").toggleClass("very thin icon");
+        $(".asd").toggleClass("marginlefting");
+        $(".sidebar z").toggleClass("displaynone");
+        $(".ui.accordion").toggleClass("displaynone");
+        $(".ui.dropdown.item").toggleClass("displaynone");
+        $(".hide_on_toggle").toggleClass("displaynone");
+        $(".pusher").toggleClass("dimmed");
+
+        $(".logo").find('img').toggle();
+
+    });
+    $('.ui.accordion').accordion({
+        selector: {}
+    });
+</script>
+<!--<script src="../themes/default/assets/charts/gray.js"></script>-->
+<script src="../moment.min.js"></script>
+<script src="../sockjs.min.js"></script>
+<script src='../vertx-eventbus.min.js'></script>
+<script src='../source_eventbus_bridge.js'></script>
+<script src='js/configuration.js'></script>
+<script src='js/views/configuration_view.js'></script>
+</body>
+</html>

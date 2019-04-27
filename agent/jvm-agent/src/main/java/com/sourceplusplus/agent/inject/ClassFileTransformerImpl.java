@@ -51,7 +51,7 @@ public class ClassFileTransformerImpl implements ClassFileTransformer {
         }
     }
 
-    public byte[] compileOneClass(String className, byte[] classBytes) {
+    private byte[] compileOneClass(String className, byte[] classBytes) {
         try {
             Logger.debug(String.format("Transforming class: %s", className));
             ClassReader cr = new ClassReader(classBytes);

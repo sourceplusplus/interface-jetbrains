@@ -17,7 +17,7 @@ public class GenericClassAdapter extends ClassVisitor {
 
     private String className;
 
-    public GenericClassAdapter(int asm5, ClassWriter cw) {
+    GenericClassAdapter(int asm5, ClassWriter cw) {
         super(asm5, cw);
     }
 

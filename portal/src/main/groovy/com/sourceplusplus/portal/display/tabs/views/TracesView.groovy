@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonArray
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * todo: description
+ * Holds the current view for the Traces portal tab.
  *
  * @version 0.2.0
  * @since 0.2.0

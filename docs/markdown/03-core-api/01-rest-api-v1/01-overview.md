@@ -1,8 +1,4 @@
-The REST API allows you to retrieve and update the data that is stored inside
-Source++ from out of your own website or application. You can write your own scripts 
-that send requests and instructions to our servers to fetch this data or
-to update it. You can use this API to automatically synchronize the data in 
-Source++ with your own system, without any human interference.
+The REST API allows you to retrieve and update the data that is stored inside Source++ from out of your own website or application. You can write your own scripts that send requests and instructions to our servers to fetch this data or to update it. You can use this API to automatically synchronize the data in Source++ with your own system, without any human interference.
 
 # Available Endpoints
 
