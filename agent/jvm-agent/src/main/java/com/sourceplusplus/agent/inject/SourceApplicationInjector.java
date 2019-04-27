@@ -17,8 +17,8 @@ public class SourceApplicationInjector extends AdviceAdapter {
     private final int access;
     private String methodDesc;
 
-    public SourceApplicationInjector(int asm5, MethodVisitor mv, int access,
-                                     String name, String methodDesc, String className) {
+    SourceApplicationInjector(int asm5, MethodVisitor mv, int access,
+                              String name, String methodDesc, String className) {
         super(asm5, mv, access, name, methodDesc);
 
         this.className = className.replace("/", ".");

@@ -16,6 +16,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
+import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -70,6 +71,7 @@ class OverviewTab extends AbstractVerticle {
             if (pluginAvailable) {
                 def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
                 def portal = SourcePortal.getPortal(portalUuid)
+                portal.interface.currentTab = PortalTab.Overview
 
                 if (portal.interface.viewingPortalArtifact) {
                     def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(
@@ -109,22 +111,21 @@ class OverviewTab extends AbstractVerticle {
 
         //refresh with stats from cache (if avail) on portal opened
         vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
-            def request = JsonObject.mapFrom(it.body())
-            def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
-
-            def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(portal.interface.viewingPortalArtifact
-                    + portal.interface.currentMetricTimeFrame)
-            if (artifactMetricResult != null) {
-                log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
-                updateStats(artifactMetricResult)
-            } else {
-                vertx.eventBus().publish(portal.portalUuid + "-ClearOverview", new JsonObject())
+            def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
+            if (portal.interface.currentTab == PortalTab.Overview) {
+                def artifactMetricResult = portal.interface.overviewView.metricResultCache.get(
+                        portal.interface.viewingPortalArtifact + portal.interface.currentMetricTimeFrame)
+                if (artifactMetricResult != null) {
+                    log.info("Updating overview stats from cache for artifact: " + portal.interface.viewingPortalArtifact)
+                    updateStats(artifactMetricResult)
+                } else {
+                    vertx.eventBus().publish(portal.portalUuid + "-ClearOverview", new JsonObject())
+                }
             }
         })
 
         vertx.eventBus().consumer(PortalViewTracker.UPDATED_METRIC_TIME_FRAME, {
             def request = JsonObject.mapFrom(it.body())
-
             if (pluginAvailable) {
                 def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
                 if (portal.interface.viewingPortalArtifact == null) {

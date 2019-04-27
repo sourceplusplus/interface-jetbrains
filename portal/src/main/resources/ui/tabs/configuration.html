@@ -58,9 +58,8 @@
             <div class="ui form">
                 <div class="ui segment">
                     <div class="field">
-                        <div class="ui toggle checkbox">
-                            <input type="checkbox" name="force_subscribe_toggle" tabindex="0" class="hidden"
-                                   checked="checked">
+                        <div class="ui toggle checkbox" id="force_subscribe_toggle">
+                            <input type="checkbox" tabindex="0" class="hidden">
                             <label>Force subscription</label>
                         </div>
                     </div>
@@ -78,9 +77,7 @@
                                 <div class="content">Qualified Name</div>
                             </h4>
                         </td>
-                        <td>
-                            com.company.JavaExample.innerMethod()
-                        </td>
+                        <td id="artifact_qualified_name"></td>
                     </tr>
                     <tr>
                         <td>
@@ -88,9 +85,7 @@
                                 <div class="content">Create Date</div>
                             </h4>
                         </td>
-                        <td>
-                            Friday, April 26, 2019 5:07:05 PM GMT-06:00
-                        </td>
+                        <td id="artifact_create_date"></td>
                     </tr>
                     <tr>
                         <td>
@@ -98,9 +93,7 @@
                                 <div class="content">Last Updated</div>
                             </h4>
                         </td>
-                        <td>
-                            Friday, April 26, 2019 5:07:05 PM GMT-06:00
-                        </td>
+                        <td id="artifact_last_updated"></td>
                     </tr>
                     <tr>
                         <td>
@@ -108,9 +101,7 @@
                                 <div class="content">Endpoint</div>
                             </h4>
                         </td>
-                        <td>
-                            endpoint.name (id: 3)
-                        </td>
+                        <td id="artifact_endpoint"></td>
                     </tr>
                     <tr>
                         <td>
@@ -118,22 +109,10 @@
                                 <div class="content">Auto-subscribe</div>
                             </h4>
                         </td>
-                        <td>
-                            true
-                        </td>
+                        <td id="artifact_auto_subscribe"></td>
                     </tr>
                     </tbody>
                 </table>
-                <!--Artifact qualified name: com.company.JavaExample.innerMethod() <br>-->
-                <!--Create date:  <br>-->
-                <!--Last updated: Friday, April 26, 2019 5:07:05 PM GMT-06:00 <br>-->
-                <!--Endpoint: true <br>-->
-                <!--Subscribe automatically: false <br>-->
-                <!--Force subscribe: false <br>-->
-                <!--Module name: example <br>-->
-                <!--Component: n/a <br>-->
-                <!--Endpoint name: n/a <br>-->
-                <!--Endpoint id: 3-->
             </div>
         </div>
     </div>
@@ -141,7 +120,14 @@
 <script src='../jquery-3.1.1.min.js'></script>
 <script src='../semantic.min.js'></script>
 <script>
-    $('.ui.checkbox').checkbox();
+    $('.ui.checkbox').checkbox({
+        onChecked: function () {
+            toggledForceSubscription(true);
+        },
+        onUnchecked: function () {
+            toggledForceSubscription(false);
+        }
+    });
 
     $(document).ready(function () {
         $('.ui.dropdown').dropdown();

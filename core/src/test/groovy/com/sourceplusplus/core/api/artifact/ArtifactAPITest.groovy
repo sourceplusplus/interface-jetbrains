@@ -108,7 +108,7 @@ class ArtifactAPITest extends SourceCoreAPITest {
             def artifactConfig = SourceArtifactConfig.builder().endpoint(true)
                     .endpointName("test-endpoint-name").build()
 
-            coreClient.createArtifactConfig(application.appUuid(), "test-name", artifactConfig, {
+            coreClient.createOrUpdateArtifactConfig(application.appUuid(), "test-name", artifactConfig, {
                 if (it.failed()) {
                     test.fail(it.cause())
                 }
@@ -141,7 +141,7 @@ class ArtifactAPITest extends SourceCoreAPITest {
                 //create artifact config to retrieve in test
                 def createArtifactConfig = SourceArtifactConfig.builder()
                         .endpointName("test-endpoint-name").build()
-                coreClient.createArtifactConfig(application.appUuid(), "test-name", createArtifactConfig, {
+                coreClient.createOrUpdateArtifactConfig(application.appUuid(), "test-name", createArtifactConfig, {
                     if (it.failed()) {
                         test.fail(it.cause())
                     }

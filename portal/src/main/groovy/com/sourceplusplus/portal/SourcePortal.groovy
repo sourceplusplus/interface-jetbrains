@@ -39,6 +39,14 @@ class SourcePortal implements Closeable {
         }
     }
 
+    static List<SourcePortal> getSimilarPortals(SourcePortal portal) {
+        return portalMap.values().findAll {
+            it.appUuid == portal.appUuid &&
+                    it.interface.viewingPortalArtifact == portal.interface.viewingPortalArtifact &&
+                    it.interface.currentTab == portal.interface.currentTab
+        }
+    }
+
     static List<SourcePortal> getPortals(String appUuid, String artifactQualifiedName) {
         return portalMap.values().findAll {
             it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName

@@ -8,3 +8,16 @@ $('#sidebar_traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&
 
 $('#configuration_link').attr('href', "configuration.html" + mainGetQuery);
 $('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuery);
+
+eb.onopen = function () {
+    console.log("Source++ bridge connected");
+
+    eb.registerHandler(portalUuid + '-DisplayArtifactConfiguration', function (error, message) {
+        updateArtifactConfigurationTable(message.body);
+    });
+    eb.send('ConfigurationTabOpened', {'portal_uuid': portalUuid});
+};
+
+function toggledForceSubscription(forceSubscribe) {
+    eb.send('UpdateArtifactForceSubscribe', {'portal_uuid': portalUuid, "force_subscribe": forceSubscribe});
+}

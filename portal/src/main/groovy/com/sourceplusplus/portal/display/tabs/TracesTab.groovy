@@ -9,6 +9,7 @@ import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.portal.PortalBootstrap
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
+import com.sourceplusplus.portal.display.PortalTab
 import com.sourceplusplus.portal.display.tabs.views.TracesView
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
@@ -62,6 +63,7 @@ class TracesTab extends AbstractVerticle {
                     //user possibly changed current trace order type; todo: create event
                     portal.interface.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
                 }
+                portal.interface.currentTab = PortalTab.Traces
                 updateUI(portal)
             } else {
                 def subscriptions = config().getJsonArray("artifact_subscriptions")
@@ -91,7 +93,9 @@ class TracesTab extends AbstractVerticle {
         //populate with latest traces from cache (if avail) on switch to traces
         vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
             def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
-            updateUI(portal)
+            if (portal.interface.currentTab == PortalTab.Traces) {
+                updateUI(portal)
+            }
         })
 
         //user clicked into trace stack

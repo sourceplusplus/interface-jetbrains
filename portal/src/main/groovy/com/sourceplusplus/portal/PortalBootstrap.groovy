@@ -21,6 +21,7 @@ import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalInterface
+import com.sourceplusplus.portal.display.tabs.ConfigurationTab
 import com.sourceplusplus.portal.display.tabs.OverviewTab
 import com.sourceplusplus.portal.display.tabs.TracesTab
 import io.vertx.core.*
@@ -181,7 +182,7 @@ class PortalBootstrap extends AbstractVerticle {
                         if (it.succeeded()) {
                             if (it.result().isPresent()) {
                                 def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                                coreClient.createArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
+                                coreClient.createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                     if (it.failed()) {
                                         log.error("Failed to create artifact config", it.cause())
                                     }
@@ -192,7 +193,7 @@ class PortalBootstrap extends AbstractVerticle {
                                 coreClient.createApplication(createApplication, {
                                     if (it.succeeded()) {
                                         def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                                        coreClient.createArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
+                                        coreClient.createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                             if (it.failed()) {
                                                 log.error("Failed to create artifact config", it.cause())
                                             }
@@ -217,11 +218,14 @@ class PortalBootstrap extends AbstractVerticle {
         //tabs
         def overviewTabFut = Future.future()
         def tracesTabFut = Future.future()
+        def configurationTabFut = Future.future()
         vertx.deployVerticle(new OverviewTab(coreClient, pluginAvailable), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), overviewTabFut.completer())
         vertx.deployVerticle(new TracesTab(coreClient, pluginAvailable), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), tracesTabFut.completer())
-        CompositeFuture.all(overviewTabFut, tracesTabFut).setHandler({
+        vertx.deployVerticle(new ConfigurationTab(coreClient, pluginAvailable), new DeploymentOptions()
+                .setConfig(config()).setWorker(true), configurationTabFut.completer())
+        CompositeFuture.all(overviewTabFut, tracesTabFut, configurationTabFut).setHandler({
             if (it.succeeded()) {
                 //track
                 vertx.deployVerticle(new PortalViewTracker(), new DeploymentOptions()

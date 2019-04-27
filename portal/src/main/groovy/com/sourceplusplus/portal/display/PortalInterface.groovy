@@ -40,9 +40,9 @@ class PortalInterface {
     private final OverviewView overviewView
     private final TracesView tracesView
 
-    public String viewingPortalArtifact //todo: better
+    public String viewingPortalArtifact
     public QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
-    public String viewingTab //todo: impl (and then better)
+    public PortalTab currentTab = PortalTab.Overview
 
     PortalInterface(String portalUuid) {
         this.portalUuid = portalUuid
@@ -51,11 +51,11 @@ class PortalInterface {
         this.tracesView = new TracesView(this)
     }
 
-    void loadPage(String page) {
-        loadPage(page, [:])
+    void loadPage(PortalTab tab) {
+        loadPage(tab, [:])
     }
 
-    void loadPage(String page, Map<String, String> queryParams) {
+    void loadPage(PortalTab tab, Map<String, String> queryParams) {
         if (!portalReady.getAndSet(true)) {
             initPortal()
         }
@@ -64,6 +64,8 @@ class PortalInterface {
         if (userQuery) {
             userQuery = "&$userQuery"
         }
+
+        def page = tab.name().toLowerCase() + ".html"
         browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
     }
 

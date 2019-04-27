@@ -45,7 +45,7 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
                         SPRING_WEB_ANNOTATIONS.contains(it.qualifiedName)
                     }.each {
                         def requestUrl = it.attributeMap.get("value") as String
-                        PluginBootstrap.sourcePlugin.coreClient.createArtifactConfig(
+                        PluginBootstrap.sourcePlugin.coreClient.createOrUpdateArtifactConfig(
                                 SourcePluginConfig.current.appUuid, mark.artifactQualifiedName,
                                 SourceArtifactConfig.builder()
                                         .component("SpringMVC")
