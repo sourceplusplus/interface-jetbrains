@@ -4,7 +4,7 @@ services:
     container_name: source-core
     hostname: source-core
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile-source-core
     ports:
     - "8080:8080"
@@ -16,7 +16,7 @@ services:
     container_name: skywalking-oap
     hostname: skywalking-oap
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile-skywalking-oap
     ports:
     - "11799:11799"
