@@ -36,17 +36,15 @@ class PortalInterface {
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()
     private final String portalUuid
-    private final BrowserView browser
     private final OverviewView overviewView
     private final TracesView tracesView
     private final ConfigurationView configurationView
-
+    private BrowserView browser
     public String viewingPortalArtifact
     public PortalTab currentTab = PortalTab.Overview
 
     PortalInterface(String portalUuid) {
         this.portalUuid = portalUuid
-        this.browser = new BrowserView()
         this.overviewView = new OverviewView(this)
         this.tracesView = new TracesView(this)
         this.configurationView = new ConfigurationView()
@@ -96,6 +94,7 @@ class PortalInterface {
     }
 
     private void initPortal() {
+        browser = new BrowserView()
         browser.setPreferredSize(new Dimension(775, 250))
         browser.browser.setSize(775, 250)
         browser.browser.addConsoleListener({

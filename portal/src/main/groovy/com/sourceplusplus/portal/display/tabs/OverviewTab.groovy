@@ -5,7 +5,6 @@ import com.codahale.metrics.UniformReservoir
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.QueryTimeFrame
-import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.BarTrendCard
 import com.sourceplusplus.api.model.internal.FormattedQuickStats
 import com.sourceplusplus.api.model.internal.SplineChart
@@ -53,12 +52,10 @@ class OverviewTab extends AbstractTab {
              MetricType.ResponseTime_90Percentile, MetricType.ResponseTime_75Percentile,
              MetricType.ResponseTime_50Percentile]
     private final SourceCoreClient coreClient
-    private final boolean pluginAvailable
 
-    OverviewTab(SourceCoreClient coreClient, boolean pluginAvailable) {
+    OverviewTab(SourceCoreClient coreClient) {
         super(PortalTab.Overview)
         this.coreClient = Objects.requireNonNull(coreClient)
-        this.pluginAvailable = pluginAvailable
     }
 
     @Override
@@ -68,23 +65,10 @@ class OverviewTab extends AbstractTab {
         //refresh with stats from cache (if avail)
         vertx.eventBus().consumer(OVERVIEW_TAB_OPENED, {
             log.info("Overview tab opened")
-
-            if (pluginAvailable) {
-                def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
-                def portal = SourcePortal.getPortal(portalUuid)
-                portal.interface.currentTab = PortalTab.Overview
-                updateUI(portal)
-            } else {
-                def subscriptions = config().getJsonArray("artifact_subscriptions")
-                for (int i = 0; i < subscriptions.size(); i++) {
-                    def sub = subscriptions.getJsonObject(i)
-                    def appUuid = sub.getString("app_uuid")
-                    def artifactQualifiedName = sub.getString("artifact_qualified_name")
-                    SourcePortal.getPortals(appUuid, artifactQualifiedName).each {
-                        updateUI(it)
-                    }
-                }
-            }
+            def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
+            def portal = SourcePortal.getPortal(portalUuid)
+            portal.interface.currentTab = PortalTab.Overview
+            updateUI(portal)
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
@@ -96,48 +80,25 @@ class OverviewTab extends AbstractTab {
 
         vertx.eventBus().consumer("SetMetricTimeFrame", {
             def request = JsonObject.mapFrom(it.body())
-            if (pluginAvailable) {
-                def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
-                def view = portal.interface.overviewView
-                view.timeFrame = QueryTimeFrame.valueOf(request.getString("metric_time_frame").toUpperCase())
-                updateUI(portal)
+            def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
+            def view = portal.interface.overviewView
+            view.timeFrame = QueryTimeFrame.valueOf(request.getString("metric_time_frame").toUpperCase())
+            log.info("Overview time frame set to: " + view.timeFrame)
+            updateUI(portal)
 
-                //subscribe (re-subscribe) to get latest stats
-                def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
-                        .appUuid(SourcePortalConfig.current.appUuid)
-                        .artifactQualifiedName(portal.interface.viewingPortalArtifact)
-                        .timeFrame(view.timeFrame)
-                        .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
-                coreClient.subscribeToArtifact(subscribeRequest, {
-                    if (it.succeeded()) {
-                        log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
-                    } else {
-                        log.error("Failed to subscribe to artifact metrics", it.cause())
-                    }
-                })
-            } else {
-                //portal.interface.overviewTabRepresentation.metricResultCache.values().each { updateUI(it) }
-
-                //subscribe (re-subscribe) to get latest stats
-                def subscriptions = config().getJsonArray("artifact_subscriptions")
-                for (int i = 0; i < subscriptions.size(); i++) {
-                    def sub = subscriptions.getJsonObject(i)
-                    QueryTimeFrame.values().each {
-                        def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
-                                .appUuid(sub.getString("app_uuid"))
-                                .artifactQualifiedName(sub.getString("artifact_qualified_name"))
-                                .timeFrame(it)
-                                .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
-                        coreClient.subscribeToArtifact(subscribeRequest, {
-                            if (it.succeeded()) {
-                                log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
-                            } else {
-                                log.error("Failed to subscribe to artifact metrics", it.cause())
-                            }
-                        })
-                    }
+            //subscribe (re-subscribe) to get latest stats
+            def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
+                    .appUuid(portal.appUuid)
+                    .artifactQualifiedName(portal.interface.viewingPortalArtifact)
+                    .timeFrame(view.timeFrame)
+                    .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
+            coreClient.subscribeToArtifact(subscribeRequest, {
+                if (it.succeeded()) {
+                    log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
+                } else {
+                    log.error("Failed to subscribe to artifact metrics", it.cause())
                 }
-            }
+            })
         })
         log.info("{} started", getClass().getSimpleName())
     }
@@ -145,8 +106,11 @@ class OverviewTab extends AbstractTab {
     void updateUI(SourcePortal portal) {
         def artifactMetricResult = portal.interface.overviewView.metricResult
         if (artifactMetricResult) {
-            log.debug(String.format("Artifact metrics updated. App uuid: %s - Artifact qualified name: %s - Time frame: %s",
-                    artifactMetricResult.appUuid(), artifactMetricResult.artifactQualifiedName(), artifactMetricResult.timeFrame()))
+            if (log.traceEnabled) {
+                log.trace(String.format("Artifact metrics updated. Portal uuid: %s - App uuid: %s - Artifact qualified name: %s - Time frame: %s",
+                        portal.portalUuid, artifactMetricResult.appUuid(), artifactMetricResult.artifactQualifiedName(), artifactMetricResult.timeFrame()))
+            }
+
             artifactMetricResult.artifactMetrics().each {
                 updateQuickStats(artifactMetricResult, it)
                 if (it.metricType() in CARD_METRIC_TYPES) {

@@ -56,31 +56,15 @@ class TracesTab extends AbstractTab {
         //refresh with traces from cache (if avail)
         vertx.eventBus().consumer(TRACES_TAB_OPENED, {
             log.info("Traces tab opened")
-
-            if (pluginAvailable) {
-                def message = JsonObject.mapFrom(it.body())
-                def portal = SourcePortal.getPortal(message.getString("portal_uuid"))
-                def orderType = message.getString("trace_order_type")
-                if (orderType) {
-                    //user possibly changed current trace order type; todo: create event
-                    portal.interface.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
-                }
-                portal.interface.currentTab = PortalTab.Traces
-                updateUI(portal)
-            } else {
-                def subscriptions = config().getJsonArray("artifact_subscriptions")
-                for (int i = 0; i < subscriptions.size(); i++) {
-                    def sub = subscriptions.getJsonObject(i)
-                    def appUuid = sub.getString("app_uuid")
-                    def artifactQualifiedName = sub.getString("artifact_qualified_name")
-
-                    SourcePortal.getPortals(appUuid, artifactQualifiedName).each {
-                        if (it.interface.tracesView.artifactTraceResult) {
-                            updateUI(it)
-                        }
-                    }
-                }
+            def message = JsonObject.mapFrom(it.body())
+            def portal = SourcePortal.getPortal(message.getString("portal_uuid"))
+            def orderType = message.getString("trace_order_type")
+            if (orderType) {
+                //user possibly changed current trace order type; todo: create event
+                portal.interface.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
             }
+            portal.interface.currentTab = PortalTab.Traces
+            updateUI(portal)
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
             handleArtifactTraceResult(it.body() as ArtifactTraceResult)
@@ -181,48 +165,6 @@ class TracesTab extends AbstractTab {
                         context.stop()
                     }
                 })
-            }
-        })
-
-        vertx.eventBus().consumer(PortalViewTracker.UPDATED_METRIC_TIME_FRAME, {
-            if (pluginAvailable) {
-                def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
-                def portal = SourcePortal.getPortal(portalUuid)
-                if (portal.interface.viewingPortalArtifact == null) {
-                    return
-                }
-
-                //subscribe (re-subscribe) to traces
-                def request = ArtifactTraceSubscribeRequest.builder()
-                        .appUuid(portal.appUuid)
-                        .artifactQualifiedName(portal.interface.viewingPortalArtifact)
-                        .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
-                        .build()
-                coreClient.subscribeToArtifact(request, {
-                    if (it.succeeded()) {
-                        log.info("Successfully subscribed to traces with request: " + request)
-                    } else {
-                        log.error("Failed to subscribe to artifact traces", it.cause())
-                    }
-                })
-            } else {
-                //subscribe (re-subscribe) to traces
-                def subscriptions = config().getJsonArray("artifact_subscriptions")
-                for (int i = 0; i < subscriptions.size(); i++) {
-                    def sub = subscriptions.getJsonObject(i)
-                    def request = ArtifactTraceSubscribeRequest.builder()
-                            .appUuid(sub.getString("app_uuid"))
-                            .artifactQualifiedName(sub.getString("artifact_qualified_name"))
-                            .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
-                            .build()
-                    coreClient.subscribeToArtifact(request, {
-                        if (it.succeeded()) {
-                            log.info("Successfully subscribed to traces with request: " + request)
-                        } else {
-                            log.error("Failed to subscribe to artifact traces", it.cause())
-                        }
-                    })
-                }
             }
         })
         log.info("{} started", getClass().getSimpleName())
@@ -364,7 +306,7 @@ class TracesTab extends AbstractTab {
             def representation = it.interface.tracesView
             representation.cacheArtifactTraceResult(artifactTraceResult)
 
-            if (!pluginAvailable || it.interface.viewingPortalArtifact == artifactTraceResult.artifactQualifiedName()
+            if (it.interface.viewingPortalArtifact == artifactTraceResult.artifactQualifiedName()
                     && it.interface.tracesView.viewType == TracesView.ViewType.TRACES) {
                 updateUI(it)
             }

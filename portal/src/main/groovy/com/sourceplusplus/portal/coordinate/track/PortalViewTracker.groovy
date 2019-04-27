@@ -1,6 +1,5 @@
 package com.sourceplusplus.portal.coordinate.track
 
-import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.portal.SourcePortal
 import io.vertx.core.AbstractVerticle
@@ -26,7 +25,6 @@ class PortalViewTracker extends AbstractVerticle {
     public static final String OPENED_PORTAL = "OpenedPortal"
     public static final String CLOSED_PORTAL = "ClosedPortal"
     public static final String CHANGED_PORTAL_ARTIFACT = "ChangedPortalArtifact"
-    public static final String UPDATED_METRIC_TIME_FRAME = "UpdatedMetricTimeFrame"
     public static final String CLICKED_VIEW_AS_EXTERNAL_PORTAL = "ClickedViewAsExternalPortal"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)

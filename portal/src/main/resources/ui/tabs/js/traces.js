@@ -13,12 +13,6 @@ var viewingInnerTrace = false;
 eb.onopen = function () {
     console.log("Source++ bridge connected");
 
-    //remind plugin of the current metric time frame
-    var timeFrame = localStorage.getItem('spp.metric_time_frame');
-    if (timeFrame) {
-        updateTime(timeFrame);
-    }
-
     eb.registerHandler(portalUuid + '-DisplayTraces', function (error, message) {
         displayTraces(message.body);
     });

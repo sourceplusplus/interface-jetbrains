@@ -210,8 +210,12 @@ class PortalBootstrap extends AbstractVerticle {
                 }
 
                 //register portal
-                SourcePortal.getPortal(SourcePortal.register(appUuid, artifactQualifiedName, true))
-                        .interface.viewingPortalArtifact = artifactQualifiedName
+                if (sub.getString("portal_uuid")) {
+                    SourcePortal.getPortal(SourcePortal.register(sub.getString("portal_uuid"),
+                            appUuid, artifactQualifiedName, true))
+                } else {
+                    SourcePortal.getPortal(SourcePortal.register(appUuid, artifactQualifiedName, true))
+                }
             }
         }
 
@@ -219,7 +223,7 @@ class PortalBootstrap extends AbstractVerticle {
         def overviewTabFut = Future.future()
         def tracesTabFut = Future.future()
         def configurationTabFut = Future.future()
-        vertx.deployVerticle(new OverviewTab(coreClient, pluginAvailable), new DeploymentOptions()
+        vertx.deployVerticle(new OverviewTab(coreClient), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), overviewTabFut.completer())
         vertx.deployVerticle(new TracesTab(coreClient, pluginAvailable), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), tracesTabFut.completer())
