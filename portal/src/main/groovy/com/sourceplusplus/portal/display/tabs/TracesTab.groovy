@@ -11,7 +11,6 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalTab
 import com.sourceplusplus.portal.display.tabs.views.TracesView
-import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -28,7 +27,7 @@ import java.util.regex.Pattern
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class TracesTab extends AbstractVerticle {
+class TracesTab extends AbstractTab {
 
     public static final String TRACES_TAB_OPENED = "TracesTabOpened"
     public static final String GET_TRACE_STACK = "GetTraceStack"
@@ -45,12 +44,15 @@ class TracesTab extends AbstractVerticle {
     private final boolean pluginAvailable
 
     TracesTab(SourceCoreClient coreClient, boolean pluginAvailable) {
+        super(PortalTab.Traces)
         this.coreClient = Objects.requireNonNull(coreClient)
         this.pluginAvailable = pluginAvailable
     }
 
     @Override
     void start() throws Exception {
+        super.start()
+
         //refresh with traces from cache (if avail)
         vertx.eventBus().consumer(TRACES_TAB_OPENED, {
             log.info("Traces tab opened")
@@ -88,14 +90,6 @@ class TracesTab extends AbstractVerticle {
         vertx.eventBus().consumer(PortalViewTracker.CHANGED_PORTAL_ARTIFACT, {
 //            def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
 //            vertx.eventBus().send(portal.portalUuid + "-ClearTraceStack", new JsonObject())
-        })
-
-        //populate with latest traces from cache (if avail) on switch to traces
-        vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
-            def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
-            if (portal.interface.currentTab == PortalTab.Traces) {
-                updateUI(portal)
-            }
         })
 
         //user clicked into trace stack
@@ -234,7 +228,12 @@ class TracesTab extends AbstractVerticle {
         log.info("{} started", getClass().getSimpleName())
     }
 
-    private void updateUI(SourcePortal portal) {
+    @Override
+    void updateUI(SourcePortal portal) {
+        if (portal.interface.currentTab != thisTab) {
+            return
+        }
+
         switch (portal.interface.tracesView.viewType) {
             case TracesView.ViewType.TRACES:
                 displayTraces(portal)

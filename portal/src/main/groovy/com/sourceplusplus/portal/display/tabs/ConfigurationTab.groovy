@@ -67,6 +67,7 @@ class ConfigurationTab extends AbstractTab {
         })
     }
 
+    @Override
     void updateUI(SourcePortal portal) {
         coreClient.getArtifact(portal.appUuid, portal.interface.viewingPortalArtifact, {
             if (it.succeeded()) {

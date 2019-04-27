@@ -1,8 +1,8 @@
 package com.sourceplusplus.portal.display
 
 import com.google.common.base.Joiner
-import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
+import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
 import com.teamdev.jxbrowser.chromium.swing.BrowserView
@@ -39,16 +39,17 @@ class PortalInterface {
     private final BrowserView browser
     private final OverviewView overviewView
     private final TracesView tracesView
+    private final ConfigurationView configurationView
 
     public String viewingPortalArtifact
-    public QueryTimeFrame currentMetricTimeFrame = QueryTimeFrame.LAST_15_MINUTES
     public PortalTab currentTab = PortalTab.Overview
 
     PortalInterface(String portalUuid) {
         this.portalUuid = portalUuid
         this.browser = new BrowserView()
-        this.overviewView = new OverviewView()
+        this.overviewView = new OverviewView(this)
         this.tracesView = new TracesView(this)
+        this.configurationView = new ConfigurationView()
     }
 
     void loadPage(PortalTab tab) {

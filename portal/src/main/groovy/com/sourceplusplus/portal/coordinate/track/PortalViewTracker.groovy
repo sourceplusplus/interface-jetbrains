@@ -75,22 +75,6 @@ class PortalViewTracker extends AbstractVerticle {
                 )
             }
         })
-        vertx.eventBus().consumer("SetMetricTimeFrame", {
-            def message = JsonObject.mapFrom(it.body())
-            def portal = SourcePortal.getPortal(message.getString("portal_uuid"))
-            def metricTimeFrame = QueryTimeFrame.valueOf(message.getString("metric_time_frame").toUpperCase())
-
-            if (metricTimeFrame != portal.interface.currentMetricTimeFrame) {
-                log.debug("Metric time frame updated to: " + (portal.interface.currentMetricTimeFrame = metricTimeFrame))
-                vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME,
-                        new JsonObject().put("portal_uuid", portal.portalUuid)
-                                .put("metric_time_frame", portal.interface.currentMetricTimeFrame.toString())
-                )
-            }
-        })
-
-        //log.debug("Initial time frame set to: " + currentMetricTimeFrame)
-        //vertx.eventBus().publish(UPDATED_METRIC_TIME_FRAME, currentMetricTimeFrame.toString())
         log.info("{} started", getClass().getSimpleName())
     }
 }
