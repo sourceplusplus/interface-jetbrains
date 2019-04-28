@@ -75,22 +75,28 @@ class CoreBootstrap extends AbstractVerticle {
 
     static void main(String[] args) {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
-        def configJSON
-        def configFile = System.getenv("SOURCE_CONFIG")
-        if (!configFile) {
-            log.warn("Missing SOURCE_CONFIG environment variable. Using default settings")
-            configFile = "local.json"
-        }
 
-        log.info("Using configuration file: $configFile")
-        def configInputStream
-        if (new File(configFile).exists()) {
-            configInputStream = new File(configFile).newInputStream()
+        def configJSON
+        if (args.length > 0) {
+            log.info("Using configuration passed via program arguments")
+            configJSON = new JsonObject(args[0])
         } else {
-            configInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config/$configFile")
+            def configFile = System.getenv("SOURCE_CONFIG")
+            if (!configFile) {
+                log.warn("Missing SOURCE_CONFIG environment variable. Using default settings")
+                configFile = "local.json"
+            }
+
+            log.info("Using configuration file: $configFile")
+            def configInputStream
+            if (new File(configFile).exists()) {
+                configInputStream = new File(configFile).newInputStream()
+            } else {
+                configInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config/$configFile")
+            }
+            def configData = IOUtils.toString(configInputStream, StandardCharsets.UTF_8)
+            configJSON = new JsonObject(configData)
         }
-        def configData = IOUtils.toString(configInputStream, StandardCharsets.UTF_8)
-        configJSON = new JsonObject(configData)
 
         def vertxOptions = new VertxOptions()
         if (BUILD.getString("version") == "dev") {
@@ -114,9 +120,7 @@ class CoreBootstrap extends AbstractVerticle {
         def configInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(configFile)
         def configData = IOUtils.toString(configInputStream, StandardCharsets.UTF_8)
         configJSON = new JsonObject(configData)
-
-        def options = new DeploymentOptions().setConfig(configJSON)
-        vertx.deployVerticle(new CoreBootstrap(), options, completionHandler)
+        vertx.deployVerticle(new CoreBootstrap(), new DeploymentOptions().setConfig(configJSON), completionHandler)
     }
 
     private CoreBootstrap() {
