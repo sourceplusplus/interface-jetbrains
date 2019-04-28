@@ -1,0 +1,24 @@
+{
+  "core": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "ssl": false,
+    "jks_path": null,
+    "jks_password": null,
+    "secure_mode": false,
+    "api_key": null,
+    "bridge_port": 7000,
+    "subscription_inactive_limit_minutes": 15
+  },
+  "storage": {
+    "type": "h2"
+  },
+  "integrations": {
+    "skywalking": {
+      "host": "localhost",
+      "port": 12800,
+      "timezone": null,
+      "endpoint_detection_interval_seconds": 15
+    }
+  }
+}

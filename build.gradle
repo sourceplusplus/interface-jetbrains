@@ -50,7 +50,7 @@ subprojects {
 
 dockerCompose {
     useComposeFiles = ['./docker-compose.yml']
-    dockerComposeWorkingDirectory = './docker/'
+    dockerComposeWorkingDirectory = './docker/local/'
     captureContainersOutput = true
 }
 composeUp.dependsOn ":core:buildAndMove"
