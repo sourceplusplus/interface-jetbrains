@@ -7,7 +7,7 @@ FROM java:8-jre
 LABEL maintainer="github.com/codebrig"
 
 ENV SOURCE_HOME=/opt/source-core
-ARG SOURCE_PLUS_PLUS_VERSION="0.1.4"
+ARG SOURCE_PLUS_PLUS_VERSION="0.2.0"
 ARG SOURCE_PLUS_PLUS_RELEASE="alpha"
 
 RUN wget https://github.com/codebrig/source/releases/download/v${SOURCE_PLUS_PLUS_VERSION}-${SOURCE_PLUS_PLUS_RELEASE}/source-core-${SOURCE_PLUS_PLUS_VERSION}.zip && \
