@@ -2,7 +2,7 @@
 # Source++ Dockerfile
 #
 # APM:      Apache Skywalking
-# Storage:  H2 (test commit)
+# Storage:  H2
 #
 FROM java:8-jre
 LABEL maintainer="github.com/codebrig"
