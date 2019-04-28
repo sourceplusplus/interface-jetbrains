@@ -28,6 +28,8 @@ COPY source-core.json ${SOURCE_HOME}/config/source-core.json
 COPY source-core.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/source-core.sh
 
+COPY application.yml ${SKYWALKING_HOME}/config/application.yml
+
 EXPOSE 8080
 
 RUN chown -R elasticsearch /opt
