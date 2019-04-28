@@ -1,7 +1,8 @@
 #
 # Source++ Dockerfile
 #
-# https://github.com/codebrig/source
+# APM:      n/a
+# Storage:  H2
 #
 FROM java:8-jre
 LABEL maintainer="github.com/codebrig"
