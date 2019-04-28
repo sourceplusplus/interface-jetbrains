@@ -1,6 +1,6 @@
 {
   "core": {
-    "host": "source-core",
+    "host": "0.0.0.0",
     "port": 8080,
     "ssl": false,
     "jks_path": null,
@@ -13,14 +13,14 @@
   "storage": {
     "type": "elasticsearch",
     "elasticsearch": {
-      "host": "es-server",
+      "host": "localhost",
       "port": 9200
     }
   },
   "integrations": {
     "skywalking": {
-      "host": "skywalking-oap",
-      "port": 12799,
+      "host": "localhost",
+      "port": 12800,
       "timezone": null,
       "endpoint_detection_interval_seconds": 15
     }
