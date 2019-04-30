@@ -51,6 +51,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 > Focus: Source code behavior predictions
 
  - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
+ - GitSocratic 0.3+ integration
 
 ## 0.6.0 (beta)
 
