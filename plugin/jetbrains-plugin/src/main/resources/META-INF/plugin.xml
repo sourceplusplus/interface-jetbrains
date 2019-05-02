@@ -35,6 +35,10 @@
                 id="Source++"
                 displayName="Source++"/>
         <applicationConfigurable groupId="Source++"
+                                 displayName="Manage Environments"
+                                 id="Environments"
+                                 instance="com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentConfigurable"/>
+        <applicationConfigurable groupId="Source++"
                                  displayName="About"
                                  id="About"
                                  instance="com.sourceplusplus.plugin.intellij.settings.about.AboutConfigurable"/>
