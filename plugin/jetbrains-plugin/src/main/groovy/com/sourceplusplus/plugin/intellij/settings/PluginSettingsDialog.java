@@ -50,9 +50,10 @@ public class PluginSettingsDialog extends JDialog {
         if (PluginBootstrap.getSourcePlugin() != null) {
             updateConnectButton(true, PluginBootstrap.getSourcePlugin().getCoreClient());
         } else {
-            SourceCoreClient newCoreClient = new SourceCoreClient(SourcePluginConfig.current.getSppUrl());
-            if (SourcePluginConfig.current.apiKey != null) {
-                newCoreClient.setApiKey(SourcePluginConfig.current.apiKey);
+            SourceCoreClient newCoreClient = new SourceCoreClient(
+                    SourcePluginConfig.current.getEnvironment().getSppUrl());
+            if (SourcePluginConfig.current.getEnvironment().apiKey != null) {
+                newCoreClient.setApiKey(SourcePluginConfig.current.getEnvironment().apiKey);
             }
             newCoreClient.ping(it -> {
                 if (it.succeeded()) {
@@ -107,9 +108,10 @@ public class PluginSettingsDialog extends JDialog {
                     connectDialog.show();
 
                     if (connectDialog.getStartPlugin()) {
-                        SourceCoreClient newCoreClient = new SourceCoreClient(SourcePluginConfig.current.getSppUrl());
-                        if (SourcePluginConfig.current.apiKey != null) {
-                            newCoreClient.setApiKey(SourcePluginConfig.current.apiKey);
+                        SourceCoreClient newCoreClient = new SourceCoreClient(
+                                SourcePluginConfig.current.getEnvironment().getSppUrl());
+                        if (SourcePluginConfig.current.getEnvironment().apiKey != null) {
+                            newCoreClient.setApiKey(SourcePluginConfig.current.getEnvironment().apiKey);
                         }
                         newCoreClient.ping(it -> {
                             if (it.succeeded()) {

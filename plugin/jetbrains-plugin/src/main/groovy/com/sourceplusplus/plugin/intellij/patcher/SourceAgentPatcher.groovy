@@ -145,13 +145,13 @@ class SourceAgentPatcher extends JavaProgramPatcher {
 
         agentConfig.put("log_location", agentFile.parentFile.absolutePath)
         agentConfig.getJsonObject("application").put("app_uuid", SourcePluginConfig.current.appUuid)
-        agentConfig.getJsonObject("api").put("host", SourcePluginConfig.current.apiHost)
-        agentConfig.getJsonObject("api").put("port", SourcePluginConfig.current.apiPort)
-        agentConfig.getJsonObject("api").put("ssl", SourcePluginConfig.current.apiSslEnabled)
-        agentConfig.getJsonObject("api").put("key", SourcePluginConfig.current.apiKey)
+        agentConfig.getJsonObject("api").put("host", SourcePluginConfig.current.environment.apiHost)
+        agentConfig.getJsonObject("api").put("port", SourcePluginConfig.current.environment.apiPort)
+        agentConfig.getJsonObject("api").put("ssl", SourcePluginConfig.current.environment.apiSslEnabled)
+        agentConfig.getJsonObject("api").put("key", SourcePluginConfig.current.environment.apiKey)
 
         agentConfig.getJsonObject("skywalking").put("backend_service",
-                SourcePluginConfig.current.apiHost + ':11800') //todo: configurable skywalking port
+                SourcePluginConfig.current.environment.apiHost + ':11800') //todo: configurable skywalking port
 
         agentConfig.getJsonObject("plugin-bridge").put("host", SourcePluginConfig.current.remoteAgentHost)
         agentConfig.getJsonObject("plugin-bridge").put("port", SourcePluginConfig.current.remoteAgentPort)

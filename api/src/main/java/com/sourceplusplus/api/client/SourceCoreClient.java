@@ -31,9 +31,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class SourceCoreClient implements SourceClient {
 
-    private final static String SPP_API_VERSION = System.getenv().getOrDefault(
+    private static final String SPP_API_VERSION = System.getenv().getOrDefault(
             "SPP_API_VERSION", System.getProperty("SPP_API_VERSION", "v1"));
-
     private static final String PING_ENDPOINT = "/ping";
     private static final String INFO_ENDPOINT = String.format("/%s/info", SPP_API_VERSION);
     private static final String REGISTER_IP_ENDPOINT = String.format("/%s/registerIP", SPP_API_VERSION);

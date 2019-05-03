@@ -47,7 +47,7 @@ class PluginBootstrap extends AbstractVerticle {
         vertx.deployVerticle(new PluginCoordinator())
         vertx.deployVerticle(new PortalBootstrap(sourcePlugin.coreClient, true))
 
-        def pluginEventBus = EventBus.create(SourcePluginConfig.current.apiHost, SourcePluginConfig.current.apiBridgePort)
+        def pluginEventBus = EventBus.create(SourcePluginConfig.current.environment.apiHost, SourcePluginConfig.current.apiBridgePort)
         pluginEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
             def artifact = Json.decodeValue(it.bodyAsMJson.toString(), SourceArtifact.class)
             vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, artifact)

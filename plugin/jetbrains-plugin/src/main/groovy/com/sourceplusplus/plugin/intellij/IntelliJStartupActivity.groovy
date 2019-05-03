@@ -127,63 +127,33 @@ class IntelliJStartupActivity implements StartupActivity {
             latch.await()
         }
 
-        def coreClient = new SourceCoreClient(SourcePluginConfig.current.sppUrl)
-        if (SourcePluginConfig.current.apiKey != null) {
-            coreClient.apiKey = SourcePluginConfig.current.apiKey
-        }
+        if (SourcePluginConfig.current.environment != null) {
+            def coreClient = new SourceCoreClient(SourcePluginConfig.current.environment.sppUrl)
+            if (SourcePluginConfig.current.environment.apiKey != null) {
+                coreClient.apiKey = SourcePluginConfig.current.environment.apiKey
+            }
 
-        coreClient.info({
-            if (it.failed()) {
-                Notifications.Bus.notify(
-                        new Notification("Source++", "Connection Required",
-                                "Source++ must be connected to a valid host to activate. Please <a href=\"#\">connect</a> here.",
-                                NotificationType.INFORMATION, new NotificationListener() {
-                            @Override
-                            void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
-                                def connectDialog = new ConnectDialogWrapper(project)
-                                connectDialog.createCenterPanel()
-                                connectDialog.show()
-
-                                if (connectDialog.startPlugin) {
-                                    coreClient = new SourceCoreClient(SourcePluginConfig.current.sppUrl)
-                                    if (SourcePluginConfig.current.apiKey != null) {
-                                        coreClient.apiKey = SourcePluginConfig.current.apiKey
-                                    }
-                                    coreClient.ping({
-                                        if (it.succeeded()) {
-                                            if (SourcePluginConfig.current.appUuid == null) {
-                                                doApplicationSettingsDialog(project, coreClient)
-                                            } else {
-                                                coreClient.getApplication(SourcePluginConfig.current.appUuid, {
-                                                    if (it.failed() || !it.result().isPresent()) {
-                                                        SourcePluginConfig.current.appUuid = null
-                                                        doApplicationSettingsDialog(project, coreClient)
-                                                    } else {
-                                                        startSourcePlugin(coreClient)
-                                                    }
-                                                })
-                                            }
-                                        }
-                                    })
-                                }
+            coreClient.info({
+                if (it.failed()) {
+                    notifyNoConnection()
+                } else {
+                    if (SourcePluginConfig.current.appUuid == null) {
+                        doApplicationSettingsDialog(project, coreClient)
+                    } else {
+                        coreClient.getApplication(SourcePluginConfig.current.appUuid, {
+                            if (it.failed() || !it.result().isPresent()) {
+                                SourcePluginConfig.current.appUuid = null
+                                doApplicationSettingsDialog(project, coreClient)
+                            } else {
+                                startSourcePlugin(coreClient)
                             }
                         })
-                )
-            } else {
-                if (SourcePluginConfig.current.appUuid == null) {
-                    doApplicationSettingsDialog(project, coreClient)
-                } else {
-                    coreClient.getApplication(SourcePluginConfig.current.appUuid, {
-                        if (it.failed() || !it.result().isPresent()) {
-                            SourcePluginConfig.current.appUuid = null
-                            doApplicationSettingsDialog(project, coreClient)
-                        } else {
-                            startSourcePlugin(coreClient)
-                        }
-                    })
+                    }
                 }
-            }
-        })
+            })
+        } else {
+            notifyNoConnection()
+        }
 
         //setup file listening
         def messageBus = project.getMessageBus()
@@ -212,6 +182,44 @@ class IntelliJStartupActivity implements StartupActivity {
             }
         })
         log.info("Source++ loaded for project: {} ({})", project.name, project.getPresentableUrl())
+    }
+
+    private static notifyNoConnection() {
+        Notifications.Bus.notify(
+                new Notification("Source++", "Connection Required",
+                        "Source++ must be connected to a valid host to activate. Please <a href=\"#\">connect</a> here.",
+                        NotificationType.INFORMATION, new NotificationListener() {
+                    @Override
+                    void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
+                        def connectDialog = new ConnectDialogWrapper(currentProject)
+                        connectDialog.createCenterPanel()
+                        connectDialog.show()
+
+                        if (connectDialog.startPlugin) {
+                            def coreClient = new SourceCoreClient(SourcePluginConfig.current.environment.sppUrl)
+                            if (SourcePluginConfig.current.environment.apiKey != null) {
+                                coreClient.apiKey = SourcePluginConfig.current.environment.apiKey
+                            }
+                            coreClient.ping({
+                                if (it.succeeded()) {
+                                    if (SourcePluginConfig.current.appUuid == null) {
+                                        doApplicationSettingsDialog(currentProject, coreClient)
+                                    } else {
+                                        coreClient.getApplication(SourcePluginConfig.current.appUuid, {
+                                            if (it.failed() || !it.result().isPresent()) {
+                                                SourcePluginConfig.current.appUuid = null
+                                                doApplicationSettingsDialog(currentProject, coreClient)
+                                            } else {
+                                                startSourcePlugin(coreClient)
+                                            }
+                                        })
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+        )
     }
 
     static void startSourcePlugin(SourceCoreClient coreClient) {

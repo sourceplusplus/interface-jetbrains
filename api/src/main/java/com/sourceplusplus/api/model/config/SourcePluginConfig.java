@@ -1,5 +1,7 @@
 package com.sourceplusplus.api.model.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,12 +14,7 @@ import java.util.Objects;
 public final class SourcePluginConfig {
 
     public static final SourcePluginConfig current = new SourcePluginConfig();
-    public volatile String apiHost = System.getenv().getOrDefault(
-            "SPP_API_HOST", System.getProperty("SPP_API_HOST", "localhost"));
-    public volatile int apiPort = Integer.parseInt(System.getenv().getOrDefault(
-            "SPP_API_PORT", "" + System.getProperty("SPP_API_PORT", "8080")));
-    public volatile boolean apiSslEnabled = Boolean.parseBoolean(System.getenv().getOrDefault(
-            "SPP_API_SSL_ENABLED", System.getProperty("SPP_API_SSL_ENABLED", "false")));
+    public volatile List<SourceEnvironmentConfig> environments = new ArrayList<>();
     public volatile int apiBridgePort = 7000;
     public volatile String appUuid = null;
     public volatile boolean classVirtualTextMarksEnabled = false;
@@ -26,7 +23,6 @@ public final class SourcePluginConfig {
     public volatile boolean methodGutterMarksEnabled = true;
     public volatile String remoteAgentHost = "localhost";
     public volatile int remoteAgentPort = -1;
-    public volatile String apiKey = null;
     public volatile boolean agentPatcherEnabled = true;
 
     private SourcePluginConfig() {
@@ -34,24 +30,16 @@ public final class SourcePluginConfig {
 
     public void applyConfig(SourcePluginConfig config) {
         Objects.requireNonNull(config);
-        apiHost = config.apiHost;
-        apiPort = config.apiPort;
-        apiSslEnabled = config.apiSslEnabled;
         appUuid = config.appUuid;
         classVirtualTextMarksEnabled = config.classVirtualTextMarksEnabled;
         methodVirtualTextMarksEnabled = config.methodVirtualTextMarksEnabled;
         classGutterMarksEnabled = config.classGutterMarksEnabled;
         methodGutterMarksEnabled = config.methodGutterMarksEnabled;
         remoteAgentPort = config.remoteAgentPort;
-        apiKey = config.apiKey;
         agentPatcherEnabled = config.agentPatcherEnabled;
     }
 
-    public String getSppUrl() {
-        if (apiSslEnabled) {
-            return "https://" + apiHost + ":" + apiPort;
-        } else {
-            return "http://" + apiHost + ":" + apiPort;
-        }
+    public SourceEnvironmentConfig getEnvironment() {
+        return null;
     }
 }
