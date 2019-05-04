@@ -195,7 +195,7 @@ class IntelliJStartupActivity implements StartupActivity {
                         connectDialog.createCenterPanel()
                         connectDialog.show()
 
-                        if (connectDialog.startPlugin) {
+                        if (SourcePluginConfig.current.environment) {
                             def coreClient = new SourceCoreClient(SourcePluginConfig.current.environment.sppUrl)
                             if (SourcePluginConfig.current.environment.apiKey != null) {
                                 coreClient.apiKey = SourcePluginConfig.current.environment.apiKey

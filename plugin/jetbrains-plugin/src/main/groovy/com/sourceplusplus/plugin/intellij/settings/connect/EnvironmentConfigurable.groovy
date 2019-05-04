@@ -2,6 +2,9 @@ package com.sourceplusplus.plugin.intellij.settings.connect
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
+import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.intellij.settings.PluginSettingsComponent
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
@@ -45,15 +48,26 @@ class EnvironmentConfigurable implements Configurable {
 
     @Override
     boolean isModified() {
-        return false
+        return form.isModified(PluginSettingsComponent.getInstance().getState())
     }
 
     @Override
     void apply() throws ConfigurationException {
+        SourcePluginConfig settings = PluginSettingsComponent.getInstance().getState()
+        if (form != null) {
+            form.getData(settings)
+
+            SourcePluginConfig.current.applyConfig(settings)
+            PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+        }
     }
 
     @Override
     void reset() {
+        SourcePluginConfig settings = PluginSettingsComponent.getInstance().getState()
+        if (form != null) {
+            form.setDataCustom(settings)
+        }
     }
 
     @Override

@@ -76,6 +76,7 @@
         </constraints>
         <properties>
           <model/>
+          <selectionMode value="1"/>
         </properties>
       </component>
       <grid id="98014" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

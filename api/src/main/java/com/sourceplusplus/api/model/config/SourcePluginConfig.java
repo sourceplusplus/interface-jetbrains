@@ -1,8 +1,6 @@
 package com.sourceplusplus.api.model.config;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Holds the current configuration used by the plugin
@@ -14,7 +12,8 @@ import java.util.Objects;
 public final class SourcePluginConfig {
 
     public static final SourcePluginConfig current = new SourcePluginConfig();
-    public volatile List<SourceEnvironmentConfig> environments = new ArrayList<>();
+    private volatile Set<SourceEnvironmentConfig> environments = new HashSet<>();
+    private volatile SourceEnvironmentConfig activeEnvironment = null;
     public volatile int apiBridgePort = 7000;
     public volatile String appUuid = null;
     public volatile boolean classVirtualTextMarksEnabled = false;
@@ -30,6 +29,8 @@ public final class SourcePluginConfig {
 
     public void applyConfig(SourcePluginConfig config) {
         Objects.requireNonNull(config);
+        environments = new HashSet<>(config.environments);
+        activeEnvironment = config.activeEnvironment;
         appUuid = config.appUuid;
         classVirtualTextMarksEnabled = config.classVirtualTextMarksEnabled;
         methodVirtualTextMarksEnabled = config.methodVirtualTextMarksEnabled;
@@ -40,6 +41,17 @@ public final class SourcePluginConfig {
     }
 
     public SourceEnvironmentConfig getEnvironment() {
-        return null;
+        if (activeEnvironment == null && environments.size() == 1) {
+            activeEnvironment = environments.iterator().next();
+        }
+        return activeEnvironment;
+    }
+
+    public List<SourceEnvironmentConfig> getEnvironments() {
+        return new ArrayList<>(environments);
+    }
+
+    public void setEnvironments(List<SourceEnvironmentConfig> environments) {
+        this.environments = new HashSet<>(environments);
     }
 }

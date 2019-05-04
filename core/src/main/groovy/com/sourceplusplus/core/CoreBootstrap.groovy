@@ -138,6 +138,7 @@ class CoreBootstrap extends AbstractVerticle {
                 .addOutboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+")))
         eventBusBridge.listen(config().getJsonObject("core").getInteger("bridge_port"), {
             if (it.failed()) {
+                log.error("Failed to boot Source++ Core eventbus bridge")
                 startFuture.fail(it.cause())
             }
         })
