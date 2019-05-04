@@ -4,7 +4,7 @@ import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
+import com.sourceplusplus.api.bridge.SourceBridgeClient
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.application.SourceApplication
@@ -37,7 +37,6 @@ import org.apache.commons.io.IOUtils
 import org.apache.log4j.ConsoleAppender
 import org.apache.log4j.Level
 import org.apache.log4j.PatternLayout
-import org.modellwerkstatt.javaxbus.EventBus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -158,16 +157,10 @@ class PortalBootstrap extends AbstractVerticle {
                 })
             }
 
+            //setup bridge to core
             def apiConfig = config().getJsonObject("api")
-            def coreEventBus = EventBus.create(apiConfig.getString("host"), SourcePortalConfig.current.apiBridgePort)
-            coreEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
-                def artifactMetricResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactMetricResult.class)
-                vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, artifactMetricResult)
-            })
-            coreEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
-                def artifactTraceResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactTraceResult.class)
-                vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, artifactTraceResult)
-            })
+            new SourceBridgeClient(vertx, apiConfig.getString("host"), apiConfig.getInteger("port"))
+                    .setupSubscriptions()
 
             //register subscriptions
             def subscriptions = config().getJsonArray("artifact_subscriptions")

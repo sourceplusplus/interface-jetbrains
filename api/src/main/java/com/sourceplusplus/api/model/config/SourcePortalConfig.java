@@ -12,7 +12,6 @@ import java.util.Objects;
 public class SourcePortalConfig {
 
     public static final SourcePortalConfig current = new SourcePortalConfig();
-    public volatile int apiBridgePort = 7000;
     public volatile String appUuid = null;
     public volatile int pluginUIPort = -1;
 

@@ -14,7 +14,6 @@ public final class SourcePluginConfig {
     public static final SourcePluginConfig current = new SourcePluginConfig();
     private volatile Set<SourceEnvironmentConfig> environments = new HashSet<>();
     private volatile SourceEnvironmentConfig activeEnvironment = null;
-    public volatile int apiBridgePort = 7000;
     public volatile String appUuid = null;
     public volatile boolean classVirtualTextMarksEnabled = false;
     public volatile boolean methodVirtualTextMarksEnabled = false;

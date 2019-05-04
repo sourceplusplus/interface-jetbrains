@@ -10,7 +10,6 @@
     "jks_password": null,
     "secure_mode": false,
     "api_key": null,
-    "bridge_port": 7000,
     "subscription_inactive_limit_minutes": 15
   },
   "elasticsearch": {
@@ -39,7 +38,6 @@
 | jks_password                        | null      | Password for the JKS file (optional)                         |
 | secure_mode                         | false     | Secure API with Bearer token authentication (requires `api_key`) |
 | api_key                             | null      | The API key to use (`secure_mode` must be true to enable)    |
-| bridge_port                         | 7000      | Port used by plugin/portal to connect to core's eventbus    |
 | subscription_inactive_limit_minutes | 15        | Minutes necessary of inactive to prune artifact subscriptions (-1 to disable) |
 
 ## Elasticsearch Settings

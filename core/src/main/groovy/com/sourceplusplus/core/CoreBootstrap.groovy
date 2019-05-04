@@ -40,14 +40,14 @@ import io.vertx.core.net.JksOptions
 import io.vertx.ext.auth.PubSecKeyOptions
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.auth.jwt.JWTAuthOptions
-import io.vertx.ext.bridge.BridgeOptions
 import io.vertx.ext.bridge.PermittedOptions
-import io.vertx.ext.eventbus.bridge.tcp.TcpEventBusBridge
 import io.vertx.ext.jwt.JWTOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.JWTAuthHandler
+import io.vertx.ext.web.handler.sockjs.BridgeOptions
+import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
 import org.jetbrains.annotations.NotNull
 import org.slf4j.Logger
@@ -131,17 +131,17 @@ class CoreBootstrap extends AbstractVerticle {
     void start(Future<Void> startFuture) throws Exception {
         registerCodecs()
 
+        def baseRouter = createRouter()
+        def v1ApiRouter = Router.router(vertx)
+        baseRouter.mountSubRouter("/v1", v1ApiRouter)
+
         //start bridge
         log.info("Booting Source++ Core eventbus bridge...")
-        def eventBusBridge = TcpEventBusBridge.create(vertx, new BridgeOptions()
+        SockJSHandler sock = SockJSHandler.create(vertx)
+        sock.bridge(new BridgeOptions()
                 .addInboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+"))
                 .addOutboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+")))
-        eventBusBridge.listen(config().getJsonObject("core").getInteger("bridge_port"), {
-            if (it.failed()) {
-                log.error("Failed to boot Source++ Core eventbus bridge")
-                startFuture.fail(it.cause())
-            }
-        })
+        baseRouter.route("/eventbus/*").handler(sock)
 
         //start services
         log.info("Booting Source++ Core services...")
@@ -158,10 +158,6 @@ class CoreBootstrap extends AbstractVerticle {
             default:
                 throw new IllegalArgumentException("Unknown storage type: " + storageConfig.getString("type"))
         }
-
-        def baseRouter = createRouter()
-        def v1ApiRouter = Router.router(vertx)
-        baseRouter.mountSubRouter("/v1", v1ApiRouter)
 
         //optional API auth
         if (config().getJsonObject("core").getBoolean("secure_mode")) {

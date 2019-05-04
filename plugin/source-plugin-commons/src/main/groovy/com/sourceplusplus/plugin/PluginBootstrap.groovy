@@ -3,7 +3,7 @@ package com.sourceplusplus.plugin
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
+import com.sourceplusplus.api.bridge.SourceBridgeClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.artifact.SourceArtifact
@@ -20,7 +20,6 @@ import com.sourceplusplus.plugin.coordinate.PluginCoordinator
 import com.sourceplusplus.portal.PortalBootstrap
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
-import org.modellwerkstatt.javaxbus.EventBus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -47,21 +46,11 @@ class PluginBootstrap extends AbstractVerticle {
         vertx.deployVerticle(new PluginCoordinator())
         vertx.deployVerticle(new PortalBootstrap(sourcePlugin.coreClient, true))
 
-        def pluginEventBus = EventBus.create(SourcePluginConfig.current.environment.apiHost, SourcePluginConfig.current.apiBridgePort)
-        pluginEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
-            def artifact = Json.decodeValue(it.bodyAsMJson.toString(), SourceArtifact.class)
-            vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, artifact)
-        })
-        pluginEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
-            def artifactMetricResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactMetricResult.class)
-            vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, artifactMetricResult)
-        })
-        pluginEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
-            def artifactTraceResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactTraceResult.class)
-            vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, artifactTraceResult)
-        })
+        //setup bridge to core
+        new SourceBridgeClient(vertx, SourcePluginConfig.current.environment.apiHost,
+                SourcePluginConfig.current.environment.apiPort).setupSubscriptions()
 
-        //start plugin ui bridge
+        //start plugin bridge for portal
         sourcePlugin.startPortalUIBridge({
             if (it.failed()) {
                 log.error("Failed to start portal ui bridge", it.cause())
