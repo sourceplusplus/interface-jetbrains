@@ -1,6 +1,7 @@
 package com.sourceplusplus.plugin.intellij.settings.connect
 
 import com.sourceplusplus.api.client.SourceCoreClient
+import io.gitsocratic.api.SocraticAPI
 
 import javax.swing.*
 import javax.swing.event.DocumentEvent
@@ -55,6 +56,46 @@ class EnvironmentDialog extends JDialog {
 
             nameTextField.requestFocus()
         })
+        setupViaDockerButton.addActionListener({
+            def connectDialog = new ConnectionInfoDialogWrapper()
+            connectDialog.createCenterPanel()
+
+            def input = new PipedInputStream()
+            def output = new PipedOutputStream()
+            input.connect(output)
+            Thread.startDaemon {
+                input.eachLine {
+                    connectDialog.log(it + "\n")
+                }
+            }
+            Thread.startDaemon {
+                connectDialog.setStatus("Initializing Apache Skywalking...")
+                def initSkywalking = SocraticAPI.administration().initApacheSkywalking()
+                        .build().execute(output)
+                if (initSkywalking.status != 0) {
+                    connectDialog.setStatus("<font color='red'>Failed to initialize Apache Skywalking service</font>")
+                    output.close()
+                    input.close()
+                    return
+                }
+
+                connectDialog.setStatus("Initializing Source++...")
+                def initSpp = SocraticAPI.administration().initSourcePlusPlus()
+                        .build().execute(output)
+                if (initSpp.status != 0) {
+                    connectDialog.setStatus("<font color='red'>Failed to initialize Source++ service</font>")
+                    output.close()
+                    input.close()
+                    return
+                }
+                output.close()
+                input.close()
+                connectDialog.setStatus("<font color='green'>Successful</font>")
+            }
+            connectDialog.show()
+        })
+
+
         testConnectionButton.addActionListener({
             def host = hostTextField.getText()
             def coreClient = new SourceCoreClient(host, portSpinner.value as int, sslEnabledCheckbox.isSelected())
