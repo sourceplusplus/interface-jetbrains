@@ -133,7 +133,7 @@ class IntelliJStartupActivity implements StartupActivity {
                     notifyNoConnection()
                 } else {
                     SourcePluginConfig.current.activeEnvironment.coreClient = coreClient
-                    if (SourcePluginConfig.current.activeEnvironment?.appUuid == null) {
+                    if (SourcePluginConfig.current.activeEnvironment.appUuid == null) {
                         doApplicationSettingsDialog(project, coreClient)
                     } else {
                         coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
