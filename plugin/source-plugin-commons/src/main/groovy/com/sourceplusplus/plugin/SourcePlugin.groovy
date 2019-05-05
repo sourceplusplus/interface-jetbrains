@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory
 class SourcePlugin {
 
     public static final String SOURCE_FILE_MARKER_ACTIVATED = "SourceFileMarkerActivated"
+    public static final String SOURCE_ENVIRONMENT_UPDATED = "SourceEnvironmentUpdated"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private final Set<SourceFileMarker> availableSourceFileMarkers = Sets.newConcurrentHashSet()
@@ -62,6 +63,7 @@ class SourcePlugin {
         if (SourcePluginConfig.current.activeEnvironment.appUuid) {
             SourcePortalConfig.current.addCoreClient(SourcePluginConfig.current.activeEnvironment.appUuid, coreClient)
         }
+        vertx.eventBus().publish(SOURCE_ENVIRONMENT_UPDATED, SourcePluginConfig.current.activeEnvironment.environmentName)
     }
 
     private void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {

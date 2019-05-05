@@ -23,7 +23,6 @@ import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.PluginSourceFile
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.coordinate.artifact.track.FileClosedTracker
@@ -133,6 +132,7 @@ class IntelliJStartupActivity implements StartupActivity {
                 if (it.failed()) {
                     notifyNoConnection()
                 } else {
+                    SourcePluginConfig.current.activeEnvironment.coreClient = coreClient
                     if (SourcePluginConfig.current.activeEnvironment?.appUuid == null) {
                         doApplicationSettingsDialog(project, coreClient)
                     } else {

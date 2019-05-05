@@ -1,12 +1,12 @@
 package com.sourceplusplus.plugin.intellij.settings
 
 import com.sourceplusplus.api.client.SourceCoreClient
+import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
 import com.sourceplusplus.plugin.intellij.settings.application.EditApplicationSettingsDialogWrapper
-import com.sourceplusplus.plugin.intellij.settings.connect.ConnectDialogWrapper
 import org.apache.commons.lang.StringUtils
 import org.jetbrains.annotations.NotNull
 import org.slf4j.Logger
@@ -33,11 +33,12 @@ class PluginSettingsDialog extends JDialog {
     private JButton editApplicationButton
     private JCheckBox agentPatcherEnabledCheckBox
     private ActionListener connectActionListener
+    private SourceEnvironmentConfig currentEnvironment
 
     PluginSettingsDialog() {
         setContentPane(contentPane)
         setModal(true)
-        editApplicationButton.setVisible(false)
+        connectButton.setEnabled(false)
         editApplicationButton.addActionListener(new AbstractAction() {
             @Override
             void actionPerformed(ActionEvent actionEvent) {
@@ -59,6 +60,7 @@ class PluginSettingsDialog extends JDialog {
         } else if (SourcePluginConfig.current.activeEnvironment == null) {
             updateConnectButton(false, null)
         } else {
+            currentEnvironment = SourcePluginConfig.current.activeEnvironment
             SourceCoreClient newCoreClient = new SourceCoreClient(
                     SourcePluginConfig.current.activeEnvironment.getSppUrl())
             if (SourcePluginConfig.current.activeEnvironment.apiKey) {
@@ -79,72 +81,73 @@ class PluginSettingsDialog extends JDialog {
             connectButton.removeActionListener(connectActionListener)
             connectActionListener = null
         }
+
+        applicationDetailsLabel.setText("")
         if (isConnected) {
-            if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.activeEnvironment?.appUuid != null) {
-                IntelliJStartupActivity.startSourcePlugin(coreClient)
+            if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.activeEnvironment?.appUuid) {
+                coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
+                    if (it.succeeded()) {
+                        if (it.result().isPresent()) {
+                            IntelliJStartupActivity.startSourcePlugin(coreClient)
+                        }
+                    } else {
+                        log.error("Failed to get application", it.cause())
+                    }
+                })
             }
 
-            applicationDetailsLabel.setText("")
             connectionStatusLabel.setText("Status: Connected")
-            connectButton.setText("Create/Assign Application")
-            connectButton.addActionListener(connectActionListener = new AbstractAction() {
-                @Override
-                void actionPerformed(ActionEvent actionEvent) {
-                    ApplicationSettingsDialogWrapper applicationSettings = new ApplicationSettingsDialogWrapper(
-                            IntelliJStartupActivity.currentProject, coreClient)
-                    applicationSettings.createCenterPanel()
-                    applicationSettings.show()
-
-                    if (applicationSettings.getOkayAction()) {
-                        updateApplicationDetails(coreClient)
-                    }
-                }
-            })
+            connectButton.setEnabled(true)
             updateApplicationDetails(coreClient)
         } else {
-            applicationDetailsLabel.setText("")
             connectionStatusLabel.setText("Status: Not Connected")
-            connectButton.setText("Connect")
-            connectButton.addActionListener(connectActionListener = new AbstractAction() {
-                @Override
-                void actionPerformed(ActionEvent actionEvent) {
-                    ConnectDialogWrapper connectDialog = new ConnectDialogWrapper(IntelliJStartupActivity.currentProject)
-                    connectDialog.createCenterPanel()
-                    connectDialog.show()
-
-                    if (SourcePluginConfig.current.activeEnvironment) {
-                        SourceCoreClient newCoreClient = new SourceCoreClient(
-                                SourcePluginConfig.current.activeEnvironment.getSppUrl())
-                        if (SourcePluginConfig.current.activeEnvironment.apiKey) {
-                            newCoreClient.setApiKey(SourcePluginConfig.current.activeEnvironment.apiKey)
-                        }
-                        newCoreClient.ping({
-                            if (it.succeeded()) {
-                                updateConnectButton(true, newCoreClient)
-                            } else {
-                                log.error("Failed to connect to Source++ Core", it.cause())
-                            }
-                        })
-                    }
-                }
-            })
+            connectButton.setEnabled(false)
         }
+
+        connectButton.addActionListener(connectActionListener = new AbstractAction() {
+            @Override
+            void actionPerformed(ActionEvent actionEvent) {
+                ApplicationSettingsDialogWrapper applicationSettings = new ApplicationSettingsDialogWrapper(
+                        IntelliJStartupActivity.currentProject, coreClient)
+                applicationSettings.createCenterPanel()
+                applicationSettings.show()
+
+                if (applicationSettings.getOkayAction()) {
+                    updateApplicationDetails(coreClient)
+                }
+            }
+        })
     }
 
     private void updateApplicationDetails(SourceCoreClient coreClient) {
-        if (SourcePluginConfig.current.activeEnvironment?.appUuid != null) {
+        if (SourcePluginConfig.current.activeEnvironment?.appUuid) {
             coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
                 if (it.succeeded()) {
                     if (it.result().isPresent()) {
                         applicationDetailsLabel.setText(String.format(
                                 "<html>Application UUID: %s<br>Application name: %s</html>",
                                 it.result().get().appUuid(), it.result().get().appName()))
-                        editApplicationButton.setVisible(true)
+                        editApplicationButton.setEnabled(true)
+                    } else {
+                        applicationDetailsLabel.setText("")
+                        editApplicationButton.setEnabled(false)
                     }
+                    currentEnvironment = SourcePluginConfig.current.activeEnvironment
                 } else {
                     log.error("Failed to get application", it.cause())
                 }
             })
+        } else {
+            applicationDetailsLabel.setText("")
+            editApplicationButton.setEnabled(false)
+            if (SourcePluginConfig.current.activeEnvironment != currentEnvironment) {
+                currentEnvironment = SourcePluginConfig.current.activeEnvironment
+                if (SourcePluginConfig.current.activeEnvironment.coreClient) {
+                    updateConnectButton(true, SourcePluginConfig.current.activeEnvironment.coreClient)
+                } else {
+                    updateConnectButton(false, null)
+                }
+            }
         }
     }
 
@@ -157,6 +160,10 @@ class PluginSettingsDialog extends JDialog {
     }
 
     boolean isModified(@NotNull SourcePluginConfig data) {
+        if (SourcePluginConfig.current.activeEnvironment?.coreClient
+                && SourcePluginConfig.current.activeEnvironment != currentEnvironment) {
+            updateApplicationDetails(SourcePluginConfig.current.activeEnvironment.coreClient)
+        }
         return agentPatcherEnabledCheckBox.isSelected() != data.agentPatcherEnabled
     }
 

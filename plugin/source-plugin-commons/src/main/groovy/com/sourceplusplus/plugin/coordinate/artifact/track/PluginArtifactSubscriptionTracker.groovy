@@ -113,7 +113,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         //artifact has data
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
-            if (SourcePluginConfig.current.methodGutterMarksEnabled) {
+            if (SourcePluginConfig.current.methodGutterMarksEnabled
+                    && artifactMetricResult.appUuid() == SourcePluginConfig.current.activeEnvironment.appUuid) {
                 def gutterMark = sourcePlugin.getSourceMark(
                         artifactMetricResult.artifactQualifiedName()) as GutterMark
                 if (gutterMark != null && !gutterMark.artifactDataAvailable) {
