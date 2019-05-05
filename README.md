@@ -61,7 +61,7 @@ Install a JetBrains IDE if you don’t already have one.
 
 1. Press `Ctrl+Alt+S` to open the `Settings` dialog and then go to `Plugins`.
 2. Click the `Install JetBrains plugin`.
-3. In the dialog that opens, search for `Source++`.
+3. In the dialog that opens, search for `SourcePlusPlus`.
 4. Press `Install`.
 5. Click `OK` in the `Settings` dialog and restart your IDE.
 
