@@ -1,9 +1,15 @@
 package com.sourceplusplus.plugin.intellij.settings.connect
 
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
+import com.intellij.psi.PsiClassOwner
+import com.intellij.psi.PsiManager
+import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
+import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import com.sourceplusplus.plugin.intellij.settings.PluginSettingsComponent
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
@@ -56,9 +62,27 @@ class EnvironmentConfigurable implements Configurable {
         SourcePluginConfig settings = PluginSettingsComponent.getInstance().getState()
         if (form != null) {
             form.getData(settings)
-
             SourcePluginConfig.current.applyConfig(settings)
-            PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+
+            PluginBootstrap.sourcePlugin.clearActiveSourceFileMarkers()
+            def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
+            if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+                coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
+            }
+            PluginBootstrap.sourcePlugin.coreClient = coreClient
+            FileEditorManager manager = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject)
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                void run() {
+                    manager.getSelectedFiles().each {
+                        def psiFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
+                        psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, null)
+                        IntelliJStartupActivity.coordinateSourceFileOpened(
+                                PluginBootstrap.sourcePlugin, (PsiClassOwner) psiFile)
+                    }
+                    PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+                }
+            })
         }
     }
 

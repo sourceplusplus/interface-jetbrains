@@ -127,10 +127,10 @@ class IntelliJStartupActivity implements StartupActivity {
             latch.await()
         }
 
-        if (SourcePluginConfig.current.environment != null) {
-            def coreClient = new SourceCoreClient(SourcePluginConfig.current.environment.sppUrl)
-            if (SourcePluginConfig.current.environment.apiKey != null) {
-                coreClient.apiKey = SourcePluginConfig.current.environment.apiKey
+        if (SourcePluginConfig.current.activeEnvironment != null) {
+            def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
+            if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+                coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
             }
 
             coreClient.info({
@@ -195,10 +195,10 @@ class IntelliJStartupActivity implements StartupActivity {
                         connectDialog.createCenterPanel()
                         connectDialog.show()
 
-                        if (SourcePluginConfig.current.environment) {
-                            def coreClient = new SourceCoreClient(SourcePluginConfig.current.environment.sppUrl)
-                            if (SourcePluginConfig.current.environment.apiKey != null) {
-                                coreClient.apiKey = SourcePluginConfig.current.environment.apiKey
+                        if (SourcePluginConfig.current.activeEnvironment) {
+                            def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
+                            if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+                                coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
                             }
                             coreClient.ping({
                                 if (it.succeeded()) {

@@ -46,7 +46,7 @@ class PluginSettingsComponent implements ApplicationComponent, PersistentStateCo
         }
     }
 
-    protected static PluginSettingsComponent getInstance() {
+    static PluginSettingsComponent getInstance() {
         return ApplicationManager.getApplication().getComponent(PluginSettingsComponent.class)
     }
 }

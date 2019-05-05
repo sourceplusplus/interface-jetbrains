@@ -2,6 +2,7 @@ package com.sourceplusplus.plugin
 
 import com.google.common.collect.Sets
 import com.sourceplusplus.api.client.SourceCoreClient
+import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import com.sourceplusplus.plugin.marker.mark.SourceMark
 import io.vertx.core.AsyncResult
@@ -30,8 +31,9 @@ class SourcePlugin {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private final Set<SourceFileMarker> availableSourceFileMarkers = Sets.newConcurrentHashSet()
-    private final SourceCoreClient coreClient
+    private SourceCoreClient coreClient
     private final Vertx vertx
+    private PluginBootstrap pluginBootstrap
 
     SourcePlugin(SourceCoreClient coreClient) {
         this.coreClient = Objects.requireNonNull(coreClient)
@@ -39,10 +41,28 @@ class SourcePlugin {
         System.addShutdownHook {
             vertx.close()
         }
-        vertx.deployVerticle(new PluginBootstrap(this))
+        vertx.deployVerticle(pluginBootstrap = new PluginBootstrap(this))
+
+        //start plugin bridge for portal
+        startPortalUIBridge({
+            if (it.failed()) {
+                log.error("Failed to start portal ui bridge", it.cause())
+                throw new RuntimeException(it.cause())
+            } else {
+                log.info("PluginBootstrap started")
+                SourcePortalConfig.current.pluginUIPort = it.result().actualPort()
+                log.info("Using portal ui bridge port: " + SourcePortalConfig.current.pluginUIPort)
+            }
+        })
     }
 
-    void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
+    void setCoreClient(SourceCoreClient coreClient) {
+        this.coreClient = Objects.requireNonNull(coreClient)
+        pluginBootstrap.stop()
+        pluginBootstrap.start()
+    }
+
+    private void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
         BridgeOptions portalBridgeOptions = new BridgeOptions()
                 .addInboundPermitted(new PermittedOptions().setAddressRegex(".+"))
@@ -52,6 +72,13 @@ class SourcePlugin {
         Router router = Router.router(vertx)
         router.route("/eventbus/*").handler(sockJSHandler)
         vertx.createHttpServer().requestHandler(router.&accept).listen(0, listenHandler)
+    }
+
+    void clearActiveSourceFileMarkers() {
+        availableSourceFileMarkers.each {
+            deactivateSourceFileMarker(it)
+        }
+        availableSourceFileMarkers.clear()
     }
 
     void refreshActiveSourceFileMarkers() {

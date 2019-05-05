@@ -56,13 +56,13 @@ class PluginSettingsDialog extends JDialog {
 
         if (PluginBootstrap.getSourcePlugin() != null) {
             updateConnectButton(true, PluginBootstrap.getSourcePlugin().getCoreClient())
-        } else if (SourcePluginConfig.current.getEnvironment() == null) {
+        } else if (SourcePluginConfig.current.activeEnvironment == null) {
             updateConnectButton(false, null)
         } else {
             SourceCoreClient newCoreClient = new SourceCoreClient(
-                    SourcePluginConfig.current.getEnvironment().getSppUrl())
-            if (SourcePluginConfig.current.getEnvironment().apiKey != null) {
-                newCoreClient.setApiKey(SourcePluginConfig.current.getEnvironment().apiKey)
+                    SourcePluginConfig.current.activeEnvironment.getSppUrl())
+            if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+                newCoreClient.setApiKey(SourcePluginConfig.current.activeEnvironment.apiKey)
             }
             newCoreClient.ping({
                 if (it.succeeded()) {
@@ -116,11 +116,11 @@ class PluginSettingsDialog extends JDialog {
                     connectDialog.createCenterPanel()
                     connectDialog.show()
 
-                    if (SourcePluginConfig.current.environment) {
+                    if (SourcePluginConfig.current.activeEnvironment) {
                         SourceCoreClient newCoreClient = new SourceCoreClient(
-                                SourcePluginConfig.current.getEnvironment().getSppUrl())
-                        if (SourcePluginConfig.current.getEnvironment().apiKey != null) {
-                            newCoreClient.setApiKey(SourcePluginConfig.current.getEnvironment().apiKey)
+                                SourcePluginConfig.current.activeEnvironment.getSppUrl())
+                        if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+                            newCoreClient.setApiKey(SourcePluginConfig.current.activeEnvironment.apiKey)
                         }
                         newCoreClient.ping({
                             if (it.succeeded()) {

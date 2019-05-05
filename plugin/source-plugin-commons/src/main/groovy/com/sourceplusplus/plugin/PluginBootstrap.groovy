@@ -23,6 +23,8 @@ import io.vertx.core.json.Json
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 /**
  * Used to bootstrap the Source++ Plugin.
  *
@@ -34,6 +36,7 @@ class PluginBootstrap extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static SourcePlugin sourcePlugin
+    private static final AtomicBoolean registeredCodecs = new AtomicBoolean()
 
     PluginBootstrap(SourcePlugin sourcePlugin) {
         PluginBootstrap.sourcePlugin = sourcePlugin
@@ -47,20 +50,8 @@ class PluginBootstrap extends AbstractVerticle {
         vertx.deployVerticle(new PortalBootstrap(sourcePlugin.coreClient, true))
 
         //setup bridge to core
-        new SourceBridgeClient(vertx, SourcePluginConfig.current.environment.apiHost,
-                SourcePluginConfig.current.environment.apiPort).setupSubscriptions()
-
-        //start plugin bridge for portal
-        sourcePlugin.startPortalUIBridge({
-            if (it.failed()) {
-                log.error("Failed to start portal ui bridge", it.cause())
-                throw new RuntimeException(it.cause())
-            } else {
-                log.info("PluginBootstrap started")
-                SourcePortalConfig.current.pluginUIPort = it.result().actualPort()
-                log.info("Using portal ui bridge port: " + SourcePortalConfig.current.pluginUIPort)
-            }
-        })
+        new SourceBridgeClient(vertx, SourcePluginConfig.current.activeEnvironment.apiHost,
+                SourcePluginConfig.current.activeEnvironment.apiPort).setupSubscriptions()
     }
 
     @Override
@@ -73,6 +64,9 @@ class PluginBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
+        if (registeredCodecs.getAndSet(true)) {
+            return
+        }
         Json.mapper.findAndRegisterModules()
         Json.mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
         Json.mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)

@@ -13,7 +13,7 @@ public final class SourcePluginConfig {
 
     public static final SourcePluginConfig current = new SourcePluginConfig();
     private volatile Set<SourceEnvironmentConfig> environments = new HashSet<>();
-    private volatile SourceEnvironmentConfig activeEnvironment = null;
+    public volatile SourceEnvironmentConfig activeEnvironment = null;
     public volatile String appUuid = null;
     public volatile boolean classVirtualTextMarksEnabled = false;
     public volatile boolean methodVirtualTextMarksEnabled = false;
@@ -37,13 +37,6 @@ public final class SourcePluginConfig {
         methodGutterMarksEnabled = config.methodGutterMarksEnabled;
         remoteAgentPort = config.remoteAgentPort;
         agentPatcherEnabled = config.agentPatcherEnabled;
-    }
-
-    public SourceEnvironmentConfig getEnvironment() {
-        if (activeEnvironment == null && environments.size() == 1) {
-            activeEnvironment = environments.iterator().next();
-        }
-        return activeEnvironment;
     }
 
     public List<SourceEnvironmentConfig> getEnvironments() {

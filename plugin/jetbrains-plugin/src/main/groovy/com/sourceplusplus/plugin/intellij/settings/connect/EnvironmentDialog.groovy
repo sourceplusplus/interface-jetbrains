@@ -32,6 +32,7 @@ class EnvironmentDialog extends JDialog {
     private JTextField apiTokenTextField
     private JButton activateButton
     private JCheckBox sslEnabledCheckbox
+    private SourceEnvironmentConfig activeEnvironment
 
     EnvironmentDialog() {
         setContentPane(contentPane)
@@ -95,8 +96,11 @@ class EnvironmentDialog extends JDialog {
                 portSpinner.value = env.apiPort
                 apiTokenTextField.text = env.apiKey
                 sslEnabledCheckbox.setSelected(env.apiSslEnabled)
+
+                activateButton.setEnabled(SourcePluginConfig.current.activeEnvironment != env)
             } else {
                 deleteButton.setEnabled(false)
+                activateButton.setEnabled(false)
             }
         })
         deleteButton.addActionListener({
@@ -105,7 +109,15 @@ class EnvironmentDialog extends JDialog {
                 int selectedIndex = environmentList.getSelectedIndex()
                 if (selectedIndex != -1) {
                     model.remove(selectedIndex)
+                    clearConnectionForm(false)
                 }
+            }
+        })
+        activateButton.addActionListener({
+            if (environmentList.selectedValue != null) {
+                DefaultListModel<SourceEnvironmentConfig> model = environmentList.getModel()
+                activeEnvironment = model.getElementAt(environmentList.getSelectedIndex())
+                activateButton.setEnabled(false)
             }
         })
         saveButton.addActionListener({
@@ -199,7 +211,19 @@ class EnvironmentDialog extends JDialog {
         }
 
         if (!hostTextField.text.trim().isEmpty() && !nameTextField.text.trim().isEmpty()) {
-            saveButton.setEnabled(true)
+            if (environmentList.selectedValue != null) {
+                DefaultListModel<SourceEnvironmentConfig> model = environmentList.getModel()
+                def env = model.getElementAt(environmentList.getSelectedIndex())
+                if (env.environmentName != nameTextField.text
+                        || env.apiHost != hostTextField.text
+                        || env.apiPort != (portSpinner.value as int)
+                        || env.apiSslEnabled != sslEnabledCheckbox.isSelected()
+                        || env.apiKey != apiTokenTextField.text) {
+                    saveButton.setEnabled(true)
+                }
+            } else {
+                saveButton.setEnabled(true)
+            }
         }
     }
 
@@ -217,10 +241,18 @@ class EnvironmentDialog extends JDialog {
 
     void getData(@NotNull SourcePluginConfig data) {
         data.environments = (environmentList.model.collect().flatten() as List<SourceEnvironmentConfig>)
+        if (activeEnvironment != null) {
+            data.activeEnvironment = activeEnvironment
+        } else if (data.activeEnvironment == null && !data.environments.isEmpty()) {
+            data.activeEnvironment = data.environments.get(0)
+        } else {
+            data.activeEnvironment = null
+        }
     }
 
     boolean isModified(@NotNull SourcePluginConfig data) {
-        return data.environments != (environmentList.model.collect().flatten() as List<SourceEnvironmentConfig>)
+        return data.environments != (environmentList.model.collect().flatten() as List<SourceEnvironmentConfig>) ||
+                (activeEnvironment != null && SourcePluginConfig.current.activeEnvironment != activeEnvironment)
     }
 
     void setDataCustom(@NotNull SourcePluginConfig settings) {
