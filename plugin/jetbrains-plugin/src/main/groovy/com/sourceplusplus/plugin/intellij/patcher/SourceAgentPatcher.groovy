@@ -54,9 +54,6 @@ class SourceAgentPatcher extends JavaProgramPatcher {
             agentFile.deleteOnExit()
             destDir.deleteOnExit()
 
-            //inject temp app id
-            modifyAgentJar(agentFile.absolutePath)
-
             //extract plugins
             def pluginsUrl = SourceAgentPatcher.class.getResource("/plugins")
             def pluginsDir = new File(destDir, "plugins")
@@ -124,6 +121,9 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         }
 
         if (agentFile != null) {
+            //inject agent config
+            modifyAgentJar(agentFile.absolutePath)
+
             javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath")
             log.info("Attached Source++ Agent to executing program")
         }
