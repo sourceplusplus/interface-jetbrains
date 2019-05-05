@@ -1,5 +1,7 @@
 package com.sourceplusplus.api.model.config;
 
+import com.sourceplusplus.api.client.SourceCoreClient;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,7 @@ import java.util.Objects;
  */
 public class SourceEnvironmentConfig {
 
+    public transient SourceCoreClient coreClient;
     public volatile String appUuid;
     public volatile String environmentName;
     public volatile String apiHost;

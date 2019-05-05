@@ -126,7 +126,9 @@ class EnvironmentDialog extends JDialog {
             env.apiHost = hostTextField.text
             env.apiPort = portSpinner.value as int
             env.apiSslEnabled = sslEnabledCheckbox.isSelected()
-            env.apiKey = apiTokenTextField.text
+            if (!apiTokenTextField.getText().isAllWhitespace()) {
+                env.apiKey = apiTokenTextField.text
+            }
             clearConnectionForm(false)
             (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).addElement(env)
         })

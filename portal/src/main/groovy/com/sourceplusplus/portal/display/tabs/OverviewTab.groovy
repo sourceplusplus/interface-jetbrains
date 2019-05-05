@@ -90,7 +90,7 @@ class OverviewTab extends AbstractTab {
                     .artifactQualifiedName(portal.interface.viewingPortalArtifact)
                     .timeFrame(view.timeFrame)
                     .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
-            SourcePortalConfig.current.coreClient.subscribeToArtifact(subscribeRequest, {
+            SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
                 if (it.succeeded()) {
                     log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
                 } else {

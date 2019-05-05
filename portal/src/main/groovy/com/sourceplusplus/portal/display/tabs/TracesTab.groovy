@@ -150,7 +150,7 @@ class TracesTab extends AbstractTab {
                 def traceStackQuery = TraceSpanStackQuery.builder()
                         .oneLevelDeep(true)
                         .traceId(globalTraceId).build()
-                SourcePortalConfig.current.coreClient.getTraceSpans(appUuid, artifactQualifiedName, traceStackQuery, {
+                SourcePortalConfig.current.getCoreClient(appUuid).getTraceSpans(appUuid, artifactQualifiedName, traceStackQuery, {
                     if (it.failed()) {
                         log.error("Failed to get trace spans", it.cause())
                     } else {
@@ -243,7 +243,7 @@ class TracesTab extends AbstractTab {
                                     .spanId(span.getLong("span_id"))
                                     .traceId(traceId).build()
 
-                            def spanPortal = SourcePortal.getInternalPortal(SourcePortalConfig.current.appUuid, spanArtifactQualifiedName)
+                            def spanPortal = SourcePortal.getInternalPortal(portal.appUuid, spanArtifactQualifiedName)
                             if (!spanPortal.isPresent()) {
                                 log.error("Failed to get span portal:" + spanArtifactQualifiedName)
                                 vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
@@ -251,7 +251,7 @@ class TracesTab extends AbstractTab {
                             }
 
                             //todo: cache
-                            SourcePortalConfig.current.coreClient.getTraceSpans(SourcePortalConfig.current.appUuid,
+                            SourcePortalConfig.current.getCoreClient(portal.appUuid).getTraceSpans(portal.appUuid,
                                     portal.interface.viewingPortalArtifact, spanStackQuery, {
                                 if (it.failed()) {
                                     log.error("Failed to get trace spans", it.cause())

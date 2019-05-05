@@ -55,13 +55,13 @@ class PluginSettingsDialog extends JDialog {
         })
 
         if (PluginBootstrap.getSourcePlugin() != null) {
-            updateConnectButton(true, PluginBootstrap.getSourcePlugin().getCoreClient())
+            updateConnectButton(true, SourcePluginConfig.current.activeEnvironment.coreClient)
         } else if (SourcePluginConfig.current.activeEnvironment == null) {
             updateConnectButton(false, null)
         } else {
             SourceCoreClient newCoreClient = new SourceCoreClient(
                     SourcePluginConfig.current.activeEnvironment.getSppUrl())
-            if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+            if (SourcePluginConfig.current.activeEnvironment.apiKey) {
                 newCoreClient.setApiKey(SourcePluginConfig.current.activeEnvironment.apiKey)
             }
             newCoreClient.ping({
@@ -97,10 +97,6 @@ class PluginSettingsDialog extends JDialog {
 
                     if (applicationSettings.getOkayAction()) {
                         updateApplicationDetails(coreClient)
-
-                        if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.activeEnvironment?.appUuid != null) {
-                            IntelliJStartupActivity.startSourcePlugin(coreClient)
-                        }
                     }
                 }
             })
@@ -119,7 +115,7 @@ class PluginSettingsDialog extends JDialog {
                     if (SourcePluginConfig.current.activeEnvironment) {
                         SourceCoreClient newCoreClient = new SourceCoreClient(
                                 SourcePluginConfig.current.activeEnvironment.getSppUrl())
-                        if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+                        if (SourcePluginConfig.current.activeEnvironment.apiKey) {
                             newCoreClient.setApiKey(SourcePluginConfig.current.activeEnvironment.apiKey)
                         }
                         newCoreClient.ping({

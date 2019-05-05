@@ -1,7 +1,6 @@
 package com.sourceplusplus.plugin
 
 import com.google.common.collect.Sets
-import com.sourceplusplus.api.bridge.SourceBridgeClient
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
@@ -33,10 +32,8 @@ class SourcePlugin {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private final Set<SourceFileMarker> availableSourceFileMarkers = Sets.newConcurrentHashSet()
-    private SourceCoreClient coreClient
     private final Vertx vertx
     private PluginBootstrap pluginBootstrap
-    private SourceBridgeClient bridgeClient
 
     SourcePlugin(SourceCoreClient coreClient) {
         vertx = Vertx.vertx()
@@ -60,14 +57,11 @@ class SourcePlugin {
     }
 
     void updateEnvironment(SourceCoreClient coreClient) {
-        this.coreClient = Objects.requireNonNull(coreClient)
-
-        //setup bridge to core
-        bridgeClient?.close()
-        bridgeClient = new SourceBridgeClient(vertx, SourcePluginConfig.current.activeEnvironment.apiHost,
-                SourcePluginConfig.current.activeEnvironment.apiPort)
-        bridgeClient.setupSubscriptions()
-        SourcePortalConfig.current.coreClient = coreClient
+        SourcePluginConfig.current.activeEnvironment.coreClient = coreClient
+        coreClient.attachBridge(vertx)
+        if (SourcePluginConfig.current.activeEnvironment.appUuid) {
+            SourcePortalConfig.current.addCoreClient(SourcePluginConfig.current.activeEnvironment.appUuid, coreClient)
+        }
     }
 
     private void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
@@ -99,7 +93,6 @@ class SourcePlugin {
         if (availableSourceFileMarkers.add(Objects.requireNonNull(sourceFileMarker))) {
             def sourceMarks = sourceFileMarker.createSourceMarks()
             sourceFileMarker.setSourceMarks(sourceMarks)
-            sourceFileMarker.refresh()
             log.info("Activated source file marker: {} - Mark count: {}", sourceFileMarker, sourceMarks.size())
             vertx.eventBus().publish(SOURCE_FILE_MARKER_ACTIVATED, sourceFileMarker.sourceFile.qualifiedClassName)
         }
@@ -116,10 +109,6 @@ class SourcePlugin {
             }
             sourceFileMarker.refresh()
         }
-    }
-
-    SourceCoreClient getCoreClient() {
-        return coreClient
     }
 
     @Nullable

@@ -13,15 +13,12 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.EditorMouseEvent
 import com.intellij.openapi.editor.event.EditorMouseEventArea
 import com.intellij.openapi.editor.event.EditorMouseMotionListener
-import com.intellij.openapi.editor.impl.DocumentMarkupModel
-import com.intellij.openapi.editor.markup.MarkupModel
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiClassOwner
-import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
@@ -33,12 +30,12 @@ import com.sourceplusplus.plugin.coordinate.artifact.track.FileClosedTracker
 import com.sourceplusplus.plugin.intellij.inspect.IntelliJInspectionProvider
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJMethodGutterMark
-import com.sourceplusplus.plugin.intellij.marker.mark.gutter.render.SourceArtifactLineMarkerGutterIconRenderer
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
 import com.sourceplusplus.plugin.intellij.settings.connect.ConnectDialogWrapper
 import com.sourceplusplus.plugin.intellij.source.navigate.IntelliJArtifactNavigator
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
+import com.sourceplusplus.plugin.marker.mark.GutterMark
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalInterface
 import io.vertx.core.Vertx
@@ -48,7 +45,6 @@ import org.apache.log4j.Level
 import org.apache.log4j.PatternLayout
 import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -129,7 +125,7 @@ class IntelliJStartupActivity implements StartupActivity {
 
         if (SourcePluginConfig.current.activeEnvironment != null) {
             def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
-            if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+            if (SourcePluginConfig.current.activeEnvironment.apiKey) {
                 coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
             }
 
@@ -197,7 +193,7 @@ class IntelliJStartupActivity implements StartupActivity {
 
                         if (SourcePluginConfig.current.activeEnvironment) {
                             def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
-                            if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
+                            if (SourcePluginConfig.current.activeEnvironment.apiKey) {
                                 coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
                             }
                             coreClient.ping({
@@ -259,12 +255,6 @@ class IntelliJStartupActivity implements StartupActivity {
                         def applicationSettings = new ApplicationSettingsDialogWrapper(project, coreClient)
                         applicationSettings.createCenterPanel()
                         applicationSettings.show()
-
-                        if (applicationSettings.getOkayAction()) {
-                            if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.activeEnvironment?.appUuid != null) {
-                                startSourcePlugin(coreClient)
-                            }
-                        }
                     }
                 }))
     }
@@ -320,12 +310,13 @@ class IntelliJStartupActivity implements StartupActivity {
                     return
                 }
 
-                def document = PsiDocumentManager.getInstance(psiFile.project).getCachedDocument(psiFile)
-                if (document == null) {
-                    return
+                def gutterMark
+                def fileMarker = psiFile.virtualFile.getUserData(IntelliJSourceFileMarker.KEY)
+                if (fileMarker != null) {
+                    gutterMark = fileMarker.getSourceMarks().find {
+                        (it as GutterMark).lineNumber == lineNumber && it.isViewable()
+                    }
                 }
-                def markupModel = DocumentMarkupModel.forDocument(document, psiFile.project, false)
-                def gutterMark = getGutterMark(markupModel, lineNumber)
                 if (gutterMark == null) {
                     return
                 } else {
@@ -344,20 +335,5 @@ class IntelliJStartupActivity implements StartupActivity {
             synchronized void mouseDragged(EditorMouseEvent e) {
             }
         }
-    }
-
-    @Nullable
-    private static IntelliJMethodGutterMark getGutterMark(MarkupModel markupModel, int lineNumber) {
-        def highlighters = markupModel.getAllHighlighters()
-        IntelliJMethodGutterMark rtnValue = null
-        highlighters.each {
-            if (it.gutterIconRenderer instanceof SourceArtifactLineMarkerGutterIconRenderer) {
-                def gutterMark = ((SourceArtifactLineMarkerGutterIconRenderer) it.gutterIconRenderer).gutterMark
-                if (gutterMark.lineNumber == lineNumber) {
-                    rtnValue = gutterMark
-                }
-            }
-        }
-        return rtnValue
     }
 }

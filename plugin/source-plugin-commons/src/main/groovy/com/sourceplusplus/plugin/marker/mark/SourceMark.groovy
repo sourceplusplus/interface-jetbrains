@@ -80,6 +80,8 @@ abstract class SourceMark {
 
     abstract String getModuleName()
 
+    abstract boolean isViewable()
+
     @NotNull
     String getArtifactQualifiedName() {
         if (isClassMark()) {

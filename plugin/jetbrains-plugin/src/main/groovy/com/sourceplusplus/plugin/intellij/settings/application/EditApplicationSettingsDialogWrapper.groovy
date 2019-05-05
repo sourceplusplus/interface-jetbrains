@@ -33,7 +33,7 @@ class EditApplicationSettingsDialogWrapper extends DialogWrapper {
         setTitle("Edit Application Settings")
         setResizable(false)
 
-        PluginBootstrap.getSourcePlugin().getCoreClient().getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
+        SourcePluginConfig.current.activeEnvironment.coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
             if (it.succeeded()) {
                 editApplicationSettings.setCurrentProject(it.result().get())
             } else {
@@ -71,7 +71,7 @@ class EditApplicationSettingsDialogWrapper extends DialogWrapper {
             agentConfig.packages = editApplicationSettings.getApplicationDomain().split(",")
         }
 
-        PluginBootstrap.getSourcePlugin().getCoreClient().updateApplication(sourceApplication.build(), {
+        SourcePluginConfig.current.activeEnvironment.coreClient.updateApplication(sourceApplication.build(), {
             if (it.failed()) {
                 log.error("Failed to update application", it.cause())
             }

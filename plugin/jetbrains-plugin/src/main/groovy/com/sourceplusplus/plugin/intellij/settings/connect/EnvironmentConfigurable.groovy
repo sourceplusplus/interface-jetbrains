@@ -11,6 +11,7 @@ import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import com.sourceplusplus.plugin.intellij.settings.PluginSettingsComponent
+import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
@@ -25,6 +26,7 @@ import javax.swing.*
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class EnvironmentConfigurable implements Configurable {
 
     private EnvironmentDialog form
@@ -65,24 +67,34 @@ class EnvironmentConfigurable implements Configurable {
             SourcePluginConfig.current.applyConfig(settings)
 
             PluginBootstrap.sourcePlugin.clearActiveSourceFileMarkers()
-            def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
-            if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
-                coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
+            def coreClient = new SourceCoreClient(settings.activeEnvironment.sppUrl)
+            if (settings.activeEnvironment.apiKey) {
+                coreClient.apiKey = settings.activeEnvironment.apiKey
             }
             PluginBootstrap.sourcePlugin.updateEnvironment(coreClient)
-            FileEditorManager manager = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject)
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                void run() {
-                    manager.getSelectedFiles().each {
-                        def psiFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
-                        psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, null)
-                        IntelliJStartupActivity.coordinateSourceFileOpened(
-                                PluginBootstrap.sourcePlugin, (PsiClassOwner) psiFile)
+            if (settings.activeEnvironment?.appUuid) {
+                coreClient.getApplication(settings.activeEnvironment.appUuid, {
+                    if (it.succeeded() && it.result().isPresent()) {
+                        FileEditorManager manager = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject)
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            void run() {
+                                manager.getSelectedFiles().each {
+                                    def psiFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
+                                    psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, null)
+                                    IntelliJStartupActivity.coordinateSourceFileOpened(
+                                            PluginBootstrap.sourcePlugin, (PsiClassOwner) psiFile)
+                                }
+                                PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+                            }
+                        })
+                    } else if (it.succeeded()) {
+                        settings.activeEnvironment.appUuid = null
+                    } else {
+                        log.error("Failed to get application", it.cause())
                     }
-                    PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
-                }
-            })
+                })
+            }
         }
     }
 

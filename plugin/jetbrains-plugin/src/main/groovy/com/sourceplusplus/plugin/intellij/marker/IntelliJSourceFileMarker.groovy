@@ -72,6 +72,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
     void setSourceMarks(@NotNull List<SourceMark> sourceMarks) {
         this.sourceMarks.clear()
         this.sourceMarks.addAll(sourceMarks)
+        refresh()
     }
 
     /**

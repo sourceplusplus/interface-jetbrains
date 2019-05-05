@@ -143,15 +143,6 @@ class IntelliJMethodGutterMark extends GutterMark {
         })
     }
 
-    boolean isViewable() {
-        try {
-            psiMethod.getContainingFile().getViewProvider().getDocument()
-            return true
-        } catch (PsiInvalidElementAccessException ex) {
-            return false
-        }
-    }
-
     @Override
     String getPortalUuid() {
         return portalUuid
@@ -245,6 +236,20 @@ class IntelliJMethodGutterMark extends GutterMark {
     String getModuleName() {
         return ProjectRootManager.getInstance(psiMethod.getProject()).getFileIndex()
                 .getModuleForFile(psiMethod.getContainingFile().getVirtualFile()).name
+    }
+
+    boolean isVisible() {
+        try {
+            psiMethod.getContainingFile().getViewProvider().getDocument()
+            return true
+        } catch (PsiInvalidElementAccessException ex) {
+            return false
+        }
+    }
+
+    @Override
+    boolean isViewable() {
+        return artifactSubscribed || artifactDataAvailable
     }
 
     private class PortalPopupListener implements JBPopupListener {

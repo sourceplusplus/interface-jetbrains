@@ -38,7 +38,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     void start() throws Exception {
         //todo: change to just subscriber
         //subscribe to automatic subscriptions
-        sourcePlugin.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.activeEnvironment.appUuid, true, {
+        SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.activeEnvironment.appUuid, true, {
             if (it.succeeded()) {
                 it.result().each {
                     if (it.automaticSubscription()) {
@@ -52,14 +52,16 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
         //keep subscriptions alive
         vertx.setPeriodic(TimeUnit.MINUTES.toMillis(5), {
-            sourcePlugin.coreClient.refreshSubscriberApplicationSubscriptions(
-                    SourcePluginConfig.current.activeEnvironment.appUuid, {
-                if (it.succeeded()) {
-                    log.debug("Refreshed subscriptions")
-                } else {
-                    log.error("Failed to refresh subscriptions", it.cause())
-                }
-            })
+            if (SourcePluginConfig.current.activeEnvironment?.appUuid) {
+                SourcePluginConfig.current.activeEnvironment.coreClient.refreshSubscriberApplicationSubscriptions(
+                        SourcePluginConfig.current.activeEnvironment.appUuid, {
+                    if (it.succeeded()) {
+                        log.debug("Refreshed subscriptions")
+                    } else {
+                        log.error("Failed to refresh subscriptions", it.cause())
+                    }
+                })
+            }
         })
 
         //refresh markers when the become available
@@ -67,7 +69,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def qualifiedClassName = it.body() as String
 
             //current subscriptions
-            sourcePlugin.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.activeEnvironment.appUuid, false, {
+            SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.activeEnvironment.appUuid, false, {
                 if (it.succeeded()) {
                     it.result().findAll { it.artifactQualifiedName().startsWith(qualifiedClassName) }.each {
                         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
@@ -129,7 +131,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def request = resp.body() as ArtifactSubscribeRequest
             log.info("Sending artifact subscription request: " + request)
 
-            sourcePlugin.coreClient.subscribeToArtifact(request, {
+            SourcePluginConfig.current.activeEnvironment.coreClient.subscribeToArtifact(request, {
                 if (it.succeeded()) {
                     resp.reply(request)
 
@@ -153,7 +155,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def request = resp.body() as SourceArtifactUnsubscribeRequest
             log.info("Sending artifact unsubscription request: " + request)
 
-            sourcePlugin.coreClient.unsubscribeFromArtifact(request, {
+            SourcePluginConfig.current.activeEnvironment.coreClient.unsubscribeFromArtifact(request, {
                 if (it.succeeded()) {
                     resp.reply(request)
                     PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())

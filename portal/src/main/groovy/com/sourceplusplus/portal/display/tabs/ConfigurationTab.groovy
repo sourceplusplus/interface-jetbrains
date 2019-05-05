@@ -59,7 +59,8 @@ class ConfigurationTab extends AbstractTab {
             def config = SourceArtifactConfig.builder()
                     .forceSubscribe(request.getBoolean("force_subscribe"))
                     .build()
-            SourcePortalConfig.current.coreClient.createOrUpdateArtifactConfig(portal.appUuid, portal.interface.viewingPortalArtifact, config, {
+            SourcePortalConfig.current.getCoreClient(portal.appUuid).createOrUpdateArtifactConfig(
+                    portal.appUuid, portal.interface.viewingPortalArtifact, config, {
                 if (it.succeeded()) {
                     SourcePortal.getSimilarPortals(portal).each {
                         updateUI(it)
@@ -77,7 +78,8 @@ class ConfigurationTab extends AbstractTab {
             return
         }
 
-        SourcePortalConfig.current.coreClient.getArtifact(portal.appUuid, portal.interface.viewingPortalArtifact, {
+        SourcePortalConfig.current.getCoreClient(portal.appUuid).getArtifact(
+                portal.appUuid, portal.interface.viewingPortalArtifact, {
             if (it.succeeded()) {
                 vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_ARTIFACT_CONFIGURATION",
                         new JsonObject(Json.encode(it.result())))

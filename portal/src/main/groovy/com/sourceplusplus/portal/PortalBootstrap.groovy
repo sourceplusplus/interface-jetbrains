@@ -103,7 +103,7 @@ class PortalBootstrap extends AbstractVerticle {
         if (apiConfig.getString("key")) {
             coreClient.setApiKey(apiConfig.getString("key"))
         }
-        SourcePortalConfig.current.coreClient = coreClient
+        SourcePortalConfig.current.addCoreClient(appUuid, coreClient)
 
         Vertx.vertx(vertxOptions).deployVerticle(new PortalBootstrap(false),
                 new DeploymentOptions().setConfig(configJSON))
@@ -170,11 +170,11 @@ class PortalBootstrap extends AbstractVerticle {
 
                 if (sub.getBoolean("force_subscribe", false)) {
                     //make sure application exists first (create if necessary), then subscribe
-                    SourcePortalConfig.current.coreClient.getApplication(appUuid, {
+                    SourcePortalConfig.current.getCoreClient(appUuid).getApplication(appUuid, {
                         if (it.succeeded()) {
                             if (it.result().isPresent()) {
                                 def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                                SourcePortalConfig.current.coreClient.createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
+                                SourcePortalConfig.current.getCoreClient(appUuid).createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                     if (it.failed()) {
                                         log.error("Failed to create artifact config", it.cause())
                                     }
@@ -182,10 +182,10 @@ class PortalBootstrap extends AbstractVerticle {
                             } else {
                                 def createApplication = SourceApplication.builder().isCreateRequest(true)
                                         .appUuid(appUuid).build()
-                                SourcePortalConfig.current.coreClient.createApplication(createApplication, {
+                                SourcePortalConfig.current.getCoreClient(appUuid).createApplication(createApplication, {
                                     if (it.succeeded()) {
                                         def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                                        SourcePortalConfig.current.coreClient.createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
+                                        SourcePortalConfig.current.getCoreClient(appUuid).createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                             if (it.failed()) {
                                                 log.error("Failed to create artifact config", it.cause())
                                             }
