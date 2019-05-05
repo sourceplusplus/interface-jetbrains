@@ -26,6 +26,14 @@ class ConnectionInfoDialog extends JDialog {
         setModal(true)
     }
 
+    void log(String data) {
+        connectionInfoTextArea.text += data
+    }
+
+    void setStatus(String status) {
+        connectionStatusLabel.setText("<html><b>Connection Status: $status</b></html>")
+    }
+
     void setSuccessful(SourceCoreInfo sourceCoreInfo) {
         connectionStatusLabel.setText("<html><b>Connection Status: <font color='green'>Successful</font></b></html>")
         connectionInfoTextArea.append(Json.encodePrettily(sourceCoreInfo))

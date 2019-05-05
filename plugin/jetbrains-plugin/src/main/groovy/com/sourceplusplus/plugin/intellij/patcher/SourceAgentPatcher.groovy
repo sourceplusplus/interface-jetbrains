@@ -54,9 +54,6 @@ class SourceAgentPatcher extends JavaProgramPatcher {
             agentFile.deleteOnExit()
             destDir.deleteOnExit()
 
-            //inject temp app id
-            modifyAgentJar(agentFile.absolutePath)
-
             //extract plugins
             def pluginsUrl = SourceAgentPatcher.class.getResource("/plugins")
             def pluginsDir = new File(destDir, "plugins")
@@ -124,6 +121,9 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         }
 
         if (agentFile != null) {
+            //inject agent config
+            modifyAgentJar(agentFile.absolutePath)
+
             javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath")
             log.info("Attached Source++ Agent to executing program")
         }
@@ -144,14 +144,14 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         def agentConfig = new JsonObject(Files.newInputStream(src).getText())
 
         agentConfig.put("log_location", agentFile.parentFile.absolutePath)
-        agentConfig.getJsonObject("application").put("app_uuid", SourcePluginConfig.current.appUuid)
-        agentConfig.getJsonObject("api").put("host", SourcePluginConfig.current.apiHost)
-        agentConfig.getJsonObject("api").put("port", SourcePluginConfig.current.apiPort)
-        agentConfig.getJsonObject("api").put("ssl", SourcePluginConfig.current.apiSslEnabled)
-        agentConfig.getJsonObject("api").put("key", SourcePluginConfig.current.apiKey)
+        agentConfig.getJsonObject("application").put("app_uuid", SourcePluginConfig.current.activeEnvironment.appUuid)
+        agentConfig.getJsonObject("api").put("host", SourcePluginConfig.current.activeEnvironment.apiHost)
+        agentConfig.getJsonObject("api").put("port", SourcePluginConfig.current.activeEnvironment.apiPort)
+        agentConfig.getJsonObject("api").put("ssl", SourcePluginConfig.current.activeEnvironment.apiSslEnabled)
+        agentConfig.getJsonObject("api").put("key", SourcePluginConfig.current.activeEnvironment.apiKey)
 
         agentConfig.getJsonObject("skywalking").put("backend_service",
-                SourcePluginConfig.current.apiHost + ':11800') //todo: configurable skywalking port
+                SourcePluginConfig.current.activeEnvironment.apiHost + ':11800') //todo: configurable skywalking port
 
         agentConfig.getJsonObject("plugin-bridge").put("host", SourcePluginConfig.current.remoteAgentHost)
         agentConfig.getJsonObject("plugin-bridge").put("port", SourcePluginConfig.current.remoteAgentPort)

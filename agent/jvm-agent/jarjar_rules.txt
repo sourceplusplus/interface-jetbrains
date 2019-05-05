@@ -15,6 +15,4 @@ rule okhttp3.** com.sourceplusplus.ext.okhttp3.@1
 rule okio.** com.sourceplusplus.ext.okio.@1
 rule javassist.** com.sourceplusplus.ext.javassist.@1
 rule javax.annotation.** com.sourceplusplus.ext.javax.annotation.@1
-rule mjson.** com.sourceplusplus.ext.mjson.@1
-rule org.modellwerkstatt.** com.sourceplusplus.ext.org.modellwerkstatt.@1
 rule org.slf4j.** com.sourceplusplus.ext.org.slf4j.@1

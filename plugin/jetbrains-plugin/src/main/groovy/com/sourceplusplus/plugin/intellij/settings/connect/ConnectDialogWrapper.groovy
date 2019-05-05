@@ -16,9 +16,8 @@ import javax.swing.*
  */
 class ConnectDialogWrapper extends DialogWrapper {
 
-    private final ConnectDialog connectDialog = new ConnectDialog()
+    private final EnvironmentDialog connectDialog = new EnvironmentDialog()
     private final Project project
-    private boolean startPlugin
 
     ConnectDialogWrapper(@Nullable Project project) {
         super(project)
@@ -26,10 +25,7 @@ class ConnectDialogWrapper extends DialogWrapper {
         init()
         setTitle("Connect Source++")
         setResizable(false)
-    }
-
-    boolean getStartPlugin() {
-        return startPlugin
+        connectDialog.setData(SourcePluginConfig.current)
     }
 
     @Nullable
@@ -40,34 +36,7 @@ class ConnectDialogWrapper extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        def fullHost = connectDialog.host
-        if (fullHost.startsWith("https://")) {
-            SourcePluginConfig.current.apiSslEnabled = true
-            def hostParts = fullHost.substring(8).split(":")
-            SourcePluginConfig.current.apiHost = hostParts[0]
-            if (hostParts.length > 1) {
-                SourcePluginConfig.current.apiPort = Integer.parseInt(hostParts[1])
-            } else {
-                SourcePluginConfig.current.apiPort = 443
-            }
-        } else {
-            SourcePluginConfig.current.apiSslEnabled = false
-            def hostParts = fullHost.substring(7).split(":")
-            SourcePluginConfig.current.apiHost = hostParts[0]
-            if (hostParts.length > 1) {
-                SourcePluginConfig.current.apiPort = Integer.parseInt(hostParts[1])
-            } else {
-                SourcePluginConfig.current.apiPort = 80
-            }
-        }
-        SourcePluginConfig.current.apiKey = connectDialog.apiToken
-
-        startPlugin = true
+        project.save()
         super.doOKAction()
-    }
-
-    @Override
-    void doCancelAction() {
-        super.doCancelAction()
     }
 }

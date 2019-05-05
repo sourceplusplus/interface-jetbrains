@@ -18,6 +18,9 @@ subprojects {
         mavenCentral()
         maven { url = 'https://jitpack.io' }
         maven { url = 'http://maven.teamdev.com/repository/products' }
+        maven {
+            url 'https://repo.grakn.ai/repository/maven/'
+        }
     }
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -34,10 +37,6 @@ subprojects {
         compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: '2.9.2'
         compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '3.2.5'
         compile group: 'io.vertx', name: 'vertx-dropwizard-metrics', version: '3.6.3'
-
-        //todo: not have these
-        implementation 'com.github.danielstieger:javaxbus:a9e05dc650'
-        compile group: 'org.sharegov', name: 'mjson', version: '1.4.1'
     }
 
     test {

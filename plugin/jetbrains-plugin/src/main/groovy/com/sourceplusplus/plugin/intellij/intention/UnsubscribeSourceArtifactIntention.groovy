@@ -82,7 +82,7 @@ class UnsubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
 
         //unsubscribe from artifact
         def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
-                .appUuid(SourcePluginConfig.current.appUuid)
+                .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                 .artifactQualifiedName(artifactQualifiedName)
                 .removeAllArtifactSubscriptions(true)
                 .build()

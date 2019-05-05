@@ -3,8 +3,8 @@ package com.sourceplusplus.portal.display.tabs
 import com.codahale.metrics.Histogram
 import com.codahale.metrics.UniformReservoir
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
-import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.QueryTimeFrame
+import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.BarTrendCard
 import com.sourceplusplus.api.model.internal.FormattedQuickStats
 import com.sourceplusplus.api.model.internal.SplineChart
@@ -51,11 +51,9 @@ class OverviewTab extends AbstractTab {
             [MetricType.ResponseTime_99Percentile, MetricType.ResponseTime_95Percentile,
              MetricType.ResponseTime_90Percentile, MetricType.ResponseTime_75Percentile,
              MetricType.ResponseTime_50Percentile]
-    private final SourceCoreClient coreClient
 
-    OverviewTab(SourceCoreClient coreClient) {
+    OverviewTab() {
         super(PortalTab.Overview)
-        this.coreClient = Objects.requireNonNull(coreClient)
     }
 
     @Override
@@ -92,7 +90,7 @@ class OverviewTab extends AbstractTab {
                     .artifactQualifiedName(portal.interface.viewingPortalArtifact)
                     .timeFrame(view.timeFrame)
                     .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
-            coreClient.subscribeToArtifact(subscribeRequest, {
+            SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
                 if (it.succeeded()) {
                     log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
                 } else {

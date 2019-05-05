@@ -2,15 +2,18 @@ package com.sourceplusplus.api.client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sourceplusplus.api.APIException;
+import com.sourceplusplus.api.bridge.SourceBridgeClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription;
 import com.sourceplusplus.api.model.artifact.*;
+import com.sourceplusplus.api.model.config.SourcePluginConfig;
 import com.sourceplusplus.api.model.info.SourceCoreInfo;
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest;
 import com.sourceplusplus.api.model.trace.*;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -31,9 +34,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class SourceCoreClient implements SourceClient {
 
-    private final static String SPP_API_VERSION = System.getenv().getOrDefault(
+    private static final String SPP_API_VERSION = System.getenv().getOrDefault(
             "SPP_API_VERSION", System.getProperty("SPP_API_VERSION", "v1"));
-
     private static final String PING_ENDPOINT = "/ping";
     private static final String INFO_ENDPOINT = String.format("/%s/info", SPP_API_VERSION);
     private static final String REGISTER_IP_ENDPOINT = String.format("/%s/registerIP", SPP_API_VERSION);
@@ -94,6 +96,13 @@ public class SourceCoreClient implements SourceClient {
     public SourceCoreClient(String sppUrl) {
         this.sppUrl = Objects.requireNonNull(sppUrl);
         SourceClient.initMappers();
+    }
+
+    public void attachBridge(Vertx vertx) {
+        SourceBridgeClient bridgeClient = new SourceBridgeClient(vertx,
+                SourcePluginConfig.current.activeEnvironment.apiHost,
+                SourcePluginConfig.current.activeEnvironment.apiPort);
+        bridgeClient.setupSubscriptions();
     }
 
     public void ping(Handler<AsyncResult<Boolean>> handler) {

@@ -39,7 +39,7 @@ class IntelliJInspectionProvider extends AbstractBaseJavaLocalInspectionTool imp
             //not source code
             return super.buildVisitor(holder, isOnTheFly, session)
         }
-        if (SourcePluginConfig.current.appUuid == null) {
+        if (SourcePluginConfig.current.activeEnvironment?.appUuid == null) {
             log.warn("No App UUID found. Ignoring file visit")
             return super.buildVisitor(holder, isOnTheFly, session)
         }

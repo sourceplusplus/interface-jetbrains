@@ -17,6 +17,12 @@ class ConnectionInfoDialogWrapper extends DialogWrapper {
 
     private final ConnectionInfoDialog connectionInfoDialog = new ConnectionInfoDialog()
 
+    ConnectionInfoDialogWrapper() {
+        super(false)
+        init()
+        setTitle("Connection Info")
+    }
+
     ConnectionInfoDialogWrapper(SourceCoreInfo coreInfo) {
         super(false)
         init()
@@ -29,6 +35,14 @@ class ConnectionInfoDialogWrapper extends DialogWrapper {
         init()
         setTitle("Connection Info")
         connectionInfoDialog.setError(ex)
+    }
+
+    void log(String data) {
+        connectionInfoDialog.log(data)
+    }
+
+    void setStatus(String status) {
+        connectionInfoDialog.setStatus(status)
     }
 
     @Nullable

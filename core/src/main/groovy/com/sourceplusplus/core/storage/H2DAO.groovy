@@ -74,7 +74,7 @@ class H2DAO extends AbstractSourceStorage {
 
     H2DAO(Vertx vertx, JsonObject config) {
         client = JDBCClient.createShared(vertx, new JsonObject()
-                .put("url", "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
+                .put("url", "jdbc:h2:mem:spp;DB_CLOSE_DELAY=-1")
                 .put("driver_class", "org.h2.Driver"))
 
         client.update(SOURCE_CORE_SCHEMA, {

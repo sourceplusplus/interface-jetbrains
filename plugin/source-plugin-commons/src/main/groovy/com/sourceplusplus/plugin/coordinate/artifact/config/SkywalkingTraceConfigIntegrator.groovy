@@ -40,8 +40,9 @@ class SkywalkingTraceConfigIntegrator extends AbstractVerticle {
                         if (operationName) {
                             artifactConfig.endpointName(operationName)
                         }
-                        PluginBootstrap.sourcePlugin.coreClient.createOrUpdateArtifactConfig(
-                                SourcePluginConfig.current.appUuid, mark.artifactQualifiedName, artifactConfig.build(), {
+                        SourcePluginConfig.current.activeEnvironment.coreClient.createOrUpdateArtifactConfig(
+                                SourcePluginConfig.current.activeEnvironment.appUuid, mark.artifactQualifiedName,
+                                artifactConfig.build(), {
                             if (it.failed()) {
                                 log.error("Failed to create artifact config", it.cause())
                             } else {
