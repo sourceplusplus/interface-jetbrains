@@ -2,6 +2,7 @@ package com.sourceplusplus.plugin.intellij.settings.connect
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
+import com.sourceplusplus.api.model.config.SourcePluginConfig
 import org.jetbrains.annotations.Nullable
 
 import javax.swing.*
@@ -24,6 +25,7 @@ class ConnectDialogWrapper extends DialogWrapper {
         init()
         setTitle("Connect Source++")
         setResizable(false)
+        connectDialog.setData(SourcePluginConfig.current)
     }
 
     @Nullable
