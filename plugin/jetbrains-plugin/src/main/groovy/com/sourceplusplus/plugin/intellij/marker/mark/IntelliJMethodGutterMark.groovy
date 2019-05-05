@@ -17,7 +17,6 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
 import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginSourceFile
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.render.SourceArtifactGutterMarkRenderer
 import com.sourceplusplus.plugin.marker.SourceFileMarker
@@ -71,7 +70,8 @@ class IntelliJMethodGutterMark extends GutterMark {
         this.sourceMethod = sourceMethod
         this.psiMethod = psiMethod
         this.gutterMarkRenderer = new SourceArtifactGutterMarkRenderer(this)
-        this.portalUuid = SourcePortal.register(SourcePluginConfig.current.appUuid, sourceMethod.artifactQualifiedName(), false)
+        this.portalUuid = SourcePortal.register(sourceFileMarker.sourceFile.appUuid,
+                sourceMethod.artifactQualifiedName(), false)
     }
 
     static void closePortalIfOpen() {

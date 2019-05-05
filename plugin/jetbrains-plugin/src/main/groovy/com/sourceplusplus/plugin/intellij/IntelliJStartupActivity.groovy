@@ -137,12 +137,12 @@ class IntelliJStartupActivity implements StartupActivity {
                 if (it.failed()) {
                     notifyNoConnection()
                 } else {
-                    if (SourcePluginConfig.current.appUuid == null) {
+                    if (SourcePluginConfig.current.activeEnvironment?.appUuid == null) {
                         doApplicationSettingsDialog(project, coreClient)
                     } else {
-                        coreClient.getApplication(SourcePluginConfig.current.appUuid, {
+                        coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
                             if (it.failed() || !it.result().isPresent()) {
-                                SourcePluginConfig.current.appUuid = null
+                                SourcePluginConfig.current.activeEnvironment.appUuid = null
                                 doApplicationSettingsDialog(project, coreClient)
                             } else {
                                 startSourcePlugin(coreClient)
@@ -202,12 +202,12 @@ class IntelliJStartupActivity implements StartupActivity {
                             }
                             coreClient.ping({
                                 if (it.succeeded()) {
-                                    if (SourcePluginConfig.current.appUuid == null) {
+                                    if (SourcePluginConfig.current.activeEnvironment?.appUuid == null) {
                                         doApplicationSettingsDialog(currentProject, coreClient)
                                     } else {
-                                        coreClient.getApplication(SourcePluginConfig.current.appUuid, {
+                                        coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
                                             if (it.failed() || !it.result().isPresent()) {
-                                                SourcePluginConfig.current.appUuid = null
+                                                SourcePluginConfig.current.activeEnvironment.appUuid = null
                                                 doApplicationSettingsDialog(currentProject, coreClient)
                                             } else {
                                                 startSourcePlugin(coreClient)
@@ -261,7 +261,7 @@ class IntelliJStartupActivity implements StartupActivity {
                         applicationSettings.show()
 
                         if (applicationSettings.getOkayAction()) {
-                            if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.appUuid != null) {
+                            if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.activeEnvironment?.appUuid != null) {
                                 startSourcePlugin(coreClient)
                             }
                         }
@@ -288,7 +288,7 @@ class IntelliJStartupActivity implements StartupActivity {
         }.toArray(new String[0])[0] //todo: better (this probably doesn't work with inner classes)
 
         def sourceFile = new PluginSourceFile(new File(psiFile.virtualFile.toString()),
-                SourcePluginConfig.current.appUuid, className)
+                SourcePluginConfig.current.activeEnvironment.appUuid, className)
         def fileMarker = new IntelliJSourceFileMarker(psiFile, sourceFile)
         psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, fileMarker)
 

@@ -3,14 +3,12 @@ package com.sourceplusplus.plugin
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.sourceplusplus.api.bridge.SourceBridgeClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
@@ -23,8 +21,6 @@ import io.vertx.core.json.Json
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.util.concurrent.atomic.AtomicBoolean
-
 /**
  * Used to bootstrap the Source++ Plugin.
  *
@@ -36,7 +32,6 @@ class PluginBootstrap extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static SourcePlugin sourcePlugin
-    private static final AtomicBoolean registeredCodecs = new AtomicBoolean()
 
     PluginBootstrap(SourcePlugin sourcePlugin) {
         PluginBootstrap.sourcePlugin = sourcePlugin
@@ -44,14 +39,10 @@ class PluginBootstrap extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
-        log.info("Source++ Plugin activated. App UUID: " + SourcePluginConfig.current.appUuid)
+        log.info("Source++ Plugin activated. App UUID: " + SourcePluginConfig.current.activeEnvironment.appUuid)
         registerCodecs()
         vertx.deployVerticle(new PluginCoordinator())
-        vertx.deployVerticle(new PortalBootstrap(sourcePlugin.coreClient, true))
-
-        //setup bridge to core
-        new SourceBridgeClient(vertx, SourcePluginConfig.current.activeEnvironment.apiHost,
-                SourcePluginConfig.current.activeEnvironment.apiPort).setupSubscriptions()
+        vertx.deployVerticle(new PortalBootstrap(true))
     }
 
     @Override
@@ -64,9 +55,6 @@ class PluginBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
-        if (registeredCodecs.getAndSet(true)) {
-            return
-        }
         Json.mapper.findAndRegisterModules()
         Json.mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
         Json.mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)

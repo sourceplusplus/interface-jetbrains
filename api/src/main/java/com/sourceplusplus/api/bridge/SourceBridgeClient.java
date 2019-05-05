@@ -21,19 +21,27 @@ public class SourceBridgeClient {
     private final Vertx vertx;
     private final String apiHost;
     private final int apiPort;
+    private final HttpClient client;
+    private boolean active = true;
 
     public SourceBridgeClient(Vertx vertx, String apiHost, int apiPort) {
         this.vertx = vertx;
         this.apiHost = apiHost;
         this.apiPort = apiPort;
+        this.client = vertx.createHttpClient();
     }
 
     public void setupSubscriptions() {
-        HttpClient client = vertx.createHttpClient();
         client.websocket(apiPort, apiHost, "/eventbus/websocket", ws -> {
             JsonObject pingMsg = new JsonObject().put("type", "ping");
             ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true));
-            vertx.setPeriodic(5000, it -> ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true)));
+            vertx.setPeriodic(5000, it -> {
+                if (active) {
+                    ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true));
+                } else {
+                    vertx.cancelTimer(it);
+                }
+            });
 
             JsonObject msg = new JsonObject().put("type", "register")
                     .put("address", PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress());
@@ -57,6 +65,11 @@ public class SourceBridgeClient {
                 }
             });
         });
+    }
+
+    public void close() {
+        active = false;
+        client.close();
     }
 
     private void handleArtifactConfigUpdated(JsonObject msg) {

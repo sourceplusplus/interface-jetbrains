@@ -49,7 +49,7 @@ class PluginSettingsDialog extends JDialog {
                 if (applicationSettings.getOkayAction() && !StringUtils.isEmpty(applicationSettings.getApplicationName())) {
                     applicationDetailsLabel.setText(String.format(
                             "<html>Application UUID: %s<br>Application name: %s</html>",
-                            SourcePluginConfig.current.appUuid, applicationSettings.getApplicationName()))
+                            SourcePluginConfig.current.activeEnvironment.appUuid, applicationSettings.getApplicationName()))
                 }
             }
         })
@@ -80,7 +80,7 @@ class PluginSettingsDialog extends JDialog {
             connectActionListener = null
         }
         if (isConnected) {
-            if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.appUuid != null) {
+            if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.activeEnvironment?.appUuid != null) {
                 IntelliJStartupActivity.startSourcePlugin(coreClient)
             }
 
@@ -98,7 +98,7 @@ class PluginSettingsDialog extends JDialog {
                     if (applicationSettings.getOkayAction()) {
                         updateApplicationDetails(coreClient)
 
-                        if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.appUuid != null) {
+                        if (PluginBootstrap.getSourcePlugin() == null && SourcePluginConfig.current.activeEnvironment?.appUuid != null) {
                             IntelliJStartupActivity.startSourcePlugin(coreClient)
                         }
                     }
@@ -136,8 +136,8 @@ class PluginSettingsDialog extends JDialog {
     }
 
     private void updateApplicationDetails(SourceCoreClient coreClient) {
-        if (SourcePluginConfig.current.appUuid != null) {
-            coreClient.getApplication(SourcePluginConfig.current.appUuid, {
+        if (SourcePluginConfig.current.activeEnvironment?.appUuid != null) {
+            coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
                 if (it.succeeded()) {
                     if (it.result().isPresent()) {
                         applicationDetailsLabel.setText(String.format(

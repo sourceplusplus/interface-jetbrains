@@ -14,7 +14,6 @@ public final class SourcePluginConfig {
     public static final SourcePluginConfig current = new SourcePluginConfig();
     private volatile Set<SourceEnvironmentConfig> environments = new HashSet<>();
     public volatile SourceEnvironmentConfig activeEnvironment = null;
-    public volatile String appUuid = null;
     public volatile boolean classVirtualTextMarksEnabled = false;
     public volatile boolean methodVirtualTextMarksEnabled = false;
     public volatile boolean classGutterMarksEnabled = false;
@@ -30,7 +29,6 @@ public final class SourcePluginConfig {
         Objects.requireNonNull(config);
         environments = new HashSet<>(config.environments);
         activeEnvironment = config.activeEnvironment;
-        appUuid = config.appUuid;
         classVirtualTextMarksEnabled = config.classVirtualTextMarksEnabled;
         methodVirtualTextMarksEnabled = config.methodVirtualTextMarksEnabled;
         classGutterMarksEnabled = config.classGutterMarksEnabled;

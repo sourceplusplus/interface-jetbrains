@@ -11,11 +11,12 @@ import java.util.Objects;
  */
 public class SourceEnvironmentConfig {
 
+    public volatile String appUuid;
     public volatile String environmentName;
     public volatile String apiHost;
     public volatile int apiPort;
     public volatile boolean apiSslEnabled;
-    public volatile String apiKey = null;
+    public volatile String apiKey;
 
     public String getSppUrl() {
         if (apiSslEnabled) {

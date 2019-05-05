@@ -1,7 +1,9 @@
 package com.sourceplusplus.plugin
 
 import com.google.common.collect.Sets
+import com.sourceplusplus.api.bridge.SourceBridgeClient
 import com.sourceplusplus.api.client.SourceCoreClient
+import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import com.sourceplusplus.plugin.marker.mark.SourceMark
@@ -34,13 +36,14 @@ class SourcePlugin {
     private SourceCoreClient coreClient
     private final Vertx vertx
     private PluginBootstrap pluginBootstrap
+    private SourceBridgeClient bridgeClient
 
     SourcePlugin(SourceCoreClient coreClient) {
-        this.coreClient = Objects.requireNonNull(coreClient)
         vertx = Vertx.vertx()
         System.addShutdownHook {
             vertx.close()
         }
+        updateEnvironment(Objects.requireNonNull(coreClient))
         vertx.deployVerticle(pluginBootstrap = new PluginBootstrap(this))
 
         //start plugin bridge for portal
@@ -56,10 +59,15 @@ class SourcePlugin {
         })
     }
 
-    void setCoreClient(SourceCoreClient coreClient) {
+    void updateEnvironment(SourceCoreClient coreClient) {
         this.coreClient = Objects.requireNonNull(coreClient)
-        pluginBootstrap.stop()
-        pluginBootstrap.start()
+
+        //setup bridge to core
+        bridgeClient?.close()
+        bridgeClient = new SourceBridgeClient(vertx, SourcePluginConfig.current.activeEnvironment.apiHost,
+                SourcePluginConfig.current.activeEnvironment.apiPort)
+        bridgeClient.setupSubscriptions()
+        SourcePortalConfig.current.coreClient = coreClient
     }
 
     private void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {

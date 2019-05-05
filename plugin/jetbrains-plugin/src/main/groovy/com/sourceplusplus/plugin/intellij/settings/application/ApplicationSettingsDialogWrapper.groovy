@@ -58,8 +58,8 @@ class ApplicationSettingsDialogWrapper extends DialogWrapper {
     protected void doOKAction() {
         if (applicationSettings.getExistingApplication() != null) {
             //assign existing application
-            SourcePluginConfig.current.appUuid = applicationSettings.getExistingApplication().appUuid()
-            log.info("Application UUID updated: " + SourcePluginConfig.current.appUuid)
+            SourcePluginConfig.current.activeEnvironment.appUuid = applicationSettings.getExistingApplication().appUuid()
+            log.info("Application UUID updated: " + SourcePluginConfig.current.activeEnvironment.appUuid)
         } else {
             //create new application
             def createRequest = SourceApplication.builder().isCreateRequest(true)
@@ -71,8 +71,8 @@ class ApplicationSettingsDialogWrapper extends DialogWrapper {
             }
 
             def newApplication = coreClient.createApplication(createRequest.build())
-            SourcePluginConfig.current.appUuid = newApplication.appUuid()
-            log.info("Application UUID updated: " + SourcePluginConfig.current.appUuid)
+            SourcePluginConfig.current.activeEnvironment.appUuid = newApplication.appUuid()
+            log.info("Application UUID updated: " + SourcePluginConfig.current.activeEnvironment.appUuid)
         }
 
         okayAction = true

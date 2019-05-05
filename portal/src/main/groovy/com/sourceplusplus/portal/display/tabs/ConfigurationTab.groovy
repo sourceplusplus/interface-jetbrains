@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.display.tabs
 
-import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
+import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.json.Json
@@ -24,13 +24,11 @@ class ConfigurationTab extends AbstractTab {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
 
-    private final SourceCoreClient coreClient
     private final boolean pluginAvailable
     private boolean updateConfigurationPermitted
 
-    ConfigurationTab(SourceCoreClient coreClient, boolean pluginAvailable) {
+    ConfigurationTab(boolean pluginAvailable) {
         super(PortalTab.Configuration)
-        this.coreClient = Objects.requireNonNull(coreClient)
         this.pluginAvailable = pluginAvailable
     }
 
@@ -61,7 +59,7 @@ class ConfigurationTab extends AbstractTab {
             def config = SourceArtifactConfig.builder()
                     .forceSubscribe(request.getBoolean("force_subscribe"))
                     .build()
-            coreClient.createOrUpdateArtifactConfig(portal.appUuid, portal.interface.viewingPortalArtifact, config, {
+            SourcePortalConfig.current.coreClient.createOrUpdateArtifactConfig(portal.appUuid, portal.interface.viewingPortalArtifact, config, {
                 if (it.succeeded()) {
                     SourcePortal.getSimilarPortals(portal).each {
                         updateUI(it)
@@ -79,7 +77,7 @@ class ConfigurationTab extends AbstractTab {
             return
         }
 
-        coreClient.getArtifact(portal.appUuid, portal.interface.viewingPortalArtifact, {
+        SourcePortalConfig.current.coreClient.getArtifact(portal.appUuid, portal.interface.viewingPortalArtifact, {
             if (it.succeeded()) {
                 vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_ARTIFACT_CONFIGURATION",
                         new JsonObject(Json.encode(it.result())))

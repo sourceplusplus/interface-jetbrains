@@ -33,7 +33,7 @@ class EditApplicationSettingsDialogWrapper extends DialogWrapper {
         setTitle("Edit Application Settings")
         setResizable(false)
 
-        PluginBootstrap.getSourcePlugin().getCoreClient().getApplication(SourcePluginConfig.current.appUuid, {
+        PluginBootstrap.getSourcePlugin().getCoreClient().getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
             if (it.succeeded()) {
                 editApplicationSettings.setCurrentProject(it.result().get())
             } else {
@@ -59,7 +59,7 @@ class EditApplicationSettingsDialogWrapper extends DialogWrapper {
     @Override
     protected void doOKAction() {
         def sourceApplication = SourceApplication.builder()
-                .appUuid(SourcePluginConfig.current.appUuid)
+                .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                 .isUpdateRequest(true)
         def agentConfig = new SourceAgentConfig()
         sourceApplication.agentConfig(agentConfig)

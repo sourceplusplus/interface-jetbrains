@@ -94,7 +94,7 @@ class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
                            MetricType.ResponseTime_75Percentile,
                            MetricType.ResponseTime_50Percentile]
         def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
-                .appUuid(SourcePluginConfig.current.appUuid)
+                .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                 .artifactQualifiedName(artifactQualifiedName)
                 .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
                 .metricTypes(metricTypes).build()
@@ -103,7 +103,7 @@ class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
 
         //subscribe to traces
         def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                .appUuid(SourcePluginConfig.current.appUuid)
+                .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                 .artifactQualifiedName(artifactQualifiedName)
                 .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                 .build()

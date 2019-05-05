@@ -67,7 +67,6 @@ class PortalBootstrap extends AbstractVerticle {
 
     public static final MetricRegistry portalMetrics = new MetricRegistry()
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private final SourceCoreClient coreClient
     private final boolean pluginAvailable
 
     static void main(String[] args) {
@@ -104,13 +103,13 @@ class PortalBootstrap extends AbstractVerticle {
         if (apiConfig.getString("key")) {
             coreClient.setApiKey(apiConfig.getString("key"))
         }
+        SourcePortalConfig.current.coreClient = coreClient
 
-        Vertx.vertx(vertxOptions).deployVerticle(new PortalBootstrap(coreClient, false),
+        Vertx.vertx(vertxOptions).deployVerticle(new PortalBootstrap(false),
                 new DeploymentOptions().setConfig(configJSON))
     }
 
-    PortalBootstrap(SourceCoreClient coreClient, boolean pluginAvailable) {
-        this.coreClient = Objects.requireNonNull(coreClient)
+    PortalBootstrap(boolean pluginAvailable) {
         this.pluginAvailable = pluginAvailable
     }
 
@@ -118,7 +117,7 @@ class PortalBootstrap extends AbstractVerticle {
     void start(Future<Void> startFuture) throws Exception {
         if (pluginAvailable) {
             PortalInterface.preloadPortalUI(vertx)
-            SourcePortalConfig.current.appUuid = SourcePluginConfig.current.appUuid
+            SourcePortalConfig.current.appUuid = SourcePluginConfig.current.activeEnvironment.appUuid
         } else {
             registerCodecs()
             SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
@@ -171,11 +170,11 @@ class PortalBootstrap extends AbstractVerticle {
 
                 if (sub.getBoolean("force_subscribe", false)) {
                     //make sure application exists first (create if necessary), then subscribe
-                    coreClient.getApplication(appUuid, {
+                    SourcePortalConfig.current.coreClient.getApplication(appUuid, {
                         if (it.succeeded()) {
                             if (it.result().isPresent()) {
                                 def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                                coreClient.createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
+                                SourcePortalConfig.current.coreClient.createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                     if (it.failed()) {
                                         log.error("Failed to create artifact config", it.cause())
                                     }
@@ -183,10 +182,10 @@ class PortalBootstrap extends AbstractVerticle {
                             } else {
                                 def createApplication = SourceApplication.builder().isCreateRequest(true)
                                         .appUuid(appUuid).build()
-                                coreClient.createApplication(createApplication, {
+                                SourcePortalConfig.current.coreClient.createApplication(createApplication, {
                                     if (it.succeeded()) {
                                         def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
-                                        coreClient.createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
+                                        SourcePortalConfig.current.coreClient.createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                             if (it.failed()) {
                                                 log.error("Failed to create artifact config", it.cause())
                                             }
@@ -207,15 +206,14 @@ class PortalBootstrap extends AbstractVerticle {
             }
         }
 
-        //tabs
         def overviewTabFut = Future.future()
         def tracesTabFut = Future.future()
         def configurationTabFut = Future.future()
-        vertx.deployVerticle(new OverviewTab(coreClient), new DeploymentOptions()
+        vertx.deployVerticle(new OverviewTab(), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), overviewTabFut.completer())
-        vertx.deployVerticle(new TracesTab(coreClient), new DeploymentOptions()
+        vertx.deployVerticle(new TracesTab(), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), tracesTabFut.completer())
-        vertx.deployVerticle(new ConfigurationTab(coreClient, pluginAvailable), new DeploymentOptions()
+        vertx.deployVerticle(new ConfigurationTab(pluginAvailable), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), configurationTabFut.completer())
         CompositeFuture.all(overviewTabFut, tracesTabFut, configurationTabFut).setHandler({
             if (it.succeeded()) {

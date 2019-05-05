@@ -144,7 +144,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         def agentConfig = new JsonObject(Files.newInputStream(src).getText())
 
         agentConfig.put("log_location", agentFile.parentFile.absolutePath)
-        agentConfig.getJsonObject("application").put("app_uuid", SourcePluginConfig.current.appUuid)
+        agentConfig.getJsonObject("application").put("app_uuid", SourcePluginConfig.current.activeEnvironment.appUuid)
         agentConfig.getJsonObject("api").put("host", SourcePluginConfig.current.activeEnvironment.apiHost)
         agentConfig.getJsonObject("api").put("port", SourcePluginConfig.current.activeEnvironment.apiPort)
         agentConfig.getJsonObject("api").put("ssl", SourcePluginConfig.current.activeEnvironment.apiSslEnabled)

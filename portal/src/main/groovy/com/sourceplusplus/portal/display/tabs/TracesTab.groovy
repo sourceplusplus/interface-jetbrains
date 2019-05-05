@@ -1,7 +1,6 @@
 package com.sourceplusplus.portal.display.tabs
 
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
-import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.InnerTraceStackInfo
 import com.sourceplusplus.api.model.internal.TraceSpanInfo
@@ -40,11 +39,9 @@ class TracesTab extends AbstractTab {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Pattern QUALIFIED_NAME_PATTERN = Pattern.compile('.+\\..+\\(.*\\)')
-    private final SourceCoreClient coreClient
 
-    TracesTab(SourceCoreClient coreClient) {
+    TracesTab() {
         super(PortalTab.Traces)
-        this.coreClient = Objects.requireNonNull(coreClient)
     }
 
     @Override
@@ -153,7 +150,7 @@ class TracesTab extends AbstractTab {
                 def traceStackQuery = TraceSpanStackQuery.builder()
                         .oneLevelDeep(true)
                         .traceId(globalTraceId).build()
-                coreClient.getTraceSpans(appUuid, artifactQualifiedName, traceStackQuery, {
+                SourcePortalConfig.current.coreClient.getTraceSpans(appUuid, artifactQualifiedName, traceStackQuery, {
                     if (it.failed()) {
                         log.error("Failed to get trace spans", it.cause())
                     } else {
@@ -254,7 +251,7 @@ class TracesTab extends AbstractTab {
                             }
 
                             //todo: cache
-                            coreClient.getTraceSpans(SourcePortalConfig.current.appUuid,
+                            SourcePortalConfig.current.coreClient.getTraceSpans(SourcePortalConfig.current.appUuid,
                                     portal.interface.viewingPortalArtifact, spanStackQuery, {
                                 if (it.failed()) {
                                     log.error("Failed to get trace spans", it.cause())

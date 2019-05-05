@@ -31,4 +31,10 @@ class ConnectDialogWrapper extends DialogWrapper {
     JComponent createCenterPanel() {
         return connectDialog.getContentPane()
     }
+
+    @Override
+    protected void doOKAction() {
+        project.save()
+        super.doOKAction()
+    }
 }

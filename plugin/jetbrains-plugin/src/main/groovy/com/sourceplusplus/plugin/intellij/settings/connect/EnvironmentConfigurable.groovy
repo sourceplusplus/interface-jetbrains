@@ -69,7 +69,7 @@ class EnvironmentConfigurable implements Configurable {
             if (SourcePluginConfig.current.activeEnvironment.apiKey != null) {
                 coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
             }
-            PluginBootstrap.sourcePlugin.coreClient = coreClient
+            PluginBootstrap.sourcePlugin.updateEnvironment(coreClient)
             FileEditorManager manager = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject)
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
