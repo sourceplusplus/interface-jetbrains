@@ -71,30 +71,37 @@ class EnvironmentConfigurable implements Configurable {
             if (settings.activeEnvironment.apiKey) {
                 coreClient.apiKey = settings.activeEnvironment.apiKey
             }
-            PluginBootstrap.sourcePlugin.updateEnvironment(coreClient)
-            if (settings.activeEnvironment?.appUuid) {
-                coreClient.getApplication(settings.activeEnvironment.appUuid, {
-                    if (it.succeeded() && it.result().isPresent()) {
-                        FileEditorManager manager = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject)
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            void run() {
-                                manager.getSelectedFiles().each {
-                                    def psiFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
-                                    psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, null)
-                                    IntelliJStartupActivity.coordinateSourceFileOpened(
-                                            PluginBootstrap.sourcePlugin, (PsiClassOwner) psiFile)
-                                }
-                                PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+            coreClient.ping({
+                if (it.succeeded()) {
+                    PluginBootstrap.sourcePlugin.updateEnvironment(coreClient)
+
+                    if (settings.activeEnvironment?.appUuid) {
+                        coreClient.getApplication(settings.activeEnvironment.appUuid, {
+                            if (it.succeeded() && it.result().isPresent()) {
+                                FileEditorManager manager = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject)
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    void run() {
+                                        manager.getSelectedFiles().each {
+                                            def psiFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
+                                            psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, null)
+                                            IntelliJStartupActivity.coordinateSourceFileOpened(
+                                                    PluginBootstrap.sourcePlugin, (PsiClassOwner) psiFile)
+                                        }
+                                        PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+                                    }
+                                })
+                            } else if (it.succeeded()) {
+                                settings.activeEnvironment.appUuid = null
+                            } else {
+                                log.error("Failed to get application", it.cause())
                             }
                         })
-                    } else if (it.succeeded()) {
-                        settings.activeEnvironment.appUuid = null
-                    } else {
-                        log.error("Failed to get application", it.cause())
                     }
-                })
-            }
+                } else {
+                    settings.activeEnvironment.appUuid = null
+                }
+            })
         }
     }
 

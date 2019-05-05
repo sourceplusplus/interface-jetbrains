@@ -39,7 +39,12 @@ public class SourceEnvironmentConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SourceEnvironmentConfig that = (SourceEnvironmentConfig) o;
-        return Objects.equals(environmentName, that.environmentName);
+        return apiPort == that.apiPort &&
+                apiSslEnabled == that.apiSslEnabled &&
+                Objects.equals(environmentName, that.environmentName) &&
+                Objects.equals(apiHost, that.apiHost) &&
+                (((apiKey == null || apiKey.isEmpty()) && (that.apiKey == null || that.apiKey.isEmpty()))
+                        || Objects.equals(apiKey, that.apiKey));
     }
 
     @Override

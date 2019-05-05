@@ -102,6 +102,7 @@ class PluginSettingsDialog extends JDialog {
         } else {
             connectionStatusLabel.setText("Status: Not Connected")
             connectButton.setEnabled(false)
+            editApplicationButton.setEnabled(false)
         }
 
         connectButton.addActionListener(connectActionListener = new AbstractAction() {
@@ -160,9 +161,26 @@ class PluginSettingsDialog extends JDialog {
     }
 
     boolean isModified(@NotNull SourcePluginConfig data) {
-        if (SourcePluginConfig.current.activeEnvironment?.coreClient
+        if (SourcePluginConfig.current.activeEnvironment
                 && SourcePluginConfig.current.activeEnvironment != currentEnvironment) {
-            updateApplicationDetails(SourcePluginConfig.current.activeEnvironment.coreClient)
+            currentEnvironment = SourcePluginConfig.current.activeEnvironment
+
+            if (SourcePluginConfig.current.activeEnvironment.coreClient) {
+                updateConnectButton(true, SourcePluginConfig.current.activeEnvironment.coreClient)
+            } else {
+                SourceCoreClient newCoreClient = new SourceCoreClient(
+                        SourcePluginConfig.current.activeEnvironment.getSppUrl())
+                if (SourcePluginConfig.current.activeEnvironment.apiKey) {
+                    newCoreClient.setApiKey(SourcePluginConfig.current.activeEnvironment.apiKey)
+                }
+                newCoreClient.ping({
+                    if (it.succeeded()) {
+                        updateConnectButton(true, newCoreClient)
+                    } else {
+                        updateConnectButton(false, null)
+                    }
+                })
+            }
         }
         return agentPatcherEnabledCheckBox.isSelected() != data.agentPatcherEnabled
     }

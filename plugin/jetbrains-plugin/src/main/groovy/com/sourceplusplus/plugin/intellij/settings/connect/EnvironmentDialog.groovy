@@ -121,6 +121,12 @@ class EnvironmentDialog extends JDialog {
             }
         })
         saveButton.addActionListener({
+            def addIndex = 0
+            if (environmentList.selectedValue != null) {
+                //update environment
+                addIndex = environmentList.getSelectedIndex()
+                (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).remove(environmentList.getSelectedIndex())
+            }
             def env = new SourceEnvironmentConfig()
             env.environmentName = nameTextField.text
             env.apiHost = hostTextField.text
@@ -130,7 +136,7 @@ class EnvironmentDialog extends JDialog {
                 env.apiKey = apiTokenTextField.text
             }
             clearConnectionForm(false)
-            (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).addElement(env)
+            (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).add(addIndex, env)
         })
         testConnectionButton.addActionListener({
             def host = hostTextField.getText()
