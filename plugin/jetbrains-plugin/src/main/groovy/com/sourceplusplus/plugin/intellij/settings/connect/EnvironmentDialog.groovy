@@ -81,14 +81,12 @@ class EnvironmentDialog extends JDialog {
                 output.close()
                 input.close()
 
+                def sppBinding = initSpp.portBindings.get("8080/tcp")[0]
                 def env = new SourceEnvironmentConfig()
                 env.environmentName = "Docker"
-                env.apiHost = hostTextField.text
-                env.apiPort = portSpinner.value as int
-                env.apiSslEnabled = sslEnabledCheckbox.isSelected()
-                if (!apiTokenTextField.getText().isAllWhitespace()) {
-                    env.apiKey = apiTokenTextField.text
-                }
+                env.apiHost = sppBinding.substring(0, sppBinding.indexOf(":"))
+                env.apiPort = sppBinding.substring(sppBinding.indexOf(":") + 1) as int
+                env.apiSslEnabled = false
                 clearConnectionForm(false)
                 (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).addElement(env)
                 connectDialog.setStatus("<font color='green'>Successful</font>")
