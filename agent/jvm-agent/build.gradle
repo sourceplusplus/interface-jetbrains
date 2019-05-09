@@ -82,7 +82,7 @@ task prepareExternalAgent(type: JavaExec) {
         file("build/libs/source-agent-$version" + "_prepare_copy.jar").delete()
         Files.copy(file("build/libs/source-agent-$version" + "_prepare.jar").toPath(),
                 file("build/libs/source-agent-$version" + "_prepare_copy.jar").toPath())
-        def agentUri = URI.create("jar:file://" + file("build/libs/source-agent-$version" + "_prepare_copy.jar").absolutePath)
+        def agentUri = URI.create("jar:" + file("build/libs/source-agent-$version" + "_prepare_copy.jar").toURI())
         def agentFilesystem
         try {
             agentFilesystem = FileSystems.newFileSystem(agentUri, ["create": "false"])
