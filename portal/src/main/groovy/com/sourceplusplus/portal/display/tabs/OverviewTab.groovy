@@ -42,6 +42,7 @@ import java.time.temporal.ChronoUnit
 class OverviewTab extends AbstractTab {
 
     public static final String OVERVIEW_TAB_OPENED = "OverviewTabOpened"
+    public static final String SET_METRIC_TIME_FRAME = "SetMetricTimeFrame"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static DecimalFormat decimalFormat = new DecimalFormat(".#")
@@ -76,7 +77,7 @@ class OverviewTab extends AbstractTab {
             }
         })
 
-        vertx.eventBus().consumer("SetMetricTimeFrame", {
+        vertx.eventBus().consumer(SET_METRIC_TIME_FRAME, {
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
             def view = portal.interface.overviewView

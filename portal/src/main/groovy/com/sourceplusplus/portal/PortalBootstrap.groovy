@@ -12,7 +12,6 @@ import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
-import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
@@ -92,19 +91,6 @@ class PortalBootstrap extends AbstractVerticle {
 //            vertxOptions.setBlockedThreadCheckInterval(Integer.MAX_VALUE)
 //        }
 
-        def appUuid = configJSON.getString("app_uuid")
-        SourcePortalConfig.current.appUuid = appUuid
-        //def artifactQualifiedName = configJSON.getString("artifact_qualified_name")
-        //PortalViewTracker.viewingPortalArtifact = artifactQualifiedName
-        def apiConfig = configJSON.getJsonObject("api")
-
-        def coreClient = new SourceCoreClient(
-                apiConfig.getString("host"), apiConfig.getInteger("port"), apiConfig.getBoolean("ssl"))
-        if (apiConfig.getString("key")) {
-            coreClient.setApiKey(apiConfig.getString("key"))
-        }
-        SourcePortalConfig.current.addCoreClient(appUuid, coreClient)
-
         Vertx.vertx(vertxOptions).deployVerticle(new PortalBootstrap(false),
                 new DeploymentOptions().setConfig(configJSON))
     }
@@ -117,7 +103,6 @@ class PortalBootstrap extends AbstractVerticle {
     void start(Future<Void> startFuture) throws Exception {
         if (pluginAvailable) {
             PortalInterface.preloadPortalUI(vertx)
-            SourcePortalConfig.current.appUuid = SourcePluginConfig.current.activeEnvironment.appUuid
         } else {
             registerCodecs()
             SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
@@ -156,8 +141,15 @@ class PortalBootstrap extends AbstractVerticle {
                 })
             }
 
-            //setup bridge to core
+            //setup connection to core
             def apiConfig = config().getJsonObject("api")
+            def coreClient = new SourceCoreClient(
+                    apiConfig.getString("host"), apiConfig.getInteger("port"), apiConfig.getBoolean("ssl"))
+            if (apiConfig.getString("key")) {
+                coreClient.setApiKey(apiConfig.getString("key"))
+            }
+
+            //setup bridge to core
             new SourceBridgeClient(vertx, apiConfig.getString("host"), apiConfig.getInteger("port"))
                     .setupSubscriptions()
 
@@ -167,6 +159,7 @@ class PortalBootstrap extends AbstractVerticle {
                 def sub = subscriptions.getJsonObject(i)
                 def appUuid = sub.getString("app_uuid")
                 def artifactQualifiedName = sub.getString("artifact_qualified_name")
+                SourcePortalConfig.current.addCoreClient(appUuid, coreClient)
 
                 if (sub.getBoolean("force_subscribe", false)) {
                     //make sure application exists first (create if necessary), then subscribe

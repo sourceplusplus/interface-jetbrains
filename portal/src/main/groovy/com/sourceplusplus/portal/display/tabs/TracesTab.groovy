@@ -60,6 +60,20 @@ class TracesTab extends AbstractTab {
             }
             portal.interface.currentTab = PortalTab.Traces
             updateUI(portal)
+
+            //subscribe (re-subscribe) to get latest stats
+            def subscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                    .appUuid(portal.appUuid)
+                    .artifactQualifiedName(portal.interface.viewingPortalArtifact)
+                    .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
+                    .build()
+            SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
+                if (it.succeeded()) {
+                    log.info("Successfully subscribed to traces with request: " + subscribeRequest)
+                } else {
+                    log.error("Failed to subscribe to artifact traces", it.cause())
+                }
+            })
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
             handleArtifactTraceResult(it.body() as ArtifactTraceResult)
@@ -273,7 +287,7 @@ class TracesTab extends AbstractTab {
                                     spanTracesView.innerTrace = true
                                     spanTracesView.innerLevel = innerLevel
                                     spanTracesView.innerTraceStack = handleTraceStack(
-                                            SourcePortalConfig.current.appUuid, portal.interface.viewingPortalArtifact, queryResult)
+                                            portal.appUuid, portal.interface.viewingPortalArtifact, queryResult)
                                     vertx.eventBus().send("NavigateToArtifact",
                                             new JsonObject().put("portal_uuid", spanPortal.get().portalUuid)
                                                     .put("artifact_qualified_name", spanArtifactQualifiedName))

@@ -16,7 +16,6 @@ import java.util.Objects;
 public class SourcePortalConfig {
 
     public static final SourcePortalConfig current = new SourcePortalConfig();
-    public volatile String appUuid = null;
     public volatile int pluginUIPort = -1;
     private volatile transient Map<String, SourceCoreClient> coreClients = Maps.newConcurrentMap();
 
@@ -25,7 +24,6 @@ public class SourcePortalConfig {
 
     public void applyConfig(SourcePortalConfig config) {
         Objects.requireNonNull(config);
-        appUuid = config.appUuid;
         pluginUIPort = config.pluginUIPort;
     }
 
