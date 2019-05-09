@@ -4,6 +4,7 @@ import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import io.gitsocratic.api.SocraticAPI
+import io.gitsocratic.command.result.InitDockerCommandResult
 import org.jetbrains.annotations.NotNull
 
 import javax.swing.*
@@ -60,7 +61,7 @@ class EnvironmentDialog extends JDialog {
             Thread.startDaemon {
                 connectDialog.setStatus("Initializing Apache Skywalking...")
                 def initSkywalking = SocraticAPI.administration().initApacheSkywalking()
-                        .build().execute(output)
+                        .build().execute(output) as InitDockerCommandResult
                 if (initSkywalking.status != 0) {
                     connectDialog.setStatus("<font color='red'>Failed to initialize Apache Skywalking service</font>")
                     output.close()
@@ -70,7 +71,7 @@ class EnvironmentDialog extends JDialog {
 
                 connectDialog.setStatus("Initializing Source++...")
                 def initSpp = SocraticAPI.administration().initSourcePlusPlus()
-                        .build().execute(output)
+                        .build().execute(output) as InitDockerCommandResult
                 if (initSpp.status != 0) {
                     connectDialog.setStatus("<font color='red'>Failed to initialize Source++ service</font>")
                     output.close()
@@ -79,6 +80,17 @@ class EnvironmentDialog extends JDialog {
                 }
                 output.close()
                 input.close()
+
+                def env = new SourceEnvironmentConfig()
+                env.environmentName = "Docker"
+                env.apiHost = hostTextField.text
+                env.apiPort = portSpinner.value as int
+                env.apiSslEnabled = sslEnabledCheckbox.isSelected()
+                if (!apiTokenTextField.getText().isAllWhitespace()) {
+                    env.apiKey = apiTokenTextField.text
+                }
+                clearConnectionForm(false)
+                (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).addElement(env)
                 connectDialog.setStatus("<font color='green'>Successful</font>")
             }
             connectDialog.show()
