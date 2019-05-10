@@ -4,12 +4,14 @@ import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.plugin.PluginSourceFile
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
+import com.sourceplusplus.portal.SourcePortal
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
 import java.time.Instant
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * todo: description
@@ -20,11 +22,13 @@ import java.time.Instant
  */
 abstract class SourceMark {
 
+    private final AtomicBoolean portalRegistered = new AtomicBoolean()
     private final SourceFileMarker sourceFileMarker
     private boolean artifactSubscribed
     private boolean artifactDataAvailable
     private Instant subscribeTime
     private Instant unsubscribeTime
+    private String portalUuid
 
     SourceMark(@NotNull SourceFileMarker sourceFileMarker) {
         this.sourceFileMarker = sourceFileMarker
@@ -38,12 +42,37 @@ abstract class SourceMark {
         return artifactDataAvailable
     }
 
-    void setArtifactDataAvailable(boolean artifactDataAvailable) {
-        this.artifactDataAvailable = artifactDataAvailable
+    void markArtifactSubscribed() {
+        if (!artifactSubscribed) {
+            artifactSubscribed = true
+            subscribeTime = Instant.now()
+            sourceFileMarker.refresh()
+            registerPortal()
+        }
     }
 
-    void setArtifactSubscribed(boolean artifactSubscribed) {
-        this.artifactSubscribed = artifactSubscribed
+    void markArtifactUnsubscribed() {
+        if (artifactSubscribed) {
+            artifactSubscribed = false
+            unsubscribeTime = Instant.now()
+            sourceFileMarker.refresh()
+        }
+    }
+
+    void markArtifactHasData() {
+        if (!artifactDataAvailable) {
+            artifactDataAvailable = true
+            sourceFileMarker.refresh()
+            registerPortal()
+        }
+    }
+
+    void registerPortal() {
+        if (!portalRegistered.getAndSet(true)) {
+            def portalUuid = SourcePortal.register(sourceFileMarker.sourceFile.appUuid, artifactQualifiedName, false)
+            SourcePortal.getPortal(portalUuid).interface.initPortal()
+            this.portalUuid = portalUuid
+        }
     }
 
     boolean isArtifactSubscribed() {
@@ -64,6 +93,14 @@ abstract class SourceMark {
 
     void setUnsubscribeTime(Instant unsubscribeTime) {
         this.unsubscribeTime = unsubscribeTime
+    }
+
+    boolean isPortalRegistered() {
+        return portalRegistered.get() && portalUuid
+    }
+
+    String getPortalUuid() {
+        return portalUuid
     }
 
     @NotNull

@@ -62,7 +62,6 @@ class IntelliJMethodGutterMark extends GutterMark {
     private final SourceArtifact sourceMethod
     private UMethod psiMethod
     private final SourceArtifactGutterMarkRenderer gutterMarkRenderer
-    private String portalUuid
 
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, SourceArtifact sourceMethod, UMethod psiMethod) {
         super(sourceFileMarker)
@@ -84,16 +83,10 @@ class IntelliJMethodGutterMark extends GutterMark {
     }
 
     void displayPortal(final Vertx vertx, final Editor editor, boolean hideOnMouseMotion) {
-        if (showingPortalWindow.get()) {
-            return
-        } else if (buildingPortalUI.getAndSet(true)) {
+        if (!portalRegistered || showingPortalWindow.get() || buildingPortalUI.getAndSet(true)) {
             return
         }
 
-        if (this.portalUuid == null) {
-            this.portalUuid = SourcePortal.register(sourceFileMarker.sourceFile.appUuid,
-                    sourceMethod.artifactQualifiedName(), false)
-        }
         final String portalUuid = this.portalUuid
         SwingUtilities.invokeLater(new Runnable() {
             @Override

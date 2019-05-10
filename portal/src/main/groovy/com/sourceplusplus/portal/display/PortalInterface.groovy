@@ -55,10 +55,6 @@ class PortalInterface {
     }
 
     void loadPage(PortalTab tab, Map<String, String> queryParams) {
-        if (!portalReady.getAndSet(true)) {
-            initPortal()
-        }
-
         def userQuery = Joiner.on("&").withKeyValueSeparator("=").join(queryParams)
         if (userQuery) {
             userQuery = "&$userQuery"
@@ -82,9 +78,6 @@ class PortalInterface {
 
     @NotNull
     JComponent getUIComponent() {
-        if (!portalReady.getAndSet(true)) {
-            initPortal()
-        }
         return browser
     }
 
@@ -93,19 +86,21 @@ class PortalInterface {
         this.tracesView.cloneView(portalInterface.tracesView)
     }
 
-    private void initPortal() {
-        browser = new BrowserView()
-        browser.setPreferredSize(new Dimension(775, 250))
-        browser.browser.setSize(775, 250)
-        browser.browser.addConsoleListener({
-            log.info("[PORTAL_CONSOLE] - " + it)
-        })
+    void initPortal() {
+        if (!portalReady.getAndSet(true)) {
+            browser = new BrowserView()
+            browser.setPreferredSize(new Dimension(775, 250))
+            browser.browser.setSize(775, 250)
+            browser.browser.addConsoleListener({
+                log.info("[PORTAL_CONSOLE] - " + it)
+            })
 
-        if (uiDirectory == null) {
-            createScene()
+            if (uiDirectory == null) {
+                createScene()
+            }
+            browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
+            vertx.eventBus().publish(PORTAL_READY, portalUuid)
         }
-        browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
-        vertx.eventBus().publish(PORTAL_READY, portalUuid)
     }
 
     static void updateTheme(boolean dark) {
@@ -131,7 +126,7 @@ class PortalInterface {
 //        view.browser.reload()
     }
 
-    static void preloadPortalUI(Vertx vertx) {
+    static void assignVertx(Vertx vertx) {
         this.vertx = vertx
     }
 

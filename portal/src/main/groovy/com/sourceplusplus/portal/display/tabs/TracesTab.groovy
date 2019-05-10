@@ -250,7 +250,9 @@ class TracesTab extends AbstractTab {
                     vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
                     log.info("Displayed trace span info: " + span)
                 } else {
-                    vertx.eventBus().send("CanNavigateToArtifact", spanArtifactQualifiedName, {
+                    vertx.eventBus().send("CanNavigateToArtifact", new JsonObject()
+                            .put("app_uuid", portal.appUuid)
+                            .put("artifact_qualified_name", spanArtifactQualifiedName), {
                         if (it.succeeded() && it.result().body() == true) {
                             def spanStackQuery = TraceSpanStackQuery.builder()
                                     .oneLevelDeep(true).followExit(true)

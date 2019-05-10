@@ -102,7 +102,7 @@ class PortalBootstrap extends AbstractVerticle {
     @Override
     void start(Future<Void> startFuture) throws Exception {
         if (pluginAvailable) {
-            PortalInterface.preloadPortalUI(vertx)
+            PortalInterface.assignVertx(vertx)
         } else {
             registerCodecs()
             SockJSHandler sockJSHandler = SockJSHandler.create(vertx)

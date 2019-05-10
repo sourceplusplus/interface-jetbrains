@@ -12,7 +12,6 @@ import io.vertx.core.AbstractVerticle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 import static com.sourceplusplus.plugin.PluginBootstrap.sourcePlugin
@@ -64,7 +63,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             }
         })
 
-        //refresh markers when the become available
+        //refresh markers when they become available
         vertx.eventBus().consumer(SourcePlugin.SOURCE_FILE_MARKER_ACTIVATED, {
             def qualifiedClassName = it.body() as String
 
@@ -74,11 +73,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     it.result().findAll { it.artifactQualifiedName().startsWith(qualifiedClassName) }.each {
                         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
                             def gutterMark = sourcePlugin.getSourceMark(it.artifactQualifiedName()) as GutterMark
-                            if (gutterMark != null && !gutterMark.artifactSubscribed) {
-                                gutterMark.artifactSubscribed = true
-                                gutterMark.subscribeTime = Instant.now()
-                                gutterMark.sourceFileMarker.refresh()
-                            }
+                            gutterMark?.markArtifactSubscribed()
                         }
                     }
                 } else {
@@ -90,9 +85,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             PENDING_DATA_AVAILABLE.findAll { it.startsWith(qualifiedClassName) }.each {
                 if (SourcePluginConfig.current.methodGutterMarksEnabled) {
                     def gutterMark = sourcePlugin.getSourceMark(it) as GutterMark
-                    if (gutterMark != null && !gutterMark.artifactDataAvailable) {
-                        gutterMark.artifactDataAvailable = true
-                        gutterMark.sourceFileMarker.refresh()
+                    if (gutterMark != null) {
+                        gutterMark.markArtifactHasData()
                         PENDING_DATA_AVAILABLE.remove(it)
                     }
                 }
@@ -100,10 +94,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             PENDING_SUBSCRIBED.findAll { it.startsWith(qualifiedClassName) }.each {
                 if (SourcePluginConfig.current.methodGutterMarksEnabled) {
                     def gutterMark = sourcePlugin.getSourceMark(it) as GutterMark
-                    if (gutterMark != null && !gutterMark.artifactSubscribed) {
-                        gutterMark.artifactSubscribed = true
-                        gutterMark.subscribeTime = Instant.now()
-                        gutterMark.sourceFileMarker.refresh()
+                    if (gutterMark != null) {
+                        gutterMark.markArtifactSubscribed()
                         PENDING_SUBSCRIBED.remove(it)
                     }
                 }
@@ -117,11 +109,10 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     && artifactMetricResult.appUuid() == SourcePluginConfig.current.activeEnvironment.appUuid) {
                 def gutterMark = sourcePlugin.getSourceMark(
                         artifactMetricResult.artifactQualifiedName()) as GutterMark
-                if (gutterMark != null && !gutterMark.artifactDataAvailable) {
-                    gutterMark.artifactDataAvailable = true
-                    gutterMark.sourceFileMarker.refresh()
+                if (gutterMark != null) {
+                    gutterMark.markArtifactHasData()
                     PENDING_DATA_AVAILABLE.remove(artifactMetricResult.artifactQualifiedName())
-                } else if (gutterMark == null) {
+                } else {
                     PENDING_DATA_AVAILABLE.add(artifactMetricResult.artifactQualifiedName())
                 }
             }
@@ -137,12 +128,10 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     resp.reply(request)
 
                     def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
-                    if (gutterMark != null && !gutterMark.artifactSubscribed) {
-                        gutterMark.artifactSubscribed = true
-                        gutterMark.subscribeTime = Instant.now()
-                        gutterMark.sourceFileMarker.refresh()
+                    if (gutterMark != null) {
+                        gutterMark.markArtifactSubscribed()
                         PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
-                    } else if (gutterMark == null) {
+                    } else {
                         PENDING_SUBSCRIBED.add(request.artifactQualifiedName())
                     }
                 } else {
@@ -162,11 +151,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
 
                     def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
-                    if (gutterMark != null && gutterMark.artifactSubscribed) {
-                        gutterMark.artifactSubscribed = false
-                        gutterMark.unsubscribeTime = Instant.now()
-                        gutterMark.sourceFileMarker.refresh()
-                    }
+                    gutterMark?.markArtifactUnsubscribed()
                 } else {
                     it.cause().printStackTrace()
                     resp.fail(500, it.cause().message)

@@ -39,16 +39,17 @@ class SourcePortal implements Closeable {
         log.info("Active portals: " + portalMap.size())
     }
 
+    static void destroyPortal(String portalUuid) {
+        log.info("Destroying portal: " + portalUuid)
+        def portal = portalMap.remove(portalUuid)
+        portal?.close()
+        log.info("Active portals: " + portalMap.size())
+    }
+
     static Optional<SourcePortal> getInternalPortal(String appUuid, String artifactQualifiedName) {
         return Optional.ofNullable(portalMap.values().find {
             it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && !it.external
         })
-    }
-
-    static List<SourcePortal> getExternalPortals(String appUuid, String artifactQualifiedName) {
-        return portalMap.values().findAll {
-            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && it.external
-        }
     }
 
     static List<SourcePortal> getSimilarPortals(SourcePortal portal) {
