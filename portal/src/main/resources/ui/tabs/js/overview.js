@@ -107,7 +107,7 @@ overviewChart.setOption(overviewChartOptions);
 
 var currentTimeFrame = "LAST_15_MINUTES";
 eb.onopen = function () {
-    console.log("Source++ bridge connected");
+    portalConnected();
 
     var clearOverviewHandler = portalUuid + '-ClearOverview';
     var displayCardHandler = portalUuid + '-DisplayCard';

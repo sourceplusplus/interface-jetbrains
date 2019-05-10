@@ -10,7 +10,7 @@ $('#configuration_link').attr('href', "configuration.html" + mainGetQuery);
 $('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuery);
 
 eb.onopen = function () {
-    console.log("Source++ bridge connected");
+    portalConnected();
 
     eb.registerHandler(portalUuid + '-DisplayArtifactConfiguration', function (error, message) {
         updateArtifactConfigurationTable(message.body);

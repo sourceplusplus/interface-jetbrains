@@ -11,7 +11,7 @@ $('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuer
 
 var viewingInnerTrace = false;
 eb.onopen = function () {
-    console.log("Source++ bridge connected");
+    portalConnected();
 
     eb.registerHandler(portalUuid + '-DisplayTraces', function (error, message) {
         displayTraces(message.body);

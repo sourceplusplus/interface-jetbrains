@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory
  */
 class PortalViewTracker extends AbstractVerticle {
 
+    public static final String KEEP_ALIVE_PORTAL = "KeepAlivePortal"
     public static final String UPDATE_PORTAL_ARTIFACT = "UpdatePortalArtifact"
     public static final String CAN_OPEN_PORTAL = "CanOpenPortal"
     public static final String OPENED_PORTAL = "OpenedPortal"
@@ -31,6 +32,12 @@ class PortalViewTracker extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
+        //get portal from cache to ensure it remains active
+        vertx.eventBus().consumer(KEEP_ALIVE_PORTAL, { messageHandler ->
+            SourcePortal.ensurePortalActive(SourcePortal.getPortal(JsonObject.mapFrom(
+                    messageHandler.body()).getString("portal_uuid")))
+        })
+
         //user wants to open portal
         vertx.eventBus().consumer(CAN_OPEN_PORTAL, { messageHandler ->
             messageHandler.reply(true)

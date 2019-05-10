@@ -20,7 +20,5 @@ abstract class GutterMark extends SourceMark {
         super(sourceFileMarker)
     }
 
-    abstract String getPortalUuid()
-
     abstract int getLineNumber()
 }

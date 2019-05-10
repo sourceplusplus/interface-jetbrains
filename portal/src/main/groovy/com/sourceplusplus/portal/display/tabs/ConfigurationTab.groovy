@@ -44,6 +44,7 @@ class ConfigurationTab extends AbstractTab {
             def portal = SourcePortal.getPortal(message.getString("portal_uuid"))
             portal.interface.currentTab = PortalTab.Configuration
             updateUI(portal)
+            SourcePortal.ensurePortalActive(portal)
         })
 
         vertx.eventBus().consumer(UPDATE_ARTIFACT_FORCE_SUBSCRIBE, {

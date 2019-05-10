@@ -62,7 +62,7 @@ class IntelliJMethodGutterMark extends GutterMark {
     private final SourceArtifact sourceMethod
     private UMethod psiMethod
     private final SourceArtifactGutterMarkRenderer gutterMarkRenderer
-    private final String portalUuid
+    private String portalUuid
 
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, SourceArtifact sourceMethod, UMethod psiMethod) {
         super(sourceFileMarker)
@@ -70,8 +70,6 @@ class IntelliJMethodGutterMark extends GutterMark {
         this.sourceMethod = sourceMethod
         this.psiMethod = psiMethod
         this.gutterMarkRenderer = new SourceArtifactGutterMarkRenderer(this)
-        this.portalUuid = SourcePortal.register(sourceFileMarker.sourceFile.appUuid,
-                sourceMethod.artifactQualifiedName(), false)
     }
 
     static void closePortalIfOpen() {
@@ -92,6 +90,10 @@ class IntelliJMethodGutterMark extends GutterMark {
             return
         }
 
+        if (this.portalUuid == null) {
+            this.portalUuid = SourcePortal.register(sourceFileMarker.sourceFile.appUuid,
+                    sourceMethod.artifactQualifiedName(), false)
+        }
         final String portalUuid = this.portalUuid
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -141,11 +143,6 @@ class IntelliJMethodGutterMark extends GutterMark {
                 }
             }
         })
-    }
-
-    @Override
-    String getPortalUuid() {
-        return portalUuid
     }
 
     /**

@@ -68,6 +68,7 @@ class OverviewTab extends AbstractTab {
             def portal = SourcePortal.getPortal(portalUuid)
             portal.interface.currentTab = PortalTab.Overview
             updateUI(portal)
+            SourcePortal.ensurePortalActive(portal)
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
@@ -102,6 +103,7 @@ class OverviewTab extends AbstractTab {
         log.info("{} started", getClass().getSimpleName())
     }
 
+    @Override
     void updateUI(SourcePortal portal) {
         if (portal.interface.currentTab != thisTab) {
             return

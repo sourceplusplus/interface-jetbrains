@@ -37,3 +37,13 @@ function clickedViewAsExternalPortal() {
         }
     });
 }
+
+function portalConnected() {
+    console.log("Source++ Portal successfully connected to eventbus bridge");
+    window.setInterval(keepPortalAlive, 60000 * 4);
+}
+
+function keepPortalAlive() {
+    eb.send('KeepAlivePortal', {'portal_uuid': portalUuid});
+    console.log("Sent portal keep alive request");
+}

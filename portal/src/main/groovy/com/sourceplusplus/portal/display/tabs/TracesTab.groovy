@@ -60,6 +60,7 @@ class TracesTab extends AbstractTab {
             }
             portal.interface.currentTab = PortalTab.Traces
             updateUI(portal)
+            SourcePortal.ensurePortalActive(portal)
 
             //subscribe (re-subscribe) to get latest stats
             def subscribeRequest = ArtifactTraceSubscribeRequest.builder()
