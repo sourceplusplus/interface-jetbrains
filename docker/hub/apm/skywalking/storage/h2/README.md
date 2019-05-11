@@ -11,9 +11,9 @@ docker run -p 8080:8080 -d sourceplusplus/core:v0.2.0-alpha-skywalking-h2
 
 Step - 2 : Connect to Source++ Core container via Source++ Plugin
 
-![](../../../../../../docs/images/screenshots/2019-05-11 10-24-01.png)
+![](https://raw.githubusercontent.com/CodeBrig/Source/v0.2.0-alpha/docs/images/screenshots/2019-05-11%2010-24-01.png)
 
-![](../../../../../../docs/images/screenshots/2019-05-11 10-24-14.png)
+![](https://raw.githubusercontent.com/CodeBrig/Source/v0.2.0-alpha/docs/images/screenshots/2019-05-11%2010-24-14.png)
 
 ## Documentation
 
