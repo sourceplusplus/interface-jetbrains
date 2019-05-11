@@ -1,7 +1,7 @@
 Source++ - Docker Images
 ---
 
-# How to use?
+## How to use?
 
 Step - 1 : Run Source++ Core docker container
 
@@ -14,3 +14,11 @@ Step - 2 : Connect to Source++ Core container via Source++ Plugin
 ![](../../../../../../docs/images/screenshots/2019-05-11 10-24-01.png)
 
 ![](../../../../../../docs/images/screenshots/2019-05-11 10-24-14.png)
+
+## Documentation
+
+For full documentation, visit the [knowledge base](https://sourceplusplus.com/knowledge).
+
+## License
+
+[Apache License 2.0](https://github.com/CodeBrig/Source/blob/master/LICENSE)
