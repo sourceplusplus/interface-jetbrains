@@ -6,7 +6,7 @@ Source++ - Docker Images
 Step - 1 : Run Source++ Core docker container
 
 ```bash
-docker run -p 8080:8080 -d sourceplusplus/core:v0.2.0-alpha-scratch-elasticsearch
+docker run -p 8080:8080 -d sourceplusplus/core:v0.2.0-alpha-elasticsearch
 ```
 
 Step - 2 : Connect to Source++ Core container via Source++ Plugin
