@@ -216,7 +216,7 @@ class CoreBootstrap extends AbstractVerticle {
             }
         })
 
-        if (SourceCoreConfig.current.pingEndpointEnabled) {
+        if (SourceCoreConfig.current.pingEndpointAvailable) {
             //for connection testing
             baseRouter.get("/ping").handler({
                 it.response().setStatusCode(200).end(new JsonObject().put("status", "ok").toString())

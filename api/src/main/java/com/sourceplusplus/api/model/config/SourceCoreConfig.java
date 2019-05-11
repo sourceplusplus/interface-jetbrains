@@ -15,7 +15,7 @@ import java.util.Objects;
 public final class SourceCoreConfig {
 
     public static final transient SourceCoreConfig current = new SourceCoreConfig();
-    public volatile boolean pingEndpointEnabled = true;
+    public volatile boolean pingEndpointAvailable = true;
     public volatile boolean secureApi = true;
     //String skywalkingVersion();
 
@@ -24,7 +24,7 @@ public final class SourceCoreConfig {
 
     public void applyConfig(SourceCoreConfig config) {
         Objects.requireNonNull(config);
-        pingEndpointEnabled = config.pingEndpointEnabled;
+        pingEndpointAvailable = config.pingEndpointAvailable;
         secureApi = config.secureApi;
     }
 }
