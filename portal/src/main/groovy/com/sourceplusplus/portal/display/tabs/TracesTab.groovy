@@ -204,7 +204,7 @@ class TracesTab extends AbstractTab {
             def artifactTraceResult = portal.interface.tracesView.artifactTraceResult
             vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_TRACES",
                     new JsonObject(Json.encode(artifactTraceResult)))
-            log.info("Displayed traces for artifact: " + artifactTraceResult.artifactQualifiedName()
+            log.debug("Displayed traces for artifact: " + artifactTraceResult.artifactQualifiedName()
                     + " - Type: " + artifactTraceResult.orderType()
                     + " - Trace size: " + artifactTraceResult.traces().size())
         }
