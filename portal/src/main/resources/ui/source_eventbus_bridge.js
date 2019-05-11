@@ -2,9 +2,7 @@ var eb = new EventBus('http://localhost:7529/eventbus');
 eb.enableReconnect(true);
 
 var getPortalUuid = findGetParameter("portal_uuid");
-var getAppUuid = findGetParameter("app_uuid");
 var portalUuid = (getPortalUuid) ? getPortalUuid : null;
-var appUuid = (getAppUuid) ? getAppUuid : null;
 var traceOrderType = findGetParameter("order_type");
 if (traceOrderType) {
     traceOrderType = traceOrderType.toUpperCase();

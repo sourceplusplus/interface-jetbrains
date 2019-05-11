@@ -5,6 +5,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricResult;
 import com.sourceplusplus.api.model.trace.ArtifactTraceResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -24,11 +25,11 @@ public class SourceBridgeClient {
     private final HttpClient client;
     private boolean active = true;
 
-    public SourceBridgeClient(Vertx vertx, String apiHost, int apiPort) {
+    public SourceBridgeClient(Vertx vertx, String apiHost, int apiPort, boolean ssl) {
         this.vertx = vertx;
         this.apiHost = apiHost;
         this.apiPort = apiPort;
-        this.client = vertx.createHttpClient();
+        this.client = vertx.createHttpClient(new HttpClientOptions().setSsl(ssl));
     }
 
     public void setupSubscriptions() {

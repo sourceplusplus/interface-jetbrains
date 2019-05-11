@@ -150,8 +150,8 @@ class PortalBootstrap extends AbstractVerticle {
             }
 
             //setup bridge to core
-            new SourceBridgeClient(vertx, apiConfig.getString("host"), apiConfig.getInteger("port"))
-                    .setupSubscriptions()
+            new SourceBridgeClient(vertx, apiConfig.getString("host"), apiConfig.getInteger("port"),
+                    apiConfig.getBoolean("ssl")).setupSubscriptions()
 
             //register subscriptions
             def subscriptions = config().getJsonArray("artifact_subscriptions")
