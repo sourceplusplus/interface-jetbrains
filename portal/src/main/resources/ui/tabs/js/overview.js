@@ -108,6 +108,9 @@ overviewChart.setOption(overviewChartOptions);
 var currentTimeFrame = "LAST_15_MINUTES";
 eb.onopen = function () {
     portalConnected();
+    if (requiresRegistration) {
+        return;
+    }
 
     var clearOverviewHandler = portalUuid + '-ClearOverview';
     var displayCardHandler = portalUuid + '-DisplayCard';

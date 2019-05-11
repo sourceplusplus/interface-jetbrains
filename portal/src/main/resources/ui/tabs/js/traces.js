@@ -12,6 +12,9 @@ $('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuer
 var viewingInnerTrace = false;
 eb.onopen = function () {
     portalConnected();
+    if (requiresRegistration) {
+        return;
+    }
 
     eb.registerHandler(portalUuid + '-DisplayTraces', function (error, message) {
         displayTraces(message.body);

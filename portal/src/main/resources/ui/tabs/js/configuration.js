@@ -11,6 +11,9 @@ $('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuer
 
 eb.onopen = function () {
     portalConnected();
+    if (requiresRegistration) {
+        return;
+    }
 
     eb.registerHandler(portalUuid + '-DisplayArtifactConfiguration', function (error, message) {
         updateArtifactConfigurationTable(message.body);

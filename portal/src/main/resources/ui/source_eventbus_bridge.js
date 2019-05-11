@@ -3,6 +3,8 @@ eb.enableReconnect(true);
 
 var getPortalUuid = findGetParameter("portal_uuid");
 var portalUuid = (getPortalUuid) ? getPortalUuid : null;
+var getRequiresRegistration = findGetParameter("requires_registration");
+var requiresRegistration = (getRequiresRegistration) ? getRequiresRegistration : false;
 var traceOrderType = findGetParameter("order_type");
 if (traceOrderType) {
     traceOrderType = traceOrderType.toUpperCase();
@@ -38,7 +40,21 @@ function clickedViewAsExternalPortal() {
 
 function portalConnected() {
     console.log("Source++ Portal successfully connected to eventbus bridge");
-    window.setInterval(keepPortalAlive, 60000 * 4);
+    if (requiresRegistration) {
+        eb.send("REGISTER_PORTAL", {
+            'app_uuid': findGetParameter("app_uuid"),
+            'artifact_qualified_name': findGetParameter("artifact_qualified_name")
+        }, function (error, message) {
+            if (traceOrderType) {
+                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid + '&order_type=' + traceOrderType,
+                    '_self');
+            } else {
+                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid, '_self');
+            }
+        });
+    } else {
+        window.setInterval(keepPortalAlive, 60000 * 4);
+    }
 }
 
 function keepPortalAlive() {

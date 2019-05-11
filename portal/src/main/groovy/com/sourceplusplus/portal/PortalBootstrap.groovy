@@ -197,6 +197,13 @@ class PortalBootstrap extends AbstractVerticle {
                 //register portal
                 SourcePortal.getPortal(SourcePortal.register(appUuid, artifactQualifiedName, true))
             }
+
+            vertx.eventBus().consumer("REGISTER_PORTAL", {
+                def request = it.body() as JsonObject
+                def portalUuid = SourcePortal.register(request.getString("app_uuid"),
+                        request.getString("artifact_qualified_name"), true)
+                it.reply(new JsonObject().put("portal_uuid", portalUuid))
+            })
         }
 
         def overviewTabFut = Future.future()
