@@ -22,25 +22,35 @@ public class SourceBridgeClient {
     private final Vertx vertx;
     private final String apiHost;
     private final int apiPort;
-    private final HttpClient client;
-    private boolean active = true;
+    private final boolean ssl;
+    private HttpClient client;
+    private boolean active;
+    private boolean reconnecting;
 
     public SourceBridgeClient(Vertx vertx, String apiHost, int apiPort, boolean ssl) {
         this.vertx = vertx;
         this.apiHost = apiHost;
         this.apiPort = apiPort;
-        this.client = vertx.createHttpClient(new HttpClientOptions().setSsl(ssl));
+        this.ssl = ssl;
     }
 
     public void setupSubscriptions() {
+        active = true;
+        client = vertx.createHttpClient(new HttpClientOptions().setSsl(ssl));
         client.websocket(apiPort, apiHost, "/eventbus/websocket", ws -> {
+            reconnecting = false;
             JsonObject pingMsg = new JsonObject().put("type", "ping");
             ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true));
             vertx.setPeriodic(5000, it -> {
-                if (active) {
+                if (active && !reconnecting) {
                     ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true));
                 } else {
                     vertx.cancelTimer(it);
+                }
+            });
+            ws.closeHandler(it -> {
+                if (active) {
+                    reconnect();
                 }
             });
 
@@ -65,12 +75,26 @@ public class SourceBridgeClient {
                     throw new IllegalArgumentException("Unsupported bridge address: " + ob.getString("address"));
                 }
             });
+        }, err -> {
+            if (reconnecting) {
+                reconnect();
+            } else {
+                err.printStackTrace();
+            }
         });
     }
 
     public void close() {
         active = false;
         client.close();
+    }
+
+    private void reconnect() {
+        reconnecting = true;
+        vertx.setTimer(5000, it -> {
+            close();
+            setupSubscriptions();
+        });
     }
 
     private void handleArtifactConfigUpdated(JsonObject msg) {
