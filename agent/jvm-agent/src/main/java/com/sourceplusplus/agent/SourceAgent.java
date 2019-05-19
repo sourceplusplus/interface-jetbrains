@@ -129,6 +129,8 @@ public class SourceAgent {
             Config.Agent.SAMPLE_N_PER_3_SECS = SourceAgentConfig.current.sampleNPer3Secs;
             Config.Agent.SPAN_LIMIT_PER_SEGMENT = SourceAgentConfig.current.spanLimitPerSegment;
             Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.backendService;
+            Config.Plugin.SpringMVC.USE_QUALIFIED_NAME_AS_ENDPOINT_NAME = true;
+            Config.Plugin.Toolkit.USE_QUALIFIED_NAME_AS_OPERATION_NAME = true;
             System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
             Logger.info("Using SkyWalking host: " + SourceAgentConfig.current.backendService);
 
