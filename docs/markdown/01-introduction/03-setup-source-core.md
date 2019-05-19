@@ -30,7 +30,7 @@ Once the above doesn't return `connection refused` you may continue setup.
 # Download Apache SkyWalking OAP
 ```sh
 cd /opt
-wget https://www-eu.apache.org/dist/incubator/skywalking/6.1.0/apache-skywalking-apm-incubating-6.1.0.tar.gz
+wget https://www-eu.apache.org/dist/skywalking/6.1.0/apache-skywalking-apm-6.1.0.tar.gz
 gunzip apache-skywalking-apm-incubating-6.1.0.tar.gz
 tar -xvf apache-skywalking-apm-incubating-6.1.0.tar
 rm apache-skywalking-apm-incubating-6.1.0.tar
