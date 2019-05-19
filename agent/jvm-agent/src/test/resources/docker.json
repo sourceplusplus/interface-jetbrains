@@ -23,7 +23,7 @@
     "sample_n_per_3_secs": -1,
     "span_limit_per_segment": 300,
     "output_enhanced_classes": false,
-    "backend_service": "localhost:11799",
+    "backend_service": "localhost:11800",
     "plugins": {
     }
   },

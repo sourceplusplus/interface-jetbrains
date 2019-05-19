@@ -19,8 +19,8 @@ services:
       context: .
       dockerfile: Dockerfile-skywalking-oap
     ports:
-    - "11799:11799"
-    - "12799:12799"
+    - "11800:11800"
+    - "12800:12800"
     #- "5005:5005"
     restart: on-failure
 #    depends_on:
