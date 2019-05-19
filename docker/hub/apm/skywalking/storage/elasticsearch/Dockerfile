@@ -14,7 +14,7 @@ ARG SOURCE_PLUS_PLUS_VERSION="0.2.0"
 ARG SOURCE_PLUS_PLUS_RELEASE="alpha"
 
 ENV SKYWALKING_HOME=/opt/apache-skywalking
-ARG SKYWALKING_VERSION="6.0.0-GA"
+ARG SKYWALKING_VERSION="6.1.0"
 
 RUN wget https://github.com/codebrig/source/releases/download/v${SOURCE_PLUS_PLUS_VERSION}-${SOURCE_PLUS_PLUS_RELEASE}/source-core-${SOURCE_PLUS_PLUS_VERSION}.zip && \
     unzip source-core-${SOURCE_PLUS_PLUS_VERSION}.zip && mv source-core-${SOURCE_PLUS_PLUS_VERSION} $SOURCE_HOME
