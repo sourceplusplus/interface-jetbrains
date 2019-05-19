@@ -19,7 +19,7 @@
   "integrations": {
     "skywalking": {
       "host": "skywalking-oap",
-      "port": 12799,
+      "port": 12800,
       "timezone": null,
       "endpoint_detection_interval_seconds": 15
     }

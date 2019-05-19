@@ -37,7 +37,6 @@ public final class SourceAgentConfig {
     public volatile Boolean apiSslEnabled;
     public volatile Boolean agentEnabled;
     public volatile Boolean skywalkingEnabled;
-    public volatile Boolean tracingEnabled;
     public volatile String appUuid;
     public volatile String logLevel;
     public volatile String logLocation;
@@ -82,8 +81,6 @@ public final class SourceAgentConfig {
         if (skywalkingConfig != null) {
             if (skywalkingConfig.containsKey("enabled"))
                 skywalkingEnabled = skywalkingConfig.getBoolean("enabled");
-            if (skywalkingConfig.containsKey("tracing_enabled"))
-                tracingEnabled = skywalkingConfig.getBoolean("tracing_enabled");
             if (skywalkingConfig.containsKey("output_enhanced_classes"))
                 outputEnhancedClasses = skywalkingConfig.getBoolean("output_enhanced_classes");
             if (skywalkingConfig.containsKey("sample_n_per_3_secs"))
@@ -157,7 +154,6 @@ public final class SourceAgentConfig {
             gen.writeFieldName("skywalking");
             gen.writeStartObject();
             if (value.skywalkingEnabled != null) gen.writeBooleanField("enabled", value.skywalkingEnabled);
-            if (value.tracingEnabled != null) gen.writeBooleanField("tracing_enabled", value.tracingEnabled);
             if (value.sampleNPer3Secs != null) gen.writeNumberField("sample_n_per_3_secs", value.sampleNPer3Secs);
             if (value.spanLimitPerSegment != null)
                 gen.writeNumberField("span_limit_per_segment", value.spanLimitPerSegment);
