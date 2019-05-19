@@ -18,7 +18,7 @@ RUN wget https://github.com/codebrig/source/releases/download/v${SOURCE_PLUS_PLU
     unzip source-core-${SOURCE_PLUS_PLUS_VERSION}.zip && mv source-core-${SOURCE_PLUS_PLUS_VERSION} $SOURCE_HOME
 
 RUN wget https://www-eu.apache.org/dist/skywalking/${SKYWALKING_VERSION}/apache-skywalking-apm-${SKYWALKING_VERSION}.zip && \
-    unzip apache-skywalking-apm-${SKYWALKING_VERSION}.zip && mv apache-skywalking-apm $SKYWALKING_HOME
+    unzip apache-skywalking-apm-${SKYWALKING_VERSION}.zip && mv apache-skywalking-apm-bin $SKYWALKING_HOME
 
 ENV SOURCE_CONFIG=${SOURCE_HOME}/config/source-core.json
 

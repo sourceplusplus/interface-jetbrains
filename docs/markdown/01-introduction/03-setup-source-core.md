@@ -31,10 +31,10 @@ Once the above doesn't return `connection refused` you may continue setup.
 ```sh
 cd /opt
 wget https://www-eu.apache.org/dist/skywalking/6.1.0/apache-skywalking-apm-6.1.0.tar.gz
-gunzip apache-skywalking-apm-incubating-6.1.0.tar.gz
-tar -xvf apache-skywalking-apm-incubating-6.1.0.tar
-rm apache-skywalking-apm-incubating-6.1.0.tar
-mv apache-skywalking-apm-incubating apache-skywalking
+gunzip apache-skywalking-apm-6.1.0.tar.gz
+tar -xvf apache-skywalking-apm-6.1.0.tar
+rm apache-skywalking-apm-6.1.0.tar
+mv apache-skywalking-apm-bin apache-skywalking
 ```
 
 ## Start Apache SkyWalking OAP
