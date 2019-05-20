@@ -5,7 +5,7 @@ Once you've downloaded and installed the Source++ Plugin, you will need to conne
 To connect the Source++ Plugin to a Source++ Core server go to:
  - `File >> Settings >> Source++ >> Manage Environments`
  
-Depending on your setup, the Source++ settings may also be located at:
+Depending on your setup, the settings may also be located at:
  - `File >> Settings >> Other Settings >> Source++ >> Manage Environments`
 
 ![](../../images/plugin/Manage%20Environments.png)
