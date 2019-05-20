@@ -12,9 +12,12 @@
     "api_key": null,
     "subscription_inactive_limit_minutes": 15
   },
-  "elasticsearch": {
-    "host": "localhost",
-    "port": 9200
+  "storage": {
+    "type": "h2",
+    "elasticsearch": {
+      "host": "localhost",
+      "port": 9200
+    }
   },
   "integrations": {
     "skywalking": {
@@ -40,7 +43,13 @@
 | api_key                             | null      | The API key to use (`secure_mode` must be true to enable)    |
 | subscription_inactive_limit_minutes | 15        | Minutes necessary of inactive to prune artifact subscriptions (-1 to disable) |
 
-## Elasticsearch Settings
+## Storage Settings
+
+| Property | Value | Description                                              |
+| -------- | ----- | -------------------------------------------------------- |
+| type     | h2    | The storage system type to use (`h2` or `elasticsearch`) |
+
+### Elasticsearch Settings
 
 | Property | Value     | Description                                             |
 | -------- | --------- | ------------------------------------------------------- |

@@ -1,4 +1,4 @@
-Once you've downloaded and installed the Source++ Plugin, you will need to connect it to your Source++ Core server. The process is the same for self-hosted and cloud-hosted instances. The plugin itself requires at minimum a valid host. An API key may optionally be required if the Source++ Core server has authentication enabled.
+Once you've downloaded and installed the Source++ Plugin, you will need to connect it to your Source++ Core server(s). The plugin itself requires at minimum a valid host. An API key may optionally be required if the Source++ Core server has authentication enabled.
 
 # Connect Source++ Plugin
 
