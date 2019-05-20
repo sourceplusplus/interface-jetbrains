@@ -1,4 +1,4 @@
-The following checklist will guide you through the process of setting up the necessary services to host Source++ locally via Docker. It should be noted that the Docker installation does not persist data and everything will be lost between container restarts with this installation.
+The following checklist will guide you through the process of setting up the necessary services to host Source++ locally via Docker. It should be noted that the Docker installation does not persist data and everything will be lost between container restarts.
 
 
 To setup Source++ with Docker you can simply run the following command:
@@ -19,3 +19,4 @@ Alternatively, the Source++ Plugin is also capable of installing the necessary s
 - [Attach Source++ Agent](./07-attach-source-agent.md)
 - [Configure Source++ Agent](./08-configure-source-agent.md)
 - [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)
+
