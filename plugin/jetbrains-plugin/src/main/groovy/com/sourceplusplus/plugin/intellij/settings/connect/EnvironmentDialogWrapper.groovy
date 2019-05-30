@@ -14,29 +14,36 @@ import javax.swing.*
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class ConnectDialogWrapper extends DialogWrapper {
+class EnvironmentDialogWrapper extends DialogWrapper {
 
-    private final EnvironmentDialog connectDialog = new EnvironmentDialog()
+    private final EnvironmentDialog environmentDialog = new EnvironmentDialog()
     private final Project project
 
-    ConnectDialogWrapper(@Nullable Project project) {
+    EnvironmentDialogWrapper(@Nullable Project project) {
         super(project)
         this.project = project
         init()
-        setTitle("Connect Source++")
+        setTitle("Manage Environments")
         setResizable(false)
-        connectDialog.setData(SourcePluginConfig.current)
+        environmentDialog.setData(SourcePluginConfig.current)
     }
 
     @Nullable
     @Override
     JComponent createCenterPanel() {
-        return connectDialog.getContentPane()
+        return environmentDialog.getContentPane()
     }
 
     @Override
     protected void doOKAction() {
+        SourcePluginConfig.current.applyConfig(getConfig())
         project.save()
         super.doOKAction()
+    }
+
+    private SourcePluginConfig getConfig() {
+        SourcePluginConfig config = SourcePluginConfig.current.clone()
+        environmentDialog.getData(config)
+        return config
     }
 }

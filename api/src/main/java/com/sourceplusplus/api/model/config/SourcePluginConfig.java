@@ -44,4 +44,11 @@ public final class SourcePluginConfig {
     public void setEnvironments(List<SourceEnvironmentConfig> environments) {
         this.environments = new HashSet<>(environments);
     }
+
+    @Override
+    public SourcePluginConfig clone() {
+        SourcePluginConfig config = new SourcePluginConfig();
+        config.applyConfig(this);
+        return config;
+    }
 }
