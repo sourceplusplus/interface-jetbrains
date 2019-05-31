@@ -9,6 +9,8 @@ var traceOrderType = findGetParameter("order_type");
 if (traceOrderType) {
     traceOrderType = traceOrderType.toUpperCase();
 }
+var getDarkMode = findGetParameter("dark_mode");
+var darkMode = (getDarkMode) ? (getDarkMode == 'true') : false;
 
 var mainGetQuery = '?portal_uuid=' + portalUuid;
 
@@ -30,10 +32,11 @@ function clickedViewAsExternalPortal() {
         'portal_uuid': portalUuid
     }, function (error, message) {
         if (traceOrderType) {
-            window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid + '&order_type=' + traceOrderType,
-                '_blank');
+            window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
+                + '&order_type=' + traceOrderType + '&dark_mode=' + darkMode, '_blank');
         } else {
-            window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid, '_blank');
+            window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
+                + '&dark_mode=' + darkMode, '_blank');
         }
     });
 }
