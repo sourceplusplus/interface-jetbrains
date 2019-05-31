@@ -11,9 +11,9 @@ docker run -p 8080:8080 -d sourceplusplus/core:v0.2.0-alpha
 
 Step - 2 : Connect to Source++ Core container via Source++ Plugin
 
-![](https://raw.githubusercontent.com/CodeBrig/Source/v0.2.0-alpha/docs/images/screenshots/2019-05-11%2010-24-01.png)
+![](https://raw.githubusercontent.com/sourceplusplus/Assistant/v0.2.0-alpha/docs/images/screenshots/2019-05-11%2010-24-01.png)
 
-![](https://raw.githubusercontent.com/CodeBrig/Source/v0.2.0-alpha/docs/images/screenshots/2019-05-11%2010-24-14.png)
+![](https://raw.githubusercontent.com/sourceplusplus/Assistant/v0.2.0-alpha/docs/images/screenshots/2019-05-11%2010-24-14.png)
 
 ## Documentation
 
@@ -21,4 +21,4 @@ For full documentation, visit the [knowledge base](https://sourceplusplus.com/kn
 
 ## License
 
-[Apache License 2.0](https://github.com/CodeBrig/Source/blob/master/LICENSE)
+[Apache License 2.0](https://github.com/sourceplusplus/Assistant/blob/master/LICENSE)

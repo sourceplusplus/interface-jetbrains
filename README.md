@@ -5,15 +5,15 @@
 *<p align="center">Open-source Automated Programming Assistant</p>*
 
 <p align="center">
-  <a href="https://travis-ci.com/CodeBrig/Source"><img src="https://travis-ci.com/CodeBrig/Source.svg?token=ss9XQPnrp2cb7kvLpwGX&branch=master"/></a>
+  <a href="https://travis-ci.com/sourceplusplus/Assistant"><img src="https://travis-ci.com/sourceplusplus/Assistant.svg?token=ss9XQPnrp2cb7kvLpwGX&branch=master"/></a>
   <a href="https://gitter.im/sourceplusplus"><img src="https://badges.gitter.im/Join Chat.svg"/></a>
-  <a href="https://github.com/CodeBrig/Source/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2-blue.svg?style=flat"/></a>
+  <a href="https://github.com/sourceplusplus/Assistant/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2-blue.svg?style=flat"/></a>
 </p>
 
 <p align="center">
   <a href="https://sourceplusplus.com">Website</a> ::
-  <a href="https://github.com/CodeBrig/Source/tree/master/docs/markdown">Knowledge Base</a> ::
-  <a href="https://github.com/CodeBrig/Source/blob/master/docs/markdown/02-general/02-roadmap.md">Roadmap</a>
+  <a href="https://github.com/sourceplusplus/Assistant/tree/master/docs/markdown">Knowledge Base</a> ::
+  <a href="https://github.com/sourceplusplus/Assistant/blob/master/docs/markdown/02-general/02-roadmap.md">Roadmap</a>
 </p>
 
 ---
@@ -124,5 +124,5 @@ that made this possible.
 
 ## License
 
-[Apache License 2.0](https://github.com/CodeBrig/Source/blob/master/LICENSE)
+[Apache License 2.0](https://github.com/sourceplusplus/Assistant/blob/master/LICENSE)
 
