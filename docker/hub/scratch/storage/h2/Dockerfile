@@ -11,7 +11,7 @@ ENV SOURCE_HOME=/opt/source-core
 ARG SOURCE_PLUS_PLUS_VERSION="0.2.0"
 ARG SOURCE_PLUS_PLUS_RELEASE="alpha"
 
-RUN wget https://github.com/codebrig/source/releases/download/v${SOURCE_PLUS_PLUS_VERSION}-${SOURCE_PLUS_PLUS_RELEASE}/source-core-${SOURCE_PLUS_PLUS_VERSION}.zip && \
+RUN wget https://github.com/sourceplusplus/Assistant/releases/download/v${SOURCE_PLUS_PLUS_VERSION}-${SOURCE_PLUS_PLUS_RELEASE}/source-core-${SOURCE_PLUS_PLUS_VERSION}.zip && \
     unzip source-core-${SOURCE_PLUS_PLUS_VERSION}.zip && mv source-core-${SOURCE_PLUS_PLUS_VERSION} $SOURCE_HOME
 
 ENV SOURCE_CONFIG=${SOURCE_HOME}/config/source-core.json

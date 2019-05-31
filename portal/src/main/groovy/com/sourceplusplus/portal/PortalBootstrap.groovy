@@ -53,7 +53,7 @@ import java.nio.charset.StandardCharsets
  */
 class PortalBootstrap extends AbstractVerticle {
 
-    //todo: fix https://github.com/CodeBrig/Source/issues/1 and remove static block below
+    //todo: fix https://github.com/sourceplusplus/Assistant/issues/1 and remove static block below
     static {
         ConsoleAppender console = new ConsoleAppender()
         console.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"))
