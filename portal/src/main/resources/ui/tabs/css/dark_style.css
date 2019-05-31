@@ -1,0 +1,71 @@
+.marginlefting {
+    margin-left: 60px !important;
+}
+
+.displaynone {
+    display: none !important;
+}
+
+.displayblock {
+    display: block !important;
+}
+
+.sidebar .item i {
+    font-size: 24px;
+    margin-top: -5px !important;
+}
+
+.title.item {
+    padding: .92857143em 1.14285714em !important;
+}
+
+.spp_blue {
+    background-color: #313335 !important;
+}
+
+.spp_blue_color {
+    color: #313335 !important;
+}
+
+.spp_red_color {
+    color: #e1483b !important;
+}
+
+.active_tab {
+    color: #e1483b !important;
+    background-color: #2B2B2B !important;
+}
+
+.active_sub_tab {
+    color: #e1483b !important;
+}
+
+.inactive_tab {
+    color: grey !important;
+}
+
+.sidebar_sub_text_color {
+    color: grey !important;
+}
+
+.background_color {
+    background-color: #2B2B2B !important;
+}
+
+.secondary_background_color {
+    background-color: #313335 !important;
+    border-color: #313335 !important;
+    color: grey !important;
+}
+
+.menu_tooltip_text {
+    color: grey !important;
+}
+
+.menu_tooltip_active_text {
+    color: #e1483b !important;
+}
+
+.ui.toggle.checkbox input:checked ~ label {
+    color: #e1483b !important
+}

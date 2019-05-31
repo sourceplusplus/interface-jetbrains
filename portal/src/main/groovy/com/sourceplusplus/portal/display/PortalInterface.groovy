@@ -2,10 +2,12 @@ package com.sourceplusplus.portal.display
 
 import com.google.common.base.Joiner
 import com.sourceplusplus.api.model.config.SourcePortalConfig
+import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
 import com.teamdev.jxbrowser.chromium.swing.BrowserView
+import groovy.io.FileType
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
 import org.jetbrains.annotations.NotNull
@@ -21,7 +23,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 /**
- * Used to render the Source++ Portal's Semantic UI HTML files as a JFXPanel.
+ * Used to render the Source++ Portal's Semantic UI HTML files as a JComponent.
  *
  * @version 0.2.0
  * @since 0.1.0
@@ -42,6 +44,8 @@ class PortalInterface {
     private BrowserView browser
     public String viewingPortalArtifact
     public PortalTab currentTab = PortalTab.Overview
+    private Map<String, String> currentQueryParams = [:]
+    private static boolean DARK_MODE
 
     PortalInterface(String portalUuid) {
         this.portalUuid = portalUuid
@@ -55,6 +59,8 @@ class PortalInterface {
     }
 
     void loadPage(PortalTab tab, Map<String, String> queryParams) {
+        queryParams.put("dark_mode", Boolean.toString(DARK_MODE))
+        currentQueryParams = new HashMap<>(queryParams)
         def userQuery = Joiner.on("&").withKeyValueSeparator("=").join(queryParams)
         if (userQuery) {
             userQuery = "&$userQuery"
@@ -74,6 +80,12 @@ class PortalInterface {
 
     void close() {
         browser.browser.dispose()
+    }
+
+    void reload() {
+        if (browser != null) {
+            loadPage(currentTab, currentQueryParams)
+        }
     }
 
     @NotNull
@@ -104,26 +116,27 @@ class PortalInterface {
     }
 
     static void updateTheme(boolean dark) {
-//        if (dark) {
-//            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
-//            tabsFolder.eachFile(FileType.FILES, {
-//                def updatedHtml = it.text
-//                        .replace('<!--<script src="../themes/default/assets/charts/gray.js"></script>-->', '<script src="../themes/default/assets/charts/gray.js"></script>')
-//                        .replace("semantic.min.css", "semantic_dark.min.css")
-//                it.text = ""
-//                it << updatedHtml
-//            })
-//        } else {
-//            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
-//            tabsFolder.eachFile(FileType.FILES, {
-//                def updatedHtml = it.text
-//                        .replace('<script src="../themes/default/assets/charts/gray.js"></script>', '<!--<script src="../themes/default/assets/charts/gray.js"></script>-->')
-//                        .replace("semantic_dark.min.css", "semantic.min.css")
-//                it.text = ""
-//                it << updatedHtml
-//            })
-//        }
-//        view.browser.reload()
+        DARK_MODE = dark
+        if (dark) {
+            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
+            tabsFolder.eachFile(FileType.FILES, {
+                def updatedHtml = it.text.replace('css/style.css', 'css/dark_style.css')
+                it.text = ""
+                it << updatedHtml
+            })
+        } else {
+            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
+            tabsFolder.eachFile(FileType.FILES, {
+                def updatedHtml = it.text.replace('css/dark_style.css', 'css/style.css')
+                it.text = ""
+                it << updatedHtml
+            })
+        }
+
+        //reload portals
+        SourcePortal.getPortals().each {
+            it.interface.reload()
+        }
     }
 
     static void assignVertx(Vertx vertx) {

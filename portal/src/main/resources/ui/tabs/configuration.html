@@ -33,14 +33,18 @@
         <z class="displaynone">Traces</z>
         <i class="icon demo-icon code"></i>
 
-        <div class="menu">
-            <a id="traces_link_latest" class="item" href="traces.html">Latest</a>
-            <a id="traces_link_slowest" class="item" href="traces.html">Slowest</a>
+        <div class="menu background_color">
+            <a id="traces_link_latest" class="item" href="traces.html">
+                <span class="menu_tooltip_text">Latest</span>
+            </a>
+            <a id="traces_link_slowest" class="item" href="traces.html">
+                <span class="menu_tooltip_text">Slowest</span>
+            </a>
         </div>
     </div>
     <a class="ui dropdown item active_tab"><i class="icon configure"></i></a>
 </div>
-<div class="pusher" style="height: 100%">
+<div class="pusher background_color" style="height: 100%">
     <div class="ui menu marginlefting aligned content"
          style="border-radius: 0!important; border: 0; align-content: center;">
         <div class="ui sidebar horizontal top menu fixed overlay visible very thin icon background_color"
@@ -56,60 +60,60 @@
         <div class="six wide column" style="min-height: 100%">
 
             <div class="ui form">
-                <div class="ui segment">
+                <div class="ui segment secondary_background_color">
                     <div class="field">
                         <div class="ui toggle checkbox" id="force_subscribe_toggle">
                             <input type="checkbox" tabindex="0" class="hidden">
-                            <label>Force subscription</label>
+                            <label class="secondary_background_color">Force subscription</label>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="ten wide column background_color" style="min-height: 100%">
-            <div class="ui segments" style="margin-right: 10px; background-color: white">
+            <div class="ui segments secondary_background_color" style="margin-right: 10px; background-color: white">
                 <table class="ui small very compact very basic collapsing celled table"
                        style="padding: 0 !important; margin-left: 10px">
                     <tbody>
                     <tr>
                         <td>
-                            <h4 class="ui header">
+                            <h4 class="ui header secondary_background_color">
                                 <div class="content">Qualified Name</div>
                             </h4>
                         </td>
-                        <td id="artifact_qualified_name"></td>
+                        <td id="artifact_qualified_name" class="secondary_background_color"></td>
                     </tr>
                     <tr>
                         <td>
-                            <h4 class="ui header">
+                            <h4 class="ui header secondary_background_color">
                                 <div class="content">Create Date</div>
                             </h4>
                         </td>
-                        <td id="artifact_create_date"></td>
+                        <td id="artifact_create_date" class="secondary_background_color"></td>
                     </tr>
                     <tr>
                         <td>
-                            <h4 class="ui header">
+                            <h4 class="ui header secondary_background_color">
                                 <div class="content">Last Updated</div>
                             </h4>
                         </td>
-                        <td id="artifact_last_updated"></td>
+                        <td id="artifact_last_updated" class="secondary_background_color"></td>
                     </tr>
                     <tr>
                         <td>
-                            <h4 class="ui header">
+                            <h4 class="ui header secondary_background_color">
                                 <div class="content">Endpoint</div>
                             </h4>
                         </td>
-                        <td id="artifact_endpoint"></td>
+                        <td id="artifact_endpoint" class="secondary_background_color"></td>
                     </tr>
                     <tr>
                         <td>
-                            <h4 class="ui header">
+                            <h4 class="ui header secondary_background_color">
                                 <div class="content">Auto-subscribe</div>
                             </h4>
                         </td>
-                        <td id="artifact_auto_subscribe"></td>
+                        <td id="artifact_auto_subscribe" class="secondary_background_color"></td>
                     </tr>
                     </tbody>
                 </table>
@@ -150,7 +154,6 @@
         selector: {}
     });
 </script>
-<!--<script src="../themes/default/assets/charts/gray.js"></script>-->
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>
