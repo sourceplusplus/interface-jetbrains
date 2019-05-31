@@ -32,16 +32,20 @@
         <z class="displaynone">Traces</z>
         <i class="icon demo-icon code"></i>
 
-        <div class="menu">
-            <a id="traces_link_latest" class="item" href="traces.html">Latest</a>
-            <a id="traces_link_slowest" class="item" href="traces.html">Slowest</a>
+        <div class="menu background_color">
+            <a id="traces_link_latest" class="item" href="traces.html">
+                <span class="menu_tooltip_text">Latest</span>
+            </a>
+            <a id="traces_link_slowest" class="item" href="traces.html">
+                <span class="menu_tooltip_text">Slowest</span>
+            </a>
         </div>
     </div>
     <a id="configuration_link" class="ui item hide_on_toggle" href="configuration.html">
         <i class="icon configure inactive_tab"></i>
     </a>
 </div>
-<div class="pusher">
+<div class="pusher background_color">
     <div class="ui menu borderless marginlefting background_color"
          style="border-radius: 0 !important; border: 0; -webkit-transition-duration: 0.1s; height: 45px; margin-bottom: 0">
         <a id="latest_traces_header" onclick="clickedBackToTraces()" class="ui item dropdown active_sub_tab">
@@ -85,13 +89,14 @@
         </div>
     </div>
     <div class="wide column marginlefting">
-        <table style="margin-top: 0" id="top_trace_table" class="ui celled striped table unstackable">
+        <table style="margin-top: 0" id="top_trace_table"
+               class="ui celled striped table unstackable secondary_background_color">
             <thead>
             <tr>
-                <th style="padding-top: 5px; padding-bottom: 5px">Operation</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Occurred</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Exec</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Status</th>
+                <th style="padding-top: 5px; padding-bottom: 5px" class="secondary_background_color">Operation</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Occurred</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Exec</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Status</th>
             </tr>
             </thead>
             <tbody id="trace_table">
@@ -99,12 +104,12 @@
         </table>
         <table id="trace_stack_table" style="visibility: hidden; margin-top: 0"
                class="ui celled striped table unstackable">
-            <thead>
+            <thead class="secondary_background_color">
             <tr>
-                <th style="padding-top: 5px; padding-bottom: 5px">Operation</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Exec</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Exec (%)</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center">Status</th>
+                <th style="padding-top: 5px; padding-bottom: 5px" class="secondary_background_color">Operation</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Exec</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Exec (%)</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Status</th>
             </tr>
             </thead>
             <tbody id="stack_table">
@@ -175,7 +180,6 @@
         selector: {}
     });
 </script>
-<!--<script src="../themes/default/assets/charts/gray.js"></script>-->
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>

@@ -78,6 +78,10 @@ class SourcePortal implements Closeable {
         return portalUuid
     }
 
+    static List<SourcePortal> getPortals() {
+        return new ArrayList<>(portalMap.values())
+    }
+
     static SourcePortal getPortal(String portalUuid) {
         return portalMap.get(portalUuid)
     }

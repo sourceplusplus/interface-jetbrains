@@ -31,9 +31,13 @@
         <z class="displaynone">Traces</z>
         <i class="icon demo-icon code"></i>
 
-        <div class="menu">
-            <a id="traces_link_latest" class="item" href="traces.html">Latest</a>
-            <a id="traces_link_slowest" class="item" href="traces.html">Slowest</a>
+        <div class="menu secondary_background_color">
+            <a id="traces_link_latest" class="item" href="traces.html">
+                <span class="menu_tooltip_text">Latest</span>
+            </a>
+            <a id="traces_link_slowest" class="item" href="traces.html">
+                <span class="menu_tooltip_text">Slowest</span>
+            </a>
         </div>
     </div>
     <a id="configuration_link" class="ui item hide_on_toggle" href="configuration.html">
@@ -48,12 +52,22 @@
             <div class="marginlefting" style="height: 45px; line-height: 45px; align-content:center;">
                 <div class="ui icon top left pointing dropdown">
                     <i class="clock outline icon spp_red_color" style="font-size: 20px; margin-top: -2px"></i>
-                    <div class="menu" style="margin-top: 0 !important;">
-                        <div onclick="updateTime('last_5_minutes')" class="item">LAST 5 MINUTES</div>
-                        <div onclick="updateTime('last_15_minutes')" class="item active">LAST 15 MINUTES</div>
-                        <div onclick="updateTime('last_30_minutes')" class="item">LAST 30 MINUTES</div>
-                        <div onclick="updateTime('last_hour')" class="item">LAST HOUR</div>
-                        <div onclick="updateTime('last_3_hours')" class="item">LAST 3 HOURS</div>
+                    <div class="menu secondary_background_color" style="margin-top: 0 !important;">
+                        <div onclick="updateTime('last_5_minutes')" class="item">
+                            <span class="menu_tooltip_text">LAST 5 MINUTES</span>
+                        </div>
+                        <div onclick="updateTime('last_15_minutes')" class="item active">
+                            <span class="menu_tooltip_active_text">LAST 15 MINUTES</span>
+                        </div>
+                        <div onclick="updateTime('last_30_minutes')" class="item">
+                            <span class="menu_tooltip_text">LAST 30 MINUTES</span>
+                        </div>
+                        <div onclick="updateTime('last_hour')" class="item">
+                            <span class="menu_tooltip_text">LAST HOUR</span>
+                        </div>
+                        <div onclick="updateTime('last_3_hours')" class="item">
+                            <span class="menu_tooltip_text">LAST 3 HOURS</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -78,10 +92,10 @@
             <div class="ui divided link items" style="font-size: 10px">
                 <div class="item">
                     <div class="ui mini statistic">
-                        <div id="card_throughput_average_header" class="value" style="text-align: left">
+                        <div id="card_throughput_average_header" class="value menu_tooltip_text" style="text-align: left">
                             n/a
                         </div>
-                        <div class="label">
+                        <div class="label menu_tooltip_text">
                             AVG THROUGHPUT
                         </div>
                     </div>
@@ -98,10 +112,10 @@
                 </div>
                 <div class="item">
                     <div class="ui mini statistic">
-                        <div id="card_servicelevelagreement_average_header" class="value" style="text-align: left">
+                        <div id="card_servicelevelagreement_average_header" class="value menu_tooltip_text" style="text-align: left">
                             n/a
                         </div>
-                        <div class="label">
+                        <div class="label menu_tooltip_text">
                             AVG SLA
                         </div>
                     </div>
@@ -134,7 +148,6 @@
         selector: {}
     });
 </script>
-<!--<script src="../themes/default/assets/charts/gray.js"></script>-->
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>

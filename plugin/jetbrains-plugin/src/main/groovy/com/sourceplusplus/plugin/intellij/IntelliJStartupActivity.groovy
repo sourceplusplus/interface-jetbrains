@@ -30,7 +30,7 @@ import com.sourceplusplus.plugin.intellij.inspect.IntelliJInspectionProvider
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
-import com.sourceplusplus.plugin.intellij.settings.connect.ConnectDialogWrapper
+import com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentDialogWrapper
 import com.sourceplusplus.plugin.intellij.source.navigate.IntelliJArtifactNavigator
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
@@ -187,7 +187,7 @@ class IntelliJStartupActivity implements StartupActivity {
                         NotificationType.INFORMATION, new NotificationListener() {
                     @Override
                     void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
-                        def connectDialog = new ConnectDialogWrapper(currentProject)
+                        def connectDialog = new EnvironmentDialogWrapper(currentProject)
                         connectDialog.createCenterPanel()
                         connectDialog.show()
 

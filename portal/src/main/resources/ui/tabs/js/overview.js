@@ -66,6 +66,7 @@ window.onresize = function () {
     overviewChart.resize();
 };
 
+var labelColor = (darkMode) ? "grey" : "black";
 var overviewChartOptions = {
     grid: {
         top: 20,
@@ -91,7 +92,8 @@ var overviewChartOptions = {
         axisLabel: {
             formatter: function (value) {
                 return moment(value).format('LT');
-            }
+            },
+            color: labelColor
         }
     },
     yAxis: {
@@ -99,6 +101,9 @@ var overviewChartOptions = {
         boundaryGap: [0, '100%'],
         splitLine: {
             show: false
+        },
+        axisLabel: {
+            color: labelColor
         }
     },
     series: [series0, series1, series2, series3, series4]
