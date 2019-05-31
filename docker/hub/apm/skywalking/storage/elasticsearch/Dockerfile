@@ -10,6 +10,7 @@ LABEL maintainer="github.com/codebrig"
 WORKDIR /opt
 
 ENV SOURCE_HOME=/opt/source-core
+ENV SOURCE_CONFIG=${SOURCE_HOME}/config/source-core.json
 ARG SOURCE_PLUS_PLUS_VERSION="0.2.0"
 ARG SOURCE_PLUS_PLUS_RELEASE="alpha"
 
@@ -21,8 +22,6 @@ RUN wget https://github.com/sourceplusplus/Assistant/releases/download/v${SOURCE
 
 RUN wget https://www-eu.apache.org/dist/skywalking/${SKYWALKING_VERSION}/apache-skywalking-apm-${SKYWALKING_VERSION}.zip && \
     unzip apache-skywalking-apm-${SKYWALKING_VERSION}.zip && mv apache-skywalking-apm-bin $SKYWALKING_HOME
-
-ENV SOURCE_CONFIG=${SOURCE_HOME}/config/source-core.json
 
 COPY source-core.json ${SOURCE_HOME}/config/source-core.json
 COPY source-core.sh /usr/local/bin
