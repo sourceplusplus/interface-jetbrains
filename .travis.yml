@@ -16,3 +16,15 @@ before_cache:
 cache:
     - $HOME/.gradle/caches/modules-2
     - $HOME/.gradle/wrapper/
+
+deploy:
+  provider: releases
+  api_key: $GH_TOKEN
+  file:
+  - /home/travis/build/CodeBrig/Source/agent/jvm-agent/build/libs/source-agent-0.2.0.jar
+  - /home/travis/build/CodeBrig/Source/api/build/libs/source-api-0.2.0.jar
+  - /home/travis/build/CodeBrig/Source/core/build/distributions/source-core-0.2.0.zip
+  - /home/travis/build/CodeBrig/Source/plugin/jetbrains-plugin/build/distributions/jetbrains-source-plugin-0.2.0.zip
+  - /home/travis/build/CodeBrig/Source/portal/build/distributions/source-portal-0.2.0.zip
+  skip_cleanup: true
+tags: true
