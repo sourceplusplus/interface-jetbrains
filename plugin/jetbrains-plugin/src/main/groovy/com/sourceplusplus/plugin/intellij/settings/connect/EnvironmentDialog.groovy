@@ -59,16 +59,6 @@ class EnvironmentDialog extends JDialog {
                 }
             }
             Thread.startDaemon {
-                connectDialog.setStatus("Initializing Apache Skywalking...")
-                def initSkywalking = SocraticAPI.administration().initApacheSkywalking()
-                        .build().execute(output) as InitDockerCommandResult
-                if (initSkywalking.status != 0) {
-                    connectDialog.setStatus("<font color='red'>Failed to initialize Apache Skywalking service</font>")
-                    output.close()
-                    input.close()
-                    return
-                }
-
                 connectDialog.setStatus("Initializing Source++...")
                 def initSpp = SocraticAPI.administration().initSourcePlusPlus()
                         .build().execute(output) as InitDockerCommandResult
