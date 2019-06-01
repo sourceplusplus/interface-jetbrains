@@ -23,7 +23,6 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
-    compile group: 'com.googlecode.wicked-charts', name: 'highcharts-wrapper', version: '2.0.1'
     compile 'com.github.codebrig:gitsocratic:37c011a2d6'
     compile "com.teamdev.jxbrowser:jxbrowser-cross-platform:${jxBrowserVersion}"
     runtime files('../../license.jar')
