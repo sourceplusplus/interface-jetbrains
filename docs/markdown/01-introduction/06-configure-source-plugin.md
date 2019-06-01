@@ -1,6 +1,6 @@
 Once you've downloaded and installed the Source++ Plugin, you will need to connect it to your Source++ Core server(s) and create/assign a Source++ application for/to your current project.
 
-# Connect Source++ Plugin
+# Manage Environments
 
 To connect the Source++ Plugin to a Source++ Core server go to:
  - `File >> Settings >> Source++ >> Manage Environments`
@@ -32,7 +32,7 @@ You can test this connection by clicking the "Test Connection" button. If everyt
 
 ![](../../images/plugin/Successful%20Connection.png)
 
-Note: Before closing the plugin settings make sure to click the "Apply" button to save all changes.
+Note: Before closing the environment settings make sure to click the "Apply" button to save all changes.
 
 # Create/Assign Application
 
