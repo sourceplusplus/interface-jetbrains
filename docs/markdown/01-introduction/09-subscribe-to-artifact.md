@@ -14,7 +14,9 @@ Once subscribed the S++ mark will show like so:
 
 ![](../../images/plugin/Subscribed%20Artifact.png)
 
-The greyed out S++ symbol indicates that the artifact is subscribed to and runtime data will be collected but that there is none available. Once the artifact has been executed and runtime data becomes available the S++ mark will update its color to reflect this.
+The greyed out S++ symbol indicates that the artifact is subscribed to and runtime data will be collected but that there is none available.
+
+Once the artifact has been executed and runtime data becomes available the S++ mark will update its color:
 
 ![](../../images/plugin/Active%20Artifact.png)
 
