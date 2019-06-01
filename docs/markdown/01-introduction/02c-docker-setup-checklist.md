@@ -1,14 +1,10 @@
 The following checklist will guide you through the process of setting up the necessary services to host Source++ locally via Docker. It should be noted that the Docker installation does not persist data and everything will be lost between container restarts.
 
-
 To setup Source++ with Docker you can simply run the following command:
 
 ```bash
 docker run -p 8080:8080 -d sourceplusplus/core-and-apache-skywalking:v0.2.0-alpha
 ```
-
-This command is also available over at [Docker Hub](https://hub.docker.com/r/sourceplusplus/core-and-apache-skywalking).
-
 
 Alternatively, the Source++ Plugin is also capable of installing the necessary services via Docker automatically. To access this functionality simply follow through the checklist below.
 
@@ -20,3 +16,6 @@ Alternatively, the Source++ Plugin is also capable of installing the necessary s
 - [Configure Source++ Agent](./08-configure-source-agent.md)
 - [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)
 
+# More Information
+
+ - [Docker Hub](https://hub.docker.com/r/sourceplusplus/core-and-apache-skywalking)
