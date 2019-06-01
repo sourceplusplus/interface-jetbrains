@@ -41,7 +41,8 @@ class DocServerBootstrap extends AbstractVerticle {
         def configJSON
         def configFile = System.getenv("SOURCE_CONFIG")
         if (!configFile) {
-            throw new RuntimeException("Missing SOURCE_CONFIG system environment!")
+            log.warn("Missing SOURCE_CONFIG environment variable. Using default settings")
+            configFile = "local.json"
         }
 
         log.info("Using configuration file: $configFile")
