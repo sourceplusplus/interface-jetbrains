@@ -42,7 +42,7 @@ public class ActiveVsInactive {
 }
 ```
 
-The `activeArtifact` method shows the active S++ mark because an artifact subscription is active and the method is being executed. These observations will be recorded and the artifact will be marked as active. The `inactiveArtifact` method shows the inactive S++ mark because this method is never executed. If it was it would turn into an active artifact subscription and appear just as `activeArtifact` currently does.
+The `activeArtifact` method shows the active S++ mark because an artifact subscription is active and the method is being executed. These executions are recorded and the artifact is marked as active. The `inactiveArtifact` method shows the inactive S++ mark because this method is never executed. If it was it would turn into an active artifact subscription and appear just as `activeArtifact` currently does.
 
 # More Information
 
