@@ -3,9 +3,8 @@ A central concept in Source++ is the subscription of source code artifact runtim
 Once subscribed to an artifact you can choose to receive various runtime data about that artifact.
 This currently only includes metrics and traces.
 
-Subscribing to an artifact is fairly simply and only requires you to place your keyboard's cursor
-in the method which you wish to subscribe to and pressing `ALT + SPACE`. This will bring up the available intentions.
-With the Source++ Plugin installed you will see:
+Subscribing to an artifact is fairly simple and only requires you to place your keyboard's cursor
+in the method which you wish to subscribe to and typing `ALT + SPACE`. This will bring up the available intentions and with the Source++ Plugin properly set up you will see:
 
 ![](../../images/plugin/Subscribe%20To%20Artifact.png)
 
