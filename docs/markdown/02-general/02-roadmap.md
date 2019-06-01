@@ -21,32 +21,37 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 > Focus: Seamless local developer environment setup
 
  - H2 database storage ([#14](https://github.com/sourceplusplus/Assistant/issues/14)) ![](../../images/roadmap/Source++-Core-blue.svg)
- - Local bundled Source++ Core in Source++ Plugin ([#15](https://github.com/sourceplusplus/Assistant/issues/15)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
+ - Source++ Core Docker image on Docker Hub ([#15](https://github.com/sourceplusplus/Assistant/issues/15)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Application/environment switching ([#16](https://github.com/sourceplusplus/Assistant/issues/16)) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Min/max response time in quick stats ([#17](https://github.com/sourceplusplus/Assistant/issues/17)) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Ability to switch overview graph ([#18](https://github.com/sourceplusplus/Assistant/issues/18)) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - View artifact slowest traces ([#19](https://github.com/sourceplusplus/Assistant/issues/19)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Configurable environment setup (via Docker) in Source++ Plugin ([#20](https://github.com/sourceplusplus/Assistant/issues/20)) ![](../../images/roadmap/Source++-Plugin-blue.svg)
-
+ - Responsive Source++ Tooltip UI ([#44](https://github.com/CodeBrig/Source/issues/44)) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
+ 
 ## 0.3.0 (alpha)
 
 > Focus: Language-agnostic source code parsing
 
  - Switch to source code parsing with Babelfish ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
- - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
+ - Trace service detection and custom tooltip displays ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
+ - Browser-based control panel 
+ - Artifact, endpoint, log, trace searching functionality
 
 ## 0.4.0 (alpha)
 
 > Focus: Automatic artifact monitoring
 
  - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Tooltip-blue.svg)
 
 ## 0.5.0 (alpha)
 
 > Focus: Source code behavior predictions
 
  - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
+ - GitSocratic 0.3+ integration
 
 ## 0.6.0 (beta)
 
