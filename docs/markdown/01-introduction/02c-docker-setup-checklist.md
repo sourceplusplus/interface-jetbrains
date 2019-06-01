@@ -18,4 +18,4 @@ Alternatively, the Source++ Plugin is also capable of installing the necessary s
 
 # More Information
 
- - [Docker Hub](https://hub.docker.com/r/sourceplusplus/core-and-apache-skywalking)
+ - [Docker Hub](https://hub.docker.com/u/sourceplusplus)
