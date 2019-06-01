@@ -17,10 +17,10 @@ class ConnectionInfoDialogWrapper extends DialogWrapper {
 
     private final ConnectionInfoDialog connectionInfoDialog = new ConnectionInfoDialog()
 
-    ConnectionInfoDialogWrapper() {
+    ConnectionInfoDialogWrapper(String title) {
         super(false)
         init()
-        setTitle("Connection Info")
+        setTitle(title)
     }
 
     ConnectionInfoDialogWrapper(SourceCoreInfo coreInfo) {

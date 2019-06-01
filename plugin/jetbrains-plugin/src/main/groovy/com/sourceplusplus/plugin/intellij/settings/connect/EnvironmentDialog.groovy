@@ -47,7 +47,7 @@ class EnvironmentDialog extends JDialog {
             nameTextField.requestFocus()
         })
         setupViaDockerButton.addActionListener({
-            def connectDialog = new ConnectionInfoDialogWrapper()
+            def connectDialog = new ConnectionInfoDialogWrapper("Docker Setup")
             connectDialog.createCenterPanel()
 
             def input = new PipedInputStream()
