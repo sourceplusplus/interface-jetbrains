@@ -28,7 +28,7 @@ After that you can click "Create" and manually input the required connection set
 
 If your Source++ Core server is in secure mode you will also need to input the API token.
 
-You can test this connection by pressing "Test Connection". If everything worked correctly you should see something similar to the following results:
+You can test this connection by clicking the "Test Connection" button. If everything worked correctly you should see something similar to the following results:
 
 ![](../../images/plugin/Successful%20Connection.png)
 
