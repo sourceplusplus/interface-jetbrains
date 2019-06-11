@@ -4,6 +4,7 @@ plugins {
 
 apply plugin: 'groovy'
 intellij {
+    version 'IC-2019.1.3'
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
     plugins = ["Groovy", "Kotlin", "properties"]
@@ -11,10 +12,6 @@ intellij {
 
 group = 'com.sourceplusplus.plugin'
 archivesBaseName = 'jetbrains-source-plugin'
-
-ext {
-    jxBrowserVersion = '6.23.1'
-}
 
 dependencies {
     compile project(":api")
@@ -24,8 +21,7 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
     compile 'com.github.codebrig:gitsocratic:37c011a2d6'
-    compile "com.teamdev.jxbrowser:jxbrowser-cross-platform:${jxBrowserVersion}"
-    runtime files('../../license.jar')
+    compile 'com.github.codebrig:journey:0.2.16-online'
 }
 
 task createProperties(dependsOn: processResources) {

@@ -5,10 +5,6 @@ applicationName = 'source-portal'
 archivesBaseName = 'source-portal'
 mainClassName = 'com.sourceplusplus.portal.PortalBootstrap'
 
-ext {
-    jxBrowserVersion = '6.23.1'
-}
-
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
@@ -16,8 +12,7 @@ dependencies {
     compile "io.vertx:vertx-web:$VERTX_VERSION"
     compile "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
     compile group: 'net.jodah', name: 'expiringmap', version: '0.5.9'
-    compile "com.teamdev.jxbrowser:jxbrowser-cross-platform:${jxBrowserVersion}"
-    runtime files('../license.jar')
+    compile 'com.github.codebrig:journey:0.2.16-online'
     compile project(":api")
 }
 
