@@ -67,7 +67,7 @@ class PortalInterface {
         }
 
         def page = tab.name().toLowerCase() + ".html"
-        //browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
+        browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
     }
 
     OverviewView getOverviewView() {
