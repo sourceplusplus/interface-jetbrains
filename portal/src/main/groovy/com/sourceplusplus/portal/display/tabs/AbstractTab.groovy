@@ -27,6 +27,11 @@ abstract class AbstractTab extends AbstractVerticle {
             def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
             if (portal.interface.currentTab == thisTab) {
                 updateUI(portal)
+
+                //https://github.com/CodeBrig/Journey/issues/13
+                if (portal.interface.browser != null && System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+                    portal.interface.browser.browser.setZoomLevel(-1.5)
+                }
             }
         })
     }
