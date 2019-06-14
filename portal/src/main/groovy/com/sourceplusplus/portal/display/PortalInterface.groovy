@@ -78,6 +78,10 @@ class PortalInterface {
         return tracesView
     }
 
+    JourneyBrowserView getBrowser() {
+        return browser
+    }
+
     void close() {
         //todo: close
     }
