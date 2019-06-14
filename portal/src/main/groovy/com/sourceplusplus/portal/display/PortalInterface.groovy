@@ -1,12 +1,12 @@
 package com.sourceplusplus.portal.display
 
+import com.codebrig.journey.JourneyBrowserView
 import com.google.common.base.Joiner
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
-import com.teamdev.jxbrowser.chromium.swing.BrowserView
 import groovy.io.FileType
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
@@ -41,7 +41,7 @@ class PortalInterface {
     private final OverviewView overviewView
     private final TracesView tracesView
     private final ConfigurationView configurationView
-    private BrowserView browser
+    private JourneyBrowserView browser
     public String viewingPortalArtifact
     public PortalTab currentTab = PortalTab.Overview
     private Map<String, String> currentQueryParams = [:]
@@ -78,8 +78,12 @@ class PortalInterface {
         return tracesView
     }
 
+    JourneyBrowserView getBrowser() {
+        return browser
+    }
+
     void close() {
-        browser.browser.dispose()
+        browser.browser.close(true)
     }
 
     void reload() {
@@ -100,17 +104,15 @@ class PortalInterface {
 
     void initPortal() {
         if (!portalReady.getAndSet(true)) {
-            browser = new BrowserView()
-            browser.setPreferredSize(new Dimension(775, 250))
-            browser.browser.setSize(775, 250)
-            browser.browser.addConsoleListener({
-                log.info("[PORTAL_CONSOLE] - " + it)
-            })
-
             if (uiDirectory == null) {
                 createScene()
             }
-            browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
+            browser = new JourneyBrowserView("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
+            browser.setPreferredSize(new Dimension(775, 250))
+            browser.setSize(775, 250)
+//            browser.browser.addConsoleListener({
+//                log.info("[PORTAL_CONSOLE] - " + it)
+//            })
             vertx.eventBus().publish(PORTAL_READY, portalUuid)
         }
     }
