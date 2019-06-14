@@ -83,7 +83,7 @@ class PortalInterface {
     }
 
     void close() {
-        //todo: close
+        browser.browser.close(true)
     }
 
     void reload() {

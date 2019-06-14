@@ -39,7 +39,7 @@ class SourcePortal implements Closeable {
         log.info("Active portals: " + portalMap.size())
 
         //https://github.com/CodeBrig/Journey/issues/13
-        if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+        if (portal.interface.browser != null && System.getProperty("os.name").toLowerCase().startsWith("windows")) {
             portal.interface.browser.browser.setZoomLevel(-1.5)
         }
     }
