@@ -1,4 +1,4 @@
-package com.sourceplusplus.core.integration.skywalking
+package com.sourceplusplus.core.integration.apm.skywalking
 
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
@@ -9,8 +9,9 @@ import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
-import com.sourceplusplus.core.integration.skywalking.config.SkywalkingEndpointIdDetector
-import com.sourceplusplus.core.storage.AbstractSourceStorage
+import com.sourceplusplus.core.integration.apm.APMIntegration
+import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
+import com.sourceplusplus.core.storage.SourceStorage
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -30,7 +31,7 @@ import java.time.format.DateTimeFormatter
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class SkywalkingIntegration extends AbstractVerticle {
+class SkywalkingIntegration extends APMIntegration {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final String GET_ALL_SERVICES = Resources.toString(Resources.getResource(
@@ -46,21 +47,21 @@ class SkywalkingIntegration extends AbstractVerticle {
     private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
     private final ArtifactAPI artifactAPI
-    private final AbstractSourceStorage storage
+    private final SourceStorage storage
     private DateTimeFormatter DATE_TIME_FORMATTER_MINUTES
     private DateTimeFormatter DATE_TIME_FORMATTER_SECONDS
     private String skywalkingOAPHost
     private int skywalkingOAPPort
     private WebClient webClient
 
-    SkywalkingIntegration(ArtifactAPI artifactAPI, AbstractSourceStorage storage) {
+    SkywalkingIntegration(ArtifactAPI artifactAPI, SourceStorage storage) {
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
     }
 
     @Override
-    void start() throws Exception {
-        def timezone = config().getString("timezone")
+    void start(Future<Void> startFuture) throws Exception {
+        def timezone = config().getJsonObject("config").getString("timezone")
         if (timezone) {
             DATE_TIME_FORMATTER_MINUTES = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
                     .withZone(ZoneId.of(timezone))
@@ -72,13 +73,19 @@ class SkywalkingIntegration extends AbstractVerticle {
             DATE_TIME_FORMATTER_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss")
                     .withZone(ZoneId.systemDefault())
         }
-        skywalkingOAPHost = Objects.requireNonNull(config().getString("host"))
-        skywalkingOAPPort = Objects.requireNonNull(config().getInteger("port"))
+        skywalkingOAPHost = Objects.requireNonNull(config().getJsonObject("connection").getString("host"))
+        skywalkingOAPPort = Objects.requireNonNull(config().getJsonObject("connection").getInteger("port"))
 
         webClient = WebClient.create(vertx)
         vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, artifactAPI),
-                new DeploymentOptions().setConfig(config()))
-        log.info("{} started", getClass().getSimpleName())
+                new DeploymentOptions().setConfig(config()), {
+            if (it.succeeded()) {
+                log.info("SkywalkingIntegration started")
+                startFuture.complete()
+            } else {
+                startFuture.fail(it.cause())
+            }
+        })
     }
 
     void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler) {
@@ -236,7 +243,8 @@ class SkywalkingIntegration extends AbstractVerticle {
         })
     }
 
-    void getSkywalkingTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
+    @Override
+    void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
         log.info("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
         def graphqlQuery = new JsonObject()
         if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
@@ -285,14 +293,9 @@ class SkywalkingIntegration extends AbstractVerticle {
         })
     }
 
-    void getSkywalkingTraceStack(String appUuid, String traceId,
-                                 Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
-        def query = TraceSpanStackQuery.builder().oneLevelDeep(false).traceId(traceId).build()
-        getSkywalkingTraceStack(appUuid, null, query, handler)
-    }
-
-    void getSkywalkingTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
-                                 Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
+    @Override
+    void getTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
+                       Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
         log.info("Getting SkyWalking trace spans: " + Objects.requireNonNull(spanQuery))
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_TRACE_STACK

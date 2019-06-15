@@ -16,12 +16,20 @@
       "port": 9200
     }
   },
-  "integrations": {
-    "skywalking": {
-      "host": "localhost",
-      "port": 12800,
-      "timezone": null,
-      "endpoint_detection_interval_seconds": 15
+  "integrations": [
+    {
+      "id": "apache_skywalking",
+      "category": "APM",
+      "enabled": true,
+      "version": "6.1.0",
+      "connection": {
+        "host": "localhost",
+        "port": 12800
+      },
+      "config": {
+        "timezone": null,
+        "endpoint_detection_interval_seconds": 15
+      }
     }
-  }
+  ]
 }

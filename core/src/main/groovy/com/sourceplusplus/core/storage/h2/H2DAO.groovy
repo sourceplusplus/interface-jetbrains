@@ -1,4 +1,4 @@
-package com.sourceplusplus.core.storage
+package com.sourceplusplus.core.storage.h2
 
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
@@ -9,6 +9,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType
 import com.sourceplusplus.api.model.config.SourceAgentConfig
+import com.sourceplusplus.core.storage.SourceStorage
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -26,7 +27,7 @@ import java.time.Instant
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class H2DAO extends AbstractSourceStorage {
+class H2DAO extends SourceStorage {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
 

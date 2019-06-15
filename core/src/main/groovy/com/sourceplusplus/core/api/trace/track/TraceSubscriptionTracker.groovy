@@ -4,9 +4,8 @@ import com.google.common.collect.Sets
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.trace.*
-import com.sourceplusplus.core.api.artifact.ArtifactAPI
+import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
-import com.sourceplusplus.core.api.trace.TraceAPI
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.slf4j.Logger
@@ -29,12 +28,10 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
     public static final String UNSUBSCRIBE_FROM_ARTIFACT_TRACES = "UnsubscribeFromArtifactTraces"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private final TraceAPI traceAPI
     private final Map<ApplicationArtifact, Set<TraceOrderType>> traceSubscriptions
 
-    TraceSubscriptionTracker(ArtifactAPI artifactAPI, TraceAPI traceAPI) {
-        super(artifactAPI)
-        this.traceAPI = Objects.requireNonNull(traceAPI)
+    TraceSubscriptionTracker(SourceCore core) {
+        super(core)
         traceSubscriptions = new ConcurrentHashMap<>()
     }
 
@@ -121,7 +118,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                 .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
-        traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
+        core.traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {
@@ -161,7 +158,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                 .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
-        traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
+        core.traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {

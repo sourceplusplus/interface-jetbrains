@@ -6,6 +6,8 @@ import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
 import org.immutables.value.Value;
 
+import java.io.Serializable;
+
 /**
  * todo: description
  *
@@ -21,7 +23,27 @@ public interface AbstractIntegrationInfo extends SourceMessage {
 
     String name();
 
-    IntegrationType type();
+    IntegrationCategory category();
 
     String version();
+
+    ConnectionInfo connection();
+
+    class ConnectionInfo implements Serializable {
+        private final String host;
+        private final int port;
+
+        public ConnectionInfo(String host, int port) {
+            this.host = host;
+            this.port = port;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+    }
 }

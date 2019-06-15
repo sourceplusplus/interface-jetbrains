@@ -13,7 +13,7 @@ Step - 2 : Connect to Source++ Core container via Source++ Plugin
 
 ![](https://raw.githubusercontent.com/sourceplusplus/Assistant/v0.2.0-alpha/docs/images/screenshots/2019-05-11%2010-24-01.png)
 
-![](https://raw.githubusercontent.com/sourceplusplus/Assistant/v0.2.0-alpha/docs/images/screenshots/2019-05-11%2010-24-14.png)
+![](https://raw.githubusercontent.com/sourceplusplus/Assistant/v0.2.0-alpha/docs/images/screenshots/2019-06-14%2021-19-46.png)
 
 ## Documentation
 

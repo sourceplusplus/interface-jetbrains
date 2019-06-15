@@ -1,8 +1,8 @@
 package com.sourceplusplus.core.api.admin
 
-import com.sourceplusplus.core.integration.skywalking.config.SkywalkingEndpointIdDetector
-import com.sourceplusplus.core.storage.AbstractSourceStorage
-import com.sourceplusplus.core.storage.ElasticsearchDAO
+import com.sourceplusplus.core.SourceCore
+import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
+import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
 import io.vertx.core.AbstractVerticle
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -21,11 +21,11 @@ class AdminAPI extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(this.name)
 
     private final Router baseRouter
-    private final AbstractSourceStorage storage
+    private final SourceCore core
 
-    AdminAPI(Router baseRouter, AbstractSourceStorage storage) {
-        this.baseRouter = baseRouter
-        this.storage = storage
+    AdminAPI(Router baseRouter, SourceCore core) {
+        this.baseRouter = Objects.requireNonNull(baseRouter)
+        this.core = Objects.requireNonNull(core)
     }
 
     @Override
@@ -44,7 +44,7 @@ class AdminAPI extends AbstractVerticle {
     }
 
     private void refreshStorage(RoutingContext routingContext) {
-        if (storage.needsManualRefresh()) {
+        if (core.storage.needsManualRefresh()) {
             //todo: not hardcode elasticsearch
             vertx.eventBus().send(ElasticsearchDAO.REFRESH_STORAGE, true, {
                 routingContext.response().setStatusCode(200).end()

@@ -7,6 +7,6 @@ package com.sourceplusplus.api.model.info;
  * @version 0.2.0
  * @since 0.1.1
  */
-public enum IntegrationType {
+public enum IntegrationCategory {
     APM
 }
