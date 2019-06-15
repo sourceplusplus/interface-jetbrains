@@ -19,14 +19,22 @@
       "port": 9200
     }
   },
-  "integrations": {
-    "skywalking": {
-      "host": "localhost",
-      "port": 12800,
-      "timezone": null,
-      "endpoint_detection_interval_seconds": 15
-    }
-  }
+  "integrations": [
+      {
+        "id": "apache_skywalking",
+        "category": "APM",
+        "enabled": true,
+        "version": "6.1.0",
+        "connection": {
+          "host": "localhost",
+          "port": 12800
+        },
+        "config": {
+          "timezone": null,
+          "endpoint_detection_interval_seconds": 15
+        }
+      }
+    ]
 }
 ```
 
@@ -60,10 +68,24 @@
 
 ### Apache SkyWalking
 
+| Property                            | Value             | Description                                                  |
+| ----------------------------------- | ----------------- | ------------------------------------------------------------ |
+| id                                  | apache_skywalking | ID for the given Source++ integration                        |
+| category                            | APM               | Category for the given Source++ integration                  |
+| enabled                             | false             | Used to enable/disable the given Source++ integration        |
+| version                             | 6.1.0             | Current version of the Source++ integration                  |
+
+#### Connection
+
 | Property                            | Value     | Description                                                  |
 | ----------------------------------- | --------- | ------------------------------------------------------------ |
 | host                                | localhost | The address of the SkyWalking OAP instance to connect to     |
 | port                                | 12800     | The port of the SkyWalking OAP instance to connect to        |
+
+#### Config
+
+| Property                            | Value     | Description                                                  |
+| ----------------------------------- | --------- | ------------------------------------------------------------ |
 | timezone                            | null      | Timezone to use when querying SkyWalking OAP (defaults to system) |
 | endpoint_detection_interval_seconds | 15        | Seconds to wait before scanning for new endpoints            |
 
