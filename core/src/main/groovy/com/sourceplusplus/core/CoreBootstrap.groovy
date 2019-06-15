@@ -192,8 +192,8 @@ class CoreBootstrap extends AbstractVerticle {
         log.info("Booting Source++ Core HTTP server...")
         def server = vertx.createHttpServer(createSeverOptions())
         server.requestHandler(baseRouter.&accept)
-        server.listen({ result ->
-            if (result.succeeded()) {
+        server.listen({
+            if (it.succeeded()) {
                 vertx.deployVerticle(core, new DeploymentOptions().setConfig(config()), {
                     if (it.succeeded()) {
                         log.info("Source++ Core online!")
@@ -203,7 +203,7 @@ class CoreBootstrap extends AbstractVerticle {
                     }
                 })
             } else {
-                startFuture.fail(result.cause())
+                startFuture.fail(it.cause())
             }
         })
     }
