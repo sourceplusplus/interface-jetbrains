@@ -13,7 +13,6 @@ import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTra
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import net.jodah.expiringmap.ExpirationPolicy
 import net.jodah.expiringmap.ExpiringMap
@@ -40,28 +39,26 @@ class ArtifactAPI extends AbstractVerticle {
             .expirationPolicy(ExpirationPolicy.ACCESSED)
             .expiration(1, TimeUnit.MINUTES).build()
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private final Router baseRouter
     private final SourceCore core
 
-    ArtifactAPI(Router baseRouter, SourceCore core) {
-        this.baseRouter = Objects.requireNonNull(baseRouter)
+    ArtifactAPI(SourceCore core) {
         this.core = Objects.requireNonNull(core)
     }
 
     @Override
     void start(Future<Void> startFuture) throws Exception {
-        baseRouter.get("/applications/:appUuid/artifacts")
+        core.baseRouter.get("/applications/:appUuid/artifacts")
                 .handler(this.&getApplicationSourceArtifactsRoute)
-        baseRouter.post("/applications/:appUuid/artifacts/:artifactQualifiedName")
+        core.baseRouter.post("/applications/:appUuid/artifacts/:artifactQualifiedName")
                 .handler(this.&createOrUpdateSourceArtifactRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName").handler(this.&getSourceArtifactRoute)
-        baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName").handler(this.&getSourceArtifactRoute)
+        core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
                 .handler(this.&createOrUpdateSourceArtifactConfigRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
                 .handler(this.&getSourceArtifactConfigRoute)
-        baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/unsubscribe")
+        core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/unsubscribe")
                 .handler(this.&unsubscribeSourceArtifactRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/subscriptions")
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/subscriptions")
                 .handler(this.&getSourceArtifactSubscriptionsRoute)
 
         def subscriptionTracker = new ArtifactSubscriptionTracker(core)

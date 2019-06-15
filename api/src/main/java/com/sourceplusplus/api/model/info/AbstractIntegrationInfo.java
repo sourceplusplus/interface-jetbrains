@@ -1,12 +1,14 @@
 package com.sourceplusplus.api.model.info;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
+import io.vertx.core.json.JsonObject;
 import org.immutables.value.Value;
 
-import java.io.Serializable;
+import javax.annotation.Nullable;
 
 /**
  * todo: description
@@ -17,33 +19,27 @@ import java.io.Serializable;
  */
 @SourceStyle
 @Value.Immutable
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonSerialize(as = IntegrationInfo.class)
 @JsonDeserialize(as = IntegrationInfo.class)
 public interface AbstractIntegrationInfo extends SourceMessage {
 
+    String id();
+
+    @Nullable
     String name();
 
+    @Nullable
     IntegrationCategory category();
 
+    @Nullable
+    Boolean enabled();
+
+    @Nullable
     String version();
 
-    ConnectionInfo connection();
+    IntegrationConnection connection();
 
-    class ConnectionInfo implements Serializable {
-        private final String host;
-        private final int port;
-
-        public ConnectionInfo(String host, int port) {
-            this.host = host;
-            this.port = port;
-        }
-
-        public String getHost() {
-            return host;
-        }
-
-        public int getPort() {
-            return port;
-        }
-    }
+    @Nullable
+    JsonObject config();
 }

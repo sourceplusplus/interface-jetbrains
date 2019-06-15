@@ -1,7 +1,7 @@
 package com.sourceplusplus.core
 
-import com.sourceplusplus.api.model.info.AbstractIntegrationInfo
 import com.sourceplusplus.api.model.info.IntegrationCategory
+import com.sourceplusplus.api.model.info.IntegrationConnection
 import com.sourceplusplus.api.model.info.IntegrationInfo
 import com.sourceplusplus.core.api.admin.AdminAPI
 import com.sourceplusplus.core.api.application.ApplicationAPI
@@ -62,9 +62,9 @@ class SourceCore extends AbstractVerticle {
         }
 
         log.info("Booting Source++ Core APIs...")
-        adminAPI = new AdminAPI(baseRouter, this)
-        applicationAPI = new ApplicationAPI(baseRouter, this)
-        artifactAPI = new ArtifactAPI(baseRouter, this)
+        adminAPI = new AdminAPI(this)
+        applicationAPI = new ApplicationAPI(this)
+        artifactAPI = new ArtifactAPI(this)
         metricAPI = new MetricAPI(vertx.sharedData(), this)
         traceAPI = new TraceAPI(vertx.sharedData(), this)
 
@@ -155,27 +155,38 @@ class SourceCore extends AbstractVerticle {
         return apmIntegration
     }
 
-    List<IntegrationInfo> getActiveIntegrations() {
+    List<IntegrationInfo> getIntegrations() {
         def integrationInfos = []
         def integrations = config().getJsonArray("integrations")
         for (int i = 0; i < integrations.size(); i++) {
             def integration = integrations.getJsonObject(i)
-            if (integration.getBoolean("enabled")) {
-                switch (integration.getString("id")) {
-                    case "apache_skywalking":
-                        def connection = integration.getJsonObject("connection")
-                        def connectionInfo = new AbstractIntegrationInfo.ConnectionInfo(
-                                connection.getString("host"), connection.getInteger("port"))
-                        integrationInfos.add(IntegrationInfo.builder()
-                                .name("Apache SkyWalking").category(IntegrationCategory.APM)
-                                .version(integration.getString("version"))
-                                .connection(connectionInfo).build())
-                        break
-                    default:
-                        throw new IllegalArgumentException("Invalid integration: " + integration.getString("id"))
-                }
+            switch (integration.getString("id")) {
+                case "apache_skywalking":
+                    def connection = integration.getJsonObject("connection")
+                    def connectionInfo = IntegrationConnection.builder()
+                            .host(connection.getString("host"))
+                            .port(connection.getInteger("port")).build()
+                    def integrationInfo = IntegrationInfo.builder()
+                            .id(integration.getString("id"))
+                            .name("Apache SkyWalking").category(IntegrationCategory.APM)
+                            .enabled(integration.getBoolean("enabled"))
+                            .version(integration.getString("version"))
+                            .connection(connectionInfo)
+                    if (integration.getJsonObject("config")) {
+                        integrationInfo.config(integration.getJsonObject("config"))
+                    }
+                    integrationInfos.add(integrationInfo.build())
+                    break
+                default:
+                    throw new IllegalArgumentException("Invalid integration: " + integration.getString("id"))
             }
         }
         return integrationInfos
+    }
+
+    List<IntegrationInfo> getActiveIntegrations() {
+        return getIntegrations().stream().filter({ it -> it.enabled() })
+                .map({ it -> IntegrationInfo.builder().id(it.id()).connection(it.connection()).build() })
+                .collect()
     }
 }

@@ -32,7 +32,7 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
 
     SourceCoreConfig config();
 
-    List<IntegrationInfo> integrations();
+    List<IntegrationInfo> activeIntegrations();
 
     @Value.Check
     default void validate() {

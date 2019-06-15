@@ -173,7 +173,7 @@ class CoreBootstrap extends AbstractVerticle {
             def coreInfo = SourceCoreInfo.builder()
                     .version(version)
                     .config(SourceCoreConfig.current)
-                    .integrations(core.getActiveIntegrations())
+                    .activeIntegrations(core.getActiveIntegrations())
             if (version != "dev") {
                 coreInfo.buildDate(Instant.parse(BUILD.getString("build_date")))
             }
