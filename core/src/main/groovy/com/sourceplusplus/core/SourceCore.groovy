@@ -1,8 +1,8 @@
 package com.sourceplusplus.core
 
 import com.sourceplusplus.api.model.info.AbstractIntegrationInfo
-import com.sourceplusplus.api.model.info.IntegrationInfo
 import com.sourceplusplus.api.model.info.IntegrationCategory
+import com.sourceplusplus.api.model.info.IntegrationInfo
 import com.sourceplusplus.core.api.admin.AdminAPI
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
@@ -161,13 +161,19 @@ class SourceCore extends AbstractVerticle {
         for (int i = 0; i < integrations.size(); i++) {
             def integration = integrations.getJsonObject(i)
             if (integration.getBoolean("enabled")) {
-                def connection = integration.getJsonObject("connection")
-                def connectionInfo = new AbstractIntegrationInfo.ConnectionInfo(
-                        connection.getString("host"), connection.getInteger("port"))
-                integrationInfos.add(IntegrationInfo.builder()
-                        .name("Apache SkyWalking").category(IntegrationCategory.APM)
-                        .version(integration.getString("version"))
-                        .connection(connectionInfo).build())
+                switch (integration.getString("id")) {
+                    case "apache_skywalking":
+                        def connection = integration.getJsonObject("connection")
+                        def connectionInfo = new AbstractIntegrationInfo.ConnectionInfo(
+                                connection.getString("host"), connection.getInteger("port"))
+                        integrationInfos.add(IntegrationInfo.builder()
+                                .name("Apache SkyWalking").category(IntegrationCategory.APM)
+                                .version(integration.getString("version"))
+                                .connection(connectionInfo).build())
+                        break
+                    default:
+                        throw new IllegalArgumentException("Invalid integration: " + integration.getString("id"))
+                }
             }
         }
         return integrationInfos
