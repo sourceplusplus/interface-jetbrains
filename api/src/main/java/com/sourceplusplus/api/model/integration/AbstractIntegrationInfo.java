@@ -1,11 +1,11 @@
-package com.sourceplusplus.api.model.info;
+package com.sourceplusplus.api.model.integration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
-import io.vertx.core.json.JsonObject;
+import com.sourceplusplus.api.model.integration.config.IntegrationConfig;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
@@ -38,8 +38,9 @@ public interface AbstractIntegrationInfo extends SourceMessage {
     @Nullable
     String version();
 
+    @Nullable
     IntegrationConnection connection();
 
     @Nullable
-    JsonObject config();
+    IntegrationConfig config();
 }

@@ -1,4 +1,4 @@
-package com.sourceplusplus.api.model.info;
+package com.sourceplusplus.api.model.integration;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

@@ -1,8 +1,9 @@
 package com.sourceplusplus.core
 
-import com.sourceplusplus.api.model.info.IntegrationCategory
-import com.sourceplusplus.api.model.info.IntegrationConnection
-import com.sourceplusplus.api.model.info.IntegrationInfo
+import com.sourceplusplus.api.model.integration.IntegrationCategory
+import com.sourceplusplus.api.model.integration.IntegrationConnection
+import com.sourceplusplus.api.model.integration.IntegrationInfo
+import com.sourceplusplus.api.model.integration.config.ApacheSkyWalkingIntegrationConfig
 import com.sourceplusplus.core.api.admin.AdminAPI
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
@@ -18,8 +19,12 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Future
+import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
+import org.apache.commons.io.IOUtils
+
+import java.nio.charset.StandardCharsets
 
 /**
  * todo: description
@@ -30,6 +35,8 @@ import io.vertx.ext.web.Router
  */
 @Slf4j
 class SourceCore extends AbstractVerticle {
+
+    public static final String UPDATE_INTEGRATIONS = "UpdateIntegrations"
 
     private final Router baseRouter
     private SourceStorage storage
@@ -104,6 +111,23 @@ class SourceCore extends AbstractVerticle {
                 startFuture.fail(it.cause())
             }
         })
+
+        vertx.eventBus().consumer(UPDATE_INTEGRATIONS, {
+            config().put("integrations", it.body())
+
+            def configFileLocation = System.getenv("SOURCE_CONFIG")
+            if (configFileLocation) {
+                def configFile = new File(configFileLocation)
+                if (configFile.exists() && configFile.canWrite()) {
+                    def configData = IOUtils.toString(configFile.newInputStream(), StandardCharsets.UTF_8)
+                    def updatedConfig = new JsonObject(configData)
+                    updatedConfig.put("integrations", it.body())
+                    configFile.newWriter().withWriter { it << updatedConfig.encodePrettily() }
+                    log.info("Saved updated Source++ integration configuration to disk")
+                }
+            }
+            it.reply(true)
+        })
     }
 
     private void connectToApacheSkyWalking(JsonObject integration, Future startFuture) {
@@ -173,7 +197,9 @@ class SourceCore extends AbstractVerticle {
                             .version(integration.getString("version"))
                             .connection(connectionInfo)
                     if (integration.getJsonObject("config")) {
-                        integrationInfo.config(integration.getJsonObject("config"))
+                        integrationInfo = integrationInfo.config(
+                                Json.decodeValue(integration.getJsonObject("config").toString(),
+                                        ApacheSkyWalkingIntegrationConfig.class))
                     }
                     integrationInfos.add(integrationInfo.build())
                     break
