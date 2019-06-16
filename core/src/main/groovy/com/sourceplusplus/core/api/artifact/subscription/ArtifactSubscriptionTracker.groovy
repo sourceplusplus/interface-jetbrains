@@ -4,10 +4,9 @@ import com.sourceplusplus.api.model.artifact.*
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
 import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
-import com.sourceplusplus.core.api.artifact.ArtifactAPI
+import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
 import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
-import com.sourceplusplus.core.storage.AbstractSourceStorage
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
@@ -40,15 +39,10 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     public static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "GetSubscriberApplicationSubscriptions"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private final ArtifactAPI artifactAPI
-    private AbstractSourceStorage storage
+    protected final SourceCore core
 
-    ArtifactSubscriptionTracker(ArtifactAPI artifactAPI) {
-        this.artifactAPI = artifactAPI
-    }
-
-    void setStorage(AbstractSourceStorage storage) {
-        this.storage = storage
+    ArtifactSubscriptionTracker(SourceCore core) {
+        this.core = Objects.requireNonNull(core)
     }
 
     @Override
@@ -69,7 +63,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
         })
         vertx.eventBus().consumer(GET_ARTIFACT_SUBSCRIPTIONS, { msg ->
             def appArtifact = msg.body() as ApplicationArtifact
-            storage.getArtifactSubscriptions(appArtifact.appUuid(), appArtifact.artifactQualifiedName(), {
+            core.storage.getArtifactSubscriptions(appArtifact.appUuid(), appArtifact.artifactQualifiedName(), {
                 if (it.succeeded()) {
                     msg.reply(Json.encode(it.result()))
                 } else {
@@ -80,7 +74,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
         })
         vertx.eventBus().consumer(GET_APPLICATION_SUBSCRIPTIONS, { msg ->
             def appUuid = msg.body() as String
-            storage.getApplicationSubscriptions(appUuid, {
+            core.storage.getApplicationSubscriptions(appUuid, {
                 if (it.succeeded()) {
                     msg.reply(Json.encode(it.result()))
                 } else {
@@ -94,7 +88,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             def appUuid = request.getString("app_uuid")
             def subscriberUuid = request.getString("subscriber_uuid")
 
-            storage.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
+            core.storage.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
                 if (it.succeeded()) {
                     def futures = []
                     def subscriberSubscriptions = it.result()
@@ -107,7 +101,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
                         def future = Future.future()
                         futures.add(future)
-                        storage.setArtifactSubscription(it.withSubscriptionLastAccessed(updatedAccess), future.completer())
+                        core.storage.setArtifactSubscription(it.withSubscriptionLastAccessed(updatedAccess), future.completer())
                     }
                     CompositeFuture.all(futures).setHandler({
                         if (it.succeeded()) {
@@ -128,7 +122,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             def appUuid = request.getString("app_uuid")
             def subscriberUuid = request.getString("subscriber_uuid")
 
-            storage.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
+            core.storage.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
                 if (it.succeeded()) {
                     msg.reply(new JsonArray(Json.encode(it.result())))
                 } else {
@@ -143,7 +137,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     private void removeInactiveArtifactSubscriptions() {
         log.debug("Removing inactivate artifact subscriptions")
         def inactiveLimit = config().getJsonObject("core").getInteger("subscription_inactive_limit_minutes")
-        storage.getArtifactSubscriptions({
+        core.storage.getArtifactSubscriptions({
             if (it.succeeded()) {
                 def futures = []
                 it.result().each { sub ->
@@ -159,10 +153,10 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                     def future = Future.future()
                     futures.add(future)
                     if (updatedSubscriptions.isEmpty()) {
-                        storage.deleteArtifactSubscription(sub, future.completer())
+                        core.storage.deleteArtifactSubscription(sub, future.completer())
                     } else if (updated) {
                         sub = sub.withSubscriptionLastAccessed(updatedSubscriptions)
-                        storage.setArtifactSubscription(sub, future.completer())
+                        core.storage.setArtifactSubscription(sub, future.completer())
                     }
                 }
                 CompositeFuture.all(futures).setHandler({
@@ -180,7 +174,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
     private void subscribeToArtifact(Message<ArtifactSubscribeRequest> request) {
         //create artifact if doesn't exist then subscribe
-        artifactAPI.getSourceArtifact(request.body().appUuid(), request.body().artifactQualifiedName(), {
+        core.artifactAPI.getSourceArtifact(request.body().appUuid(), request.body().artifactQualifiedName(), {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
                     acceptArtifactSubscription(request)
@@ -188,7 +182,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                     def artifact = SourceArtifact.builder()
                             .appUuid(request.body().appUuid())
                             .artifactQualifiedName(request.body().artifactQualifiedName()).build()
-                    artifactAPI.createOrUpdateSourceArtifact(artifact, {
+                    core.artifactAPI.createOrUpdateSourceArtifact(artifact, {
                         if (it.succeeded()) {
                             acceptArtifactSubscription(request)
                         } else {
@@ -212,7 +206,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 .artifactQualifiedName(request.body().artifactQualifiedName())
                 .putSubscriptionLastAccessed(request.body().type, Instant.now())
                 .build()
-        storage.updateArtifactSubscription(artifactSubscription, {
+        core.storage.updateArtifactSubscription(artifactSubscription, {
             if (it.succeeded()) {
                 switch (request.body().type) {
                     case SourceArtifactSubscriptionType.METRICS:
@@ -243,7 +237,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 if (it.succeeded()) {
                     def removeArtifactSubscriber = it.result().body()
                     if (removeArtifactSubscriber) {
-                        storage.getArtifactSubscription(metricUnsubRequest.subscriberClientId,
+                        core.storage.getArtifactSubscription(metricUnsubRequest.subscriberClientId,
                                 metricUnsubRequest.appUuid(), metricUnsubRequest.artifactQualifiedName(), {
                             if (it.succeeded()) {
                                 if (it.result().isPresent()) {
@@ -252,7 +246,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                     updatedAccess.remove(SourceArtifactSubscriptionType.METRICS)
 
                                     if (updatedAccess.isEmpty()) {
-                                        storage.deleteArtifactSubscription(subscription, {
+                                        core.storage.deleteArtifactSubscription(subscription, {
                                             if (it.succeeded()) {
                                                 request.reply(true)
                                             } else {
@@ -262,7 +256,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                         })
                                     } else {
                                         subscription = subscription.withSubscriptionLastAccessed(updatedAccess)
-                                        storage.setArtifactSubscription(subscription, {
+                                        core.storage.setArtifactSubscription(subscription, {
                                             if (it.succeeded()) {
                                                 request.reply(true)
                                             } else {
@@ -293,7 +287,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 if (it.succeeded()) {
                     def removeArtifactSubscriber = it.result().body()
                     if (removeArtifactSubscriber) {
-                        storage.getArtifactSubscription(traceUnsubRequest.subscriberClientId,
+                        core.storage.getArtifactSubscription(traceUnsubRequest.subscriberClientId,
                                 traceUnsubRequest.appUuid(), traceUnsubRequest.artifactQualifiedName(), {
                             if (it.succeeded()) {
                                 if (it.result().isPresent()) {
@@ -302,7 +296,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                     updatedAccess.remove(SourceArtifactSubscriptionType.TRACES)
 
                                     if (updatedAccess.isEmpty()) {
-                                        storage.deleteArtifactSubscription(subscription, {
+                                        core.storage.deleteArtifactSubscription(subscription, {
                                             if (it.succeeded()) {
                                                 request.reply(true)
                                             } else {
@@ -312,7 +306,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                         })
                                     } else {
                                         subscription = subscription.withSubscriptionLastAccessed(updatedAccess)
-                                        storage.setArtifactSubscription(subscription, {
+                                        core.storage.setArtifactSubscription(subscription, {
                                             if (it.succeeded()) {
                                                 request.reply(true)
                                             } else {
@@ -338,11 +332,11 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 }
             })
         } else if (unsubRequest instanceof SourceArtifactUnsubscribeRequest) {
-            storage.getArtifactSubscription(unsubRequest.subscriberClientId, unsubRequest.appUuid(),
+            core.storage.getArtifactSubscription(unsubRequest.subscriberClientId, unsubRequest.appUuid(),
                     unsubRequest.artifactQualifiedName(), {
                 if (it.succeeded()) {
                     if (it.result().isPresent()) {
-                        storage.deleteArtifactSubscription(it.result().get(), {
+                        core.storage.deleteArtifactSubscription(it.result().get(), {
                             if (it.succeeded()) {
                                 request.reply(true)
                             } else {

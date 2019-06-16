@@ -1,4 +1,4 @@
-package com.sourceplusplus.core.storage
+package com.sourceplusplus.core.storage.elasticsearch
 
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
@@ -6,6 +6,7 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
+import com.sourceplusplus.core.storage.SourceStorage
 import io.searchbox.client.JestClient
 import io.searchbox.client.JestClientFactory
 import io.searchbox.client.JestResult
@@ -33,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class ElasticsearchDAO extends AbstractSourceStorage {
+class ElasticsearchDAO extends SourceStorage {
 
     public static final String REFRESH_STORAGE = "REFRESH_STORAGE"
 

@@ -82,7 +82,6 @@ task createProperties(dependsOn: processResources) {
         new File("$buildDir/resources/main/source-core_build.properties").withWriter { w ->
             Properties p = new Properties()
             p['version'] = project.version.toString()
-            p['apache_skywalking_version'] = project.APACHE_SKYWALKING_VERSION.toString()
             p['build_date'] = new Date().toInstant().toString()
             p.store w, null
         }

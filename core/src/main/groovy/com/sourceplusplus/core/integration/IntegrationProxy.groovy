@@ -1,4 +1,4 @@
-package com.sourceplusplus.core
+package com.sourceplusplus.core.integration
 
 import com.google.common.collect.Sets
 import io.vertx.core.AbstractVerticle

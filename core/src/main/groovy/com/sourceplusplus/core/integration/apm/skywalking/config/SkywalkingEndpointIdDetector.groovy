@@ -1,4 +1,4 @@
-package com.sourceplusplus.core.integration.skywalking.config
+package com.sourceplusplus.core.integration.apm.skywalking.config
 
 import com.google.common.collect.Sets
 import com.sourceplusplus.api.model.artifact.SourceArtifact
@@ -6,7 +6,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
-import com.sourceplusplus.core.integration.skywalking.SkywalkingIntegration
+import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -42,7 +42,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     }
 
     @Override
-    void start() throws Exception {
+    void start(Future<Void> startFuture) throws Exception {
         vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, { message ->
             def artifact = Json.decodeValue((message.body() as JsonObject).toString(), SourceArtifact.class)
             if (artifact.config().endpointName() != null) {
@@ -76,13 +76,9 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
             }
         })
 
-        searchForNewEndpoints({
-            if (it.failed()) {
-                it.cause().printStackTrace()
-                log.error("Failed to search for new endpoints", it.cause())
-            }
-        })
-        vertx.setPeriodic(TimeUnit.SECONDS.toMillis(config().getInteger("endpoint_detection_interval_seconds")), {
+        searchForNewEndpoints(startFuture.completer())
+        vertx.setPeriodic(TimeUnit.SECONDS.toMillis(config().getJsonObject("config")
+                .getInteger("endpoint_detection_interval_seconds")), {
             searchForNewEndpoints({
                 if (it.failed()) {
                     it.cause().printStackTrace()
@@ -102,6 +98,11 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
             })
         })
         log.info("{} started", getClass().getSimpleName())
+    }
+
+    @Override
+    void stop() throws Exception {
+        log.info("{} stopped", getClass().getSimpleName())
     }
 
     private void handleDynamicEndpointName(SourceArtifactConfig config, HashSet<String> endpointIds) {

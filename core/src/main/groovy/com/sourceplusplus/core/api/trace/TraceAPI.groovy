@@ -3,14 +3,12 @@ package com.sourceplusplus.core.api.trace
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.trace.*
-import com.sourceplusplus.core.api.artifact.ArtifactAPI
+import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
 import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
-import com.sourceplusplus.core.integration.skywalking.SkywalkingIntegration
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.shareddata.SharedData
-import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,28 +27,23 @@ class TraceAPI extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private final SharedData sharedData
-    private final Router baseRouter
-    private final ArtifactAPI artifactAPI
-    private final SkywalkingIntegration skywalkingIntegration
+    private final SourceCore core
 
-    TraceAPI(SharedData sharedData, Router baseRouter,
-             ArtifactAPI artifactAPI, SkywalkingIntegration skywalkingIntegration) {
+    TraceAPI(SharedData sharedData, SourceCore core) {
         this.sharedData = Objects.requireNonNull(sharedData)
-        this.baseRouter = Objects.requireNonNull(baseRouter)
-        this.artifactAPI = Objects.requireNonNull(artifactAPI)
-        this.skywalkingIntegration = Objects.requireNonNull(skywalkingIntegration)
+        this.core = Objects.requireNonNull(core)
     }
 
     @Override
     void start() throws Exception {
-        baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/traces/subscribe")
+        core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/traces/subscribe")
                 .handler(this.&subscribeToArtifactRoute)
-        baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/traces/unsubscribe")
+        core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/traces/unsubscribe")
                 .handler(this.&unsubscribeToArtifactRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/traces").handler(this.&getTracesRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans")
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/traces").handler(this.&getTracesRoute)
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans")
                 .handler(this.&getTraceSpansRoute)
-        vertx.deployVerticle(new TraceSubscriptionTracker(artifactAPI, this))
+        vertx.deployVerticle(new TraceSubscriptionTracker(core))
         log.info("{} started", getClass().getSimpleName())
     }
 
@@ -193,7 +186,7 @@ class TraceAPI extends AbstractVerticle {
             throw new UnsupportedOperationException("todo: this")
         }
 
-        artifactAPI.getSourceArtifactConfig(appUuid, traceQuery.artifactQualifiedName(), {
+        core.artifactAPI.getSourceArtifactConfig(appUuid, traceQuery.artifactQualifiedName(), {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
                     def artifactConfig = it.result().get()
@@ -203,7 +196,7 @@ class TraceAPI extends AbstractVerticle {
                             artifactConfig.endpointIds().each {
                                 traceQuery = traceQuery.withEndpointId(it)
                                 def fut = Future.future()
-                                skywalkingIntegration.getSkywalkingTraces(traceQuery, fut.completer())
+                                core.APMIntegration.getTraces(traceQuery, fut.completer())
                                 futures.add(fut)
                             }
                             CompositeFuture.all(futures).setHandler({
@@ -247,19 +240,19 @@ class TraceAPI extends AbstractVerticle {
     void getTraceSpans(String appUuid, String artifactQualifiedName, TraceSpanStackQuery traceSpanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
         if (traceSpanQuery.oneLevelDeep()) {
-            artifactAPI.getSourceArtifact(appUuid, artifactQualifiedName, {
+            core.artifactAPI.getSourceArtifact(appUuid, artifactQualifiedName, {
                 if (it.succeeded()) {
                     if (it.result().isPresent()) {
-                        skywalkingIntegration.getSkywalkingTraceStack(appUuid, it.result().get(), traceSpanQuery, handler)
+                        core.APMIntegration.getTraceStack(appUuid, it.result().get(), traceSpanQuery, handler)
                     } else {
-                        skywalkingIntegration.getSkywalkingTraceStack(appUuid, null, traceSpanQuery, handler)
+                        core.APMIntegration.getTraceStack(appUuid, null, traceSpanQuery, handler)
                     }
                 } else {
                     handler.handle(Future.failedFuture(it.cause()))
                 }
             })
         } else {
-            skywalkingIntegration.getSkywalkingTraceStack(appUuid, null, traceSpanQuery, handler)
+            core.APMIntegration.getTraceStack(appUuid, null, traceSpanQuery, handler)
         }
     }
 }

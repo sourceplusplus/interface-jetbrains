@@ -1,10 +1,18 @@
 package com.sourceplusplus.core.api.admin
 
-import com.sourceplusplus.core.integration.skywalking.config.SkywalkingEndpointIdDetector
-import com.sourceplusplus.core.storage.AbstractSourceStorage
-import com.sourceplusplus.core.storage.ElasticsearchDAO
+import com.sourceplusplus.api.model.error.SourceAPIError
+import com.sourceplusplus.api.model.error.SourceAPIErrors
+import com.sourceplusplus.api.model.integration.IntegrationInfo
+import com.sourceplusplus.api.model.integration.config.ApacheSkyWalkingIntegrationConfig
+import com.sourceplusplus.core.SourceCore
+import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
+import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
 import io.vertx.core.AbstractVerticle
-import io.vertx.ext.web.Router
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
+import io.vertx.core.Handler
+import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,21 +28,109 @@ class AdminAPI extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
 
-    private final Router baseRouter
-    private final AbstractSourceStorage storage
+    private final SourceCore core
 
-    AdminAPI(Router baseRouter, AbstractSourceStorage storage) {
-        this.baseRouter = baseRouter
-        this.storage = storage
+    AdminAPI(SourceCore core) {
+        this.core = Objects.requireNonNull(core)
     }
 
     @Override
     void start() throws Exception {
-        baseRouter.get("/admin/integrations/skywalking/searchForNewEndpoints")
+        core.baseRouter.get("/admin/integrations").handler(this.&getIntegrationsRoute)
+        core.baseRouter.put("/admin/integrations/:integrationId").handler(this.&updateIntegrationInfoRoute)
+        core.baseRouter.get("/admin/integrations/skywalking/searchForNewEndpoints")
                 .handler(this.&searchForNewEndpointsRoute)
-        baseRouter.get("/admin/storage/refresh")
+        core.baseRouter.get("/admin/storage/refresh")
                 .handler(this.&refreshStorage)
         log.info("{} started", getClass().getSimpleName())
+    }
+
+    private getIntegrationsRoute(RoutingContext routingContext) {
+        routingContext.response().setStatusCode(200).end(Json.encode(core.getIntegrations()))
+    }
+
+    private void updateIntegrationInfoRoute(RoutingContext routingContext) {
+        def integrationId = routingContext.request().getParam("integrationId")
+        if (!integrationId) {
+            routingContext.response().setStatusCode(400)
+                    .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
+            return
+        }
+
+        IntegrationInfo request
+        try {
+            def integrationConfig = routingContext.getBodyAsJson().getJsonObject("config")
+            request = Json.decodeValue(routingContext.getBodyAsJson()
+                    .putNull("name")
+                    .putNull("category")
+                    .putNull("version")
+                    .putNull("config")
+                    .put("id", integrationId).toString(),
+                    IntegrationInfo.class)
+            if (integrationConfig) {
+                switch (integrationId) {
+                    case "apache_skywalking":
+                        request = request.withConfig(Json.decodeValue(integrationConfig.toString(),
+                                ApacheSkyWalkingIntegrationConfig.class))
+                        break
+                    default:
+                        routingContext.response().setStatusCode(400)
+                                .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
+                        return
+                }
+            }
+        } catch (all) {
+            all.printStackTrace()
+            routingContext.response().setStatusCode(400)
+                    .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
+            return
+        }
+
+        updateIntegrationInfo(request, {
+            if (it.succeeded()) {
+                routingContext.response().setStatusCode(200)
+                        .end(Json.encode(it.result()))
+            } else {
+                routingContext.response().setStatusCode(400)
+                        .end(Json.encode(new SourceAPIError().addError(it.cause().message)))
+            }
+        })
+    }
+
+    private void updateIntegrationInfo(IntegrationInfo integrationInfo,
+                                       Handler<AsyncResult<IntegrationInfo>> handler) {
+        def currentInfo = core.integrations.find { it.id() == integrationInfo.id() }
+        if (currentInfo) {
+            integrationInfo = integrationInfo
+                    .withCategory(currentInfo.category())
+                    .withVersion(currentInfo.version())
+            if (!integrationInfo.connection()) {
+                integrationInfo = integrationInfo.withConnection(currentInfo.connection())
+            }
+            if (!integrationInfo.config()) {
+                integrationInfo = integrationInfo.withConfig(currentInfo.config())
+            }
+
+            def integrations = config().getJsonArray("integrations")
+            for (int i = 0; i < integrations.size(); i++) {
+                def integration = integrations.getJsonObject(i)
+                if (integration.getString("id") == integrationInfo.id()) {
+                    integrations.getJsonObject(i).mergeIn(JsonObject.mapFrom(integrationInfo))
+                    break
+                }
+            }
+
+            vertx.eventBus().send(SourceCore.UPDATE_INTEGRATIONS, integrations, {
+                if (it.succeeded()) {
+                    handler.handle(Future.succeededFuture(integrationInfo))
+                } else {
+                    handler.handle(Future.failedFuture(it.cause()))
+                }
+            })
+        } else {
+            handler.handle(Future.failedFuture(
+                    new IllegalStateException("Could not find integration: " + integrationInfo.id())))
+        }
     }
 
     private void searchForNewEndpointsRoute(RoutingContext routingContext) {
@@ -44,7 +140,7 @@ class AdminAPI extends AbstractVerticle {
     }
 
     private void refreshStorage(RoutingContext routingContext) {
-        if (storage.needsManualRefresh()) {
+        if (core.storage.needsManualRefresh()) {
             //todo: not hardcode elasticsearch
             vertx.eventBus().send(ElasticsearchDAO.REFRESH_STORAGE, true, {
                 routingContext.response().setStatusCode(200).end()

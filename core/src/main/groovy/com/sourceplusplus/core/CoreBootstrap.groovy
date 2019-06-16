@@ -14,23 +14,13 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourceCoreConfig
 import com.sourceplusplus.api.model.error.SourceAPIError
-import com.sourceplusplus.api.model.info.IntegrationInfo
-import com.sourceplusplus.api.model.info.IntegrationType
 import com.sourceplusplus.api.model.info.SourceCoreInfo
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.*
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceSpan
-import com.sourceplusplus.core.api.admin.AdminAPI
-import com.sourceplusplus.core.api.application.ApplicationAPI
-import com.sourceplusplus.core.api.artifact.ArtifactAPI
-import com.sourceplusplus.core.api.metric.MetricAPI
-import com.sourceplusplus.core.api.trace.TraceAPI
-import com.sourceplusplus.core.integration.skywalking.SkywalkingIntegration
-import com.sourceplusplus.core.storage.AbstractSourceStorage
-import com.sourceplusplus.core.storage.ElasticsearchDAO
-import com.sourceplusplus.core.storage.H2DAO
+import com.sourceplusplus.core.integration.IntegrationProxy
 import io.vertx.core.*
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
@@ -70,8 +60,6 @@ class CoreBootstrap extends AbstractVerticle {
     public static final ResourceBundle BUILD = ResourceBundle.getBundle("source-core_build")
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private static final Set<IntegrationInfo> ACTIVE_INTEGRATIONS = new HashSet<>()
-    private AbstractSourceStorage storage
 
     static void main(String[] args) {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
@@ -92,7 +80,8 @@ class CoreBootstrap extends AbstractVerticle {
             if (new File(configFile).exists()) {
                 configInputStream = new File(configFile).newInputStream()
             } else {
-                configInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config/$configFile")
+                configInputStream = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("config/$configFile")
             }
             def configData = IOUtils.toString(configInputStream, StandardCharsets.UTF_8)
             configJSON = new JsonObject(configData)
@@ -134,6 +123,7 @@ class CoreBootstrap extends AbstractVerticle {
         def baseRouter = createRouter()
         def v1ApiRouter = Router.router(vertx)
         baseRouter.mountSubRouter("/v1", v1ApiRouter)
+        def core = new SourceCore(v1ApiRouter)
 
         //start bridge
         log.info("Booting Source++ Core eventbus bridge...")
@@ -142,22 +132,6 @@ class CoreBootstrap extends AbstractVerticle {
                 .addInboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+"))
                 .addOutboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+")))
         baseRouter.route("/eventbus/*").handler(sock)
-
-        //start services
-        log.info("Booting Source++ Core services...")
-        def storageConfig = config().getJsonObject("storage")
-        switch (storageConfig.getString("type")) {
-            case "elasticsearch":
-                log.info("Using storage: Elasticsearch")
-                storage = new ElasticsearchDAO(vertx.eventBus(), storageConfig.getJsonObject("elasticsearch"))
-                break
-            case "h2":
-                log.info("Using storage: H2")
-                storage = new H2DAO(vertx, storageConfig.getJsonObject("h2"))
-                break
-            default:
-                throw new IllegalArgumentException("Unknown storage type: " + storageConfig.getString("type"))
-        }
 
         //optional API auth
         if (config().getJsonObject("core").getBoolean("secure_mode")) {
@@ -186,36 +160,6 @@ class CoreBootstrap extends AbstractVerticle {
             SourceCoreConfig.current.secureApi = false
         }
 
-        //start APIs
-        log.info("Booting Source++ Core APIs...")
-        vertx.deployVerticle(new AdminAPI(v1ApiRouter, storage))
-        vertx.deployVerticle(new ApplicationAPI(v1ApiRouter, storage))
-
-        def artifactAPI = new ArtifactAPI(v1ApiRouter, storage)
-        vertx.deployVerticle(artifactAPI, new DeploymentOptions().setConfig(config()))
-
-        ACTIVE_INTEGRATIONS.add(IntegrationInfo.builder()
-                .name("Apache SkyWalking").type(IntegrationType.APM)
-                .version(BUILD.getString("apache_skywalking_version")).build())
-        def skywalking = new SkywalkingIntegration(artifactAPI, storage)
-        vertx.deployVerticle(skywalking, new DeploymentOptions().setConfig(
-                config().getJsonObject("integrations").getJsonObject("skywalking")))
-        vertx.deployVerticle(new MetricAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, storage, skywalking))
-        vertx.deployVerticle(new TraceAPI(vertx.sharedData(), v1ApiRouter, artifactAPI, skywalking))
-
-        //start core HTTP server
-        log.info("Booting Source++ Core HTTP server...")
-        def server = vertx.createHttpServer(createSeverOptions())
-        server.requestHandler(baseRouter.&accept)
-        server.listen({ result ->
-            if (result.succeeded()) {
-                log.info("Source++ Core online!")
-                startFuture.complete()
-            } else {
-                startFuture.fail(result.cause())
-            }
-        })
-
         if (SourceCoreConfig.current.pingEndpointAvailable) {
             //for connection testing
             baseRouter.get("/ping").handler({
@@ -229,13 +173,12 @@ class CoreBootstrap extends AbstractVerticle {
             def coreInfo = SourceCoreInfo.builder()
                     .version(version)
                     .config(SourceCoreConfig.current)
-                    .integrations(ACTIVE_INTEGRATIONS)
+                    .activeIntegrations(core.getActiveIntegrations())
             if (version != "dev") {
                 coreInfo.buildDate(Instant.parse(BUILD.getString("build_date")))
             }
             it.response().setStatusCode(200).end(Json.encode(coreInfo.build()))
         })
-
         v1ApiRouter.get("/registerIP").handler({
             def ipAddress = it.request().remoteAddress().host()
             if (IntegrationProxy.ALLOWED_IP_ADDRESSES.add(ipAddress)) {
@@ -244,7 +187,32 @@ class CoreBootstrap extends AbstractVerticle {
             it.response().setStatusCode(200)
                     .end(Json.encode(new JsonArray(IntegrationProxy.ALLOWED_IP_ADDRESSES.asList())))
         })
-        log.info("{} started", getClass().getSimpleName())
+
+        //start core HTTP server
+        log.info("Booting Source++ Core HTTP server...")
+        def server = vertx.createHttpServer(createSeverOptions())
+        server.requestHandler(baseRouter.&accept)
+        server.listen({
+            if (it.succeeded()) {
+                vertx.deployVerticle(core, new DeploymentOptions().setConfig(config()), {
+                    if (it.succeeded()) {
+                        log.info("Source++ Core online!")
+                        startFuture.complete()
+                    } else {
+                        startFuture.fail(it.cause())
+                        vertx.close()
+                        vertx.close({
+                            System.exit(-1)
+                        })
+                    }
+                })
+            } else {
+                startFuture.fail(it.cause())
+                vertx.close({
+                    System.exit(-1)
+                })
+            }
+        })
     }
 
     @Override

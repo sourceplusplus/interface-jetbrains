@@ -14,7 +14,7 @@ import io.vertx.core.Handler
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-abstract class AbstractSourceStorage {
+abstract class SourceStorage {
 
     abstract void createApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler)
 

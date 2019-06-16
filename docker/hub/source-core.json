@@ -12,12 +12,5 @@
   "storage": {
     "type": "h2"
   },
-  "integrations": {
-    "skywalking": {
-      "host": "localhost",
-      "port": 12800,
-      "timezone": null,
-      "endpoint_detection_interval_seconds": 15
-    }
-  }
+  "integrations": []
 }

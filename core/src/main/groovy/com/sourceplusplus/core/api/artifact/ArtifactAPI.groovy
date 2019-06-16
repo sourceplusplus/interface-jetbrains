@@ -8,12 +8,11 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
+import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
-import com.sourceplusplus.core.storage.AbstractSourceStorage
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import net.jodah.expiringmap.ExpirationPolicy
 import net.jodah.expiringmap.ExpiringMap
@@ -40,33 +39,30 @@ class ArtifactAPI extends AbstractVerticle {
             .expirationPolicy(ExpirationPolicy.ACCESSED)
             .expiration(1, TimeUnit.MINUTES).build()
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private final Router baseRouter
-    private final AbstractSourceStorage storage
+    private final SourceCore core
 
-    ArtifactAPI(Router baseRouter, AbstractSourceStorage storage) {
-        this.baseRouter = baseRouter
-        this.storage = storage
+    ArtifactAPI(SourceCore core) {
+        this.core = Objects.requireNonNull(core)
     }
 
     @Override
-    void start() throws Exception {
-        baseRouter.get("/applications/:appUuid/artifacts")
+    void start(Future<Void> startFuture) throws Exception {
+        core.baseRouter.get("/applications/:appUuid/artifacts")
                 .handler(this.&getApplicationSourceArtifactsRoute)
-        baseRouter.post("/applications/:appUuid/artifacts/:artifactQualifiedName")
+        core.baseRouter.post("/applications/:appUuid/artifacts/:artifactQualifiedName")
                 .handler(this.&createOrUpdateSourceArtifactRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName").handler(this.&getSourceArtifactRoute)
-        baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName").handler(this.&getSourceArtifactRoute)
+        core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
                 .handler(this.&createOrUpdateSourceArtifactConfigRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
                 .handler(this.&getSourceArtifactConfigRoute)
-        baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/unsubscribe")
+        core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/unsubscribe")
                 .handler(this.&unsubscribeSourceArtifactRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/subscriptions")
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/subscriptions")
                 .handler(this.&getSourceArtifactSubscriptionsRoute)
 
-        def subscriptionTracker = new ArtifactSubscriptionTracker(this)
-        subscriptionTracker.storage = storage
-        vertx.deployVerticle(subscriptionTracker, new DeploymentOptions().setConfig(config()))
+        def subscriptionTracker = new ArtifactSubscriptionTracker(core)
+        vertx.deployVerticle(subscriptionTracker, new DeploymentOptions().setConfig(config()), startFuture.completer())
         log.info("{} started", getClass().getSimpleName())
     }
 
@@ -203,7 +199,7 @@ class ArtifactAPI extends AbstractVerticle {
                         }
                         artifact = artifact.withConfig(newConfig)
                     }
-                    storage.updateArtifact(artifact, {
+                    core.storage.updateArtifact(artifact, {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
                                     .artifactQualifiedName(artifact.artifactQualifiedName()).build()
@@ -214,7 +210,7 @@ class ArtifactAPI extends AbstractVerticle {
                 } else {
                     //create
                     artifact = artifact.withCreateDate(now).withLastUpdated(now)
-                    storage.createArtifact(artifact, {
+                    core.storage.createArtifact(artifact, {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
                                     .artifactQualifiedName(artifact.artifactQualifiedName()).build()
@@ -250,7 +246,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     void getApplicationSourceArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         log.info("Getting all of application's source artifacts. App UUID: {}", appUuid)
-        storage.getApplicationArtifacts(appUuid, handler)
+        core.storage.getApplicationArtifacts(appUuid, handler)
     }
 
     private void getSourceArtifactRoute(RoutingContext routingContext) {
@@ -286,13 +282,13 @@ class ArtifactAPI extends AbstractVerticle {
     void getSourceArtifactByEndpointName(String appUuid, String endpointName,
                                          Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         log.info("Getting source artifact. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
-        storage.findArtifactByEndpointName(appUuid, endpointName, handler)
+        core.storage.findArtifactByEndpointName(appUuid, endpointName, handler)
     }
 
     void getSourceArtifactByEndpointId(String appUuid, String endpointId,
                                        Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         log.info("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
-        storage.findArtifactByEndpointId(appUuid, endpointId, handler)
+        core.storage.findArtifactByEndpointId(appUuid, endpointId, handler)
     }
 
     private createOrUpdateSourceArtifactConfigRoute(RoutingContext routingContext) {
@@ -393,7 +389,7 @@ class ArtifactAPI extends AbstractVerticle {
         } else {
             log.info("Getting source artifact from storage. App UUID: {} - Artifact qualified name: {}",
                     appUuid, artifactQualifiedName)
-            storage.getArtifact(appUuid, artifactQualifiedName, {
+            core.storage.getArtifact(appUuid, artifactQualifiedName, {
                 if (it.failed()) {
                     handler.handle(Future.failedFuture(it.cause()))
                 } else {

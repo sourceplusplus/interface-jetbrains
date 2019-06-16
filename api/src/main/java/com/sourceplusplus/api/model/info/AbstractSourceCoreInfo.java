@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
 import com.sourceplusplus.api.model.config.SourceCoreConfig;
+import com.sourceplusplus.api.model.integration.IntegrationInfo;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
@@ -32,7 +33,7 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
 
     SourceCoreConfig config();
 
-    List<IntegrationInfo> integrations();
+    List<IntegrationInfo> activeIntegrations();
 
     @Value.Check
     default void validate() {
