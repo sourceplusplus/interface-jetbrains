@@ -1,9 +1,6 @@
 package com.sourceplusplus.core
 
-import com.sourceplusplus.api.model.integration.IntegrationCategory
-import com.sourceplusplus.api.model.integration.IntegrationConnection
 import com.sourceplusplus.api.model.integration.IntegrationInfo
-import com.sourceplusplus.api.model.integration.config.ApacheSkyWalkingIntegrationConfig
 import com.sourceplusplus.core.api.admin.AdminAPI
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
@@ -243,28 +240,13 @@ class SourceCore extends AbstractVerticle {
         def integrationInfos = []
         def integrations = config().getJsonArray("integrations")
         for (int i = 0; i < integrations.size(); i++) {
-            def integration = integrations.getJsonObject(i)
-            switch (integration.getString("id")) {
+            def integrationInfo = Json.decodeValue(integrations.getJsonObject(i).toString(), IntegrationInfo.class)
+            switch (integrationInfo.id()) {
                 case "apache_skywalking":
-                    def connection = integration.getJsonObject("connection")
-                    def connectionInfo = IntegrationConnection.builder()
-                            .host(connection.getString("host"))
-                            .port(connection.getInteger("port")).build()
-                    def integrationInfo = IntegrationInfo.builder()
-                            .id(integration.getString("id"))
-                            .name("Apache SkyWalking").category(IntegrationCategory.APM)
-                            .enabled(integration.getBoolean("enabled"))
-                            .version(integration.getString("version"))
-                            .connection(connectionInfo)
-                    if (integration.getJsonObject("config")) {
-                        integrationInfo = integrationInfo.config(
-                                Json.decodeValue(integration.getJsonObject("config").toString(),
-                                        ApacheSkyWalkingIntegrationConfig.class))
-                    }
-                    integrationInfos.add(integrationInfo.build())
+                    integrationInfos.add(integrationInfo.withName("Apache SkyWalking"))
                     break
                 default:
-                    throw new IllegalArgumentException("Invalid integration: " + integration.getString("id"))
+                    throw new IllegalArgumentException("Invalid integration: " + integrationInfo.id())
             }
         }
         return integrationInfos
