@@ -15,11 +15,9 @@ import com.sourceplusplus.core.storage.SourceStorage
 import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
 import com.sourceplusplus.core.storage.h2.H2DAO
 import groovy.util.logging.Slf4j
-import io.vertx.core.AbstractVerticle
-import io.vertx.core.CompositeFuture
-import io.vertx.core.DeploymentOptions
-import io.vertx.core.Future
+import io.vertx.core.*
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import org.apache.commons.io.IOUtils
@@ -38,6 +36,8 @@ class SourceCore extends AbstractVerticle {
 
     public static final String UPDATE_INTEGRATIONS = "UpdateIntegrations"
 
+    private final Set<String> deployedIntegrations = new HashSet<>()
+    private final Set<String> deployedIntegrationAPIs = new HashSet<>()
     private final Router baseRouter
     private SourceStorage storage
     private AdminAPI adminAPI
@@ -86,34 +86,15 @@ class SourceCore extends AbstractVerticle {
                 .setHandler({
             if (it.succeeded()) {
                 log.info("Connecting Source++ integrations...")
-                def succeeded = true
-                def integrations = config().getJsonArray("integrations")
-                def integrationFutures = []
-                for (int i = 0; i < integrations.size(); i++) {
-                    def future = Future.future()
-                    integrationFutures.add(future)
-
-                    def integration = integrations.getJsonObject(i)
-                    switch (integration.getString("id")) {
-                        case "apache_skywalking":
-                            connectToApacheSkyWalking(integration, future)
-                            break
-                        default:
-                            succeeded = false
-                            startFuture.fail(new IllegalArgumentException(
-                                    "Invalid integration: " + integration.getString("id")))
-                    }
-                }
-                if (succeeded) {
-                    CompositeFuture.all(integrationFutures).setHandler(startFuture.completer())
-                }
+                deployIntegrations(startFuture.completer())
             } else {
                 startFuture.fail(it.cause())
             }
         })
 
-        vertx.eventBus().consumer(UPDATE_INTEGRATIONS, {
-            config().put("integrations", it.body())
+        vertx.eventBus().consumer(UPDATE_INTEGRATIONS, { msg ->
+            def integrations = msg.body() as JsonArray
+            config().put("integrations", integrations)
 
             def configFileLocation = System.getenv("SOURCE_CONFIG")
             if (configFileLocation) {
@@ -121,28 +102,108 @@ class SourceCore extends AbstractVerticle {
                 if (configFile.exists() && configFile.canWrite()) {
                     def configData = IOUtils.toString(configFile.newInputStream(), StandardCharsets.UTF_8)
                     def updatedConfig = new JsonObject(configData)
-                    updatedConfig.put("integrations", it.body())
+                    updatedConfig.put("integrations", integrations)
                     configFile.newWriter().withWriter { it << updatedConfig.encodePrettily() }
                     log.info("Saved updated Source++ integration configuration to disk")
                 }
             }
-            it.reply(true)
+
+            //undeploy integration APIs
+            def undeployFutures = []
+            deployedIntegrationAPIs.removeIf({
+                def fut = Future.future()
+                undeployFutures += fut
+                vertx.undeploy(it, fut.completer())
+                return true
+            })
+            //undeploy integrations
+            deployedIntegrations.removeIf({
+                def fut = Future.future()
+                undeployFutures += fut
+                vertx.undeploy(it, fut.completer())
+                return true
+            })
+            CompositeFuture.all(undeployFutures).setHandler({
+                if (it.succeeded()) {
+                    //redeploy integrations
+                    def fut = Future.future()
+                    fut.setHandler({
+                        if (it.succeeded()) {
+                            msg.reply(true)
+                        } else {
+                            it.cause().printStackTrace()
+                            msg.fail(500, "Failed to deploy integrations")
+                        }
+                    })
+                    deployIntegrations(fut.completer())
+                } else {
+                    it.cause().printStackTrace()
+                    msg.fail(500, "Failed to undeploy integrations")
+                }
+            })
         })
     }
 
-    private void connectToApacheSkyWalking(JsonObject integration, Future startFuture) {
+    private void deployIntegrations(Handler<AsyncResult<Void>> handler) {
+        def succeeded = true
+        def integrations = config().getJsonArray("integrations")
+        def integrationFutures = []
+
+        boolean deployMetricAPI = false
+        boolean deployTraceAPI = false
+        for (int i = 0; i < integrations.size(); i++) {
+            def integration = integrations.getJsonObject(i)
+            if (integration.getBoolean("enabled")) {
+                def future = Future.future()
+                integrationFutures.add(future)
+
+                switch (integration.getString("id")) {
+                    case "apache_skywalking":
+                        deployMetricAPI = deployTraceAPI = true
+                        connectToApacheSkyWalking(integration, future)
+                        break
+                    default:
+                        succeeded = false
+                        handler.handle(Future.failedFuture(new IllegalArgumentException(
+                                "Invalid integration: " + integration.getString("id"))))
+                }
+            }
+        }
+        if (succeeded) {
+            def deploymentOptions = new DeploymentOptions().setConfig(config())
+            def metricAPIFuture = Future.future()
+            def traceAPIFuture = Future.future()
+            def futures = []
+            if (deployMetricAPI) {
+                futures.add(metricAPIFuture)
+                vertx.deployVerticle(metricAPI, deploymentOptions, metricAPIFuture.completer())
+            }
+            if (deployTraceAPI) {
+                futures.add(traceAPIFuture)
+                vertx.deployVerticle(traceAPI, deploymentOptions, traceAPIFuture.completer())
+            }
+            CompositeFuture.all(futures).setHandler({
+                if (it.succeeded()) {
+                    (it."results").collect({ it."result" }).each {
+                        deployedIntegrationAPIs.add(it)
+                    }
+                    CompositeFuture.all(integrationFutures).setHandler(handler)
+                } else {
+                    handler.handle(Future.failedFuture(it.cause()))
+                }
+            })
+        }
+    }
+
+    private void connectToApacheSkyWalking(JsonObject integration, Handler<AsyncResult<Void>> handler) {
         log.info("Connecting to Apache SkyWalking...")
         apmIntegration = new SkywalkingIntegration(artifactAPI, storage)
         vertx.deployVerticle(apmIntegration, new DeploymentOptions().setConfig(integration), {
             if (it.succeeded()) {
-                def deploymentOptions = new DeploymentOptions().setConfig(config())
-                def metricAPIFuture = Future.future()
-                def traceAPIFuture = Future.future()
-                vertx.deployVerticle(metricAPI, deploymentOptions, metricAPIFuture.completer())
-                vertx.deployVerticle(traceAPI, deploymentOptions, traceAPIFuture.completer())
-                CompositeFuture.all(metricAPIFuture, traceAPIFuture).setHandler(startFuture.completer())
+                deployedIntegrations.add(it.result())
+                handler.handle(Future.succeededFuture())
             } else {
-                startFuture.fail(it.cause())
+                handler.handle(Future.failedFuture(it.cause()))
             }
         })
     }

@@ -100,6 +100,11 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         log.info("{} started", getClass().getSimpleName())
     }
 
+    @Override
+    void stop() throws Exception {
+        log.info("{} stopped", getClass().getSimpleName())
+    }
+
     private void handleDynamicEndpointName(SourceArtifactConfig config, HashSet<String> endpointIds) {
         //using wildcard, iterate saved endpoints
         def replacedWildcard = config.endpointName().replaceAll(Pattern.compile('(\\{.+\\})'), '.+')

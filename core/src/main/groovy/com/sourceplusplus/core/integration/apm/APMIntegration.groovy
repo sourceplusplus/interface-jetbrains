@@ -7,8 +7,7 @@ import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceQueryResult
 import com.sourceplusplus.api.model.trace.TraceSpanStackQuery
 import com.sourceplusplus.api.model.trace.TraceSpanStackQueryResult
-import com.sourceplusplus.core.integration.SourceIntegration
-import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
+import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 
@@ -19,18 +18,7 @@ import io.vertx.core.Handler
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-abstract class APMIntegration extends SourceIntegration {
-
-    private SkywalkingIntegration skywalkingIntegration
-
-    @Override
-    void enableIntegration() {
-    }
-
-    @Override
-    void disableIntegration() {
-
-    }
+abstract class APMIntegration extends AbstractVerticle {
 
     abstract void getEndpointMetrics(String endpointId, ArtifactMetricQuery metricQuery,
                                      Handler<AsyncResult<ArtifactMetricResult>> handler)

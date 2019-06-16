@@ -88,6 +88,11 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    @Override
+    void stop() throws Exception {
+        log.info("{} stopped", getClass().getSimpleName())
+    }
+
     void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler) {
         log.info("Getting all SkyWalking services. Start: " + start + " - End: " + end)
         def graphqlQuery = new JsonObject()

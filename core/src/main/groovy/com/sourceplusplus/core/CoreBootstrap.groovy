@@ -201,15 +201,14 @@ class CoreBootstrap extends AbstractVerticle {
                     } else {
                         startFuture.fail(it.cause())
                         vertx.close()
-                        new Timer().runAfter(1000, {
+                        vertx.close({
                             System.exit(-1)
                         })
                     }
                 })
             } else {
                 startFuture.fail(it.cause())
-                vertx.close()
-                new Timer().runAfter(1000, {
+                vertx.close({
                     System.exit(-1)
                 })
             }
