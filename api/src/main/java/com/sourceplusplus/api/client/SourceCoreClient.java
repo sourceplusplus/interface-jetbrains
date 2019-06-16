@@ -8,6 +8,7 @@ import com.sourceplusplus.api.model.application.SourceApplicationSubscription;
 import com.sourceplusplus.api.model.artifact.*;
 import com.sourceplusplus.api.model.config.SourcePluginConfig;
 import com.sourceplusplus.api.model.info.SourceCoreInfo;
+import com.sourceplusplus.api.model.integration.IntegrationInfo;
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest;
 import com.sourceplusplus.api.model.trace.*;
 import io.vertx.core.AsyncResult;
@@ -41,6 +42,8 @@ public class SourceCoreClient implements SourceClient {
     private static final String REGISTER_IP_ENDPOINT = String.format("/%s/registerIP", SPP_API_VERSION);
     private static final String REFRESH_STORAGE = String.format(
             "/%s/admin/storage/refresh", SPP_API_VERSION);
+    private static final String UPDATE_INTEGRATION_INFO = String.format(
+            "/%s/admin/integrations/:integrationId", SPP_API_VERSION);
     private static final String SEARCH_FOR_NEW_ENDPOINTS = String.format(
             "/%s/admin/integrations/skywalking/searchForNewEndpoints", SPP_API_VERSION);
     private static final String CREATE_APPLICATION_ENDPOINT = String.format(
@@ -83,6 +86,10 @@ public class SourceCoreClient implements SourceClient {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private final String sppUrl;
     private String apiKey;
+
+    public SourceCoreClient(String host, int port) {
+        this(host, port, false);
+    }
 
     public SourceCoreClient(String host, int port, boolean ssl) {
         if (ssl) {
@@ -127,6 +134,38 @@ public class SourceCoreClient implements SourceClient {
             }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public void updateIntegrationInfo(IntegrationInfo updatedIntegrationInfo,
+                                      Handler<AsyncResult<IntegrationInfo>> handler) {
+        String url = sppUrl + UPDATE_INTEGRATION_INFO.replace(":integrationId", updatedIntegrationInfo.id());
+        Request.Builder request = new Request.Builder().url(url)
+                .put(RequestBody.create(JSON, Json.encode(updatedIntegrationInfo)));
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, IntegrationInfo.class)));
+            } else {
+                handler.handle(extractAPIException(responseBody));
+            }
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public IntegrationInfo updateIntegrationInfo(IntegrationInfo updatedIntegrationInfo) {
+        String url = sppUrl + UPDATE_INTEGRATION_INFO.replace(":integrationId", updatedIntegrationInfo.id());
+        Request.Builder request = new Request.Builder().url(url)
+                .put(RequestBody.create(JSON, Json.encode(updatedIntegrationInfo)));
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            return Json.decodeValue(response.body().string(), IntegrationInfo.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
