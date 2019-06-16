@@ -7,7 +7,7 @@ import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription;
 import com.sourceplusplus.api.model.artifact.*;
 import com.sourceplusplus.api.model.config.SourcePluginConfig;
-import com.sourceplusplus.api.model.integration.SourceCoreInfo;
+import com.sourceplusplus.api.model.info.SourceCoreInfo;
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest;
 import com.sourceplusplus.api.model.trace.*;
 import io.vertx.core.AsyncResult;

@@ -1,4 +1,4 @@
-package com.sourceplusplus.api.model.integration;
+package com.sourceplusplus.api.model.info;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
 import com.sourceplusplus.api.model.config.SourceCoreConfig;
+import com.sourceplusplus.api.model.integration.IntegrationInfo;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;

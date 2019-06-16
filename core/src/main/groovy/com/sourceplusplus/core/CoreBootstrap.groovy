@@ -14,7 +14,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourceCoreConfig
 import com.sourceplusplus.api.model.error.SourceAPIError
-import com.sourceplusplus.api.model.integration.SourceCoreInfo
+import com.sourceplusplus.api.model.info.SourceCoreInfo
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.*
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
