@@ -63,6 +63,7 @@ class CoreBootstrap extends AbstractVerticle {
 
     static void main(String[] args) {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
+        System.setProperty("vertx.disableDnsResolver", "true")
 
         def configJSON
         if (args.length > 0) {
@@ -99,6 +100,7 @@ class CoreBootstrap extends AbstractVerticle {
     @SuppressWarnings("unused")
     static void boot(Vertx vertx, Handler<AsyncResult<String>> completionHandler) {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
+        System.setProperty("vertx.disableDnsResolver", "true")
         def configJSON
         def configFile = System.getenv("SOURCE_CONFIG")
         if (!configFile) {
