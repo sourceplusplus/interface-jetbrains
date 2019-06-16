@@ -1,4 +1,4 @@
 jdk: oraclejdk8
 
 install:
-- ./gradlew build -p api
+- ./gradlew clean build -x test
