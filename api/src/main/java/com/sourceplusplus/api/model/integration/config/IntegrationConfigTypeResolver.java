@@ -23,12 +23,12 @@ public class IntegrationConfigTypeResolver extends TypeIdResolverBase {
 
     @Override
     public String idFromValue(Object value) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public String idFromValueAndType(Object value, Class<?> suggestedType) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
