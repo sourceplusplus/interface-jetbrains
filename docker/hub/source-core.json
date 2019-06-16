@@ -12,5 +12,20 @@
   "storage": {
     "type": "h2"
   },
-  "integrations": []
+  "integrations": [
+    {
+      "id": "apache_skywalking",
+      "category": "APM",
+      "enabled": false,
+      "version": "6.1.0",
+      "connection": {
+        "host": "localhost",
+        "port": 12800
+      },
+      "config": {
+        "timezone": null,
+        "endpoint_detection_interval_seconds": 15
+      }
+    }
+  ]
 }
