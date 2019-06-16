@@ -6,6 +6,8 @@ import com.sourceplusplus.agent.sync.ArtifactTraceSubscriptionSync;
 import com.sourceplusplus.api.client.SourceCoreClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.config.SourceAgentConfig;
+import com.sourceplusplus.api.model.info.SourceCoreInfo;
+import com.sourceplusplus.api.model.integration.IntegrationInfo;
 import io.vertx.core.json.JsonObject;
 import org.apache.skywalking.apm.agent.SkyWalkingAgent;
 import org.apache.skywalking.apm.agent.core.conf.Config;
@@ -115,55 +117,14 @@ public class SourceAgent {
             SourceAgent.instrumentation = instrumentation;
             Logger.info("Build: " + BUILD.getString("build_date"));
 
-            coreClient = new SourceCoreClient(
-                    SourceAgentConfig.current.apiHost, SourceAgentConfig.current.apiPort, SourceAgentConfig.current.apiSslEnabled);
+            coreClient = new SourceCoreClient(SourceAgentConfig.current.apiHost, SourceAgentConfig.current.apiPort,
+                    SourceAgentConfig.current.apiSslEnabled);
             if (SourceAgentConfig.current.apiKey != null) {
                 coreClient.setApiKey(SourceAgentConfig.current.apiKey);
             }
             coreClient.registerIP();
+            SourceCoreInfo coreInfo = coreClient.info();
             Logger.info("Source++ Agent initialized");
-
-            LogManager.setLogResolver(new SourceLoggerResolver());
-            Config.Collector.GRPC_CHANNEL_CHECK_INTERVAL = Integer.MAX_VALUE;
-            Config.Agent.IS_OPEN_DEBUGGING_CLASS = SourceAgentConfig.current.outputEnhancedClasses;
-            Config.Agent.SAMPLE_N_PER_3_SECS = SourceAgentConfig.current.sampleNPer3Secs;
-            Config.Agent.SPAN_LIMIT_PER_SEGMENT = SourceAgentConfig.current.spanLimitPerSegment;
-            Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.backendService;
-            Config.Plugin.SpringMVC.USE_QUALIFIED_NAME_AS_ENDPOINT_NAME = true;
-            Config.Plugin.Toolkit.USE_QUALIFIED_NAME_AS_OPERATION_NAME = true;
-            System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
-            Logger.info("Using SkyWalking host: " + SourceAgentConfig.current.backendService);
-
-            if (SourceAgentConfig.current.testMode) {
-                Logger.info("Test mode enabled");
-                System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
-                System.setProperty("skywalking.agent.application_code", "test_mode");
-                System.setProperty("skywalking.agent.service_name", "test_mode");
-                Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.backendService;
-                SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
-            } else {
-                if (SourceAgentConfig.current.skywalkingEnabled) {
-                    if (SourceAgentConfig.current.appUuid == null) {
-                        throw new RuntimeException("Missing application UUID in Source++ Agent configuration");
-                    }
-                    Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
-                    System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
-                    SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
-
-                    Logger.info("Waiting for Apache SkyWalking to finish setup");
-                    while (true) {
-                        if (RemoteDownstreamConfig.Agent.SERVICE_ID != DictionaryUtil.nullValue()
-                                && RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID != DictionaryUtil.nullValue()) {
-                            break;
-                        }
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                    Logger.info("Apache SkyWalking initialized");
-                }
-            }
 
             if (SourceAgentConfig.current.testMode) {
                 ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
@@ -179,7 +140,6 @@ public class SourceAgent {
                     if (application.agentConfig() != null) {
                         Logger.info("Overriding agent config with: " + application.agentConfig());
                         SourceAgentConfig.current.applyConfig(application.agentConfig().toJsonObject());
-                        Config.Agent.SPAN_LIMIT_PER_SEGMENT = SourceAgentConfig.current.spanLimitPerSegment;
                     }
                     ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
                     instrumentation.addTransformer(sTransformer, true);
@@ -196,7 +156,62 @@ public class SourceAgent {
             } else {
                 throw new IllegalStateException("Source++ Agent configuration is missing appUuid");
             }
+
+            Logger.info("Booting Source++ integrations");
+            coreInfo.activeIntegrations().parallelStream().forEach(info -> {
+                switch (info.id()) {
+                    case "apache_skywalking":
+                        bootApacheSkyWalking(info);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid integration: " + info.id());
+                }
+            });
             Logger.info("Source++ Agent successfully started");
+        }
+    }
+
+    private static void bootApacheSkyWalking(IntegrationInfo info) {
+        Logger.info("Booting Apache SkyWalking");
+        LogManager.setLogResolver(new SourceLoggerResolver());
+        Config.Collector.GRPC_CHANNEL_CHECK_INTERVAL = Integer.MAX_VALUE;
+        Config.Agent.IS_OPEN_DEBUGGING_CLASS = SourceAgentConfig.current.outputEnhancedClasses;
+        Config.Agent.SAMPLE_N_PER_3_SECS = SourceAgentConfig.current.sampleNPer3Secs;
+        Config.Agent.SPAN_LIMIT_PER_SEGMENT = SourceAgentConfig.current.spanLimitPerSegment;
+        Config.Collector.BACKEND_SERVICE = info.connection().getHost() + ":" + info.connection().getPort();
+        Config.Plugin.SpringMVC.USE_QUALIFIED_NAME_AS_ENDPOINT_NAME = true;
+        Config.Plugin.Toolkit.USE_QUALIFIED_NAME_AS_OPERATION_NAME = true;
+        System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
+        Logger.info("Using SkyWalking host: " + Config.Collector.BACKEND_SERVICE);
+
+        if (SourceAgentConfig.current.testMode) {
+            Logger.info("Test mode enabled");
+            System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
+            System.setProperty("skywalking.agent.application_code", "test_mode");
+            System.setProperty("skywalking.agent.service_name", "test_mode");
+            SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
+        } else {
+            if (SourceAgentConfig.current.skywalkingEnabled) {
+                if (SourceAgentConfig.current.appUuid == null) {
+                    throw new RuntimeException("Missing application UUID in Source++ Agent configuration");
+                }
+                Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
+                System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
+                SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
+
+                Logger.info("Waiting for Apache SkyWalking to finish setup");
+                while (true) {
+                    if (RemoteDownstreamConfig.Agent.SERVICE_ID != DictionaryUtil.nullValue()
+                            && RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID != DictionaryUtil.nullValue()) {
+                        break;
+                    }
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                    }
+                }
+                Logger.info("Apache SkyWalking initialized");
+            }
         }
     }
 
