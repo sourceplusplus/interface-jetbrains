@@ -108,7 +108,7 @@ class SourceCore extends AbstractVerticle {
                 }
             }
 
-            //undeploy integration APIs
+            //undeploy integrations
             def undeployFutures = []
             deployedIntegrationAPIs.removeIf({
                 def fut = Future.future()
@@ -116,7 +116,6 @@ class SourceCore extends AbstractVerticle {
                 vertx.undeploy(it, fut.completer())
                 return true
             })
-            //undeploy integrations
             deployedIntegrations.removeIf({
                 def fut = Future.future()
                 undeployFutures += fut
