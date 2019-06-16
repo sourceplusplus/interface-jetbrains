@@ -1,6 +1,5 @@
 plugins {
     id "com.avast.gradle.docker-compose" version "0.6.6"
-    id 'maven-publish'
 }
 group = 'com.github.sourceplusplus'
 
@@ -8,6 +7,7 @@ subprojects {
 
     apply plugin: 'idea'
     apply plugin: 'java'
+    apply plugin: 'maven'
 
     version = '0.2.0'
     sourceCompatibility = 1.8
