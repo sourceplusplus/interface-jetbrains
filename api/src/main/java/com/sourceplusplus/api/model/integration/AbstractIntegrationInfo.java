@@ -1,11 +1,14 @@
 package com.sourceplusplus.api.model.integration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
 import com.sourceplusplus.api.model.integration.config.IntegrationConfig;
+import com.sourceplusplus.api.model.integration.config.IntegrationConfigTypeResolver;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
@@ -39,6 +42,8 @@ public interface AbstractIntegrationInfo extends SourceMessage {
     String version();
 
     @Nullable
+    @JsonTypeIdResolver(IntegrationConfigTypeResolver.class)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "id")
     IntegrationConnection connection();
 
     @Nullable
