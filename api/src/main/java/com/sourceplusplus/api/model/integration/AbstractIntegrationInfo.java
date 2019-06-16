@@ -42,10 +42,10 @@ public interface AbstractIntegrationInfo extends SourceMessage {
     String version();
 
     @Nullable
-    @JsonTypeIdResolver(IntegrationConfigTypeResolver.class)
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "id")
     IntegrationConnection connection();
 
     @Nullable
+    @JsonTypeIdResolver(IntegrationConfigTypeResolver.class)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "id")
     IntegrationConfig config();
 }
