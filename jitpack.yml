@@ -1,4 +1,4 @@
 jdk: oraclejdk8
 
 install:
-- ./gradlew clean build -x test
+- ./gradlew build -x test publishToMavenLocal
