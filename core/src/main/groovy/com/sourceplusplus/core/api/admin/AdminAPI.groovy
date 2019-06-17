@@ -59,26 +59,12 @@ class AdminAPI extends AbstractVerticle {
 
         IntegrationInfo request
         try {
-            def integrationConfig = routingContext.getBodyAsJson().getJsonObject("config")
             request = Json.decodeValue(routingContext.getBodyAsJson()
                     .putNull("name")
                     .putNull("category")
                     .putNull("version")
-                    .putNull("config")
                     .put("id", integrationId).toString(),
                     IntegrationInfo.class)
-            if (integrationConfig) {
-                switch (integrationId) {
-                    case "apache_skywalking":
-                        request = request.withConfig(Json.decodeValue(integrationConfig.toString(),
-                                ApacheSkyWalkingIntegrationConfig.class))
-                        break
-                    default:
-                        routingContext.response().setStatusCode(400)
-                                .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
-                        return
-                }
-            }
         } catch (all) {
             all.printStackTrace()
             routingContext.response().setStatusCode(400)

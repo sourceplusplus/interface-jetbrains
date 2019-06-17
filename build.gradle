@@ -3,10 +3,11 @@ plugins {
 }
 
 subprojects {
-    group = 'com.sourceplusplus'
 
     apply plugin: 'idea'
     apply plugin: 'java'
+    apply plugin: 'maven'
+    group = 'com.github.sourceplusplus'
 
     version = '0.2.0'
     sourceCompatibility = 1.8

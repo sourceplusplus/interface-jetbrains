@@ -1,16 +1,24 @@
 package com.sourceplusplus.api.model.info;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.google.common.base.Preconditions;
 import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
 import com.sourceplusplus.api.model.config.SourceCoreConfig;
 import com.sourceplusplus.api.model.integration.IntegrationInfo;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,12 +41,35 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
 
     SourceCoreConfig config();
 
+    @JsonDeserialize(using = ActiveIntegrationsDeserializer.class)
     List<IntegrationInfo> activeIntegrations();
 
     @Value.Check
     default void validate() {
         if (!"dev".equals(version())) {
             Preconditions.checkNotNull(buildDate());
+        }
+    }
+
+    class ActiveIntegrationsDeserializer extends StdDeserializer<List<IntegrationInfo>> {
+
+        public ActiveIntegrationsDeserializer() {
+            this(null);
+        }
+
+        public ActiveIntegrationsDeserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        @Override
+        public List<IntegrationInfo> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+            List<IntegrationInfo> infos = new ArrayList<>();
+            JsonNode node = jp.getCodec().readTree(jp);
+            for (int i = 0; i < node.size(); i++) {
+                infos.add(Json.decodeValue(new JsonObject(node.get(i).toString()).putNull("config").toString(),
+                        IntegrationInfo.class));
+            }
+            return infos;
         }
     }
 }
