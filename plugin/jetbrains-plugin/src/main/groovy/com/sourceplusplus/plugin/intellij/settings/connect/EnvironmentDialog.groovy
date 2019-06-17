@@ -74,6 +74,7 @@ class EnvironmentDialog extends JDialog {
                     input.close()
                     return
                 }
+                Thread.sleep(10000) //todo: better (waits for skywalking to boot)
 
                 connectDialog.setStatus("Initializing Source++...")
                 def initSpp = SocraticAPI.administration().initSourcePlusPlus()
