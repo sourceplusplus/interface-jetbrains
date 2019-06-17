@@ -174,10 +174,13 @@ public class SourceAgent {
     private static void bootApacheSkyWalking(IntegrationInfo info) {
         Logger.info("Booting Apache SkyWalking");
         LogManager.setLogResolver(new SourceLoggerResolver());
-        if ("localhost".equals(info.connection().getHost()) || "127.0.0.1".equals(info.connection().getHost())) {
-            Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.apiHost + ":" + info.connection().getPort();
+        if ("localhost".equals(info.connection().getHost()) || "127.0.0.1".equals(info.connection().getHost())
+                || "Apache_SkyWalking".equals(info.connection().getHost())) {
+            //todo: not hardcode 11800
+            Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.apiHost + ":11800";
         } else {
-            Config.Collector.BACKEND_SERVICE = info.connection().getHost() + ":" + info.connection().getPort();
+            //todo: not hardcode 11800
+            Config.Collector.BACKEND_SERVICE = info.connection().getHost() + ":11800";
         }
         Config.Collector.GRPC_CHANNEL_CHECK_INTERVAL = Integer.MAX_VALUE;
         Config.Agent.IS_OPEN_DEBUGGING_CLASS = SourceAgentConfig.current.outputEnhancedClasses;
