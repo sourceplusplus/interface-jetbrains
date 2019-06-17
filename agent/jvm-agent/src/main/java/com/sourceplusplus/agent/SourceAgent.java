@@ -7,6 +7,8 @@ import com.sourceplusplus.api.client.SourceCoreClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.config.SourceAgentConfig;
 import com.sourceplusplus.api.model.info.SourceCoreInfo;
+import com.sourceplusplus.api.model.integration.ConnectionType;
+import com.sourceplusplus.api.model.integration.IntegrationConnection;
 import com.sourceplusplus.api.model.integration.IntegrationInfo;
 import io.vertx.core.json.JsonObject;
 import org.apache.skywalking.apm.agent.SkyWalkingAgent;
@@ -174,13 +176,13 @@ public class SourceAgent {
     private static void bootApacheSkyWalking(IntegrationInfo info) {
         Logger.info("Booting Apache SkyWalking");
         LogManager.setLogResolver(new SourceLoggerResolver());
-        if ("localhost".equals(info.connection().getHost()) || "127.0.0.1".equals(info.connection().getHost())
-                || "Apache_SkyWalking".equals(info.connection().getHost())) {
-            //todo: not hardcode 11800
-            Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.apiHost + ":11800";
+
+        IntegrationConnection connection = info.connections().get(ConnectionType.gRPC);
+        if ("localhost".equals(connection.getHost()) || "127.0.0.1".equals(connection.getHost())
+                || "Apache_SkyWalking".equals(connection.getHost())) {
+            Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.apiHost + ":" + connection.getPort();
         } else {
-            //todo: not hardcode 11800
-            Config.Collector.BACKEND_SERVICE = info.connection().getHost() + ":11800";
+            Config.Collector.BACKEND_SERVICE = connection.getHost() + ":" + connection.getPort();
         }
         Config.Collector.GRPC_CHANNEL_CHECK_INTERVAL = Integer.MAX_VALUE;
         Config.Agent.IS_OPEN_DEBUGGING_CLASS = SourceAgentConfig.current.outputEnhancedClasses;

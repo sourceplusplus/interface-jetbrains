@@ -200,7 +200,6 @@ class CoreBootstrap extends AbstractVerticle {
                         startFuture.complete()
                     } else {
                         startFuture.fail(it.cause())
-                        vertx.close()
                         vertx.close({
                             System.exit(-1)
                         })

@@ -20,21 +20,27 @@
     }
   },
   "integrations": [
-      {
-        "id": "apache_skywalking",
-        "category": "APM",
-        "enabled": true,
-        "version": "6.1.0",
-        "connection": {
+    {
+      "id": "apache_skywalking",
+      "category": "APM",
+      "enabled": true,
+      "version": "6.1.0",
+      "connections": {
+        "REST": {
           "host": "localhost",
           "port": 12800
         },
-        "config": {
-          "timezone": null,
-          "endpoint_detection_interval_seconds": 15
+        "gRPC": {
+          "host": "localhost",
+          "port": 11800
         }
+      },
+      "config": {
+        "timezone": null,
+        "endpoint_detection_interval_seconds": 15
       }
-    ]
+    }
+  ]
 }
 ```
 
@@ -75,12 +81,21 @@
 | enabled                             | false             | Used to enable/disable the given Source++ integration        |
 | version                             | 6.1.0             | Current version of the Source++ integration                  |
 
-#### Connection
+#### Connections
+
+##### REST
 
 | Property                            | Value     | Description                                                  |
 | ----------------------------------- | --------- | ------------------------------------------------------------ |
 | host                                | localhost | The address of the SkyWalking OAP instance to connect to     |
 | port                                | 12800     | The port of the SkyWalking OAP instance to connect to        |
+
+##### gRPC
+
+| Property                            | Value     | Description                                                  |
+| ----------------------------------- | --------- | ------------------------------------------------------------ |
+| host                                | localhost | The address of the SkyWalking OAP instance to connect to     |
+| port                                | 11800     | The port of the SkyWalking OAP instance to connect to        |
 
 #### Config
 
