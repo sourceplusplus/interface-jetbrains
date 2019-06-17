@@ -3,6 +3,8 @@ package com.sourceplusplus.plugin.intellij.settings.connect
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.api.model.integration.IntegrationConnection
+import com.sourceplusplus.api.model.integration.IntegrationInfo
 import io.gitsocratic.api.SocraticAPI
 import io.gitsocratic.command.result.InitDockerCommandResult
 import org.jetbrains.annotations.NotNull
@@ -59,8 +61,19 @@ class EnvironmentDialog extends JDialog {
                 }
             }
             Thread.startDaemon {
+                connectDialog.setStatus("Initializing Apache SkyWalking...")
+                def initSkywalking = SocraticAPI.administration().initApacheSkyWalking()
+                        .build().execute(output) as InitDockerCommandResult
+                if (initSkywalking.status != 0) {
+                    connectDialog.setStatus("<font color='red'>Failed to initialize Apache SkyWalking service</font>")
+                    output.close()
+                    input.close()
+                    return
+                }
+
                 connectDialog.setStatus("Initializing Source++...")
                 def initSpp = SocraticAPI.administration().initSourcePlusPlus()
+                        .link("Apache_SkyWalking")
                         .build().execute(output) as InitDockerCommandResult
                 if (initSpp.status != 0) {
                     connectDialog.setStatus("<font color='red'>Failed to initialize Source++ service</font>")
@@ -71,15 +84,35 @@ class EnvironmentDialog extends JDialog {
                 output.close()
                 input.close()
 
+                connectDialog.setStatus("Integrating Apache SkyWalking with Source++...")
+                def skywalkingBinding = initSkywalking.portBindings.get("12800/tcp")[0]
+                def skywalkingPort = skywalkingBinding.substring(skywalkingBinding.indexOf(":") + 1) as int
                 def sppBinding = initSpp.portBindings.get("8080/tcp")[0]
-                def env = new SourceEnvironmentConfig()
-                env.environmentName = "Docker"
-                env.apiHost = sppBinding.substring(0, sppBinding.indexOf(":"))
-                env.apiPort = sppBinding.substring(sppBinding.indexOf(":") + 1) as int
-                env.apiSslEnabled = false
-                clearConnectionForm(false)
-                (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).addElement(env)
-                connectDialog.setStatus("<font color='green'>Successful</font>")
+                def sppHost = sppBinding.substring(0, sppBinding.indexOf(":"))
+
+                Thread.sleep(5000) //todo: better
+                def sppPort = sppBinding.substring(sppBinding.indexOf(":") + 1) as int
+                def coreClient = new SourceCoreClient(sppHost, sppPort, sslEnabledCheckbox.isSelected())
+
+                def integrationInfo = IntegrationInfo.builder()
+                        .id("apache_skywalking")
+                        .enabled(true)
+                        .connection(IntegrationConnection.builder().host("Apache_SkyWalking").port(skywalkingPort).build())
+                        .build()
+                coreClient.updateIntegrationInfo(integrationInfo, {
+                    if (it.succeeded()) {
+                        def env = new SourceEnvironmentConfig()
+                        env.environmentName = "Docker"
+                        env.apiHost = sppBinding.substring(0, sppBinding.indexOf(":"))
+                        env.apiPort = sppBinding.substring(sppBinding.indexOf(":") + 1) as int
+                        env.apiSslEnabled = false
+                        clearConnectionForm(false)
+                        (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).addElement(env)
+                        connectDialog.setStatus("<font color='green'>Successful</font>")
+                    } else {
+                        connectDialog.setError(it.cause())
+                    }
+                })
             }
             connectDialog.show()
         })

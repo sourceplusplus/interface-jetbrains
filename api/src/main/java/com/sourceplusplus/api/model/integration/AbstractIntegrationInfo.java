@@ -48,6 +48,6 @@ public interface AbstractIntegrationInfo extends SourceMessage {
 
     @Nullable
     @JsonTypeIdResolver(IntegrationConfigTypeResolver.class)
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "id")
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "id")
     IntegrationConfig config();
 }

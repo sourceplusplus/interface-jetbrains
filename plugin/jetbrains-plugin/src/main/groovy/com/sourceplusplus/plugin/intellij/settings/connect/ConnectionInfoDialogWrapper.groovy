@@ -45,6 +45,10 @@ class ConnectionInfoDialogWrapper extends DialogWrapper {
         connectionInfoDialog.setStatus(status)
     }
 
+    void setError(Throwable ex) {
+        connectionInfoDialog.setError(ex)
+    }
+
     @Nullable
     @Override
     JComponent createCenterPanel() {
