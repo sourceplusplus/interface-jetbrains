@@ -1,6 +1,7 @@
 package com.sourceplusplus.api.model.integration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeId;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -27,6 +28,7 @@ import javax.annotation.Nullable;
 @JsonDeserialize(as = IntegrationInfo.class)
 public interface AbstractIntegrationInfo extends SourceMessage {
 
+    @JsonTypeId
     String id();
 
     @Nullable
