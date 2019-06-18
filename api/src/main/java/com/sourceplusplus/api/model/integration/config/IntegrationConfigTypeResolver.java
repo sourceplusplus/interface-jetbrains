@@ -23,6 +23,9 @@ public class IntegrationConfigTypeResolver extends TypeIdResolverBase {
 
     @Override
     public String idFromValue(Object value) {
+        if (value instanceof ApacheSkyWalkingIntegrationConfig) {
+            return "apache_skywalking";
+        }
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
