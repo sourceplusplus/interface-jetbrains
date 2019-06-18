@@ -1,11 +1,14 @@
 package com.sourceplusplus.api.model.info;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.common.base.Preconditions;
 import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
@@ -41,6 +44,7 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
 
     SourceCoreConfig config();
 
+    @JsonSerialize(using = ActiveIntegrationsSerializer.class)
     @JsonDeserialize(using = ActiveIntegrationsDeserializer.class)
     List<IntegrationInfo> activeIntegrations();
 
@@ -48,6 +52,27 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
     default void validate() {
         if (!"dev".equals(version())) {
             Preconditions.checkNotNull(buildDate());
+        }
+    }
+
+    class ActiveIntegrationsSerializer extends StdSerializer<List<IntegrationInfo>> {
+
+        public ActiveIntegrationsSerializer() {
+            this(null);
+        }
+
+        public ActiveIntegrationsSerializer(Class<List<IntegrationInfo>> vc) {
+            super(vc);
+        }
+
+        @Override
+        public void serialize(List<IntegrationInfo> value, JsonGenerator gen, SerializerProvider provider)
+                throws IOException {
+            gen.writeStartArray();
+            for (IntegrationInfo info : value) {
+                gen.writeRawValue(new JsonObject(Json.encode(info)).put("id", info.id()).toString());
+            }
+            gen.writeEndArray();
         }
     }
 
@@ -66,9 +91,8 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
             List<IntegrationInfo> infos = new ArrayList<>();
             JsonNode node = jp.getCodec().readTree(jp);
             for (int i = 0; i < node.size(); i++) {
-                JsonObject ob = new JsonObject(node.get(i).toString());
-                ob.remove("config");
-                infos.add(Json.decodeValue(ob.toString(), IntegrationInfo.class));
+                infos.add(Json.decodeValue(new JsonObject(node.get(i).toString()).putNull("config").toString(),
+                        IntegrationInfo.class));
             }
             return infos;
         }
