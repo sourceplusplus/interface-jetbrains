@@ -254,7 +254,7 @@ class SourceCore extends AbstractVerticle {
 
     List<IntegrationInfo> getActiveIntegrations() {
         return getIntegrations().stream().filter({ it -> it.enabled() })
-                .map({ it -> IntegrationInfo.builder().id(it.id()).connection(it.connection()).build() })
+                .map({ it -> IntegrationInfo.builder().id(it.id()).connections(it.connections()).build() })
                 .collect()
     }
 }
