@@ -37,7 +37,7 @@ class AdminAPI extends AbstractVerticle {
     void start() throws Exception {
         core.baseRouter.get("/admin/integrations").handler(this.&getIntegrationsRoute)
         core.baseRouter.put("/admin/integrations/:integrationId").handler(this.&updateIntegrationInfoRoute)
-        core.baseRouter.get("/admin/integrations/skywalking/searchForNewEndpoints")
+        core.baseRouter.get("/admin/integrations/apache_skywalking/searchForNewEndpoints")
                 .handler(this.&searchForNewEndpointsRoute)
         core.baseRouter.get("/admin/storage/refresh")
                 .handler(this.&refreshStorage)

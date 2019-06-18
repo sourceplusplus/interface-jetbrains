@@ -45,7 +45,7 @@ public class SourceCoreClient implements SourceClient {
     private static final String UPDATE_INTEGRATION_INFO = String.format(
             "/%s/admin/integrations/:integrationId", SPP_API_VERSION);
     private static final String SEARCH_FOR_NEW_ENDPOINTS = String.format(
-            "/%s/admin/integrations/skywalking/searchForNewEndpoints", SPP_API_VERSION);
+            "/%s/admin/integrations/apache_skywalking/searchForNewEndpoints", SPP_API_VERSION);
     private static final String CREATE_APPLICATION_ENDPOINT = String.format(
             "/%s/applications", SPP_API_VERSION);
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
