@@ -66,8 +66,9 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
             List<IntegrationInfo> infos = new ArrayList<>();
             JsonNode node = jp.getCodec().readTree(jp);
             for (int i = 0; i < node.size(); i++) {
-                infos.add(Json.decodeValue(new JsonObject(node.get(i).toString()).putNull("config").toString(),
-                        IntegrationInfo.class));
+                JsonObject ob = new JsonObject(node.get(i).toString());
+                ob.remove("config");
+                infos.add(Json.decodeValue(ob.toString(), IntegrationInfo.class));
             }
             return infos;
         }
