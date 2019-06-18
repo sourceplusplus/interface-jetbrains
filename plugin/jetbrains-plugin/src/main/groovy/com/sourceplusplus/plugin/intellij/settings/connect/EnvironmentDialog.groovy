@@ -3,6 +3,7 @@ package com.sourceplusplus.plugin.intellij.settings.connect
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.api.model.integration.ConnectionType
 import com.sourceplusplus.api.model.integration.IntegrationConnection
 import com.sourceplusplus.api.model.integration.IntegrationInfo
 import io.gitsocratic.api.SocraticAPI
@@ -90,8 +91,17 @@ class EnvironmentDialog extends JDialog {
                 input.close()
 
                 connectDialog.setStatus("Integrating Apache SkyWalking with Source++...")
-                def skywalkingBinding = initSkywalking.portBindings.get("12800/tcp")[0]
-                def skywalkingPort = skywalkingBinding.substring(skywalkingBinding.indexOf(":") + 1) as int
+                def skywalkingRestBinding = initSkywalking.portBindings.get("12800/tcp")[0]
+                def skywalkingRestPort = skywalkingRestBinding.substring(skywalkingRestBinding.indexOf(":") + 1) as int
+                def restConnection = IntegrationConnection.builder()
+                        .host("Apache_SkyWalking").port(skywalkingRestPort)
+                        .build()
+                def skywalkingGrpcBinding = initSkywalking.portBindings.get("11800/tcp")[0]
+                def skywalkingGrpcPort = skywalkingGrpcBinding.substring(skywalkingGrpcBinding.indexOf(":") + 1) as int
+                def grpcConnection = IntegrationConnection.builder()
+                        .host("Apache_SkyWalking").port(skywalkingGrpcPort)
+                        .build()
+
                 def sppBinding = initSpp.portBindings.get("8080/tcp")[0]
                 def sppHost = sppBinding.substring(0, sppBinding.indexOf(":"))
                 def sppPort = sppBinding.substring(sppBinding.indexOf(":") + 1) as int
@@ -104,7 +114,8 @@ class EnvironmentDialog extends JDialog {
                 def integrationInfo = IntegrationInfo.builder()
                         .id("apache_skywalking")
                         .enabled(true)
-                        .connection(IntegrationConnection.builder().host("Apache_SkyWalking").port(skywalkingPort).build())
+                        .putConnections(ConnectionType.REST, restConnection)
+                        .putConnections(ConnectionType.gRPC, grpcConnection)
                         .build()
                 coreClient.updateIntegrationInfo(integrationInfo, {
                     if (it.succeeded()) {
