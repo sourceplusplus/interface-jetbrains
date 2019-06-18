@@ -27,4 +27,4 @@ deploy:
   - /home/travis/build/sourceplusplus/Assistant/plugin/jetbrains-plugin/build/distributions/jetbrains-source-plugin-0.2.0.zip
   - /home/travis/build/sourceplusplus/Assistant/portal/build/distributions/source-portal-0.2.0.zip
   skip_cleanup: true
-tags: true
+  tags: true
