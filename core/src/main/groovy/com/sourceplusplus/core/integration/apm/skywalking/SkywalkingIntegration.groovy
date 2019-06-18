@@ -301,6 +301,13 @@ class SkywalkingIntegration extends APMIntegration {
     }
 
     @Override
+    void getTraceStack(String appUuid, String traceId,
+                       Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
+        def query = TraceSpanStackQuery.builder().oneLevelDeep(false).traceId(traceId).build()
+        getTraceStack(appUuid, null, query, handler)
+    }
+
+    @Override
     void getTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
         log.info("Getting SkyWalking trace spans: " + Objects.requireNonNull(spanQuery))

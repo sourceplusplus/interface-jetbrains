@@ -252,14 +252,14 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 .durationStart(Instant.now().minus(14, ChronoUnit.MINUTES))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
-        skywalking.getSkywalkingTraces(traceQuery, {
+        skywalking.getTraces(traceQuery, {
             if (it.succeeded()) {
                 def futures = []
                 it.result().traces().each {
                     it.traceIds().each {
                         def fut = Future.future()
                         futures.add(fut)
-                        skywalking.getSkywalkingTraceStack(appUuid, it, {
+                        skywalking.getTraceStack(appUuid, it, {
                             if (it.succeeded()) {
                                 def spans = it.result().traceSpans()
                                 if (spans && spans.size() > 1) {
