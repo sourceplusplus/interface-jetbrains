@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.0
- * @since 0.1.1
+ * @since 0.2.0
  */
 @SourceStyle
 @Value.Immutable
