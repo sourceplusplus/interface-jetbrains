@@ -73,8 +73,10 @@ class SkywalkingIntegration extends APMIntegration {
             DATE_TIME_FORMATTER_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss")
                     .withZone(ZoneId.systemDefault())
         }
-        skywalkingOAPHost = Objects.requireNonNull(config().getJsonObject("connection").getString("host"))
-        skywalkingOAPPort = Objects.requireNonNull(config().getJsonObject("connection").getInteger("port"))
+
+        def restHost = Objects.requireNonNull(config().getJsonObject("connections").getJsonObject("REST"))
+        skywalkingOAPHost = Objects.requireNonNull(restHost.getString("host"))
+        skywalkingOAPPort = Objects.requireNonNull(restHost.getInteger("port"))
 
         webClient = WebClient.create(vertx)
         vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, artifactAPI),

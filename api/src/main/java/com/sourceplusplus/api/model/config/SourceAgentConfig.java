@@ -44,7 +44,6 @@ public final class SourceAgentConfig {
     public volatile Boolean outputEnhancedClasses;
     public volatile Integer sampleNPer3Secs;
     public volatile Integer spanLimitPerSegment;
-    public volatile String backendService;
     public volatile List<String> packages;
     public volatile String pluginHost;
     public volatile Integer pluginPort;
@@ -87,8 +86,6 @@ public final class SourceAgentConfig {
                 sampleNPer3Secs = skywalkingConfig.getInteger("sample_n_per_3_secs");
             if (skywalkingConfig.containsKey("span_limit_per_segment"))
                 spanLimitPerSegment = skywalkingConfig.getInteger("span_limit_per_segment");
-            if (skywalkingConfig.containsKey("backend_service"))
-                backendService = skywalkingConfig.getString("backend_service");
             //todo: plugins
         }
 
@@ -159,7 +156,6 @@ public final class SourceAgentConfig {
                 gen.writeNumberField("span_limit_per_segment", value.spanLimitPerSegment);
             if (value.outputEnhancedClasses != null)
                 gen.writeBooleanField("output_enhanced_classes", value.outputEnhancedClasses);
-            if (value.backendService != null) gen.writeStringField("backend_service", value.backendService);
             //todo: plugins
             gen.writeEndObject(); //skywalking
 

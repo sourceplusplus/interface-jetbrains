@@ -13,6 +13,7 @@ import com.sourceplusplus.api.model.integration.config.IntegrationConfigTypeReso
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
  * todo: description
@@ -44,7 +45,7 @@ public interface AbstractIntegrationInfo extends SourceMessage {
     String version();
 
     @Nullable
-    IntegrationConnection connection();
+    Map<ConnectionType, IntegrationConnection> connections();
 
     @Nullable
     @JsonTypeIdResolver(IntegrationConfigTypeResolver.class)

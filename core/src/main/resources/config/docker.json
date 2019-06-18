@@ -22,9 +22,15 @@
       "category": "APM",
       "enabled": true,
       "version": "6.1.0",
-      "connection": {
-        "host": "skywalking-oap",
-        "port": 12800
+      "connections": {
+        "REST": {
+          "host": "skywalking-oap",
+          "port": 12800
+        },
+        "gRPC": {
+          "host": "skywalking-oap",
+          "port": 11800
+        }
       },
       "config": {
         "timezone": null,

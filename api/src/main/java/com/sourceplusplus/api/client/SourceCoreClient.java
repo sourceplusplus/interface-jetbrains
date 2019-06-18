@@ -186,6 +186,18 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
+    public SourceCoreInfo info() {
+        String url = sppUrl + INFO_ENDPOINT;
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            return Json.decodeValue(response.body().string(), SourceCoreInfo.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void registerIP() {
         String url = sppUrl + REGISTER_IP_ENDPOINT;
         Request.Builder request = new Request.Builder().url(url).get();

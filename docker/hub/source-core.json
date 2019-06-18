@@ -18,9 +18,15 @@
       "category": "APM",
       "enabled": false,
       "version": "6.1.0",
-      "connection": {
-        "host": "localhost",
-        "port": 12800
+      "connections": {
+        "REST": {
+          "host": "localhost",
+          "port": 12800
+        },
+        "gRPC": {
+          "host": "localhost",
+          "port": 11800
+        }
       },
       "config": {
         "timezone": null,

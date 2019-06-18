@@ -3,7 +3,6 @@ package com.sourceplusplus.core.api.admin
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.integration.IntegrationInfo
-import com.sourceplusplus.api.model.integration.config.ApacheSkyWalkingIntegrationConfig
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
 import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
@@ -59,12 +58,15 @@ class AdminAPI extends AbstractVerticle {
 
         IntegrationInfo request
         try {
-            request = Json.decodeValue(routingContext.getBodyAsJson()
+            def requestOb = routingContext.getBodyAsJson()
+                    .put("id", integrationId)
                     .putNull("name")
                     .putNull("category")
                     .putNull("version")
-                    .put("id", integrationId).toString(),
-                    IntegrationInfo.class)
+            if (!requestOb.getJsonObject("config")) {
+                requestOb.putNull("config")
+            }
+            request = Json.decodeValue(requestOb.toString(), IntegrationInfo.class)
         } catch (all) {
             all.printStackTrace()
             routingContext.response().setStatusCode(400)
@@ -90,8 +92,8 @@ class AdminAPI extends AbstractVerticle {
             integrationInfo = integrationInfo
                     .withCategory(currentInfo.category())
                     .withVersion(currentInfo.version())
-            if (!integrationInfo.connection()) {
-                integrationInfo = integrationInfo.withConnection(currentInfo.connection())
+            if (!integrationInfo.connections()) {
+                integrationInfo = integrationInfo.withConnections(currentInfo.connections())
             }
             if (!integrationInfo.config()) {
                 integrationInfo = integrationInfo.withConfig(currentInfo.config())

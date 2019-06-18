@@ -63,7 +63,6 @@ class CoreBootstrap extends AbstractVerticle {
 
     static void main(String[] args) {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
-        System.setProperty("vertx.disableDnsResolver", "true")
 
         def configJSON
         if (args.length > 0) {
@@ -100,7 +99,6 @@ class CoreBootstrap extends AbstractVerticle {
     @SuppressWarnings("unused")
     static void boot(Vertx vertx, Handler<AsyncResult<String>> completionHandler) {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
-        System.setProperty("vertx.disableDnsResolver", "true")
         def configJSON
         def configFile = System.getenv("SOURCE_CONFIG")
         if (!configFile) {
@@ -202,7 +200,6 @@ class CoreBootstrap extends AbstractVerticle {
                         startFuture.complete()
                     } else {
                         startFuture.fail(it.cause())
-                        vertx.close()
                         vertx.close({
                             System.exit(-1)
                         })
@@ -271,6 +268,7 @@ class CoreBootstrap extends AbstractVerticle {
                 } else {
                     def errorMessage = new SourceAPIError().addError(ctx.failure().message)
                     ctx.response().setStatusCode(500).end(Json.encode(errorMessage))
+                    ctx.failure().printStackTrace()
                 }
         }
     }
