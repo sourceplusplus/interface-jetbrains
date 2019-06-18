@@ -268,6 +268,7 @@ class CoreBootstrap extends AbstractVerticle {
                 } else {
                     def errorMessage = new SourceAPIError().addError(ctx.failure().message)
                     ctx.response().setStatusCode(500).end(Json.encode(errorMessage))
+                    ctx.failure().printStackTrace()
                 }
         }
     }
