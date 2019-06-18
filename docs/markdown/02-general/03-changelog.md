@@ -1,4 +1,4 @@
-# 0.2.0-alpha (2019-06-17)
+# 0.2.0-alpha (2019-06-18)
 
 - Moved GitHub project from CodeBrig/Source to sourceplusplus/Assistant
 - Added additional query time frames (5 minutes, 1 hour, 3 hours)
