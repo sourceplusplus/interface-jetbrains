@@ -1,8 +1,9 @@
-# 0.2.0-alpha (2019-05-31)
+# 0.2.0-alpha (2019-06-17)
 
 - Moved GitHub project from CodeBrig/Source to sourceplusplus/Assistant
 - Added additional query time frames (5 minutes, 1 hour, 3 hours)
 - Renamed `pingEndpointEnabled` core config to `pingEndpointAvailable`
+- Added documentation for Admin API
 - Docker setup guide Knowledge Base ([#8](https://github.com/sourceplusplus/Assistant/issues/8))
 - Configurable environment setup (via Docker) in Source++ Plugin Source++ Plugin ([#20](https://github.com/sourceplusplus/Assistant/issues/20))
 - Source++ Core Docker image on Docker Hub Source++ Core Source++ Plugin ([#15](https://github.com/sourceplusplus/Assistant/issues/15))
@@ -26,6 +27,9 @@
 - Rename Source++ Tooltip to Source++ Portal ([#49](https://github.com/sourceplusplus/Assistant/issues/49))
 - Upgrade Semantic UI and create tooltip build task Source++ Portal ([#43](https://github.com/sourceplusplus/Assistant/issues/43))
 - Responsive Source++ Tooltip UI Source++ Portal ([#44](https://github.com/sourceplusplus/Assistant/issues/44))
+- Core standalone functionality ([#60](https://github.com/sourceplusplus/Assistant/issues/60))
+- Automatic GitHub release artifact uploads via Travis-CI ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
+- Added ability for agent to detect integration connection information via API ([#73](https://github.com/sourceplusplus/Assistant/issues/73))
 
 # 0.1.4-alpha (2019-03-30)
 
