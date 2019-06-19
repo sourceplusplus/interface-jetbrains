@@ -55,8 +55,8 @@ task runCore {
 task buildAndMove {
     dependsOn ":core:distZip"
     doLast {
-        file("core/build/distributions/source-core-" + version + ".zip").renameTo(file("docker/local/source-core-" + version + ".zip"))
-        file("../core/build/distributions/source-core-" + version + ".zip").renameTo(file("../docker/local/source-core-" + version + ".zip"))
+        file("docker/local/source-core-" + version + ".zip") << file("core/build/distributions/source-core-" + version + ".zip").text
+        file("../docker/local/source-core-" + version + ".zip") << file("../core/build/distributions/source-core-" + version + ".zip").text
     }
 }
 
