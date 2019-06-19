@@ -24,7 +24,7 @@ import java.util.regex.Pattern
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -41,7 +41,8 @@ class DocServerBootstrap extends AbstractVerticle {
         def configJSON
         def configFile = System.getenv("SOURCE_CONFIG")
         if (!configFile) {
-            throw new RuntimeException("Missing SOURCE_CONFIG system environment!")
+            log.warn("Missing SOURCE_CONFIG environment variable. Using default settings")
+            configFile = "local.json"
         }
 
         log.info("Using configuration file: $configFile")

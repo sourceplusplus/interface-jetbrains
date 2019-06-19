@@ -1,0 +1,37 @@
+{
+  "core": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "ssl": false,
+    "jks_path": null,
+    "jks_password": null,
+    "secure_mode": false,
+    "api_key": null,
+    "subscription_inactive_limit_minutes": 15
+  },
+  "storage": {
+    "type": "h2"
+  },
+  "integrations": [
+    {
+      "id": "apache_skywalking",
+      "category": "APM",
+      "enabled": false,
+      "version": "6.1.0",
+      "connections": {
+        "REST": {
+          "host": "localhost",
+          "port": 12800
+        },
+        "gRPC": {
+          "host": "localhost",
+          "port": 11800
+        }
+      },
+      "config": {
+        "timezone": null,
+        "endpoint_detection_interval_seconds": 15
+      }
+    }
+  ]
+}

@@ -1,8 +1,0 @@
-FROM java:8-jre
-ADD ./source-core-0.1.4.zip /source-core-0.1.4.zip
-
-ENV SOURCE_CONFIG=docker.json
-#ENV JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
-
-RUN unzip *.zip
-CMD ["./source-core-0.1.4/bin/source-core"]

@@ -1,3 +1,0 @@
-FROM apache/skywalking-oap-server:6.0.0-GA
-ADD ./application.yml /skywalking/config/application.yml
-ADD ./log4j2.xml /skywalking/config/log4j2.xml

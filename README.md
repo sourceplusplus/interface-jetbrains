@@ -5,15 +5,15 @@
 *<p align="center">Open-source Automated Programming Assistant</p>*
 
 <p align="center">
-  <a href="https://travis-ci.com/CodeBrig/Source"><img src="https://travis-ci.com/CodeBrig/Source.svg?token=ss9XQPnrp2cb7kvLpwGX&branch=master"/></a>
+  <a href="https://travis-ci.com/sourceplusplus/Assistant"><img src="https://travis-ci.com/sourceplusplus/Assistant.svg?token=ss9XQPnrp2cb7kvLpwGX&branch=master"/></a>
   <a href="https://gitter.im/sourceplusplus"><img src="https://badges.gitter.im/Join Chat.svg"/></a>
-  <a href="https://github.com/CodeBrig/Source/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2-blue.svg?style=flat"/></a>
+  <a href="https://github.com/sourceplusplus/Assistant/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2-blue.svg?style=flat"/></a>
 </p>
 
 <p align="center">
   <a href="https://sourceplusplus.com">Website</a> ::
-  <a href="https://github.com/CodeBrig/Source/tree/master/docs/markdown">Knowledge Base</a> ::
-  <a href="https://github.com/CodeBrig/Source/blob/master/docs/markdown/02-general/02-roadmap.md">Roadmap</a>
+  <a href="https://github.com/sourceplusplus/Assistant/tree/master/docs/markdown">Knowledge Base</a> ::
+  <a href="https://github.com/sourceplusplus/Assistant/blob/master/docs/markdown/02-general/02-roadmap.md">Roadmap</a>
 </p>
 
 ---
@@ -46,7 +46,7 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 
 - Supported APMs: [Apache SkyWalking](https://github.com/apache/incubator-skywalking)
 - Supported IDEs: JetBrains
-- Supported OSes: Linux, macOS, and Windows
+- Supported OSes: ~~Linux~~ ([see](https://github.com/sourceplusplus/Assistant/issues/68)), macOS, and Windows
 
 ### Installation
 
@@ -61,7 +61,7 @@ Install a JetBrains IDE if you don’t already have one.
 
 1. Press `Ctrl+Alt+S` to open the `Settings` dialog and then go to `Plugins`.
 2. Click the `Install JetBrains plugin`.
-3. In the dialog that opens, search for `Source++`.
+3. In the dialog that opens, search for `SourcePlusPlus` ([direct link](https://plugins.jetbrains.com/plugin/12033-source-)).
 4. Press `Install`.
 5. Click `OK` in the `Settings` dialog and restart your IDE.
 
@@ -76,7 +76,7 @@ After installation you will need to configure the Source++ Plugin (see [Configur
 | :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.4+ |
 | :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.4+ |
 | :plugin:source-plugin-commons | Common Source++ Plugin functionality                     | Groovy 2.4+ |
-| :tooltip                      | Used to visually display contextualized artifact data    | Groovy 2.4+ |
+| :portal                       | Used to visually display contextualized artifact data    | Groovy 2.4+ |
 
 ## Building/Testing
 
@@ -124,5 +124,5 @@ that made this possible.
 
 ## License
 
-[Apache License 2.0](https://github.com/CodeBrig/Source/blob/master/LICENSE)
+[Apache License 2.0](https://github.com/sourceplusplus/Assistant/blob/master/LICENSE)
 

@@ -1,0 +1,31 @@
+apply plugin: 'groovy'
+apply plugin: 'application'
+
+applicationName = 'source-portal'
+archivesBaseName = 'source-portal'
+mainClassName = 'com.sourceplusplus.portal.PortalBootstrap'
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    compile "io.vertx:vertx-web:$VERTX_VERSION"
+    compile "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
+    compile group: 'net.jodah', name: 'expiringmap', version: '0.5.9'
+    compile 'com.github.codebrig:journey:0.2.17-online'
+    compile project(":api")
+}
+
+task createProperties(dependsOn: processResources) {
+    doLast {
+        new File("$buildDir/resources/main/source-portal_build.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = project.version.toString()
+            p['build_date'] = new Date().toInstant().toString()
+            p.store w, null
+        }
+    }
+}
+classes {
+    dependsOn createProperties
+}

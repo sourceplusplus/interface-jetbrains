@@ -10,12 +10,13 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  */
 @SourceStyle
@@ -28,7 +29,7 @@ public interface AbstractArtifactTraceSubscribeRequest extends ArtifactSubscribe
     @Nullable
     QueryTimeFrame timeFrame();
 
-    TraceOrderType orderType();
+    List<TraceOrderType> orderTypes();
 
     @Override
     @Value.Default

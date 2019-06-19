@@ -10,21 +10,37 @@
     "jks_password": null,
     "secure_mode": false,
     "api_key": null,
-    "bridge_port": 7000,
     "subscription_inactive_limit_minutes": 15
   },
-  "elasticsearch": {
-    "host": "localhost",
-    "port": 9200
-  },
-  "integrations": {
-    "skywalking": {
+  "storage": {
+    "type": "h2",
+    "elasticsearch": {
       "host": "localhost",
-      "port": 12800,
-      "timezone": null,
-      "endpoint_detection_interval_seconds": 15
+      "port": 9200
     }
-  }
+  },
+  "integrations": [
+    {
+      "id": "apache_skywalking",
+      "category": "APM",
+      "enabled": true,
+      "version": "6.1.0",
+      "connections": {
+        "REST": {
+          "host": "localhost",
+          "port": 12800
+        },
+        "gRPC": {
+          "host": "localhost",
+          "port": 11800
+        }
+      },
+      "config": {
+        "timezone": null,
+        "endpoint_detection_interval_seconds": 15
+      }
+    }
+  ]
 }
 ```
 
@@ -39,10 +55,15 @@
 | jks_password                        | null      | Password for the JKS file (optional)                         |
 | secure_mode                         | false     | Secure API with Bearer token authentication (requires `api_key`) |
 | api_key                             | null      | The API key to use (`secure_mode` must be true to enable)    |
-| bridge_port                         | 7000      | Port used by plugin/tooltip to connect to core's eventbus    |
 | subscription_inactive_limit_minutes | 15        | Minutes necessary of inactive to prune artifact subscriptions (-1 to disable) |
 
-## Elasticsearch Settings
+## Storage Settings
+
+| Property | Value | Description                                              |
+| -------- | ----- | -------------------------------------------------------- |
+| type     | h2    | The storage system type to use (`h2` or `elasticsearch`) |
+
+### Elasticsearch Settings
 
 | Property | Value     | Description                                             |
 | -------- | --------- | ------------------------------------------------------- |
@@ -53,10 +74,33 @@
 
 ### Apache SkyWalking
 
+| Property                            | Value             | Description                                                  |
+| ----------------------------------- | ----------------- | ------------------------------------------------------------ |
+| id                                  | apache_skywalking | ID for the given Source++ integration                        |
+| category                            | APM               | Category for the given Source++ integration                  |
+| enabled                             | false             | Used to enable/disable the given Source++ integration        |
+| version                             | 6.1.0             | Current version of the Source++ integration                  |
+
+#### Connections
+
+##### REST
+
 | Property                            | Value     | Description                                                  |
 | ----------------------------------- | --------- | ------------------------------------------------------------ |
 | host                                | localhost | The address of the SkyWalking OAP instance to connect to     |
 | port                                | 12800     | The port of the SkyWalking OAP instance to connect to        |
+
+##### gRPC
+
+| Property                            | Value     | Description                                                  |
+| ----------------------------------- | --------- | ------------------------------------------------------------ |
+| host                                | localhost | The address of the SkyWalking OAP instance to connect to     |
+| port                                | 11800     | The port of the SkyWalking OAP instance to connect to        |
+
+#### Config
+
+| Property                            | Value     | Description                                                  |
+| ----------------------------------- | --------- | ------------------------------------------------------------ |
 | timezone                            | null      | Timezone to use when querying SkyWalking OAP (defaults to system) |
 | endpoint_detection_interval_seconds | 15        | Seconds to wait before scanning for new endpoints            |
 

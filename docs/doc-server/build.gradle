@@ -8,8 +8,8 @@ mainClassName = 'com.sourceplusplus.docserver.DocServerBootstrap'
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.1'
-    compile 'io.vertx:vertx-web:3.6.3'
-    compile 'io.vertx:vertx-web-client:3.6.3'
+    compile "io.vertx:vertx-web:$VERTX_VERSION"
+    compile "io.vertx:vertx-web-client:$VERTX_VERSION"
     compile group: 'net.jodah', name: 'expiringmap', version: '0.5.9'
 }
 
@@ -45,7 +45,7 @@ groovydoc {
               '../../core/src/main/groovy',
               //'../../plugin/jetbrains-plugin/src/main/groovy',
               '../../plugin/source-plugin-commons/src/main/groovy',
-              '../../tooltip/src/main/groovy',
+              '../../portal/src/main/groovy',
               '../../api/build/generated/source/apt/main']
 
     finalizedBy "updateGroovydocStylesheet"

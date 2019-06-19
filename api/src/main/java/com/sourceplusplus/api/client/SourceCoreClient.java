@@ -2,15 +2,19 @@ package com.sourceplusplus.api.client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sourceplusplus.api.APIException;
+import com.sourceplusplus.api.bridge.SourceBridgeClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription;
 import com.sourceplusplus.api.model.artifact.*;
+import com.sourceplusplus.api.model.config.SourcePluginConfig;
 import com.sourceplusplus.api.model.info.SourceCoreInfo;
+import com.sourceplusplus.api.model.integration.IntegrationInfo;
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest;
 import com.sourceplusplus.api.model.trace.*;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -26,21 +30,22 @@ import java.util.concurrent.TimeUnit;
  * Used to communicate with Source++ Core.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  */
 public class SourceCoreClient implements SourceClient {
 
-    private final static String SPP_API_VERSION = System.getenv().getOrDefault(
+    private static final String SPP_API_VERSION = System.getenv().getOrDefault(
             "SPP_API_VERSION", System.getProperty("SPP_API_VERSION", "v1"));
-
     private static final String PING_ENDPOINT = "/ping";
     private static final String INFO_ENDPOINT = String.format("/%s/info", SPP_API_VERSION);
     private static final String REGISTER_IP_ENDPOINT = String.format("/%s/registerIP", SPP_API_VERSION);
     private static final String REFRESH_STORAGE = String.format(
             "/%s/admin/storage/refresh", SPP_API_VERSION);
+    private static final String UPDATE_INTEGRATION_INFO = String.format(
+            "/%s/admin/integrations/:integrationId", SPP_API_VERSION);
     private static final String SEARCH_FOR_NEW_ENDPOINTS = String.format(
-            "/%s/admin/integrations/skywalking/searchForNewEndpoints", SPP_API_VERSION);
+            "/%s/admin/integrations/apache_skywalking/searchForNewEndpoints", SPP_API_VERSION);
     private static final String CREATE_APPLICATION_ENDPOINT = String.format(
             "/%s/applications", SPP_API_VERSION);
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
@@ -82,6 +87,10 @@ public class SourceCoreClient implements SourceClient {
     private final String sppUrl;
     private String apiKey;
 
+    public SourceCoreClient(String host, int port) {
+        this(host, port, false);
+    }
+
     public SourceCoreClient(String host, int port, boolean ssl) {
         if (ssl) {
             this.sppUrl = "https://" + Objects.requireNonNull(host) + ":" + port;
@@ -94,6 +103,14 @@ public class SourceCoreClient implements SourceClient {
     public SourceCoreClient(String sppUrl) {
         this.sppUrl = Objects.requireNonNull(sppUrl);
         SourceClient.initMappers();
+    }
+
+    public void attachBridge(Vertx vertx) {
+        SourceBridgeClient bridgeClient = new SourceBridgeClient(vertx,
+                SourcePluginConfig.current.activeEnvironment.apiHost,
+                SourcePluginConfig.current.activeEnvironment.apiPort,
+                SourcePluginConfig.current.activeEnvironment.apiSslEnabled);
+        bridgeClient.setupSubscriptions();
     }
 
     public void ping(Handler<AsyncResult<Boolean>> handler) {
@@ -120,6 +137,38 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
+    public void updateIntegrationInfo(IntegrationInfo updatedIntegrationInfo,
+                                      Handler<AsyncResult<IntegrationInfo>> handler) {
+        String url = sppUrl + UPDATE_INTEGRATION_INFO.replace(":integrationId", updatedIntegrationInfo.id());
+        Request.Builder request = new Request.Builder().url(url)
+                .put(RequestBody.create(JSON, Json.encode(updatedIntegrationInfo)));
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, IntegrationInfo.class)));
+            } else {
+                handler.handle(extractAPIException(responseBody));
+            }
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public IntegrationInfo updateIntegrationInfo(IntegrationInfo updatedIntegrationInfo) {
+        String url = sppUrl + UPDATE_INTEGRATION_INFO.replace(":integrationId", updatedIntegrationInfo.id());
+        Request.Builder request = new Request.Builder().url(url)
+                .put(RequestBody.create(JSON, Json.encode(updatedIntegrationInfo)));
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            return Json.decodeValue(response.body().string(), IntegrationInfo.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void info(Handler<AsyncResult<SourceCoreInfo>> handler) {
         String url = sppUrl + INFO_ENDPOINT;
         Request.Builder request = new Request.Builder().url(url).get();
@@ -134,6 +183,18 @@ public class SourceCoreClient implements SourceClient {
             }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public SourceCoreInfo info() {
+        String url = sppUrl + INFO_ENDPOINT;
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            return Json.decodeValue(response.body().string(), SourceCoreInfo.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -403,8 +464,8 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void createArtifactConfig(String appUuid, String artifactQualifiedName, SourceArtifactConfig createRequest,
-                                     Handler<AsyncResult<SourceArtifactConfig>> handler) {
+    public void createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName, SourceArtifactConfig createRequest,
+                                             Handler<AsyncResult<SourceArtifactConfig>> handler) {
         String url = sppUrl + CONFIGURE_SOURCE_ARTIFACT_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":artifactQualifiedName", URLEncoder.encode(artifactQualifiedName));
@@ -419,8 +480,8 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public SourceArtifactConfig createArtifactConfig(String appUuid, String artifactQualifiedName,
-                                                     SourceArtifactConfig createRequest) {
+    public SourceArtifactConfig createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName,
+                                                             SourceArtifactConfig createRequest) {
         String url = sppUrl + CONFIGURE_SOURCE_ARTIFACT_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":artifactQualifiedName", URLEncoder.encode(artifactQualifiedName));

@@ -1,3 +1,36 @@
+# 0.2.0-alpha (2019-06-18)
+
+- Moved GitHub project from CodeBrig/Source to sourceplusplus/Assistant
+- Added additional query time frames (5 minutes, 1 hour, 3 hours)
+- Renamed `pingEndpointEnabled` core config to `pingEndpointAvailable`
+- Added documentation for Admin API
+- Docker setup guide Knowledge Base ([#8](https://github.com/sourceplusplus/Assistant/issues/8))
+- Configurable environment setup (via Docker) in Source++ Plugin ([#20](https://github.com/sourceplusplus/Assistant/issues/20))
+- Source++ Core Docker image on Docker Hub ([#15](https://github.com/sourceplusplus/Assistant/issues/15))
+- Add automatic release artifact uploads ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
+- Use RequestMapping.method in determining correct artifact ([#10](https://github.com/sourceplusplus/Assistant/issues/10))
+- Upgrade to SkyWalking 6.1 ([#30](https://github.com/sourceplusplus/Assistant/issues/30))
+- Fix bridge reconnection issue ([#61](https://github.com/sourceplusplus/Assistant/issues/61))
+- Fix portal pre-loading bug ([#57](https://github.com/sourceplusplus/Assistant/issues/57))
+- Remove inactive portals ([#59](https://github.com/sourceplusplus/Assistant/issues/59))
+- H2 database storage ([#14](https://github.com/sourceplusplus/Assistant/issues/14))
+- Application/environment switching ([#16](https://github.com/sourceplusplus/Assistant/issues/16))
+- Get rid of eventbus bridge port ([#56](https://github.com/sourceplusplus/Assistant/issues/56))
+- IDE restart required after S++ Core connection bug ([#26](https://github.com/sourceplusplus/Assistant/issues/26))
+- Implement artifact config tab in tooltip UI ([#13](https://github.com/sourceplusplus/Assistant/issues/13))
+- Register external portals as new ([#52](https://github.com/sourceplusplus/Assistant/issues/52))
+- Change portalId to portalUuid ([#50](https://github.com/sourceplusplus/Assistant/issues/50))
+- Ability to change portal active tab ([#51](https://github.com/sourceplusplus/Assistant/issues/51))
+- Add status column to trace stack table ([#46](https://github.com/sourceplusplus/Assistant/issues/46))
+- Truncate extra 0 in time occurred on Traces tab ([#45](https://github.com/sourceplusplus/Assistant/issues/45))
+- View artifact slowest traces ([#19](https://github.com/sourceplusplus/Assistant/issues/19))
+- Rename Source++ Tooltip to Source++ Portal ([#49](https://github.com/sourceplusplus/Assistant/issues/49))
+- Upgrade Semantic UI and create tooltip build task ([#43](https://github.com/sourceplusplus/Assistant/issues/43))
+- Responsive Source++ Tooltip UI ([#44](https://github.com/sourceplusplus/Assistant/issues/44))
+- Core standalone functionality ([#60](https://github.com/sourceplusplus/Assistant/issues/60))
+- Automatic GitHub release artifact uploads via Travis-CI ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
+- Added ability for agent to detect integration connection information via API ([#73](https://github.com/sourceplusplus/Assistant/issues/73))
+
 # 0.1.4-alpha (2019-03-30)
 
 - Fixed issue with overview tab not being updated when viewing an artifact with no data

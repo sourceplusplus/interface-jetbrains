@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -34,7 +34,7 @@ class ArtifactSignatureChangeTracker extends AbstractVerticle {
 
         vertx.eventBus().consumer(ARTIFACT_REMOVED, {
             def sourceMark = it.body() as SourceMark
-            sourceMark.artifactSubscribed = false
+            sourceMark.markArtifactUnsubscribed()
             sourceMark.sourceFileMarker.removeSourceMark(sourceMark)
 
             //publish updated event

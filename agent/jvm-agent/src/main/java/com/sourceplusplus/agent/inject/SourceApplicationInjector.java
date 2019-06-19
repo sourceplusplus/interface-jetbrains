@@ -7,7 +7,7 @@ import org.objectweb.asm.commons.AdviceAdapter;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  */
 public class SourceApplicationInjector extends AdviceAdapter {
@@ -17,8 +17,8 @@ public class SourceApplicationInjector extends AdviceAdapter {
     private final int access;
     private String methodDesc;
 
-    public SourceApplicationInjector(int asm5, MethodVisitor mv, int access,
-                                     String name, String methodDesc, String className) {
+    SourceApplicationInjector(int asm5, MethodVisitor mv, int access,
+                              String name, String methodDesc, String className) {
         super(asm5, mv, access, name, methodDesc);
 
         this.className = className.replace("/", ".");

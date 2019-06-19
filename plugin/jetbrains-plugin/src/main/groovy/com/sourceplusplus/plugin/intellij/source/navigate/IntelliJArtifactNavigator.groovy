@@ -10,7 +10,9 @@ import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import com.sourceplusplus.plugin.source.navigate.ArtifactNavigator
-import com.sourceplusplus.tooltip.coordinate.track.TooltipViewTracker
+import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.portal.display.PortalTab
+import io.vertx.core.json.JsonObject
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
 import org.slf4j.Logger
@@ -19,7 +21,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -30,25 +32,44 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
     @Override
     void start() throws Exception {
         vertx.eventBus().consumer(CAN_NAVIGATE_TO_ARTIFACT, { message ->
-            def artifactQualifiedName = message.body() as String
+            def request = message.body() as JsonObject
+            def appUuid = request.getString("app_uuid")
+            def artifactQualifiedName = request.getString("artifact_qualified_name")
             ApplicationManager.getApplication().invokeLater({
-                message.reply(canNavigateTo(artifactQualifiedName))
+                if (canNavigateTo(artifactQualifiedName)) {
+                    def internalPortal = SourcePortal.getInternalPortal(appUuid, artifactQualifiedName)
+                    if (!internalPortal.isPresent()) {
+                        def sourceMark = PluginBootstrap.sourcePlugin.getSourceMark(artifactQualifiedName)
+                        if (sourceMark) {
+                            sourceMark.registerPortal()
+                            message.reply(true)
+                        } else {
+                            message.reply(false)
+                        }
+                    } else {
+                        message.reply(true)
+                    }
+                } else {
+                    message.reply(false)
+                }
             })
         })
         vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT, { message ->
-            def artifactQualifiedName = message.body() as String
+            def request = message.body() as JsonObject
+            def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
             ApplicationManager.getApplication().invokeLater({
-                IntelliJMethodGutterMark.closeTooltipIfOpen()
-                navigateTo(artifactQualifiedName)
-                vertx.eventBus().send(TooltipViewTracker.UPDATE_TOOLTIP_ARTIFACT, artifactQualifiedName)
+                IntelliJMethodGutterMark.closePortalIfOpen()
 
-                def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark
+                portal.interface.loadPage(PortalTab.Traces, ["order_type": portal.interface.tracesView.orderType.toString()])
+                navigateTo(portal.interface.viewingPortalArtifact)
+
+                def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(portal.interface.viewingPortalArtifact) as IntelliJMethodGutterMark
                 if (sourceMark != null) {
                     handleMark(sourceMark)
                 } else {
                     //todo: smarter
                     vertx.setPeriodic(1000, {
-                        sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark
+                        sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(portal.interface.viewingPortalArtifact) as IntelliJMethodGutterMark
                         if (sourceMark != null) {
                             vertx.cancelTimer(it)
                             message.reply(true)
@@ -62,13 +83,12 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
     }
 
     private void handleMark(IntelliJMethodGutterMark mark) {
-        mark.artifactDataAvailable = true
-        mark.sourceFileMarker.refresh()
+        mark.markArtifactHasData()
 
         ApplicationManager.getApplication().invokeLater({
             ApplicationManager.getApplication().runReadAction({
                 def editor = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject).getSelectedTextEditor()
-                mark.displayTooltip(vertx, editor, false)
+                mark.displayPortal(vertx, editor, false)
             })
         })
     }

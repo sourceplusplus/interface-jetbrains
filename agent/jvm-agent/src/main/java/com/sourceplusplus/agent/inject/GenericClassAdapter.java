@@ -10,14 +10,14 @@ import org.pmw.tinylog.Logger;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  */
 public class GenericClassAdapter extends ClassVisitor {
 
     private String className;
 
-    public GenericClassAdapter(int asm5, ClassWriter cw) {
+    GenericClassAdapter(int asm5, ClassWriter cw) {
         super(asm5, cw);
     }
 

@@ -17,12 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  */
 public class PluginSourceFile implements MessageCodec<PluginSourceFile, PluginSourceFile> {
 
     private File file;
+    private String appUuid;
     private String qualifiedClassName;
     private final Map<String, SourceArtifact> sourceMethods = new ConcurrentHashMap<>();
 
@@ -30,14 +31,20 @@ public class PluginSourceFile implements MessageCodec<PluginSourceFile, PluginSo
         //ONLY USE WHEN REGISTERING CODEC
     }
 
-    public PluginSourceFile(@NotNull File file, @NotNull String qualifiedClassName) {
+    public PluginSourceFile(@NotNull File file, @NotNull String appUuid, @NotNull String qualifiedClassName) {
         this.file = file;
+        this.appUuid = appUuid;
         this.qualifiedClassName = qualifiedClassName;
     }
 
     @NotNull
     public File getFile() {
         return file;
+    }
+
+    @NotNull
+    public String getAppUuid() {
+        return appUuid;
     }
 
     @NotNull
@@ -89,11 +96,13 @@ public class PluginSourceFile implements MessageCodec<PluginSourceFile, PluginSo
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PluginSourceFile that = (PluginSourceFile) o;
-        return Objects.equals(file, that.file) && Objects.equals(qualifiedClassName, that.qualifiedClassName);
+        return Objects.equals(file, that.file) &&
+                Objects.equals(appUuid, that.appUuid) &&
+                Objects.equals(qualifiedClassName, that.qualifiedClassName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(file, qualifiedClassName);
+        return Objects.hash(file, appUuid, qualifiedClassName);
     }
 }

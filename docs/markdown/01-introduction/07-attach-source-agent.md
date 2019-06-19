@@ -20,13 +20,13 @@ For more information about the activations and plugins available see: [here](htt
 ### Attach Source++ Agent
 
 ```bash
-java -jar -javaagent:source-agent-0.1.4.jar MyApplication.jar
+java -jar -javaagent:source-agent-0.2.0.jar MyApplication.jar
 ```
 
-You may additional supply a `SOURCE_CONFIG` system property to point to a custom agent configuration file. Like so:
+You may additional supply a `SOURCE_CONFIG` system property to point to a custom agent configuration file:
 
 ```bash
-java -jar -DSOURCE_CONFIG=custom-config.json -javaagent:source-agent-0.1.4.jar MyApplication.jar
+java -jar -DSOURCE_CONFIG=custom-config.json -javaagent:source-agent-0.2.0.jar MyApplication.jar
 ```
 
 # Next Step

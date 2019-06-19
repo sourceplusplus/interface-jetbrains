@@ -9,14 +9,14 @@ Install a JetBrains IDE if you don’t already have one.
 
 1. Press `Ctrl+Alt+S` to open the `Settings` dialog and then go to `Plugins`.
 2. Click the `Install JetBrains plugin`.
-3. In the dialog that opens, search for `Source++`.
+3. In the dialog that opens, search for `SourcePlusPlus`. ([direct link](https://plugins.jetbrains.com/plugin/12033-source-))
 4. Press `Install`.
 5. Click `OK` in the `Settings` dialog and restart your IDE.
 
 ## Updating Source++ Plugin
 
 1. Press `Ctrl+Alt+S` to open the `Settings` dialog and then go to `Plugins`.
-2. Search for `Source++`.
+2. Search for `SourcePlusPlus`.
 3. If plugin is ready for update, it is highlighted with blue and has `Update` button available.
 4. Press `Update`.
 5. Click `OK` in the `Settings` dialog and restart your IDE.
@@ -24,7 +24,7 @@ Install a JetBrains IDE if you don’t already have one.
 ## Uninstalling Source++ Plugin
 
 1. Press `Ctrl+Alt+S` to open the `Settings` dialog and then go to `Plugins`.
-2. Search for `Source++`.
+2. Search for `SourcePlusPlus`.
 3. Press `Uninstall`.
 4. Click `OK` in the `Settings` dialog and restart your IDE.
 

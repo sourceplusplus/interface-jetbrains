@@ -3,7 +3,7 @@ package com.sourceplusplus.api.model.metric;
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

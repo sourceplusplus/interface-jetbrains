@@ -9,13 +9,19 @@ import javax.swing.*
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 class ConnectionInfoDialogWrapper extends DialogWrapper {
 
     private final ConnectionInfoDialog connectionInfoDialog = new ConnectionInfoDialog()
+
+    ConnectionInfoDialogWrapper(String title) {
+        super(false)
+        init()
+        setTitle(title)
+    }
 
     ConnectionInfoDialogWrapper(SourceCoreInfo coreInfo) {
         super(false)
@@ -28,6 +34,18 @@ class ConnectionInfoDialogWrapper extends DialogWrapper {
         super(false)
         init()
         setTitle("Connection Info")
+        connectionInfoDialog.setError(ex)
+    }
+
+    void log(String data) {
+        connectionInfoDialog.log(data)
+    }
+
+    void setStatus(String status) {
+        connectionInfoDialog.setStatus(status)
+    }
+
+    void setError(Throwable ex) {
         connectionInfoDialog.setError(ex)
     }
 

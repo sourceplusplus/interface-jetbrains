@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  */
 public class TraceTest extends ActiveSourceAgentTest {
@@ -23,7 +23,7 @@ public class TraceTest extends ActiveSourceAgentTest {
         usingAppUuid(application.appUuid());
 
         ArtifactTraceSubscribeRequest subscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                .orderType(TraceOrderType.LATEST_TRACES)
+                .addOrderTypes(TraceOrderType.LATEST_TRACES)
                 .appUuid(application.appUuid())
                 .artifactQualifiedName(JavaTestClass.class.getName() + ".staticMethod()").build();
         assertTrue(coreClient.subscribeToArtifact(subscribeRequest));

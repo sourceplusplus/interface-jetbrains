@@ -15,7 +15,7 @@ import javax.swing.*
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -33,7 +33,7 @@ class EditApplicationSettingsDialogWrapper extends DialogWrapper {
         setTitle("Edit Application Settings")
         setResizable(false)
 
-        PluginBootstrap.getSourcePlugin().getCoreClient().getApplication(SourcePluginConfig.current.appUuid, {
+        SourcePluginConfig.current.activeEnvironment.coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
             if (it.succeeded()) {
                 editApplicationSettings.setCurrentProject(it.result().get())
             } else {
@@ -59,7 +59,7 @@ class EditApplicationSettingsDialogWrapper extends DialogWrapper {
     @Override
     protected void doOKAction() {
         def sourceApplication = SourceApplication.builder()
-                .appUuid(SourcePluginConfig.current.appUuid)
+                .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                 .isUpdateRequest(true)
         def agentConfig = new SourceAgentConfig()
         sourceApplication.agentConfig(agentConfig)
@@ -71,7 +71,7 @@ class EditApplicationSettingsDialogWrapper extends DialogWrapper {
             agentConfig.packages = editApplicationSettings.getApplicationDomain().split(",")
         }
 
-        PluginBootstrap.getSourcePlugin().getCoreClient().updateApplication(sourceApplication.build(), {
+        SourcePluginConfig.current.activeEnvironment.coreClient.updateApplication(sourceApplication.build(), {
             if (it.failed()) {
                 log.error("Failed to update application", it.cause())
             }

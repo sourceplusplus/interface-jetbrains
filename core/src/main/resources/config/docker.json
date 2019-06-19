@@ -7,19 +7,35 @@
     "jks_password": null,
     "secure_mode": false,
     "api_key": null,
-    "bridge_port": 7000,
     "subscription_inactive_limit_minutes": 15
   },
-  "elasticsearch": {
-    "host": "es-server",
-    "port": 9200
-  },
-  "integrations": {
-    "skywalking": {
-      "host": "skywalking-oap",
-      "port": 12799,
-      "timezone": null,
-      "endpoint_detection_interval_seconds": 15
+  "storage": {
+    "type": "h2",
+    "elasticsearch": {
+      "host": "es-server",
+      "port": 9200
     }
-  }
+  },
+  "integrations": [
+    {
+      "id": "apache_skywalking",
+      "category": "APM",
+      "enabled": true,
+      "version": "6.1.0",
+      "connections": {
+        "REST": {
+          "host": "skywalking-oap",
+          "port": 12800
+        },
+        "gRPC": {
+          "host": "skywalking-oap",
+          "port": 11800
+        }
+      },
+      "config": {
+        "timezone": null,
+        "endpoint_detection_interval_seconds": 15
+      }
+    }
+  ]
 }

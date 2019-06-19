@@ -6,15 +6,14 @@ import com.sourceplusplus.api.model.application.SourceApplicationSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
+import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
-import com.sourceplusplus.core.storage.ElasticsearchDAO
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.io.IOUtils
 import org.slf4j.Logger
@@ -27,7 +26,7 @@ import java.util.regex.Pattern
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -40,24 +39,22 @@ class ApplicationAPI extends AbstractVerticle {
             IOUtils.readLines(ApplicationAPI.getResourceAsStream("/appname_gen/color-list.txt"), "UTF-8")
     private final static List<String> ANIMAL_NAMES =
             IOUtils.readLines(ApplicationAPI.getResourceAsStream("/appname_gen/animal-list.txt"), "UTF-8")
-    private final Router baseRouter
-    private final ElasticsearchDAO elasticsearch
+    private final SourceCore core
 
-    ApplicationAPI(Router baseRouter, ElasticsearchDAO elasticsearch) {
-        this.baseRouter = baseRouter
-        this.elasticsearch = elasticsearch
+    ApplicationAPI(SourceCore core) {
+        this.core = Objects.requireNonNull(core)
     }
 
     @Override
     void start() throws Exception {
-        baseRouter.post("/applications").handler(this.&createApplicationRoute)
-        baseRouter.get("/applications").handler(this.&getApplicationsRoute)
-        baseRouter.put("/applications/:appUuid").handler(this.&updateApplicationRoute)
-        baseRouter.get("/applications/:appUuid").handler(this.&getApplicationRoute)
-        baseRouter.get("/applications/:appUuid/subscriptions").handler(this.&getApplicationSubscriptionsRoute)
-        baseRouter.get("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions")
+        core.baseRouter.post("/applications").handler(this.&createApplicationRoute)
+        core.baseRouter.get("/applications").handler(this.&getApplicationsRoute)
+        core.baseRouter.put("/applications/:appUuid").handler(this.&updateApplicationRoute)
+        core.baseRouter.get("/applications/:appUuid").handler(this.&getApplicationRoute)
+        core.baseRouter.get("/applications/:appUuid/subscriptions").handler(this.&getApplicationSubscriptionsRoute)
+        core.baseRouter.get("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions")
                 .handler(this.&getSubscriberApplicationSubscriptionsRoute)
-        baseRouter.put("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions/refresh")
+        core.baseRouter.put("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions/refresh")
                 .handler(this.&refreshSubscriberApplicationSubscriptionsRoute)
         log.info("{} started", getClass().getSimpleName())
     }
@@ -157,7 +154,7 @@ class ApplicationAPI extends AbstractVerticle {
             if (it.succeeded()) {
                 def subscribers = Json.decodeValue(it.result().body() as String,
                         new TypeReference<Set<SourceApplicationSubscription>>() {})
-                elasticsearch.findArtifactBySubscribeAutomatically(appUuid, {
+                core.storage.findArtifactBySubscribeAutomatically(appUuid, {
                     if (it.succeeded()) {
                         def automaticSubscriptions = it.result()
                         def mergeMap = new HashMap<String, SourceApplicationSubscription.Builder>()
@@ -232,7 +229,7 @@ class ApplicationAPI extends AbstractVerticle {
     void updateApplication(SourceApplication updateRequest, Handler<AsyncResult<SourceApplication>> handler) {
         log.info(String.format("Updating application. App uuid: %s - App name: %s",
                 updateRequest.appUuid(), updateRequest.appName()))
-        elasticsearch.updateApplication(updateRequest, handler)
+        core.storage.updateApplication(updateRequest, handler)
     }
 
     private void createApplicationRoute(RoutingContext routingContext) {
@@ -281,7 +278,7 @@ class ApplicationAPI extends AbstractVerticle {
                                     .withIsUpdateRequest(null)
                             log.info(String.format("Creating application. App uuid: %s - App name: %s",
                                     createRequest.appUuid(), createRequest.appName()))
-                            elasticsearch.createApplication(createRequest, handler)
+                            core.storage.createApplication(createRequest, handler)
                         }
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
@@ -296,7 +293,7 @@ class ApplicationAPI extends AbstractVerticle {
                     .withIsUpdateRequest(null)
             log.info(String.format("Creating application. App uuid: %s - App name: %s",
                     createRequest.appUuid(), createRequest.appName()))
-            elasticsearch.createApplication(createRequest, handler)
+            core.storage.createApplication(createRequest, handler)
         }
     }
 
@@ -330,7 +327,7 @@ class ApplicationAPI extends AbstractVerticle {
      */
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         log.info("Getting application. App uuid: {}", appUuid)
-        elasticsearch.getApplication(appUuid, handler)
+        core.storage.getApplication(appUuid, handler)
     }
 
     private void getApplicationsRoute(RoutingContext routingContext) {
@@ -347,7 +344,7 @@ class ApplicationAPI extends AbstractVerticle {
 
     void getApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
         log.info("Getting all applications")
-        elasticsearch.getAllApplications(handler)
+        core.storage.getAllApplications(handler)
     }
 
     /**

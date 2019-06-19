@@ -6,17 +6,14 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricQuery
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
-import com.sourceplusplus.core.api.artifact.ArtifactAPI
+import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
 import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
-import com.sourceplusplus.core.integration.skywalking.SkywalkingIntegration
-import com.sourceplusplus.core.storage.ElasticsearchDAO
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.json.Json
 import io.vertx.core.shareddata.SharedData
-import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -24,7 +21,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -32,30 +29,23 @@ class MetricAPI extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private final SharedData sharedData
-    private final Router baseRouter
-    private final ArtifactAPI artifactAPI
-    private final ElasticsearchDAO elasticsearch
-    private final SkywalkingIntegration skywalkingIntegration
+    private final SourceCore core
 
-    MetricAPI(SharedData sharedData, Router baseRouter, ArtifactAPI artifactAPI, ElasticsearchDAO elasticsearch,
-              SkywalkingIntegration skywalkingIntegration) {
+    MetricAPI(SharedData sharedData, SourceCore core) {
         this.sharedData = Objects.requireNonNull(sharedData)
-        this.baseRouter = Objects.requireNonNull(baseRouter)
-        this.artifactAPI = Objects.requireNonNull(artifactAPI)
-        this.elasticsearch = Objects.requireNonNull(elasticsearch)
-        this.skywalkingIntegration = Objects.requireNonNull(skywalkingIntegration)
+        this.core = Objects.requireNonNull(core)
     }
 
     @Override
     void start() throws Exception {
-        baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/metrics/subscribe")
+        core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/metrics/subscribe")
                 .handler(this.&subscribeToArtifactRoute)
-        baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/metrics/unsubscribe")
+        core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/metrics/unsubscribe")
                 .handler(this.&unsubscribeToArtifactRoute)
-        baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/metrics")
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/metrics")
                 .handler(this.&getArtifactMetricsRoute)
 
-        vertx.deployVerticle(new MetricSubscriptionTracker(artifactAPI, this))
+        vertx.deployVerticle(new MetricSubscriptionTracker(core))
         log.info("MetricAPI started")
     }
 
@@ -154,14 +144,14 @@ class MetricAPI extends AbstractVerticle {
     }
 
     void getArtifactMetrics(ArtifactMetricQuery metricQuery, Handler<AsyncResult<ArtifactMetricResult>> handler) {
-        artifactAPI.getSourceArtifact(metricQuery.appUuid(), metricQuery.artifactQualifiedName(), {
+        core.artifactAPI.getSourceArtifact(metricQuery.appUuid(), metricQuery.artifactQualifiedName(), {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
                     def artifactConfig = it.result().get().config()
                     def endpointIds = artifactConfig?.endpointIds()
                     if (endpointIds != null && !endpointIds.isEmpty()) {
                         def endpointId = endpointIds[0] //todo: not only use first endpoint id
-                        skywalkingIntegration.getEndpointMetrics(endpointId, metricQuery, handler)
+                        core.APMIntegration.getEndpointMetrics(endpointId, metricQuery, handler)
                     } else {
                         log.warn("Could not find endpoint id for artifact: " + metricQuery.artifactQualifiedName())
                         //todo: doesn't complete handler

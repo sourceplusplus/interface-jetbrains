@@ -9,6 +9,7 @@ import com.sourceplusplus.plugin.PluginSourceFile
 import com.sourceplusplus.plugin.intellij.inspect.IntelliJSourceMarkInspection
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import com.sourceplusplus.plugin.marker.mark.SourceMark
+import com.sourceplusplus.portal.SourcePortal
 import org.jetbrains.annotations.NotNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -72,6 +73,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
     void setSourceMarks(@NotNull List<SourceMark> sourceMarks) {
         this.sourceMarks.clear()
         this.sourceMarks.addAll(sourceMarks)
+        refresh()
     }
 
     /**
@@ -90,6 +92,9 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
     boolean removeSourceMark(@NotNull SourceMark sourceMark) {
         log.trace("Removing source mark for artifact: " + sourceMark.artifactQualifiedName)
         if (sourceMarks.remove(sourceMark)) {
+            if (sourceMark.portalRegistered) {
+                SourcePortal.destroyPortal(sourceMark.portalUuid)
+            }
             refresh()
             log.trace("Removed source mark for artifact: " + sourceMark.artifactQualifiedName)
             return true

@@ -23,8 +23,7 @@
     "enabled": true,
     "sample_n_per_3_secs": -1,
     "span_limit_per_segment": 300,
-    "output_enhanced_classes": false,
-    "backend_service": "localhost:11800"
+    "output_enhanced_classes": false
   },
   "plugin-bridge": {
     "enabled": false,
@@ -68,7 +67,6 @@
 | sample_n_per_3_secs     | -1              | Amount of traces to sample per 3 seconds |
 | span_limit_per_segment  | 300             | Maximum span limit per segment           |
 | output_enhanced_classes | false           | Whether to output enhanced classes       |
-| backend_service         | localhost:11800 | Apache SkyWalking OAP host               |
 
 ## Plugin Bridge Settings
 

@@ -1,6 +1,6 @@
 # Overview
 
-The Source++ Tooltip is the most visual portion of Source++. The tooltip is used to display relevant runtime statistics next to the associate source code artifact.
+The Source++ Portal is the most visual portion of Source++. The portal is used to display relevant runtime statistics next to the associate source code artifact.
 
 # Dependencies
 

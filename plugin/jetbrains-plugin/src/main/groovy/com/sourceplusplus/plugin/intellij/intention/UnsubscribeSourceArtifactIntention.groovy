@@ -22,7 +22,7 @@ import static com.sourceplusplus.plugin.PluginBootstrap.*
  * Artifacts currently supported:
  *  - methods
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -82,7 +82,7 @@ class UnsubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
 
         //unsubscribe from artifact
         def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
-                .appUuid(SourcePluginConfig.current.appUuid)
+                .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                 .artifactQualifiedName(artifactQualifiedName)
                 .removeAllArtifactSubscriptions(true)
                 .build()

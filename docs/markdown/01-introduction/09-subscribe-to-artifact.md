@@ -1,11 +1,9 @@
-A central concept in Source++ is the subscription of source code artifact runtime information.
+A central concept in Source++ is the subscription of source code artifact runtime information. Once subscribed to an artifact you can choose to receive various runtime data about that artifact. This currently only includes metrics and traces.
 
-Once subscribed to an artifact you can choose to receive various runtime data about that artifact.
-This currently only includes metrics and traces.
+Subscribing to an artifact is fairly simple and only requires you to place your keyboard's cursor
+in the method which you wish to subscribe to and typing `ALT + SPACE`.
 
-Subscribing to an artifact is fairly simply and only requires you to place your keyboard's cursor
-in the method which you wish to subscribe to and pressing `ALT + SPACE`. This will bring up the available intentions.
-With the Source++ Plugin installed you will see:
+This will bring up the available intentions and with the Source++ Plugin properly set up you will see:
 
 ![](../../images/plugin/Subscribe%20To%20Artifact.png)
 
@@ -16,8 +14,9 @@ Once subscribed the S++ mark will show like so:
 
 ![](../../images/plugin/Subscribed%20Artifact.png)
 
-The greyed out S++ symbol indicates that the artifact is subscribed to and runtime data will be collected but that there is none available. 
-Once the method has been executed and runtime data becomes available you will be able to view collected data like so:
+The greyed out S++ symbol indicates that the artifact is subscribed to and runtime data will be collected but that there is none available.
+
+Once the artifact has been executed and runtime data becomes available the S++ mark will update its color:
 
 ![](../../images/plugin/Active%20Artifact.png)
 
@@ -43,7 +42,7 @@ public class ActiveVsInactive {
 }
 ```
 
-The `activeArtifact` method shows the active S++ mark because an artifact subscription is active and the method is being executed. These observations will be recorded and the artifact will be marked as active. The `inactiveArtifact` method shows the inactive S++ mark because this method is never executed. If it was it would turn into an active artifact subscription and appear just as `activeArtifact` currently does.
+The `activeArtifact` method shows the active S++ mark because an artifact subscription is active and the method is being executed. These executions are recorded and the artifact is marked as active. The `inactiveArtifact` method shows the inactive S++ mark because this method is never executed. If it was it would turn into an active artifact subscription and appear just as `activeArtifact` currently does.
 
 # More Information
 

@@ -15,18 +15,20 @@ import com.intellij.psi.PsiLiteral
 import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
+import com.intellij.util.ui.JBUI
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.plugin.PluginSourceFile
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.render.SourceArtifactGutterMarkRenderer
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import com.sourceplusplus.plugin.marker.mark.GutterMark
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
-import com.sourceplusplus.tooltip.coordinate.track.TooltipViewTracker
-import com.sourceplusplus.tooltip.display.TooltipUI
+import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
@@ -40,20 +42,19 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.List
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 class IntelliJMethodGutterMark extends GutterMark {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private static final AtomicBoolean buildingTooltipUI = new AtomicBoolean(false)
-    private static TooltipMouseMotionListener mouseMotionListener
+    private static final AtomicBoolean buildingPortalUI = new AtomicBoolean(false)
+    private static PortalMouseMotionListener mouseMotionListener
     private static Balloon currentShowingBalloon
     private static IntelliJMethodGutterMark currentShowingMark
     private static int scrollPosition
@@ -61,7 +62,6 @@ class IntelliJMethodGutterMark extends GutterMark {
     private final SourceArtifact sourceMethod
     private UMethod psiMethod
     private final SourceArtifactGutterMarkRenderer gutterMarkRenderer
-    private static AtomicInteger tooltipId = new AtomicInteger(0)
 
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, SourceArtifact sourceMethod, UMethod psiMethod) {
         super(sourceFileMarker)
@@ -71,82 +71,71 @@ class IntelliJMethodGutterMark extends GutterMark {
         this.gutterMarkRenderer = new SourceArtifactGutterMarkRenderer(this)
     }
 
-    static void closeTooltipIfOpen() {
+    static void closePortalIfOpen() {
         if (currentShowingBalloon != null) {
             currentShowingBalloon.hide()
             currentShowingBalloon = null
         }
         if (currentShowingMark != null) {
-            currentShowingMark.showingTooltipWindow.set(false)
+            currentShowingMark.showingPortalWindow.set(false)
             currentShowingMark = null
         }
     }
 
-    void displayTooltip(final Vertx vertx, final Editor editor, boolean hideOnMouseMotion) {
-        if (showingTooltipWindow.get()) {
-            return
-        } else if (buildingTooltipUI.getAndSet(true)) {
+    void displayPortal(final Vertx vertx, final Editor editor, boolean hideOnMouseMotion) {
+        if (!portalRegistered || showingPortalWindow.get() || buildingPortalUI.getAndSet(true)) {
             return
         }
 
-        vertx.eventBus().send(TooltipViewTracker.UPDATE_TOOLTIP_ARTIFACT, getArtifactQualifiedName())
+        final String portalUuid = this.portalUuid
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             void run() {
-                closeTooltipIfOpen()
-                def tooltipId = tooltipId.incrementAndGet()
+                closePortalIfOpen()
 
                 JBPopupFactory popupFactory = JBPopupFactory.getInstance()
                 BalloonImpl balloon = popupFactory
-                        .createBalloonBuilder(TooltipUI.tooltipUI)
+                        .createBalloonBuilder(SourcePortal.getPortal(portalUuid).interface.UIComponent)
+                        .setBorderInsets(JBUI.emptyInsets())
                         .setDialogMode(true)
                         .setFillColor(JBColor.background())
-                        .setAnimationCycle(1)
+                        .setAnimationCycle(0)
                         .createBalloon() as BalloonImpl
                 Disposer.register(editor.project, balloon)
-                balloon.addListener(new TooltipPopupListener(vertx, tooltipId))
+                balloon.addListener(new PortalPopupListener(vertx, portalUuid))
 
-                Point tooltipPoint = editor.visualPositionToXY(editor.offsetToVisualPosition(
+                Point portalPoint = editor.visualPositionToXY(editor.offsetToVisualPosition(
                         editor.document.getLineStartOffset(lineNumber)))
-                tooltipPoint.x = tooltipPoint.x + 370 as int
-                tooltipPoint.y = tooltipPoint.y - 145 as int
+                portalPoint.x = portalPoint.x + 380 as int
+                portalPoint.y = portalPoint.y - 125 as int
 
-                showingTooltipWindow.set(true)
-                buildingTooltipUI.getAndSet(false)
+                showingPortalWindow.set(true)
+                buildingPortalUI.getAndSet(false)
 
                 balloon.setShowPointer(false)
-                balloon.show(new RelativePoint(editor.contentComponent, tooltipPoint),
+                balloon.show(new RelativePoint(editor.contentComponent, portalPoint),
                         Balloon.Position.atRight)
                 currentShowingBalloon = balloon
                 currentShowingMark = IntelliJMethodGutterMark.this
                 scrollPosition = editor.scrollingModel.verticalScrollOffset
 
-                //dispose popup when mouse hovers off tooltip
+                //dispose popup when mouse hovers off portal
                 if (hideOnMouseMotion) {
                     editor.contentComponent.addMouseMotionListener(
-                            mouseMotionListener = new TooltipMouseMotionListener(tooltipId))
+                            mouseMotionListener = new PortalMouseMotionListener(portalUuid))
                 }
 
                 if (hideOnMouseMotion) {
                     //dispose popup when code has been scrolled
-                    editor.scrollingModel.addVisibleAreaListener(new TooltipVisibleAreaListener(tooltipId))
+                    editor.scrollingModel.addVisibleAreaListener(new PortalVisibleAreaListener(portalUuid))
                 } else {
                     //todo: smarter; it thinks it was scrolled after jumping to method; added delay :/
                     vertx.setTimer(1000, {
-                        editor.scrollingModel.addVisibleAreaListener(new TooltipVisibleAreaListener(tooltipId))
+                        editor.scrollingModel.addVisibleAreaListener(new PortalVisibleAreaListener(portalUuid))
                     })
                 }
             }
         })
-    }
-
-    boolean isViewable() {
-        try {
-            psiMethod.getContainingFile().getViewProvider().getDocument()
-            return true
-        } catch (PsiInvalidElementAccessException ex) {
-            return false
-        }
     }
 
     /**
@@ -239,56 +228,76 @@ class IntelliJMethodGutterMark extends GutterMark {
                 .getModuleForFile(psiMethod.getContainingFile().getVirtualFile()).name
     }
 
-    private class TooltipPopupListener implements JBPopupListener {
+    boolean isVisible() {
+        try {
+            psiMethod.getContainingFile().getViewProvider().getDocument()
+            return true
+        } catch (PsiInvalidElementAccessException ex) {
+            return false
+        }
+    }
+
+    @Override
+    boolean isViewable() {
+        return artifactSubscribed || artifactDataAvailable
+    }
+
+    private class PortalPopupListener implements JBPopupListener {
 
         private final Vertx vertx
-        private final long tooltipId
+        private final String portalUuid
 
-        TooltipPopupListener(Vertx vertx, long tooltipId) {
+        PortalPopupListener(Vertx vertx, String portalUuid) {
             this.vertx = Objects.requireNonNull(vertx)
-            this.tooltipId = tooltipId
+            this.portalUuid = portalUuid
         }
 
         @Override
         void beforeShown(LightweightWindowEvent event1) {
-            if (IntelliJMethodGutterMark.tooltipId.get() == tooltipId) {
-                vertx.eventBus().publish(TooltipViewTracker.OPENED_TOOLTIP, IntelliJMethodGutterMark.this.sourceMethod)
+            if (IntelliJMethodGutterMark.this.portalUuid == portalUuid) {
+                vertx.eventBus().publish(PortalViewTracker.OPENED_PORTAL,
+                        new JsonObject().put("portal_uuid", portalUuid).put("artifact_qualified_name",
+                                IntelliJMethodGutterMark.this.sourceMethod.artifactQualifiedName())
+                )
             }
         }
 
         @Override
         void onClosed(LightweightWindowEvent event1) {
-            if (IntelliJMethodGutterMark.tooltipId.get() == tooltipId) {
-                vertx.eventBus().publish(TooltipViewTracker.CLOSED_TOOLTIP, IntelliJMethodGutterMark.this.sourceMethod)
-                IntelliJMethodGutterMark.this.showingTooltipWindow.set(false)
+            if (IntelliJMethodGutterMark.this.portalUuid == portalUuid) {
+                vertx.eventBus().publish(PortalViewTracker.CLOSED_PORTAL,
+                        new JsonObject().put("portal_uuid", portalUuid).put("artifact_qualified_name",
+                                IntelliJMethodGutterMark.this.sourceMethod.artifactQualifiedName())
+                )
+                IntelliJMethodGutterMark.this.showingPortalWindow.set(false)
                 currentShowingBalloon = null
             }
         }
     }
 
-    private class TooltipVisibleAreaListener implements VisibleAreaListener {
+    private class PortalVisibleAreaListener implements VisibleAreaListener {
 
-        private final long tooltipId
+        private final String portalUuid
 
-        TooltipVisibleAreaListener(long tooltipId) {
-            this.tooltipId = tooltipId
+        PortalVisibleAreaListener(String portalUuid) {
+            this.portalUuid = portalUuid
         }
 
         @Override
         void visibleAreaChanged(VisibleAreaEvent e) {
-            if (currentShowingBalloon != null && IntelliJMethodGutterMark.tooltipId.get() == tooltipId) {
+            if (currentShowingBalloon != null && IntelliJMethodGutterMark.this.portalUuid == portalUuid) {
                 currentShowingBalloon.hide()
                 currentShowingBalloon = null
             }
         }
     }
 
-    private class TooltipMouseMotionListener implements MouseMotionListener {
+    private class PortalMouseMotionListener implements MouseMotionListener {
 
-        private final long tooltipId
+        private final String portalUuid
 
-        TooltipMouseMotionListener(long tooltipId) {
-            this.tooltipId = tooltipId
+        PortalMouseMotionListener(String portalUuid) {
+            this.portalUuid = portalUuid
         }
 
         @Override
@@ -297,8 +306,8 @@ class IntelliJMethodGutterMark extends GutterMark {
 
         @Override
         void mouseMoved(MouseEvent e2) {
-            //10 pixels on x coord puts mouse past gap
-            if (currentShowingBalloon != null && e2.point.x > 10 && IntelliJMethodGutterMark.tooltipId.get() == tooltipId) {
+            //13 pixels on x coord puts mouse past gutter
+            if (currentShowingBalloon != null && e2.point.x > 13 && IntelliJMethodGutterMark.this.portalUuid == portalUuid) {
                 currentShowingBalloon.hide()
                 currentShowingBalloon = null
             }

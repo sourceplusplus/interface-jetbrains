@@ -26,7 +26,7 @@ import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
  * Artifacts currently supported:
  *  - methods
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -95,7 +95,7 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
                                        MetricType.ResponseTime_75Percentile,
                                        MetricType.ResponseTime_50Percentile]
                     def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
-                            .appUuid(SourcePluginConfig.current.appUuid)
+                            .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                             .artifactQualifiedName(it.artifactQualifiedName)
                             .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
                             .metricTypes(metricTypes).build()
@@ -104,9 +104,9 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
 
                     //subscribe to traces
                     def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                            .appUuid(SourcePluginConfig.current.appUuid)
+                            .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                             .artifactQualifiedName(it.artifactQualifiedName)
-                            .orderType(TraceOrderType.LATEST_TRACES)
+                            .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
                             .build()
                     sourcePlugin.vertx.eventBus().send(
                             PluginArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, traceSubscribeRequest)

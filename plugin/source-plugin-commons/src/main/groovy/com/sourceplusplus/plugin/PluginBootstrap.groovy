@@ -3,31 +3,28 @@ package com.sourceplusplus.plugin
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.api.model.config.SourceTooltipConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
-import com.sourceplusplus.tooltip.TooltipBootstrap
+import com.sourceplusplus.portal.PortalBootstrap
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.Json
-import org.modellwerkstatt.javaxbus.EventBus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
  * Used to bootstrap the Source++ Plugin.
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -42,36 +39,10 @@ class PluginBootstrap extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
-        log.info("Source++ Plugin activated. App UUID: " + SourcePluginConfig.current.appUuid)
+        log.info("Source++ Plugin activated. App UUID: " + SourcePluginConfig.current.activeEnvironment.appUuid)
         registerCodecs()
         vertx.deployVerticle(new PluginCoordinator())
-        vertx.deployVerticle(new TooltipBootstrap(sourcePlugin.coreClient, true))
-
-        def pluginEventBus = EventBus.create(SourcePluginConfig.current.apiHost, SourcePluginConfig.current.apiBridgePort)
-        pluginEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
-            def artifact = Json.decodeValue(it.bodyAsMJson.toString(), SourceArtifact.class)
-            vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, artifact)
-        })
-        pluginEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
-            def artifactMetricResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactMetricResult.class)
-            vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, artifactMetricResult)
-        })
-        pluginEventBus.consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
-            def artifactTraceResult = Json.decodeValue(it.bodyAsMJson.toString(), ArtifactTraceResult.class)
-            vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, artifactTraceResult)
-        })
-
-        //start plugin ui bridge
-        sourcePlugin.startTooltipUIBridge({
-            if (it.failed()) {
-                log.error("Failed to start tooltip ui bridge", it.cause())
-                throw new RuntimeException(it.cause())
-            } else {
-                log.info("PluginBootstrap started")
-                SourceTooltipConfig.current.pluginUIPort = it.result().actualPort()
-                log.info("Using tooltip ui bridge port: " + SourceTooltipConfig.current.pluginUIPort)
-            }
-        })
+        vertx.deployVerticle(new PortalBootstrap(true))
     }
 
     @Override

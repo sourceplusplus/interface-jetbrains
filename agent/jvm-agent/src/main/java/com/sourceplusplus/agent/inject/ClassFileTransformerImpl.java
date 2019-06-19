@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  */
 public class ClassFileTransformerImpl implements ClassFileTransformer {
@@ -51,7 +51,7 @@ public class ClassFileTransformerImpl implements ClassFileTransformer {
         }
     }
 
-    public byte[] compileOneClass(String className, byte[] classBytes) {
+    private byte[] compileOneClass(String className, byte[] classBytes) {
         try {
             Logger.debug(String.format("Transforming class: %s", className));
             ClassReader cr = new ClassReader(classBytes);

@@ -16,3 +16,16 @@ before_cache:
 cache:
     - $HOME/.gradle/caches/modules-2
     - $HOME/.gradle/wrapper/
+
+deploy:
+  provider: releases
+  api_key: $GH_TOKEN
+  file:
+  - /home/travis/build/sourceplusplus/Assistant/agent/jvm-agent/build/libs/source-agent-0.2.0.jar
+  - /home/travis/build/sourceplusplus/Assistant/api/build/libs/source-api-0.2.0.jar
+  - /home/travis/build/sourceplusplus/Assistant/core/build/distributions/source-core-0.2.0.zip
+  - /home/travis/build/sourceplusplus/Assistant/plugin/jetbrains-plugin/build/distributions/jetbrains-source-plugin-0.2.0.zip
+  - /home/travis/build/sourceplusplus/Assistant/portal/build/distributions/source-portal-0.2.0.zip
+  skip_cleanup: true
+  on:
+    tags: true

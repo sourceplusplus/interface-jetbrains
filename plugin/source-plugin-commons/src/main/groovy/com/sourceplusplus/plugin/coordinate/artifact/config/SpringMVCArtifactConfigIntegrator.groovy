@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -45,8 +45,8 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
                         SPRING_WEB_ANNOTATIONS.contains(it.qualifiedName)
                     }.each {
                         def requestUrl = it.attributeMap.get("value") as String
-                        PluginBootstrap.sourcePlugin.coreClient.createArtifactConfig(
-                                SourcePluginConfig.current.appUuid, mark.artifactQualifiedName,
+                        SourcePluginConfig.current.activeEnvironment.coreClient.createOrUpdateArtifactConfig(
+                                SourcePluginConfig.current.activeEnvironment.appUuid, mark.artifactQualifiedName,
                                 SourceArtifactConfig.builder()
                                         .component("SpringMVC")
                                         .moduleName(mark.getModuleName())

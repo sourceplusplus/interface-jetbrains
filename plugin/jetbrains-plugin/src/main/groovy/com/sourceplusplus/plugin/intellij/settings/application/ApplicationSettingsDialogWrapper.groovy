@@ -6,6 +6,9 @@ import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.api.model.config.SourcePortalConfig
+import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import org.jetbrains.annotations.Nullable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,7 +18,7 @@ import javax.swing.*
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -58,8 +61,7 @@ class ApplicationSettingsDialogWrapper extends DialogWrapper {
     protected void doOKAction() {
         if (applicationSettings.getExistingApplication() != null) {
             //assign existing application
-            SourcePluginConfig.current.appUuid = applicationSettings.getExistingApplication().appUuid()
-            log.info("Application UUID updated: " + SourcePluginConfig.current.appUuid)
+            SourcePluginConfig.current.activeEnvironment.appUuid = applicationSettings.getExistingApplication().appUuid()
         } else {
             //create new application
             def createRequest = SourceApplication.builder().isCreateRequest(true)
@@ -71,9 +73,15 @@ class ApplicationSettingsDialogWrapper extends DialogWrapper {
             }
 
             def newApplication = coreClient.createApplication(createRequest.build())
-            SourcePluginConfig.current.appUuid = newApplication.appUuid()
-            log.info("Application UUID updated: " + SourcePluginConfig.current.appUuid)
+            SourcePluginConfig.current.activeEnvironment.appUuid = newApplication.appUuid()
         }
+        SourcePortalConfig.current.addCoreClient(SourcePluginConfig.current.activeEnvironment.appUuid, coreClient)
+        if (PluginBootstrap.getSourcePlugin() == null) {
+            IntelliJStartupActivity.startSourcePlugin(coreClient)
+            PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+        }
+        IntelliJStartupActivity.currentProject.save()
+        log.info("Application UUID updated: " + SourcePluginConfig.current.activeEnvironment.appUuid)
 
         okayAction = true
         super.doOKAction()

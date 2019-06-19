@@ -8,13 +8,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 abstract class GutterMark extends SourceMark {
 
-    final AtomicBoolean showingTooltipWindow = new AtomicBoolean()
+    final AtomicBoolean showingPortalWindow = new AtomicBoolean()
 
     GutterMark(@NotNull SourceFileMarker sourceFileMarker) {
         super(sourceFileMarker)

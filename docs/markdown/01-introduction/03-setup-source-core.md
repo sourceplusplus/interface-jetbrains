@@ -30,11 +30,11 @@ Once the above doesn't return `connection refused` you may continue setup.
 # Download Apache SkyWalking OAP
 ```sh
 cd /opt
-wget https://www-eu.apache.org/dist/incubator/skywalking/6.0.0-GA/apache-skywalking-apm-incubating-6.0.0-GA.tar.gz
-gunzip apache-skywalking-apm-incubating-6.0.0-GA.tar.gz
-tar -xvf apache-skywalking-apm-incubating-6.0.0-GA.tar
-rm apache-skywalking-apm-incubating-6.0.0-GA.tar
-mv apache-skywalking-apm-incubating apache-skywalking
+wget https://www-eu.apache.org/dist/skywalking/6.1.0/apache-skywalking-apm-6.1.0.tar.gz
+gunzip apache-skywalking-apm-6.1.0.tar.gz
+tar -xvf apache-skywalking-apm-6.1.0.tar
+rm apache-skywalking-apm-6.1.0.tar
+mv apache-skywalking-apm-bin apache-skywalking
 ```
 
 ## Start Apache SkyWalking OAP
@@ -53,10 +53,10 @@ Once the above doesn't return `connection refused` you can continue setup.
 # Download Source++ Core
 ```sh
 cd /opt
-wget https://github.com/CodeBrig/Source/releases/download/v0.1.4-alpha/source-core-0.1.4.tar
-tar -xvf source-core-0.1.4.tar
-rm source-core-0.1.4.tar
-mv source-core-0.1.4 source-core
+wget https://github.com/sourceplusplus/Assistant/releases/download/v0.2.0-alpha/source-core-0.2.0.tar
+tar -xvf source-core-0.2.0.tar
+rm source-core-0.2.0.tar
+mv source-core-0.2.0 source-core
 ```
 
 ## Start Source++ Core

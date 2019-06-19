@@ -5,10 +5,12 @@ import com.google.common.collect.Sets
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
-import com.sourceplusplus.api.model.metric.*
-import com.sourceplusplus.core.api.artifact.ArtifactAPI
+import com.sourceplusplus.api.model.metric.ArtifactMetricQuery
+import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
+import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
+import com.sourceplusplus.api.model.metric.MetricType
+import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
-import com.sourceplusplus.core.api.metric.MetricAPI
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.slf4j.Logger
@@ -21,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * todo: description
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -31,12 +33,10 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
     public static final String UNSUBSCRIBE_FROM_ARTIFACT_METRICS = "UnsubscribeFromArtifactMetrics"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
-    private final MetricAPI metricAPI
     private final Map<ApplicationArtifact, Map<QueryTimeFrame, Set<MetricType>>> metricSubscriptions
 
-    MetricSubscriptionTracker(ArtifactAPI artifactAPI, MetricAPI metricAPI) {
-        super(artifactAPI)
-        this.metricAPI = Objects.requireNonNull(metricAPI)
+    MetricSubscriptionTracker(SourceCore core) {
+        super(core)
         metricSubscriptions = new ConcurrentHashMap<>()
     }
 
@@ -117,7 +117,7 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
                 .stop(Instant.now())
                 .step("MINUTE")
                 .build()
-        metricAPI.getArtifactMetrics(metricQuery, {
+        core.metricAPI.getArtifactMetrics(metricQuery, {
             if (it.succeeded()) {
                 def metricResult = it.result()
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address,
