@@ -35,7 +35,7 @@ import java.time.temporal.ChronoUnit
  *  - Minimum/Maximum response time
  *  - Average SLA
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 /**
  * Used to display and configure a given source code artifact.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

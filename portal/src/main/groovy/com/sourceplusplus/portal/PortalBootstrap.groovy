@@ -47,7 +47,7 @@ import java.nio.charset.StandardCharsets
  * The portal is able to fetch and display runtime behavior without interacting with the Source++ Plugin.
  * This allows the portal to be independently outside the IDE.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

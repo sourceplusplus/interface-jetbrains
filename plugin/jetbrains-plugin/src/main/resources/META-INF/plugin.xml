@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.sourceplusplus.plugin.intellij</id>
     <name>Source++</name>
-    <version>0.2.0-alpha</version>
+    <version>0.2.1-alpha</version>
     <vendor email="support@sourceplusplus.com" url="https://sourceplusplus.com">Source++ Team</vendor>
 
     <description><![CDATA[
