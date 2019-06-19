@@ -85,8 +85,7 @@ class AdminAPI extends AbstractVerticle {
         })
     }
 
-    private void updateIntegrationInfo(IntegrationInfo integrationInfo,
-                                       Handler<AsyncResult<IntegrationInfo>> handler) {
+    void updateIntegrationInfo(IntegrationInfo integrationInfo, Handler<AsyncResult<IntegrationInfo>> handler) {
         def currentInfo = core.integrations.find { it.id() == integrationInfo.id() }
         if (currentInfo) {
             integrationInfo = integrationInfo
