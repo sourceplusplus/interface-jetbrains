@@ -43,9 +43,16 @@ The overview tab displays general artifact statistics to gather an overall view 
  - Average SLA
 
 ### Traces
+
+The traces tab is used to navigate gathered distributed traces. The traces tab is able to display the latest and slowest traces for a given source code artifact. 
+
+#### Latest Traces
+
 ![](../../images/portal/latest_traces.png)
 
-The traces tab is used to navigate gathered distributed traces. The traces tab displays the latest traces which a given source artifact created. 
+#### Slowest Traces
+
+![](../../images/portal/slowest_traces.png)
 
 ## Source++ Plugin
 
