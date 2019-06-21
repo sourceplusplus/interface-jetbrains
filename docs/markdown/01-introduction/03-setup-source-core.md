@@ -55,4 +55,4 @@ Once the above doesn't return `connection refused` you have successfully started
 
 # Next Step
 
-- [Configure Source++ Core](./04-configure-source-core.md)
+- [Install Source++ Plugin](./05-install-source-plugin.md) or [Configure Source++ Core](./04-configure-source-core.md)
