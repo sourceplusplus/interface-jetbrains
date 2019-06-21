@@ -26,21 +26,17 @@ The Source++ Core is the central component used to coordinate the Source++ Agent
 
 The Source++ Portal is the most visual portion of Source++. The portal is used to display relevant runtime statistics next to the associated source code artifact. 
 
-The portal currently contains two tabs:
+The portal currently contains three tabs:
 
  - Overview
  - Traces
+ - Configuration
 
 ### Overview
+
+The overview tab displays general artifact statistics to gather an overall view of a source code artifact's runtime behavior. 
+
 ![](../../images/portal/overview_last_15_minutes.png)
-
-The overview tab displays general artifact statistics to gather an overall view of the artifact's runtime behavior. On this tab you can view:
-
- - Average throughput
- - Average response time
- - 99/95/90/75/50 response time percentiles
- - Minimum/Maximum response time
- - Average SLA
 
 ### Traces
 
@@ -53,6 +49,12 @@ The traces tab is used to navigate gathered distributed traces. The traces tab i
 #### Slowest Traces
 
 ![](../../images/portal/slowest_traces.png)
+
+### Configuration
+
+The configuration tab is used to configure how Source++ handles specific source code artifacts.
+
+![](../../images/portal/configuration_tab.png)
 
 ## Source++ Plugin
 
