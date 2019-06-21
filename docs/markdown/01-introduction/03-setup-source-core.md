@@ -43,7 +43,6 @@ mv source-core-0.2.0 source-core
 ## Start Source++ Core
 ```sh
 cd /opt/source-core
-export SOURCE_CONFIG=/opt/source-core/config/source-core.json
 nohup ./bin/source-core >/dev/null 2>&1 &
 ```
 
