@@ -1,31 +1,12 @@
 In order to setup Source++ Core you will need:
 
  * [Java](https://www.oracle.com/java/)
- * [Elasticsearch](https://www.elastic.co/products/elasticsearch)
  * [Apache SkyWalking OAP](https://skywalking.apache.org/)
 
 # Install Java (JDK 8)
 ```sh
 apt-get update && sudo apt install -y openjdk-8-jdk
 ```
-
-# Install Elasticsearch
-
-```sh
-wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.5.4.deb
-sudo dpkg -i elasticsearch-6.5.4.deb
-sudo /bin/systemctl daemon-reload
-sudo /bin/systemctl enable elasticsearch.service
-sudo /bin/systemctl start elasticsearch.service
-rm elasticsearch-6.5.4.deb
-```
-
-Elasticsearch may take some time to boot. You can verify when it's available by using:
-```sh
-curl -XGET 'localhost:9200'
-```
-
-Once the above doesn't return `connection refused` you may continue setup.
 
 # Download Apache SkyWalking OAP
 ```sh
@@ -71,7 +52,7 @@ Source++ Core may take some time to boot. You can verify when it's available by 
 curl -XGET 'localhost:8080'
 ```
 
-Once the above doesn't return `connection refused` you have successfully finished setting up Source++ Core!
+Once the above doesn't return `connection refused` you have successfully started Source++ Core! Now all you will need to do is integrate the two services together. This can be easily done via the Source++ Plugin.
 
 # Next Step
 
