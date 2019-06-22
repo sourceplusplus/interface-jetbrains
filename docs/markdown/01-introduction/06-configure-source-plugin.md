@@ -16,13 +16,7 @@ Clicking "Setup via Docker" will bring up the following window and begin downloa
 
 ![](../../images/plugin/Setup%20via%20Docker.png)
 
-Alternatively, you can achieve the same thing by running:
-
-```bash
-docker run -p 8080:8080 -d sourceplusplus/core-and-apache-skywalking:v0.2.1-alpha
-```
-
-After that you can click "Create" and manually input the required connection settings.
+This will automatically create the required connection settings.
 
 ![](../../images/plugin/Connect%20Source++.png)
 
