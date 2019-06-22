@@ -11,7 +11,7 @@ apt-get update && sudo apt install -y openjdk-8-jdk
 # Download Apache SkyWalking OAP
 ```sh
 cd /opt
-wget https://www-eu.apache.org/dist/skywalking/6.1.0/apache-skywalking-apm-6.1.0.tar.gz
+wget https://www-us.apache.org/dist/skywalking/6.1.0/apache-skywalking-apm-6.1.0.tar.gz
 gunzip apache-skywalking-apm-6.1.0.tar.gz
 tar -xvf apache-skywalking-apm-6.1.0.tar
 rm apache-skywalking-apm-6.1.0.tar
@@ -34,9 +34,9 @@ Once the above doesn't return `connection refused` you can continue setup.
 # Download Source++ Core
 ```sh
 cd /opt
-wget https://github.com/sourceplusplus/Assistant/releases/download/v0.2.1-alpha/source-core-0.2.1.tar
-tar -xvf source-core-0.2.1.tar
-rm source-core-0.2.1.tar
+wget https://github.com/sourceplusplus/Assistant/releases/download/v0.2.1-alpha/source-core-0.2.1.zip
+unzip source-core-0.2.1.zip
+rm source-core-0.2.1.zip
 mv source-core-0.2.1 source-core
 ```
 
