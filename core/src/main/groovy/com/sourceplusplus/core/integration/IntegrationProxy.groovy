@@ -67,8 +67,8 @@ class IntegrationProxy extends AbstractVerticle {
         }
         CompositeFuture.all(proxyIntegrationFutures).setHandler({
             if (it.succeeded()) {
-                fut.complete()
                 log.info("IntegrationProxy started", getClass().getSimpleName())
+                fut.complete()
             } else {
                 fut.fail(new IllegalStateException("Failed to start SkyWalking OAP gRPC proxy"))
             }
