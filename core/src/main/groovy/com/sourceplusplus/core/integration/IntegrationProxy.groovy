@@ -55,7 +55,7 @@ class IntegrationProxy extends AbstractVerticle {
                         if (it.succeeded()) {
                             log.info("Started integration proxy. Proxy port: $proxyPort - Actual port: $actualPort")
                             vertx.sharedData().getLocalMap("integration.proxy")
-                                    .put(proxyPort.toString(), actualPort)
+                                    .put(actualPort.toString(), proxyPort)
                             proxyFuture.complete()
                         } else {
                             proxyFuture.fail(new IllegalStateException(
