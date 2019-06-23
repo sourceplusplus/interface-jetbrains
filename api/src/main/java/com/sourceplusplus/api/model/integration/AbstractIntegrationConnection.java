@@ -1,9 +1,12 @@
 package com.sourceplusplus.api.model.integration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sourceplusplus.api.model.SourceStyle;
 import org.immutables.value.Value;
+
+import javax.annotation.Nullable;
 
 /**
  * todo: description
@@ -14,6 +17,7 @@ import org.immutables.value.Value;
  */
 @SourceStyle
 @Value.Immutable
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonSerialize(as = IntegrationConnection.class)
 @JsonDeserialize(as = IntegrationConnection.class)
 public interface AbstractIntegrationConnection {
@@ -21,4 +25,7 @@ public interface AbstractIntegrationConnection {
     String getHost();
 
     int getPort();
+
+    @Nullable
+    Integer getProxyPort();
 }

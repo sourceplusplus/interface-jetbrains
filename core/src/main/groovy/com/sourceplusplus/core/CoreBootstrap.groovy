@@ -15,6 +15,8 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourceCoreConfig
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.info.SourceCoreInfo
+import com.sourceplusplus.api.model.integration.ConnectionType
+import com.sourceplusplus.api.model.integration.IntegrationConnection
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.*
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
@@ -170,10 +172,23 @@ class CoreBootstrap extends AbstractVerticle {
         //general info (version, etc)
         v1ApiRouter.get("/info").handler({
             def version = BUILD.getString("version")
+            def activeIntegrations = core.getActiveIntegrations()
+            def publicActiveIntegrations = []
+            activeIntegrations.each {
+                def updatedConnections = new HashMap<ConnectionType, IntegrationConnection>(it.connections())
+                updatedConnections.each {
+                    def port = it.value.port
+                    def publicPort = vertx.sharedData().getLocalMap("integration.proxy")
+                            .getOrDefault(port.toString(), port) as int
+                    updatedConnections.put(it.key, it.value.withPort(publicPort).withProxyPort(null))
+                }
+                publicActiveIntegrations += it.withConnections(updatedConnections)
+            }
+
             def coreInfo = SourceCoreInfo.builder()
                     .version(version)
                     .config(SourceCoreConfig.current)
-                    .activeIntegrations(core.getActiveIntegrations())
+                    .activeIntegrations(publicActiveIntegrations)
             if (version != "dev") {
                 coreInfo.buildDate(Instant.parse(BUILD.getString("build_date")))
             }

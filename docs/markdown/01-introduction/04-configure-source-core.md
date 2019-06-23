@@ -28,11 +28,13 @@
       "connections": {
         "REST": {
           "host": "localhost",
-          "port": 12800
+          "port": 12800,
+          "proxy_port": 12799
         },
         "gRPC": {
           "host": "localhost",
-          "port": 11800
+          "port": 11800,
+          "proxy_port": 11799
         }
       },
       "config": {
@@ -89,6 +91,7 @@
 | ----------------------------------- | --------- | ------------------------------------------------------------ |
 | host                                | localhost | The address of the SkyWalking OAP instance to connect to     |
 | port                                | 12800     | The port of the SkyWalking OAP instance to connect to        |
+| proxy_port                          | 12799     | The proxy port to use (`secure_mode` must be true to enable) |
 
 ##### gRPC
 
@@ -96,6 +99,7 @@
 | ----------------------------------- | --------- | ------------------------------------------------------------ |
 | host                                | localhost | The address of the SkyWalking OAP instance to connect to     |
 | port                                | 11800     | The port of the SkyWalking OAP instance to connect to        |
+| proxy_port                          | 11799     | The proxy port to use (`secure_mode` must be true to enable) |
 
 #### Config
 
