@@ -1,6 +1,7 @@
 {
   "enabled": true,
   "test_mode": false,
+  "manual_setup_mode": false,
   "log_level": "info",
   "log_location": null,
   "application": {

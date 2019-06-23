@@ -12,6 +12,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
+import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.api.model.config.SourceCoreConfig
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.info.SourceCoreInfo
@@ -171,28 +172,7 @@ class CoreBootstrap extends AbstractVerticle {
 
         //general info (version, etc)
         v1ApiRouter.get("/info").handler({
-            def version = BUILD.getString("version")
-            def activeIntegrations = core.getActiveIntegrations()
-            def publicActiveIntegrations = []
-            activeIntegrations.each {
-                def updatedConnections = new HashMap<ConnectionType, IntegrationConnection>(it.connections())
-                updatedConnections.each {
-                    def port = it.value.port
-                    def publicPort = vertx.sharedData().getLocalMap("integration.proxy")
-                            .getOrDefault(port.toString(), port) as int
-                    updatedConnections.put(it.key, it.value.withPort(publicPort).withProxyPort(null))
-                }
-                publicActiveIntegrations += it.withConnections(updatedConnections)
-            }
-
-            def coreInfo = SourceCoreInfo.builder()
-                    .version(version)
-                    .config(SourceCoreConfig.current)
-                    .activeIntegrations(publicActiveIntegrations)
-            if (version != "dev") {
-                coreInfo.buildDate(Instant.parse(BUILD.getString("build_date")))
-            }
-            it.response().setStatusCode(200).end(Json.encode(coreInfo.build()))
+            it.response().setStatusCode(200).end(Json.encode(getSourceCoreInfo(core, true)))
         })
         v1ApiRouter.get("/registerIP").handler({
             def ipAddress = it.request().remoteAddress().host()
@@ -211,6 +191,7 @@ class CoreBootstrap extends AbstractVerticle {
             if (it.succeeded()) {
                 vertx.deployVerticle(core, new DeploymentOptions().setConfig(config()), {
                     if (it.succeeded()) {
+                        enableSelfMonitoring(core)
                         log.info("Source++ Core online!")
                         startFuture.complete()
                     } else {
@@ -271,6 +252,62 @@ class CoreBootstrap extends AbstractVerticle {
             context.next()
         })
         return router
+    }
+
+    private void enableSelfMonitoring(SourceCore core) {
+        Class agentClass
+        try {
+            agentClass = Class.forName("com.sourceplusplus.agent.SourceAgent")
+        } catch (ClassNotFoundException ex) {
+            log.info("Self monitoring disabled")
+            return
+        }
+
+        def sourceCoreApplication = SourceApplication.builder()
+                .appName("source-core").isCreateRequest(true).build()
+        core.applicationAPI.createApplication(sourceCoreApplication, {
+            if (it.succeeded()) {
+                def application = it.result()
+                def agentConfig = new SourceAgentConfig()
+                agentConfig.appUuid = application.appUuid()
+
+                agentClass.getMethod("overrideSourceAgentConfig", SourceAgentConfig.class)
+                        .invoke(null, agentConfig)
+                agentClass.getMethod("startArtifactTraceSubscriptionSync").invoke(null)
+                agentClass.getMethod("bootIntegrations", SourceCoreInfo.class)
+                        .invoke(null, getSourceCoreInfo(core, false))
+                log.info("Self monitoring enabled")
+            } else {
+                log.error("Failed to create application for self monitoring", it.cause())
+            }
+        })
+    }
+
+    private SourceCoreInfo getSourceCoreInfo(SourceCore core, boolean resolveProxyPorts) {
+        def version = BUILD.getString("version")
+        def activeIntegrations = core.getActiveIntegrations()
+        def publicActiveIntegrations = []
+        activeIntegrations.each {
+            def updatedConnections = new HashMap<ConnectionType, IntegrationConnection>(it.connections())
+            if (resolveProxyPorts) {
+                updatedConnections.each {
+                    def port = it.value.port
+                    def publicPort = vertx.sharedData().getLocalMap("integration.proxy")
+                            .getOrDefault(port.toString(), port) as int
+                    updatedConnections.put(it.key, it.value.withPort(publicPort).withProxyPort(null))
+                }
+            }
+            publicActiveIntegrations += it.withConnections(updatedConnections)
+        }
+
+        def coreInfo = SourceCoreInfo.builder()
+                .version(version)
+                .config(SourceCoreConfig.current)
+                .activeIntegrations(publicActiveIntegrations)
+        if (version != "dev") {
+            coreInfo.buildDate(Instant.parse(BUILD.getString("build_date")))
+        }
+        return coreInfo.build()
     }
 
     @NotNull

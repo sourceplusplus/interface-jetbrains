@@ -119,58 +119,79 @@ public class SourceAgent {
             SourceAgent.instrumentation = instrumentation;
             Logger.info("Build: " + BUILD.getString("build_date"));
 
-            coreClient = new SourceCoreClient(SourceAgentConfig.current.apiHost, SourceAgentConfig.current.apiPort,
-                    SourceAgentConfig.current.apiSslEnabled);
-            if (SourceAgentConfig.current.apiKey != null) {
-                coreClient.setApiKey(SourceAgentConfig.current.apiKey);
+            SourceCoreInfo coreInfo = null;
+            if (!SourceAgentConfig.current.manualSetupMode) {
+                coreClient = new SourceCoreClient(SourceAgentConfig.current.apiHost, SourceAgentConfig.current.apiPort,
+                        SourceAgentConfig.current.apiSslEnabled);
+                if (SourceAgentConfig.current.apiKey != null) {
+                    coreClient.setApiKey(SourceAgentConfig.current.apiKey);
+                }
+                coreClient.registerIP();
+                coreInfo = coreClient.info();
             }
-            coreClient.registerIP();
-            SourceCoreInfo coreInfo = coreClient.info();
             Logger.info("Source++ Agent initialized");
 
             if (SourceAgentConfig.current.testMode) {
                 ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
                 instrumentation.addTransformer(sTransformer, true);
                 traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient);
-            } else if (SourceAgentConfig.current.appUuid != null) {
-                Logger.info("Getting Source++ application");
-                SourceApplication application = coreClient.getApplication(SourceAgentConfig.current.appUuid);
-                if (application != null) {
-                    Logger.warn(String.format("Found application. App name: %s - App uuid: %s",
-                            application.appName(), application.appUuid()));
+            } else if (SourceAgentConfig.current.appUuid != null || SourceAgentConfig.current.manualSetupMode) {
+                if (!SourceAgentConfig.current.manualSetupMode) {
+                    Logger.info("Getting Source++ application");
+                    SourceApplication application = coreClient.getApplication(SourceAgentConfig.current.appUuid);
+                    if (application != null) {
+                        Logger.warn(String.format("Found application. App name: %s - App uuid: %s",
+                                application.appName(), application.appUuid()));
 
-                    if (application.agentConfig() != null) {
-                        Logger.info("Overriding agent config with: " + application.agentConfig());
-                        SourceAgentConfig.current.applyConfig(application.agentConfig().toJsonObject());
+                        if (application.agentConfig() != null) {
+                            overrideSourceAgentConfig(application.agentConfig());
+                        }
+                    } else {
+                        throw new IllegalStateException("Could not find application: " + SourceAgentConfig.current.appUuid);
                     }
-                    ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
-                    instrumentation.addTransformer(sTransformer, true);
+                }
 
-                    Thread daemonThread = new Thread(() -> {
-                        workScheduler.scheduleAtFixedRate(traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient),
-                                0, ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);
-                    });
-                    daemonThread.setDaemon(true);
-                    daemonThread.start();
-                } else {
-                    throw new IllegalStateException("Could not find application: " + SourceAgentConfig.current.appUuid);
+                ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
+                instrumentation.addTransformer(sTransformer, true);
+                if (!SourceAgentConfig.current.manualSetupMode) {
+                    startArtifactTraceSubscriptionSync();
                 }
             } else {
                 throw new IllegalStateException("Source++ Agent configuration is missing appUuid");
             }
 
-            Logger.info("Booting Source++ integrations");
-            coreInfo.activeIntegrations().parallelStream().forEach(info -> {
-                switch (info.id()) {
-                    case "apache_skywalking":
-                        bootApacheSkyWalking(info);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Invalid integration: " + info.id());
-                }
-            });
+            if (!SourceAgentConfig.current.manualSetupMode) {
+                bootIntegrations(coreInfo);
+            }
             Logger.info("Source++ Agent successfully started");
         }
+    }
+
+    public static void overrideSourceAgentConfig(SourceAgentConfig agentConfig) {
+        Logger.info("Overriding Source++ Agent configuration with: " + agentConfig);
+        SourceAgentConfig.current.applyConfig(agentConfig.toJsonObject());
+    }
+
+    public static void startArtifactTraceSubscriptionSync() {
+        Thread daemonThread = new Thread(() -> {
+            workScheduler.scheduleAtFixedRate(traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient),
+                    0, ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);
+        });
+        daemonThread.setDaemon(true);
+        daemonThread.start();
+    }
+
+    public static void bootIntegrations(SourceCoreInfo coreInfo) {
+        Logger.info("Booting Source++ integrations");
+        coreInfo.activeIntegrations().parallelStream().forEach(info -> {
+            switch (info.id()) {
+                case "apache_skywalking":
+                    bootApacheSkyWalking(info);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid integration: " + info.id());
+            }
+        });
     }
 
     private static void bootApacheSkyWalking(IntegrationInfo info) {
@@ -243,11 +264,11 @@ public class SourceAgent {
 
     private static void loadConfiguration() {
         InputStream configInputStream;
-        String environmentConfigFile = System.getenv("SOURCE_CONFIG");
+        String environmentConfigFile = System.getenv("SOURCE_AGENT_CONFIG");
         if (environmentConfigFile != null) {
             configInputStream = getConfigInputStream(environmentConfigFile);
         } else {
-            configInputStream = getConfigInputStream(System.getProperty("SOURCE_CONFIG"));
+            configInputStream = getConfigInputStream(System.getProperty("SOURCE_AGENT_CONFIG"));
         }
         String configData = convertStreamToString(configInputStream);
         SourceAgentConfig.current.applyConfig(new JsonObject(configData));
