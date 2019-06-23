@@ -33,10 +33,11 @@ class IntegrationProxy extends AbstractVerticle {
                 def conn = connection.value as JsonObject
                 def proxyPort = conn.getInteger("proxy_port")
                 if (proxyPort) {
+                    def actualPort = conn.getInteger("port")
                     def proxyFuture = Future.future()
                     proxyIntegrationFutures += proxyFuture
                     vertx.createNetServer().connectHandler({ clientSocket ->
-                        vertx.createNetClient().connect(conn.getInteger("port"), "localhost", { serverSocket ->
+                        vertx.createNetClient().connect(actualPort, "localhost", { serverSocket ->
                             if (serverSocket.succeeded()) {
                                 log.debug("Connection request from IP address: " + clientSocket.remoteAddress())
 
@@ -52,8 +53,9 @@ class IntegrationProxy extends AbstractVerticle {
                         })
                     }).listen(proxyPort, {
                         if (it.succeeded()) {
+                            log.info("Started integration proxy. Proxy port: $proxyPort - Actual port: $actualPort")
                             vertx.sharedData().getLocalMap("integration.proxy")
-                                    .put(proxyPort.toString(), conn.getInteger("port"))
+                                    .put(proxyPort.toString(), actualPort)
                             proxyFuture.complete()
                         } else {
                             proxyFuture.fail(new IllegalStateException(
