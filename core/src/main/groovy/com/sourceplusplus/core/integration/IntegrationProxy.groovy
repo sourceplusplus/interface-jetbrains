@@ -36,7 +36,7 @@ class IntegrationProxy extends AbstractVerticle {
                     def proxyFuture = Future.future()
                     proxyIntegrationFutures += proxyFuture
                     vertx.createNetServer().connectHandler({ clientSocket ->
-                        vertx.createNetClient().connect(proxyPort, "localhost", { serverSocket ->
+                        vertx.createNetClient().connect(conn.getInteger("port"), "localhost", { serverSocket ->
                             if (serverSocket.succeeded()) {
                                 log.debug("Connection request from IP address: " + clientSocket.remoteAddress())
 
@@ -50,7 +50,7 @@ class IntegrationProxy extends AbstractVerticle {
                                 clientSocket.close()
                             }
                         })
-                    }).listen(conn.getInteger("port"), {
+                    }).listen(proxyPort, {
                         if (it.succeeded()) {
                             vertx.sharedData().getLocalMap("integration.proxy")
                                     .put(proxyPort.toString(), conn.getInteger("port"))
