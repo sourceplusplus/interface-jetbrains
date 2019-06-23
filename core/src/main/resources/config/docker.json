@@ -26,12 +26,12 @@
         "REST": {
           "host": "skywalking-oap",
           "port": 12800,
-          "proxy_port": 12799
+          "proxy_port": 12800
         },
         "gRPC": {
           "host": "skywalking-oap",
           "port": 11800,
-          "proxy_port": 11799
+          "proxy_port": 11800
         }
       },
       "config": {
