@@ -172,7 +172,7 @@ class CoreBootstrap extends AbstractVerticle {
 
         //general info (version, etc)
         v1ApiRouter.get("/info").handler({
-            it.response().setStatusCode(200).end(Json.encode(getSourceCoreInfo(core, true)))
+            it.response().setStatusCode(200).end(Json.encode(getSourceCoreInfo(core)))
         })
         v1ApiRouter.get("/registerIP").handler({
             def ipAddress = it.request().remoteAddress().host()
@@ -277,7 +277,7 @@ class CoreBootstrap extends AbstractVerticle {
                                 .invoke(null, agentConfig)
                         agentClass.getMethod("startArtifactTraceSubscriptionSync").invoke(null)
                         agentClass.getMethod("bootIntegrations", SourceCoreInfo.class)
-                                .invoke(null, getSourceCoreInfo(core, false))
+                                .invoke(null, getSourceCoreInfo(core))
                         it.complete()
                     } catch (all) {
                         it.fail(all)
@@ -295,19 +295,17 @@ class CoreBootstrap extends AbstractVerticle {
         })
     }
 
-    private SourceCoreInfo getSourceCoreInfo(SourceCore core, boolean resolveProxyPorts) {
+    private SourceCoreInfo getSourceCoreInfo(SourceCore core) {
         def version = BUILD.getString("version")
         def activeIntegrations = core.getActiveIntegrations()
         def publicActiveIntegrations = []
         activeIntegrations.each {
             def updatedConnections = new HashMap<ConnectionType, IntegrationConnection>(it.connections())
-            if (resolveProxyPorts) {
-                updatedConnections.each {
-                    def port = it.value.port
-                    def publicPort = vertx.sharedData().getLocalMap("integration.proxy")
-                            .getOrDefault(port.toString(), port) as int
-                    updatedConnections.put(it.key, it.value.withPort(publicPort).withProxyPort(null))
-                }
+            updatedConnections.each {
+                def port = it.value.port
+                def publicPort = vertx.sharedData().getLocalMap("integration.proxy")
+                        .getOrDefault(port.toString(), port) as int
+                updatedConnections.put(it.key, it.value.withPort(publicPort).withProxyPort(null))
             }
             publicActiveIntegrations += it.withConnections(updatedConnections)
         }
