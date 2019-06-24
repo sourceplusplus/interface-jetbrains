@@ -154,7 +154,7 @@ public class SourceAgent {
                 ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
                 instrumentation.addTransformer(sTransformer, true);
                 if (!SourceAgentConfig.current.manualSetupMode) {
-                    startArtifactTraceSubscriptionSync();
+                    startArtifactTraceSubscriptionSync(coreClient);
                 }
             } else {
                 throw new IllegalStateException("Source++ Agent configuration is missing appUuid");
@@ -173,6 +173,16 @@ public class SourceAgent {
     }
 
     public static void startArtifactTraceSubscriptionSync() {
+        coreClient = new SourceCoreClient(SourceAgentConfig.current.apiHost, SourceAgentConfig.current.apiPort,
+                SourceAgentConfig.current.apiSslEnabled);
+        if (SourceAgentConfig.current.apiKey != null) {
+            coreClient.setApiKey(SourceAgentConfig.current.apiKey);
+        }
+        coreClient.registerIP();
+        startArtifactTraceSubscriptionSync(coreClient);
+    }
+
+    private static void startArtifactTraceSubscriptionSync(SourceCoreClient coreClient) {
         Thread daemonThread = new Thread(() -> {
             workScheduler.scheduleAtFixedRate(traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient),
                     0, ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);

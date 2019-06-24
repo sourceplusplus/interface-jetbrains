@@ -271,12 +271,24 @@ class CoreBootstrap extends AbstractVerticle {
                 def agentConfig = new SourceAgentConfig()
                 agentConfig.appUuid = application.appUuid()
 
-                agentClass.getMethod("overrideSourceAgentConfig", SourceAgentConfig.class)
-                        .invoke(null, agentConfig)
-                agentClass.getMethod("startArtifactTraceSubscriptionSync").invoke(null)
-                agentClass.getMethod("bootIntegrations", SourceCoreInfo.class)
-                        .invoke(null, getSourceCoreInfo(core, false))
-                log.info("Self monitoring enabled")
+                vertx.executeBlocking({
+                    try {
+                        agentClass.getMethod("overrideSourceAgentConfig", SourceAgentConfig.class)
+                                .invoke(null, agentConfig)
+                        agentClass.getMethod("startArtifactTraceSubscriptionSync").invoke(null)
+                        agentClass.getMethod("bootIntegrations", SourceCoreInfo.class)
+                                .invoke(null, getSourceCoreInfo(core, false))
+                        it.complete()
+                    } catch (all) {
+                        it.fail(all)
+                    }
+                }, false, {
+                    if (it.succeeded()) {
+                        log.info("Self monitoring enabled")
+                    } else {
+                        log.error("Failed to enable self monitoring", it.cause())
+                    }
+                })
             } else {
                 log.error("Failed to create application for self monitoring", it.cause())
             }
