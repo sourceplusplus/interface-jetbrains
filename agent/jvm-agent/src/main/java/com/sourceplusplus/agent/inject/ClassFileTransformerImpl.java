@@ -79,8 +79,8 @@ public class ClassFileTransformerImpl implements ClassFileTransformer {
                 Pattern p = (Pattern) patternsForASMClass;
                 Matcher m = p.matcher(className);
                 if (m.matches()) {
-                    matchFound = SourceAgentConfig.current.testMode || SourceAgentConfig.current.manualSetupMode
-                            || !className.startsWith("com/sourceplusplus/");
+                    matchFound = SourceAgentConfig.current.testMode
+                            || !className.startsWith("com/sourceplusplus/agent/");
                 }
             }
         }
