@@ -40,8 +40,24 @@ class AdminAPI extends AbstractVerticle {
         core.baseRouter.get("/admin/integrations/apache_skywalking/searchForNewEndpoints")
                 .handler(this.&searchForNewEndpointsRoute)
         core.baseRouter.get("/admin/storage/refresh")
-                .handler(this.&refreshStorage)
+                .handler(this.&refreshStorageRoute)
+        core.baseRouter.delete("/admin/core/shutdown")
+                .handler(this.&shutdownCoreRoute)
         log.info("{} started", getClass().getSimpleName())
+    }
+
+    private shutdownCoreRoute(RoutingContext routingContext) {
+        log.info("Shutting down Source++ Core")
+        routingContext.response().setStatusCode(200).end()
+
+        vertx.close({
+            if (it.succeeded()) {
+                def restartServer = routingContext.request().getParam("restartServer")
+                shutdown(restartServer && Boolean.valueOf(restartServer))
+            } else {
+                log.error("Failed to shutdown Source++ Core", it.cause())
+            }
+        })
     }
 
     private getIntegrationsRoute(RoutingContext routingContext) {
@@ -126,7 +142,7 @@ class AdminAPI extends AbstractVerticle {
         })
     }
 
-    private void refreshStorage(RoutingContext routingContext) {
+    private void refreshStorageRoute(RoutingContext routingContext) {
         if (core.storage.needsManualRefresh()) {
             //todo: not hardcode elasticsearch
             vertx.eventBus().send(ElasticsearchDAO.REFRESH_STORAGE, true, {
@@ -135,5 +151,21 @@ class AdminAPI extends AbstractVerticle {
         } else {
             routingContext.response().setStatusCode(200).end()
         }
+    }
+
+    private static void shutdown(boolean restartServer) throws RuntimeException, IOException {
+        if (restartServer) {
+            String shutdownCommand
+            String operatingSystem = System.getProperty("os.name")
+            if ("Linux" == operatingSystem || "Mac OS X" == operatingSystem) {
+                shutdownCommand = "shutdown -r now"
+            } else if ("Windows" == operatingSystem) {
+                shutdownCommand = "shutdown.exe -s -t 0"
+            } else {
+                throw new RuntimeException("Unsupported operating system.")
+            }
+            Runtime.getRuntime().exec(shutdownCommand)
+        }
+        System.exit(0)
     }
 }

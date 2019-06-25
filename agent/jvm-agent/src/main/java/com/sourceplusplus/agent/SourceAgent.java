@@ -1,5 +1,7 @@
 package com.sourceplusplus.agent;
 
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.MetricRegistry;
 import com.sourceplusplus.agent.inject.ClassFileTransformerImpl;
 import com.sourceplusplus.agent.intercept.logger.SourceLoggerResolver;
 import com.sourceplusplus.agent.sync.ArtifactTraceSubscriptionSync;
@@ -33,6 +35,7 @@ import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -45,6 +48,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 public class SourceAgent {
 
+    public static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
     public static final ResourceBundle BUILD = ResourceBundle.getBundle("source-agent_build");
 
     private static final ScheduledExecutorService workScheduler = Executors.newScheduledThreadPool(1, r -> {
@@ -58,12 +62,11 @@ public class SourceAgent {
 
     @SuppressWarnings("unused")
     public static void triggerStart(String artifactSignature) {
-        Logger.trace("Try trigger start: " + artifactSignature);
         if (!ArtifactTraceSubscriptionSync.TRACE_ARTIFACTS.contains(artifactSignature)) {
             return;
         }
 
-        Logger.debug("Trigger start: " + artifactSignature);
+        METRIC_REGISTRY.meter("agent.trigger.start-" + artifactSignature).mark();
         if (ContextManager.getGlobalTraceId().equals("N/A")) {
             ContextCarrier contextCarrier = new ContextCarrier();
             AbstractSpan firstEntrySpan = ContextManager.createEntrySpan(artifactSignature, contextCarrier);
@@ -74,36 +77,34 @@ public class SourceAgent {
 
     @SuppressWarnings("unused")
     public static void triggerEnd(String artifactSignature) {
-        Logger.trace("Try trigger end: " + artifactSignature);
         if (!ArtifactTraceSubscriptionSync.TRACE_ARTIFACTS.contains(artifactSignature)) {
             return;
         }
 
         if (!ContextManager.getGlobalTraceId().equals("N/A")) {
-            Logger.debug("Trigger end: " + artifactSignature);
+            METRIC_REGISTRY.meter("agent.trigger.end-" + artifactSignature).mark();
             ContextManager.stopSpan();
         }
     }
 
     @SuppressWarnings("unused")
     public static void triggerEnd(Throwable throwable, String artifactSignature) {
-        Logger.trace("Try trigger exception end: " + artifactSignature);
         if (!ArtifactTraceSubscriptionSync.TRACE_ARTIFACTS.contains(artifactSignature)) {
             return;
         }
 
         if (!ContextManager.getGlobalTraceId().equals("N/A")) {
-            Logger.debug("Trigger exception end: " + artifactSignature);
+            METRIC_REGISTRY.meter("agent.trigger.exception-" + artifactSignature).mark();
             ContextManager.activeSpan().errorOccurred().log(throwable);
             ContextManager.stopSpan();
         }
     }
 
-    public static void agentmain(String agentArgs, Instrumentation instrumentation) {
+    public static void agentmain(String agentArgs, Instrumentation instrumentation) throws Exception {
         premain(agentArgs, instrumentation);
     }
 
-    public static void premain(String agentArgs, Instrumentation instrumentation) {
+    public static void premain(String agentArgs, Instrumentation instrumentation) throws Exception {
         if (isAgentInitialized()) {
             throw new IllegalStateException("Source++ Agent already initialized");
         } else {
@@ -115,6 +116,16 @@ public class SourceAgent {
                         .level(Level.valueOf(SourceAgentConfig.current.logLevel))
                         .formatPattern("[AGENT] - {message}")
                         .activate();
+
+                if (SourceAgentConfig.current.logMetrics) {
+                    File metricsFile = new File(SourceAgentConfig.current.logLocation, "source-agent.metrics");
+                    ConsoleReporter reporter = ConsoleReporter.forRegistry(METRIC_REGISTRY)
+                            .convertRatesTo(TimeUnit.SECONDS)
+                            .convertDurationsTo(TimeUnit.MILLISECONDS)
+                            .outputTo(new PrintStream(new FileOutputStream(metricsFile, true)))
+                            .build();
+                    reporter.start(1, TimeUnit.MINUTES);
+                }
             }
             SourceAgent.instrumentation = instrumentation;
             Logger.info("Build: " + BUILD.getString("build_date"));

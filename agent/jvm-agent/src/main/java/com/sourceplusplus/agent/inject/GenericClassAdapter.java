@@ -6,6 +6,9 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.pmw.tinylog.Logger;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * todo: description
  *
@@ -14,6 +17,26 @@ import org.pmw.tinylog.Logger;
  * @since 0.1.0
  */
 public class GenericClassAdapter extends ClassVisitor {
+
+    private static final Set<String> GROOVY_SKIP_METHODS = new HashSet<>();
+
+    static {
+        GROOVY_SKIP_METHODS.add("$getCallSiteArray");
+        GROOVY_SKIP_METHODS.add("$createCallSiteArray");
+        GROOVY_SKIP_METHODS.add("$getStaticMetaClass");
+        GROOVY_SKIP_METHODS.add("getMetaClass");
+        GROOVY_SKIP_METHODS.add("setMetaClass");
+        GROOVY_SKIP_METHODS.add("invokeMethod");
+        GROOVY_SKIP_METHODS.add("getProperty");
+        GROOVY_SKIP_METHODS.add("setProperty");
+        GROOVY_SKIP_METHODS.add("$createCallSiteArray_1");
+        GROOVY_SKIP_METHODS.add("super$3$$getStaticMetaClass");
+        GROOVY_SKIP_METHODS.add("$static_methodMissing");
+        GROOVY_SKIP_METHODS.add("propertyMissing");
+        GROOVY_SKIP_METHODS.add("methodMissing");
+        GROOVY_SKIP_METHODS.add("$static_propertyMissing");
+        GROOVY_SKIP_METHODS.add("doCall");
+    }
 
     private String className;
 
@@ -36,6 +59,10 @@ public class GenericClassAdapter extends ClassVisitor {
         }
         //skip generated Apache SkyWalking methods
         if (name.equals("getSkyWalkingDynamicField")) {
+            return mv;
+        }
+        //skip generated Groovy methods
+        if (GROOVY_SKIP_METHODS.contains(name)) {
             return mv;
         }
 

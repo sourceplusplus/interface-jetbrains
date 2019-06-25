@@ -42,6 +42,7 @@ public final class SourceAgentConfig {
     public volatile String appUuid;
     public volatile String logLevel;
     public volatile String logLocation;
+    public volatile Boolean logMetrics;
     public volatile Boolean outputEnhancedClasses;
     public volatile Integer sampleNPer3Secs;
     public volatile Integer spanLimitPerSegment;
@@ -58,6 +59,7 @@ public final class SourceAgentConfig {
         if (agentConfig.containsKey("manual_setup_mode")) manualSetupMode = agentConfig.getBoolean("manual_setup_mode");
         if (agentConfig.containsKey("log_level")) logLevel = agentConfig.getString("log_level").toUpperCase();
         if (agentConfig.containsKey("log_location")) logLocation = agentConfig.getString("log_location");
+        if (agentConfig.containsKey("log_metrics")) logMetrics = agentConfig.getBoolean("log_metrics");
 
         JsonObject applicationConfig = agentConfig.getJsonObject("application");
         if (applicationConfig != null) {
@@ -125,6 +127,7 @@ public final class SourceAgentConfig {
             if (value.manualSetupMode != null) gen.writeBooleanField("manual_setup_mode", value.manualSetupMode);
             if (value.logLevel != null) gen.writeStringField("log_level", value.logLevel);
             if (value.logLocation != null) gen.writeStringField("log_location", value.logLocation);
+            if (value.logMetrics != null) gen.writeBooleanField("log_metrics", value.logMetrics);
 
             gen.writeFieldName("application");
             gen.writeStartObject();

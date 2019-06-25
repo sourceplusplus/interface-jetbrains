@@ -252,7 +252,7 @@ class SkywalkingIntegration extends APMIntegration {
 
     @Override
     void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
-        log.info("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
+        log.debug("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
         def graphqlQuery = new JsonObject()
         if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
             graphqlQuery.put("query", GET_LATEST_TRACES

@@ -122,7 +122,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {
-                    log.info("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
+                    log.debug("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
                 } else {
                     def traceResult = ArtifactTraceResult.builder()
                             .appUuid(appArtifact.appUuid())
@@ -162,7 +162,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {
-                    log.info("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
+                    log.debug("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
                 } else {
                     def traceResult = ArtifactTraceResult.builder()
                             .appUuid(appArtifact.appUuid())

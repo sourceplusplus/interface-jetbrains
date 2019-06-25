@@ -79,12 +79,13 @@ public class ClassFileTransformerImpl implements ClassFileTransformer {
                 Pattern p = (Pattern) patternsForASMClass;
                 Matcher m = p.matcher(className);
                 if (m.matches()) {
-                    matchFound = SourceAgentConfig.current.testMode
-                            || !className.startsWith("com/sourceplusplus/agent/");
+                    matchFound = SourceAgentConfig.current.testMode ||
+                            (!className.startsWith("com/sourceplusplus/agent/")
+                                    && !className.startsWith("com/sourceplusplus/api/model/"));
                 }
             }
         }
-        Logger.debug(String.format("Found traceable class: %s - Is match: %s", className, matchFound));
+        Logger.trace(String.format("Found traceable class: %s - Is match: %s", className, matchFound));
         return matchFound;
     }
 }
