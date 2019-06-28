@@ -623,9 +623,12 @@ class H2DAO extends SourceStorage {
                             it.getString(3)), it.getInstant(4))
                 }
 
-                handler.handle(Future.succeededFuture(Optional.ofNullable(
-                        subscriptions.values().collect { it.build() }.get(0)
-                )))
+                def value = subscriptions.values().collect { it.build() }
+                if (value) {
+                    handler.handle(Future.succeededFuture(Optional.of(value.get(0))))
+                } else {
+                    handler.handle(Future.succeededFuture(Optional.empty()))
+                }
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

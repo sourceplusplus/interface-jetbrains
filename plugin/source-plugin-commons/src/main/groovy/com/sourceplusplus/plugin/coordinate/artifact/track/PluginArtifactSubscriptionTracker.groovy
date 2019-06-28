@@ -37,7 +37,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     void start() throws Exception {
         //todo: change to just subscriber
         //subscribe to automatic subscriptions
-        SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.activeEnvironment.appUuid, true, {
+        SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
+                SourcePluginConfig.current.activeEnvironment.appUuid, true, {
             if (it.succeeded()) {
                 it.result().each {
                     if (it.automaticSubscription()) {
@@ -68,7 +69,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def qualifiedClassName = it.body() as String
 
             //current subscriptions
-            SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.activeEnvironment.appUuid, false, {
+            SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
+                    SourcePluginConfig.current.activeEnvironment.appUuid, false, {
                 if (it.succeeded()) {
                     it.result().findAll { it.artifactQualifiedName().startsWith(qualifiedClassName) }.each {
                         if (SourcePluginConfig.current.methodGutterMarksEnabled) {

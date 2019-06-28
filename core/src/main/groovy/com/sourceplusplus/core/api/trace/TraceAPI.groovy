@@ -228,7 +228,7 @@ class TraceAPI extends AbstractVerticle {
                         handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                     }
                 } else {
-                    log.warn("Could not find artifact config. Artifact qualified name: " + traceQuery.artifactQualifiedName())
+                    log.debug("Could not find artifact config. Artifact qualified name: " + traceQuery.artifactQualifiedName())
                     handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                 }
             } else {
