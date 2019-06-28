@@ -293,8 +293,8 @@ class SkywalkingIntegration extends APMIntegration {
                         .total(result.getInteger("total"))
                         .build()
 
-                log.info("Got SkyWalking traces. Traces: {} - Total: {}",
-                        traceQueryResult.traces().size(), traceQueryResult.total())
+                log.info("Got SkyWalking traces. Artifact: {} - Traces: {} - Total: {}",
+                        traceQuery.artifactQualifiedName(), traceQueryResult.traces().size(), traceQueryResult.total())
                 handler.handle(Future.succeededFuture(traceQueryResult))
             }
         })

@@ -220,7 +220,7 @@ class TraceAPI extends AbstractVerticle {
                                 }
                             })
                         } else {
-                            log.warn("Could not find endpoint id for endpoint. Artifact qualified name: " + traceQuery.artifactQualifiedName())
+                            log.debug("Could not find endpoint id for endpoint. Artifact qualified name: " + traceQuery.artifactQualifiedName())
                             handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                         }
                     } else {
