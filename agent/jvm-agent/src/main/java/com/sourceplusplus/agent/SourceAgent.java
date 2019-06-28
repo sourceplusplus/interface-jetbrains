@@ -159,7 +159,8 @@ public class SourceAgent {
                         application = coreClient.findApplicationByName(SourceAgentConfig.current.appName);
                     }
                     if (application != null) {
-                        Logger.warn(String.format("Found application. App Name: %s - App UUID: %s",
+                        SourceAgentConfig.current.appUuid = application.appUuid();
+                        Logger.info(String.format("Found application. App Name: %s - App UUID: %s",
                                 application.appName(), application.appUuid()));
 
                         if (application.agentConfig() != null) {
