@@ -1,6 +1,6 @@
 CREATE TABLE source_application (
   app_uuid      VARCHAR PRIMARY KEY,
-  app_name      VARCHAR NOT NULL,
+  app_name      VARCHAR NOT NULL UNIQUE,
   create_date   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   agent_config  TEXT
 );

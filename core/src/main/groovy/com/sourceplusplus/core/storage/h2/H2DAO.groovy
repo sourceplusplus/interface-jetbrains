@@ -15,6 +15,7 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
+import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -100,6 +101,8 @@ class H2DAO extends SourceStorage {
         client.updateWithParams(CREATE_APPLICATION, params, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture(application))
+            } else if (it.cause() instanceof JdbcSQLIntegrityConstraintViolationException) {
+                handler.handle(Future.failedFuture(new IllegalArgumentException("Application name is already in use")))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

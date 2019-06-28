@@ -1,0 +1,14 @@
+{
+  "application": {
+    "properties": {
+      "app_uuid": {
+        "type": "keyword",
+        "index": true
+      },
+      "app_name": {
+        "type": "keyword",
+        "index": true
+      }
+    }
+  }
+}
