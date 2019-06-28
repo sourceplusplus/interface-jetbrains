@@ -234,6 +234,7 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    @Override
     void findApplicationByName(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         String query = '{\n' +
                 '  "query": {\n' +
@@ -275,6 +276,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         def get = new Get.Builder(SPP_INDEX + "_application", Objects.requireNonNull(appUuid))

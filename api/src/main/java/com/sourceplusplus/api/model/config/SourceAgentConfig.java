@@ -40,6 +40,7 @@ public final class SourceAgentConfig {
     public volatile Boolean manualSetupMode;
     public volatile Boolean skywalkingEnabled;
     public volatile String appUuid;
+    public volatile String appName;
     public volatile String logLevel;
     public volatile String logLocation;
     public volatile Boolean logMetrics;
@@ -64,6 +65,7 @@ public final class SourceAgentConfig {
         JsonObject applicationConfig = agentConfig.getJsonObject("application");
         if (applicationConfig != null) {
             if (applicationConfig.containsKey("app_uuid")) appUuid = applicationConfig.getString("app_uuid");
+            if (applicationConfig.containsKey("app_name")) appName = applicationConfig.getString("app_name");
 
             JsonObject sourceCodeConfig = applicationConfig.getJsonObject("application_source_code");
             if (sourceCodeConfig != null) {
@@ -132,6 +134,7 @@ public final class SourceAgentConfig {
             gen.writeFieldName("application");
             gen.writeStartObject();
             if (value.appUuid != null) gen.writeStringField("app_uuid", value.appUuid);
+            if (value.appName != null) gen.writeStringField("app_name", value.appName);
 
             gen.writeFieldName("application_source_code");
             gen.writeStartObject();

@@ -38,6 +38,8 @@ class H2DAO extends SourceStorage {
             "storage/h2/queries/create_application.sql"), Charsets.UTF_8)
     private static final String UPDATE_APPLICATION = Resources.toString(Resources.getResource(
             "storage/h2/queries/update_application.sql"), Charsets.UTF_8)
+    private static final String FIND_APPLICATION_BY_NAME = Resources.toString(Resources.getResource(
+            "storage/h2/queries/find_application_by_name.sql"), Charsets.UTF_8)
     private static final String GET_APPLICATION = Resources.toString(Resources.getResource(
             "storage/h2/queries/get_application.sql"), Charsets.UTF_8)
     private static final String GET_ALL_APPLICATIONS = Resources.toString(Resources.getResource(
@@ -138,6 +140,36 @@ class H2DAO extends SourceStorage {
         })
     }
 
+    @Override
+    void findApplicationByName(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
+        def params = new JsonArray()
+        params.add(appName)
+        client.queryWithParams(FIND_APPLICATION_BY_NAME, params, {
+            if (it.succeeded()) {
+                def results = it.result().results
+                if (!results.isEmpty()) {
+                    def existingApp = results.get(0)
+                    def sourceApplication = SourceApplication.builder()
+                            .appUuid(existingApp.getString(0))
+                            .appName(existingApp.getString(1))
+                            .createDate(Instant.parse(existingApp.getString(2)))
+                    if (existingApp.getString(3)) {
+                        sourceApplication.agentConfig(Json.decodeValue(
+                                existingApp.getString(3), SourceAgentConfig.class))
+                    }
+                    handler.handle(Future.succeededFuture(Optional.of(sourceApplication.build())))
+                } else {
+                    handler.handle(Future.succeededFuture(Optional.empty()))
+                }
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         def params = new JsonArray()

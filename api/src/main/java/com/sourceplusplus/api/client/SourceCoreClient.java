@@ -56,6 +56,8 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications/:appUuid/subscribers/:subscriberUuid/subscriptions/refresh", SPP_API_VERSION);
     private static final String UPDATE_APPLICATION_ENDPOINT = String.format(
             "/%s/applications/:appUuid", SPP_API_VERSION);
+    private static final String SEARCH_APPLICATIONS_ENDPOINT = String.format(
+            "/%s/applications/search?appName=:appName", SPP_API_VERSION);
     private static final String GET_APPLICATION_ENDPOINT = String.format(
             "/%s/applications/:appUuid", SPP_API_VERSION);
     private static final String GET_APPLICATIONS_ENDPOINT = String.format(
@@ -302,6 +304,41 @@ public class SourceCoreClient implements SourceClient {
 
         try (Response response = client.newCall(request.build()).execute()) {
             handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceApplication.class)));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public SourceApplication findApplicationByName(String appName) {
+        String url = sppUrl + SEARCH_APPLICATIONS_ENDPOINT.replace(":appName", appName);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            if (response.isSuccessful()) {
+                return Json.decodeValue(response.body().string(), SourceApplication.class);
+            } else if (response.code() == 404) {
+                return null;
+            } else {
+                throw new IllegalStateException("Unknown response: " + response.body().string());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void findApplicationByName(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
+        String url = sppUrl + SEARCH_APPLICATIONS_ENDPOINT.replace(":appName", appName);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            if (response.isSuccessful()) {
+                handler.handle(Future.succeededFuture(Optional.of(Json.decodeValue(response.body().string(),
+                        SourceApplication.class))));
+            } else {
+                handler.handle(Future.succeededFuture(Optional.empty()));
+            }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
         }

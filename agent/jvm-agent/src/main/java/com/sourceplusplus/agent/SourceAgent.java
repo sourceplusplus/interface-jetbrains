@@ -146,12 +146,20 @@ public class SourceAgent {
                 ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
                 instrumentation.addTransformer(sTransformer, true);
                 traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient);
-            } else if (SourceAgentConfig.current.appUuid != null || SourceAgentConfig.current.manualSetupMode) {
+            } else if ((SourceAgentConfig.current.appUuid != null || SourceAgentConfig.current.appName != null)
+                    || SourceAgentConfig.current.manualSetupMode) {
                 if (!SourceAgentConfig.current.manualSetupMode) {
                     Logger.info("Getting Source++ application");
-                    SourceApplication application = coreClient.getApplication(SourceAgentConfig.current.appUuid);
+                    SourceApplication application;
+                    if (SourceAgentConfig.current.appUuid != null) {
+                        Logger.info("Using App UUID to get application");
+                        application = coreClient.getApplication(SourceAgentConfig.current.appUuid);
+                    } else {
+                        Logger.info("Using App Name to find application");
+                        application = coreClient.findApplicationByName(SourceAgentConfig.current.appName);
+                    }
                     if (application != null) {
-                        Logger.warn(String.format("Found application. App name: %s - App uuid: %s",
+                        Logger.warn(String.format("Found application. App Name: %s - App UUID: %s",
                                 application.appName(), application.appUuid()));
 
                         if (application.agentConfig() != null) {
@@ -168,7 +176,7 @@ public class SourceAgent {
                     startArtifactTraceSubscriptionSync(coreClient);
                 }
             } else {
-                throw new IllegalStateException("Source++ Agent configuration is missing appUuid");
+                throw new IllegalStateException("Source++ Agent configuration is missing app_uuid/app_name");
             }
 
             if (!SourceAgentConfig.current.manualSetupMode) {

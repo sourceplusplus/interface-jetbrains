@@ -7,6 +7,7 @@
   "log_metrics": false,
   "application": {
     "app_uuid": null,
+    "app_name": null,
     "application_source_code": {
       "packages": []
     }
