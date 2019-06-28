@@ -35,12 +35,12 @@ class ApplicationAPITest extends SourceCoreAPITest {
     }
 
     @Test
-    void finApplicationByNameTest() {
+    void findApplicationByNameTest() {
         def testPassed = new AtomicBoolean(false)
         def createdAppUuid = ""
         def createdAppName = ""
 
-        TestSuite.create("ApplicationAPITest-finApplicationByNameTest").before({ test ->
+        TestSuite.create("ApplicationAPITest-findApplicationByNameTest").before({ test ->
             //create application to find in test
             Async async = test.async()
             coreClient.createApplication({
@@ -51,7 +51,7 @@ class ApplicationAPITest extends SourceCoreAPITest {
                 createdAppName = it.result().appName()
                 async.complete()
             })
-        }).test("finApplicationByName", { test ->
+        }).test("findApplicationByName", { test ->
             Async async = test.async()
             coreClient.findApplicationByName(createdAppName, {
                 if (it.failed()) {
