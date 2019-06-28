@@ -4,7 +4,7 @@
   "manual_setup_mode": false,
   "log_level": "info",
   "log_location": null,
-  "log_metrics": true,
+  "log_metrics": false,
   "application": {
     "app_uuid": null,
     "application_source_code": {
