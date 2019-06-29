@@ -118,15 +118,16 @@ class OverviewTab extends AbstractTab {
             }
 
             artifactMetricResult.artifactMetrics().each {
-                updateCard(artifactMetricResult, it)
+                updateCard(portal, artifactMetricResult, it)
                 if (it.metricType() == portal.interface.overviewView.activeChartMetric) {
-                    updateSplineGraph(artifactMetricResult, it)
+                    updateSplineGraph(portal, artifactMetricResult, it)
                 }
             }
         }
     }
 
-    private void updateSplineGraph(ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
+    private void updateSplineGraph(SourcePortal portal, ArtifactMetricResult metricResult,
+                                   ArtifactMetrics artifactMetrics) {
         def times = new ArrayList<Instant>()
         def current = metricResult.start()
         times.add(current)
@@ -170,14 +171,11 @@ class OverviewTab extends AbstractTab {
                 .addSeriesData(seriesDataBuilder.build())
                 .build()
 
-        SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-            def portalUuid = it.portalUuid
-            vertx.eventBus().publish("$portalUuid-UpdateChart",
-                    new JsonObject(Json.encode(splintChart)))
-        }
+        def portalUuid = portal.portalUuid
+        vertx.eventBus().publish("$portalUuid-UpdateChart", new JsonObject(Json.encode(splintChart)))
     }
 
-    private void updateCard(ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
+    private void updateCard(SourcePortal portal, ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
         def histogram = new Histogram(new UniformReservoir(artifactMetrics.values().size()))
         def metricArr = new ArrayList<Integer>()
         if (artifactMetrics.values().size() == 60) {
@@ -214,11 +212,8 @@ class OverviewTab extends AbstractTab {
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def portalUuid = it.portalUuid
-                vertx.eventBus().publish("$portalUuid-DisplayCard",
-                        new JsonObject(Json.encode(barTrendCard)))
-            }
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
         } else if (artifactMetrics.metricType() == ResponseTime_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
@@ -226,11 +221,8 @@ class OverviewTab extends AbstractTab {
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def portalUuid = it.portalUuid
-                vertx.eventBus().publish("$portalUuid-DisplayCard",
-                        new JsonObject(Json.encode(barTrendCard)))
-            }
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
         } else if (artifactMetrics.metricType() == ServiceLevelAgreement_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
@@ -238,11 +230,8 @@ class OverviewTab extends AbstractTab {
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def portalUuid = it.portalUuid
-                vertx.eventBus().publish("$portalUuid-DisplayCard",
-                        new JsonObject(Json.encode(barTrendCard)))
-            }
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
         }
     }
 
