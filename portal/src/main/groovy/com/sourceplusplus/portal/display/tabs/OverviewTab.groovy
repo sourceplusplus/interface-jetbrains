@@ -141,6 +141,9 @@ class OverviewTab extends AbstractTab {
                 throw new UnsupportedOperationException("Invalid step: " + metricResult.step())
             }
         }
+        if (artifactMetrics.metricType() == ServiceLevelAgreement_Average) {
+            artifactMetrics = artifactMetrics.withValues(artifactMetrics.values().collect { it / 100 } as int[])
+        }
 
         def seriesDataBuilder = SplineSeriesData.builder()
                 .times(times)
