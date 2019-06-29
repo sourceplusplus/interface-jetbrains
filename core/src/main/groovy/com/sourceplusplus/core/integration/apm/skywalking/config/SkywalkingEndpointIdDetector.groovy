@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -142,7 +143,8 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                         if (it.succeeded()) {
                             def searchEndpoints = new JsonArray()
                             for (int z = 0; z < it.result().size(); z++) {
-                                def endpoint = it.result().getJsonObject(z)
+                                //get random endpoint
+                                def endpoint = it.result().getJsonObject(ThreadLocalRandom.current().nextInt(it.result().size()))
                                 def endpointId = endpoint.getString("key")
                                 endpointCheckBackoff.putIfAbsent(endpointId, [0, Instant.now().toEpochMilli()] as Long[])
 
@@ -156,6 +158,11 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                                     endpointCheckBackoff.put(endpointId, values)
                                 } else {
                                     log.debug("Ignoring endpoint: $endpointId - Till: " + Instant.ofEpochMilli(expireTime))
+                                }
+
+                                //search max of 10 endpoints at a time
+                                if (searchEndpoints.size() >= 10) {
+                                    break
                                 }
                             }
                             if (searchEndpoints.size() > 0) {
