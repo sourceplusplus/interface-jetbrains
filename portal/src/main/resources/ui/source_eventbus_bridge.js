@@ -55,10 +55,9 @@ function portalConnected() {
         }, function (error, message) {
             if (traceOrderType) {
                 window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
-                    + '&external=true&order_type=' + traceOrderType, '_self');
+                    + '&order_type=' + traceOrderType, '_self');
             } else {
-                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
-                    + '&external=true', '_self');
+                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid, '_self');
             }
         });
     } else {

@@ -6,13 +6,11 @@ import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.BarTrendCard
-import com.sourceplusplus.api.model.internal.FormattedQuickStats
 import com.sourceplusplus.api.model.internal.SplineChart
 import com.sourceplusplus.api.model.internal.SplineSeriesData
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
-import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.json.Json
@@ -49,7 +47,6 @@ class OverviewTab extends AbstractTab {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static DecimalFormat decimalFormat = new DecimalFormat(".#")
-    private MetricType activeChartMetric = ResponseTime_Average
 
     OverviewTab() {
         super(PortalTab.Overview)
@@ -101,7 +98,7 @@ class OverviewTab extends AbstractTab {
         vertx.eventBus().consumer(SET_ACTIVE_CHART_METRIC, {
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
-            activeChartMetric = valueOf(request.getString("metric_type"))
+            portal.interface.overviewView.activeChartMetric = valueOf(request.getString("metric_type"))
             updateUI(portal)
         })
         log.info("{} started", getClass().getSimpleName())
@@ -122,7 +119,7 @@ class OverviewTab extends AbstractTab {
 
             artifactMetricResult.artifactMetrics().each {
                 updateCard(artifactMetricResult, it)
-                if (it.metricType() == activeChartMetric) {
+                if (it.metricType() == portal.interface.overviewView.activeChartMetric) {
                     updateSplineGraph(artifactMetricResult, it)
                 }
             }
@@ -177,39 +174,6 @@ class OverviewTab extends AbstractTab {
             def portalUuid = it.portalUuid
             vertx.eventBus().publish("$portalUuid-UpdateChart",
                     new JsonObject(Json.encode(splintChart)))
-        }
-    }
-
-    private void updateQuickStats(ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
-        def formattedStats = FormattedQuickStats.builder()
-                .timeFrame(metricResult.timeFrame())
-        def avg = artifactMetrics.values().sum() / artifactMetrics.values().size()
-        switch (artifactMetrics.metricType()) {
-            case ResponseTime_50Percentile:
-                formattedStats.p50(toPrettyDuration(avg as int))
-                        .min(toPrettyDuration(artifactMetrics.values().min()))
-                break
-            case ResponseTime_75Percentile:
-                formattedStats.p75(toPrettyDuration(avg as int))
-                break
-            case ResponseTime_90Percentile:
-                formattedStats.p90(toPrettyDuration(avg as int))
-                break
-            case ResponseTime_95Percentile:
-                formattedStats.p95(toPrettyDuration(avg as int))
-                break
-            case ResponseTime_99Percentile:
-                formattedStats.p99(toPrettyDuration(avg as int))
-                        .max(toPrettyDuration(artifactMetrics.values().max()))
-                break
-            default:
-                return
-        }
-
-        SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-            def portalUuid = it.portalUuid
-            vertx.eventBus().publish("$portalUuid-DisplayStats",
-                    new JsonObject(Json.encode(formattedStats.build())))
         }
     }
 
