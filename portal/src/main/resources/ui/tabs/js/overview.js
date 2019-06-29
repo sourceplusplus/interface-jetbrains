@@ -233,16 +233,4 @@ function updateTime(interval) {
     currentTimeFrame = interval.toUpperCase();
     localStorage.setItem('spp.metric_time_frame', interval);
     eb.send('SetMetricTimeFrame', {'portal_uuid': portalUuid, 'metric_time_frame': interval});
-
-    if (interval === 'last_5_minutes') {
-        $('#current_metric_time_frame').text('LAST 5 MINUTES');
-    } else if (interval === 'last_15_minutes') {
-        $('#current_metric_time_frame').text('LAST 15 MINUTES');
-    } else if (interval === 'last_30_minutes') {
-        $('#current_metric_time_frame').text('LAST 30 MINUTES');
-    } else if (interval === 'last_hour') {
-        $('#current_metric_time_frame').text('LAST HOUR');
-    } else if (interval === 'last_3_hours') {
-        $('#current_metric_time_frame').text('LAST 3 HOURS');
-    }
 }

@@ -9,6 +9,8 @@ var traceOrderType = findGetParameter("order_type");
 if (traceOrderType) {
     traceOrderType = traceOrderType.toUpperCase();
 }
+var getExternal = findGetParameter("external");
+var externalPortal = (getExternal) ? (getExternal == 'true') : false;
 var getDarkMode = findGetParameter("dark_mode");
 var darkMode = (getDarkMode) ? (getDarkMode == 'true') : false;
 
@@ -33,10 +35,10 @@ function clickedViewAsExternalPortal() {
     }, function (error, message) {
         if (traceOrderType) {
             window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
-                + '&order_type=' + traceOrderType + '&dark_mode=' + darkMode, '_blank');
+                + '&external=true&order_type=' + traceOrderType + '&dark_mode=' + darkMode, '_blank');
         } else {
             window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
-                + '&dark_mode=' + darkMode, '_blank');
+                + '&external=true&dark_mode=' + darkMode, '_blank');
         }
     });
 }
@@ -49,10 +51,11 @@ function portalConnected() {
             'artifact_qualified_name': findGetParameter("artifact_qualified_name")
         }, function (error, message) {
             if (traceOrderType) {
-                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid + '&order_type=' + traceOrderType,
-                    '_self');
+                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
+                    + '&external=true&order_type=' + traceOrderType, '_self');
             } else {
-                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid, '_self');
+                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
+                    + '&external=true', '_self');
             }
         });
     } else {

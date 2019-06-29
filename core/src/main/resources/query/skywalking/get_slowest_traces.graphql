@@ -9,7 +9,7 @@
     traceState: ALL,
     queryOrder: BY_DURATION,
     paging: {
-      pageSize: 10
+      pageSize: $pageSize
     }
   }) {
   traces {

@@ -64,6 +64,11 @@ public interface AbstractTraceQuery {
     String durationStep();
 
     @Value.Default
+    default Integer pageSize() {
+        return 10;
+    }
+
+    @Value.Default
     default TraceOrderType orderType() {
         return TraceOrderType.LATEST_TRACES;
     }

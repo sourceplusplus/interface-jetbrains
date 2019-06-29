@@ -1,17 +1,4 @@
 function setupUI() {
-    var timeFrame = localStorage.getItem('spp.metric_time_frame');
-    if (timeFrame) {
-        if (timeFrame === 'last_minute') {
-            $('#current_metric_time_frame').text('LAST MINUTE');
-        } else if (timeFrame === 'last_hour') {
-            $('#current_metric_time_frame').text('LAST HOUR');
-        } else if (timeFrame === 'last_day') {
-            $('#current_metric_time_frame').text('LAST DAY');
-        } else if (timeFrame === 'last_month') {
-            $('#current_metric_time_frame').text('LAST MONTH');
-        }
-    }
-
     if (traceOrderType == 'LATEST_TRACES') {
         $('#latest_traces_header_text').text('Latest Traces');
     } else if (traceOrderType == 'SLOWEST_TRACES') {
@@ -26,6 +13,9 @@ function setupUI() {
 }
 
 setupUI();
+
+var keepTraceCount = (externalPortal) ? 25 : 10;
+var displayedTraces = [];
 
 function displayTraces(traceResult) {
     if (traceResult.order_type != traceOrderType) {
@@ -54,23 +44,27 @@ function displayTraces(traceResult) {
     var appUuid = traceResult.app_uuid;
     eb.send('PortalLogger', 'Displaying traces - Size: ' + traceResult.traces.length);
     // console.log('Displaying traces - Size: ' + traceResult.traces.length);
-    $('#trace_table tr').remove();
 
     $('#traces_start_field').val(moment.unix(Number(traceResult.start)).format());
     $('#traces_stop_field').val(moment.unix(Number(traceResult.stop)).format());
     $('#traces_total_label').text("Total: " + traceResult.total);
 
     if (traceResult.traces.length > 0) {
-        for (var i = traceResult.traces.length - 1; i >= 0; i--) {
+        for (var i = 0; i < traceResult.traces.length; i++) {
             var trace = traceResult.traces[i];
             var globalTraceId = trace.trace_ids[0];
+            if (displayedTraces.includes(globalTraceId)) {
+                continue;
+            }
+            displayedTraces.push(globalTraceId);
+
             var htmlTraceId = globalTraceId.split('.').join('');
             var operationName = trace.operation_names[0];
             if (operationName == traceResult.artifact_qualified_name) {
                 operationName = traceResult.artifact_simple_name;
             }
 
-            var rowHtml = '<tr><td onclick=\'clickedDisplayTraceStack("' + appUuid + '","'
+            var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + appUuid + '","'
                 + traceResult.artifact_qualified_name + '","' + globalTraceId +
                 '");\' style="border-top: 0px !important; padding-left: 20px">';
             rowHtml += '<i class="large plus square outline icon"></i>'
@@ -89,7 +83,12 @@ function displayTraces(traceResult) {
             } else {
                 rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
             }
-            $('#trace_table').append(rowHtml);
+            $("#trace_table").prepend(rowHtml);
+
+            if (displayedTraces.length > keepTraceCount) {
+                var globalTraceId = displayedTraces.shift();
+                $('#trace-' + globalTraceId.split('.').join('')).remove();
+            }
         }
     }
 
