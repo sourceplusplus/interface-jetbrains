@@ -76,6 +76,22 @@ class SourcePortal implements Closeable {
         }
     }
 
+    static List<SourcePortal> getExternalPortals() {
+        return portalMap.asMap().values().findAll { it.external }
+    }
+
+    static List<SourcePortal> getExternalPortals(String appUuid) {
+        return portalMap.asMap().values().findAll {
+            it.appUuid == appUuid && it.external
+        }
+    }
+
+    static List<SourcePortal> getExternalPortals(String appUuid, String artifactQualifiedName) {
+        return portalMap.asMap().values().findAll {
+            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && it.external
+        }
+    }
+
     static List<SourcePortal> getPortals(String appUuid, String artifactQualifiedName) {
         return portalMap.asMap().values().findAll {
             it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName

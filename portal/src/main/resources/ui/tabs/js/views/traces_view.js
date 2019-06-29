@@ -50,6 +50,11 @@ function displayTraces(traceResult) {
     $('#traces_total_label').text("Total: " + traceResult.total);
 
     if (traceResult.traces.length > 0) {
+        if (traceResult.traces.length == 25) {
+            $('#trace_table tr').remove();
+            displayedTraces = [];
+        }
+
         for (var i = 0; i < traceResult.traces.length; i++) {
             var trace = traceResult.traces[i];
             var globalTraceId = trace.trace_ids[0];
@@ -86,8 +91,7 @@ function displayTraces(traceResult) {
             $("#trace_table").prepend(rowHtml);
 
             if (displayedTraces.length > keepTraceCount) {
-                var globalTraceId = displayedTraces.shift();
-                $('#trace-' + globalTraceId.split('.').join('')).remove();
+                $('#trace-' + displayedTraces.shift().split('.').join('')).remove();
             }
         }
     }

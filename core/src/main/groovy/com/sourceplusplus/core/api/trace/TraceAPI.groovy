@@ -14,7 +14,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 /**
  * todo: description
@@ -40,7 +39,8 @@ class TraceAPI extends AbstractVerticle {
                 .handler(this.&subscribeToArtifactRoute)
         core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/traces/unsubscribe")
                 .handler(this.&unsubscribeToArtifactRoute)
-        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/traces").handler(this.&getTracesRoute)
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/traces")
+                .handler(this.&getTracesRoute)
         core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans")
                 .handler(this.&getTraceSpansRoute)
         vertx.deployVerticle(new TraceSubscriptionTracker(core))
@@ -119,19 +119,15 @@ class TraceAPI extends AbstractVerticle {
         def traceQueryBuilder = TraceQuery.builder()
                 .artifactQualifiedName(artifactQualifiedName)
         def orderType = routingContext.request().getParam("orderType")
-        if (orderType != null) {
-            //todo: dynamic
-            traceQueryBuilder.durationStart(Instant.now().minus(14, ChronoUnit.MINUTES))
-                    .durationStop(Instant.now())
-                    .durationStep("SECOND")
-        } else {
-            def queryDurationStart = Instant.parse(routingContext.request().getParam("durationStart"))
-            def queryDurationStop = Instant.parse(routingContext.request().getParam("durationStop"))
-            def queryDurationStep = routingContext.request().getParam("durationStep")
-            traceQueryBuilder.durationStart(queryDurationStart)
-                    .durationStop(queryDurationStop)
-                    .durationStep(queryDurationStep)
-        }
+        if (orderType) traceQueryBuilder.orderType(TraceOrderType.valueOf(orderType.toUpperCase()))
+        def queryDurationStart = routingContext.request().getParam("durationStart")
+        if (queryDurationStart) traceQueryBuilder.durationStart(Instant.parse(queryDurationStart))
+        def queryDurationStop = routingContext.request().getParam("durationStop")
+        if (queryDurationStop) traceQueryBuilder.durationStop(Instant.parse(queryDurationStop))
+        def queryDurationStep = routingContext.request().getParam("durationStep")
+        if (queryDurationStep) traceQueryBuilder.durationStep(queryDurationStep)
+        def pageSize = routingContext.request().getParam("pageSize")
+        if (pageSize) traceQueryBuilder.pageSize(Integer.parseInt(pageSize))
 
         getTraces(appUuid, traceQueryBuilder.build(), {
             if (it.succeeded()) {

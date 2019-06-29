@@ -226,7 +226,7 @@ eb.onopen = function () {
         eb.send('PortalLogger', 'Set initial time frame to: ' + timeFrame);
     }
 
-    eb.send('OverviewTabOpened', {'portal_uuid': portalUuid});
+    eb.publish('OverviewTabOpened', {'portal_uuid': portalUuid});
 };
 
 function updateTime(interval) {

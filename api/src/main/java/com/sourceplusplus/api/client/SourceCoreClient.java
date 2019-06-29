@@ -21,6 +21,8 @@ import io.vertx.core.json.JsonObject;
 import okhttp3.*;
 
 import java.net.URLEncoder;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -79,7 +81,8 @@ public class SourceCoreClient implements SourceClient {
             CREATE_SOURCE_ARTIFACT_ENDPOINT + "/traces/unsubscribe", SPP_API_VERSION);
     private static final String GET_SOURCE_ARTIFACT_CONFIGURATION_ENDPOINT = CONFIGURE_SOURCE_ARTIFACT_ENDPOINT;
     private static final String GET_TRACES_ENDPOINT = String.format(
-            "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces?orderType=:orderType", SPP_API_VERSION);
+            "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces?orderType=:orderType&pageSize=:pageSize" +
+                    "&durationStart=:durationStart&durationStop=:durationStop&durationStep=:durationStep", SPP_API_VERSION);
     private static final String GET_TRACE_SPANS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans" +
                     "?followExit=:followExit&oneLevelDeep=:oneLevelDeep&segmentId=:segmentId&spanId=:spanId", SPP_API_VERSION);
@@ -672,7 +675,11 @@ public class SourceCoreClient implements SourceClient {
         String url = sppUrl + GET_TRACES_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":artifactQualifiedName", artifactQualifiedName)
-                .replace(":orderType", orderType.toString());
+                .replace(":orderType", orderType.toString())
+                .replace(":pageSize", "10")
+                .replace(":durationStart", Instant.now().minus(14, ChronoUnit.MINUTES).toString())
+                .replace(":durationStop", Instant.now().toString())
+                .replace(":durationStep", "SECOND");
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
@@ -680,6 +687,25 @@ public class SourceCoreClient implements SourceClient {
             return Json.decodeValue(response.body().string(), TraceQueryResult.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
+        String url = sppUrl + GET_TRACES_ENDPOINT
+                .replace(":appUuid", traceQuery.appUuid())
+                .replace(":artifactQualifiedName", traceQuery.artifactQualifiedName())
+                .replace(":orderType", traceQuery.orderType().toString())
+                .replace(":pageSize", traceQuery.pageSize().toString())
+                .replace(":durationStart", traceQuery.durationStart().toString())
+                .replace(":durationStop", traceQuery.durationStop().toString())
+                .replace(":durationStep", traceQuery.durationStep());
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), TraceQueryResult.class)));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
         }
     }
 

@@ -15,6 +15,9 @@ var getDarkMode = findGetParameter("dark_mode");
 var darkMode = (getDarkMode) ? (getDarkMode == 'true') : false;
 
 var mainGetQuery = '?portal_uuid=' + portalUuid;
+if (externalPortal) {
+    mainGetQuery += '&external=true';
+}
 
 function findGetParameter(parameterName) {
     var result = null,

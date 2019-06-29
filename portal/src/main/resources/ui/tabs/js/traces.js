@@ -33,7 +33,7 @@ eb.onopen = function () {
         displaySpanInfo(message.body);
     });
 
-    eb.send('TracesTabOpened', {'portal_uuid': portalUuid, 'trace_order_type': traceOrderType});
+    eb.publish('TracesTabOpened', {'portal_uuid': portalUuid, 'trace_order_type': traceOrderType});
 };
 
 function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, segmentId, spanId) {
