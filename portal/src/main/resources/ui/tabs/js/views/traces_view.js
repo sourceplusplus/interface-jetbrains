@@ -54,6 +54,10 @@ function displayTraces(traceResult) {
             $('#trace_table tr').remove();
             displayedTraces = [];
         }
+        //todo: smarter, result needs to be merged in to current result set in correct position
+        if (traceResult.order_type == "SLOWEST_TRACES" && displayedTraces.length == 25 && traceResult.traces.length != 25) {
+            return;
+        }
 
         for (var i = 0; i < traceResult.traces.length; i++) {
             var trace = traceResult.traces[i];
