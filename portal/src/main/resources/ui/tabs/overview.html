@@ -91,31 +91,31 @@
         <div class="four wide stretched column middle aligned">
             <div class="ui divided link items" style="font-size: 10px">
                 <div class="item">
-                    <div class="ui mini statistic">
-                        <div id="card_throughput_average_header" class="value menu_tooltip_text" style="text-align: left">
+                    <div class="ui mini statistic" onclick="clickedViewAverageThroughputChart()">
+                        <div id="card_throughput_average_header" class="value" style="text-align: left">
                             n/a
                         </div>
-                        <div class="label menu_tooltip_text">
+                        <div id="card_throughput_average_header_label" class="label">
                             AVG THROUGHPUT
                         </div>
                     </div>
                 </div>
                 <div class="item">
-                    <div class="ui mini statistic">
+                    <div class="ui mini statistic" onclick="clickedViewAverageResponseTimeChart()">
                         <div id="card_responsetime_average_header" class="value spp_red_color" style="text-align: left">
                             n/a
                         </div>
-                        <div class="label spp_red_color">
+                        <div id="card_responsetime_average_header_label" class="label spp_red_color">
                             AVG RESP TIME
                         </div>
                     </div>
                 </div>
                 <div class="item">
-                    <div class="ui mini statistic">
-                        <div id="card_servicelevelagreement_average_header" class="value menu_tooltip_text" style="text-align: left">
+                    <div class="ui mini statistic" onclick="clickedViewAverageSLAChart()">
+                        <div id="card_servicelevelagreement_average_header" class="value" style="text-align: left">
                             n/a
                         </div>
-                        <div class="label menu_tooltip_text">
+                        <div id="card_servicelevelagreement_average_header_label" class="label">
                             AVG SLA
                         </div>
                     </div>

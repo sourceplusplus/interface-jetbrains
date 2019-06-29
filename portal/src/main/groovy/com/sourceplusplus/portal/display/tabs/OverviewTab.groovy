@@ -24,6 +24,8 @@ import java.text.DecimalFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+import static com.sourceplusplus.api.model.metric.MetricType.*
+
 /**
  * Displays general source code artifact statistics.
  * Useful for gathering an overall view of an artifact's runtime behavior.
@@ -43,15 +45,11 @@ class OverviewTab extends AbstractTab {
 
     public static final String OVERVIEW_TAB_OPENED = "OverviewTabOpened"
     public static final String SET_METRIC_TIME_FRAME = "SetMetricTimeFrame"
+    public static final String SET_ACTIVE_CHART_METRIC = "SetActiveChartMetric"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static DecimalFormat decimalFormat = new DecimalFormat(".#")
-    private final static List<MetricType> CARD_METRIC_TYPES =
-            [MetricType.Throughput_Average, MetricType.ResponseTime_Average, MetricType.ServiceLevelAgreement_Average]
-    private final static List<MetricType> SPLINE_CHART_METRIC_TYPES =
-            [MetricType.ResponseTime_99Percentile, MetricType.ResponseTime_95Percentile,
-             MetricType.ResponseTime_90Percentile, MetricType.ResponseTime_75Percentile,
-             MetricType.ResponseTime_50Percentile]
+    private MetricType activeChartMetric = ResponseTime_Average
 
     OverviewTab() {
         super(PortalTab.Overview)
@@ -91,7 +89,7 @@ class OverviewTab extends AbstractTab {
                     .appUuid(portal.appUuid)
                     .artifactQualifiedName(portal.interface.viewingPortalArtifact)
                     .timeFrame(view.timeFrame)
-                    .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
+                    .metricTypes([Throughput_Average, ResponseTime_Average, ServiceLevelAgreement_Average]).build()
             SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
                 if (it.succeeded()) {
                     log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
@@ -99,6 +97,12 @@ class OverviewTab extends AbstractTab {
                     log.error("Failed to subscribe to artifact metrics", it.cause())
                 }
             })
+        })
+        vertx.eventBus().consumer(SET_ACTIVE_CHART_METRIC, {
+            def request = JsonObject.mapFrom(it.body())
+            def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
+            activeChartMetric = valueOf(request.getString("metric_type"))
+            updateUI(portal)
         })
         log.info("{} started", getClass().getSimpleName())
     }
@@ -117,13 +121,9 @@ class OverviewTab extends AbstractTab {
             }
 
             artifactMetricResult.artifactMetrics().each {
-                updateQuickStats(artifactMetricResult, it)
-                if (it.metricType() in CARD_METRIC_TYPES) {
-                    updateCard(artifactMetricResult, it)
-                } else if (it.metricType() in SPLINE_CHART_METRIC_TYPES) {
+                updateCard(artifactMetricResult, it)
+                if (it.metricType() == activeChartMetric) {
                     updateSplineGraph(artifactMetricResult, it)
-                } else {
-                    throw new UnsupportedOperationException("Invalid metric type: " + it)
                 }
             }
         }
@@ -146,25 +146,26 @@ class OverviewTab extends AbstractTab {
                 .times(times)
                 .values(artifactMetrics.values() as double[])
         switch (artifactMetrics.metricType()) {
-            case MetricType.ResponseTime_99Percentile:
+            case ResponseTime_99Percentile:
                 seriesDataBuilder.seriesIndex(0)
                 break
-            case MetricType.ResponseTime_95Percentile:
+            case ResponseTime_95Percentile:
                 seriesDataBuilder.seriesIndex(1)
                 break
-            case MetricType.ResponseTime_90Percentile:
+            case ResponseTime_90Percentile:
                 seriesDataBuilder.seriesIndex(2)
                 break
-            case MetricType.ResponseTime_75Percentile:
+            case ResponseTime_75Percentile:
                 seriesDataBuilder.seriesIndex(3)
                 break
-            case MetricType.ResponseTime_50Percentile:
+            case ResponseTime_50Percentile:
                 seriesDataBuilder.seriesIndex(4)
                 break
             default:
-                throw new UnsupportedOperationException("Invalid metric type: " + artifactMetrics.metricType())
+                seriesDataBuilder.seriesIndex(0)
         }
         def splintChart = SplineChart.builder()
+                .metricType(artifactMetrics.metricType())
                 .timeFrame(metricResult.timeFrame())
                 .addSeriesData(seriesDataBuilder.build())
                 .build()
@@ -181,20 +182,20 @@ class OverviewTab extends AbstractTab {
                 .timeFrame(metricResult.timeFrame())
         def avg = artifactMetrics.values().sum() / artifactMetrics.values().size()
         switch (artifactMetrics.metricType()) {
-            case MetricType.ResponseTime_50Percentile:
+            case ResponseTime_50Percentile:
                 formattedStats.p50(toPrettyDuration(avg as int))
                         .min(toPrettyDuration(artifactMetrics.values().min()))
                 break
-            case MetricType.ResponseTime_75Percentile:
+            case ResponseTime_75Percentile:
                 formattedStats.p75(toPrettyDuration(avg as int))
                 break
-            case MetricType.ResponseTime_90Percentile:
+            case ResponseTime_90Percentile:
                 formattedStats.p90(toPrettyDuration(avg as int))
                 break
-            case MetricType.ResponseTime_95Percentile:
+            case ResponseTime_95Percentile:
                 formattedStats.p95(toPrettyDuration(avg as int))
                 break
-            case MetricType.ResponseTime_99Percentile:
+            case ResponseTime_99Percentile:
                 formattedStats.p99(toPrettyDuration(avg as int))
                         .max(toPrettyDuration(artifactMetrics.values().max()))
                 break
@@ -239,7 +240,7 @@ class OverviewTab extends AbstractTab {
         }
         def avg = histogram.snapshot.mean
 
-        if (artifactMetrics.metricType() == MetricType.Throughput_Average) {
+        if (artifactMetrics.metricType() == Throughput_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
                     .header(toPrettyFrequency(avg / 60.0))
@@ -251,7 +252,7 @@ class OverviewTab extends AbstractTab {
                 vertx.eventBus().publish("$portalUuid-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
-        } else if (artifactMetrics.metricType() == MetricType.ResponseTime_Average) {
+        } else if (artifactMetrics.metricType() == ResponseTime_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
                     .header(toPrettyDuration(avg as int))
@@ -263,7 +264,7 @@ class OverviewTab extends AbstractTab {
                 vertx.eventBus().publish("$portalUuid-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
-        } else if (artifactMetrics.metricType() == MetricType.ServiceLevelAgreement_Average) {
+        } else if (artifactMetrics.metricType() == ServiceLevelAgreement_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
                     .header(decimalFormat.format(avg / 100.0))
@@ -275,8 +276,6 @@ class OverviewTab extends AbstractTab {
                 vertx.eventBus().publish("$portalUuid-DisplayCard",
                         new JsonObject(Json.encode(barTrendCard)))
             }
-        } else {
-            throw new UnsupportedOperationException("Invalid metric type: " + artifactMetrics.metricType())
         }
     }
 

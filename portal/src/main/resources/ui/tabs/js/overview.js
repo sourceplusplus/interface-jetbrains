@@ -110,12 +110,14 @@ var overviewChartOptions = {
 };
 overviewChart.setOption(overviewChartOptions);
 
+var currentMetricType = "Throughput_Average";
 var currentTimeFrame = "LAST_15_MINUTES";
 eb.onopen = function () {
     portalConnected();
     if (requiresRegistration) {
         return;
     }
+    clickedViewAverageResponseTimeChart(); //default = avg resp time
 
     var clearOverviewHandler = portalUuid + '-ClearOverview';
     var displayCardHandler = portalUuid + '-DisplayCard';
@@ -123,22 +125,6 @@ eb.onopen = function () {
     var displayStatsHandler = portalUuid + '-DisplayStats';
     eb.registerHandler(clearOverviewHandler, function (error, message) {
         console.log("Clearing overview");
-        $('#quick_stats_min').text("n/a");
-        $('#quick_stats_max').text("n/a");
-        $('#quick_stats_p99').text("n/a");
-        $('#quick_stats_p95').text("n/a");
-        $('#quick_stats_p90').text("n/a");
-        $('#quick_stats_p75').text("n/a");
-        $('#quick_stats_p50').text("n/a");
-
-        var cards = ["card_throughput_average", "card_responsetime_average", "card_servicelevelagreement_average"];
-        for (var i = 0; i < cards.length; i++) {
-            var name = cards[i];
-            document.getElementById(name + '_header').textContent = "n/a";
-            for (var z = 1; z <= 15; z++) {
-                $('#' + name + '_bar_' + z).css('height', '0%');
-            }
-        }
 
         overviewChart.setOption({
             series: []
@@ -155,10 +141,6 @@ eb.onopen = function () {
         }
 
         document.getElementById('card_' + card.meta.toLowerCase() + '_header').textContent = card.header;
-
-        for (var i = 0; i < 15; i++) {
-            $('#card_' + card.meta.toLowerCase() + '_bar_' + (i + 1)).css('height', card.bar_graph_data[i] + '%');
-        }
     });
     eb.registerHandler(updateChartHandler, function (error, message) {
         //eb.send('PortalLogger', 'Updating chart: ' + JSON.stringify(message));
@@ -167,6 +149,13 @@ eb.onopen = function () {
         if (chartData.time_frame != currentTimeFrame) {
             return
         }
+        var cards = ["throughput_average", "responsetime_average", "servicelevelagreement_average"];
+        for (var i = 0; i < cards.length; i++) {
+            $('#card_' + cards[i] + '_header').removeClass('spp_red_color');
+            $('#card_' + cards[i] + '_header_label').removeClass('spp_red_color');
+        }
+        $('#card_' + chartData.metric_type.toLowerCase() + '_header').addClass('spp_red_color');
+        $('#card_' + chartData.metric_type.toLowerCase() + '_header_label').addClass('spp_red_color');
 
         for (var i = 0; i < chartData.series_data.length; i++) {
             var seriesData = chartData.series_data[i];
@@ -209,14 +198,6 @@ eb.onopen = function () {
             //     + " - Current time frame: " + currentTimeFrame);
             return
         }
-
-        if (stats.min) $('#quick_stats_min').text(stats.min);
-        if (stats.max) $('#quick_stats_max').text(stats.max);
-        if (stats.p99) $('#quick_stats_p99').text(stats.p99);
-        if (stats.p95) $('#quick_stats_p95').text(stats.p95);
-        if (stats.p90) $('#quick_stats_p90').text(stats.p90);
-        if (stats.p75) $('#quick_stats_p75').text(stats.p75);
-        if (stats.p50) $('#quick_stats_p50').text(stats.p50);
     });
 
     var timeFrame = localStorage.getItem('spp.metric_time_frame');
@@ -233,4 +214,19 @@ function updateTime(interval) {
     currentTimeFrame = interval.toUpperCase();
     localStorage.setItem('spp.metric_time_frame', interval);
     eb.send('SetMetricTimeFrame', {'portal_uuid': portalUuid, 'metric_time_frame': interval});
+}
+
+function clickedViewAverageThroughputChart() {
+    currentMetricType = "Throughput_Average";
+    eb.send('SetActiveChartMetric', {'portal_uuid': portalUuid, 'metric_type': currentMetricType});
+}
+
+function clickedViewAverageResponseTimeChart() {
+    currentMetricType = "ResponseTime_Average";
+    eb.send('SetActiveChartMetric', {'portal_uuid': portalUuid, 'metric_type': currentMetricType});
+}
+
+function clickedViewAverageSLAChart() {
+    currentMetricType = "ServiceLevelAgreement_Average";
+    eb.send('SetActiveChartMetric', {'portal_uuid': portalUuid, 'metric_type': currentMetricType});
 }
