@@ -16,6 +16,7 @@ setupUI();
 
 var keepTraceCount = (externalPortal) ? 25 : 10;
 var displayedTraces = [];
+var displayedTraceIds = new Map();
 
 function displayTraces(traceResult) {
     if (traceResult.order_type != traceOrderType) {
@@ -50,22 +51,12 @@ function displayTraces(traceResult) {
     $('#traces_total_label').text("Total: " + traceResult.total);
 
     if (traceResult.traces.length > 0) {
-        if (traceResult.traces.length == 25) {
-            $('#trace_table tr').remove();
-            displayedTraces = [];
-        }
-        //todo: smarter, result needs to be merged in to current result set in correct position
-        if (traceResult.order_type == "SLOWEST_TRACES" && displayedTraces.length == 25 && traceResult.traces.length != 25) {
-            return;
-        }
-
         for (var i = 0; i < traceResult.traces.length; i++) {
             var trace = traceResult.traces[i];
             var globalTraceId = trace.trace_ids[0];
-            if (displayedTraces.includes(globalTraceId)) {
+            if (displayedTraceIds.has(globalTraceId)) {
                 continue;
             }
-            displayedTraces.push(globalTraceId);
 
             var htmlTraceId = globalTraceId.split('.').join('');
             var operationName = trace.operation_names[0];
@@ -92,10 +83,32 @@ function displayTraces(traceResult) {
             } else {
                 rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
             }
-            $("#trace_table").prepend(rowHtml);
 
+            var insertIndex = 0;
+            if (traceResult.order_type == "LATEST_TRACES") {
+                //sort by time
+                insertIndex = displayedTraces.length;
+                for (var z = 0; z < displayedTraces.length; z++) {
+                    if (trace.start >= displayedTraces[z].start) {
+                        insertIndex = z;
+                        break;
+                    }
+                }
+            } else {
+                //sort by duration
+                for (var z = 0; z < displayedTraces.length; z++) {
+                    if (trace.duration >= displayedTraces[z].duration) {
+                        insertIndex = z;
+                        break;
+                    }
+                }
+            }
+            document.getElementById("trace_table").insertRow(insertIndex).outerHTML = rowHtml;
+            displayedTraceIds.set(globalTraceId, true);
+            displayedTraces.splice(insertIndex, 0, trace);
             if (displayedTraces.length > keepTraceCount) {
-                $('#trace-' + displayedTraces.shift().split('.').join('')).remove();
+                displayedTraceIds.delete(globalTraceId);
+                $('#trace-' + displayedTraces.pop().trace_ids[0].split('.').join('')).remove();
             }
         }
     }

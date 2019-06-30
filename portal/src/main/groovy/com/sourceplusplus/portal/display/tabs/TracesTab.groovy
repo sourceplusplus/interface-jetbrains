@@ -106,7 +106,7 @@ class TracesTab extends AbstractTab {
                                 .traces(it.result().traces())
                                 .total(it.result().total())
                                 .build()
-                        handleArtifactTraceResult(traceResult)
+                        handleArtifactTraceResult(Collections.singletonList(portal), traceResult)
                     } else {
                         log.error("Failed to get traces", it.cause())
                     }
@@ -372,6 +372,11 @@ class TracesTab extends AbstractTab {
     }
 
     private void handleArtifactTraceResult(ArtifactTraceResult artifactTraceResult) {
+        handleArtifactTraceResult(SourcePortal.getPortals(artifactTraceResult.appUuid(),
+                artifactTraceResult.artifactQualifiedName()).collect(), artifactTraceResult)
+    }
+
+    private void handleArtifactTraceResult(List<SourcePortal> portals, ArtifactTraceResult artifactTraceResult) {
         def traces = new ArrayList<Trace>()
         artifactTraceResult.traces().each {
             traces.add(it.withPrettyDuration(humanReadableDuration(Duration.ofMillis(it.duration()))))
@@ -379,7 +384,7 @@ class TracesTab extends AbstractTab {
         artifactTraceResult = artifactTraceResult.withTraces(traces)
                 .withArtifactSimpleName(removePackageAndClassName(removePackageNames(artifactTraceResult.artifactQualifiedName())))
 
-        SourcePortal.getPortals(artifactTraceResult.appUuid(), artifactTraceResult.artifactQualifiedName()).each {
+        portals.each {
             def representation = it.interface.tracesView
             representation.cacheArtifactTraceResult(artifactTraceResult)
 
