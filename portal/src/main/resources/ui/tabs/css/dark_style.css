@@ -69,3 +69,15 @@
 .ui.toggle.checkbox input:checked ~ label {
     color: #e1483b !important
 }
+
+.stack_table_background {
+    background-color: grey;
+}
+
+.trace_stack_table {
+    border: none !important;
+}
+
+.span_segment_background {
+    background-color: grey !important;
+}

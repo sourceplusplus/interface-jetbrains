@@ -18,6 +18,9 @@ var mainGetQuery = '?portal_uuid=' + portalUuid;
 if (externalPortal) {
     mainGetQuery += '&external=true';
 }
+if (darkMode) {
+    mainGetQuery += '&dark_mode=true';
+}
 
 function findGetParameter(parameterName) {
     var result = null,
