@@ -84,10 +84,9 @@ function displayTraces(traceResult) {
                 rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
             }
 
-            var insertIndex = 0;
+            var insertIndex = displayedTraces.length;
             if (traceResult.order_type == "LATEST_TRACES") {
                 //sort by time
-                insertIndex = displayedTraces.length;
                 for (var z = 0; z < displayedTraces.length; z++) {
                     if (trace.start >= displayedTraces[z].start) {
                         insertIndex = z;
@@ -106,9 +105,11 @@ function displayTraces(traceResult) {
             document.getElementById("trace_table").insertRow(insertIndex).outerHTML = rowHtml;
             displayedTraceIds.set(globalTraceId, true);
             displayedTraces.splice(insertIndex, 0, trace);
+
             if (displayedTraces.length > keepTraceCount) {
-                displayedTraceIds.delete(globalTraceId);
-                $('#trace-' + displayedTraces.pop().trace_ids[0].split('.').join('')).remove();
+                var deleteGlobalTraceId = displayedTraces.pop().trace_ids[0];
+                displayedTraceIds.delete(deleteGlobalTraceId);
+                $('#trace-' + deleteGlobalTraceId.split('.').join('')).remove();
             }
         }
     }
