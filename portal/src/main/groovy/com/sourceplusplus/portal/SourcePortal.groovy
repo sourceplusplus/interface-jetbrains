@@ -47,16 +47,6 @@ class SourcePortal implements Closeable {
         log.info("Active portals: " + portalMap.size())
     }
 
-    static void destroyPortal(String portalUuid) {
-        log.info("Destroying portal: " + portalUuid)
-        def portal = portalMap.get(portalUuid)
-        if (portal) {
-            portal.close()
-            portalMap.invalidate(portalUuid)
-        }
-        log.info("Active portals: " + portalMap.size())
-    }
-
     static Optional<SourcePortal> getInternalPortal(String appUuid, String artifactQualifiedName) {
         return Optional.ofNullable(portalMap.asMap().values().find {
             it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && !it.external
@@ -127,7 +117,10 @@ class SourcePortal implements Closeable {
 
     @Override
     void close() throws IOException {
+        log.info("Closed portal: $portalUuid")
+        portalMap.invalidate(portalUuid)
         portalUI.close()
+        log.info("Active portals: " + portalMap.size())
     }
 
     boolean isExternal() {

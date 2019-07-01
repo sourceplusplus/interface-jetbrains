@@ -139,7 +139,7 @@ class PortalInterface {
                     popupFrame.addWindowListener(new WindowAdapter() {
                         @Override
                         void windowClosing(WindowEvent e) {
-                            browser.close(true)
+                            portal.close()
                         }
                     })
                     return true
