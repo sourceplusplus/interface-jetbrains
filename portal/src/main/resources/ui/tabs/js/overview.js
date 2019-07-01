@@ -66,6 +66,7 @@ window.onresize = function () {
     overviewChart.resize();
 };
 
+var tooltipMeasurement = "ms";
 var labelColor = (darkMode) ? "grey" : "black";
 var overviewChartOptions = {
     grid: {
@@ -78,7 +79,7 @@ var overviewChartOptions = {
         trigger: 'axis',
         formatter: function (params) {
             params = params[0];
-            return moment(params.value[0]).format('LTS') + ' : ' + params.value[1] + "ms";
+            return moment(params.value[0]).format('LTS') + ' : ' + params.value[1] + tooltipMeasurement;
         },
         axisPointer: {
             animation: false
@@ -156,6 +157,13 @@ eb.onopen = function () {
         }
         $('#card_' + chartData.metric_type.toLowerCase() + '_header').addClass('spp_red_color');
         $('#card_' + chartData.metric_type.toLowerCase() + '_header_label').addClass('spp_red_color');
+        if (chartData.metric_type.toLowerCase() == cards[0]) {
+            tooltipMeasurement = "/min";
+        } else if (chartData.metric_type.toLowerCase() == cards[1]) {
+            tooltipMeasurement = "ms";
+        } else if (chartData.metric_type.toLowerCase() == cards[2]) {
+            tooltipMeasurement = "%";
+        }
 
         for (var i = 0; i < chartData.series_data.length; i++) {
             var seriesData = chartData.series_data[i];
