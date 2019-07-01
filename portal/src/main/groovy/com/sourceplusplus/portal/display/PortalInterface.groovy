@@ -119,15 +119,17 @@ class PortalInterface {
 //                log.info("[PORTAL_CONSOLE] - " + it)
 //            })
 
+            browser.cefClient.removeLifeSpanHandler()
             browser.cefClient.addLifeSpanHandler(CefLifeSpanHandlerProxy.createHandler(new CefLifeSpanHandlerProxy() {
                 @Override
                 boolean onBeforePopup(CefBrowserProxy browser, CefFrameProxy frame, String targetUrl, String targetFrameName) {
-                    JourneyBrowserView browserView = new JourneyBrowserView(browser)
-
                     def portal = SourcePortal.getPortal(new QueryStringDecoder(
                             targetUrl).parameters().get("portal_uuid").get(0))
+                    def browserView = new JourneyBrowserView(
+                            browser.getClient().createBrowser(targetUrl, false, false))
                     portal.interface.browser = browserView
-                    final JFrame popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
+
+                    def popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
                     popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
                     popupFrame.setPreferredSize(new Dimension(800, 600))
                     popupFrame.add(browserView, BorderLayout.CENTER)
@@ -145,6 +147,19 @@ class PortalInterface {
 
                 @Override
                 void onAfterCreated(CefBrowserProxy browser) {
+                    //https://github.com/CodeBrig/Journey/issues/13
+                    if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+                        new java.util.Timer().schedule(
+                                new TimerTask() {
+                                    @Override
+                                    void run() {
+                                        if (browser.getZoomLevel() != -1.5d) {
+                                            browser.setZoomLevel(-1.5)
+                                        }
+                                    }
+                                }, 0, 50
+                        )
+                    }
                 }
 
                 @Override
