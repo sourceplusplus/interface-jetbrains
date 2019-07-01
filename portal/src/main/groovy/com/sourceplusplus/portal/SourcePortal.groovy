@@ -100,7 +100,7 @@ class SourcePortal implements Closeable {
     }
 
     static SourcePortal getPortal(String portalUuid) {
-        return portalMap.get(portalUuid)
+        return portalMap.getIfPresent(portalUuid)
     }
 
     PortalInterface getInterface() {

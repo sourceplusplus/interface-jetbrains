@@ -8,6 +8,7 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.marker.mark.GutterMark
+import com.sourceplusplus.portal.SourcePortal
 import io.vertx.core.AbstractVerticle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -153,7 +154,12 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
 
                     def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
-                    gutterMark?.markArtifactUnsubscribed()
+                    if (gutterMark) {
+                        gutterMark.markArtifactUnsubscribed()
+                        if (gutterMark.portalRegistered) {
+                            SourcePortal.getPortal(gutterMark.portalUuid)?.close()
+                        }
+                    }
                 } else {
                     it.cause().printStackTrace()
                     resp.fail(500, it.cause().message)
