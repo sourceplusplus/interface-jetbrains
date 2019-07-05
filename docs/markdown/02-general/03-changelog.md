@@ -1,3 +1,21 @@
+# 0.2.0-alpha (2019-07-04)
+
+- Added ability to switch overview graph ([#18](https://github.com/sourceplusplus/Assistant/issues/18))
+- Configurable latest/slowest trace page size ([#65](https://github.com/sourceplusplus/Assistant/issues/65))
+- Upgrade to SkyWalking 6.2 ([#97](https://github.com/sourceplusplus/Assistant/issues/97))
+- Added agent artifact trigger metrics ([#83](https://github.com/sourceplusplus/Assistant/issues/83))
+- Fixed secure mode sending incorrect integration ports ([#80](https://github.com/sourceplusplus/Assistant/issues/80))
+- Added AdminAPI.shutdown API endpoint ([#85](https://github.com/sourceplusplus/Assistant/issues/85))
+- Implemented ability for Source++ to monitor itself ([#81](https://github.com/sourceplusplus/Assistant/issues/81))
+- Closing files now correctly unsubscribe artifacts ([#86](https://github.com/sourceplusplus/Assistant/issues/86))
+- Unsubscribed artifacts now correctly close internal portal ([#95](https://github.com/sourceplusplus/Assistant/issues/95))
+- Force unique application names ([#88](https://github.com/sourceplusplus/Assistant/issues/88))
+- Ability to configure agent with application name instead of id ([#89](https://github.com/sourceplusplus/Assistant/issues/89))
+- Better portal caching ([#70](https://github.com/sourceplusplus/Assistant/issues/70))
+- More efficient SkyWalking endpoint sync mechanism ([#90](https://github.com/sourceplusplus/Assistant/issues/90))
+- Increased ability to change portal theme ([#87](https://github.com/sourceplusplus/Assistant/issues/87))
+- Skip tracing Groovy generated functions ([#84](https://github.com/sourceplusplus/Assistant/issues/84))
+
 # 0.2.0-alpha (2019-06-18)
 
 - Moved GitHub project from CodeBrig/Source to sourceplusplus/Assistant
