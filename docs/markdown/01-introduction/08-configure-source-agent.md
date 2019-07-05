@@ -6,8 +6,10 @@
   "test_mode": false,
   "log_level": "info",
   "log_location": null,
+  "log_metrics": false,
   "application": {
     "app_uuid": null,
+    "app_name": null,
     "application_source_code": {
       "packages": []
     }
@@ -41,12 +43,14 @@
 | test_mode    | false | Includes additional output        |
 | log_level    | info  | Log level to use throughout agent |
 | log_location | null  | The directory to write logs to    |
+| log_metrics  | false | Log agent metrics to the log_location |
 
 ## Application Settings
 
 | Property                | Value | Description                        |
 | ----------------------- | ----- | ---------------------------------- |
 | app_uuid                | null  | The application UUID               |
+| app_name                | null  | The application name (optional)    |
 | application_source_code | null  | Represents the packages to monitor |
 
 ## API Settings
