@@ -18,7 +18,8 @@ eb.onopen = function () {
     eb.registerHandler(portalUuid + '-DisplayArtifactConfiguration', function (error, message) {
         updateArtifactConfigurationTable(message.body);
     });
-    eb.send('ConfigurationTabOpened', {'portal_uuid': portalUuid});
+
+    eb.publish('ConfigurationTabOpened', {'portal_uuid': portalUuid});
 };
 
 function toggledForceSubscription(forceSubscribe) {

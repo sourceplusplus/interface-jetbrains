@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  */
 public class ClassFileTransformerImpl implements ClassFileTransformer {
@@ -79,11 +79,13 @@ public class ClassFileTransformerImpl implements ClassFileTransformer {
                 Pattern p = (Pattern) patternsForASMClass;
                 Matcher m = p.matcher(className);
                 if (m.matches()) {
-                    matchFound = SourceAgentConfig.current.testMode || !className.startsWith("com/sourceplusplus/");
+                    matchFound = SourceAgentConfig.current.testMode ||
+                            (!className.startsWith("com/sourceplusplus/agent/")
+                                    && !className.startsWith("com/sourceplusplus/api/model/"));
                 }
             }
         }
-        Logger.debug(String.format("Found traceable class: %s - Is match: %s", className, matchFound));
+        Logger.trace(String.format("Found traceable class: %s - Is match: %s", className, matchFound));
         return matchFound;
     }
 }

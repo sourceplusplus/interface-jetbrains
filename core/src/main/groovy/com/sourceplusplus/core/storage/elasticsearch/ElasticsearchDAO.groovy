@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -38,6 +38,8 @@ class ElasticsearchDAO extends SourceStorage {
 
     public static final String REFRESH_STORAGE = "REFRESH_STORAGE"
 
+    private static final String SOURCE_APPLICATION_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
+            "config/elasticsearch/application_index_mappings.json"), Charsets.UTF_8)
     private static final String SOURCE_ARTIFACT_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
             "config/elasticsearch/artifact_index_mappings.json"), Charsets.UTF_8)
     private static final String SOURCE_ARTIFACT_SUBSCRIPTION_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
@@ -85,12 +87,17 @@ class ElasticsearchDAO extends SourceStorage {
     }
 
     private void installIndexes(Handler<AsyncResult<Void>> handler) {
-        //todo: application
-        installIndex("artifact", SOURCE_ARTIFACT_INDEX_MAPPINGS, {
+        installIndex("application", SOURCE_APPLICATION_INDEX_MAPPINGS, {
             if (it.succeeded()) {
-                installIndex("artifact_subscription", SOURCE_ARTIFACT_SUBSCRIPTION_INDEX_MAPPINGS, {
+                installIndex("artifact", SOURCE_ARTIFACT_INDEX_MAPPINGS, {
                     if (it.succeeded()) {
-                        handler.handle(Future.succeededFuture())
+                        installIndex("artifact_subscription", SOURCE_ARTIFACT_SUBSCRIPTION_INDEX_MAPPINGS, {
+                            if (it.succeeded()) {
+                                handler.handle(Future.succeededFuture())
+                            } else {
+                                handler.handle(Future.failedFuture(it.cause()))
+                            }
+                        })
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
                     }
@@ -153,26 +160,37 @@ class ElasticsearchDAO extends SourceStorage {
 
     @Override
     void createApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler) {
-        def createApplication = new JsonObject(Json.encode(application))
-        createApplication.remove("create_request") //todo: smarter
-        createApplication.remove("update_request") //todo: smarter
+        findApplicationByName(application.appName(), {
+            if (it.succeeded()) {
+                if (it.result().isPresent()) {
+                    handler.handle(Future.failedFuture(new IllegalArgumentException(
+                            "Application name is already in use")))
+                } else {
+                    def createApplication = new JsonObject(Json.encode(application))
+                    createApplication.remove("create_request") //todo: smarter
+                    createApplication.remove("update_request") //todo: smarter
 
-        def index = new Index.Builder(Json.encode(createApplication)).index(SPP_INDEX + "_application")
-                .type("application")
-                .id(application.appUuid()).build()
-        client.executeAsync(index, new JestResultHandler() {
+                    def index = new Index.Builder(Json.encode(createApplication)).index(SPP_INDEX + "_application")
+                            .type("application")
+                            .id(application.appUuid()).build()
+                    client.executeAsync(index, new JestResultHandler() {
 
-            @Override
-            void completed(Object result) {
-                log.info(String.format("Created application. App UUID: %s - App name: %s",
-                        application.appUuid(), application.appName()))
-                handler.handle(Future.succeededFuture(application))
-            }
+                        @Override
+                        void completed(Object result) {
+                            log.info(String.format("Created application. App UUID: %s - App name: %s",
+                                    application.appUuid(), application.appName()))
+                            handler.handle(Future.succeededFuture(application))
+                        }
 
-            @Override
-            void failed(Exception ex) {
-                log.error("Failed to create application", ex)
-                handler.handle(Future.failedFuture(ex))
+                        @Override
+                        void failed(Exception ex) {
+                            log.error("Failed to create application", ex)
+                            handler.handle(Future.failedFuture(ex))
+                        }
+                    })
+                }
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
             }
         })
     }
@@ -216,6 +234,51 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    @Override
+    void findApplicationByName(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
+        String query = '{\n' +
+                '  "query": {\n' +
+                '    "bool": {\n' +
+                '      "must": [\n' +
+                '        { "term": { "app_name": "' + appName + '" }}\n' +
+                '      ]\n' +
+                '    }\n' +
+                '  }\n' +
+                '}'
+        def search = new Search.Builder(query)
+                .addIndex(SPP_INDEX + "_application")
+                .build()
+
+        client.executeAsync(search, new JestResultHandler<SearchResult>() {
+
+            @Override
+            void completed(SearchResult result) {
+                if (result.succeeded || result.responseCode == 404) {
+                    def resultString = result.getSourceAsString()
+                    if (resultString == null || resultString.isEmpty()) {
+                        log.debug(String.format("Could not find application. Application name: %s", appName))
+                        handler.handle(Future.succeededFuture(Optional.empty()))
+                    } else {
+                        def application = Json.decodeValue(result.getSourceAsString(), SourceApplication.class)
+                        handler.handle(Future.succeededFuture(Optional.of(application)))
+                    }
+                } else {
+                    log.error(result.errorMessage)
+                    handler.handle(Future.failedFuture(result.errorMessage))
+                }
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to search for application by name", ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         def get = new Get.Builder(SPP_INDEX + "_application", Objects.requireNonNull(appUuid))
@@ -296,7 +359,7 @@ class ElasticsearchDAO extends SourceStorage {
 
             @Override
             void completed(Object result) {
-                log.info(String.format("Created artifact. App uuid: %s - Artifact qualified name: %s",
+                log.info(String.format("Created artifact. App UUID: %s - Artifact qualified name: %s",
                         artifact.appUuid(), artifact.artifactQualifiedName()))
                 handler.handle(Future.succeededFuture(artifact))
             }
@@ -319,7 +382,7 @@ class ElasticsearchDAO extends SourceStorage {
 
             @Override
             void completed(DocumentResult result) {
-                log.info(String.format("Updated artifact. App uuid: %s - Artifact qualified name: %s",
+                log.info(String.format("Updated artifact. App UUID: %s - Artifact qualified name: %s",
                         artifact.appUuid(), artifact.artifactQualifiedName()))
                 if (result.succeeded) {
                     getArtifact(artifact.appUuid(), artifact.artifactQualifiedName(), {

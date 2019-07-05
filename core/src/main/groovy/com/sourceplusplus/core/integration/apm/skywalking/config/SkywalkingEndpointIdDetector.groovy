@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -24,7 +26,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -33,6 +35,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     public static final String SEARCH_FOR_NEW_ENDPOINTS = "SearchForNewEndpoints"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
+    private static final Map<String, Long[]> endpointCheckBackoff = new ConcurrentHashMap<>()
     private final SkywalkingIntegration skywalking
     private final ArtifactAPI artifactAPI
 
@@ -138,7 +141,35 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                     futures.add(fut)
                     skywalking.getServiceEndpoints(service.getString("key"), {
                         if (it.succeeded()) {
-                            searchServiceEndpoints(appUuid, it.result(), fut.completer())
+                            def searchEndpoints = new JsonArray()
+                            for (int z = 0; z < it.result().size(); z++) {
+                                //get random endpoint
+                                def endpoint = it.result().getJsonObject(ThreadLocalRandom.current().nextInt(it.result().size()))
+                                def endpointId = endpoint.getString("key")
+                                endpointCheckBackoff.putIfAbsent(endpointId, [0, Instant.now().toEpochMilli()] as Long[])
+
+                                def expireTime = endpointCheckBackoff.get(endpointId)[1]
+                                if (expireTime <= Instant.now().toEpochMilli()) {
+                                    searchEndpoints.add(endpoint)
+                                    def values = endpointCheckBackoff.get(endpointId)
+                                    values[0]++
+                                    if (values[0] >= 240) values[0] = 240 //max 1 hour wait
+                                    values[1] = Instant.now().plus(values[0] * 15, ChronoUnit.SECONDS).toEpochMilli()
+                                    endpointCheckBackoff.put(endpointId, values)
+                                } else {
+                                    log.debug("Ignoring endpoint: $endpointId - Till: " + Instant.ofEpochMilli(expireTime))
+                                }
+
+                                //search max of 10 endpoints at a time
+                                if (searchEndpoints.size() >= 10) {
+                                    break
+                                }
+                            }
+                            if (searchEndpoints.size() > 0) {
+                                searchServiceEndpoints(appUuid, searchEndpoints, fut.completer())
+                            } else {
+                                fut.complete()
+                            }
                         } else {
                             fut.fail(it.cause())
                         }
@@ -153,6 +184,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     private void searchServiceEndpoints(String appUuid, JsonArray serviceEndpoints,
                                         Handler<AsyncResult<Void>> handler) {
+        log.info("Searching service endpoints. App UUID: $appUuid - Endpoints: $serviceEndpoints")
         def futures = []
         for (int z = 0; z < serviceEndpoints.size(); z++) {
             def serviceEndpoint = serviceEndpoints.getJsonObject(z)
@@ -195,6 +227,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     private void searchServiceId(String appUuid, String endpointId, String endpointName,
                                  Handler<AsyncResult<Void>> handler) {
+        log.info("Searching service id. App UUID: $appUuid - Endpoint id: $endpointId - Endpoint name: $endpointName")
         artifactAPI.getSourceArtifactByEndpointId(appUuid, endpointId, {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
@@ -219,6 +252,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     private void searchServiceName(String appUuid, String endpointName, String endpointId,
                                    Handler<AsyncResult<Optional<SourceArtifactConfig>>> handler) {
+        log.info("Searching service name. App UUID: $appUuid - Endpoint id: $endpointId - Endpoint name: $endpointName")
         artifactAPI.getSourceArtifactByEndpointName(appUuid, endpointName, {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
@@ -245,6 +279,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     }
 
     private void analyzeEndpointTraces(String appUuid, String endpointId, Handler<AsyncResult<Void>> handler) {
+        log.info("Analayzing endpoint traces. App UUID: $appUuid - Endpoint id: $endpointId")
         //todo: should be a limit in this query and should look further back than 15 minutes
         def traceQuery = TraceQuery.builder()
                 .appUuid(appUuid)
@@ -281,6 +316,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     }
 
     private void analyzeEndpointSpans(String appUuid, List<TraceSpan> spans, Handler<AsyncResult<Void>> handler) {
+        log.info("Analayzing endpoint spans. App UUID: $appUuid - Span size: " + spans.size())
         def futures = []
         for (int i = 0; i < spans.size(); i++) {
             def span = spans.get(i)

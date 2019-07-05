@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject
 /**
  * Contains common portal tab functionality.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -27,11 +27,6 @@ abstract class AbstractTab extends AbstractVerticle {
             def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
             if (portal.interface.currentTab == thisTab) {
                 updateUI(portal)
-
-                //https://github.com/CodeBrig/Journey/issues/13
-                if (portal.interface.browser != null && System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                    portal.interface.browser.browser.setZoomLevel(-1.5)
-                }
             }
         })
     }

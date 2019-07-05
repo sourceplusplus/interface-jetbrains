@@ -3,7 +3,7 @@ package com.sourceplusplus.portal.display
 /**
  * Contains the available possible portal tabs.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -252,23 +252,21 @@ class SkywalkingIntegration extends APMIntegration {
 
     @Override
     void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
-        log.info("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
+        log.debug("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
         def graphqlQuery = new JsonObject()
+        def fullQuery
         if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
-            graphqlQuery.put("query", GET_LATEST_TRACES
-                    .replace('$endpointId', traceQuery.endpointId())
-                    .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
-                    .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
-                    .replace('$queryDurationStep', traceQuery.durationStep())
-            )
+            fullQuery = GET_LATEST_TRACES
         } else {
-            graphqlQuery.put("query", GET_SLOWEST_TRACES
-                    .replace('$endpointId', traceQuery.endpointId())
-                    .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
-                    .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
-                    .replace('$queryDurationStep', traceQuery.durationStep())
-            )
+            fullQuery = GET_SLOWEST_TRACES
         }
+        graphqlQuery.put("query", fullQuery
+                .replace('$endpointId', traceQuery.endpointId())
+                .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
+                .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
+                .replace('$queryDurationStep', traceQuery.durationStep())
+                .replace('$pageSize', Integer.toString(traceQuery.pageSize()))
+        )
 
         webClient.post(skywalkingOAPPort, skywalkingOAPHost,
                 "/graphql").sendJsonObject(graphqlQuery, {
@@ -293,8 +291,8 @@ class SkywalkingIntegration extends APMIntegration {
                         .total(result.getInteger("total"))
                         .build()
 
-                log.info("Got SkyWalking traces. Traces: {} - Total: {}",
-                        traceQueryResult.traces().size(), traceQueryResult.total())
+                log.info("Got SkyWalking traces. Artifact: {} - Traces: {} - Total: {}",
+                        traceQuery.artifactQualifiedName(), traceQueryResult.traces().size(), traceQueryResult.total())
                 handler.handle(Future.succeededFuture(traceQueryResult))
             }
         })

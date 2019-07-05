@@ -9,11 +9,11 @@ subprojects {
     apply plugin: 'maven'
     group = 'com.github.sourceplusplus'
 
-    version = '0.2.0'
+    version = '0.2.1'
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
-    project.ext.APACHE_SKYWALKING_VERSION = "6.1.0"
+    project.ext.APACHE_SKYWALKING_VERSION = "6.2.0"
     project.ext.VERTX_VERSION = "3.7.0"
 
     repositories {
@@ -39,7 +39,7 @@ subprojects {
         compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.9'
         compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.9.9'
         compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: '2.9.9'
-        compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '3.2.6'
+        compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.1.0'
     }
 
     test {

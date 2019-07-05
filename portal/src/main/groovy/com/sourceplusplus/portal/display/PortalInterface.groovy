@@ -1,13 +1,16 @@
 package com.sourceplusplus.portal.display
 
 import com.codebrig.journey.JourneyBrowserView
+import com.codebrig.journey.proxy.CefBrowserProxy
+import com.codebrig.journey.proxy.browser.CefFrameProxy
+import com.codebrig.journey.proxy.handler.CefLifeSpanHandlerProxy
 import com.google.common.base.Joiner
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
-import groovy.io.FileType
+import io.netty.handler.codec.http.QueryStringDecoder
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
 import org.jetbrains.annotations.NotNull
@@ -16,6 +19,8 @@ import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import java.awt.*
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicBoolean
@@ -25,7 +30,7 @@ import java.util.zip.ZipFile
 /**
  * Used to render the Source++ Portal's Semantic UI HTML files as a JComponent.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -67,7 +72,7 @@ class PortalInterface {
         }
 
         def page = tab.name().toLowerCase() + ".html"
-        browser.browser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
+        browser.cefBrowser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
     }
 
     OverviewView getOverviewView() {
@@ -83,7 +88,7 @@ class PortalInterface {
     }
 
     void close() {
-        browser.browser.close(true)
+        browser.cefBrowser.close(true)
     }
 
     void reload() {
@@ -113,29 +118,69 @@ class PortalInterface {
 //            browser.browser.addConsoleListener({
 //                log.info("[PORTAL_CONSOLE] - " + it)
 //            })
+
+            browser.cefClient.removeLifeSpanHandler()
+            browser.cefClient.addLifeSpanHandler(CefLifeSpanHandlerProxy.createHandler(new CefLifeSpanHandlerProxy() {
+                @Override
+                boolean onBeforePopup(CefBrowserProxy browser, CefFrameProxy frame, String targetUrl, String targetFrameName) {
+                    def portal = SourcePortal.getPortal(new QueryStringDecoder(
+                            targetUrl).parameters().get("portal_uuid").get(0))
+                    def browserView = new JourneyBrowserView(
+                            browser.getClient().createBrowser(targetUrl, false, false))
+                    portal.interface.browser = browserView
+
+                    def popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
+                    popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
+                    popupFrame.setPreferredSize(new Dimension(800, 600))
+                    popupFrame.add(browserView, BorderLayout.CENTER)
+                    popupFrame.pack()
+                    popupFrame.setLocationByPlatform(true)
+                    popupFrame.setVisible(true)
+                    popupFrame.addWindowListener(new WindowAdapter() {
+                        @Override
+                        void windowClosing(WindowEvent e) {
+                            portal.close()
+                        }
+                    })
+                    return true
+                }
+
+                @Override
+                void onAfterCreated(CefBrowserProxy browser) {
+                    //https://github.com/CodeBrig/Journey/issues/13
+                    if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+                        new java.util.Timer().schedule(
+                                new TimerTask() {
+                                    @Override
+                                    void run() {
+                                        if (browser.getZoomLevel() != -1.5d) {
+                                            browser.setZoomLevel(-1.5)
+                                        }
+                                    }
+                                }, 0, 50
+                        )
+                    }
+                }
+
+                @Override
+                void onAfterParentChanged(CefBrowserProxy browser) {
+                }
+
+                @Override
+                boolean doClose(CefBrowserProxy browser) {
+                    return false
+                }
+
+                @Override
+                void onBeforeClose(CefBrowserProxy browser) {
+                }
+            }))
             vertx.eventBus().publish(PORTAL_READY, portalUuid)
         }
     }
 
     static void updateTheme(boolean dark) {
         DARK_MODE = dark
-        if (dark) {
-            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
-            tabsFolder.eachFile(FileType.FILES, {
-                def updatedHtml = it.text.replace('css/style.css', 'css/dark_style.css')
-                it.text = ""
-                it << updatedHtml
-            })
-        } else {
-            def tabsFolder = new File(uiDirectory.absolutePath, "tabs")
-            tabsFolder.eachFile(FileType.FILES, {
-                def updatedHtml = it.text.replace('css/dark_style.css', 'css/style.css')
-                it.text = ""
-                it << updatedHtml
-            })
-        }
-
-        //reload portals
         SourcePortal.getPortals().each {
             it.interface.reload()
         }

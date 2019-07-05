@@ -1,2 +1,2 @@
-FROM apache/skywalking-oap-server:6.1.0
+FROM apache/skywalking-oap-server:6.2.0
 ADD ./log4j2.xml /skywalking/config/log4j2.xml

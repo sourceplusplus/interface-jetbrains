@@ -15,6 +15,7 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
+import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -23,7 +24,7 @@ import java.time.Instant
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -37,6 +38,8 @@ class H2DAO extends SourceStorage {
             "storage/h2/queries/create_application.sql"), Charsets.UTF_8)
     private static final String UPDATE_APPLICATION = Resources.toString(Resources.getResource(
             "storage/h2/queries/update_application.sql"), Charsets.UTF_8)
+    private static final String FIND_APPLICATION_BY_NAME = Resources.toString(Resources.getResource(
+            "storage/h2/queries/find_application_by_name.sql"), Charsets.UTF_8)
     private static final String GET_APPLICATION = Resources.toString(Resources.getResource(
             "storage/h2/queries/get_application.sql"), Charsets.UTF_8)
     private static final String GET_ALL_APPLICATIONS = Resources.toString(Resources.getResource(
@@ -100,6 +103,8 @@ class H2DAO extends SourceStorage {
         client.updateWithParams(CREATE_APPLICATION, params, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture(application))
+            } else if (it.cause() instanceof JdbcSQLIntegrityConstraintViolationException) {
+                handler.handle(Future.failedFuture(new IllegalArgumentException("Application name is already in use")))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -135,6 +140,36 @@ class H2DAO extends SourceStorage {
         })
     }
 
+    @Override
+    void findApplicationByName(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
+        def params = new JsonArray()
+        params.add(appName)
+        client.queryWithParams(FIND_APPLICATION_BY_NAME, params, {
+            if (it.succeeded()) {
+                def results = it.result().results
+                if (!results.isEmpty()) {
+                    def existingApp = results.get(0)
+                    def sourceApplication = SourceApplication.builder()
+                            .appUuid(existingApp.getString(0))
+                            .appName(existingApp.getString(1))
+                            .createDate(Instant.parse(existingApp.getString(2)))
+                    if (existingApp.getString(3)) {
+                        sourceApplication.agentConfig(Json.decodeValue(
+                                existingApp.getString(3), SourceAgentConfig.class))
+                    }
+                    handler.handle(Future.succeededFuture(Optional.of(sourceApplication.build())))
+                } else {
+                    handler.handle(Future.succeededFuture(Optional.empty()))
+                }
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         def params = new JsonArray()
@@ -623,9 +658,12 @@ class H2DAO extends SourceStorage {
                             it.getString(3)), it.getInstant(4))
                 }
 
-                handler.handle(Future.succeededFuture(Optional.ofNullable(
-                        subscriptions.values().collect { it.build() }.get(0)
-                )))
+                def value = subscriptions.values().collect { it.build() }
+                if (value) {
+                    handler.handle(Future.succeededFuture(Optional.of(value.get(0))))
+                } else {
+                    handler.handle(Future.succeededFuture(Optional.empty()))
+                }
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

@@ -2,6 +2,7 @@ package com.sourceplusplus.plugin
 
 import com.google.common.collect.Sets
 import com.sourceplusplus.api.client.SourceCoreClient
+import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.plugin.marker.SourceFileMarker
@@ -19,10 +20,12 @@ import org.jetbrains.annotations.Nullable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
+
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -106,6 +109,15 @@ class SourcePlugin {
 
             log.info("Deactivated source file marker: {} - Mark count: {}", sourceFileMarker, sourceMarks.size())
             sourceMarks.each {
+                if (it.artifactSubscribed) {
+                    def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
+                            .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
+                            .artifactQualifiedName(it.artifactQualifiedName)
+                            .removeAllArtifactSubscriptions(true)
+                            .build()
+                    vertx.eventBus().send(UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
+                }
+
                 sourceFileMarker.removeSourceMark(it)
                 log.trace("Removed source mark: {}", it)
             }

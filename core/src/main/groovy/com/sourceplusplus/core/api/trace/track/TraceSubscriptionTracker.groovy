@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -122,7 +122,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {
-                    log.info("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
+                    log.debug("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
                 } else {
                     def traceResult = ArtifactTraceResult.builder()
                             .appUuid(appArtifact.appUuid())
@@ -162,7 +162,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {
-                    log.info("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
+                    log.debug("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
                 } else {
                     def traceResult = ArtifactTraceResult.builder()
                             .appUuid(appArtifact.appUuid())

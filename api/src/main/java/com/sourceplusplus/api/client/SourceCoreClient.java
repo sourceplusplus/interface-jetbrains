@@ -21,6 +21,8 @@ import io.vertx.core.json.JsonObject;
 import okhttp3.*;
 
 import java.net.URLEncoder;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * Used to communicate with Source++ Core.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  */
 public class SourceCoreClient implements SourceClient {
@@ -56,6 +58,8 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications/:appUuid/subscribers/:subscriberUuid/subscriptions/refresh", SPP_API_VERSION);
     private static final String UPDATE_APPLICATION_ENDPOINT = String.format(
             "/%s/applications/:appUuid", SPP_API_VERSION);
+    private static final String SEARCH_APPLICATIONS_ENDPOINT = String.format(
+            "/%s/applications/search?appName=:appName", SPP_API_VERSION);
     private static final String GET_APPLICATION_ENDPOINT = String.format(
             "/%s/applications/:appUuid", SPP_API_VERSION);
     private static final String GET_APPLICATIONS_ENDPOINT = String.format(
@@ -77,7 +81,8 @@ public class SourceCoreClient implements SourceClient {
             CREATE_SOURCE_ARTIFACT_ENDPOINT + "/traces/unsubscribe", SPP_API_VERSION);
     private static final String GET_SOURCE_ARTIFACT_CONFIGURATION_ENDPOINT = CONFIGURE_SOURCE_ARTIFACT_ENDPOINT;
     private static final String GET_TRACES_ENDPOINT = String.format(
-            "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces?orderType=:orderType", SPP_API_VERSION);
+            "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces?orderType=:orderType&pageSize=:pageSize" +
+                    "&durationStart=:durationStart&durationStop=:durationStop&durationStep=:durationStep", SPP_API_VERSION);
     private static final String GET_TRACE_SPANS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans" +
                     "?followExit=:followExit&oneLevelDeep=:oneLevelDeep&segmentId=:segmentId&spanId=:spanId", SPP_API_VERSION);
@@ -302,6 +307,41 @@ public class SourceCoreClient implements SourceClient {
 
         try (Response response = client.newCall(request.build()).execute()) {
             handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceApplication.class)));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public SourceApplication findApplicationByName(String appName) {
+        String url = sppUrl + SEARCH_APPLICATIONS_ENDPOINT.replace(":appName", appName);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            if (response.isSuccessful()) {
+                return Json.decodeValue(response.body().string(), SourceApplication.class);
+            } else if (response.code() == 404) {
+                return null;
+            } else {
+                throw new IllegalStateException("Unknown response: " + response.body().string());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void findApplicationByName(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
+        String url = sppUrl + SEARCH_APPLICATIONS_ENDPOINT.replace(":appName", appName);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            if (response.isSuccessful()) {
+                handler.handle(Future.succeededFuture(Optional.of(Json.decodeValue(response.body().string(),
+                        SourceApplication.class))));
+            } else {
+                handler.handle(Future.succeededFuture(Optional.empty()));
+            }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
         }
@@ -635,7 +675,11 @@ public class SourceCoreClient implements SourceClient {
         String url = sppUrl + GET_TRACES_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":artifactQualifiedName", artifactQualifiedName)
-                .replace(":orderType", orderType.toString());
+                .replace(":orderType", orderType.toString())
+                .replace(":pageSize", "10")
+                .replace(":durationStart", Instant.now().minus(14, ChronoUnit.MINUTES).toString())
+                .replace(":durationStop", Instant.now().toString())
+                .replace(":durationStep", "SECOND");
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
@@ -643,6 +687,25 @@ public class SourceCoreClient implements SourceClient {
             return Json.decodeValue(response.body().string(), TraceQueryResult.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
+        String url = sppUrl + GET_TRACES_ENDPOINT
+                .replace(":appUuid", traceQuery.appUuid())
+                .replace(":artifactQualifiedName", traceQuery.artifactQualifiedName())
+                .replace(":orderType", traceQuery.orderType().toString())
+                .replace(":pageSize", traceQuery.pageSize().toString())
+                .replace(":durationStart", traceQuery.durationStart().toString())
+                .replace(":durationStop", traceQuery.durationStop().toString())
+                .replace(":durationStep", traceQuery.durationStep());
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), TraceQueryResult.class)));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
         }
     }
 

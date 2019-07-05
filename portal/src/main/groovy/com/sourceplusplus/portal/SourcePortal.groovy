@@ -1,8 +1,10 @@
 package com.sourceplusplus.portal
 
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
+import com.google.common.cache.LoadingCache
 import com.sourceplusplus.portal.display.PortalInterface
 import groovy.transform.Canonical
-import net.jodah.expiringmap.ExpiringMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -11,7 +13,7 @@ import java.util.concurrent.TimeUnit
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -20,8 +22,14 @@ class SourcePortal implements Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
 
-    private static final ExpiringMap<String, SourcePortal> portalMap = ExpiringMap.builder()
-            .expiration(5, TimeUnit.MINUTES).build()
+    private static final LoadingCache<String, SourcePortal> portalMap = CacheBuilder.newBuilder()
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .build(new CacheLoader<String, SourcePortal>() {
+        @Override
+        SourcePortal load(String portalUuid) throws Exception {
+            return getPortal(portalUuid)
+        }
+    })
     private final String portalUuid
     private final String appUuid
     private final boolean external
@@ -35,38 +43,42 @@ class SourcePortal implements Closeable {
 
     static void ensurePortalActive(SourcePortal portal) {
         log.info("Keep alive portal: " + Objects.requireNonNull(portal).portalUuid)
-        portalMap.resetExpiration(portal.portalUuid)
-        log.info("Active portals: " + portalMap.size())
-
-        //https://github.com/CodeBrig/Journey/issues/13
-        if (portal.interface.browser != null && System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-            portal.interface.browser.browser.setZoomLevel(-1.5)
-        }
-    }
-
-    static void destroyPortal(String portalUuid) {
-        log.info("Destroying portal: " + portalUuid)
-        def portal = portalMap.remove(portalUuid)
-        portal?.close()
+        portalMap.refresh(portal.portalUuid)
         log.info("Active portals: " + portalMap.size())
     }
 
     static Optional<SourcePortal> getInternalPortal(String appUuid, String artifactQualifiedName) {
-        return Optional.ofNullable(portalMap.values().find {
+        return Optional.ofNullable(portalMap.asMap().values().find {
             it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && !it.external
         })
     }
 
     static List<SourcePortal> getSimilarPortals(SourcePortal portal) {
-        return portalMap.values().findAll {
+        return portalMap.asMap().values().findAll {
             it.appUuid == portal.appUuid &&
                     it.interface.viewingPortalArtifact == portal.interface.viewingPortalArtifact &&
                     it.interface.currentTab == portal.interface.currentTab
         }
     }
 
+    static List<SourcePortal> getExternalPortals() {
+        return portalMap.asMap().values().findAll { it.external }
+    }
+
+    static List<SourcePortal> getExternalPortals(String appUuid) {
+        return portalMap.asMap().values().findAll {
+            it.appUuid == appUuid && it.external
+        }
+    }
+
+    static List<SourcePortal> getExternalPortals(String appUuid, String artifactQualifiedName) {
+        return portalMap.asMap().values().findAll {
+            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && it.external
+        }
+    }
+
     static List<SourcePortal> getPortals(String appUuid, String artifactQualifiedName) {
-        return portalMap.values().findAll {
+        return portalMap.asMap().values().findAll {
             it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName
         }
     }
@@ -78,17 +90,17 @@ class SourcePortal implements Closeable {
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalUuid, portal)
-        log.info("Registered new Source++ Portal. Portal uuid: $portalUuid - App uuid: $appUuid - Artifact: $artifactQualifiedName")
+        log.info("Registered new Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
         log.info("Active portals: " + portalMap.size())
         return portalUuid
     }
 
     static List<SourcePortal> getPortals() {
-        return new ArrayList<>(portalMap.values())
+        return new ArrayList<>(portalMap.asMap().values())
     }
 
     static SourcePortal getPortal(String portalUuid) {
-        return portalMap.get(portalUuid)
+        return portalMap.getIfPresent(portalUuid)
     }
 
     PortalInterface getInterface() {
@@ -105,7 +117,10 @@ class SourcePortal implements Closeable {
 
     @Override
     void close() throws IOException {
+        log.info("Closed portal: $portalUuid")
+        portalMap.invalidate(portalUuid)
         portalUI.close()
+        log.info("Active portals: " + portalMap.size())
     }
 
     boolean isExternal() {

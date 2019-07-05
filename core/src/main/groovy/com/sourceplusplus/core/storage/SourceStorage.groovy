@@ -10,7 +10,7 @@ import io.vertx.core.Handler
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -20,6 +20,14 @@ abstract class SourceStorage {
 
     abstract void updateApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler)
 
+    abstract void findApplicationByName(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler)
+
+    /**
+     * Retrieve {@link SourceApplication} by an existing {@link SourceApplication#appUuid}.
+     *
+     * @param appUuid the {@link SourceApplication#appUuid} to retrieve
+     * @param handler executed with {@link SourceApplication} if found, empty Optional otherwise
+     */
     abstract void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler)
 
     abstract void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler)

@@ -5,13 +5,13 @@ import java.awt.*
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 interface SourcePluginDefines {
 
-    public static String VERSION = "0.2.0" //todo: dynamic
+    public static String VERSION = "0.2.1" //todo: dynamic
 
     public static String DISPLAY_NAME = "Source++"
     public static String FULL_TEXT_NAME = "SourcePlusPlus"

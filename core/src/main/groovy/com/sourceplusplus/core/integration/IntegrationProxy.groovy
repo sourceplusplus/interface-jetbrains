@@ -2,7 +2,9 @@ package com.sourceplusplus.core.integration
 
 import com.google.common.collect.Sets
 import io.vertx.core.AbstractVerticle
+import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
+import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetSocket
 import io.vertx.core.streams.Pump
 import org.slf4j.Logger
@@ -11,7 +13,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -22,33 +24,55 @@ class IntegrationProxy extends AbstractVerticle {
 
     @Override
     void start(Future<Void> fut) throws Exception {
-        //todo: no hardcoding
-        vertx.createNetServer().connectHandler({ clientSocket ->
-            vertx.createNetClient().connect(11799, "localhost", { serverSocket ->
-                if (serverSocket.succeeded()) {
-                    log.debug("Connection request from IP address: " + clientSocket.remoteAddress())
+        def proxyIntegrationFutures = []
+        def integrations = config().getJsonArray("integrations")
+        for (int i = 0; i < integrations.size(); i++) {
+            def integration = integrations.getJsonObject(i)
+            def connections = integration.getJsonObject("connections")
+            for (def connection : connections) {
+                def conn = connection.value as JsonObject
+                def proxyPort = conn.getInteger("proxy_port")
+                if (proxyPort) {
+                    def actualPort = conn.getInteger("port")
+                    def proxyFuture = Future.future()
+                    proxyIntegrationFutures += proxyFuture
+                    vertx.createNetServer().connectHandler({ clientSocket ->
+                        vertx.createNetClient().connect(actualPort, "localhost", { serverSocket ->
+                            if (serverSocket.succeeded()) {
+                                log.debug("Connection request from IP address: " + clientSocket.remoteAddress())
 
-                    if (ALLOWED_IP_ADDRESSES.contains(clientSocket.remoteAddress().host())) {
-                        new SocketProxy(clientSocket, serverSocket.result()).proxy()
-                    } else {
-                        log.warn("Rejected starting proxy for IP address: " + clientSocket.remoteAddress())
-                    }
-                } else {
-                    log.error(serverSocket.cause().getMessage(), serverSocket.cause())
-                    clientSocket.close()
+                                if (ALLOWED_IP_ADDRESSES.contains(clientSocket.remoteAddress().host())) {
+                                    new SocketProxy(clientSocket, serverSocket.result()).proxy()
+                                } else {
+                                    log.warn("Rejected starting proxy for IP address: " + clientSocket.remoteAddress())
+                                }
+                            } else {
+                                log.error(serverSocket.cause().getMessage(), serverSocket.cause())
+                                clientSocket.close()
+                            }
+                        })
+                    }).listen(proxyPort, {
+                        if (it.succeeded()) {
+                            log.info("Started integration proxy. Proxy port: $proxyPort - Actual port: $actualPort")
+                            vertx.sharedData().getLocalMap("integration.proxy")
+                                    .put(actualPort.toString(), proxyPort)
+                            proxyFuture.complete()
+                        } else {
+                            proxyFuture.fail(new IllegalStateException(
+                                    "Failed to start integration proxy on port: " + proxyPort))
+                        }
+                    })
                 }
-            })
-        }).listen(11800, {
+            }
+        }
+        CompositeFuture.all(proxyIntegrationFutures).setHandler({
             if (it.succeeded()) {
-                log.info("SkyWalking OAP gRPC proxy started")
+                log.info("IntegrationProxy started", getClass().getSimpleName())
                 fut.complete()
             } else {
-                log.error("Failed to start SkyWalking OAP gRPC proxy")
-                it.cause().printStackTrace()
-                System.exit(-1)
+                fut.fail(new IllegalStateException("Failed to start SkyWalking OAP gRPC proxy"))
             }
         })
-        log.info("{} started", getClass().getSimpleName())
     }
 
     private class SocketProxy {

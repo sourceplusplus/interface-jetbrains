@@ -6,13 +6,11 @@ import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.BarTrendCard
-import com.sourceplusplus.api.model.internal.FormattedQuickStats
 import com.sourceplusplus.api.model.internal.SplineChart
 import com.sourceplusplus.api.model.internal.SplineSeriesData
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
-import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.json.Json
@@ -23,6 +21,8 @@ import org.slf4j.LoggerFactory
 import java.text.DecimalFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+
+import static com.sourceplusplus.api.model.metric.MetricType.*
 
 /**
  * Displays general source code artifact statistics.
@@ -35,7 +35,7 @@ import java.time.temporal.ChronoUnit
  *  - Minimum/Maximum response time
  *  - Average SLA
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -43,15 +43,10 @@ class OverviewTab extends AbstractTab {
 
     public static final String OVERVIEW_TAB_OPENED = "OverviewTabOpened"
     public static final String SET_METRIC_TIME_FRAME = "SetMetricTimeFrame"
+    public static final String SET_ACTIVE_CHART_METRIC = "SetActiveChartMetric"
 
     private static final Logger log = LoggerFactory.getLogger(this.name)
     private static DecimalFormat decimalFormat = new DecimalFormat(".#")
-    private final static List<MetricType> CARD_METRIC_TYPES =
-            [MetricType.Throughput_Average, MetricType.ResponseTime_Average, MetricType.ServiceLevelAgreement_Average]
-    private final static List<MetricType> SPLINE_CHART_METRIC_TYPES =
-            [MetricType.ResponseTime_99Percentile, MetricType.ResponseTime_95Percentile,
-             MetricType.ResponseTime_90Percentile, MetricType.ResponseTime_75Percentile,
-             MetricType.ResponseTime_50Percentile]
 
     OverviewTab() {
         super(PortalTab.Overview)
@@ -91,7 +86,7 @@ class OverviewTab extends AbstractTab {
                     .appUuid(portal.appUuid)
                     .artifactQualifiedName(portal.interface.viewingPortalArtifact)
                     .timeFrame(view.timeFrame)
-                    .metricTypes(CARD_METRIC_TYPES + SPLINE_CHART_METRIC_TYPES).build()
+                    .metricTypes([Throughput_Average, ResponseTime_Average, ServiceLevelAgreement_Average]).build()
             SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
                 if (it.succeeded()) {
                     log.info("Successfully subscribed to metrics with request: " + subscribeRequest)
@@ -99,6 +94,12 @@ class OverviewTab extends AbstractTab {
                     log.error("Failed to subscribe to artifact metrics", it.cause())
                 }
             })
+        })
+        vertx.eventBus().consumer(SET_ACTIVE_CHART_METRIC, {
+            def request = JsonObject.mapFrom(it.body())
+            def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
+            portal.interface.overviewView.activeChartMetric = valueOf(request.getString("metric_type"))
+            updateUI(portal)
         })
         log.info("{} started", getClass().getSimpleName())
     }
@@ -117,19 +118,16 @@ class OverviewTab extends AbstractTab {
             }
 
             artifactMetricResult.artifactMetrics().each {
-                updateQuickStats(artifactMetricResult, it)
-                if (it.metricType() in CARD_METRIC_TYPES) {
-                    updateCard(artifactMetricResult, it)
-                } else if (it.metricType() in SPLINE_CHART_METRIC_TYPES) {
-                    updateSplineGraph(artifactMetricResult, it)
-                } else {
-                    throw new UnsupportedOperationException("Invalid metric type: " + it)
+                updateCard(portal, artifactMetricResult, it)
+                if (it.metricType() == portal.interface.overviewView.activeChartMetric) {
+                    updateSplineGraph(portal, artifactMetricResult, it)
                 }
             }
         }
     }
 
-    private void updateSplineGraph(ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
+    private void updateSplineGraph(SourcePortal portal, ArtifactMetricResult metricResult,
+                                   ArtifactMetrics artifactMetrics) {
         def times = new ArrayList<Instant>()
         def current = metricResult.start()
         times.add(current)
@@ -141,75 +139,43 @@ class OverviewTab extends AbstractTab {
                 throw new UnsupportedOperationException("Invalid step: " + metricResult.step())
             }
         }
+        if (artifactMetrics.metricType() == ServiceLevelAgreement_Average) {
+            artifactMetrics = artifactMetrics.withValues(artifactMetrics.values().collect { it / 100 } as int[])
+        }
 
         def seriesDataBuilder = SplineSeriesData.builder()
                 .times(times)
                 .values(artifactMetrics.values() as double[])
         switch (artifactMetrics.metricType()) {
-            case MetricType.ResponseTime_99Percentile:
+            case ResponseTime_99Percentile:
                 seriesDataBuilder.seriesIndex(0)
                 break
-            case MetricType.ResponseTime_95Percentile:
+            case ResponseTime_95Percentile:
                 seriesDataBuilder.seriesIndex(1)
                 break
-            case MetricType.ResponseTime_90Percentile:
+            case ResponseTime_90Percentile:
                 seriesDataBuilder.seriesIndex(2)
                 break
-            case MetricType.ResponseTime_75Percentile:
+            case ResponseTime_75Percentile:
                 seriesDataBuilder.seriesIndex(3)
                 break
-            case MetricType.ResponseTime_50Percentile:
+            case ResponseTime_50Percentile:
                 seriesDataBuilder.seriesIndex(4)
                 break
             default:
-                throw new UnsupportedOperationException("Invalid metric type: " + artifactMetrics.metricType())
+                seriesDataBuilder.seriesIndex(0)
         }
         def splintChart = SplineChart.builder()
+                .metricType(artifactMetrics.metricType())
                 .timeFrame(metricResult.timeFrame())
                 .addSeriesData(seriesDataBuilder.build())
                 .build()
 
-        SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-            def portalUuid = it.portalUuid
-            vertx.eventBus().publish("$portalUuid-UpdateChart",
-                    new JsonObject(Json.encode(splintChart)))
-        }
+        def portalUuid = portal.portalUuid
+        vertx.eventBus().publish("$portalUuid-UpdateChart", new JsonObject(Json.encode(splintChart)))
     }
 
-    private void updateQuickStats(ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
-        def formattedStats = FormattedQuickStats.builder()
-                .timeFrame(metricResult.timeFrame())
-        def avg = artifactMetrics.values().sum() / artifactMetrics.values().size()
-        switch (artifactMetrics.metricType()) {
-            case MetricType.ResponseTime_50Percentile:
-                formattedStats.p50(toPrettyDuration(avg as int))
-                        .min(toPrettyDuration(artifactMetrics.values().min()))
-                break
-            case MetricType.ResponseTime_75Percentile:
-                formattedStats.p75(toPrettyDuration(avg as int))
-                break
-            case MetricType.ResponseTime_90Percentile:
-                formattedStats.p90(toPrettyDuration(avg as int))
-                break
-            case MetricType.ResponseTime_95Percentile:
-                formattedStats.p95(toPrettyDuration(avg as int))
-                break
-            case MetricType.ResponseTime_99Percentile:
-                formattedStats.p99(toPrettyDuration(avg as int))
-                        .max(toPrettyDuration(artifactMetrics.values().max()))
-                break
-            default:
-                return
-        }
-
-        SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-            def portalUuid = it.portalUuid
-            vertx.eventBus().publish("$portalUuid-DisplayStats",
-                    new JsonObject(Json.encode(formattedStats.build())))
-        }
-    }
-
-    private void updateCard(ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
+    private void updateCard(SourcePortal portal, ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
         def histogram = new Histogram(new UniformReservoir(artifactMetrics.values().size()))
         def metricArr = new ArrayList<Integer>()
         if (artifactMetrics.values().size() == 60) {
@@ -239,44 +205,33 @@ class OverviewTab extends AbstractTab {
         }
         def avg = histogram.snapshot.mean
 
-        if (artifactMetrics.metricType() == MetricType.Throughput_Average) {
+        if (artifactMetrics.metricType() == Throughput_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
                     .header(toPrettyFrequency(avg / 60.0))
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def portalUuid = it.portalUuid
-                vertx.eventBus().publish("$portalUuid-DisplayCard",
-                        new JsonObject(Json.encode(barTrendCard)))
-            }
-        } else if (artifactMetrics.metricType() == MetricType.ResponseTime_Average) {
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
+        } else if (artifactMetrics.metricType() == ResponseTime_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
                     .header(toPrettyDuration(avg as int))
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def portalUuid = it.portalUuid
-                vertx.eventBus().publish("$portalUuid-DisplayCard",
-                        new JsonObject(Json.encode(barTrendCard)))
-            }
-        } else if (artifactMetrics.metricType() == MetricType.ServiceLevelAgreement_Average) {
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
+        } else if (artifactMetrics.metricType() == ServiceLevelAgreement_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
                     .header(decimalFormat.format(avg / 100.0))
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()
-            SourcePortal.getPortals(metricResult.appUuid(), metricResult.artifactQualifiedName()).each {
-                def portalUuid = it.portalUuid
-                vertx.eventBus().publish("$portalUuid-DisplayCard",
-                        new JsonObject(Json.encode(barTrendCard)))
-            }
-        } else {
-            throw new UnsupportedOperationException("Invalid metric type: " + artifactMetrics.metricType())
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
         }
     }
 

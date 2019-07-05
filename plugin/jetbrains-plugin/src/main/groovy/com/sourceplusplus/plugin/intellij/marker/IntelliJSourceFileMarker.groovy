@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -93,7 +93,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
         log.trace("Removing source mark for artifact: " + sourceMark.artifactQualifiedName)
         if (sourceMarks.remove(sourceMark)) {
             if (sourceMark.portalRegistered) {
-                SourcePortal.destroyPortal(sourceMark.portalUuid)
+                SourcePortal.getPortal(sourceMark.portalUuid)?.close()
             }
             refresh()
             log.trace("Removed source mark for artifact: " + sourceMark.artifactQualifiedName)

@@ -8,6 +8,7 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.marker.mark.GutterMark
+import com.sourceplusplus.portal.SourcePortal
 import io.vertx.core.AbstractVerticle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,7 +21,7 @@ import static com.sourceplusplus.plugin.PluginBootstrap.sourcePlugin
  * Keeps track of all artifact subscriptions.
  * Distributes specific artifact subscriptions to specified trackers.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -37,7 +38,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     void start() throws Exception {
         //todo: change to just subscriber
         //subscribe to automatic subscriptions
-        SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.activeEnvironment.appUuid, true, {
+        SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
+                SourcePluginConfig.current.activeEnvironment.appUuid, true, {
             if (it.succeeded()) {
                 it.result().each {
                     if (it.automaticSubscription()) {
@@ -68,7 +70,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def qualifiedClassName = it.body() as String
 
             //current subscriptions
-            SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(SourcePluginConfig.current.activeEnvironment.appUuid, false, {
+            SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
+                    SourcePluginConfig.current.activeEnvironment.appUuid, false, {
                 if (it.succeeded()) {
                     it.result().findAll { it.artifactQualifiedName().startsWith(qualifiedClassName) }.each {
                         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
@@ -151,7 +154,12 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
 
                     def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
-                    gutterMark?.markArtifactUnsubscribed()
+                    if (gutterMark) {
+                        gutterMark.markArtifactUnsubscribed()
+                        if (gutterMark.portalRegistered) {
+                            SourcePortal.getPortal(gutterMark.portalUuid)?.close()
+                        }
+                    }
                 } else {
                     it.cause().printStackTrace()
                     resp.fail(500, it.cause().message)

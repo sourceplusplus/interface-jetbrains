@@ -47,7 +47,7 @@ import java.nio.charset.StandardCharsets
  * The portal is able to fetch and display runtime behavior without interacting with the Source++ Plugin.
  * This allows the portal to be independently outside the IDE.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -195,13 +195,27 @@ class PortalBootstrap extends AbstractVerticle {
                 }
 
                 //register portal
-                SourcePortal.getPortal(SourcePortal.register(appUuid, artifactQualifiedName, true))
+                def portal = SourcePortal.getPortal(SourcePortal.register(appUuid, artifactQualifiedName, true))
+                //keep portal active
+                vertx.setPeriodic(60_000, {
+                    SourcePortal.ensurePortalActive(portal)
+                })
             }
 
             vertx.eventBus().consumer("REGISTER_PORTAL", {
                 def request = it.body() as JsonObject
-                def portalUuid = SourcePortal.register(request.getString("app_uuid"),
-                        request.getString("artifact_qualified_name"), true)
+                def appUuid = request.getString("app_uuid")
+                def artifactQualifiedName = request.getString("artifact_qualified_name")
+
+                def activePortals = SourcePortal.getPortals(appUuid, artifactQualifiedName)
+                log.info("Registering new portal")
+                def portalUuid = SourcePortal.register(appUuid, artifactQualifiedName, true)
+                if (activePortals) {
+                    log.info("Registered new portal with cloned view from portal: " + activePortals[0].portalUuid)
+                    SourcePortal.getPortal(portalUuid).interface.cloneViews(activePortals[0].interface)
+                } else {
+                    log.info("Registered new portal with blank view")
+                }
                 it.reply(new JsonObject().put("portal_uuid", portalUuid))
             })
         }

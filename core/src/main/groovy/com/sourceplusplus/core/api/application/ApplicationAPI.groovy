@@ -26,7 +26,7 @@ import java.util.regex.Pattern
 /**
  * todo: description
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -50,6 +50,7 @@ class ApplicationAPI extends AbstractVerticle {
         core.baseRouter.post("/applications").handler(this.&createApplicationRoute)
         core.baseRouter.get("/applications").handler(this.&getApplicationsRoute)
         core.baseRouter.put("/applications/:appUuid").handler(this.&updateApplicationRoute)
+        core.baseRouter.get("/applications/search").handler(this.&searchApplicationsRoute)
         core.baseRouter.get("/applications/:appUuid").handler(this.&getApplicationRoute)
         core.baseRouter.get("/applications/:appUuid/subscriptions").handler(this.&getApplicationSubscriptionsRoute)
         core.baseRouter.get("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions")
@@ -319,12 +320,33 @@ class ApplicationAPI extends AbstractVerticle {
         }
     }
 
-    /**
-     * Retrieve {@link SourceApplication} by an existing {@link SourceApplication#appUuid}.
-     *
-     * @param appUuid the {@link SourceApplication#appUuid} to retrieve
-     * @param handler executed with {@link SourceApplication} if found, empty Optional otherwise
-     */
+    private void searchApplicationsRoute(RoutingContext routingContext) {
+        def appName = routingContext.request().getParam("appName")
+        if (!appName) {
+            routingContext.response().setStatusCode(400)
+                    .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
+        } else {
+            searchApplications(appName, {
+                if (it.succeeded()) {
+                    if (it.result().isPresent()) {
+                        routingContext.response().setStatusCode(200)
+                                .end(Json.encode(it.result()))
+                    } else {
+                        routingContext.response().setStatusCode(404).end()
+                    }
+                } else {
+                    routingContext.response().setStatusCode(400)
+                            .end(it.cause().message)
+                }
+            })
+        }
+    }
+
+    void searchApplications(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
+        log.info("Searching for application. App name: {}", appName)
+        core.storage.findApplicationByName(appName, handler)
+    }
+
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         log.info("Getting application. App uuid: {}", appUuid)
         core.storage.getApplication(appUuid, handler)
