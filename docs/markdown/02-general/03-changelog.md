@@ -1,4 +1,4 @@
-# 0.2.0-alpha (2019-07-04)
+# 0.2.1-alpha (2019-07-04)
 
 - Added ability to switch overview graph ([#18](https://github.com/sourceplusplus/Assistant/issues/18))
 - Configurable latest/slowest trace page size ([#65](https://github.com/sourceplusplus/Assistant/issues/65))
