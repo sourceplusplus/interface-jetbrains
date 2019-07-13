@@ -7,6 +7,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.editor.Editor
@@ -80,7 +81,8 @@ class IntelliJStartupActivity implements StartupActivity {
     void runActivity(@NotNull Project project) {
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             return //don't need to boot everything for unit tests
-        } else if (System.getProperty("os.name").toLowerCase().startsWith("linux")) {
+        } else if (System.getProperty("os.name").toLowerCase().startsWith("linux")
+                && ApplicationInfo.getInstance().majorVersion == "2019") {
             //https://github.com/sourceplusplus/Assistant/issues/68
             Notifications.Bus.notify(
                     new Notification("Source++", "Linux Unsupported",
