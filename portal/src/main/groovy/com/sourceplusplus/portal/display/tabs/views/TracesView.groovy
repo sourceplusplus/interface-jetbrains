@@ -18,9 +18,9 @@ import java.util.concurrent.ConcurrentHashMap
 @Canonical
 class TracesView {
 
-    private final Map<TraceOrderType, ArtifactTraceResult> traceResultCache = new ConcurrentHashMap<>()
-    private final Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
     private final PortalInterface portalInterface
+    private Map<TraceOrderType, ArtifactTraceResult> traceResultCache = new ConcurrentHashMap<>()
+    private Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
     int innerLevel = 0
     boolean innerTrace
     String rootArtifactQualifiedName
@@ -52,10 +52,8 @@ class TracesView {
     }
 
     void cloneView(TracesView view) {
-        traceResultCache.clear()
-        traceStacks.clear()
-        traceResultCache.putAll(view.traceResultCache)
-        traceStacks.putAll(view.traceStacks)
+        traceResultCache = view.traceResultCache
+        traceStacks = view.traceStacks
         innerLevel = view.innerLevel
         innerTrace = view.innerTrace
         rootArtifactQualifiedName = view.rootArtifactQualifiedName
