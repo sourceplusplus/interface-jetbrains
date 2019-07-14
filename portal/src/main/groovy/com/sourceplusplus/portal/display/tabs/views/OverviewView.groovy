@@ -13,7 +13,7 @@ import static com.sourceplusplus.api.model.metric.MetricType.ResponseTime_Averag
 /**
  * Holds the current view for the Overview portal tab.
  *
- * @version 0.2.1
+ * @version 0.2.2
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -21,7 +21,7 @@ import static com.sourceplusplus.api.model.metric.MetricType.ResponseTime_Averag
 class OverviewView {
 
     private final PortalInterface portalInterface
-    private final Map<String, Map<QueryTimeFrame, ArtifactMetricResult>> metricResultCache = new ConcurrentHashMap<>()
+    private Map<String, Map<QueryTimeFrame, ArtifactMetricResult>> metricResultCache = new ConcurrentHashMap<>()
     QueryTimeFrame timeFrame = QueryTimeFrame.LAST_15_MINUTES
     MetricType activeChartMetric = ResponseTime_Average
 
@@ -30,8 +30,9 @@ class OverviewView {
     }
 
     void cloneView(OverviewView view) {
-        metricResultCache.clear()
-        metricResultCache.putAll(view.metricResultCache)
+        metricResultCache = view.metricResultCache
+        timeFrame = view.timeFrame
+        activeChartMetric = view.activeChartMetric
     }
 
     void cacheMetricResult(ArtifactMetricResult metricResult) {

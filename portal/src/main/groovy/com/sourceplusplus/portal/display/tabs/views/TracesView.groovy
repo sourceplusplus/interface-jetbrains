@@ -11,16 +11,16 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Holds the current view for the Traces portal tab.
  *
- * @version 0.2.1
+ * @version 0.2.2
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Canonical
 class TracesView {
 
-    private final Map<TraceOrderType, ArtifactTraceResult> traceResultCache = new ConcurrentHashMap<>()
-    private final Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
     private final PortalInterface portalInterface
+    private Map<TraceOrderType, ArtifactTraceResult> traceResultCache = new ConcurrentHashMap<>()
+    private Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
     int innerLevel = 0
     boolean innerTrace
     String rootArtifactQualifiedName
@@ -52,10 +52,8 @@ class TracesView {
     }
 
     void cloneView(TracesView view) {
-        traceResultCache.clear()
-        traceStacks.clear()
-        traceResultCache.putAll(view.traceResultCache)
-        traceStacks.putAll(view.traceStacks)
+        traceResultCache = view.traceResultCache
+        traceStacks = view.traceStacks
         innerLevel = view.innerLevel
         innerTrace = view.innerTrace
         rootArtifactQualifiedName = view.rootArtifactQualifiedName

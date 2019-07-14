@@ -24,7 +24,7 @@ import java.util.regex.Pattern
 /**
  * Displays traces (and the underlying spans) for a given source code artifact.
  *
- * @version 0.2.1
+ * @version 0.2.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

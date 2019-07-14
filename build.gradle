@@ -9,20 +9,17 @@ subprojects {
     apply plugin: 'maven'
     group = 'com.github.sourceplusplus'
 
-    version = '0.2.1'
+    version = '0.2.2'
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
     project.ext.APACHE_SKYWALKING_VERSION = "6.2.0"
-    project.ext.VERTX_VERSION = "3.7.0"
+    project.ext.VERTX_VERSION = "3.7.1"
 
     repositories {
         mavenCentral()
         maven { url = 'https://jitpack.io' }
-        maven { url = 'http://maven.teamdev.com/repository/products' }
-        maven {
-            url 'https://repo.grakn.ai/repository/maven/'
-        }
+        maven { url = 'https://repo.grakn.ai/repository/maven/' }
     }
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'

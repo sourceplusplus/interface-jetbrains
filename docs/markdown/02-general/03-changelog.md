@@ -1,3 +1,9 @@
+# 0.2.2-alpha (2019-07-14)
+
+- Upgraded Journey browser version to 0.3.3
+- Increased IntelliJ Linux plugin compatibility ([#68](https://github.com/sourceplusplus/Assistant/issues/68))
+- Cloned portal views share data instead of copying ([#91](https://github.com/sourceplusplus/Assistant/issues/91))
+
 # 0.2.1-alpha (2019-07-04)
 
 - Added ability to switch overview graph ([#18](https://github.com/sourceplusplus/Assistant/issues/18))
