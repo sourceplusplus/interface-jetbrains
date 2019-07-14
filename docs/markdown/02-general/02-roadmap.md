@@ -37,7 +37,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Switch to source code parsing with Arthur ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Trace service detection and custom tooltip displays ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
- - Browser-based control panel
+ - Browser-based control panel ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
 
 ## 0.4.0 (alpha)
 
