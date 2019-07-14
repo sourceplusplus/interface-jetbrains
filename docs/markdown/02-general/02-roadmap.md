@@ -37,13 +37,13 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Switch to source code parsing with Babelfish ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Trace service detection and custom tooltip displays ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
- - Browser-based control panel 
- - Artifact, endpoint, log, trace searching functionality
+ - Browser-based control panel
 
 ## 0.4.0 (alpha)
 
 > Focus: Automatic artifact monitoring
 
+ - Artifact, endpoint, log, trace searching functionality
  - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
  - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
 
