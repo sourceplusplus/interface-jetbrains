@@ -30,7 +30,7 @@ import java.util.zip.ZipFile
 /**
  * Used to render the Source++ Portal's Semantic UI HTML files as a JComponent.
  *
- * @version 0.2.1
+ * @version 0.2.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

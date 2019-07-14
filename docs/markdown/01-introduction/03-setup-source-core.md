@@ -34,10 +34,10 @@ Once the above doesn't return `connection refused` you can continue setup.
 # Download Source++ Core
 ```sh
 cd /opt
-wget https://github.com/sourceplusplus/Assistant/releases/download/v0.2.1-alpha/source-core-0.2.1.zip
-unzip source-core-0.2.1.zip
-rm source-core-0.2.1.zip
-mv source-core-0.2.1 source-core
+wget https://github.com/sourceplusplus/Assistant/releases/download/v0.2.2-alpha/source-core-0.2.2.zip
+unzip source-core-0.2.2.zip
+rm source-core-0.2.2.zip
+mv source-core-0.2.2 source-core
 ```
 
 ## Start Source++ Core

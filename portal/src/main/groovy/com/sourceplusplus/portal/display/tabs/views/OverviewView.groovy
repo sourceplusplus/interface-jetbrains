@@ -13,7 +13,7 @@ import static com.sourceplusplus.api.model.metric.MetricType.ResponseTime_Averag
 /**
  * Holds the current view for the Overview portal tab.
  *
- * @version 0.2.1
+ * @version 0.2.2
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
