@@ -23,7 +23,7 @@ dependencies {
     compile(group: 'com.github.codebrig', name: 'gitsocratic', version: '92bd34ab56') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
-    compile 'com.github.codebrig:journey:0.3.0-online'
+    compile 'com.github.codebrig:journey:0.3.3-online'
 }
 
 task createProperties(dependsOn: processResources) {
