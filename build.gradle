@@ -10,8 +10,8 @@ subprojects {
     group = 'com.github.sourceplusplus'
 
     version = '0.2.2'
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
     project.ext.APACHE_SKYWALKING_VERSION = "6.2.0"
     project.ext.VERTX_VERSION = "3.7.1"

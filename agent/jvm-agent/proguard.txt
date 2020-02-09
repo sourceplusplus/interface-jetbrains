@@ -1,5 +1,5 @@
 # Include java runtime classes
--libraryjars <java.home>/lib/rt.jar
+-libraryjars <java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)
 
 # Keep filenames and line numbers
 -keepattributes Exceptions,InnerClasses,Signature,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
