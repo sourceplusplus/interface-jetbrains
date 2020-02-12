@@ -7,7 +7,6 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.editor.Editor
@@ -50,7 +49,6 @@ import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
-import java.awt.*
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -81,24 +79,6 @@ class IntelliJStartupActivity implements StartupActivity {
     void runActivity(@NotNull Project project) {
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             return //don't need to boot everything for unit tests
-        } else if (System.getProperty("os.name").toLowerCase().startsWith("linux")
-                && ApplicationInfo.getInstance().majorVersion == "2019") {
-            //https://github.com/sourceplusplus/Assistant/issues/68
-            Notifications.Bus.notify(
-                    new Notification("Source++", "Linux Unsupported",
-                            "Source++ is currently unsupported on Linux. " +
-                                    "For more information visit: <a href=\"#\">https://github.com/sourceplusplus/Assistant/issues/68</a>",
-                            NotificationType.INFORMATION, new NotificationListener() {
-                        @Override
-                        void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
-                            try {
-                                Desktop.getDesktop().browse(URI.create("https://github.com/sourceplusplus/Assistant/issues/68"))
-                            } catch (Exception e) {
-                                e.printStackTrace()
-                            }
-                        }
-                    }))
-            return
         }
         System.setProperty("vertx.disableFileCPResolving", "true")
 

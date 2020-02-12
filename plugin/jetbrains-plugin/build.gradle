@@ -1,13 +1,14 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.4.9"
+    id "org.jetbrains.intellij" version "0.4.16"
 }
 
 apply plugin: 'groovy'
 intellij {
-    version 'IU-2018.3.5'
+    version '201.5259-EAP-CANDIDATE-SNAPSHOT'
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
-    plugins = ["Groovy", "Kotlin", "properties"]
+    plugins = ["java", "Groovy", "Kotlin", "properties"]
+    buildSearchableOptions.enabled = false
 }
 
 group = 'com.sourceplusplus.plugin'
@@ -15,15 +16,17 @@ archivesBaseName = 'jetbrains-source-plugin'
 
 dependencies {
     compile project(":api")
-    compile project(":portal")
+    compile (project(":portal")) {
+        exclude group: 'com.jetbrains.intellij.platform', module: 'ide'
+        exclude group: 'com.jetbrains.intellij.platform', module: 'util'
+    }
     compile project(":plugin:source-plugin-commons")
-    compile 'org.codehaus.groovy:groovy-all:2.4.15'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
-    compile(group: 'com.github.codebrig', name: 'gitsocratic', version: '92bd34ab56') {
+    compile 'org.codehaus.groovy:groovy-all:2.4.17'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
+    compile(group: 'com.github.codebrig', name: 'gitsocratic', version: 'b228cab573') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
-    compile 'com.github.codebrig:journey:0.3.3-online'
 }
 
 task createProperties(dependsOn: processResources) {

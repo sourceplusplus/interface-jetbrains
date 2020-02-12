@@ -246,7 +246,7 @@ class PortalBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
-        Json.mapper.findAndRegisterModules()
+        //Json.mapper.findAndRegisterModules()
         Json.mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
         Json.mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         Json.mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)

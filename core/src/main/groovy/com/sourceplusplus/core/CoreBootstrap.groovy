@@ -336,7 +336,7 @@ class CoreBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
-        Json.mapper.findAndRegisterModules()
+        //Json.mapper.findAndRegisterModules()
         Json.mapper.registerModule(new GuavaModule())
         Json.mapper.registerModule(new Jdk8Module())
         Json.mapper.registerModule(new JavaTimeModule())

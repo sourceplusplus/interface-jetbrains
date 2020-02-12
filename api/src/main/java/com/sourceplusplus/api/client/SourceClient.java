@@ -22,7 +22,7 @@ public interface SourceClient {
     String CLIENT_ID = UUID.randomUUID().toString();
 
     static void initMappers() {
-        Json.mapper.findAndRegisterModules();
+        //Json.mapper.findAndRegisterModules();
         Json.mapper.registerModule(new GuavaModule());
         Json.mapper.registerModule(new Jdk8Module());
         Json.mapper.registerModule(new JavaTimeModule());
