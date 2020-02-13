@@ -4,7 +4,7 @@ plugins {
 
 apply plugin: 'groovy'
 intellij {
-    version 'IU-2018.3.5'
+    version 'IU-2019.1'
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
     plugins = ["Groovy", "Kotlin", "properties"]
@@ -17,7 +17,7 @@ dependencies {
     compile project(":api")
     compile project(":portal")
     compile project(":plugin:source-plugin-commons")
-    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    compile 'org.codehaus.groovy:groovy-all:2.4.17'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
     compile(group: 'com.github.codebrig', name: 'gitsocratic', version: '92bd34ab56') {

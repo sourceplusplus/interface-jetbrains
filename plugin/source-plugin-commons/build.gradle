@@ -4,7 +4,7 @@ group = 'com.sourceplusplus.plugin'
 archivesBaseName = 'source-plugin-commons'
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    compile 'org.codehaus.groovy:groovy-all:2.4.17'
     compile project(":api")
     compile project(":portal")
     compile "io.vertx:vertx-web:$VERTX_VERSION"
