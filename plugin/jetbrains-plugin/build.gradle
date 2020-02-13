@@ -47,7 +47,7 @@ classes {
     dependsOn createProperties
 }
 
-task updatePluginResources(dependsOn: [":agent:jvm-agent:prepareExternalAgent"]) {
+task updatePluginResources(dependsOn: [":agent:jvm-agent:buildAgent"]) {
     doLast {
         copy {
             from '../../portal/src/main/resources'
