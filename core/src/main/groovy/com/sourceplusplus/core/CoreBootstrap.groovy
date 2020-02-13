@@ -54,7 +54,7 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -336,7 +336,6 @@ class CoreBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
-        Json.mapper.findAndRegisterModules()
         Json.mapper.registerModule(new GuavaModule())
         Json.mapper.registerModule(new Jdk8Module())
         Json.mapper.registerModule(new JavaTimeModule())

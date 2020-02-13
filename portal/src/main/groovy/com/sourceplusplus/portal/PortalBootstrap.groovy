@@ -47,7 +47,7 @@ import java.nio.charset.StandardCharsets
  * The portal is able to fetch and display runtime behavior without interacting with the Source++ Plugin.
  * This allows the portal to be independently outside the IDE.
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -246,7 +246,6 @@ class PortalBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
-        Json.mapper.findAndRegisterModules()
         Json.mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
         Json.mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         Json.mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)

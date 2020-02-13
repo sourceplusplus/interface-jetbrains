@@ -43,7 +43,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  */
 public class SourceAgent {
@@ -230,7 +230,7 @@ public class SourceAgent {
 
         IntegrationConnection connection = info.connections().get(ConnectionType.gRPC);
         if ("localhost".equals(connection.getHost()) || "127.0.0.1".equals(connection.getHost())
-                || "Apache_SkyWalking".equals(connection.getHost())) {
+                || "skywalking-oap".equals(connection.getHost())) {
             Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.apiHost + ":" + connection.getPort();
         } else {
             Config.Collector.BACKEND_SERVICE = connection.getHost() + ":" + connection.getPort();

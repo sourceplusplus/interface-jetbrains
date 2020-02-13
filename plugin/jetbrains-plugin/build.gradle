@@ -4,10 +4,10 @@ plugins {
 
 apply plugin: 'groovy'
 intellij {
-    version 'IU-2019.1'
+    version 'IU-2019.3.3'
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
-    plugins = ["Groovy", "Kotlin", "properties"]
+    plugins = ["java", "Groovy", "Kotlin", "properties"]
 }
 
 group = 'com.sourceplusplus.plugin'
@@ -18,12 +18,12 @@ dependencies {
     compile project(":portal")
     compile project(":plugin:source-plugin-commons")
     compile 'org.codehaus.groovy:groovy-all:2.4.17'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
-    compile(group: 'com.github.codebrig', name: 'gitsocratic', version: '92bd34ab56') {
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
+    compile(group: 'com.github.codebrig', name: 'gitsocratic', version: 'b228cab573') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
-    compile 'com.github.codebrig:journey:0.3.3-online'
+    compile 'com.github.codebrig:journey:0.4.0-online'
 }
 
 task createProperties(dependsOn: processResources) {
