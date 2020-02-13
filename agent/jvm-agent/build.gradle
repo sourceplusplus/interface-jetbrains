@@ -124,25 +124,25 @@ task prepareExternalAgent(type: JavaExec) {
             "process",
             "jarjar_rules.txt",
             "build/libs/source-agent-$version" + "_prepare_copy.jar",
-            "build/libs/source-agent-$version" + ".jar"
+            "build/libs/source-agent-$version" + "_prepare_external.jar"
     ]
     doLast {
         file("build/libs/source-agent-$version" + "_prepare_copy.jar").delete()
     }
 }
 
-//task buildAgent(type: proguard.gradle.ProGuardTask) {
-//    dependsOn "prepareExternalAgent"
-//    inputs.file file("build/libs/source-agent-$version" + "_prepare_external.jar")
-//    outputs.file file("build/libs/source-agent-$version" + ".jar")
-//
-//    configuration 'proguard.txt'
-//    injars "build/libs/source-agent-$version" + "_prepare_external.jar"
-//    outjars "build/libs/source-agent-$version" + ".jar"
-//}
-//build {
-//    finalizedBy buildAgent
-//}
+task buildAgent(type: proguard.gradle.ProGuardTask) {
+    dependsOn "prepareExternalAgent"
+    inputs.file file("build/libs/source-agent-$version" + "_prepare_external.jar")
+    outputs.file file("build/libs/source-agent-$version" + ".jar")
+
+    configuration 'proguard.txt'
+    injars "build/libs/source-agent-$version" + "_prepare_external.jar"
+    outjars "build/libs/source-agent-$version" + ".jar"
+}
+build {
+    finalizedBy buildAgent
+}
 
 test {
     jvmArgs '-javaagent:../lib/source-agent-manifest.jar'
