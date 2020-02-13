@@ -13,6 +13,9 @@ buildscript {
 group = 'com.sourceplusplus.agent'
 archivesBaseName = 'source-agent'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 dependencies {
     testCompile group: 'com.ea.agentloader', name: 'ea-agent-loader', version: '1.0.3'
     testCompile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'

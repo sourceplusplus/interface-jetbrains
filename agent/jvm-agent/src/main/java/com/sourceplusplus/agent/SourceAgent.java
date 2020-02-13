@@ -230,7 +230,7 @@ public class SourceAgent {
 
         IntegrationConnection connection = info.connections().get(ConnectionType.gRPC);
         if ("localhost".equals(connection.getHost()) || "127.0.0.1".equals(connection.getHost())
-                || "Apache_SkyWalking".equals(connection.getHost())) {
+                || "skywalking-oap".equals(connection.getHost())) {
             Config.Collector.BACKEND_SERVICE = SourceAgentConfig.current.apiHost + ":" + connection.getPort();
         } else {
             Config.Collector.BACKEND_SERVICE = connection.getHost() + ":" + connection.getPort();

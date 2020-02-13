@@ -93,8 +93,7 @@ class IntelliJMethodGutterMark extends GutterMark {
             void run() {
                 closePortalIfOpen()
 
-                JBPopupFactory popupFactory = JBPopupFactory.getInstance()
-                BalloonImpl balloon = popupFactory
+                BalloonImpl balloon = JBPopupFactory.getInstance()
                         .createBalloonBuilder(SourcePortal.getPortal(portalUuid).interface.UIComponent)
                         .setBorderInsets(JBUI.emptyInsets())
                         .setDialogMode(true)

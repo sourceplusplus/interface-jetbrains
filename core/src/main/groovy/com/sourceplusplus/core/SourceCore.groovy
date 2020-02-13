@@ -180,8 +180,8 @@ class SourceCore extends AbstractVerticle {
             }
             CompositeFuture.all(futures).setHandler({
                 if (it.succeeded()) {
-                    (it."results").collect({ it."result" }).each {
-                        deployedIntegrationAPIs.add(it)
+                    it.result().list().each {
+                        deployedIntegrationAPIs.add(it as String)
                     }
                     CompositeFuture.all(integrationFutures).setHandler(handler)
                 } else {

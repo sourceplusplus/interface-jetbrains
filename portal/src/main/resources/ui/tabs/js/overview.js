@@ -1,3 +1,4 @@
+console.log("Overview started");
 $('#overview_link').attr('href', "overview.html" + mainGetQuery);
 $('#sidebar_overview_link').attr('href', "overview.html" + mainGetQuery);
 
@@ -20,7 +21,6 @@ var series0 = {
     areaStyle: {},
     data: []
 };
-
 var series1 = {
     name: '95th percentile',
     type: 'line',
@@ -30,7 +30,6 @@ var series1 = {
     areaStyle: {},
     data: []
 };
-
 var series2 = {
     name: '90th percentile',
     type: 'line',
@@ -40,7 +39,6 @@ var series2 = {
     areaStyle: {},
     data: []
 };
-
 var series3 = {
     name: '75th percentile',
     type: 'line',
@@ -50,7 +48,6 @@ var series3 = {
     areaStyle: {},
     data: []
 };
-
 var series4 = {
     name: '50th percentile',
     type: 'line',
@@ -63,6 +60,7 @@ var series4 = {
 
 var overviewChart = echarts.init(document.getElementById('overview_chart'));
 window.onresize = function () {
+    console.log("Resizing overview chart");
     overviewChart.resize();
 };
 
@@ -113,6 +111,8 @@ overviewChart.setOption(overviewChartOptions);
 
 var currentMetricType = "Throughput_Average";
 var currentTimeFrame = "LAST_15_MINUTES";
+
+console.log("Connecting portal");
 eb.onopen = function () {
     portalConnected();
     if (requiresRegistration) {
@@ -123,21 +123,19 @@ eb.onopen = function () {
     var clearOverviewHandler = portalUuid + '-ClearOverview';
     var displayCardHandler = portalUuid + '-DisplayCard';
     var updateChartHandler = portalUuid + '-UpdateChart';
-    var displayStatsHandler = portalUuid + '-DisplayStats';
     eb.registerHandler(clearOverviewHandler, function (error, message) {
         console.log("Clearing overview");
-
         overviewChart.setOption({
             series: []
         })
     });
     eb.registerHandler(displayCardHandler, function (error, message) {
         //eb.send('PortalLogger', 'Displaying card: ' + JSON.stringify(message));
-        // console.log('Displaying card: ' + JSON.stringify(message));
+        console.log('Displaying card');
         var card = message.body;
         if (card.time_frame != currentTimeFrame) {
-            // console.log("Ignoring card for time frame: " + card.time_frame
-            //     + " - Current time frame: " + currentTimeFrame);
+            console.log("Ignoring card for time frame: " + card.time_frame
+                + " - Current time frame: " + currentTimeFrame);
             return
         }
 
@@ -145,7 +143,7 @@ eb.onopen = function () {
     });
     eb.registerHandler(updateChartHandler, function (error, message) {
         //eb.send('PortalLogger', 'Updating chart: ' + JSON.stringify(message));
-        // console.log('Updating chart: ' + JSON.stringify(message));
+        console.log('Updating chart');
         var chartData = message.body;
         if (chartData.time_frame != currentTimeFrame) {
             return
@@ -197,16 +195,6 @@ eb.onopen = function () {
             series: [series0, series1, series2, series3, series4]
         })
     });
-    eb.registerHandler(displayStatsHandler, function (error, message) {
-        //eb.send('PortalLogger', 'Displaying stats: ' + JSON.stringify(message));
-        // console.log('Displaying stats: ' + JSON.stringify(message));
-        var stats = message.body;
-        if (stats.time_frame != currentTimeFrame) {
-            // console.log("Ignoring stats for time frame: " + stats.time_frame
-            //     + " - Current time frame: " + currentTimeFrame);
-            return
-        }
-    });
 
     var timeFrame = localStorage.getItem('spp.metric_time_frame');
     if (timeFrame !== null) {
@@ -219,22 +207,26 @@ eb.onopen = function () {
 };
 
 function updateTime(interval) {
+    console.log("Update time: " + interval);
     currentTimeFrame = interval.toUpperCase();
     localStorage.setItem('spp.metric_time_frame', interval);
     eb.send('SetMetricTimeFrame', {'portal_uuid': portalUuid, 'metric_time_frame': interval});
 }
 
 function clickedViewAverageThroughputChart() {
+    console.log("Clicked view average throughput");
     currentMetricType = "Throughput_Average";
     eb.send('SetActiveChartMetric', {'portal_uuid': portalUuid, 'metric_type': currentMetricType});
 }
 
 function clickedViewAverageResponseTimeChart() {
+    console.log("Clicked view average response time");
     currentMetricType = "ResponseTime_Average";
     eb.send('SetActiveChartMetric', {'portal_uuid': portalUuid, 'metric_type': currentMetricType});
 }
 
 function clickedViewAverageSLAChart() {
+    console.log("Clicked view average SLA");
     currentMetricType = "ServiceLevelAgreement_Average";
     eb.send('SetActiveChartMetric', {'portal_uuid': portalUuid, 'metric_type': currentMetricType});
 }

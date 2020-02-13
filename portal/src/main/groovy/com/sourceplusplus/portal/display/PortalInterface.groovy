@@ -10,8 +10,10 @@ import com.sourceplusplus.portal.display.tabs.views.TracesView
 import io.netty.handler.codec.http.QueryStringDecoder
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
+import org.cef.CefSettings
 import org.cef.browser.CefBrowser
 import org.cef.browser.CefFrame
+import org.cef.handler.CefDisplayHandler
 import org.cef.handler.CefLifeSpanHandler
 import org.jetbrains.annotations.NotNull
 import org.slf4j.Logger
@@ -118,6 +120,30 @@ class PortalInterface {
 //            browser.browser.addConsoleListener({
 //                log.info("[PORTAL_CONSOLE] - " + it)
 //            })
+            browser.cefBrowser.client.addDisplayHandler(new CefDisplayHandler() {
+                @Override
+                void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
+                }
+
+                @Override
+                void onTitleChange(CefBrowser browser, String title) {
+                }
+
+                @Override
+                boolean onTooltip(CefBrowser browser, String text) {
+                    return false
+                }
+
+                @Override
+                void onStatusMessage(CefBrowser browser, String value) {
+                }
+
+                @Override
+                boolean onConsoleMessage(CefBrowser browser, CefSettings.LogSeverity level, String message, String source, int line) {
+                    log.info("[PORTAL_CONSOLE] - " + message)
+                    return false
+                }
+            })
 
             browser.getJBCefClient().addLifeSpanHandler(new CefLifeSpanHandler() {
                 @Override

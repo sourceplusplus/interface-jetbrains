@@ -10,6 +10,9 @@ intellij {
     plugins = ["java", "Groovy", "Kotlin", "properties"]
     buildSearchableOptions.enabled = false
 }
+runIde {
+    systemProperty('ide.browser.jcef.enabled', 'true')
+}
 
 group = 'com.sourceplusplus.plugin'
 archivesBaseName = 'jetbrains-source-plugin'
