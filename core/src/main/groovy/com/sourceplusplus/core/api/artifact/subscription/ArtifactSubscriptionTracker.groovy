@@ -9,7 +9,7 @@ import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
 import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
-import io.vertx.core.Future
+import io.vertx.core.Promise
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -99,9 +99,9 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                             updatedAccess.put(it.key, now)
                         }
 
-                        def future = Future.future()
+                        def future = Promise.promise()
                         futures.add(future)
-                        core.storage.setArtifactSubscription(it.withSubscriptionLastAccessed(updatedAccess), future.completer())
+                        core.storage.setArtifactSubscription(it.withSubscriptionLastAccessed(updatedAccess), future)
                     }
                     CompositeFuture.all(futures).setHandler({
                         if (it.succeeded()) {
@@ -150,13 +150,13 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                         }
                     }
 
-                    def future = Future.future()
+                    def future = Promise.promise()
                     futures.add(future)
                     if (updatedSubscriptions.isEmpty()) {
-                        core.storage.deleteArtifactSubscription(sub, future.completer())
+                        core.storage.deleteArtifactSubscription(sub, future)
                     } else if (updated) {
                         sub = sub.withSubscriptionLastAccessed(updatedSubscriptions)
-                        core.storage.setArtifactSubscription(sub, future.completer())
+                        core.storage.setArtifactSubscription(sub, future)
                     }
                 }
                 CompositeFuture.all(futures).setHandler({
@@ -210,12 +210,12 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             if (it.succeeded()) {
                 switch (request.body().type) {
                     case SourceArtifactSubscriptionType.METRICS:
-                        vertx.eventBus().send(MetricSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT_METRICS, request.body(), {
+                        vertx.eventBus().request(MetricSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT_METRICS, request.body(), {
                             request.reply(it.result().body())
                         })
                         break
                     case SourceArtifactSubscriptionType.TRACES:
-                        vertx.eventBus().send(TraceSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT_TRACES, request.body(), {
+                        vertx.eventBus().request(TraceSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT_TRACES, request.body(), {
                             request.reply(it.result().body())
                         })
                         break
@@ -233,7 +233,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
         def unsubRequest = request.body()
         if (unsubRequest instanceof ArtifactMetricUnsubscribeRequest) {
             def metricUnsubRequest = unsubRequest
-            vertx.eventBus().send(MetricSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT_METRICS, unsubRequest, {
+            vertx.eventBus().request(MetricSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT_METRICS, unsubRequest, {
                 if (it.succeeded()) {
                     def removeArtifactSubscriber = it.result().body()
                     if (removeArtifactSubscriber) {
@@ -283,7 +283,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             })
         } else if (unsubRequest instanceof ArtifactTraceUnsubscribeRequest) {
             def traceUnsubRequest = unsubRequest
-            vertx.eventBus().send(TraceSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT_TRACES, traceUnsubRequest, {
+            vertx.eventBus().request(TraceSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT_TRACES, traceUnsubRequest, {
                 if (it.succeeded()) {
                     def removeArtifactSubscriber = it.result().body()
                     if (removeArtifactSubscriber) {

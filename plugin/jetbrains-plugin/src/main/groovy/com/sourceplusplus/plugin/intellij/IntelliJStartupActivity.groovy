@@ -343,7 +343,7 @@ class IntelliJStartupActivity implements StartupActivity {
                     e.consume()
                 }
 
-                vertx.eventBus().send(PortalViewTracker.CAN_OPEN_PORTAL,
+                vertx.eventBus().request(PortalViewTracker.CAN_OPEN_PORTAL,
                         gutterMark.sourceMethod.artifactQualifiedName(), {
                     if (it.result().body() == true) {
                         gutterMark.displayPortal(vertx, editor, true)

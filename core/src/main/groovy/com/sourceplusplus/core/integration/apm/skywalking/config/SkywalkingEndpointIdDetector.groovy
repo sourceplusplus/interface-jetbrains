@@ -45,7 +45,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     }
 
     @Override
-    void start(Future<Void> startFuture) throws Exception {
+    void start(Promise<Void> startFuture) throws Exception {
         vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, { message ->
             def artifact = Json.decodeValue((message.body() as JsonObject).toString(), SourceArtifact.class)
             if (artifact.config().endpointName() != null) {
@@ -79,7 +79,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
             }
         })
 
-        searchForNewEndpoints(startFuture.completer())
+        searchForNewEndpoints(startFuture)
         vertx.setPeriodic(TimeUnit.SECONDS.toMillis(config().getJsonObject("config")
                 .getInteger("endpoint_detection_interval_seconds")), {
             searchForNewEndpoints({
@@ -137,7 +137,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                     def service = it.result().getJsonObject(i)
                     def appUuid = service.getString("label")
 
-                    def fut = Future.future()
+                    def fut = Promise.promise()
                     futures.add(fut)
                     skywalking.getServiceEndpoints(service.getString("key"), {
                         if (it.succeeded()) {
@@ -166,7 +166,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                                 }
                             }
                             if (searchEndpoints.size() > 0) {
-                                searchServiceEndpoints(appUuid, searchEndpoints, fut.completer())
+                                searchServiceEndpoints(appUuid, searchEndpoints, fut)
                             } else {
                                 fut.complete()
                             }
@@ -192,7 +192,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
             def endpointId = serviceEndpoint.getString("key")
             vertx.sharedData().getLocalMap("skywalking_endpoints").put(endpointName, endpointId)
 
-            def fut = Future.future()
+            def fut = Promise.promise()
             futures.add(fut)
             artifactAPI.getSourceArtifact(appUuid, endpointName, {
                 if (it.succeeded()) {
@@ -200,7 +200,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                         def artifact = it.result().get()
                         if (artifact.config() == null || artifact.config().endpointIds() == null
                                 || !artifact.config().endpointIds().contains(endpointId)) {
-                            addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), fut.completer())
+                            addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), fut)
                         } else {
                             fut.complete()
                         }
@@ -210,7 +210,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                                 if (it.result().isPresent()) {
                                     fut.complete()
                                 } else {
-                                    searchServiceId(appUuid, endpointId, endpointName, fut.completer())
+                                    searchServiceId(appUuid, endpointId, endpointName, fut)
                                 }
                             } else {
                                 fut.fail(it.cause())
@@ -292,7 +292,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 def futures = []
                 it.result().traces().each {
                     it.traceIds().each {
-                        def fut = Future.future()
+                        def fut = Promise.promise()
                         futures.add(fut)
                         skywalking.getTraceStack(appUuid, it, {
                             if (it.succeeded()) {
@@ -327,7 +327,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                     if (i + 1 < spans.size()) {
                         def nextSpan = spans.get(i + 1)
                         if (nextSpan.artifactQualifiedName()) {
-                            def fut = Future.future()
+                            def fut = Promise.promise()
                             futures.add(fut)
                             artifactAPI.getSourceArtifact(appUuid, nextSpan.artifactQualifiedName(), {
                                 if (it.succeeded()) {

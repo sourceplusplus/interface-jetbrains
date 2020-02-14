@@ -17,7 +17,7 @@ import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
 import com.sourceplusplus.portal.PortalBootstrap
 import io.vertx.core.AbstractVerticle
-import io.vertx.core.json.Json
+import io.vertx.core.json.jackson.DatabindCodec
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -55,9 +55,9 @@ class PluginBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
-        Json.mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-        Json.mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-        Json.mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
+        DatabindCodec.mapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+        DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
+        DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
         //api
         vertx.eventBus().registerDefaultCodec(PluginSourceFile.class, new PluginSourceFile())

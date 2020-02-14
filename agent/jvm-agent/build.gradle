@@ -93,20 +93,16 @@ task prepareExternalAgent(type: JavaExec) {
             FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 if (file.toString().startsWith("/META-INF/") &&
                         !file.toString().startsWith("/META-INF/MANIFEST.MF") &&
-                        !file.toString().startsWith("/META-INF/services/org.apache.skywalking.apm.agent.")) {
+                        !file.toString().startsWith("/META-INF/services/org.apache.skywalking.apm.agent.") &&
+                        !file.toString().startsWith("/META-INF/services/com.sourceplusplus.")) {
                     Files.delete(file)
-                }
-                //todo: remove this stuff if unnecessary
-//                else if (file.toString().startsWith("/assets/") ||
-//                        file.toString().startsWith("/common/") ||
-//                        file.toString().startsWith("/junit/") ||
-//                        file.toString().startsWith("/language-agent/") ||
-//                        file.toString().startsWith("/language-agent-v2/") ||
-//                        file.toString().startsWith("/register/") ||
-//                        file.toString().startsWith("/service-mesh-probe/")) {
-//                    Files.delete(file)
-//                }
-                if (file.toString() == "/LICENSE.txt" || file.toString() == "/LICENSE-junit.txt") {
+                } else if (file.toString() == "/LICENSE.txt" || file.toString() == "/LICENSE-junit.txt" ||
+                        file.toString().startsWith("/assets/") ||
+                        file.toString().startsWith("/common/") ||
+                        file.toString().startsWith("/language-agent/") ||
+                        file.toString().startsWith("/language-agent-v2/") ||
+                        file.toString().startsWith("/register/") ||
+                        file.toString().startsWith("/service-mesh-probe/")) {
                     Files.delete(file)
                 }
                 return FileVisitResult.CONTINUE

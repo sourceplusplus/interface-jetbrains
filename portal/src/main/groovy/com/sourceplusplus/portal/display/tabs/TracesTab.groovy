@@ -161,7 +161,7 @@ class TracesTab extends AbstractTab {
                 portal.interface.tracesView.viewType = TracesView.ViewType.TRACE_STACK
                 updateUI(portal)
             } else {
-                vertx.eventBus().send(GET_TRACE_STACK, request, {
+                vertx.eventBus().request(GET_TRACE_STACK, request, {
                     if (it.failed()) {
                         it.cause().printStackTrace()
                         log.error("Failed to display trace stack", it.cause())
@@ -315,7 +315,7 @@ class TracesTab extends AbstractTab {
                     vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
                     log.info("Displayed trace span info: " + span)
                 } else {
-                    vertx.eventBus().send("CanNavigateToArtifact", new JsonObject()
+                    vertx.eventBus().request("CanNavigateToArtifact", new JsonObject()
                             .put("app_uuid", portal.appUuid)
                             .put("artifact_qualified_name", spanArtifactQualifiedName), {
                         if (it.succeeded() && it.result().body() == true) {

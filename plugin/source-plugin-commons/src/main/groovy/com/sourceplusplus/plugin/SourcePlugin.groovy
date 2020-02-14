@@ -78,7 +78,7 @@ class SourcePlugin {
 
         Router router = Router.router(vertx)
         router.route("/eventbus/*").handler(sockJSHandler)
-        vertx.createHttpServer().requestHandler(router.&accept).listen(0, listenHandler)
+        vertx.createHttpServer().requestHandler(router).listen(0, listenHandler)
     }
 
     void clearActiveSourceFileMarkers() {

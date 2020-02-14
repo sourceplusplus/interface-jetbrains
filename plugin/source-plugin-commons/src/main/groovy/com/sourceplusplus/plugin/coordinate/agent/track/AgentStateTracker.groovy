@@ -17,7 +17,7 @@ package com.sourceplusplus.plugin.coordinate.agent.track
 //    private final static Logger logger = LoggerFactory.getLogger(AgentStateTracker.class)
 //
 //    @Override
-//    void start(Future<Void> startFuture) throws Exception {
+//    void start(Promise<Void> startFuture) throws Exception {
 //        logger.info("{} started", getClass().getSimpleName())
 //    }
 //

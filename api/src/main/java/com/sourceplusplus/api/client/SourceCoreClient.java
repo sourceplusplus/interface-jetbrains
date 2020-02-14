@@ -18,6 +18,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.jackson.JacksonCodec;
 import okhttp3.*;
 
 import java.net.URLEncoder;
@@ -388,7 +389,7 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(),
+            handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(response.body().string(),
                     new TypeReference<List<SourceApplication>>() {
                     })));
         } catch (Exception e) {
@@ -406,7 +407,7 @@ public class SourceCoreClient implements SourceClient {
 
         try (Response response = client.newCall(request.build()).execute()) {
             if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(),
+                handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(response.body().string(),
                         new TypeReference<List<SourceArtifactSubscription>>() {
                         })));
             } else {
@@ -443,7 +444,7 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            return Json.decodeValue(response.body().string(),
+            return JacksonCodec.decodeValue(response.body().string(),
                     new TypeReference<List<SourceApplicationSubscription>>() {
                     });
         } catch (Exception e) {
@@ -460,7 +461,7 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            List<SourceApplicationSubscription> subscribers = Json.decodeValue(response.body().string(),
+            List<SourceApplicationSubscription> subscribers = JacksonCodec.decodeValue(response.body().string(),
                     new TypeReference<List<SourceApplicationSubscription>>() {
                     });
             handler.handle(Future.succeededFuture(subscribers));

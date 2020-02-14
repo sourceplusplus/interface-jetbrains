@@ -3,7 +3,7 @@ package com.sourceplusplus.core.integration
 import com.google.common.collect.Sets
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
-import io.vertx.core.Future
+import io.vertx.core.Promise
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetSocket
 import io.vertx.core.streams.Pump
@@ -23,7 +23,7 @@ class IntegrationProxy extends AbstractVerticle {
     public static final Set<String> ALLOWED_IP_ADDRESSES = Sets.newConcurrentHashSet()
 
     @Override
-    void start(Future<Void> fut) throws Exception {
+    void start(Promise<Void> fut) throws Exception {
         def proxyIntegrationFutures = []
         def integrations = config().getJsonArray("integrations")
         for (int i = 0; i < integrations.size(); i++) {
@@ -34,7 +34,7 @@ class IntegrationProxy extends AbstractVerticle {
                 def proxyPort = conn.getInteger("proxy_port")
                 if (proxyPort) {
                     def actualPort = conn.getInteger("port")
-                    def proxyFuture = Future.future()
+                    def proxyFuture = Promise.promise()
                     proxyIntegrationFutures += proxyFuture
                     vertx.createNetServer().connectHandler({ clientSocket ->
                         vertx.createNetClient().connect(actualPort, "localhost", { serverSocket ->

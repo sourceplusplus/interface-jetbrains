@@ -10,7 +10,7 @@ import com.sourceplusplus.plugin.coordinate.artifact.track.FileClosedTracker
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
-import io.vertx.core.Future
+import io.vertx.core.Promise
 import io.vertx.core.net.NetServer
 import io.vertx.ext.bridge.BridgeOptions
 import io.vertx.ext.bridge.PermittedOptions
@@ -38,7 +38,7 @@ class PluginCoordinator extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(this.name)
 
     @Override
-    void start(Future<Void> startFuture) throws Exception {
+    void start(Promise<Void> startFuture) throws Exception {
         //bridge agent to plugin
         log.info("Booting agent event bus bridge")
         def eventBusBridge = TcpEventBusBridge.create(vertx, new BridgeOptions()

@@ -67,7 +67,7 @@ class DocServerBootstrap extends AbstractVerticle {
     }
 
     @Override
-    void start(Future<Void> fut) throws Exception {
+    void start(Promise<Void> fut) throws Exception {
         def serveLocalFiles = false
         def basePath = config().getString("base.path")
         if (!basePath.contains("http")) {
