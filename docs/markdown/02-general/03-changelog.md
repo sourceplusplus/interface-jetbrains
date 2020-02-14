@@ -33,7 +33,7 @@
 - Upgraded h2 (1.4.199 -> 1.4.200)
 - Upgraded JetBrains intellij plugin (0.4.9 -> 0.4.16)
 - Upgraded IntelliJ plugin IntelliJ version (2018.3.5 -> 2018.3.6)
-- Upgraded GitSocratic (92bd34ab56 -> b228cab573)
+- Upgraded GitSocratic (92bd34ab56 -> 5d33d30262)
 
 # 0.2.2-alpha (2019-07-14)
 

@@ -5,10 +5,10 @@ import org.apache.skywalking.apm.agent.core.boot.AgentPackagePath;
 import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.conf.Constants;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
-import org.apache.skywalking.apm.agent.core.logging.core.EasyLogResolver;
-import org.apache.skywalking.apm.agent.core.logging.core.EasyLogger;
 import org.apache.skywalking.apm.agent.core.logging.core.FileWriter;
 import org.apache.skywalking.apm.agent.core.logging.core.LogLevel;
+import org.apache.skywalking.apm.agent.core.logging.core.PatternLogResolver;
+import org.apache.skywalking.apm.agent.core.logging.core.PatternLogger;
 import org.apache.skywalking.apm.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -26,11 +26,16 @@ import java.util.Date;
  * @version 0.2.3
  * @since 0.1.0
  */
-public class SourceLoggerResolver extends EasyLogResolver {
+public class SourceLoggerResolver extends PatternLogResolver {
 
     @Override
     public ILog getLogger(Class<?> clazz) {
-        return new EasyLogger(clazz) {
+        return getLogger(clazz.getSimpleName());
+    }
+
+    @Override
+    public ILog getLogger(String clazz) {
+        return new PatternLogger(clazz, Config.Logging.PATTERN) {
             @Override
             protected void logger(LogLevel level, String message, Throwable e) {
                 if (StringUtil.isEmpty(Config.Logging.DIR)) {
@@ -46,7 +51,7 @@ public class SourceLoggerResolver extends EasyLogResolver {
             String format(LogLevel level, String message, Throwable t) {
                 return StringUtil.join(' ', level.name(),
                         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(new Date()),
-                        clazz.getSimpleName(),
+                        clazz,
                         ": ",
                         message,
                         t == null ? "" : format(t)
