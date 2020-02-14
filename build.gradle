@@ -22,21 +22,21 @@ subprojects {
         maven { url = 'https://repo.grakn.ai/repository/maven/' }
     }
     dependencies {
-        testCompile group: 'junit', name: 'junit', version: '4.12'
+        testCompile group: 'junit', name: 'junit', version: '4.13'
         testCompile "io.vertx:vertx-unit:$VERTX_VERSION"
 
         compile group: 'io.vertx', name: 'vertx-core', version: "$VERTX_VERSION"
         compile group: 'io.vertx', name: 'vertx-dropwizard-metrics', version: "$VERTX_VERSION"
-        compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-        compile group: 'com.google.guava', name: 'guava', version: '26.0-jre'
+        compile group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+        compile group: 'com.google.guava', name: 'guava', version: '28.2-jre'
         compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
         compile group: 'commons-io', name: 'commons-io', version: '2.6'
-        compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
+        compile group: 'org.jetbrains', name: 'annotations', version: '18.0.0'
         compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.2'
         compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.2'
         compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.10.2'
         compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: '2.10.2'
-        compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.1.0'
+        compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.1.2'
     }
 
     test {
