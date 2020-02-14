@@ -12,8 +12,11 @@
 - Groovy/Kotlin no longer optional IntelliJ plugins
 - Removed usage of `Json.mapper.findAndRegisterModules`
 - Force Travis-CI to use JDK8
+- Removed unused files from agent jar
 
 ## Dependency upgrade
+- Upgraded Apache SkyWalking (6.2.0 -> 6.5.0)
+- Upgraded Vert.x (3.7.1 -> 3.8.5)
 - Upgraded Journey (0.3.3 -> 0.4.0)
 - Upgraded proguard-gradle (5.3.3 -> 6.2.2)
 - Upgraded log4j (2.10.0 -> 2.13.0)
