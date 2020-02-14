@@ -11,7 +11,7 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
     compile "io.vertx:vertx-web:$VERTX_VERSION"
     compile "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
-    compile 'com.github.codebrig:journey:0.3.3-online'
+    compile 'com.github.codebrig:journey:0.4.0-online'
     compile project(":api")
 }
 
