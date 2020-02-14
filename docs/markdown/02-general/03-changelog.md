@@ -4,8 +4,8 @@
 - Fixed issue with agent failing to connect to Apache SkyWalking when using host `skywalking-oap`
 
 ## Improvement
-- Switched GitHub `access_token` query param to basic authentication
-- Removed usage of deprecated ApplicationComponent
+- Switched docs from using GitHub `access_token` query param to basic authentication
+- Removed usage of deprecated `ApplicationComponent`
 - Added additional logging output to Travis-CI builds
 - Added favicon.ico redirect to docs
 - Using `skywalking-oap` as Apache SkyWalking Docker host universally
