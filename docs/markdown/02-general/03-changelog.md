@@ -1,5 +1,19 @@
 # 0.2.3-alpha (2020-02-14)
 
+## Bug
+- Fixed issue with agent connecting to Apache SkyWalking using host `skywalking-oap`
+
+## Improvement
+- Switched GitHub `access_token` query param to basic authentication
+- Removed usage of deprecated ApplicationComponent
+- Added additional logging output to Travis-CI builds
+- Added favicon.ico redirect to docs
+- Using `skywalking-oap` as Apache SkyWalking Docker host universally
+- Groovy/Kotlin no longer optional IntelliJ plugins
+- Removed usage of `Json.mapper.findAndRegisterModules`
+- Force Travis-CI to use JDK8
+
+## Dependency upgrade
 - Upgraded Journey (0.3.3 -> 0.4.0)
 - Upgraded proguard-gradle (5.3.3 -> 6.2.2)
 - Upgraded log4j (2.10.0 -> 2.13.0)
@@ -20,15 +34,6 @@
 - Upgraded JetBrains intellij plugin (0.4.9 -> 0.4.16)
 - Upgraded IntelliJ plugin IntelliJ version (2018.3.5 -> 2018.3.6)
 - Upgraded GitSocratic (92bd34ab56 -> b228cab573)
-- Fixed issue with agent connecting to Apache SkyWalking using host `skywalking-oap`
-- Using `skywalking-oap` as Apache SkyWalking Docker host universally
-- Groovy/Kotlin no longer optional IntelliJ plugins
-- Removed usage of `Json.mapper.findAndRegisterModules`
-- Force Travis-CI to use JDK8
-- Added additional logging output to Travis-CI builds
-- Added favicon.ico redirect to docs
-- Switched GitHub `access_token` query param to basic authentication
-- Removed usage of deprecated ApplicationComponent
 
 # 0.2.2-alpha (2019-07-14)
 
