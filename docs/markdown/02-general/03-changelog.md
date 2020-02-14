@@ -1,7 +1,7 @@
 # 0.2.3-alpha (2020-02-14)
 
 ## Bug
-- Fixed issue with agent connecting to Apache SkyWalking using host `skywalking-oap`
+- Fixed issue with agent failing to connect to Apache SkyWalking when using host `skywalking-oap`
 
 ## Improvement
 - Switched GitHub `access_token` query param to basic authentication
