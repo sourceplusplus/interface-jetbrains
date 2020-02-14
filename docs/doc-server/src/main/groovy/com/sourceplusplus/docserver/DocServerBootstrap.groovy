@@ -24,7 +24,7 @@ import java.util.regex.Pattern
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -67,7 +67,7 @@ class DocServerBootstrap extends AbstractVerticle {
     }
 
     @Override
-    void start(Future<Void> fut) throws Exception {
+    void start(Promise<Void> fut) throws Exception {
         def serveLocalFiles = false
         def basePath = config().getString("base.path")
         if (!basePath.contains("http")) {
@@ -97,12 +97,15 @@ class DocServerBootstrap extends AbstractVerticle {
                     log.info("Served: " + ctx.request().uri())
                 }
             } else {
+                if (ctx.request().uri() == "/favicon.ico") {
+                    ctx.response().putHeader("location", config().getString("base.url") + "/favicon.ico")
+                            .setStatusCode(302).end()
+                    return
+                }
+
                 def url = config().getString("base.path") + ctx.request().uri() + "?1=1"
                 if (config().getString("version")) {
                     url += "&ref=" + config().getString("version")
-                }
-                if (config().getString("access_token")) {
-                    url += "&access_token=" + config().getString("access_token")
                 }
                 log.info("Serving: " + ctx.request().uri())
 
@@ -112,7 +115,13 @@ class DocServerBootstrap extends AbstractVerticle {
                             .end(Json.encodePrettily(cachedValue))
                     log.info("Served cached: " + ctx.request().uri())
                 } else {
-                    client.getAbs(url).send({
+                    def httpRequest = client.getAbs(url)
+                    if (config().getString("access_username") && config().getString("access_token")) {
+                        httpRequest = httpRequest.basicAuthentication(
+                                config().getString("access_username"), config().getString("access_token"))
+                    }
+
+                    httpRequest.send({
                         if (it.succeeded()) {
                             def response = it.result().bodyAsJsonObject()
                             def content = new String(response.getString("content").decodeBase64())
@@ -138,28 +147,28 @@ class DocServerBootstrap extends AbstractVerticle {
         if (config().getBoolean("ssl")) {
             vertx.createHttpServer(new HttpServerOptions().setSsl(true)
                     .setKeyStoreOptions(new JksOptions()
-                    .setPath(config().getString("jks_path"))
-                    .setPassword(config().getString("jks_password"))))
+                            .setPath(config().getString("jks_path"))
+                            .setPassword(config().getString("jks_password"))))
                     .requestHandler(router)
                     .listen(config().getInteger("port"), config().getString("host"), {
-                if (it.succeeded()) {
-                    fut.complete()
-                    log.info("DocServer started (ver. " + BUILD.getString("version") + ")")
-                } else {
-                    fut.fail(it.cause())
-                }
-            })
+                        if (it.succeeded()) {
+                            fut.complete()
+                            log.info("DocServer started (ver. " + BUILD.getString("version") + ")")
+                        } else {
+                            fut.fail(it.cause())
+                        }
+                    })
         } else {
             vertx.createHttpServer()
                     .requestHandler(router)
                     .listen(config().getInteger("port"), config().getString("host"), {
-                if (it.succeeded()) {
-                    fut.complete()
-                    log.info("DocServer started (ver. " + BUILD.getString("version") + ")")
-                } else {
-                    fut.fail(it.cause())
-                }
-            })
+                        if (it.succeeded()) {
+                            fut.complete()
+                            log.info("DocServer started (ver. " + BUILD.getString("version") + ")")
+                        } else {
+                            fut.fail(it.cause())
+                        }
+                    })
         }
     }
 

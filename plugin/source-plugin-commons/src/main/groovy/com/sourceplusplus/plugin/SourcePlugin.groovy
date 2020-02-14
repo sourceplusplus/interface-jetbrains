@@ -25,7 +25,7 @@ import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifact
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -78,7 +78,7 @@ class SourcePlugin {
 
         Router router = Router.router(vertx)
         router.route("/eventbus/*").handler(sockJSHandler)
-        vertx.createHttpServer().requestHandler(router.&accept).listen(0, listenHandler)
+        vertx.createHttpServer().requestHandler(router).listen(0, listenHandler)
     }
 
     void clearActiveSourceFileMarkers() {

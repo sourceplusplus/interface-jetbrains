@@ -1,3 +1,43 @@
+# 0.2.3-alpha (2020-02-14)
+
+## Bug
+- Fixed issue with agent failing to connect to Apache SkyWalking when using host `skywalking-oap`
+
+## Improvement
+- Switched docs from using GitHub `access_token` query param to basic authentication
+- Removed usage of deprecated `ApplicationComponent`
+- Added additional logging output to Travis-CI builds
+- Added favicon.ico redirect to docs
+- Using `skywalking-oap` as Apache SkyWalking Docker host universally
+- Groovy/Kotlin no longer optional IntelliJ plugins
+- Removed usage of `Json.mapper.findAndRegisterModules`
+- Force Travis-CI to use JDK8
+- Removed unused files from agent jar
+
+## Dependency upgrade
+- Upgraded Apache SkyWalking (6.2.0 -> 6.5.0)
+- Upgraded Vert.x (3.7.1 -> 3.8.5)
+- Upgraded Journey (0.3.3 -> 0.4.0)
+- Upgraded proguard-gradle (5.3.3 -> 6.2.2)
+- Upgraded log4j (2.10.0 -> 2.13.0)
+- Upgraded slf4j (1.7.25 -> 1.7.30)
+- Upgraded asm (5.2 -> 7.3.1)
+- Upgraded asm-nonclassloadingextensions (1.0-rc1 -> 1.0-rc2)
+- Upgraded gradle-apt-plugin (0.7 -> 0.21)
+- Upgraded immutables (2.5.6 -> 2.8.3)
+- Upgraded okhttp (3.9.1 -> 3.14.6)
+- Upgraded junit (4.12 -> 4.13)
+- Upgraded gson (2.8.5 -> 2.8.6)
+- Upgraded guava (26.0-jre -> 28.2-jre)
+- Upgraded JetBrains annotations (13.0 -> 18.0.0)
+- Upgraded jackson (2.9.9 -> 2.10.2)
+- Upgraded metrics-core (4.1.0 -> 4.1.2)
+- Upgraded log4j (2.11.1 -> 2.13.0)
+- Upgraded h2 (1.4.199 -> 1.4.200)
+- Upgraded JetBrains intellij plugin (0.4.9 -> 0.4.16)
+- Upgraded IntelliJ plugin IntelliJ version (2018.3.5 -> 2018.3.6)
+- Upgraded GitSocratic (92bd34ab56 -> 5d33d30262)
+
 # 0.2.2-alpha (2019-07-14)
 
 - Upgraded Journey browser version to 0.3.3

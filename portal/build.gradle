@@ -7,11 +7,11 @@ mainClassName = 'com.sourceplusplus.portal.PortalBootstrap'
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
     compile "io.vertx:vertx-web:$VERTX_VERSION"
     compile "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
-    compile 'com.github.codebrig:journey:0.3.3-online'
+    compile 'com.github.codebrig:journey:0.4.0-online'
     compile project(":api")
 }
 

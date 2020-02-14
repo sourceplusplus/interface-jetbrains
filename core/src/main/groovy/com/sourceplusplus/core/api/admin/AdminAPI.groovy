@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -123,7 +123,7 @@ class AdminAPI extends AbstractVerticle {
                 }
             }
 
-            vertx.eventBus().send(SourceCore.UPDATE_INTEGRATIONS, integrations, {
+            vertx.eventBus().request(SourceCore.UPDATE_INTEGRATIONS, integrations, {
                 if (it.succeeded()) {
                     handler.handle(Future.succeededFuture(integrationInfo))
                 } else {
@@ -137,7 +137,7 @@ class AdminAPI extends AbstractVerticle {
     }
 
     private void searchForNewEndpointsRoute(RoutingContext routingContext) {
-        vertx.eventBus().send(SkywalkingEndpointIdDetector.SEARCH_FOR_NEW_ENDPOINTS, true, {
+        vertx.eventBus().request(SkywalkingEndpointIdDetector.SEARCH_FOR_NEW_ENDPOINTS, true, {
             routingContext.response().setStatusCode(200).end()
         })
     }
@@ -145,7 +145,7 @@ class AdminAPI extends AbstractVerticle {
     private void refreshStorageRoute(RoutingContext routingContext) {
         if (core.storage.needsManualRefresh()) {
             //todo: not hardcode elasticsearch
-            vertx.eventBus().send(ElasticsearchDAO.REFRESH_STORAGE, true, {
+            vertx.eventBus().request(ElasticsearchDAO.REFRESH_STORAGE, true, {
                 routingContext.response().setStatusCode(200).end()
             })
         } else {

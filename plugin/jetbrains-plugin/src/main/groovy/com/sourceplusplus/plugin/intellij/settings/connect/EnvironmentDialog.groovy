@@ -18,7 +18,7 @@ import javax.swing.event.DocumentListener
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -94,12 +94,12 @@ class EnvironmentDialog extends JDialog {
                 def skywalkingRestBinding = initSkywalking.portBindings.get("12800/tcp")[0]
                 def skywalkingRestPort = skywalkingRestBinding.substring(skywalkingRestBinding.indexOf(":") + 1) as int
                 def restConnection = IntegrationConnection.builder()
-                        .host("Apache_SkyWalking").port(skywalkingRestPort)
+                        .host("skywalking-oap").port(skywalkingRestPort)
                         .build()
                 def skywalkingGrpcBinding = initSkywalking.portBindings.get("11800/tcp")[0]
                 def skywalkingGrpcPort = skywalkingGrpcBinding.substring(skywalkingGrpcBinding.indexOf(":") + 1) as int
                 def grpcConnection = IntegrationConnection.builder()
-                        .host("Apache_SkyWalking").port(skywalkingGrpcPort)
+                        .host("skywalking-oap").port(skywalkingGrpcPort)
                         .build()
 
                 def sppBinding = initSpp.portBindings.get("8080/tcp")[0]

@@ -4,5 +4,6 @@
   "base.path": "https://api.github.com/repos/sourceplusplus/Assistant/contents/docs/markdown",
   "base.url": "https://sourceplusplus.com",
   "version": "master",
+  "access_username": null,
   "access_token": null
 }

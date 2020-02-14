@@ -56,7 +56,7 @@ import java.util.concurrent.CountDownLatch
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -343,7 +343,7 @@ class IntelliJStartupActivity implements StartupActivity {
                     e.consume()
                 }
 
-                vertx.eventBus().send(PortalViewTracker.CAN_OPEN_PORTAL,
+                vertx.eventBus().request(PortalViewTracker.CAN_OPEN_PORTAL,
                         gutterMark.sourceMethod.artifactQualifiedName(), {
                     if (it.result().body() == true) {
                         gutterMark.displayPortal(vertx, editor, true)

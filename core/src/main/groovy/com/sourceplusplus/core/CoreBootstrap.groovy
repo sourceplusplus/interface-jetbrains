@@ -29,6 +29,7 @@ import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.core.net.JksOptions
 import io.vertx.ext.auth.PubSecKeyOptions
 import io.vertx.ext.auth.jwt.JWTAuth
@@ -54,7 +55,7 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -120,7 +121,7 @@ class CoreBootstrap extends AbstractVerticle {
     }
 
     @Override
-    void start(Future<Void> startFuture) throws Exception {
+    void start(Promise<Void> startFuture) throws Exception {
         registerCodecs()
 
         def baseRouter = createRouter()
@@ -186,8 +187,7 @@ class CoreBootstrap extends AbstractVerticle {
         //start core HTTP server
         log.info("Booting Source++ Core HTTP server...")
         def server = vertx.createHttpServer(createSeverOptions())
-        server.requestHandler(baseRouter.&accept)
-        server.listen({
+        server.requestHandler(baseRouter).listen({
             if (it.succeeded()) {
                 vertx.deployVerticle(core, new DeploymentOptions().setConfig(config()), {
                     if (it.succeeded()) {
@@ -336,13 +336,12 @@ class CoreBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
-        Json.mapper.findAndRegisterModules()
-        Json.mapper.registerModule(new GuavaModule())
-        Json.mapper.registerModule(new Jdk8Module())
-        Json.mapper.registerModule(new JavaTimeModule())
-        Json.mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-        Json.mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-        Json.mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
+        DatabindCodec.mapper().registerModule(new GuavaModule())
+        DatabindCodec.mapper().registerModule(new Jdk8Module())
+        DatabindCodec.mapper().registerModule(new JavaTimeModule())
+        DatabindCodec.mapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+        DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
+        DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
         //api
         vertx.eventBus().registerDefaultCodec(SourceCoreInfo.class, SourceMessage.messageCodec(SourceCoreInfo.class))

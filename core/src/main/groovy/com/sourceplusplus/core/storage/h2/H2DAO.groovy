@@ -24,7 +24,7 @@ import java.time.Instant
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -588,7 +588,7 @@ class H2DAO extends SourceStorage {
                                     Handler<AsyncResult<SourceArtifactSubscription>> handler) {
         def futures = []
         subscription.subscriptionLastAccessed().each {
-            def future = Future.future()
+            def future = Promise.promise()
             futures.add(future)
 
             def params = new JsonArray()
@@ -597,7 +597,7 @@ class H2DAO extends SourceStorage {
             params.add(subscription.artifactQualifiedName())
             params.add(it.key.toString())
             params.add(it.value)
-            client.updateWithParams(UPDATE_ARTIFACT_SUBSCRIPTION, params, future.completer())
+            client.updateWithParams(UPDATE_ARTIFACT_SUBSCRIPTION, params, future)
         }
         CompositeFuture.all(futures).setHandler({
             if (it.succeeded()) {

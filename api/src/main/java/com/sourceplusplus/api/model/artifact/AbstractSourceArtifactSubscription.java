@@ -14,7 +14,7 @@ import java.util.Map;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.2
  */
 @SourceStyle
