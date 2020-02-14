@@ -32,10 +32,10 @@ subprojects {
         compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
         compile group: 'commons-io', name: 'commons-io', version: '2.6'
         compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.9'
-        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.9'
-        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.9.9'
-        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: '2.9.9'
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.2'
+        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.2'
+        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.10.2'
+        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: '2.10.2'
         compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.1.0'
     }
 

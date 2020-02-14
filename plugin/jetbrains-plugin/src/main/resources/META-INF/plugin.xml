@@ -10,7 +10,6 @@
     ]]></description>
 
     <idea-version since-build="171"/>
-    <depends>com.intellij.modules.java</depends>
     <depends>org.intellij.groovy</depends>
     <depends>org.jetbrains.kotlin</depends>
 
