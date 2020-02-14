@@ -1,7 +1,6 @@
 package com.sourceplusplus.plugin.intellij.settings
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.ApplicationComponent
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
@@ -16,22 +15,8 @@ import org.jetbrains.annotations.Nullable
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-@State(name = "Source++", storages = [@Storage(file = '$APP_CONFIG$/Source++.xml')])
-class PluginSettingsComponent implements ApplicationComponent, PersistentStateComponent<SourcePluginConfig> {
-
-    @Override
-    void disposeComponent() {
-    }
-
-    @Override
-    void initComponent() {
-    }
-
-    @NotNull
-    @Override
-    String getComponentName() {
-        return "Source++"
-    }
+@State(name = "Source++", storages = [@Storage(value = '$APP_CONFIG$/Source++.xml')])
+class PluginSettingsComponent implements PersistentStateComponent<SourcePluginConfig> {
 
     @NotNull
     @Override
