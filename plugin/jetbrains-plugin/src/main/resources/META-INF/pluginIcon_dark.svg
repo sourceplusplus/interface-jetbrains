@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <defs>
+    <style>
+      .cls-1 {
+        font-size: 37.5px;
+        fill: #fff;
+        font-family: "Fujita Ray";
+      }
+
+      .cls-2 {
+        fill: #e1483b;
+      }
+    </style>
+  </defs>
+  <text id="S_" data-name="S++" class="cls-1" x="2.147" y="34.491">S<tspan class="cls-2">++</tspan></text>
+</svg>
