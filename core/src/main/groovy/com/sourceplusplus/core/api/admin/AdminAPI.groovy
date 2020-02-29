@@ -6,6 +6,7 @@ import com.sourceplusplus.api.model.integration.IntegrationInfo
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
 import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
@@ -13,8 +14,6 @@ import io.vertx.core.Handler
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * todo: description
@@ -23,9 +22,8 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class AdminAPI extends AbstractVerticle {
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     private final SourceCore core
 

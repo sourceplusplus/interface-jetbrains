@@ -12,13 +12,12 @@ import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
 import com.sourceplusplus.core.storage.SourceStorage
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.client.WebClient
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Instant
 import java.time.ZoneId
@@ -31,9 +30,9 @@ import java.time.format.DateTimeFormatter
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class SkywalkingIntegration extends APMIntegration {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final String GET_ALL_SERVICES = Resources.toString(Resources.getResource(
             "query/skywalking/get_all_services.graphql"), Charsets.UTF_8)
     private static final String GET_SERVICE_ENDPOINTS = Resources.toString(Resources.getResource(

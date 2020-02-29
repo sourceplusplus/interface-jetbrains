@@ -10,9 +10,8 @@ import com.sourceplusplus.plugin.intellij.inspect.IntelliJSourceMarkInspection
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import com.sourceplusplus.plugin.marker.mark.SourceMark
 import com.sourceplusplus.portal.SourcePortal
+import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * todo: description
@@ -21,10 +20,10 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class IntelliJSourceFileMarker extends SourceFileMarker {
 
     public static final Key<IntelliJSourceFileMarker> KEY = Key.create("IntelliJSourceFileMarker")
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final PsiFile psiFile
     private final List<SourceMark> sourceMarks
 

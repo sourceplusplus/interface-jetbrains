@@ -23,6 +23,7 @@ import com.sourceplusplus.portal.display.PortalInterface
 import com.sourceplusplus.portal.display.tabs.ConfigurationTab
 import com.sourceplusplus.portal.display.tabs.OverviewTab
 import com.sourceplusplus.portal.display.tabs.TracesTab
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
@@ -36,8 +37,6 @@ import org.apache.commons.io.IOUtils
 import org.apache.log4j.ConsoleAppender
 import org.apache.log4j.Level
 import org.apache.log4j.PatternLayout
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.nio.charset.StandardCharsets
 
@@ -51,6 +50,7 @@ import java.nio.charset.StandardCharsets
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class PortalBootstrap extends AbstractVerticle {
 
     //todo: fix https://github.com/sourceplusplus/Assistant/issues/1 and remove static block below
@@ -65,7 +65,6 @@ class PortalBootstrap extends AbstractVerticle {
     }
 
     public static final MetricRegistry portalMetrics = new MetricRegistry()
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final boolean pluginAvailable
 
     static void main(String[] args) {

@@ -9,9 +9,8 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.marker.mark.GutterMark
 import com.sourceplusplus.portal.SourcePortal
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.util.concurrent.TimeUnit
 
@@ -25,12 +24,12 @@ import static com.sourceplusplus.plugin.PluginBootstrap.sourcePlugin
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Set<String> PENDING_DATA_AVAILABLE = Sets.newConcurrentHashSet()
     private static final Set<String> PENDING_SUBSCRIBED = Sets.newConcurrentHashSet()
 

@@ -38,6 +38,7 @@ import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import com.sourceplusplus.plugin.marker.mark.GutterMark
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalInterface
+import groovy.util.logging.Slf4j
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import org.apache.log4j.AppenderSkeleton
@@ -46,8 +47,6 @@ import org.apache.log4j.Level
 import org.apache.log4j.PatternLayout
 import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
@@ -60,6 +59,7 @@ import java.util.concurrent.CountDownLatch
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class IntelliJStartupActivity implements StartupActivity {
 
     //todo: fix https://github.com/sourceplusplus/Assistant/issues/1 and remove static block below
@@ -72,7 +72,6 @@ class IntelliJStartupActivity implements StartupActivity {
         org.apache.log4j.Logger.getLogger("com.sourceplusplus").addAppender(console)
     }
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static EditorMouseMotionListener editorMouseMotionListener
     private static SourcePlugin sourcePlugin
     public static Project currentProject

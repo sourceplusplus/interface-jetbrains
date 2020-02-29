@@ -1,10 +1,9 @@
 package com.sourceplusplus.plugin.coordinate.artifact.track
 
 import com.sourceplusplus.plugin.marker.mark.SourceMark
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * todo: description
@@ -13,13 +12,12 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class ArtifactSignatureChangeTracker extends AbstractVerticle {
 
     public static final String ARTIFACT_ADDED = "ArtifactAdded"
     public static final String ARTIFACT_REMOVED = "ArtifactRemoved"
     public static final String ARTIFACT_SIGNATURE_UPDATED = "ArtifactSignatureUpdated"
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     @Override
     void start() throws Exception {

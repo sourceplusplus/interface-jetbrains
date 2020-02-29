@@ -1,14 +1,13 @@
 package com.sourceplusplus.core.integration
 
 import com.google.common.collect.Sets
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Promise
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetSocket
 import io.vertx.core.streams.Pump
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * todo: description
@@ -17,9 +16,9 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class IntegrationProxy extends AbstractVerticle {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     public static final Set<String> ALLOWED_IP_ADDRESSES = Sets.newConcurrentHashSet()
 
     @Override

@@ -7,6 +7,7 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
+import groovy.util.logging.Slf4j
 import io.netty.handler.codec.http.QueryStringDecoder
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
@@ -16,8 +17,6 @@ import org.cef.browser.CefFrame
 import org.cef.handler.CefDisplayHandler
 import org.cef.handler.CefLifeSpanHandler
 import org.jetbrains.annotations.NotNull
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import java.awt.*
@@ -36,11 +35,11 @@ import java.util.zip.ZipFile
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class PortalInterface {
 
     public static final String PORTAL_READY = "PortalReady"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static File uiDirectory
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()

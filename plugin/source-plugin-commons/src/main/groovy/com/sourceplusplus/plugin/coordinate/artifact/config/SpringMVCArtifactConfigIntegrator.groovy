@@ -6,9 +6,8 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.marker.mark.SourceMark
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * todo: description
@@ -17,6 +16,7 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
 
     private static final String SPRING_WEB_ANNOTATIONS = Sets.newHashSet([
@@ -27,7 +27,6 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
             "org.springframework.web.bind.annotation.PatchMapping",
             "org.springframework.web.bind.annotation.RequestMapping"
     ])
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     @Override
     void start() throws Exception {

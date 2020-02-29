@@ -13,10 +13,9 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
+import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.text.DecimalFormat
 import java.time.Instant
@@ -39,13 +38,13 @@ import static com.sourceplusplus.api.model.metric.MetricType.*
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class OverviewTab extends AbstractTab {
 
     public static final String OVERVIEW_TAB_OPENED = "OverviewTabOpened"
     public static final String SET_METRIC_TIME_FRAME = "SetMetricTimeFrame"
     public static final String SET_ACTIVE_CHART_METRIC = "SetActiveChartMetric"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static DecimalFormat decimalFormat = new DecimalFormat(".#")
 
     OverviewTab() {

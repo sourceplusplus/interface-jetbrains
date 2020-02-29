@@ -1,9 +1,8 @@
 package com.sourceplusplus.plugin.coordinate.artifact.track
 
 import com.sourceplusplus.plugin.marker.SourceFileMarker
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
 
@@ -14,11 +13,10 @@ import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class FileClosedTracker extends AbstractVerticle {
 
     public static final String ADDRESS = "SourceFileClosed"
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     @Override
     void start() throws Exception {

@@ -6,12 +6,11 @@ import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
 import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.shareddata.SharedData
 import io.vertx.ext.web.RoutingContext
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Instant
 
@@ -22,9 +21,9 @@ import java.time.Instant
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class TraceAPI extends AbstractVerticle {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final SharedData sharedData
     private final SourceCore core
 

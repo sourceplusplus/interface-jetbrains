@@ -7,10 +7,9 @@ import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
 import com.sourceplusplus.plugin.intellij.settings.application.EditApplicationSettingsDialogWrapper
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang.StringUtils
 import org.jetbrains.annotations.NotNull
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import java.awt.event.ActionEvent
@@ -23,9 +22,9 @@ import java.awt.event.ActionListener
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class PluginSettingsDialog extends JDialog {
 
-    private static final Logger log = LoggerFactory.getLogger(PluginSettingsDialog.class)
     private JPanel contentPane
     private JLabel connectionStatusLabel
     private JButton connectButton

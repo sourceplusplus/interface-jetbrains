@@ -12,13 +12,12 @@ import com.sourceplusplus.plugin.SourcePluginDefines
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import com.sourceplusplus.portal.display.PortalInterface
+import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.input.Tailer
 import org.apache.commons.io.input.TailerListenerAdapter
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -33,9 +32,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class SourceAgentPatcher extends JavaProgramPatcher {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static AtomicBoolean patched = new AtomicBoolean()
     private static File agentFile
 

@@ -5,10 +5,8 @@ import com.intellij.openapi.ui.DialogWrapper
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.plugin.PluginBootstrap
+import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.Nullable
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 
@@ -19,9 +17,9 @@ import javax.swing.*
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class EditApplicationSettingsDialogWrapper extends DialogWrapper {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final EditApplicationSettingsDialog editApplicationSettings = new EditApplicationSettingsDialog()
     private final Project project
     private boolean okayAction

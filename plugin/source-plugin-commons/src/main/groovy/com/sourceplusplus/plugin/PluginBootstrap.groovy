@@ -16,10 +16,9 @@ import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
 import com.sourceplusplus.portal.PortalBootstrap
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.jackson.DatabindCodec
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Used to bootstrap the Source++ Plugin.
@@ -28,9 +27,9 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class PluginBootstrap extends AbstractVerticle {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static SourcePlugin sourcePlugin
 
     PluginBootstrap(SourcePlugin sourcePlugin) {

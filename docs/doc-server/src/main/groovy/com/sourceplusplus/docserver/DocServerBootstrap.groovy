@@ -1,5 +1,6 @@
 package com.sourceplusplus.docserver
 
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpServerOptions
@@ -13,8 +14,6 @@ import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.CorsHandler
 import net.jodah.expiringmap.ExpiringMap
 import org.apache.commons.io.IOUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
@@ -28,11 +27,11 @@ import java.util.regex.Pattern
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class DocServerBootstrap extends AbstractVerticle {
 
     public static final ResourceBundle BUILD = ResourceBundle.getBundle("source-doc-server_build")
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Map<String, JsonObject> DOC_CACHE = ExpiringMap.builder()
             .expiration(1, TimeUnit.HOURS).build()
 

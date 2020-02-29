@@ -12,10 +12,9 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePluginDefines
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
+import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 
@@ -26,9 +25,9 @@ import javax.swing.*
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class IntelliJInspectionProvider extends AbstractBaseJavaLocalInspectionTool implements InspectionToolProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     public static PsiFile lastFileOpened
 
     @NotNull

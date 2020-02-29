@@ -24,6 +24,7 @@ import com.sourceplusplus.plugin.marker.mark.GutterMark
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
@@ -33,8 +34,6 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.java.JavaUAnnotation
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import java.awt.*
@@ -50,9 +49,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class IntelliJMethodGutterMark extends GutterMark {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final AtomicBoolean buildingPortalUI = new AtomicBoolean(false)
     private static PortalMouseMotionListener mouseMotionListener
     private static Balloon currentShowingBalloon

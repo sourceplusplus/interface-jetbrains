@@ -12,11 +12,10 @@ import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import com.sourceplusplus.plugin.source.navigate.ArtifactNavigator
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
+import groovy.util.logging.Slf4j
 import io.vertx.core.json.JsonObject
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * todo: description
@@ -25,9 +24,8 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class IntelliJArtifactNavigator extends ArtifactNavigator {
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     @Override
     void start() throws Exception {
