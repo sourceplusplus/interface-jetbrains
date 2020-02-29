@@ -1,16 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-  <defs>
-    <style>
-      .cls-1 {
-        font-size: 37.5px;
-        fill: #182d34;
-        font-family: "Fujita Ray";
-      }
-
-      .cls-2 {
-        fill: #e1483b;
-      }
-    </style>
-  </defs>
-  <text id="S_" data-name="S++" class="cls-1" x="2.147" y="34.491">S<tspan class="cls-2">++</tspan></text>
-</svg>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36.07 18.28"><defs><style>.cls-1{fill:#182d34;}.cls-2{fill:#e1483b;}</style></defs><title>pluginIcon</title><path class="cls-1" d="M12,7.32l0,4.43L7.59,14.2l5.29,4.29L5.44,24l3.08-5L2,14.07,2,14Z" transform="translate(-1.97 -7.32)"/><path class="cls-2" d="M18.37,14.7h2.56v4.16h4.12v2.58H20.93v4.15H18.37V21.44H14.25V18.86h4.12Z" transform="translate(-1.97 -7.32)"/><path class="cls-2" d="M31.36,14.7h2.56v4.16H38v2.58H33.92v4.15H31.36V21.44H27.24V18.86h4.12Z" transform="translate(-1.97 -7.32)"/></svg>
