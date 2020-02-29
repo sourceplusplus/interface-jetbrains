@@ -25,8 +25,8 @@ import com.sourceplusplus.portal.display.tabs.OverviewTab
 import com.sourceplusplus.portal.display.tabs.TracesTab
 import io.vertx.core.*
 import io.vertx.core.http.HttpServerOptions
-import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.core.net.JksOptions
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
@@ -47,7 +47,7 @@ import java.nio.charset.StandardCharsets
  * The portal is able to fetch and display runtime behavior without interacting with the Source++ Plugin.
  * This allows the portal to be independently outside the IDE.
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -100,7 +100,7 @@ class PortalBootstrap extends AbstractVerticle {
     }
 
     @Override
-    void start(Future<Void> startFuture) throws Exception {
+    void start(Promise<Void> startFuture) throws Exception {
         if (pluginAvailable) {
             PortalInterface.assignVertx(vertx)
         } else {
@@ -116,20 +116,20 @@ class PortalBootstrap extends AbstractVerticle {
             if (config().getBoolean("bridge_ssl")) {
                 vertx.createHttpServer(new HttpServerOptions().setSsl(true)
                         .setKeyStoreOptions(new JksOptions()
-                        .setPath(config().getString("jks_path"))
-                        .setPassword(config().getString("jks_password")))
-                ).requestHandler(router.&accept)
+                                .setPath(config().getString("jks_path"))
+                                .setPassword(config().getString("jks_password")))
+                ).requestHandler(router)
                         .listen(config().getInteger("bridge_port"), config().getString("bridge_host"), {
-                    if (it.succeeded()) {
-                        log.info("Started portal ui bridge (using SSL). Using port: " + it.result().actualPort())
-                    } else {
-                        it.cause().printStackTrace()
-                        log.error("Failed to start portal bridge (using SSL)", it.cause())
-                        System.exit(-1)
-                    }
-                })
+                            if (it.succeeded()) {
+                                log.info("Started portal ui bridge (using SSL). Using port: " + it.result().actualPort())
+                            } else {
+                                it.cause().printStackTrace()
+                                log.error("Failed to start portal bridge (using SSL)", it.cause())
+                                System.exit(-1)
+                            }
+                        })
             } else {
-                vertx.createHttpServer().requestHandler(router.&accept).listen(config().getInteger("bridge_port"),
+                vertx.createHttpServer().requestHandler(router).listen(config().getInteger("bridge_port"),
                         config().getString("bridge_host"), {
                     if (it.succeeded()) {
                         log.info("Started portal ui bridge. Using port: " + it.result().actualPort())
@@ -220,20 +220,19 @@ class PortalBootstrap extends AbstractVerticle {
             })
         }
 
-        def overviewTabFut = Future.future()
-        def tracesTabFut = Future.future()
-        def configurationTabFut = Future.future()
+        def overviewTabFut = Promise.promise().future()
+        def tracesTabFut = Promise.promise().future()
+        def configurationTabFut = Promise.promise().future()
         vertx.deployVerticle(new OverviewTab(), new DeploymentOptions()
-                .setConfig(config()).setWorker(true), overviewTabFut.completer())
+                .setConfig(config()).setWorker(true), overviewTabFut)
         vertx.deployVerticle(new TracesTab(), new DeploymentOptions()
-                .setConfig(config()).setWorker(true), tracesTabFut.completer())
+                .setConfig(config()).setWorker(true), tracesTabFut)
         vertx.deployVerticle(new ConfigurationTab(pluginAvailable), new DeploymentOptions()
-                .setConfig(config()).setWorker(true), configurationTabFut.completer())
+                .setConfig(config()).setWorker(true), configurationTabFut)
         CompositeFuture.all(overviewTabFut, tracesTabFut, configurationTabFut).setHandler({
             if (it.succeeded()) {
                 //track
-                vertx.deployVerticle(new PortalViewTracker(), new DeploymentOptions()
-                        .setWorker(true), startFuture.completer())
+                vertx.deployVerticle(new PortalViewTracker(), new DeploymentOptions().setWorker(true), startFuture)
             } else {
                 startFuture.fail(it.cause())
             }
@@ -246,10 +245,9 @@ class PortalBootstrap extends AbstractVerticle {
     }
 
     private void registerCodecs() {
-        //Json.mapper.findAndRegisterModules()
-        Json.mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-        Json.mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-        Json.mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
+        DatabindCodec.mapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+        DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
+        DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
         //api
         vertx.eventBus().registerDefaultCodec(SourceApplication.class, SourceMessage.messageCodec(SourceApplication.class))

@@ -21,7 +21,7 @@ import static com.sourceplusplus.plugin.PluginBootstrap.sourcePlugin
  * Keeps track of all artifact subscriptions.
  * Distributes specific artifact subscriptions to specified trackers.
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -123,7 +123,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
         //subscribe to artifact
         vertx.eventBus().consumer(SUBSCRIBE_TO_ARTIFACT, { resp ->
-            def request = resp.body() as ArtifactSubscribeRequest
+            ArtifactSubscribeRequest request = resp.body() as ArtifactSubscribeRequest
             log.info("Sending artifact subscription request: " + request)
 
             SourcePluginConfig.current.activeEnvironment.coreClient.subscribeToArtifact(request, {
@@ -145,7 +145,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         })
         //unsubscribe from artifact
         vertx.eventBus().consumer(UNSUBSCRIBE_FROM_ARTIFACT, { resp ->
-            def request = resp.body() as SourceArtifactUnsubscribeRequest
+            SourceArtifactUnsubscribeRequest request = resp.body() as SourceArtifactUnsubscribeRequest
             log.info("Sending artifact unsubscription request: " + request)
 
             SourcePluginConfig.current.activeEnvironment.coreClient.unsubscribeFromArtifact(request, {

@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -49,7 +49,7 @@ class SourceCore extends AbstractVerticle {
     }
 
     @Override
-    void start(Future<Void> startFuture) throws Exception {
+    void start(Promise<Void> startFuture) throws Exception {
         log.info("Booting Source++ Core storage...")
         def storageConfig = config().getJsonObject("storage")
         switch (storageConfig.getString("type")) {
@@ -73,17 +73,16 @@ class SourceCore extends AbstractVerticle {
         traceAPI = new TraceAPI(vertx.sharedData(), this)
 
         def deploymentConfig = new DeploymentOptions().setConfig(config())
-        def adminAPIFuture = Future.future()
-        vertx.deployVerticle(adminAPI, deploymentConfig, adminAPIFuture.completer())
-        def applicationAPIFuture = Future.future()
-        vertx.deployVerticle(applicationAPI, deploymentConfig, applicationAPIFuture.completer())
-        def artifactAPIFuture = Future.future()
-        vertx.deployVerticle(artifactAPI, deploymentConfig, artifactAPIFuture.completer())
-        CompositeFuture.all(adminAPIFuture, applicationAPIFuture, artifactAPIFuture)
-                .setHandler({
+        def adminAPIFuture = Promise.promise().future()
+        vertx.deployVerticle(adminAPI, deploymentConfig, adminAPIFuture)
+        def applicationAPIFuture = Promise.promise().future()
+        vertx.deployVerticle(applicationAPI, deploymentConfig, applicationAPIFuture)
+        def artifactAPIFuture = Promise.promise().future()
+        vertx.deployVerticle(artifactAPI, deploymentConfig, artifactAPIFuture)
+        CompositeFuture.all(adminAPIFuture, applicationAPIFuture, artifactAPIFuture).setHandler({
             if (it.succeeded()) {
                 log.info("Connecting Source++ integrations...")
-                deployIntegrations(startFuture.completer())
+                deployIntegrations(startFuture)
             } else {
                 startFuture.fail(it.cause())
             }
@@ -108,21 +107,21 @@ class SourceCore extends AbstractVerticle {
             //undeploy integrations
             def undeployFutures = []
             deployedIntegrationAPIs.removeIf({
-                def fut = Future.future()
+                def fut = Promise.promise().future()
                 undeployFutures += fut
-                vertx.undeploy(it, fut.completer())
+                vertx.undeploy(it, fut)
                 return true
             })
             deployedIntegrations.removeIf({
-                def fut = Future.future()
+                def fut = Promise.promise().future()
                 undeployFutures += fut
-                vertx.undeploy(it, fut.completer())
+                vertx.undeploy(it, fut)
                 return true
             })
             CompositeFuture.all(undeployFutures).setHandler({
                 if (it.succeeded()) {
                     //redeploy integrations
-                    def fut = Future.future()
+                    def fut = Promise.promise().future()
                     fut.setHandler({
                         if (it.succeeded()) {
                             msg.reply(true)
@@ -131,7 +130,7 @@ class SourceCore extends AbstractVerticle {
                             msg.fail(500, "Failed to deploy integrations")
                         }
                     })
-                    deployIntegrations(fut.completer())
+                    deployIntegrations(fut)
                 } else {
                     it.cause().printStackTrace()
                     msg.fail(500, "Failed to undeploy integrations")
@@ -150,7 +149,7 @@ class SourceCore extends AbstractVerticle {
         for (int i = 0; i < integrations.size(); i++) {
             def integration = integrations.getJsonObject(i)
             if (integration.getBoolean("enabled")) {
-                def future = Future.future()
+                def future = Promise.promise()
                 integrationFutures.add(future)
 
                 switch (integration.getString("id")) {
@@ -167,16 +166,16 @@ class SourceCore extends AbstractVerticle {
         }
         if (succeeded) {
             def deploymentOptions = new DeploymentOptions().setConfig(config())
-            def metricAPIFuture = Future.future()
-            def traceAPIFuture = Future.future()
+            def metricAPIFuture = Promise.promise().future()
+            def traceAPIFuture = Promise.promise().future()
             def futures = []
             if (deployMetricAPI) {
                 futures.add(metricAPIFuture)
-                vertx.deployVerticle(metricAPI, deploymentOptions, metricAPIFuture.completer())
+                vertx.deployVerticle(metricAPI, deploymentOptions, metricAPIFuture)
             }
             if (deployTraceAPI) {
                 futures.add(traceAPIFuture)
-                vertx.deployVerticle(traceAPI, deploymentOptions, traceAPIFuture.completer())
+                vertx.deployVerticle(traceAPI, deploymentOptions, traceAPIFuture)
             }
             CompositeFuture.all(futures).setHandler({
                 if (it.succeeded()) {

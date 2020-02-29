@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -69,7 +69,7 @@ class MetricAPI extends AbstractVerticle {
         }
         request = request.withAppUuid(appUuid).withArtifactQualifiedName(artifactQualifiedName)
 
-        vertx.eventBus().send(ArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT, request, {
+        vertx.eventBus().request(ArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT, request, {
             if (it.succeeded()) {
                 routingContext.response().setStatusCode(200).end()
             } else {
@@ -99,7 +99,7 @@ class MetricAPI extends AbstractVerticle {
         }
         request = request.withAppUuid(appUuid).withArtifactQualifiedName(artifactQualifiedName)
 
-        vertx.eventBus().send(ArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, request, {
+        vertx.eventBus().request(ArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, request, {
             if (it.succeeded()) {
                 routingContext.response().setStatusCode(200).end()
             } else {

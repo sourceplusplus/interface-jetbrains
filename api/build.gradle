@@ -3,7 +3,7 @@ buildscript {
         maven { url = "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.7"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.21"
     }
 }
 
@@ -15,9 +15,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    apt "org.immutables:value:2.5.6"
-    compileOnly "org.immutables:value:2.5.6:annotations"
-    compile 'com.squareup.okhttp3:okhttp:3.9.1'
+    annotationProcessor "org.immutables:value:2.8.3"
+    compileOnly "org.immutables:value:2.8.3:annotations"
+    compile 'com.squareup.okhttp3:okhttp:3.14.6'
 }
 
 archivesBaseName = 'source-api'

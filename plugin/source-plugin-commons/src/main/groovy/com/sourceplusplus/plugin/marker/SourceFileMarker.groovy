@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable
  * Used to mark a source code file with Source++ artifact marks.
  * Source++ artifact marks can be used to subscribe to and collect source code runtime information.
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

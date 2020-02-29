@@ -43,7 +43,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  */
 public class SourceAgent {
@@ -250,7 +250,11 @@ public class SourceAgent {
             System.setProperty("skywalking.agent.application_code", "test_mode");
             System.setProperty("skywalking.agent.service_name", "test_mode");
             Config.Collector.BACKEND_SERVICE = "localhost:" + connection.getPort();
-            SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
+            try {
+                SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             if (SourceAgentConfig.current.skywalkingEnabled) {
                 if (SourceAgentConfig.current.appUuid == null) {
@@ -258,7 +262,11 @@ public class SourceAgent {
                 }
                 Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
                 System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
-                SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
+                try {
+                    SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
                 Logger.info("Waiting for Apache SkyWalking to finish setup");
                 while (true) {

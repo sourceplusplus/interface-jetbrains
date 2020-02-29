@@ -14,6 +14,7 @@ import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.jackson.JacksonCodec
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.io.IOUtils
 import org.slf4j.Logger
@@ -26,7 +27,7 @@ import java.util.regex.Pattern
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -85,9 +86,9 @@ class ApplicationAPI extends AbstractVerticle {
         def message = new JsonObject()
         message.put("app_uuid", appUuid)
         message.put('subscriber_uuid', subscriberUuid)
-        vertx.eventBus().send(ArtifactSubscriptionTracker.GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS, message, {
+        vertx.eventBus().request(ArtifactSubscriptionTracker.GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS, message, {
             if (it.succeeded()) {
-                handler.handle(Future.succeededFuture(Json.decodeValue(it.result().body().toString(),
+                handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(it.result().body().toString(),
                         new TypeReference<List<SourceArtifactSubscription>>() {
                         })))
             } else {
@@ -120,7 +121,7 @@ class ApplicationAPI extends AbstractVerticle {
         def message = new JsonObject()
         message.put("app_uuid", appUuid)
         message.put('subscriber_uuid', subscriberUuid)
-        vertx.eventBus().send(ArtifactSubscriptionTracker.REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS, message, {
+        vertx.eventBus().request(ArtifactSubscriptionTracker.REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS, message, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture())
             } else {
@@ -151,9 +152,9 @@ class ApplicationAPI extends AbstractVerticle {
 
     void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
                                      Handler<AsyncResult<Set<SourceApplicationSubscription>>> handler) {
-        vertx.eventBus().send(ArtifactSubscriptionTracker.GET_APPLICATION_SUBSCRIPTIONS, appUuid, {
+        vertx.eventBus().request(ArtifactSubscriptionTracker.GET_APPLICATION_SUBSCRIPTIONS, appUuid, {
             if (it.succeeded()) {
-                def subscribers = Json.decodeValue(it.result().body() as String,
+                def subscribers = JacksonCodec.decodeValue(it.result().body() as String,
                         new TypeReference<Set<SourceApplicationSubscription>>() {})
                 core.storage.findArtifactBySubscribeAutomatically(appUuid, {
                     if (it.succeeded()) {

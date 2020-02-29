@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter
 /**
  * todo: description
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -60,7 +60,7 @@ class SkywalkingIntegration extends APMIntegration {
     }
 
     @Override
-    void start(Future<Void> startFuture) throws Exception {
+    void start(Promise<Void> startFuture) throws Exception {
         def timezone = config().getJsonObject("config").getString("timezone")
         if (timezone) {
             DATE_TIME_FORMATTER_MINUTES = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
@@ -380,7 +380,7 @@ class SkywalkingIntegration extends APMIntegration {
 
                 def futures = new ArrayList<Future>()
                 spanList.each {
-                    def fut = Future.future()
+                    def fut = Promise.promise()
                     String endpointName = it.endpointName()
                     def endpointId = vertx.sharedData().getLocalMap("skywalking_endpoints")
                             .get(endpointName) as String

@@ -27,7 +27,7 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.17'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
-    compile(group: 'com.github.codebrig', name: 'gitsocratic', version: 'b228cab573') {
+    compile(group: 'com.github.codebrig', name: 'gitsocratic', version: '5d33d30262') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
 }

@@ -3,8 +3,8 @@ The following checklist will guide you through the process of setting up the nec
 To setup Source++ with Docker you can simply run the following command:
 
 ```bash
-docker run --name Apache_SkyWalking -p 12800:12800 -p 11800:11800 -d apache/skywalking-oap-server:6.2.0
-docker run --name SourcePlusPlus -p 8080:8080 -d sourceplusplus/core:v0.2.2-alpha
+docker run --name Apache_SkyWalking -p 12800:12800 -p 11800:11800 -d apache/skywalking-oap-server:6.5.0
+docker run --name SourcePlusPlus -p 8080:8080 -d sourceplusplus/core:v0.2.3-alpha
 ```
 
 Note: Source++ will need to be integrated with Apache SkyWalking to enable usage. You can use the Source++ Plugin to enable this integration after running the above commands (see [Manage Environments](./06-configure-source-plugin.md#manage-environments)).

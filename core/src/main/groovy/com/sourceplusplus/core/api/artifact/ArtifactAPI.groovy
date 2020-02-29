@@ -13,6 +13,7 @@ import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTra
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.jackson.JacksonCodec
 import io.vertx.ext.web.RoutingContext
 import net.jodah.expiringmap.ExpirationPolicy
 import net.jodah.expiringmap.ExpiringMap
@@ -29,7 +30,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
  *
  * todo: artifact caching
  *
- * @version 0.2.2
+ * @version 0.2.3
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -46,12 +47,13 @@ class ArtifactAPI extends AbstractVerticle {
     }
 
     @Override
-    void start(Future<Void> startFuture) throws Exception {
+    void start(Promise<Void> startFuture) throws Exception {
         core.baseRouter.get("/applications/:appUuid/artifacts")
                 .handler(this.&getApplicationSourceArtifactsRoute)
         core.baseRouter.post("/applications/:appUuid/artifacts/:artifactQualifiedName")
                 .handler(this.&createOrUpdateSourceArtifactRoute)
-        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName").handler(this.&getSourceArtifactRoute)
+        core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName")
+                .handler(this.&getSourceArtifactRoute)
         core.baseRouter.put("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
                 .handler(this.&createOrUpdateSourceArtifactConfigRoute)
         core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName/config")
@@ -62,7 +64,7 @@ class ArtifactAPI extends AbstractVerticle {
                 .handler(this.&getSourceArtifactSubscriptionsRoute)
 
         def subscriptionTracker = new ArtifactSubscriptionTracker(core)
-        vertx.deployVerticle(subscriptionTracker, new DeploymentOptions().setConfig(config()), startFuture.completer())
+        vertx.deployVerticle(subscriptionTracker, new DeploymentOptions().setConfig(config()), startFuture)
         log.info("{} started", getClass().getSimpleName())
     }
 
@@ -90,9 +92,9 @@ class ArtifactAPI extends AbstractVerticle {
 
     void getSourceArtifactSubscriptions(ApplicationArtifact applicationArtifact,
                                         Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
-        vertx.eventBus().send(ArtifactSubscriptionTracker.GET_ARTIFACT_SUBSCRIPTIONS, applicationArtifact, {
+        vertx.eventBus().request(ArtifactSubscriptionTracker.GET_ARTIFACT_SUBSCRIPTIONS, applicationArtifact, {
             if (it.succeeded()) {
-                def subscribers = Json.decodeValue(it.result().body() as String,
+                def subscribers = JacksonCodec.decodeValue(it.result().body() as String,
                         new TypeReference<List<SourceArtifactSubscription>>() {})
                 handler.handle(Future.succeededFuture(subscribers))
             } else {
@@ -134,7 +136,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private void unsubscribeSourceArtifact(SourceArtifactUnsubscribeRequest request,
                                            Handler<AsyncResult<Boolean>> handler) {
-        vertx.eventBus().send(ArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT, request, {
+        vertx.eventBus().request(ArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT, request, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture(true))
             } else {
