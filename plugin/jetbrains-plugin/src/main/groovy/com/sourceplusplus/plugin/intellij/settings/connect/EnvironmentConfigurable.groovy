@@ -1,5 +1,6 @@
 package com.sourceplusplus.plugin.intellij.settings.connect
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
@@ -10,8 +11,8 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
-import com.sourceplusplus.plugin.intellij.settings.PluginSettingsComponent
 import groovy.util.logging.Slf4j
+import io.vertx.core.json.Json
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
@@ -56,27 +57,30 @@ class EnvironmentConfigurable implements Configurable {
 
     @Override
     boolean isModified() {
-        return form.isModified(PluginSettingsComponent.getInstance().getState())
+        SourcePluginConfig pluginConfig = SourcePluginConfig.current.clone()
+        return form.isModified(pluginConfig)
     }
 
     @Override
     void apply() throws ConfigurationException {
-        SourcePluginConfig settings = PluginSettingsComponent.getInstance().getState()
+        SourcePluginConfig pluginConfig = SourcePluginConfig.current.clone()
         if (form != null) {
-            form.getData(settings)
-            SourcePluginConfig.current.applyConfig(settings)
+            form.getData(pluginConfig)
+            SourcePluginConfig.current.applyConfig(pluginConfig)
+            PropertiesComponent.getInstance().setValue(
+                    "spp_plugin_config", Json.encode(SourcePluginConfig.current))
 
             PluginBootstrap.sourcePlugin.clearActiveSourceFileMarkers()
-            def coreClient = new SourceCoreClient(settings.activeEnvironment.sppUrl)
-            if (settings.activeEnvironment.apiKey) {
-                coreClient.apiKey = settings.activeEnvironment.apiKey
+            def coreClient = new SourceCoreClient(pluginConfig.activeEnvironment.sppUrl)
+            if (pluginConfig.activeEnvironment.apiKey) {
+                coreClient.apiKey = pluginConfig.activeEnvironment.apiKey
             }
             coreClient.ping({
                 if (it.succeeded()) {
                     PluginBootstrap.sourcePlugin.updateEnvironment(coreClient)
 
-                    if (settings.activeEnvironment?.appUuid) {
-                        coreClient.getApplication(settings.activeEnvironment.appUuid, {
+                    if (pluginConfig.activeEnvironment?.appUuid) {
+                        coreClient.getApplication(pluginConfig.activeEnvironment.appUuid, {
                             if (it.succeeded() && it.result().isPresent()) {
                                 FileEditorManager manager = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject)
                                 SwingUtilities.invokeLater(new Runnable() {
@@ -92,14 +96,14 @@ class EnvironmentConfigurable implements Configurable {
                                     }
                                 })
                             } else if (it.succeeded()) {
-                                settings.activeEnvironment.appUuid = null
+                                pluginConfig.activeEnvironment.appUuid = null
                             } else {
                                 log.error("Failed to get application", it.cause())
                             }
                         })
                     }
                 } else {
-                    settings.activeEnvironment.appUuid = null
+                    pluginConfig.activeEnvironment.appUuid = null
                 }
             })
         }
@@ -107,9 +111,8 @@ class EnvironmentConfigurable implements Configurable {
 
     @Override
     void reset() {
-        SourcePluginConfig settings = PluginSettingsComponent.getInstance().getState()
         if (form != null) {
-            form.setDataCustom(settings)
+            form.setDataCustom(SourcePluginConfig.current)
         }
     }
 

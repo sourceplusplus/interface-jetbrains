@@ -3,6 +3,7 @@ package com.sourceplusplus.plugin.intellij
 import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerImpl
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.ide.ui.laf.IntelliJLaf
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
@@ -38,6 +39,7 @@ import com.sourceplusplus.plugin.marker.mark.GutterMark
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalInterface
 import io.vertx.core.Vertx
+import io.vertx.core.json.Json
 import org.apache.log4j.AppenderSkeleton
 import org.apache.log4j.ConsoleAppender
 import org.apache.log4j.Level
@@ -120,6 +122,12 @@ class IntelliJStartupActivity implements StartupActivity {
                 latch.countDown()
             })
             latch.await()
+        }
+
+        //load config
+        def pluginConfig = PropertiesComponent.getInstance().getValue("spp_plugin_config")
+        if (pluginConfig != null) {
+            SourcePluginConfig.current.applyConfig(Json.decodeValue(pluginConfig, SourcePluginConfig.class))
         }
 
         if (SourcePluginConfig.current.activeEnvironment != null) {

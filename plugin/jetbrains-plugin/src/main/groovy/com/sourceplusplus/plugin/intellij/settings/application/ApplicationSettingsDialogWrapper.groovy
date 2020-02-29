@@ -1,5 +1,6 @@
 package com.sourceplusplus.plugin.intellij.settings.application
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.sourceplusplus.api.client.SourceCoreClient
@@ -9,6 +10,7 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
+import io.vertx.core.json.Json
 import org.jetbrains.annotations.Nullable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -80,6 +82,8 @@ class ApplicationSettingsDialogWrapper extends DialogWrapper {
             IntelliJStartupActivity.startSourcePlugin(coreClient)
             PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
         }
+        PropertiesComponent.getInstance().setValue(
+                "spp_plugin_config", Json.encode(SourcePluginConfig.current))
         IntelliJStartupActivity.currentProject.save()
         log.info("Application UUID updated: " + SourcePluginConfig.current.activeEnvironment.appUuid)
 

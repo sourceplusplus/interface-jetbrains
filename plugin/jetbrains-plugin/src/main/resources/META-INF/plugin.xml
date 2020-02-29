@@ -14,13 +14,6 @@
     <depends>org.intellij.groovy</depends>
     <depends>org.jetbrains.kotlin</depends>
 
-    <application-components>
-        <component>
-            <implementation-class>com.sourceplusplus.plugin.intellij.settings.PluginSettingsComponent
-            </implementation-class>
-        </component>
-    </application-components>
-
     <extensions defaultExtensionNs="com.intellij">
         <projectService
                 serviceImplementation="com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService"/>

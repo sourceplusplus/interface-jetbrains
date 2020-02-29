@@ -1,8 +1,10 @@
 package com.sourceplusplus.plugin.intellij.settings.connect
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import io.vertx.core.json.Json
 import org.jetbrains.annotations.Nullable
 
 import javax.swing.*
@@ -37,6 +39,8 @@ class EnvironmentDialogWrapper extends DialogWrapper {
     @Override
     protected void doOKAction() {
         SourcePluginConfig.current.applyConfig(getConfig())
+        PropertiesComponent.getInstance().setValue(
+                "spp_plugin_config", Json.encode(SourcePluginConfig.current))
         project.save()
         super.doOKAction()
     }
