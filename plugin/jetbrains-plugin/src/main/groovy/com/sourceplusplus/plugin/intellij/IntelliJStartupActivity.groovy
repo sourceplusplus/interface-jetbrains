@@ -44,6 +44,7 @@ import io.vertx.core.json.Json
 import org.apache.log4j.AppenderSkeleton
 import org.apache.log4j.ConsoleAppender
 import org.apache.log4j.Level
+import org.apache.log4j.Logger
 import org.apache.log4j.PatternLayout
 import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
@@ -68,8 +69,8 @@ class IntelliJStartupActivity implements StartupActivity {
         console.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"))
         console.activateOptions()
 
-        org.apache.log4j.Logger.rootLogger.loggerRepository.resetConfiguration()
-        org.apache.log4j.Logger.getLogger("com.sourceplusplus").addAppender(console)
+        Logger.rootLogger.loggerRepository.resetConfiguration()
+        Logger.getLogger("com.sourceplusplus").addAppender(console)
     }
 
     private static EditorMouseMotionListener editorMouseMotionListener
@@ -85,7 +86,7 @@ class IntelliJStartupActivity implements StartupActivity {
 
         //redirect loggers to console
         def consoleView = ServiceManager.getService(project, SourcePluginConsoleService.class).getConsoleView()
-        org.apache.log4j.Logger.getLogger("com.sourceplusplus").addAppender(new AppenderSkeleton() {
+        Logger.getLogger("com.sourceplusplus").addAppender(new AppenderSkeleton() {
             @Override
             protected void append(LoggingEvent loggingEvent) {
                 Object message = loggingEvent.message

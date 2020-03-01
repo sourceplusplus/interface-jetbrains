@@ -48,7 +48,7 @@ class TraceAPI extends AbstractVerticle {
 
     private void unsubscribeToArtifactRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -78,7 +78,7 @@ class TraceAPI extends AbstractVerticle {
 
     private void subscribeToArtifactRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -108,7 +108,7 @@ class TraceAPI extends AbstractVerticle {
 
     private void getTracesRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -141,7 +141,7 @@ class TraceAPI extends AbstractVerticle {
 
     private void getTraceSpansRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         def traceId = routingContext.request().getParam("traceId")
         if (!appUuid || !artifactQualifiedName || !traceId) {
             routingContext.response().setStatusCode(400)

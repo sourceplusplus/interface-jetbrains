@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class APIException extends RuntimeException {
 
-    private Set<String> errors;
+    private final Set<String> errors;
 
     public APIException(String... errors) {
         super(Arrays.toString(errors));

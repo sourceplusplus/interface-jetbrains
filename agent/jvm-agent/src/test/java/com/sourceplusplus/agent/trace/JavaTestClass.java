@@ -8,10 +8,9 @@ package com.sourceplusplus.agent.trace;
 public class JavaTestClass {
 
     static void staticMethod() {
-        System.out.println("invoked staticMethod()");
         try {
             Thread.sleep(500);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignore) {
         }
     }
 }

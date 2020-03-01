@@ -10,7 +10,7 @@ public class ApplicationSettingsDialog extends JDialog {
     private JPanel contentPane;
     private JTextField applicationNameTextField;
     private JTextField applicationDomainTextField;
-    private JComboBox existingApplicationsComboBox;
+    private JComboBox<ApplicationChoice> existingApplicationsComboBox;
 
     public ApplicationSettingsDialog() {
         setContentPane(contentPane);
@@ -23,7 +23,6 @@ public class ApplicationSettingsDialog extends JDialog {
         return contentPane;
     }
 
-    @SuppressWarnings("unchecked")
     public void addExistingApplication(SourceApplication... applications) {
         for (SourceApplication application : applications) {
             existingApplicationsComboBox.addItem(new ApplicationChoice(application));
@@ -43,7 +42,7 @@ public class ApplicationSettingsDialog extends JDialog {
     }
 
     public static final class ApplicationChoice {
-        SourceApplication application;
+        final SourceApplication application;
 
         ApplicationChoice(SourceApplication application) {
             this.application = application;

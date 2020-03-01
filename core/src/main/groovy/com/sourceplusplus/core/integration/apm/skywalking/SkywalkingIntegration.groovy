@@ -384,11 +384,11 @@ class SkywalkingIntegration extends APMIntegration {
                     def endpointId = vertx.sharedData().getLocalMap("skywalking_endpoints")
                             .get(endpointName) as String
                     if (endpointId) {
-                        artifactAPI.getSourceArtifactByEndpointId(appUuid, endpointId, fut.completer())
+                        artifactAPI.getSourceArtifactByEndpointId(appUuid, endpointId, fut)
                     } else {
-                        artifactAPI.getSourceArtifactByEndpointName(appUuid, endpointName, fut.completer())
+                        artifactAPI.getSourceArtifactByEndpointName(appUuid, endpointName, fut)
                     }
-                    futures.add(fut)
+                    futures.add(fut.future())
                 }
                 CompositeFuture.all(futures).setHandler({
                     if (it.succeeded()) {

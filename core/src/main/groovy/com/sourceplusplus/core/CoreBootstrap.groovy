@@ -256,7 +256,7 @@ class CoreBootstrap extends AbstractVerticle {
         Class agentClass
         try {
             agentClass = Class.forName("com.sourceplusplus.agent.SourceAgent")
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException ignore) {
             log.info("Self monitoring disabled")
             return
         }

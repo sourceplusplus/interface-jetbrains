@@ -22,9 +22,9 @@ abstract class SourceCoreAPITest {
 
     static String getSppUrl() {
         if (apiSslEnabled) {
-            return "https://" + apiHost + ":" + apiPort;
+            return "https://" + apiHost + ":" + apiPort
         } else {
-            return "http://" + apiHost + ":" + apiPort;
+            return "http://" + apiHost + ":" + apiPort
         }
     }
 

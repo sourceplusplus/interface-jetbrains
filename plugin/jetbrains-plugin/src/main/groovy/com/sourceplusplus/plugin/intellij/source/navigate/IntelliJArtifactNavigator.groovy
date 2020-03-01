@@ -120,7 +120,7 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
         def classQualifiedName
         try {
             classQualifiedName = getQualifiedClassName(artifactQualifiedName)
-        } catch (all) {
+        } catch (ignore) {
             return false
         }
 

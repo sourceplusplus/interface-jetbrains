@@ -87,7 +87,7 @@ task prepareExternalAgent(type: JavaExec) {
         def agentFilesystem
         try {
             agentFilesystem = FileSystems.newFileSystem(agentUri, ["create": "false"])
-        } catch (all) {
+        } catch (ignore) {
             agentFilesystem = FileSystems.getFileSystem(agentUri)
         }
 

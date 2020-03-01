@@ -36,6 +36,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
 import org.apache.log4j.ConsoleAppender
 import org.apache.log4j.Level
+import org.apache.log4j.Logger
 import org.apache.log4j.PatternLayout
 
 import java.nio.charset.StandardCharsets
@@ -60,8 +61,8 @@ class PortalBootstrap extends AbstractVerticle {
         console.setThreshold(Level.DEBUG)
         console.activateOptions()
 
-        org.apache.log4j.Logger.rootLogger.loggerRepository.resetConfiguration()
-        org.apache.log4j.Logger.getLogger("com.sourceplusplus").addAppender(console)
+        Logger.rootLogger.loggerRepository.resetConfiguration()
+        Logger.getLogger("com.sourceplusplus").addAppender(console)
     }
 
     public static final MetricRegistry portalMetrics = new MetricRegistry()

@@ -230,7 +230,7 @@ class IntelliJMethodGutterMark extends GutterMark {
         try {
             psiMethod.getContainingFile().getViewProvider().getDocument()
             return true
-        } catch (PsiInvalidElementAccessException ex) {
+        } catch (PsiInvalidElementAccessException ignore) {
             return false
         }
     }

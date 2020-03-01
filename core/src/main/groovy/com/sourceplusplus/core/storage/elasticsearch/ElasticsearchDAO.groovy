@@ -355,7 +355,8 @@ class ElasticsearchDAO extends SourceStorage {
     void createArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
         def index = new Index.Builder(Json.encode(artifact)).index(SPP_INDEX + "_artifact")
                 .type("artifact")
-                .id(URLEncoder.encode(artifact.appUuid() + "-" + artifact.artifactQualifiedName())).build()
+                .id(URLEncoder.encode(artifact.appUuid() + "-" + artifact.artifactQualifiedName(), "UTF-8"))
+                .build()
         client.executeAsync(index, new JestResultHandler() {
 
             @Override
@@ -378,7 +379,8 @@ class ElasticsearchDAO extends SourceStorage {
         def update = new Update.Builder(new JsonObject().put("doc", new JsonObject(Json.encode(artifact))).toString())
                 .index(SPP_INDEX + "_artifact")
                 .type("artifact")
-                .id(URLEncoder.encode(artifact.appUuid() + "-" + artifact.artifactQualifiedName())).build()
+                .id(URLEncoder.encode(artifact.appUuid() + "-" + artifact.artifactQualifiedName(), "UTF-8"))
+                .build()
         client.executeAsync(update, new JestResultHandler<DocumentResult>() {
 
             @Override
@@ -411,7 +413,7 @@ class ElasticsearchDAO extends SourceStorage {
     @Override
     void getArtifact(String appUuid, String artifactQualifiedName,
                      Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        def get = new Get.Builder(SPP_INDEX + "_artifact", URLEncoder.encode(appUuid + "-" + artifactQualifiedName))
+        def get = new Get.Builder(SPP_INDEX + "_artifact", URLEncoder.encode(appUuid + "-" + artifactQualifiedName, "UTF-8"))
                 .type("artifact").build()
         client.executeAsync(get, new JestResultHandler<DocumentResult>() {
 
@@ -774,7 +776,8 @@ class ElasticsearchDAO extends SourceStorage {
         def update = new Update.Builder(jsonSubscription.toString())
                 .index(SPP_INDEX + "_artifact_subscription")
                 .type("artifact_subscription")
-                .id(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName())).build()
+                .id(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName(), "UTF-8"))
+                .build()
         client.executeAsync(update, new JestResultHandler<DocumentResult>() {
 
             @Override
@@ -812,9 +815,11 @@ class ElasticsearchDAO extends SourceStorage {
 
     @Override
     void deleteArtifactSubscription(SourceArtifactSubscription subscription, Handler<AsyncResult<Void>> handler) {
-        def delete = new Delete.Builder(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName())).index(SPP_INDEX + "_artifact_subscription")
+        def delete = new Delete.Builder(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName(), "UTF-8"))
+                .index(SPP_INDEX + "_artifact_subscription")
                 .type("artifact_subscription")
-                .id(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName())).build()
+                .id(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName(), "UTF-8"))
+                .build()
         client.executeAsync(delete, new JestResultHandler<DocumentResult>() {
 
             @Override
@@ -842,7 +847,8 @@ class ElasticsearchDAO extends SourceStorage {
                                  Handler<AsyncResult<SourceArtifactSubscription>> handler) {
         def index = new Index.Builder(Json.encode(subscription)).index(SPP_INDEX + "_artifact_subscription")
                 .type("artifact_subscription")
-                .id(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName())).build()
+                .id(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName(), "UTF-8"))
+                .build()
         client.executeAsync(index, new JestResultHandler<DocumentResult>() {
 
             @Override

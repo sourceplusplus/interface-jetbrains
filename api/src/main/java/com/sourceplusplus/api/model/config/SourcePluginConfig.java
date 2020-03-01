@@ -37,6 +37,7 @@ public final class SourcePluginConfig {
         methodVirtualTextMarksEnabled = config.methodVirtualTextMarksEnabled;
         classGutterMarksEnabled = config.classGutterMarksEnabled;
         methodGutterMarksEnabled = config.methodGutterMarksEnabled;
+        remoteAgentHost = config.remoteAgentHost;
         remoteAgentPort = config.remoteAgentPort;
         agentPatcherEnabled = config.agentPatcherEnabled;
     }
