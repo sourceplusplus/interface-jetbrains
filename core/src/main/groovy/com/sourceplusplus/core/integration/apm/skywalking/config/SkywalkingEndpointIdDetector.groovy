@@ -187,8 +187,8 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         def futures = []
         for (int z = 0; z < serviceEndpoints.size(); z++) {
             def serviceEndpoint = serviceEndpoints.getJsonObject(z)
-            def endpointName = serviceEndpoint.getString("label")
-            def endpointId = serviceEndpoint.getString("key")
+            String endpointName = serviceEndpoint.getString("label")
+            String endpointId = serviceEndpoint.getString("key")
             vertx.sharedData().getLocalMap("skywalking_endpoints").put(endpointName, endpointId)
 
             def fut = Promise.promise()
@@ -297,7 +297,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                             if (it.succeeded()) {
                                 def spans = it.result().traceSpans()
                                 if (spans && spans.size() > 1) {
-                                    analyzeEndpointSpans(appUuid, spans, fut.completer())
+                                    analyzeEndpointSpans(appUuid, spans, fut)
                                 } else {
                                     fut.complete()
                                 }
@@ -333,8 +333,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                                     if (it.result().isPresent()) {
                                         def artifact = it.result().get()
                                         if (artifact.config() && artifact.config().endpoint()) {
-                                            addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId),
-                                                    fut.completer())
+                                            addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), fut)
                                         } else {
                                             fut.complete()
                                         }
