@@ -1,15 +1,7 @@
 package com.sourceplusplus.plugin.coordinate.artifact.track
 
-import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
-import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
-import com.sourceplusplus.api.model.metric.MetricType
-import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
-import com.sourceplusplus.api.model.trace.TraceOrderType
-import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * todo: description
@@ -18,11 +10,10 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class ArtifactConfigTracker extends AbstractVerticle {
 
     //public static final String GET_ARTIFACT_CONFIG = "GetArtifactConfig"
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     @Override
     void start() throws Exception {

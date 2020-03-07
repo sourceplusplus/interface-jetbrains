@@ -8,6 +8,7 @@ import com.sourceplusplus.plugin.coordinate.artifact.track.ArtifactConfigTracker
 import com.sourceplusplus.plugin.coordinate.artifact.track.ArtifactSignatureChangeTracker
 import com.sourceplusplus.plugin.coordinate.artifact.track.FileClosedTracker
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Promise
@@ -15,8 +16,6 @@ import io.vertx.core.net.NetServer
 import io.vertx.ext.bridge.BridgeOptions
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.eventbus.bridge.tcp.TcpEventBusBridge
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Used to coordinate all the different events that Source++ Plugin subscribes to.
@@ -32,10 +31,10 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class PluginCoordinator extends AbstractVerticle {
 
     public final static MetricRegistry pluginMetrics = new MetricRegistry()
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     @Override
     void start(Promise<Void> startFuture) throws Exception {

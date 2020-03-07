@@ -7,6 +7,7 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.plugin.marker.SourceFileMarker
 import com.sourceplusplus.plugin.marker.mark.SourceMark
+import groovy.util.logging.Slf4j
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
@@ -17,8 +18,6 @@ import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
 
@@ -29,12 +28,12 @@ import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifact
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class SourcePlugin {
 
     public static final String SOURCE_FILE_MARKER_ACTIVATED = "SourceFileMarkerActivated"
     public static final String SOURCE_ENVIRONMENT_UPDATED = "SourceEnvironmentUpdated"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final Set<SourceFileMarker> availableSourceFileMarkers = Sets.newConcurrentHashSet()
     private final Vertx vertx
     private PluginBootstrap pluginBootstrap

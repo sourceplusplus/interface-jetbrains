@@ -7,12 +7,11 @@ import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -30,11 +29,11 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     public static final String SEARCH_FOR_NEW_ENDPOINTS = "SearchForNewEndpoints"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Map<String, Long[]> endpointCheckBackoff = new ConcurrentHashMap<>()
     private final SkywalkingIntegration skywalking
     private final ArtifactAPI artifactAPI
@@ -188,8 +187,8 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         def futures = []
         for (int z = 0; z < serviceEndpoints.size(); z++) {
             def serviceEndpoint = serviceEndpoints.getJsonObject(z)
-            def endpointName = serviceEndpoint.getString("label")
-            def endpointId = serviceEndpoint.getString("key")
+            String endpointName = serviceEndpoint.getString("label")
+            String endpointId = serviceEndpoint.getString("key")
             vertx.sharedData().getLocalMap("skywalking_endpoints").put(endpointName, endpointId)
 
             def fut = Promise.promise()
@@ -298,7 +297,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                             if (it.succeeded()) {
                                 def spans = it.result().traceSpans()
                                 if (spans && spans.size() > 1) {
-                                    analyzeEndpointSpans(appUuid, spans, fut.completer())
+                                    analyzeEndpointSpans(appUuid, spans, fut)
                                 } else {
                                     fut.complete()
                                 }
@@ -334,8 +333,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                                     if (it.result().isPresent()) {
                                         def artifact = it.result().get()
                                         if (artifact.config() && artifact.config().endpoint()) {
-                                            addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId),
-                                                    fut.completer())
+                                            addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), fut)
                                         } else {
                                             fut.complete()
                                         }

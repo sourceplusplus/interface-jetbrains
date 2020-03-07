@@ -1,4 +1,4 @@
-FROM java:8-jre
+FROM openjdk:11-jre
 ADD ./source-core-0.2.3.zip /source-core-0.2.3.zip
 
 ENV SOURCE_CONFIG=docker.json

@@ -11,10 +11,9 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -27,12 +26,12 @@ import java.util.concurrent.ConcurrentHashMap
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
 
     public static final String SUBSCRIBE_TO_ARTIFACT_METRICS = "SubscribeToArtifactMetrics"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT_METRICS = "UnsubscribeFromArtifactMetrics"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final Map<ApplicationArtifact, Map<QueryTimeFrame, Set<MetricType>>> metricSubscriptions
 
     MetricSubscriptionTracker(SourceCore core) {

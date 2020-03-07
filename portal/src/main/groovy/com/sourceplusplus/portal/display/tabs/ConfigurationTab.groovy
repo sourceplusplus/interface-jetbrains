@@ -4,10 +4,9 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
+import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Used to display and configure a given source code artifact.
@@ -16,13 +15,12 @@ import org.slf4j.LoggerFactory
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class ConfigurationTab extends AbstractTab {
 
     public static final String CONFIGURATION_TAB_OPENED = "ConfigurationTabOpened"
     public static final String DISPLAY_ARTIFACT_CONFIGURATION = "DisplayArtifactConfiguration"
     public static final String UPDATE_ARTIFACT_FORCE_SUBSCRIBE = "UpdateArtifactForceSubscribe"
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     private final boolean pluginAvailable
     private boolean updateConfigurationPermitted

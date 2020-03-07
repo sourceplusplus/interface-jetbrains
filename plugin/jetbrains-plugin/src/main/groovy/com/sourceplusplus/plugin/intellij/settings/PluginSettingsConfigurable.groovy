@@ -1,9 +1,11 @@
 package com.sourceplusplus.plugin.intellij.settings
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
+import io.vertx.core.json.Json
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
@@ -47,25 +49,28 @@ class PluginSettingsConfigurable implements Configurable {
 
     @Override
     boolean isModified() {
-        return form.isModified(PluginSettingsComponent.getInstance().getState())
+        SourcePluginConfig pluginConfig = SourcePluginConfig.current.clone()
+        return form.isModified(pluginConfig)
     }
 
     @Override
     void apply() throws ConfigurationException {
-        SourcePluginConfig settings = PluginSettingsComponent.getInstance().getState()
+        SourcePluginConfig pluginConfig = SourcePluginConfig.current.clone()
         if (form != null) {
-            form.getData(settings)
+            form.getData(pluginConfig)
 
-            SourcePluginConfig.current.applyConfig(settings)
+            SourcePluginConfig.current.applyConfig(pluginConfig)
+            PropertiesComponent.getInstance().setValue(
+                    "spp_plugin_config", Json.encode(SourcePluginConfig.current))
+
             PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
         }
     }
 
     @Override
     void reset() {
-        SourcePluginConfig settings = PluginSettingsComponent.getInstance().getState()
         if (form != null) {
-            form.setDataCustom(settings)
+            form.setDataCustom(SourcePluginConfig.current)
         }
     }
 

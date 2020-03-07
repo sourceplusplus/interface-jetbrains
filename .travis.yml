@@ -1,13 +1,13 @@
 sudo: required
 
 language: java
-jdk: openjdk8
 
 services:
   - docker
 
 env:
-  - DOCKER_COMPOSE_VERSION=1.4.2
+  global:
+    - JAVA_TOOL_OPTIONS=-Dhttps.protocols=TLSv1.2
 
 before_install:
  - chmod +x gradlew

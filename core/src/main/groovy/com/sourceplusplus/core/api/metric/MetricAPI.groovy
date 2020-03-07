@@ -9,6 +9,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
 import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -25,9 +26,9 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class MetricAPI extends AbstractVerticle {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final SharedData sharedData
     private final SourceCore core
 
@@ -51,7 +52,7 @@ class MetricAPI extends AbstractVerticle {
 
     private void unsubscribeToArtifactRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -81,7 +82,7 @@ class MetricAPI extends AbstractVerticle {
 
     private void subscribeToArtifactRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))

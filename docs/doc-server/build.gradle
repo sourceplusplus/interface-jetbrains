@@ -6,7 +6,7 @@ archivesBaseName = 'source-doc-server'
 mainClassName = 'com.sourceplusplus.docserver.DocServerBootstrap'
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    compile 'org.codehaus.groovy:groovy-all:2.4.17'
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.0'
     compile "io.vertx:vertx-web:$VERTX_VERSION"
     compile "io.vertx:vertx-web-client:$VERTX_VERSION"

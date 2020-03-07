@@ -10,16 +10,13 @@
     ]]></description>
 
     <idea-version since-build="171"/>
+    <depends>com.intellij.modules.java</depends>
     <depends>org.intellij.groovy</depends>
     <depends>org.jetbrains.kotlin</depends>
 
-    <application-components>
-        <component>
-            <implementation-class>com.sourceplusplus.plugin.intellij.settings.PluginSettingsComponent
-            </implementation-class>
-        </component>
-    </application-components>
-
+    <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
+        <taskManager implementation="com.sourceplusplus.plugin.intellij.patcher.SPPGradleTaskManager"/>
+    </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <projectService
                 serviceImplementation="com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService"/>

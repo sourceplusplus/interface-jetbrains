@@ -5,8 +5,7 @@ import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import com.sourceplusplus.portal.display.PortalInterface
 import groovy.transform.Canonical
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import groovy.util.logging.Slf4j
 
 import java.util.concurrent.TimeUnit
 
@@ -17,10 +16,9 @@ import java.util.concurrent.TimeUnit
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 @Canonical
 class SourcePortal implements Closeable {
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     private static final LoadingCache<String, SourcePortal> portalMap = CacheBuilder.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)

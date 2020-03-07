@@ -22,7 +22,7 @@ public class ActiveSourceAgentTest {
             "SPP_API_PORT", "" + System.getProperty("SPP_API_PORT", "8080")));
     public static final boolean apiSslEnabled = Boolean.parseBoolean(System.getenv().getOrDefault(
             "SPP_API_SSL_ENABLED", System.getProperty("SPP_API_SSL_ENABLED", "false")));
-    public static SourceCoreClient coreClient = new SourceCoreClient(getSppUrl());
+    public static final SourceCoreClient coreClient = new SourceCoreClient(getSppUrl());
 
     @BeforeClass
     public static void setup() {

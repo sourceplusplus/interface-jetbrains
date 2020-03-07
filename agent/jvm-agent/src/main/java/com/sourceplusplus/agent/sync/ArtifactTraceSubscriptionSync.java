@@ -26,7 +26,7 @@ public class ArtifactTraceSubscriptionSync implements Runnable {
     public final static int WORK_SYNC_DELAY = 5000;
     private final SourceCoreClient coreClient;
     private static boolean enabled = true;
-    private static AtomicBoolean readyForWork = new AtomicBoolean(true);
+    private static final AtomicBoolean readyForWork = new AtomicBoolean(true);
 
     public ArtifactTraceSubscriptionSync(SourceCoreClient coreClient) {
         this.coreClient = Objects.requireNonNull(coreClient);

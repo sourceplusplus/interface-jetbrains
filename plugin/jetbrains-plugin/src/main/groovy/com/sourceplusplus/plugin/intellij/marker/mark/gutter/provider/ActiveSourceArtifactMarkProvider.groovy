@@ -11,12 +11,11 @@ import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.render.SourceArtifactGutterMarkRenderer
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.render.SourceArtifactLineMarkerGutterIconRenderer
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
+import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 
@@ -27,9 +26,8 @@ import javax.swing.*
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class ActiveSourceArtifactMarkProvider extends LineMarkerProviderDescriptor {
-
-    private static final Logger log = LoggerFactory.getLogger(ActiveSourceArtifactMarkProvider.name)
 
     @Override
     LineMarkerInfo getLineMarkerInfo(@NotNull PsiElement element) {

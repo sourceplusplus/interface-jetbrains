@@ -23,6 +23,7 @@ import com.sourceplusplus.portal.display.PortalInterface
 import com.sourceplusplus.portal.display.tabs.ConfigurationTab
 import com.sourceplusplus.portal.display.tabs.OverviewTab
 import com.sourceplusplus.portal.display.tabs.TracesTab
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
@@ -35,9 +36,8 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
 import org.apache.log4j.ConsoleAppender
 import org.apache.log4j.Level
+import org.apache.log4j.Logger
 import org.apache.log4j.PatternLayout
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.nio.charset.StandardCharsets
 
@@ -51,6 +51,7 @@ import java.nio.charset.StandardCharsets
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class PortalBootstrap extends AbstractVerticle {
 
     //todo: fix https://github.com/sourceplusplus/Assistant/issues/1 and remove static block below
@@ -60,12 +61,11 @@ class PortalBootstrap extends AbstractVerticle {
         console.setThreshold(Level.DEBUG)
         console.activateOptions()
 
-        org.apache.log4j.Logger.rootLogger.loggerRepository.resetConfiguration()
-        org.apache.log4j.Logger.getLogger("com.sourceplusplus").addAppender(console)
+        Logger.rootLogger.loggerRepository.resetConfiguration()
+        Logger.getLogger("com.sourceplusplus").addAppender(console)
     }
 
     public static final MetricRegistry portalMetrics = new MetricRegistry()
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final boolean pluginAvailable
 
     static void main(String[] args) {

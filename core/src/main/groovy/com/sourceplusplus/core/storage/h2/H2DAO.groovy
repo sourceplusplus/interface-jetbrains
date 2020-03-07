@@ -10,14 +10,13 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType
 import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.core.storage.SourceStorage
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Instant
 
@@ -28,9 +27,8 @@ import java.time.Instant
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class H2DAO extends SourceStorage {
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     private static final String SOURCE_CORE_SCHEMA = Resources.toString(Resources.getResource(
             "storage/h2/schema/source_core.sql"), Charsets.UTF_8)

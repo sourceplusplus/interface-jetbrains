@@ -1,5 +1,8 @@
 package com.sourceplusplus.api.model.config;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import java.util.*;
 
 /**
@@ -9,9 +12,10 @@ import java.util.*;
  * @version 0.2.3
  * @since 0.1.0
  */
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public final class SourcePluginConfig {
 
-    public static final SourcePluginConfig current = new SourcePluginConfig();
+    public static final transient SourcePluginConfig current = defaultConfiguration();
     private volatile Set<SourceEnvironmentConfig> environments = new HashSet<>();
     public volatile SourceEnvironmentConfig activeEnvironment = null;
     public volatile boolean classVirtualTextMarksEnabled = false;
@@ -33,6 +37,7 @@ public final class SourcePluginConfig {
         methodVirtualTextMarksEnabled = config.methodVirtualTextMarksEnabled;
         classGutterMarksEnabled = config.classGutterMarksEnabled;
         methodGutterMarksEnabled = config.methodGutterMarksEnabled;
+        remoteAgentHost = config.remoteAgentHost;
         remoteAgentPort = config.remoteAgentPort;
         agentPatcherEnabled = config.agentPatcherEnabled;
     }
@@ -50,5 +55,9 @@ public final class SourcePluginConfig {
         SourcePluginConfig config = new SourcePluginConfig();
         config.applyConfig(this);
         return config;
+    }
+
+    public static SourcePluginConfig defaultConfiguration() {
+        return new SourcePluginConfig();
     }
 }

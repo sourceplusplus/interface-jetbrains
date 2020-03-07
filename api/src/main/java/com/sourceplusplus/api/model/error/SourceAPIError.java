@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class SourceAPIError {
 
-    private List<String> errors = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
 
     public String[] getErrors() {
         return errors.toArray(new String[0]);

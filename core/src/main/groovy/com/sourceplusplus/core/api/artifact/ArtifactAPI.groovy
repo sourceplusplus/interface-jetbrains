@@ -10,6 +10,7 @@ import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -17,8 +18,6 @@ import io.vertx.core.json.jackson.JacksonCodec
 import io.vertx.ext.web.RoutingContext
 import net.jodah.expiringmap.ExpirationPolicy
 import net.jodah.expiringmap.ExpiringMap
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -34,12 +33,12 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class ArtifactAPI extends AbstractVerticle {
 
     private static final Map<ApplicationArtifact, SourceArtifact> ARTIFACT_CACHE = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.ACCESSED)
             .expiration(1, TimeUnit.MINUTES).build()
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private final SourceCore core
 
     ArtifactAPI(SourceCore core) {
@@ -70,7 +69,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private getSourceArtifactSubscriptionsRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -105,7 +104,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private void unsubscribeSourceArtifactRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -147,7 +146,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private void createOrUpdateSourceArtifactRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -253,7 +252,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private void getSourceArtifactRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -295,7 +294,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private createOrUpdateSourceArtifactConfigRoute(RoutingContext routingContext) {
         def appUuid = routingContext.pathParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
@@ -345,7 +344,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private getSourceArtifactConfigRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"))
+        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
         if (!appUuid || !artifactQualifiedName) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))

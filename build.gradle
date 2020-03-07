@@ -3,6 +3,7 @@ plugins {
 }
 
 subprojects {
+    if (it.name == "agent" || it.name == "docs" || it.name == "plugin") return
 
     apply plugin: 'idea'
     apply plugin: 'java'
@@ -10,8 +11,8 @@ subprojects {
     group = 'com.github.sourceplusplus'
 
     version = '0.2.3'
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
     project.ext.APACHE_SKYWALKING_VERSION = "6.5.0"
     project.ext.VERTX_VERSION = "3.8.5"

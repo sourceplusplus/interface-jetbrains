@@ -8,6 +8,7 @@ import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
@@ -17,8 +18,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.JacksonCodec
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.io.IOUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Instant
 import java.util.concurrent.ThreadLocalRandom
@@ -31,9 +30,9 @@ import java.util.regex.Pattern
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class ApplicationAPI extends AbstractVerticle {
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Pattern UUID_PATTERN = Pattern.compile(
             '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}')
     private final static List<String> COLOR_NAMES =

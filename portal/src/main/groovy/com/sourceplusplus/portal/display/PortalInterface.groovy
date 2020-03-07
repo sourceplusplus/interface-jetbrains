@@ -1,21 +1,22 @@
 package com.sourceplusplus.portal.display
 
-import com.codebrig.journey.JourneyBrowserView
-import com.codebrig.journey.proxy.CefBrowserProxy
-import com.codebrig.journey.proxy.browser.CefFrameProxy
-import com.codebrig.journey.proxy.handler.CefLifeSpanHandlerProxy
 import com.google.common.base.Joiner
+import com.intellij.ui.jcef.JBCefBrowser
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
+import groovy.util.logging.Slf4j
 import io.netty.handler.codec.http.QueryStringDecoder
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
+import org.cef.CefSettings
+import org.cef.browser.CefBrowser
+import org.cef.browser.CefFrame
+import org.cef.handler.CefDisplayHandler
+import org.cef.handler.CefLifeSpanHandler
 import org.jetbrains.annotations.NotNull
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import java.awt.*
@@ -34,11 +35,11 @@ import java.util.zip.ZipFile
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class PortalInterface {
 
     public static final String PORTAL_READY = "PortalReady"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static File uiDirectory
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()
@@ -46,7 +47,7 @@ class PortalInterface {
     private final OverviewView overviewView
     private final TracesView tracesView
     private final ConfigurationView configurationView
-    private JourneyBrowserView browser
+    private JBCefBrowser browser
     public String viewingPortalArtifact
     public PortalTab currentTab = PortalTab.Overview
     private Map<String, String> currentQueryParams = [:]
@@ -83,7 +84,7 @@ class PortalInterface {
         return tracesView
     }
 
-    JourneyBrowserView getBrowser() {
+    JBCefBrowser getBrowser() {
         return browser
     }
 
@@ -99,7 +100,7 @@ class PortalInterface {
 
     @NotNull
     JComponent getUIComponent() {
-        return browser
+        return browser.getComponent()
     }
 
     void cloneViews(PortalInterface portalInterface) {
@@ -112,27 +113,47 @@ class PortalInterface {
             if (uiDirectory == null) {
                 createScene()
             }
-            browser = new JourneyBrowserView("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
-            browser.setPreferredSize(new Dimension(775, 250))
-            browser.setSize(775, 250)
-//            browser.browser.addConsoleListener({
-//                log.info("[PORTAL_CONSOLE] - " + it)
-//            })
-
-            browser.cefClient.removeLifeSpanHandler()
-            browser.cefClient.addLifeSpanHandler(CefLifeSpanHandlerProxy.createHandler(new CefLifeSpanHandlerProxy() {
+            browser = new JBCefBrowser("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
+            browser.getComponent().setPreferredSize(new Dimension(775, 250))
+            browser.getComponent().setSize(775, 250)
+            browser.cefBrowser.client.addDisplayHandler(new CefDisplayHandler() {
                 @Override
-                boolean onBeforePopup(CefBrowserProxy browser, CefFrameProxy frame, String targetUrl, String targetFrameName) {
+                void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
+                }
+
+                @Override
+                void onTitleChange(CefBrowser browser, String title) {
+                }
+
+                @Override
+                boolean onTooltip(CefBrowser browser, String text) {
+                    return false
+                }
+
+                @Override
+                void onStatusMessage(CefBrowser browser, String value) {
+                }
+
+                @Override
+                boolean onConsoleMessage(CefBrowser browser, CefSettings.LogSeverity level, String message, String source, int line) {
+                    log.info("[PORTAL_CONSOLE] - " + message)
+                    return false
+                }
+            })
+
+            browser.getJBCefClient().addLifeSpanHandler(new CefLifeSpanHandler() {
+                @Override
+                boolean onBeforePopup(CefBrowser cefBrowser, CefFrame cefFrame, String targetUrl, String targetFrameName) {
                     def portal = SourcePortal.getPortal(new QueryStringDecoder(
                             targetUrl).parameters().get("portal_uuid").get(0))
-                    def browserView = new JourneyBrowserView(
-                            browser.getClient().createBrowser(targetUrl, false, false))
+                    def browserView = JBCefBrowser.getJBCefBrowser(browser.getJBCefClient().getCefClient()
+                            .createBrowser(targetUrl, false, false))
                     portal.interface.browser = browserView
 
                     def popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
                     popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
                     popupFrame.setPreferredSize(new Dimension(800, 600))
-                    popupFrame.add(browserView, BorderLayout.CENTER)
+                    popupFrame.add(browserView.getComponent(), BorderLayout.CENTER)
                     popupFrame.pack()
                     popupFrame.setLocationByPlatform(true)
                     popupFrame.setVisible(true)
@@ -146,35 +167,22 @@ class PortalInterface {
                 }
 
                 @Override
-                void onAfterCreated(CefBrowserProxy browser) {
-                    //https://github.com/CodeBrig/Journey/issues/13
-                    if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                        new java.util.Timer().schedule(
-                                new TimerTask() {
-                                    @Override
-                                    void run() {
-                                        if (browser.getZoomLevel() != -1.5d) {
-                                            browser.setZoomLevel(-1.5)
-                                        }
-                                    }
-                                }, 0, 50
-                        )
-                    }
+                void onAfterCreated(CefBrowser cefBrowser) {
                 }
 
                 @Override
-                void onAfterParentChanged(CefBrowserProxy browser) {
+                void onAfterParentChanged(CefBrowser cefBrowser) {
                 }
 
                 @Override
-                boolean doClose(CefBrowserProxy browser) {
+                boolean doClose(CefBrowser cefBrowser) {
                     return false
                 }
 
                 @Override
-                void onBeforeClose(CefBrowserProxy browser) {
+                void onBeforeClose(CefBrowser cefBrowser) {
                 }
-            }))
+            }, browser.getCefBrowser())
             vertx.eventBus().publish(PORTAL_READY, portalUuid)
         }
     }

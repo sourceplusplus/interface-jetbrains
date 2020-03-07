@@ -10,11 +10,10 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalTab
 import com.sourceplusplus.portal.display.tabs.views.TracesView
+import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Duration
 import java.time.Instant
@@ -28,6 +27,7 @@ import java.util.regex.Pattern
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class TracesTab extends AbstractTab {
 
     public static final String TRACES_TAB_OPENED = "TracesTabOpened"
@@ -39,7 +39,6 @@ class TracesTab extends AbstractTab {
     public static final String DISPLAY_TRACE_STACK = "DisplayTraceStack"
     public static final String DISPLAY_SPAN_INFO = "DisplaySpanInfo"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static final Pattern QUALIFIED_NAME_PATTERN = Pattern.compile('.+\\..+\\(.*\\)')
 
     TracesTab() {

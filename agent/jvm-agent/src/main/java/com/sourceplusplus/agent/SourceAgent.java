@@ -269,14 +269,11 @@ public class SourceAgent {
                 }
 
                 Logger.info("Waiting for Apache SkyWalking to finish setup");
-                while (true) {
-                    if (RemoteDownstreamConfig.Agent.SERVICE_ID != DictionaryUtil.nullValue()
-                            && RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID != DictionaryUtil.nullValue()) {
-                        break;
-                    }
+                while (RemoteDownstreamConfig.Agent.SERVICE_ID == DictionaryUtil.nullValue()
+                        || RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID == DictionaryUtil.nullValue()) {
                     try {
                         Thread.sleep(100);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignore) {
                     }
                 }
                 Logger.info("Apache SkyWalking initialized");
@@ -312,7 +309,7 @@ public class SourceAgent {
         SourceAgentConfig.current.applyConfig(new JsonObject(configData));
         try {
             configInputStream.close();
-        } catch (IOException e) {
+        } catch (IOException ignore) {
         }
     }
 

@@ -7,6 +7,7 @@ import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
 import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Promise
@@ -14,8 +15,6 @@ import io.vertx.core.eventbus.Message
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.time.Duration
 import java.time.Instant
@@ -28,6 +27,7 @@ import java.util.concurrent.TimeUnit
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class ArtifactSubscriptionTracker extends AbstractVerticle {
 
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
@@ -38,7 +38,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     public static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "RefreshSubscriberApplicationSubscriptions"
     public static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "GetSubscriberApplicationSubscriptions"
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     protected final SourceCore core
 
     ArtifactSubscriptionTracker(SourceCore core) {

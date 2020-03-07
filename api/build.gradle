@@ -11,6 +11,9 @@ apply plugin: "net.ltgt.apt"
 
 group = 'com.sourceplusplus.api'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 dependencies {
     annotationProcessor "org.immutables:value:2.8.3"
     compileOnly "org.immutables:value:2.8.3:annotations"

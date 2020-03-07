@@ -3,11 +3,11 @@ package com.sourceplusplus.plugin.intellij
 import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerImpl
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.ide.ui.laf.IntelliJLaf
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.editor.Editor
@@ -38,19 +38,19 @@ import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import com.sourceplusplus.plugin.marker.mark.GutterMark
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalInterface
+import groovy.util.logging.Slf4j
 import io.vertx.core.Vertx
+import io.vertx.core.json.Json
 import org.apache.log4j.AppenderSkeleton
 import org.apache.log4j.ConsoleAppender
 import org.apache.log4j.Level
+import org.apache.log4j.Logger
 import org.apache.log4j.PatternLayout
 import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
-import java.awt.*
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -60,6 +60,7 @@ import java.util.concurrent.CountDownLatch
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class IntelliJStartupActivity implements StartupActivity {
 
     //todo: fix https://github.com/sourceplusplus/Assistant/issues/1 and remove static block below
@@ -68,11 +69,10 @@ class IntelliJStartupActivity implements StartupActivity {
         console.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"))
         console.activateOptions()
 
-        org.apache.log4j.Logger.rootLogger.loggerRepository.resetConfiguration()
-        org.apache.log4j.Logger.getLogger("com.sourceplusplus").addAppender(console)
+        Logger.rootLogger.loggerRepository.resetConfiguration()
+        Logger.getLogger("com.sourceplusplus").addAppender(console)
     }
 
-    private static final Logger log = LoggerFactory.getLogger(this.name)
     private static EditorMouseMotionListener editorMouseMotionListener
     private static SourcePlugin sourcePlugin
     public static Project currentProject
@@ -81,30 +81,12 @@ class IntelliJStartupActivity implements StartupActivity {
     void runActivity(@NotNull Project project) {
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             return //don't need to boot everything for unit tests
-        } else if (System.getProperty("os.name").toLowerCase().startsWith("linux")
-                && ApplicationInfo.getInstance().majorVersion == "2019") {
-            //https://github.com/sourceplusplus/Assistant/issues/68
-            Notifications.Bus.notify(
-                    new Notification("Source++", "Linux Unsupported",
-                            "Source++ is currently unsupported on Linux. " +
-                                    "For more information visit: <a href=\"#\">https://github.com/sourceplusplus/Assistant/issues/68</a>",
-                            NotificationType.INFORMATION, new NotificationListener() {
-                        @Override
-                        void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
-                            try {
-                                Desktop.getDesktop().browse(URI.create("https://github.com/sourceplusplus/Assistant/issues/68"))
-                            } catch (Exception e) {
-                                e.printStackTrace()
-                            }
-                        }
-                    }))
-            return
         }
         System.setProperty("vertx.disableFileCPResolving", "true")
 
         //redirect loggers to console
         def consoleView = ServiceManager.getService(project, SourcePluginConsoleService.class).getConsoleView()
-        org.apache.log4j.Logger.getLogger("com.sourceplusplus").addAppender(new AppenderSkeleton() {
+        Logger.getLogger("com.sourceplusplus").addAppender(new AppenderSkeleton() {
             @Override
             protected void append(LoggingEvent loggingEvent) {
                 Object message = loggingEvent.message
@@ -140,6 +122,12 @@ class IntelliJStartupActivity implements StartupActivity {
                 latch.countDown()
             })
             latch.await()
+        }
+
+        //load config
+        def pluginConfig = PropertiesComponent.getInstance().getValue("spp_plugin_config")
+        if (pluginConfig != null) {
+            SourcePluginConfig.current.applyConfig(Json.decodeValue(pluginConfig, SourcePluginConfig.class))
         }
 
         if (SourcePluginConfig.current.activeEnvironment != null) {

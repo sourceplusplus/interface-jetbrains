@@ -66,7 +66,7 @@ function displayTraces(traceResult) {
 
             var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + appUuid + '","'
                 + traceResult.artifact_qualified_name + '","' + globalTraceId +
-                '");\' style="border-top: 0px !important; padding-left: 20px">';
+                '");\' style="border-top: 0 !important; padding-left: 20px">';
             rowHtml += '<i class="large plus square outline icon"></i>'
                 + operationName.replace('<', '&lt;').replace('>', '&gt;');
             rowHtml += '</td>';
@@ -171,7 +171,7 @@ function displayInnerTraces(message) {
         var spanInfo = traceStack[i];
         var span = spanInfo.span;
         var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
-            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0px !important; padding-left: 20px">';
+            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px">';
         rowHtml += '<i class="large minus square outline icon"></i>' +
             spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         rowHtml += '</td>';
@@ -303,7 +303,7 @@ function displayTraceStack(traceStack) {
         var spanInfo = traceStack[i];
         var span = spanInfo.span;
         var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
-            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0px !important; padding-left: 20px">';
+            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px">';
         rowHtml += '<i class="large minus square outline icon"></i>' +
             spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         rowHtml += '</td>';

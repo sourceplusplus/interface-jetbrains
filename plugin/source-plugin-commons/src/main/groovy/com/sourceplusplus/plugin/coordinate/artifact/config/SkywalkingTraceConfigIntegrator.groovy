@@ -6,16 +6,22 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.marker.mark.SourceMark
+import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
+/**
+ * todo: description
+ *
+ * @version 0.2.3
+ * @since 0.1.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ */
+@Slf4j
 class SkywalkingTraceConfigIntegrator extends AbstractVerticle {
 
     private static final String TRACE_ANNOTATION_QUALIFIED_NAMES = Sets.newHashSet([
             "org.apache.skywalking.apm.toolkit.trace.Trace"
     ])
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     @Override
     void start() throws Exception {

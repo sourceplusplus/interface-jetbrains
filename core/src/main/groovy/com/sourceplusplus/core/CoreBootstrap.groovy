@@ -24,6 +24,7 @@ import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.integration.IntegrationProxy
+import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
@@ -44,8 +45,6 @@ import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
 import org.jetbrains.annotations.NotNull
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
@@ -59,11 +58,10 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class CoreBootstrap extends AbstractVerticle {
 
     public static final ResourceBundle BUILD = ResourceBundle.getBundle("source-core_build")
-
-    private static final Logger log = LoggerFactory.getLogger(this.name)
 
     static void main(String[] args) {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
@@ -258,7 +256,7 @@ class CoreBootstrap extends AbstractVerticle {
         Class agentClass
         try {
             agentClass = Class.forName("com.sourceplusplus.agent.SourceAgent")
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException ignore) {
             log.info("Self monitoring disabled")
             return
         }
