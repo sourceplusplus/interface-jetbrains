@@ -40,13 +40,26 @@ class SourceAgentPatcher extends JavaProgramPatcher {
 
     @Override
     void patchJavaParameters(Executor executor, RunProfile configuration, JavaParameters javaParameters) {
+        patchAgent()
+
+        if (agentFile != null) {
+            javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath")
+            log.info("Attached Source++ Agent to executing program")
+        }
+    }
+
+    static File getAgentFile() {
+        return agentFile
+    }
+
+    static void patchAgent() {
         if (!SourcePluginConfig.current.agentPatcherEnabled) {
             log.info("Skipped patching program. Agent patcher is disabled.")
             return
         }
         if (PluginBootstrap.sourcePlugin != null && !patched.getAndSet(true)) {
             log.info("Patching Source++ Agent for executing program...")
-            URL inputUrl = getClass().getResource("/source-agent-" + SourcePluginDefines.VERSION + ".jar")
+            URL inputUrl = SourceAgentPatcher.class.getResource("/source-agent-" + SourcePluginDefines.VERSION + ".jar")
             File destDir = File.createTempDir()
             agentFile = new File(destDir, "source-agent-" + SourcePluginDefines.VERSION + ".jar")
             FileUtils.copyURLToFile(inputUrl, agentFile)
@@ -122,9 +135,6 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         if (agentFile != null) {
             //inject agent config
             modifyAgentJar(agentFile.absolutePath)
-
-            javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath")
-            log.info("Attached Source++ Agent to executing program")
         }
     }
 
@@ -139,7 +149,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         }
     }
 
-    static void modifyAgentSettings(Path src, Path dst) throws IOException {
+    private static void modifyAgentSettings(Path src, Path dst) throws IOException {
         def agentConfig = new JsonObject(Files.newInputStream(src).getText())
 
         agentConfig.put("log_location", agentFile.parentFile.absolutePath)

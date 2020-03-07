@@ -7,7 +7,7 @@ intellij {
     version 'LATEST-EAP-SNAPSHOT'
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
-    plugins = ["java", "Groovy", "Kotlin", "properties"]
+    plugins = ["java", "Groovy", "Kotlin", "properties", "gradle"]
     buildSearchableOptions.enabled = false
 }
 runIde {

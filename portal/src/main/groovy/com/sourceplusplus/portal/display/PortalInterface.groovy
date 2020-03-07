@@ -116,9 +116,6 @@ class PortalInterface {
             browser = new JBCefBrowser("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
             browser.getComponent().setPreferredSize(new Dimension(775, 250))
             browser.getComponent().setSize(775, 250)
-//            browser.browser.addConsoleListener({
-//                log.info("[PORTAL_CONSOLE] - " + it)
-//            })
             browser.cefBrowser.client.addDisplayHandler(new CefDisplayHandler() {
                 @Override
                 void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
@@ -149,8 +146,8 @@ class PortalInterface {
                 boolean onBeforePopup(CefBrowser cefBrowser, CefFrame cefFrame, String targetUrl, String targetFrameName) {
                     def portal = SourcePortal.getPortal(new QueryStringDecoder(
                             targetUrl).parameters().get("portal_uuid").get(0))
-                    def browserView = ((JBCefBrowser.MyComponent) browser.getJBCefClient().getCefClient().createBrowser(
-                            targetUrl, false, false).getUIComponent().getParent()).getJBCefBrowser()
+                    def browserView = JBCefBrowser.getJBCefBrowser(browser.getJBCefClient().getCefClient()
+                            .createBrowser(targetUrl, false, false))
                     portal.interface.browser = browserView
 
                     def popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
@@ -171,19 +168,6 @@ class PortalInterface {
 
                 @Override
                 void onAfterCreated(CefBrowser cefBrowser) {
-                    //https://github.com/CodeBrig/Journey/issues/13
-                    if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                        new java.util.Timer().schedule(
-                                new TimerTask() {
-                                    @Override
-                                    void run() {
-                                        if (browser.getCefBrowser().getZoomLevel() != -1.5d) {
-                                            browser.getCefBrowser().setZoomLevel(-1.5)
-                                        }
-                                    }
-                                }, 0, 50
-                        )
-                    }
                 }
 
                 @Override
