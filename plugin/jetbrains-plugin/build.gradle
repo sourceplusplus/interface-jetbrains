@@ -21,8 +21,7 @@ archivesBaseName = 'jetbrains-source-plugin'
 dependencies {
     compile project(":api")
     compile (project(":portal")) {
-        exclude group: 'com.jetbrains.intellij.platform', module: 'ide'
-        exclude group: 'com.jetbrains.intellij.platform', module: 'util'
+        exclude group: 'com.jetbrains.intellij.platform'
     }
     compile project(":plugin:source-plugin-commons")
     compile 'org.codehaus.groovy:groovy-all:2.4.17'

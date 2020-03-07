@@ -1,7 +1,7 @@
 #
 # Source++ Dockerfile
 #
-FROM java:8-jre
+FROM openjdk:11-jre
 LABEL maintainer="github.com/sourceplusplus"
 
 ENV SOURCE_HOME=/opt/source-core
