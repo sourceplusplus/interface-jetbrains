@@ -23,8 +23,8 @@ subprojects {
         maven { url = 'https://repo.grakn.ai/repository/maven/' }
     }
     dependencies {
-        testCompile group: 'junit', name: 'junit', version: '4.13'
-        testCompile "io.vertx:vertx-unit:$VERTX_VERSION"
+        testImplementation group: 'junit', name: 'junit', version: '4.13'
+        testImplementation "io.vertx:vertx-unit:$VERTX_VERSION"
 
         implementation group: 'io.vertx', name: 'vertx-core', version: "$VERTX_VERSION"
         implementation group: 'io.vertx', name: 'vertx-dropwizard-metrics', version: "$VERTX_VERSION"
