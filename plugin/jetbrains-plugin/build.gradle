@@ -19,15 +19,15 @@ group = 'com.sourceplusplus.plugin'
 archivesBaseName = 'jetbrains-source-plugin'
 
 dependencies {
-    compile project(":api")
-    compile (project(":portal")) {
+    implementation project(":api")
+    implementation(project(":portal")) {
         exclude group: 'com.jetbrains.intellij.platform'
     }
     compile project(":plugin:source-plugin-commons")
-    compile 'org.codehaus.groovy:groovy-all:2.4.17'
+    implementation 'org.codehaus.groovy:groovy-all:2.4.17'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
-    compile(group: 'com.github.codebrig', name: 'gitsocratic', version: '5d33d30262') {
+    implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5d33d30262') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
 }
