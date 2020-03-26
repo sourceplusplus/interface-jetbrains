@@ -23,7 +23,7 @@ dependencies {
     implementation(project(":portal")) {
         exclude group: 'com.jetbrains.intellij.platform'
     }
-    compile project(":plugin:source-plugin-commons")
+    implementation project(":plugin:source-plugin-commons")
     implementation 'org.codehaus.groovy:groovy-all:2.4.17'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
