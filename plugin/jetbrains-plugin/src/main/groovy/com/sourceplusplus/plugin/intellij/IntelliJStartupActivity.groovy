@@ -18,6 +18,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiFile
@@ -114,6 +115,7 @@ class IntelliJStartupActivity implements StartupActivity {
                 return false
             }
         })
+        Disposer.register(project, consoleView)
 
         currentProject = project
         if (sourcePlugin != null) {
