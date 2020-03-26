@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class SourceAgentPatcher extends JavaProgramPatcher {
 
     private static AtomicBoolean patched = new AtomicBoolean()
-    private static File agentFile
+    static File agentFile //todo: should be private, share in a smarter way
 
     @Override
     void patchJavaParameters(Executor executor, RunProfile configuration, JavaParameters javaParameters) {
@@ -46,10 +46,6 @@ class SourceAgentPatcher extends JavaProgramPatcher {
             javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath")
             log.info("Attached Source++ Agent to executing program")
         }
-    }
-
-    static File getAgentFile() {
-        return agentFile
     }
 
     static void patchAgent() {
