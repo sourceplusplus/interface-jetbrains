@@ -4,7 +4,7 @@ plugins {
 
 apply plugin: 'groovy'
 intellij {
-    version 'LATEST-EAP-SNAPSHOT'
+    version '201.6073-EAP-CANDIDATE-SNAPSHOT'
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
     plugins = ["java", "Groovy", "Kotlin", "properties", "gradle"]
