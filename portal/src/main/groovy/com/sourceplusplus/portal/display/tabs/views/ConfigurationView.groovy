@@ -12,4 +12,7 @@ import groovy.transform.Canonical
 @Canonical
 class ConfigurationView {
     //SourceArtifact artifact
+
+    void cloneView(ConfigurationView view) {
+    }
 }
