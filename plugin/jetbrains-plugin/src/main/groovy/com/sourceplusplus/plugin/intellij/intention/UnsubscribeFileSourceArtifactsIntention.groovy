@@ -28,27 +28,6 @@ import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
  */
 class UnsubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionAction {
 
-    @NotNull
-    String getText() {
-        return "Unsubscribe from all source artifacts"
-    }
-
-    @NotNull
-    String getFamilyName() {
-        return getText()
-    }
-
-    @Override
-    boolean startInWriteAction() {
-        return false
-    }
-
-    @Nullable
-    @Override
-    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
-        return currentFile
-    }
-
     @Override
     boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
         if (sourcePlugin == null || element == null) return false
@@ -92,5 +71,26 @@ class UnsubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionAct
                 }
             }
         }
+    }
+
+    @NotNull
+    String getText() {
+        return "Unsubscribe from all source artifacts"
+    }
+
+    @NotNull
+    String getFamilyName() {
+        return getText()
+    }
+
+    @Override
+    boolean startInWriteAction() {
+        return false
+    }
+
+    @Nullable
+    @Override
+    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
+        return currentFile
     }
 }

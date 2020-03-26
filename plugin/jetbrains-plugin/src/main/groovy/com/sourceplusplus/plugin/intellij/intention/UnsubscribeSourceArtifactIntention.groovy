@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
 
-import static com.sourceplusplus.plugin.PluginBootstrap.*
+import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
 
 /**
  * Intention used to unsubscribe from source code artifacts.
@@ -27,27 +27,6 @@ import static com.sourceplusplus.plugin.PluginBootstrap.*
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 class UnsubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
-
-    @NotNull
-    String getText() {
-        return "Unsubscribe from source artifact"
-    }
-
-    @NotNull
-    String getFamilyName() {
-        return getText()
-    }
-
-    @Override
-    boolean startInWriteAction() {
-        return false
-    }
-
-    @Nullable
-    @Override
-    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
-        return currentFile
-    }
 
     @Override
     boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
@@ -88,5 +67,26 @@ class UnsubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
                 .build()
         sourcePlugin.vertx.eventBus().send(
                 PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
+    }
+
+    @NotNull
+    String getText() {
+        return "Unsubscribe from source artifact"
+    }
+
+    @NotNull
+    String getFamilyName() {
+        return getText()
+    }
+
+    @Override
+    boolean startInWriteAction() {
+        return false
+    }
+
+    @Nullable
+    @Override
+    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
+        return currentFile
     }
 }

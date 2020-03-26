@@ -32,27 +32,6 @@ import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
  */
 class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionAction {
 
-    @NotNull
-    String getText() {
-        return "Subscribe to all source artifacts"
-    }
-
-    @NotNull
-    String getFamilyName() {
-        return getText()
-    }
-
-    @Override
-    boolean startInWriteAction() {
-        return false
-    }
-
-    @Nullable
-    @Override
-    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
-        return currentFile
-    }
-
     @Override
     boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
         if (sourcePlugin == null || element == null) return false
@@ -113,5 +92,26 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
                 }
             }
         }
+    }
+
+    @NotNull
+    String getText() {
+        return "Subscribe to all source artifacts"
+    }
+
+    @NotNull
+    String getFamilyName() {
+        return getText()
+    }
+
+    @Override
+    boolean startInWriteAction() {
+        return false
+    }
+
+    @Nullable
+    @Override
+    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
+        return currentFile
     }
 }
