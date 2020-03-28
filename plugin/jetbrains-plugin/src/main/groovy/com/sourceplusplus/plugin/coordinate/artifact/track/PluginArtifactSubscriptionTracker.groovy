@@ -7,7 +7,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.plugin.SourcePlugin
-import com.sourceplusplus.plugin.marker.mark.GutterMark
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.portal.SourcePortal
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
@@ -74,7 +74,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                 if (it.succeeded()) {
                     it.result().findAll { it.artifactQualifiedName().startsWith(qualifiedClassName) }.each {
                         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                            def gutterMark = sourcePlugin.getSourceMark(it.artifactQualifiedName()) as GutterMark
+                            def gutterMark = sourcePlugin.getSourceMark(it.artifactQualifiedName()) as IntelliJGutterMark
                             gutterMark?.markArtifactSubscribed()
                         }
                     }
@@ -86,7 +86,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             //pending data available/subscriptions
             PENDING_DATA_AVAILABLE.findAll { it.startsWith(qualifiedClassName) }.each {
                 if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                    def gutterMark = sourcePlugin.getSourceMark(it) as GutterMark
+                    def gutterMark = sourcePlugin.getSourceMark(it) as IntelliJGutterMark
                     if (gutterMark != null) {
                         gutterMark.markArtifactHasData()
                         PENDING_DATA_AVAILABLE.remove(it)
@@ -95,7 +95,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             }
             PENDING_SUBSCRIBED.findAll { it.startsWith(qualifiedClassName) }.each {
                 if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                    def gutterMark = sourcePlugin.getSourceMark(it) as GutterMark
+                    def gutterMark = sourcePlugin.getSourceMark(it) as IntelliJGutterMark
                     if (gutterMark != null) {
                         gutterMark.markArtifactSubscribed()
                         PENDING_SUBSCRIBED.remove(it)
@@ -110,7 +110,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             if (SourcePluginConfig.current.methodGutterMarksEnabled
                     && artifactMetricResult.appUuid() == SourcePluginConfig.current.activeEnvironment.appUuid) {
                 def gutterMark = sourcePlugin.getSourceMark(
-                        artifactMetricResult.artifactQualifiedName()) as GutterMark
+                        artifactMetricResult.artifactQualifiedName()) as IntelliJGutterMark
                 if (gutterMark != null) {
                     gutterMark.markArtifactHasData()
                     PENDING_DATA_AVAILABLE.remove(artifactMetricResult.artifactQualifiedName())
@@ -129,7 +129,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                 if (it.succeeded()) {
                     resp.reply(request)
 
-                    def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
+                    def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as IntelliJGutterMark
                     if (gutterMark != null) {
                         gutterMark.markArtifactSubscribed()
                         PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
@@ -152,7 +152,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     resp.reply(request)
                     PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
 
-                    def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as GutterMark
+                    def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as IntelliJGutterMark
                     if (gutterMark) {
                         gutterMark.markArtifactUnsubscribed()
                         if (gutterMark.portalRegistered) {

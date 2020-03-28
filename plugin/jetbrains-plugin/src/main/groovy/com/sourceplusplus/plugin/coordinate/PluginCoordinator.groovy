@@ -6,7 +6,6 @@ import com.sourceplusplus.plugin.coordinate.artifact.config.SkywalkingTraceConfi
 import com.sourceplusplus.plugin.coordinate.artifact.config.SpringMVCArtifactConfigIntegrator
 import com.sourceplusplus.plugin.coordinate.artifact.track.ArtifactConfigTracker
 import com.sourceplusplus.plugin.coordinate.artifact.track.ArtifactSignatureChangeTracker
-import com.sourceplusplus.plugin.coordinate.artifact.track.FileClosedTracker
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
@@ -62,7 +61,6 @@ class PluginCoordinator extends AbstractVerticle {
         vertx.deployVerticle(new SkywalkingTraceConfigIntegrator(), new DeploymentOptions().setWorker(true))
 
         //track
-        vertx.deployVerticle(new FileClosedTracker(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new ArtifactConfigTracker(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new ArtifactSignatureChangeTracker(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new PluginArtifactSubscriptionTracker(), new DeploymentOptions().setWorker(true))

@@ -5,7 +5,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePlugin
-import com.sourceplusplus.plugin.marker.mark.SourceMark
+import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 
@@ -31,7 +31,7 @@ class SkywalkingTraceConfigIntegrator extends AbstractVerticle {
         })
     }
 
-    private static List<SourceMark> handleSourceMarks(List<SourceMark> sourceMarks) {
+    private static List<IntelliJSourceMark> handleSourceMarks(List<IntelliJSourceMark> sourceMarks) {
         sourceMarks.each { mark ->
             if (mark.isMethodMark()) {
                 mark.getMethodAnnotations({

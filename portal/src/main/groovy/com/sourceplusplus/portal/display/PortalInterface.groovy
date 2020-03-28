@@ -40,14 +40,14 @@ class PortalInterface {
 
     public static final String PORTAL_READY = "PortalReady"
 
-    private static File uiDirectory
+    static File uiDirectory //todo: private
     private static Vertx vertx
     private final AtomicBoolean portalReady = new AtomicBoolean()
     private final String portalUuid
     private final OverviewView overviewView
     private final TracesView tracesView
     private final ConfigurationView configurationView
-    private JBCefBrowser browser
+    //private JBCefBrowser browser
     public String viewingPortalArtifact
     public PortalTab currentTab = PortalTab.Overview
     private Map<String, String> currentQueryParams = [:]
@@ -73,7 +73,7 @@ class PortalInterface {
         }
 
         def page = tab.name().toLowerCase() + ".html"
-        browser.cefBrowser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
+        //browser.cefBrowser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
     }
 
     OverviewView getOverviewView() {
@@ -84,23 +84,23 @@ class PortalInterface {
         return tracesView
     }
 
-    JBCefBrowser getBrowser() {
-        return browser
-    }
+//    JBCefBrowser getBrowser() {
+//        return browser
+//    }
 
     void close() {
-        browser.cefBrowser.close(true)
+        //browser.cefBrowser.close(true)
     }
 
     void reload() {
-        if (browser != null) {
-            loadPage(currentTab, currentQueryParams)
-        }
+//        if (browser != null) {
+//            loadPage(currentTab, currentQueryParams)
+//        }
     }
 
     @NotNull
     JComponent getUIComponent() {
-        return browser.getComponent()
+        return null //browser.getComponent()
     }
 
     void cloneViews(PortalInterface portalInterface) {
@@ -113,76 +113,76 @@ class PortalInterface {
             if (uiDirectory == null) {
                 createScene()
             }
-            browser = new JBCefBrowser("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
-            browser.getComponent().setPreferredSize(new Dimension(775, 250))
-            browser.getComponent().setSize(775, 250)
-            browser.cefBrowser.client.addDisplayHandler(new CefDisplayHandler() {
-                @Override
-                void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
-                }
-
-                @Override
-                void onTitleChange(CefBrowser browser, String title) {
-                }
-
-                @Override
-                boolean onTooltip(CefBrowser browser, String text) {
-                    return false
-                }
-
-                @Override
-                void onStatusMessage(CefBrowser browser, String value) {
-                }
-
-                @Override
-                boolean onConsoleMessage(CefBrowser browser, CefSettings.LogSeverity level, String message, String source, int line) {
-                    log.info("[PORTAL_CONSOLE] - " + message)
-                    return false
-                }
-            })
-
-            browser.getJBCefClient().addLifeSpanHandler(new CefLifeSpanHandler() {
-                @Override
-                boolean onBeforePopup(CefBrowser cefBrowser, CefFrame cefFrame, String targetUrl, String targetFrameName) {
-                    def portal = SourcePortal.getPortal(new QueryStringDecoder(
-                            targetUrl).parameters().get("portal_uuid").get(0))
-                    def browserView = JBCefBrowser.getJBCefBrowser(browser.getJBCefClient().getCefClient()
-                            .createBrowser(targetUrl, false, false))
-                    portal.interface.browser = browserView
-
-                    def popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
-                    popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
-                    popupFrame.setPreferredSize(new Dimension(800, 600))
-                    popupFrame.add(browserView.getComponent(), BorderLayout.CENTER)
-                    popupFrame.pack()
-                    popupFrame.setLocationByPlatform(true)
-                    popupFrame.setVisible(true)
-                    popupFrame.addWindowListener(new WindowAdapter() {
-                        @Override
-                        void windowClosing(WindowEvent e) {
-                            portal.close()
-                        }
-                    })
-                    return true
-                }
-
-                @Override
-                void onAfterCreated(CefBrowser cefBrowser) {
-                }
-
-                @Override
-                void onAfterParentChanged(CefBrowser cefBrowser) {
-                }
-
-                @Override
-                boolean doClose(CefBrowser cefBrowser) {
-                    return false
-                }
-
-                @Override
-                void onBeforeClose(CefBrowser cefBrowser) {
-                }
-            }, browser.getCefBrowser())
+//            browser = new JBCefBrowser("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
+//            browser.getComponent().setPreferredSize(new Dimension(775, 250))
+//            browser.getComponent().setSize(775, 250)
+//            browser.cefBrowser.client.addDisplayHandler(new CefDisplayHandler() {
+//                @Override
+//                void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
+//                }
+//
+//                @Override
+//                void onTitleChange(CefBrowser browser, String title) {
+//                }
+//
+//                @Override
+//                boolean onTooltip(CefBrowser browser, String text) {
+//                    return false
+//                }
+//
+//                @Override
+//                void onStatusMessage(CefBrowser browser, String value) {
+//                }
+//
+//                @Override
+//                boolean onConsoleMessage(CefBrowser browser, CefSettings.LogSeverity level, String message, String source, int line) {
+//                    log.info("[PORTAL_CONSOLE] - " + message)
+//                    return false
+//                }
+//            })
+//
+//            browser.getJBCefClient().addLifeSpanHandler(new CefLifeSpanHandler() {
+//                @Override
+//                boolean onBeforePopup(CefBrowser cefBrowser, CefFrame cefFrame, String targetUrl, String targetFrameName) {
+//                    def portal = SourcePortal.getPortal(new QueryStringDecoder(
+//                            targetUrl).parameters().get("portal_uuid").get(0))
+//                    def browserView = JBCefBrowser.getJBCefBrowser(browser.getJBCefClient().getCefClient()
+//                            .createBrowser(targetUrl, false, false))
+//                    portal.interface.browser = browserView
+//
+//                    def popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
+//                    popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
+//                    popupFrame.setPreferredSize(new Dimension(800, 600))
+//                    popupFrame.add(browserView.getComponent(), BorderLayout.CENTER)
+//                    popupFrame.pack()
+//                    popupFrame.setLocationByPlatform(true)
+//                    popupFrame.setVisible(true)
+//                    popupFrame.addWindowListener(new WindowAdapter() {
+//                        @Override
+//                        void windowClosing(WindowEvent e) {
+//                            portal.close()
+//                        }
+//                    })
+//                    return true
+//                }
+//
+//                @Override
+//                void onAfterCreated(CefBrowser cefBrowser) {
+//                }
+//
+//                @Override
+//                void onAfterParentChanged(CefBrowser cefBrowser) {
+//                }
+//
+//                @Override
+//                boolean doClose(CefBrowser cefBrowser) {
+//                    return false
+//                }
+//
+//                @Override
+//                void onBeforeClose(CefBrowser cefBrowser) {
+//                }
+//            }, browser.getCefBrowser())
             vertx.eventBus().publish(PORTAL_READY, portalUuid)
         }
     }

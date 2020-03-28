@@ -1,12 +1,12 @@
 package com.sourceplusplus.plugin
 
-import com.google.common.collect.Sets
+import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
-import com.sourceplusplus.plugin.marker.SourceFileMarker
-import com.sourceplusplus.plugin.marker.mark.SourceMark
+import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
+import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import groovy.util.logging.Slf4j
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -18,6 +18,7 @@ import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
+import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 
 import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
 
@@ -31,10 +32,10 @@ import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifact
 @Slf4j
 class SourcePlugin {
 
+    //todo: replace with SourceMark listeners
     public static final String SOURCE_FILE_MARKER_ACTIVATED = "SourceFileMarkerActivated"
     public static final String SOURCE_ENVIRONMENT_UPDATED = "SourceEnvironmentUpdated"
 
-    private final Set<SourceFileMarker> availableSourceFileMarkers = Sets.newConcurrentHashSet()
     private final Vertx vertx
     private PluginBootstrap pluginBootstrap
 
@@ -93,16 +94,16 @@ class SourcePlugin {
         }
     }
 
-    void activateSourceFileMarker(SourceFileMarker sourceFileMarker) {
-        if (availableSourceFileMarkers.add(Objects.requireNonNull(sourceFileMarker))) {
-            def sourceMarks = sourceFileMarker.createSourceMarks()
-            sourceFileMarker.setSourceMarks(sourceMarks)
-            log.info("Activated source file marker: {} - Mark count: {}", sourceFileMarker, sourceMarks.size())
-            vertx.eventBus().publish(SOURCE_FILE_MARKER_ACTIVATED, sourceFileMarker.sourceFile.qualifiedClassName)
-        }
-    }
+//    void activateSourceFileMarker(IntelliJSourceFileMarker sourceFileMarker) {
+//        if (availableSourceFileMarkers.add(Objects.requireNonNull(sourceFileMarker))) {
+//            def sourceMarks = sourceFileMarker.createSourceMarks()
+//            sourceFileMarker.setSourceMarks(sourceMarks)
+//            log.info("Activated source file marker: {} - Mark count: {}", sourceFileMarker, sourceMarks.size())
+//            vertx.eventBus().publish(SOURCE_FILE_MARKER_ACTIVATED, sourceFileMarker.sourceFile.qualifiedClassName)
+//        }
+//    }
 
-    void deactivateSourceFileMarker(SourceFileMarker sourceFileMarker) {
+    void deactivateSourceFileMarker(IntelliJSourceFileMarker sourceFileMarker) {
         if (availableSourceFileMarkers.remove(Objects.requireNonNull(sourceFileMarker))) {
             def sourceMarks = sourceFileMarker.getSourceMarks()
 
@@ -125,37 +126,26 @@ class SourcePlugin {
     }
 
     @Nullable
-    SourceFileMarker getSourceFileMarker(String qualifiedClassName) {
-        return availableSourceFileMarkers.find {
-            it.sourceFile.qualifiedClassName == qualifiedClassName
-        }
-    }
-
-    @Nullable
-    SourceFileMarker getSourceFileMarker(PluginSourceFile sourceFile) {
-        return availableSourceFileMarkers.find {
-            it.sourceFile == sourceFile
-        }
+    IntelliJSourceFileMarker getSourceFileMarker(String classQualifiedName) {
+        return SourceMarkerPlugin.INSTANCE.getSourceFileMarker(classQualifiedName) as IntelliJSourceFileMarker
     }
 
     @NotNull
-    Set<SourceFileMarker> getAvailableSourceFileMarkers() {
-        return Sets.newHashSet(availableSourceFileMarkers)
+    Set<IntelliJSourceFileMarker> getAvailableSourceFileMarkers() {
+        return SourceMarkerPlugin.INSTANCE.getAvailableSourceFileMarkers().toSet() as Set<IntelliJSourceFileMarker>
+    }
+
+    IntelliJSourceFileMarker getSourceFileMarker(PsiFile psiFile) {
+        return SourceMarkerPlugin.INSTANCE.getSourceFileMarker(psiFile) as IntelliJSourceFileMarker
+    }
+
+    @Nullable
+    IntelliJSourceMark getSourceMark(String artifactQualifiedName) {
+        return SourceMarkerPlugin.INSTANCE.getSourceMark(artifactQualifiedName) as IntelliJSourceMark
     }
 
     @NotNull
     Vertx getVertx() {
         return vertx
-    }
-
-    @Nullable
-    SourceMark getSourceMark(String artifactQualifiedName) {
-        def sourceMark = null
-        availableSourceFileMarkers.each {
-            if (sourceMark == null) {
-                sourceMark = it.getSourceMark(artifactQualifiedName)
-            }
-        }
-        return sourceMark
     }
 }

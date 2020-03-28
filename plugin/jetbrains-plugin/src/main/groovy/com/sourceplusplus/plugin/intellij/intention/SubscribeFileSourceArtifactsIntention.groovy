@@ -46,8 +46,7 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
         }
         if (!inMethod) {
             //check for unsubscribed source marks
-            def fileMarkers = sourcePlugin.getAvailableSourceFileMarkers() as List<IntelliJSourceFileMarker>
-            def fileMarker = fileMarkers.find { it.psiFile == originalElement.containingFile }
+            def fileMarker = sourcePlugin.getSourceFileMarker(originalElement.containingFile)
             if (fileMarker) {
                 return fileMarker.sourceMarks.find { !it.artifactSubscribed }
             }
@@ -59,8 +58,7 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
     @SuppressWarnings("GroovyVariableNotAssigned")
     void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element)
             throws IncorrectOperationException {
-        def fileMarkers = sourcePlugin.getAvailableSourceFileMarkers() as List<IntelliJSourceFileMarker>
-        def fileMarker = fileMarkers.find { it.psiFile == element.containingFile }
+        def fileMarker = sourcePlugin.getSourceFileMarker(element.containingFile)
         if (fileMarker) {
             fileMarker.sourceMarks.each {
                 if (!it.artifactSubscribed) {

@@ -1,6 +1,6 @@
 package com.sourceplusplus.plugin.coordinate.artifact.track
 
-import com.sourceplusplus.plugin.marker.mark.SourceMark
+import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
@@ -22,23 +22,23 @@ class ArtifactSignatureChangeTracker extends AbstractVerticle {
     @Override
     void start() throws Exception {
         vertx.eventBus().consumer(ARTIFACT_ADDED, {
-            def sourceMark = it.body() as SourceMark
+            def sourceMark = it.body() as IntelliJSourceMark
 
             //publish updated event
             vertx.eventBus().publish(ARTIFACT_SIGNATURE_UPDATED,
                     new JsonObject().put("change", "added")
-                            .put("artifact", sourceMark.sourceMethod.artifactQualifiedName()))
+                            .put("artifact", sourceMark.artifactQualifiedName))
         })
 
         vertx.eventBus().consumer(ARTIFACT_REMOVED, {
-            def sourceMark = it.body() as SourceMark
+            def sourceMark = it.body() as IntelliJSourceMark
             sourceMark.markArtifactUnsubscribed()
             sourceMark.sourceFileMarker.removeSourceMark(sourceMark)
 
             //publish updated event
             vertx.eventBus().publish(ARTIFACT_SIGNATURE_UPDATED,
                     new JsonObject().put("change", "removed")
-                            .put("artifact", sourceMark.sourceMethod.artifactQualifiedName()))
+                            .put("artifact", sourceMark.artifactQualifiedName))
         })
         log.info("{} started", getClass().getSimpleName())
     }

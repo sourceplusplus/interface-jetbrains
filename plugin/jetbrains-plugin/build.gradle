@@ -23,12 +23,16 @@ dependencies {
     implementation(project(":portal")) {
         exclude group: 'com.jetbrains.intellij.platform'
     }
-    implementation project(":plugin:source-plugin-commons")
     implementation 'org.codehaus.groovy:groovy-all:2.4.17'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
+    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+    implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
     implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5d33d30262') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
+    }
+    implementation('com.github.sourceplusplus.SourceMarker:marker-provider:33bfcb2c4f') {
+        transitive = false
     }
 }
 

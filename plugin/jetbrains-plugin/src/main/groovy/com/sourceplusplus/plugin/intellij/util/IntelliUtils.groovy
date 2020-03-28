@@ -56,26 +56,6 @@ final class IntelliUtils {
         return "$classQualifiedName.$methodName($methodParams)"
     }
 
-    static int convertPointToLineNumber(Project project, Point p) {
-        def myEditor = FileEditorManager.getInstance(project).getSelectedTextEditor()
-        Document document = myEditor.getDocument()
-        int line = EditorUtil.yPositionToLogicalLine(myEditor, p)
-        if (!isValidLine(document, line)) return -1
-
-        int startOffset = document.getLineStartOffset(line)
-        final FoldRegion region = myEditor.getFoldingModel().getCollapsedRegionAtOffset(startOffset)
-        if (region != null) {
-            return document.getLineNumber(region.getEndOffset())
-        }
-        return line
-    }
-
-    private static boolean isValidLine(Document document, int line) {
-        if (line < 0) return false
-        int lineCount = document.getLineCount()
-        return lineCount == 0 ? line == 0 : line < lineCount
-    }
-
     @Nullable
     static String getClassVMName(PsiClass containingClass) {
         if (containingClass instanceof PsiAnonymousClass) {
