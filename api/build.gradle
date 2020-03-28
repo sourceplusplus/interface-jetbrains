@@ -17,7 +17,7 @@ targetCompatibility = 1.8
 dependencies {
     annotationProcessor "org.immutables:value:2.8.3"
     compileOnly "org.immutables:value:2.8.3:annotations"
-    compile 'com.squareup.okhttp3:okhttp:3.14.6'
+    compile 'com.squareup.okhttp3:okhttp:4.4.1'
 }
 
 archivesBaseName = 'source-api'

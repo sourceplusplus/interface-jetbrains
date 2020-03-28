@@ -4,6 +4,7 @@
 - Upgraded jackson (2.10.2 -> 2.10.3)
 - Upgraded JetBrains annotations (13.0 -> 18.0.0)
 - Upgraded log4j (2.13.0 -> 2.13.1)
+- Upgraded okhttp (3.14.6 -> 4.4.1)
 
 # 0.2.3-alpha (2020-02-14)
 
