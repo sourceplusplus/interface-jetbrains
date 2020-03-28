@@ -32,8 +32,7 @@ import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifact
 @Slf4j
 class SourcePlugin {
 
-    //todo: replace with SourceMark listeners
-    public static final String SOURCE_FILE_MARKER_ACTIVATED = "SourceFileMarkerActivated"
+    public static final String SOURCE_MARKER_ACTIVATED = "SourceMarkerActivated"
     public static final String SOURCE_ENVIRONMENT_UPDATED = "SourceEnvironmentUpdated"
 
     private final Vertx vertx

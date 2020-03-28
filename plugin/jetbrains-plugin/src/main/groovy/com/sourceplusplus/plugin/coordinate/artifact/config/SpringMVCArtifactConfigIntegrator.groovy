@@ -3,9 +3,8 @@ package com.sourceplusplus.plugin.coordinate.artifact.config
 import com.google.common.collect.Sets
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePlugin
-import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 
@@ -30,36 +29,31 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
-        vertx.eventBus().consumer(SourcePlugin.SOURCE_FILE_MARKER_ACTIVATED, {
-            def sourceMarks = PluginBootstrap.sourcePlugin.getSourceFileMarker(it.body() as String).sourceMarks
-            handleSourceMarks(sourceMarks)
+        vertx.eventBus().consumer(SourcePlugin.SOURCE_MARKER_ACTIVATED, {
+            handleSourceMark(it.body() as IntelliJMethodGutterMark)
         })
     }
 
-    private static List<IntelliJSourceMark> handleSourceMarks(List<IntelliJSourceMark> sourceMarks) {
-        sourceMarks.each { mark ->
-            if (mark.isMethodMark()) {
-                mark.getMethodAnnotations({
-                    it.result().findAll {
-                        SPRING_WEB_ANNOTATIONS.contains(it.qualifiedName)
-                    }.each {
-                        def requestUrl = it.attributeMap.get("value") as String
-                        SourcePluginConfig.current.activeEnvironment.coreClient.createOrUpdateArtifactConfig(
-                                SourcePluginConfig.current.activeEnvironment.appUuid, mark.artifactQualifiedName,
-                                SourceArtifactConfig.builder()
-                                        .component("SpringMVC")
-                                        .moduleName(mark.getModuleName())
-                                        .endpoint(true).subscribeAutomatically(true)
-                                        .endpointName(requestUrl).build(), {
-                            if (it.failed()) {
-                                log.error("Failed to create artifact config", it.cause())
-                            } else {
-                                log.debug("Created/Updated artifact config for artifact: " + mark.artifactQualifiedName)
-                            }
-                        })
+    private static void handleSourceMark(IntelliJMethodGutterMark mark) {
+        mark.getMethodAnnotations({
+            it.result().findAll {
+                SPRING_WEB_ANNOTATIONS.contains(it.qualifiedName)
+            }.each {
+                def requestUrl = it.attributeMap.get("value") as String
+                SourcePluginConfig.current.activeEnvironment.coreClient.createOrUpdateArtifactConfig(
+                        SourcePluginConfig.current.activeEnvironment.appUuid, mark.artifactQualifiedName,
+                        SourceArtifactConfig.builder()
+                                .component("SpringMVC")
+                                .moduleName(mark.getModuleName())
+                                .endpoint(true).subscribeAutomatically(true)
+                                .endpointName(requestUrl).build(), {
+                    if (it.succeeded()) {
+                        log.debug("Created/Updated artifact config for artifact: " + mark.artifactQualifiedName)
+                    } else {
+                        log.error("Failed to create artifact config", it.cause())
                     }
                 })
             }
-        }
+        })
     }
 }

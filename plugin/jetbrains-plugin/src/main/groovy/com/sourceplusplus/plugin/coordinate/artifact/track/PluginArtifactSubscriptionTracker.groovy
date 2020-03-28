@@ -7,6 +7,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.plugin.SourcePlugin
+import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.portal.SourcePortal
 import groovy.util.logging.Slf4j
@@ -40,11 +41,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
                 SourcePluginConfig.current.activeEnvironment.appUuid, true, {
             if (it.succeeded()) {
-                it.result().each {
-                    if (it.automaticSubscription()) {
-                        PENDING_SUBSCRIBED.add(it.artifactQualifiedName())
-                    }
-                }
+                it.result().each { PENDING_SUBSCRIBED.add(it.artifactQualifiedName()) }
             } else {
                 log.error("Failed to get application subscriptions", it.cause())
             }
@@ -65,42 +62,15 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         })
 
         //refresh markers when they become available
-        vertx.eventBus().consumer(SourcePlugin.SOURCE_FILE_MARKER_ACTIVATED, {
-            def qualifiedClassName = it.body() as String
-
-            //current subscriptions
-            SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
-                    SourcePluginConfig.current.activeEnvironment.appUuid, false, {
-                if (it.succeeded()) {
-                    it.result().findAll { it.artifactQualifiedName().startsWith(qualifiedClassName) }.each {
-                        if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                            def gutterMark = sourcePlugin.getSourceMark(it.artifactQualifiedName()) as IntelliJGutterMark
-                            gutterMark?.markArtifactSubscribed()
-                        }
-                    }
-                } else {
-                    log.error("Failed to get application subscriptions", it.cause())
-                }
-            })
+        vertx.eventBus().consumer(SourcePlugin.SOURCE_MARKER_ACTIVATED, {
+            def sourceMark = it.body() as IntelliJSourceMark
 
             //pending data available/subscriptions
-            PENDING_DATA_AVAILABLE.findAll { it.startsWith(qualifiedClassName) }.each {
-                if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                    def gutterMark = sourcePlugin.getSourceMark(it) as IntelliJGutterMark
-                    if (gutterMark != null) {
-                        gutterMark.markArtifactHasData()
-                        PENDING_DATA_AVAILABLE.remove(it)
-                    }
-                }
+            if (PENDING_DATA_AVAILABLE.remove(sourceMark.artifactQualifiedName)) {
+                sourceMark.markArtifactHasData()
             }
-            PENDING_SUBSCRIBED.findAll { it.startsWith(qualifiedClassName) }.each {
-                if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                    def gutterMark = sourcePlugin.getSourceMark(it) as IntelliJGutterMark
-                    if (gutterMark != null) {
-                        gutterMark.markArtifactSubscribed()
-                        PENDING_SUBSCRIBED.remove(it)
-                    }
-                }
+            if (PENDING_SUBSCRIBED.remove(sourceMark.artifactQualifiedName)) {
+                sourceMark.markArtifactSubscribed()
             }
         })
 

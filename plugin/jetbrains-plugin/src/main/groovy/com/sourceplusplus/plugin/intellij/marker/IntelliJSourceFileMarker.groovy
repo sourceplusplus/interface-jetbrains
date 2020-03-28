@@ -2,6 +2,8 @@ package com.sourceplusplus.plugin.intellij.marker
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import groovy.util.logging.Slf4j
@@ -60,7 +62,9 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
     @Override
     SourceMark createSourceMark(@NotNull UMethod psiMethod, @NotNull SourceMark.Type type) {
         if (type == SourceMark.Type.GUTTER) {
-            return new IntelliJMethodGutterMark(this, psiMethod)
+            def sourceMark = new IntelliJMethodGutterMark(this, psiMethod)
+            PluginBootstrap.sourcePlugin.vertx.eventBus().publish(SourcePlugin.SOURCE_MARKER_ACTIVATED, sourceMark)
+            return sourceMark
         } else {
             throw new IllegalStateException("Unsupported mark type: " + type)
         }

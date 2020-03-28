@@ -14,10 +14,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.client.SourceCoreClient
+import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMarkComponentProvider
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
 import com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentDialogWrapper
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
@@ -152,20 +154,9 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity {
         SourceMarkerPlugin.configuration.sourceFileMarkerProvider = new SourceFileMarkerProvider() {
             @Override
             SourceFileMarker createSourceFileMarker(@NotNull PsiFile psiFile) {
-                def fileMarker = new IntelliJSourceFileMarker(psiFile)
-                fileMarker.classQualifiedNames.each {
-                    sourcePlugin.vertx.eventBus().publish(SourcePlugin.SOURCE_FILE_MARKER_ACTIVATED, it)
-                }
-                return fileMarker
+                return new IntelliJSourceFileMarker(psiFile)
             }
         }
-//        SourceMarkerPlugin.configuration.sourceMarkFilter = new SourceMarkFilter() {
-//            @Override
-//            boolean test(SourceMark sourceMark) {
-//                return sourceMark instanceof IntelliJGutterMark ?
-//                        sourceMark.artifactSubscribed || sourceMark.artifactDataAvailable : false
-//            }
-//        }
     }
 
     private static notifyNoConnection() {
@@ -245,10 +236,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity {
     }
 
     private static void registerCodecs() {
-        //todo: determine if needed
-//        sourcePlugin.vertx.eventBus().registerDefaultCodec(IntelliJSourceFileMarker.class,
-//                SourceMessage.messageCodec(IntelliJSourceFileMarker.class))
-//        sourcePlugin.vertx.eventBus().registerDefaultCodec(IntelliJMethodGutterMark.class,
-//                SourceMessage.messageCodec(IntelliJMethodGutterMark.class))
+        sourcePlugin.vertx.eventBus().registerDefaultCodec(IntelliJMethodGutterMark.class,
+                SourceMessage.messageCodec(IntelliJMethodGutterMark.class))
     }
 }

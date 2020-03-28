@@ -20,6 +20,8 @@ class IntelliJGutterMarkComponentProvider extends GutterMarkJcefComponentProvide
 
     IntelliJGutterMarkComponentProvider() {
         defaultConfiguration.setComponentSize(new Dimension(775, 250))
+        //todo: measure size of editor and make short if it will extend past IDE
+        //defaultConfiguration.setComponentSize(new Dimension(620, 250))
     }
 
     @Override
