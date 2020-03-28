@@ -8,28 +8,16 @@ import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
 import groovy.util.logging.Slf4j
-import io.netty.handler.codec.http.QueryStringDecoder
 import io.vertx.core.Vertx
 import org.apache.commons.io.FileUtils
-import org.cef.CefSettings
-import org.cef.browser.CefBrowser
-import org.cef.browser.CefFrame
-import org.cef.handler.CefDisplayHandler
-import org.cef.handler.CefLifeSpanHandler
-import org.jetbrains.annotations.NotNull
 
-import javax.swing.*
-import java.awt.*
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 /**
- * Used to render the Source++ Portal's Semantic UI HTML files as a JComponent.
+ * Used to render the Source++ Portal's Semantic UI.
  *
  * @version 0.2.3
  * @since 0.1.0
@@ -40,21 +28,25 @@ class PortalInterface {
 
     public static final String PORTAL_READY = "PortalReady"
 
-    static File uiDirectory //todo: private
+    private static File _uiDirectory
     private static Vertx vertx
-    private final AtomicBoolean portalReady = new AtomicBoolean()
     private final String portalUuid
     private final OverviewView overviewView
     private final TracesView tracesView
     private final ConfigurationView configurationView
-    //private JBCefBrowser browser
+    private JBCefBrowser browser
     public String viewingPortalArtifact
     public PortalTab currentTab = PortalTab.Overview
     private Map<String, String> currentQueryParams = [:]
     private static boolean DARK_MODE
 
     PortalInterface(String portalUuid) {
+        this(portalUuid, null)
+    }
+
+    PortalInterface(String portalUuid, JBCefBrowser browser) {
         this.portalUuid = portalUuid
+        this.browser = browser
         this.overviewView = new OverviewView(this)
         this.tracesView = new TracesView(this)
         this.configurationView = new ConfigurationView()
@@ -71,9 +63,7 @@ class PortalInterface {
         if (userQuery) {
             userQuery = "&$userQuery"
         }
-
-        def page = tab.name().toLowerCase() + ".html"
-        //browser.cefBrowser.loadURL("file:///" + uiDirectory.absolutePath + "/tabs/$page?portal_uuid=$portalUuid$userQuery")
+        browser.cefBrowser.loadURL(getPortalUrl(tab, portalUuid, userQuery))
     }
 
     OverviewView getOverviewView() {
@@ -84,107 +74,23 @@ class PortalInterface {
         return tracesView
     }
 
-//    JBCefBrowser getBrowser() {
-//        return browser
-//    }
+    ConfigurationView getConfigurationView() {
+        return configurationView
+    }
 
     void close() {
-        //browser.cefBrowser.close(true)
+        browser.cefBrowser.close(true)
     }
 
     void reload() {
-//        if (browser != null) {
-//            loadPage(currentTab, currentQueryParams)
-//        }
-    }
-
-    @NotNull
-    JComponent getUIComponent() {
-        return null //browser.getComponent()
+        if (browser != null) {
+            loadPage(currentTab, currentQueryParams)
+        }
     }
 
     void cloneViews(PortalInterface portalInterface) {
         this.overviewView.cloneView(portalInterface.overviewView)
         this.tracesView.cloneView(portalInterface.tracesView)
-    }
-
-    void initPortal() {
-        if (!portalReady.getAndSet(true)) {
-            if (uiDirectory == null) {
-                createScene()
-            }
-//            browser = new JBCefBrowser("file:///" + uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid")
-//            browser.getComponent().setPreferredSize(new Dimension(775, 250))
-//            browser.getComponent().setSize(775, 250)
-//            browser.cefBrowser.client.addDisplayHandler(new CefDisplayHandler() {
-//                @Override
-//                void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
-//                }
-//
-//                @Override
-//                void onTitleChange(CefBrowser browser, String title) {
-//                }
-//
-//                @Override
-//                boolean onTooltip(CefBrowser browser, String text) {
-//                    return false
-//                }
-//
-//                @Override
-//                void onStatusMessage(CefBrowser browser, String value) {
-//                }
-//
-//                @Override
-//                boolean onConsoleMessage(CefBrowser browser, CefSettings.LogSeverity level, String message, String source, int line) {
-//                    log.info("[PORTAL_CONSOLE] - " + message)
-//                    return false
-//                }
-//            })
-//
-//            browser.getJBCefClient().addLifeSpanHandler(new CefLifeSpanHandler() {
-//                @Override
-//                boolean onBeforePopup(CefBrowser cefBrowser, CefFrame cefFrame, String targetUrl, String targetFrameName) {
-//                    def portal = SourcePortal.getPortal(new QueryStringDecoder(
-//                            targetUrl).parameters().get("portal_uuid").get(0))
-//                    def browserView = JBCefBrowser.getJBCefBrowser(browser.getJBCefClient().getCefClient()
-//                            .createBrowser(targetUrl, false, false))
-//                    portal.interface.browser = browserView
-//
-//                    def popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
-//                    popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
-//                    popupFrame.setPreferredSize(new Dimension(800, 600))
-//                    popupFrame.add(browserView.getComponent(), BorderLayout.CENTER)
-//                    popupFrame.pack()
-//                    popupFrame.setLocationByPlatform(true)
-//                    popupFrame.setVisible(true)
-//                    popupFrame.addWindowListener(new WindowAdapter() {
-//                        @Override
-//                        void windowClosing(WindowEvent e) {
-//                            portal.close()
-//                        }
-//                    })
-//                    return true
-//                }
-//
-//                @Override
-//                void onAfterCreated(CefBrowser cefBrowser) {
-//                }
-//
-//                @Override
-//                void onAfterParentChanged(CefBrowser cefBrowser) {
-//                }
-//
-//                @Override
-//                boolean doClose(CefBrowser cefBrowser) {
-//                    return false
-//                }
-//
-//                @Override
-//                void onBeforeClose(CefBrowser cefBrowser) {
-//                }
-//            }, browser.getCefBrowser())
-            vertx.eventBus().publish(PORTAL_READY, portalUuid)
-        }
     }
 
     static void updateTheme(boolean dark) {
@@ -198,16 +104,32 @@ class PortalInterface {
         this.vertx = vertx
     }
 
+    static String getPortalUrl(PortalTab tab, String portalUuid) {
+        return getPortalUrl(tab, portalUuid, "")
+    }
+
+    static String getPortalUrl(PortalTab tab, String portalUuid, String userQuery) {
+        return "file:///" + uiDirectory + "/tabs/" + tab.name().toLowerCase() + ".html?portal_uuid=$portalUuid$userQuery"
+    }
+
+    private static String getUiDirectory() {
+        if (_uiDirectory == null) {
+            createScene()
+            vertx.eventBus().publish(PORTAL_READY, true)
+        }
+        return _uiDirectory
+    }
+
     private static void createScene() {
-        uiDirectory = File.createTempDir()
-        uiDirectory.deleteOnExit()
+        _uiDirectory = File.createTempDir()
+        _uiDirectory.deleteOnExit()
 
         def url = PortalInterface.class.getResource("/ui")
-        extract(url, "/ui", uiDirectory.absolutePath)
-        log.debug("Using portal ui directory: " + uiDirectory.absolutePath)
+        extract(url, "/ui", _uiDirectory.absolutePath)
+        log.debug("Using portal ui directory: " + _uiDirectory.absolutePath)
 
         def bridgePort = SourcePortalConfig.current.pluginUIPort
-        def bridgeFile = new File(uiDirectory.absolutePath + "/source_eventbus_bridge.js").toPath()
+        def bridgeFile = new File(_uiDirectory.absolutePath + "/source_eventbus_bridge.js").toPath()
         def fileContent = new ArrayList<>(Files.readAllLines(bridgeFile, StandardCharsets.UTF_8))
         for (int i = 0; i < fileContent.size(); i++) {
             if (fileContent.get(i) == "var eb = new EventBus('http://localhost:7529/eventbus');") {

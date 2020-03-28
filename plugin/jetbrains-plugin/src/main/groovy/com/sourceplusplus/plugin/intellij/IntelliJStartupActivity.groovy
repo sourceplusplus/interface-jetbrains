@@ -203,6 +203,9 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity {
         registerCodecs()
         coreClient.registerIP()
 
+        //register coordinators
+        sourcePlugin.vertx.deployVerticle(new IntelliJArtifactNavigator())
+
         sourcePlugin.vertx.eventBus().consumer(PortalInterface.PORTAL_READY, {
             //set portal theme
             UIManager.addPropertyChangeListener({

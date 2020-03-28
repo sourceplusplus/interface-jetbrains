@@ -1,11 +1,12 @@
 package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 
-import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
-import com.sourceplusplus.portal.display.PortalInterface
 import org.jetbrains.annotations.NotNull
+import plus.sourceplus.marker.source.mark.api.event.SourceMarkEvent
+import plus.sourceplus.marker.source.mark.api.event.SourceMarkEventListener
 import plus.sourceplus.marker.source.mark.gutter.GutterMark
 import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
 import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponentProvider
+import plus.sourceplus.marker.source.mark.gutter.event.GutterMarkEventCode
 
 import java.awt.Dimension
 
@@ -16,9 +17,10 @@ import java.awt.Dimension
  * @since 0.2.4
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class IntelliJGutterMarkComponentProvider extends GutterMarkJcefComponentProvider {
+class IntelliJGutterMarkComponentProvider extends GutterMarkJcefComponentProvider  implements SourceMarkEventListener{
 
     IntelliJGutterMarkComponentProvider() {
+        defaultConfiguration.preloadJcefBrowser = false
         defaultConfiguration.setComponentSize(new Dimension(775, 250))
         //todo: measure size of editor and make short if it will extend past IDE
         //defaultConfiguration.setComponentSize(new Dimension(620, 250))
@@ -26,12 +28,14 @@ class IntelliJGutterMarkComponentProvider extends GutterMarkJcefComponentProvide
 
     @Override
     GutterMarkJcefComponent getComponent(@NotNull GutterMark gutterMark) {
-        GutterMarkJcefComponent component = super.getComponent(gutterMark)
-        def intellijGutterMark = gutterMark as IntelliJGutterMark
-        intellijGutterMark.registerPortal()
+        gutterMark.addEventListener(this)
+        return super.getComponent(gutterMark)
+    }
 
-        def portalUuid = intellijGutterMark.getUserData(IntelliJKeys.PortalUUID)
-        component.configuration.initialUrl = "file:///" + PortalInterface.uiDirectory.absolutePath + "/tabs/overview.html?portal_uuid=$portalUuid"
-        return component
+    @Override
+    void handleEvent(@NotNull SourceMarkEvent event) {
+        if (event.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
+            (event.sourceMark as IntelliJGutterMark).registerPortal()
+        }
     }
 }

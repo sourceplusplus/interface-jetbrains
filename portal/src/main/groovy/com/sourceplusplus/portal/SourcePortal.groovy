@@ -3,6 +3,7 @@ package com.sourceplusplus.portal
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
+import com.intellij.ui.jcef.JBCefBrowser
 import com.sourceplusplus.portal.display.PortalInterface
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
@@ -79,6 +80,17 @@ class SourcePortal implements Closeable {
         return portalMap.asMap().values().findAll {
             it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName
         }
+    }
+
+    static void registerInternal(String appUuid, String portalUuid, String artifactQualifiedName, JBCefBrowser browser) {
+        //todo: ensure portal uuid valid
+        def portal = new SourcePortal(portalUuid, Objects.requireNonNull(appUuid), false)
+        portal.portalUI = new PortalInterface(portalUuid, browser)
+        portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
+
+        portalMap.put(portalUuid, portal)
+        log.info("Registered new Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
+        log.info("Active portals: " + portalMap.size())
     }
 
     static String register(String appUuid, String artifactQualifiedName, boolean external) {

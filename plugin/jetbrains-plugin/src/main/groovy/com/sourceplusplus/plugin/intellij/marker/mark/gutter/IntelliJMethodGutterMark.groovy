@@ -6,6 +6,8 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.portal.display.PortalInterface
+import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
@@ -14,6 +16,7 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.java.JavaUAnnotation
 import plus.sourceplus.marker.SourceFileMarker
 import plus.sourceplus.marker.source.mark.gutter.MethodGutterMark
+import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
 import plus.sourceplus.marker.source.mark.gutter.config.GutterMarkIcon
 
 import java.time.Instant
@@ -76,7 +79,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             putUserData(IntelliJKeys.ArtifactSubscribed, true)
             putUserData(IntelliJKeys.ArtifactSubscribeTime, Instant.now())
             sourceFileMarker.refresh()
-            //registerPortal()
         }
     }
 
@@ -102,7 +104,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             configuration.icon = GutterMarkIcon.sppActive
             putUserData(IntelliJKeys.ArtifactDataAvailable, true)
             sourceFileMarker.refresh()
-            //registerPortal()
         }
     }
 
@@ -153,9 +154,13 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     void registerPortal() {
         if (!portalRegistered) {
             def appUuid = SourcePluginConfig.current.activeEnvironment.appUuid
-            def portalUuid = SourcePortal.register(appUuid, artifactQualifiedName, false)
-            SourcePortal.getPortal(portalUuid).interface.initPortal()
+            def portalUuid = UUID.randomUUID().toString()
             putUserData(IntelliJKeys.PortalUUID, portalUuid)
+
+            def markComponent = gutterMarkComponent as GutterMarkJcefComponent
+            markComponent.configuration.initialUrl = PortalInterface.getPortalUrl(PortalTab.Overview, portalUuid)
+            markComponent.initialize()
+            SourcePortal.registerInternal(appUuid, portalUuid, artifactQualifiedName, markComponent.browser)
         }
     }
 }
