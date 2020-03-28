@@ -7,7 +7,7 @@ mainClassName = 'com.sourceplusplus.docserver.DocServerBootstrap'
 
 dependencies {
     implementation 'org.codehaus.groovy:groovy-all:2.4.17'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.1'
     implementation "io.vertx:vertx-web:$VERTX_VERSION"
     implementation "io.vertx:vertx-web-client:$VERTX_VERSION"
     implementation group: 'net.jodah', name: 'expiringmap', version: '0.5.9'
