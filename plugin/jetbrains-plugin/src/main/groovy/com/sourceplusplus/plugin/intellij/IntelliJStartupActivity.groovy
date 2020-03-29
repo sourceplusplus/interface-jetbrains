@@ -101,6 +101,7 @@ class IntelliJStartupActivity implements StartupActivity {
                             }
                         }
                     }))
+            return
         }
         System.setProperty("vertx.disableFileCPResolving", "true")
 
