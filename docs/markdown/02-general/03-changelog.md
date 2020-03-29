@@ -4,7 +4,7 @@
 - Fixed issue with "Parent Stack" not navigating back to caller function
 - Fixed issue with environment dialog not recognizing activate environment when updated
 - Disable activate button on first saved environment (#110)
-- Disabled buildSearchableOptions (causes HeadlessException on Travis-CI)
+- Disabled buildSearchableOptions (causes HeadlessException on Travis CI)
 
 ## Improvement
 - Registered `SourcePluginConsoleService` to dispose on project disposal
@@ -13,9 +13,9 @@
 - Build with JDK 11 instead of JDK 8
 - Use @Slf4j instead of static final Loggers
 - Specify charset when using URLDecoder.encode/URLDecoder.decode
-- Allow JitPack & Travis-CI to use default JDK
-- Allow Travis-CI to use default Docker Compose
-- Force Travis-CI to use https.protocols TLSv1.2
+- Allow JitPack & Travis CI to use default JDK
+- Allow Travis CI to use default Docker Compose
+- Force Travis CI to use https.protocols TLSv1.2
 - Use ignore variable names on catch clauses where appropriate
 - Various code refactorings
 - Added gradle, Java, and properties to IntelliJ plugin depends
@@ -42,12 +42,12 @@
 ## Improvement
 - Switched docs from using GitHub `access_token` query param to basic authentication
 - Removed usage of deprecated `ApplicationComponent`
-- Added additional logging output to Travis-CI builds
+- Added additional logging output to Travis CI builds
 - Added favicon.ico redirect to docs
 - Using `skywalking-oap` as Apache SkyWalking Docker host universally
 - Groovy/Kotlin no longer optional IntelliJ plugins
 - Removed usage of `Json.mapper.findAndRegisterModules`
-- Force Travis-CI to use JDK8
+- Force Travis CI to use JDK8
 - Removed unused files from agent jar
 
 ## Dependency upgrade
@@ -128,7 +128,7 @@
 - Upgrade Semantic UI and create tooltip build task ([#43](https://github.com/sourceplusplus/Assistant/issues/43))
 - Responsive Source++ Tooltip UI ([#44](https://github.com/sourceplusplus/Assistant/issues/44))
 - Core standalone functionality ([#60](https://github.com/sourceplusplus/Assistant/issues/60))
-- Automatic GitHub release artifact uploads via Travis-CI ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
+- Automatic GitHub release artifact uploads via Travis CI ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
 - Added ability for agent to detect integration connection information via API ([#73](https://github.com/sourceplusplus/Assistant/issues/73))
 
 # 0.1.4-alpha (2019-03-30)
