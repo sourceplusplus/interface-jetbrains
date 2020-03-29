@@ -1,6 +1,5 @@
 # 0.2.4-alpha (2020-03-29)
 //todo: ensure plugin config saves correctly
-//todo: private getAgentFile()
 
 ## Improvement
 - Replaced deprecated `PluginSettingsComponent` for `PropertiesComponent` implementation
@@ -17,16 +16,16 @@
 - Added IntelliJ plugin icon for marketplace display
 - Added logging to Portal overview page
 - Removed unused handler from Portal overview page
+- Updated agent log format to include more information
 
 ## Dependency upgrade
-- Upgraded Portal //todo: echarts
-- Upgraded Portal //todo: moment
-- Upgraded Portal //todo: sockjs
-- Upgraded Portal //todo: eventbus
-- Upgraded Portal //todo: semantic/formantic
-
 - Upgraded Groovy (2.4.15 -> 2.4.17)
 - Upgraded IntelliJ plugin (2018.3.6 -> 2019.3.4)
+- Upgraded Apache ECharts (4.2.1 -> 4.7.0)
+- Upgraded Moment.js (2.20.1 -> 2.24.0)
+- Upgraded SockJS (1.3.0 -> 1.4.0)
+- Upgraded vertx-eventbus.min.js (n/a -> 3.8.3)
+- Upgraded from Semantic 2.4.0 to Fomantic UI - 2.8.4
 
 # 0.2.3-alpha (2020-02-14)
 
