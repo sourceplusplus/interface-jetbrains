@@ -1,3 +1,39 @@
+# 0.2.4-alpha (2020-03-29)
+
+## Bug
+- Fixed issue with "Parent Stack" not navigating back to caller function
+- Fixed issue with environment dialog not recognizing activate environment when updated
+- Disable activate button on first saved environment (#110)
+- Disabled buildSearchableOptions (causes HeadlessException on Travis CI)
+
+## Improvement
+- Registered `SourcePluginConsoleService` to dispose on project disposal
+- Replaced deprecated `PluginSettingsComponent` for `PropertiesComponent` implementation
+- Auto-attach agent to Gradle based application runs (#116)
+- Build with JDK 11 instead of JDK 8
+- Use @Slf4j instead of static final Loggers
+- Specify charset when using URLDecoder.encode/URLDecoder.decode
+- Allow JitPack & Travis CI to use default JDK
+- Allow Travis CI to use default Docker Compose
+- Force Travis CI to use https.protocols TLSv1.2
+- Use ignore variable names on catch clauses where appropriate
+- Various code refactorings
+- Added gradle, Java, and properties to IntelliJ plugin depends
+- Added IntelliJ plugin icon for marketplace display
+- Added logging to Portal overview page
+- Removed unused handler from Portal overview page
+- Updated agent log format to include more information
+
+## Dependency upgrade
+- Upgraded Groovy (2.4.15 -> 2.4.17)
+- Upgraded IntelliJ plugin (2018.3.6 -> 2019.3.4)
+- Upgraded Apache ECharts (4.2.1 -> 4.7.0)
+- Upgraded Moment.js (2.20.1 -> 2.24.0)
+- Upgraded SockJS (1.3.0 -> 1.4.0)
+- Upgraded vertx-eventbus.min.js (n/a -> 3.8.3)
+- Upgraded from Semantic 2.4.0 to Fomantic UI 2.8.4
+- Upgraded JetBrains intellij plugin (0.4.16 -> 0.4.17)
+
 # 0.2.3-alpha (2020-02-14)
 
 ## Bug
@@ -6,12 +42,12 @@
 ## Improvement
 - Switched docs from using GitHub `access_token` query param to basic authentication
 - Removed usage of deprecated `ApplicationComponent`
-- Added additional logging output to Travis-CI builds
+- Added additional logging output to Travis CI builds
 - Added favicon.ico redirect to docs
 - Using `skywalking-oap` as Apache SkyWalking Docker host universally
 - Groovy/Kotlin no longer optional IntelliJ plugins
 - Removed usage of `Json.mapper.findAndRegisterModules`
-- Force Travis-CI to use JDK8
+- Force Travis CI to use JDK8
 - Removed unused files from agent jar
 
 ## Dependency upgrade
@@ -92,7 +128,7 @@
 - Upgrade Semantic UI and create tooltip build task ([#43](https://github.com/sourceplusplus/Assistant/issues/43))
 - Responsive Source++ Tooltip UI ([#44](https://github.com/sourceplusplus/Assistant/issues/44))
 - Core standalone functionality ([#60](https://github.com/sourceplusplus/Assistant/issues/60))
-- Automatic GitHub release artifact uploads via Travis-CI ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
+- Automatic GitHub release artifact uploads via Travis CI ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
 - Added ability for agent to detect integration connection information via API ([#73](https://github.com/sourceplusplus/Assistant/issues/73))
 
 # 0.1.4-alpha (2019-03-30)

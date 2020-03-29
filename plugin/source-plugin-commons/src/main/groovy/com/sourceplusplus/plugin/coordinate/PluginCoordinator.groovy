@@ -27,7 +27,7 @@ import io.vertx.ext.eventbus.bridge.tcp.TcpEventBusBridge
  *  - source code artifact configuration changes
  *  - source code artifact subscription changes
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

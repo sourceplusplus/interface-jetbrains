@@ -1,18 +1,14 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.4.16"
+    id "org.jetbrains.intellij" version "0.4.17"
 }
 
 apply plugin: 'groovy'
 intellij {
-    version 'LATEST-EAP-SNAPSHOT'
+    version '2019.3.4'
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
     plugins = ["java", "Groovy", "Kotlin", "properties", "gradle"]
     buildSearchableOptions.enabled = false
-}
-runIde {
-    systemProperty('ide.browser.jcef.enabled', 'true')
-    //systemProperty('idea.auto.reload.plugins', 'true') //todo: remove at 0.4.17
 }
 
 group = 'com.sourceplusplus.plugin'
@@ -20,9 +16,7 @@ archivesBaseName = 'jetbrains-source-plugin'
 
 dependencies {
     compile project(":api")
-    compile (project(":portal")) {
-        exclude group: 'com.jetbrains.intellij.platform'
-    }
+    compile project(":portal")
     compile project(":plugin:source-plugin-commons")
     compile 'org.codehaus.groovy:groovy-all:2.4.17'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
@@ -30,6 +24,7 @@ dependencies {
     compile(group: 'com.github.codebrig', name: 'gitsocratic', version: '5d33d30262') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
+    compile 'com.github.codebrig:journey:0.4.0-online'
 }
 
 task createProperties(dependsOn: processResources) {

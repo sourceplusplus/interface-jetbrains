@@ -20,7 +20,7 @@ import org.jetbrains.uast.UastContextKt
 /**
  * todo: description
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -55,19 +55,20 @@ class IntelliJArtifactNavigator extends ArtifactNavigator {
         vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT, { message ->
             def request = message.body() as JsonObject
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
+            def artifactQualifiedName = request.getString("artifact_qualified_name")
             ApplicationManager.getApplication().invokeLater({
                 IntelliJMethodGutterMark.closePortalIfOpen()
 
                 portal.interface.loadPage(PortalTab.Traces, ["order_type": portal.interface.tracesView.orderType.toString()])
-                navigateTo(portal.interface.viewingPortalArtifact)
+                navigateTo(artifactQualifiedName)
 
-                def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(portal.interface.viewingPortalArtifact) as IntelliJMethodGutterMark
+                def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark
                 if (sourceMark != null) {
                     handleMark(sourceMark)
                 } else {
                     //todo: smarter
                     vertx.setPeriodic(1000, {
-                        sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(portal.interface.viewingPortalArtifact) as IntelliJMethodGutterMark
+                        sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark
                         if (sourceMark != null) {
                             vertx.cancelTimer(it)
                             message.reply(true)

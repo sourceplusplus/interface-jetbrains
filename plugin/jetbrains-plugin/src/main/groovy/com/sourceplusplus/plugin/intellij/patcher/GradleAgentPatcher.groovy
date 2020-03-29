@@ -13,18 +13,23 @@ import org.jetbrains.plugins.gradle.settings.GradleExecutionSettings
 /**
  * todo: description
  *
- * @version 0.2.3
- * @since 0.1.0
+ * @version 0.2.4
+ * @since 0.2.4
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Slf4j
-class SPPGradleTaskManager implements GradleTaskManagerExtension {
+class GradleAgentPatcher implements GradleTaskManagerExtension, SourceAgentPatcher {
 
     @Override
-    boolean executeTasks(@NotNull ExternalSystemTaskId id, @NotNull List<String> taskNames, @NotNull String projectPath, @Nullable GradleExecutionSettings settings, @Nullable String jvmParametersSetup, @NotNull ExternalSystemTaskNotificationListener listener) throws ExternalSystemException {
-        SourceAgentPatcher.patchAgent()
+    boolean executeTasks(@NotNull ExternalSystemTaskId id,
+                         @NotNull List<String> taskNames,
+                         @NotNull String projectPath,
+                         @Nullable GradleExecutionSettings settings,
+                         @Nullable String jvmParametersSetup,
+                         @NotNull ExternalSystemTaskNotificationListener listener) throws ExternalSystemException {
+        patchAgent()
 
-        if (SourceAgentPatcher.agentFile != null) {
+        if (agentFile != null) {
             def initScript = settings.getUserData(GradleTaskManager.INIT_SCRIPT_KEY).toString()
             if (!initScript.contains('main = mainClass\n' +
                     '            \n' +
@@ -40,7 +45,7 @@ class SPPGradleTaskManager implements GradleTaskManagerExtension {
             }
 
             initScript = initScript.replace('if(_workingDir) workingDir = _workingDir',
-                    "jvmArgs '-javaagent:" + SourceAgentPatcher.agentFile + "'\n\n" +
+                    "jvmArgs '-javaagent:" + agentFile + "'\n\n" +
                             "            if(_workingDir) workingDir = _workingDir")
             settings.putUserData(GradleTaskManager.INIT_SCRIPT_KEY, initScript)
             log.info("Attached Source++ Agent to executing program")

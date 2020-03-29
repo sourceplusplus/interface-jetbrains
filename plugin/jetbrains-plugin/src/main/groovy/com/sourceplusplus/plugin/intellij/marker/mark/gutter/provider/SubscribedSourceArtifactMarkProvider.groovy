@@ -22,7 +22,7 @@ import javax.swing.*
 /**
  * Provides the visual rendering for 'Subscribed' source marks located in the IDE gutter.
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

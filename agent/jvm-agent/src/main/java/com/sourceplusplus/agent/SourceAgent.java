@@ -43,7 +43,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  */
 public class SourceAgent {
@@ -114,7 +114,7 @@ public class SourceAgent {
                 Configurator.defaultConfig()
                         .writer(new FileWriter(logFile.getAbsolutePath()))
                         .level(Level.valueOf(SourceAgentConfig.current.logLevel))
-                        .formatPattern("[AGENT] - {message}")
+                        .formatPattern("{level} {date:yyyy-MM-dd HH:mm:ss.S} {class_name} : {message}")
                         .activate();
 
                 if (SourceAgentConfig.current.logMetrics) {

@@ -8,6 +8,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.editor.Editor
@@ -18,6 +19,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiFile
@@ -51,12 +53,13 @@ import org.jetbrains.annotations.NotNull
 
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
+import java.awt.Desktop
 import java.util.concurrent.CountDownLatch
 
 /**
  * todo: description
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -81,6 +84,24 @@ class IntelliJStartupActivity implements StartupActivity {
     void runActivity(@NotNull Project project) {
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             return //don't need to boot everything for unit tests
+        } else if (System.getProperty("os.name").toLowerCase().startsWith("linux")
+                && ApplicationInfo.getInstance().majorVersion == "2019") {
+            //https://github.com/sourceplusplus/Assistant/issues/68
+            Notifications.Bus.notify(
+                    new Notification("Source++", "Linux Unsupported",
+                            "Source++ is currently unsupported on Linux. " +
+                                    "For more information visit: <a href=\"#\">https://github.com/sourceplusplus/Assistant/issues/68</a>",
+                            NotificationType.INFORMATION, new NotificationListener() {
+                        @Override
+                        void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
+                            try {
+                                Desktop.getDesktop().browse(URI.create("https://github.com/sourceplusplus/Assistant/issues/68"))
+                            } catch (Exception e) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }))
+            return
         }
         System.setProperty("vertx.disableFileCPResolving", "true")
 
@@ -114,6 +135,7 @@ class IntelliJStartupActivity implements StartupActivity {
                 return false
             }
         })
+        Disposer.register(project, consoleView)
 
         currentProject = project
         if (sourcePlugin != null) {
