@@ -1,8 +1,8 @@
 # 0.2.4-alpha (2020-03-29)
-//todo: ensure plugin config saves correctly
 
 ## Bug
 - Fixed issue with "Parent Stack" not navigating back to caller function
+- Disable activate button on first saved environment (#110) 
 
 ## Improvement
 - Replaced deprecated `PluginSettingsComponent` for `PropertiesComponent` implementation

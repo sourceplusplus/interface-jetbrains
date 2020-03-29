@@ -25,7 +25,7 @@ import javax.swing.event.DocumentListener
 class EnvironmentDialog extends JDialog {
 
     private JPanel contentPane
-    private JList environmentList
+    private JList<SourceEnvironmentConfig> environmentList
     private JButton createButton
     private JButton deleteButton
     private JButton setupViaDockerButton
@@ -148,7 +148,12 @@ class EnvironmentDialog extends JDialog {
                 apiTokenTextField.text = env.apiKey
                 sslEnabledCheckbox.setSelected(env.apiSslEnabled)
 
-                activateButton.setEnabled(SourcePluginConfig.current.activeEnvironment != env)
+                if (SourcePluginConfig.current.activeEnvironment == null && environmentList.model.size == 1) {
+                    //only environment automatically becomes active environment
+                    activateButton.setEnabled(false)
+                } else {
+                    activateButton.setEnabled(SourcePluginConfig.current.activeEnvironment != env)
+                }
             } else {
                 deleteButton.setEnabled(false)
                 activateButton.setEnabled(false)
@@ -166,8 +171,7 @@ class EnvironmentDialog extends JDialog {
         })
         activateButton.addActionListener({
             if (environmentList.selectedValue != null) {
-                DefaultListModel<SourceEnvironmentConfig> model = environmentList.getModel()
-                activeEnvironment = model.getElementAt(environmentList.getSelectedIndex())
+                activeEnvironment = environmentList.getModel().getElementAt(environmentList.getSelectedIndex())
                 activateButton.setEnabled(false)
             }
         })
@@ -271,8 +275,7 @@ class EnvironmentDialog extends JDialog {
 
         if (!hostTextField.text.trim().isEmpty() && !nameTextField.text.trim().isEmpty()) {
             if (environmentList.selectedValue != null) {
-                DefaultListModel<SourceEnvironmentConfig> model = environmentList.getModel()
-                def env = model.getElementAt(environmentList.getSelectedIndex())
+                def env = environmentList.getModel().getElementAt(environmentList.getSelectedIndex())
                 if (env.environmentName != nameTextField.text
                         || env.apiHost != hostTextField.text
                         || env.apiPort != (portSpinner.value as int)
