@@ -15,9 +15,7 @@ archivesBaseName = 'jetbrains-source-plugin'
 
 dependencies {
     compile project(":api")
-    compile (project(":portal")) {
-        exclude group: 'com.jetbrains.intellij.platform'
-    }
+    compile project(":portal")
     compile project(":plugin:source-plugin-commons")
     compile 'org.codehaus.groovy:groovy-all:2.4.17'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
