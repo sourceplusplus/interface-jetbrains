@@ -31,7 +31,7 @@ dependencies {
     implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5d33d30262') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
-    implementation('com.github.sourceplusplus.SourceMarker:marker-provider:3bb164403e') {
+    implementation('com.github.sourceplusplus.SourceMarker:marker-provider:0eb756dc17') { //todo: real version
         transitive = false
     }
 }

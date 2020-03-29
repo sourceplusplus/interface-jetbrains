@@ -89,7 +89,7 @@ class SourcePortal implements Closeable {
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalUuid, portal)
-        log.info("Registered new Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
+        log.info("Registered internal Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
         log.info("Active portals: " + portalMap.size())
     }
 
@@ -100,7 +100,7 @@ class SourcePortal implements Closeable {
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalUuid, portal)
-        log.info("Registered new Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
+        log.info("Registered external Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
         log.info("Active portals: " + portalMap.size())
         return portalUuid
     }

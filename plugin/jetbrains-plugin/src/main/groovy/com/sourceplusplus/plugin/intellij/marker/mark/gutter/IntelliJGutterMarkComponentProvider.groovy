@@ -3,8 +3,6 @@ package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 import org.jetbrains.annotations.NotNull
 import plus.sourceplus.marker.source.mark.api.event.SourceMarkEvent
 import plus.sourceplus.marker.source.mark.api.event.SourceMarkEventListener
-import plus.sourceplus.marker.source.mark.gutter.GutterMark
-import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
 import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponentProvider
 import plus.sourceplus.marker.source.mark.gutter.event.GutterMarkEventCode
 
@@ -24,12 +22,6 @@ class IntelliJGutterMarkComponentProvider extends GutterMarkJcefComponentProvide
         defaultConfiguration.setComponentSize(new Dimension(775, 250))
         //todo: measure size of editor and make short if it will extend past IDE
         //defaultConfiguration.setComponentSize(new Dimension(620, 250))
-    }
-
-    @Override
-    GutterMarkJcefComponent getComponent(@NotNull GutterMark gutterMark) {
-        gutterMark.addEventListener(this)
-        return super.getComponent(gutterMark)
     }
 
     @Override
