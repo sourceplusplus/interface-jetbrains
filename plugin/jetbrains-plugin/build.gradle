@@ -8,6 +8,7 @@ intellij {
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
     plugins = ["java", "Groovy", "Kotlin", "properties", "gradle"]
+    buildSearchableOptions.enabled = false
 }
 
 group = 'com.sourceplusplus.plugin'
