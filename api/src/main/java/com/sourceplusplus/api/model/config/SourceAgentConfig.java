@@ -21,7 +21,7 @@ import java.util.Objects;
  * Holds the current configuration used by the agent
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)

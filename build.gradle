@@ -10,7 +10,7 @@ subprojects {
     apply plugin: 'maven'
     group = 'com.github.sourceplusplus'
 
-    version = '0.2.3'
+    version = '0.2.4'
     sourceCompatibility = 11
     targetCompatibility = 11
 

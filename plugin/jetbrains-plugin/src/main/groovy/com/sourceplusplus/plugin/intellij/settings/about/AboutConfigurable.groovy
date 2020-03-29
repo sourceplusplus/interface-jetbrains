@@ -14,7 +14,7 @@ import java.awt.*
 /**
  * todo: description
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -43,7 +43,7 @@ class AboutConfigurable implements Configurable {
             form = new AboutDialog()
         }
 
-        form.versionLabel.setText("Version " + SourcePluginDefines.VERSION + ", © 2019 CodeBrig, LLC.")
+        form.versionLabel.setText("Version " + SourcePluginDefines.VERSION + ", © 2020 CodeBrig, LLC.")
         form.websiteLabel.setCursor(new Cursor(Cursor.HAND_CURSOR))
         form.websiteLabel.addMouseListener(new HyperlinkMouseListener(form.websiteLabel,
                 "https://sourceplusplus.com"))
