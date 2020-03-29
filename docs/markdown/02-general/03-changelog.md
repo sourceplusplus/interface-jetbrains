@@ -5,6 +5,7 @@
 - Disable activate button on first saved environment (#110) 
 
 ## Improvement
+- Registered `SourcePluginConsoleService` to dispose on project disposal
 - Replaced deprecated `PluginSettingsComponent` for `PropertiesComponent` implementation
 - Auto-attach agent to Gradle based application runs (#116)
 - Build with JDK 11 instead of JDK 8
