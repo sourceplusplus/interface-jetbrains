@@ -29,7 +29,7 @@
 - Upgraded Moment.js (2.20.1 -> 2.24.0)
 - Upgraded SockJS (1.3.0 -> 1.4.0)
 - Upgraded vertx-eventbus.min.js (n/a -> 3.8.3)
-- Upgraded from Semantic 2.4.0 to Fomantic UI - 2.8.4
+- Upgraded from Semantic 2.4.0 to Fomantic UI 2.8.4
 - Upgraded JetBrains intellij plugin (0.4.16 -> 0.4.17)
 
 # 0.2.3-alpha (2020-02-14)
