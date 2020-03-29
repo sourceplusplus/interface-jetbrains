@@ -1,3 +1,52 @@
+# 0.2.4-alpha (2020-03-29)
+//todo: ensure plugin config saves correctly
+//todo: private getAgentFile()
+//verify needed
+/*
+    maven { url 'https://www.jetbrains.com/intellij-repository/snapshots/' }
+    maven { url 'https://jetbrains.bintray.com/intellij-third-party-dependencies/' }
+  compileOnly(group: 'com.jetbrains.intellij.platform', name: 'ide', version: '201.5259-EAP-CANDIDATE-SNAPSHOT') {
+        transitive = false
+    }
+    compileOnly(group: 'com.jetbrains.intellij.platform', name: 'util', version: '201.5259-EAP-CANDIDATE-SNAPSHOT') {
+        transitive = false
+    }
+    compileOnly 'org.jetbrains.intellij.deps.jcef:jcef:3.3683.1920.g9f41a27-3'
+*/
+
+## Bug
+- Fixed issue with Portals not displaying/crashing on Linux (#68)
+- Fixed Portal scaling issues on 4k displays (#107)
+- Fixed issue with Portal location starting at top left of IDE (#108)
+
+## Improvement
+- Replaced deprecated `PluginSettingsComponent` for `PropertiesComponent` implementation
+- Auto-attach agent to Gradle based application runs (#116)
+- Build with JDK 11 instead of JDK 8
+- Use @Slf4j instead of static final Loggers
+- Specify charset when using URLDecoder.encode/URLDecoder.decode
+- Upgrade IntelliJ plugin version from 
+- Allow JitPack & Travis-CI to use default JDK
+- Allow Travis-CI to use default Docker Compose
+- Force Travis-CI to use https.protocols TLSv1.2
+- Use ignore variable names on catch clauses where appropriate
+- Various code refactorings
+- Removed Journey dependency (switched to IntelliJ embedded JCEF)
+- Added Java to IntelliJ plugin depends
+- Added IntelliJ plugin icon for marketplace display
+- Added logging to Portal overview page
+- Removed unused handler from Portal overview page
+
+## Dependency upgrade
+- Upgraded Portal //todo: echarts
+- Upgraded Portal //todo: moment
+- Upgraded Portal //todo: sockjs
+- Upgraded Portal //todo: eventbus
+- Upgraded Portal //todo: semantic/formantic
+
+- Upgraded Groovy (2.4.15 -> 2.4.17)
+- Upgraded IntelliJ plugin (2018.3.6 -> 2019.3.4)
+
 # 0.2.3-alpha (2020-02-14)
 
 ## Bug
