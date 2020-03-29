@@ -85,7 +85,7 @@ class IntelliJStartupActivity implements StartupActivity {
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             return //don't need to boot everything for unit tests
         } else if (System.getProperty("os.name").toLowerCase().startsWith("linux")
-                && ApplicationInfo.getInstance().majorVersion == "2019") {
+                && ApplicationInfo.getInstance().majorVersion >= "2019") {
             //https://github.com/sourceplusplus/Assistant/issues/68
             Notifications.Bus.notify(
                     new Notification("Source++", "Linux Unsupported",
