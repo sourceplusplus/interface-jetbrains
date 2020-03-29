@@ -16,7 +16,7 @@
 - Force Travis-CI to use https.protocols TLSv1.2
 - Use ignore variable names on catch clauses where appropriate
 - Various code refactorings
-- Added Java to IntelliJ plugin depends
+- Added gradle, Java, and properties to IntelliJ plugin depends
 - Added IntelliJ plugin icon for marketplace display
 - Added logging to Portal overview page
 - Removed unused handler from Portal overview page
@@ -30,6 +30,7 @@
 - Upgraded SockJS (1.3.0 -> 1.4.0)
 - Upgraded vertx-eventbus.min.js (n/a -> 3.8.3)
 - Upgraded from Semantic 2.4.0 to Fomantic UI - 2.8.4
+- Upgraded JetBrains intellij plugin (0.4.16 -> 0.4.17)
 
 # 0.2.3-alpha (2020-02-14)
 
