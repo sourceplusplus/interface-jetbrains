@@ -114,7 +114,7 @@ public class SourceAgent {
                 Configurator.defaultConfig()
                         .writer(new FileWriter(logFile.getAbsolutePath()))
                         .level(Level.valueOf(SourceAgentConfig.current.logLevel))
-                        .formatPattern("[AGENT] - {message}")
+                        .formatPattern("{level} {date:yyyy-MM-dd HH:mm:ss.S} {class_name} : {message}")
                         .activate();
 
                 if (SourceAgentConfig.current.logMetrics) {
