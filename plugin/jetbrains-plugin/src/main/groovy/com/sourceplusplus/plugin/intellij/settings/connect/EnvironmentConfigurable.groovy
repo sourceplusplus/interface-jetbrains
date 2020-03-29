@@ -67,8 +67,10 @@ class EnvironmentConfigurable implements Configurable {
         if (form != null) {
             form.getData(pluginConfig)
             SourcePluginConfig.current.applyConfig(pluginConfig)
-            PropertiesComponent.getInstance().setValue(
-                    "spp_plugin_config", Json.encode(SourcePluginConfig.current))
+            PropertiesComponent.getInstance().setValue("spp_plugin_config", Json.encode(SourcePluginConfig.current))
+            if (PluginBootstrap.sourcePlugin == null) {
+                return //nothing left to do
+            }
 
             PluginBootstrap.sourcePlugin.clearActiveSourceFileMarkers()
             def coreClient = new SourceCoreClient(pluginConfig.activeEnvironment.sppUrl)

@@ -2,7 +2,8 @@
 
 ## Bug
 - Fixed issue with "Parent Stack" not navigating back to caller function
-- Disable activate button on first saved environment (#110) 
+- Fixed issue with environment dialog not recognizing activate environment when updated
+- Disable activate button on first saved environment (#110)
 
 ## Improvement
 - Registered `SourcePluginConsoleService` to dispose on project disposal

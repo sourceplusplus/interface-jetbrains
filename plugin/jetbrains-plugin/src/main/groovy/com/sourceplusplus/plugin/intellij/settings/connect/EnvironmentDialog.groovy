@@ -47,6 +47,7 @@ class EnvironmentDialog extends JDialog {
         environmentList.setModel(new DefaultListModel<SourceEnvironmentConfig>())
 
         createButton.addActionListener({
+            environmentList.clearSelection()
             clearConnectionForm(true)
             nameTextField.requestFocus()
         })
@@ -148,11 +149,11 @@ class EnvironmentDialog extends JDialog {
                 apiTokenTextField.text = env.apiKey
                 sslEnabledCheckbox.setSelected(env.apiSslEnabled)
 
-                if (SourcePluginConfig.current.activeEnvironment == null && environmentList.model.size == 1) {
+                if (activeEnvironment == null && environmentList.model.size == 1) {
                     //only environment automatically becomes active environment
                     activateButton.setEnabled(false)
                 } else {
-                    activateButton.setEnabled(SourcePluginConfig.current.activeEnvironment != env)
+                    activateButton.setEnabled(activeEnvironment != env)
                 }
             } else {
                 deleteButton.setEnabled(false)
@@ -176,12 +177,16 @@ class EnvironmentDialog extends JDialog {
             }
         })
         saveButton.addActionListener({
-            def addIndex = 0
+            def setAsActive = false
+            def addIndex = environmentList.model.size
             if (environmentList.selectedValue != null) {
                 //update environment
+                def env = environmentList.getModel().getElementAt(environmentList.getSelectedIndex())
+                setAsActive = activeEnvironment == env
                 addIndex = environmentList.getSelectedIndex()
                 (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).remove(environmentList.getSelectedIndex())
             }
+
             def env = new SourceEnvironmentConfig()
             env.environmentName = nameTextField.text
             env.apiHost = hostTextField.text
@@ -192,6 +197,10 @@ class EnvironmentDialog extends JDialog {
             }
             clearConnectionForm(false)
             (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).add(addIndex, env)
+
+            if (setAsActive) {
+                activeEnvironment = env
+            }
         })
         testConnectionButton.addActionListener({
             def host = hostTextField.getText()
@@ -298,6 +307,7 @@ class EnvironmentDialog extends JDialog {
         if (!config.environments.isEmpty()) {
             DefaultListModel<SourceEnvironmentConfig> model = environmentList.getModel()
             config.environments.each { model.addElement(it) }
+            activeEnvironment = SourcePluginConfig.current.activeEnvironment
         }
     }
 
