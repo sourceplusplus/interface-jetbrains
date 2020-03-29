@@ -15,7 +15,7 @@
     <depends>org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
-        <taskManager implementation="com.sourceplusplus.plugin.intellij.patcher.SPPGradleTaskManager"/>
+        <taskManager implementation="com.sourceplusplus.plugin.intellij.patcher.GradleAgentPatcher"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <projectService
@@ -23,7 +23,7 @@
         <toolWindow id="Source++ Console" icon="/icons/s.png" anchor="bottom"
                     factoryClass="com.sourceplusplus.plugin.intellij.tool.SourcePluginToolWindowFactory"/>
         <postStartupActivity implementation="com.sourceplusplus.plugin.intellij.IntelliJStartupActivity"/>
-        <java.programPatcher implementation="com.sourceplusplus.plugin.intellij.patcher.SourceAgentPatcher"/>
+        <java.programPatcher implementation="com.sourceplusplus.plugin.intellij.patcher.MavenAgentPatcher"/>
         <inspectionToolProvider
                 implementation="com.sourceplusplus.plugin.intellij.inspect.IntelliJInspectionProvider"/>
         <applicationConfigurable
