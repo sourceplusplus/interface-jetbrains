@@ -5,10 +5,6 @@ applicationName = 'source-portal'
 archivesBaseName = 'source-portal'
 mainClassName = 'com.sourceplusplus.portal.PortalBootstrap'
 
-repositories {
-    maven { url 'https://www.jetbrains.com/intellij-repository/snapshots/' }
-    maven { url 'https://jetbrains.bintray.com/intellij-third-party-dependencies/' }
-}
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.17'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'

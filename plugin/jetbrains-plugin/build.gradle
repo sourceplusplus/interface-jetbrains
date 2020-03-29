@@ -8,11 +8,6 @@ intellij {
     updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
     plugins = ["java", "Groovy", "Kotlin", "properties", "gradle"]
-    buildSearchableOptions.enabled = false
-}
-runIde {
-    systemProperty('ide.browser.jcef.enabled', 'true')
-    //systemProperty('idea.auto.reload.plugins', 'true') //todo: remove at 0.4.17
 }
 
 group = 'com.sourceplusplus.plugin'
