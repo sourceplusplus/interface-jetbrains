@@ -4,6 +4,7 @@
 - Fixed issue with "Parent Stack" not navigating back to caller function
 - Fixed issue with environment dialog not recognizing activate environment when updated
 - Disable activate button on first saved environment (#110)
+- Disabled buildSearchableOptions (causes HeadlessException on Travis-CI)
 
 ## Improvement
 - Registered `SourcePluginConsoleService` to dispose on project disposal
