@@ -13,8 +13,8 @@ import org.jetbrains.plugins.gradle.settings.GradleExecutionSettings
 /**
  * todo: description
  *
- * @version 0.2.3
- * @since 0.1.0
+ * @version 0.2.4
+ * @since 0.2.4
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Slf4j
