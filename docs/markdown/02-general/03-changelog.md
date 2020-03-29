@@ -23,6 +23,7 @@
 - Removed unused files from agent jar
 
 ## Dependency upgrade
+- Upgraded Groovy (2.4.15 -> 2.4.17)
 - Upgraded Apache SkyWalking (6.2.0 -> 6.5.0)
 - Upgraded Vert.x (3.7.1 -> 3.8.5)
 - Upgraded Journey (0.3.3 -> 0.4.0)
