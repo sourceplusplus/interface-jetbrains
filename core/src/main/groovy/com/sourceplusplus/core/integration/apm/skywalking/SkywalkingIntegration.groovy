@@ -393,7 +393,7 @@ class SkywalkingIntegration extends APMIntegration {
                     } else {
                         artifactAPI.getSourceArtifactByEndpointName(appUuid, endpointName, fut)
                     }
-                    futures.add(fut.future())
+                    futures.add(fut as Future)  //see: #130
                 }
                 CompositeFuture.all(futures).setHandler({
                     if (it.succeeded()) {
