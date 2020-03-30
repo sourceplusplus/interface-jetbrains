@@ -13,7 +13,6 @@
 - Build with JDK 11 instead of JDK 8
 - Use @Slf4j instead of static final Loggers
 - Specify charset when using URLDecoder.encode/URLDecoder.decode
-- Allow JitPack & Travis CI to use default JDK
 - Allow Travis CI to use default Docker Compose
 - Force Travis CI to use https.protocols TLSv1.2
 - Use ignore variable names on catch clauses where appropriate
