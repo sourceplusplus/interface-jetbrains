@@ -35,7 +35,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
         super(sourceFileMarker, psiMethod)
     }
 
-    //todo: impl
     void getMethodAnnotations(Handler<AsyncResult<List<SourceMethodAnnotation>>> handler) {
         ReadAction.run({
             def annotations = new ArrayList<SourceMethodAnnotation>()
