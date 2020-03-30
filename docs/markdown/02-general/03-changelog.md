@@ -3,14 +3,14 @@
 ## Bug
 - Fixed issue with "Parent Stack" not navigating back to caller function
 - Fixed issue with environment dialog not recognizing activate environment when updated
-- Disable activate button on first saved environment (#110)
+- Disable activate button on first saved environment ([#110](https://github.com/sourceplusplus/Assistant/issues/110))
 - Disabled buildSearchableOptions (causes HeadlessException on Travis CI)
 - Fixed missing logging issue when using "Setup via Docker"
 
 ## Improvement
 - Registered `SourcePluginConsoleService` to dispose on project disposal
 - Replaced deprecated `PluginSettingsComponent` for `PropertiesComponent` implementation
-- Auto-attach agent to Gradle based application runs (#116)
+- Auto-attach agent to Gradle based application runs ([#116](https://github.com/sourceplusplus/Assistant/issues/116))
 - Build with JDK 11 instead of JDK 8
 - Use @Slf4j instead of static final Loggers
 - Specify charset when using URLDecoder.encode/URLDecoder.decode
