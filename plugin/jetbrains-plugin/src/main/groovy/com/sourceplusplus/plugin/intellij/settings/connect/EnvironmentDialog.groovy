@@ -58,12 +58,12 @@ class EnvironmentDialog extends JDialog {
             def input = new PipedInputStream()
             def output = new PipedOutputStream()
             input.connect(output)
-            Thread.startDaemon {
+            Thread.startDaemon { //todo: ensure thread closes
                 input.eachLine {
                     connectDialog.log(it + "\n")
                 }
             }
-            Thread.startDaemon {
+            Thread.startDaemon { //todo: ensure thread closes
                 if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
                     ConfigOption.docker_host.setValue("192.168.99.100")
                 }
@@ -77,6 +77,18 @@ class EnvironmentDialog extends JDialog {
                     return
                 }
                 Thread.sleep(10000) //todo: better (waits for skywalking to boot)
+
+                //todo: didn't always need this block twice
+                output.close()
+                input.close()
+                input = new PipedInputStream()
+                output = new PipedOutputStream()
+                input.connect(output)
+                Thread.startDaemon { //todo: ensure thread closes
+                    input.eachLine {
+                        connectDialog.log(it + "\n")
+                    }
+                }
 
                 connectDialog.setStatus("Initializing Source++...")
                 def initSpp = SocraticAPI.administration().initSourcePlusPlus()

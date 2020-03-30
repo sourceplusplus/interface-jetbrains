@@ -5,6 +5,7 @@
 - Fixed issue with environment dialog not recognizing activate environment when updated
 - Disable activate button on first saved environment (#110)
 - Disabled buildSearchableOptions (causes HeadlessException on Travis CI)
+- Fixed missing logging issue when using "Setup via Docker"
 
 ## Improvement
 - Registered `SourcePluginConsoleService` to dispose on project disposal
@@ -32,6 +33,7 @@
 - Upgraded vertx-eventbus.min.js (n/a -> 3.8.3)
 - Upgraded from Semantic 2.4.0 to Fomantic UI 2.8.4
 - Upgraded JetBrains intellij plugin (0.4.16 -> 0.4.17)
+- Upgraded GitSocratic (5d33d30262 -> b50580b3c7)
 
 # 0.2.3-alpha (2020-02-14)
 
