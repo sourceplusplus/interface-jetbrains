@@ -21,7 +21,7 @@ import static com.sourceplusplus.plugin.PluginBootstrap.sourcePlugin
  * Keeps track of all artifact subscriptions.
  * Distributes specific artifact subscriptions to specified trackers.
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

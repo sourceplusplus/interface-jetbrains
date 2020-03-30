@@ -1,23 +1,15 @@
 package com.sourceplusplus.plugin.intellij.patcher
 
-import com.intellij.execution.Executor
-import com.intellij.execution.configurations.JavaParameters
-import com.intellij.execution.configurations.RunProfile
-import com.intellij.execution.runners.JavaProgramPatcher
-import com.intellij.execution.ui.ConsoleViewContentType
-import com.intellij.openapi.components.ServiceManager
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePluginDefines
-import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
-import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
+import com.sourceplusplus.plugin.intellij.patcher.tail.LogTailer
 import com.sourceplusplus.portal.display.PortalInterface
+import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.input.Tailer
-import org.apache.commons.io.input.TailerListenerAdapter
 
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -28,25 +20,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * todo: description
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Slf4j
-class SourceAgentPatcher extends JavaProgramPatcher {
+trait SourceAgentPatcher {
 
+    @PackageScope static File agentFile
     private static AtomicBoolean patched = new AtomicBoolean()
-    static File agentFile //todo: should be private, share in a smarter way
-
-    @Override
-    void patchJavaParameters(Executor executor, RunProfile configuration, JavaParameters javaParameters) {
-        patchAgent()
-
-        if (agentFile != null) {
-            javaParameters.getVMParametersList()?.add("-javaagent:$agentFile.absolutePath")
-            log.info("Attached Source++ Agent to executing program")
-        }
-    }
 
     static void patchAgent() {
         if (!SourcePluginConfig.current.agentPatcherEnabled) {
@@ -79,26 +61,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
             log.info("Tailing log file: " + logFile)
             logFile.createNewFile()
             logFile.deleteOnExit()
-            new Thread(new Runnable() {
-                @Override
-                void run() {
-                    def consoleView = ServiceManager.getService(IntelliJStartupActivity.currentProject,
-                            SourcePluginConsoleService.class).getConsoleView()
-                    new Tailer(logFile, new TailerListenerAdapter() {
-                        @Override
-                        void handle(Exception ex) {
-                            ex.stackTrace.each {
-                                consoleView.print(it.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
-                            }
-                        }
-
-                        @Override
-                        void handle(String line) {
-                            consoleView.print(line + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
-                        }
-                    }).run()
-                }
-            }).start()
+            new Thread(new LogTailer(logFile, "AGENT")).start()
 
             //redirect skywalking logs to console
             def skywalkingLogFile = new File(destDir.absolutePath + File.separator + "logs" + File.separator + "skywalking-api.log")
@@ -106,26 +69,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
             log.info("Tailing log file: " + skywalkingLogFile)
             skywalkingLogFile.createNewFile()
             skywalkingLogFile.deleteOnExit()
-            new Thread(new Runnable() {
-                @Override
-                void run() {
-                    def consoleView = ServiceManager.getService(IntelliJStartupActivity.currentProject,
-                            SourcePluginConsoleService.class).getConsoleView()
-                    new Tailer(skywalkingLogFile, new TailerListenerAdapter() {
-                        @Override
-                        void handle(Exception ex) {
-                            ex.stackTrace.each {
-                                consoleView.print("[SKYWALKING] - " + it.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
-                            }
-                        }
-
-                        @Override
-                        void handle(String line) {
-                            consoleView.print("[SKYWALKING] - " + line + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
-                        }
-                    }).run()
-                }
-            }).start()
+            new Thread(new LogTailer(skywalkingLogFile, "SKYWALKING")).start()
         }
 
         if (agentFile != null) {
@@ -134,7 +78,7 @@ class SourceAgentPatcher extends JavaProgramPatcher {
         }
     }
 
-    static void modifyAgentJar(String agentPath) throws IOException {
+    private static void modifyAgentJar(String agentPath) throws IOException {
         Path agentFilePath = Paths.get(agentPath)
         FileSystems.newFileSystem(agentFilePath, null).withCloseable { fs ->
             Path source = fs.getPath("/source-agent.json")

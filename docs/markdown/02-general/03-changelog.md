@@ -7,53 +7,41 @@
 - Upgraded okhttp (3.14.6 -> 4.4.1)
 
 # 0.2.4-alpha (2020-03-29)
-//todo: ensure plugin config saves correctly
-//todo: private getAgentFile()
-//verify needed
-/*
-    maven { url 'https://www.jetbrains.com/intellij-repository/snapshots/' }
-    maven { url 'https://jetbrains.bintray.com/intellij-third-party-dependencies/' }
-  compileOnly(group: 'com.jetbrains.intellij.platform', name: 'ide', version: '201.5259-EAP-CANDIDATE-SNAPSHOT') {
-        transitive = false
-    }
-    compileOnly(group: 'com.jetbrains.intellij.platform', name: 'util', version: '201.5259-EAP-CANDIDATE-SNAPSHOT') {
-        transitive = false
-    }
-    compileOnly 'org.jetbrains.intellij.deps.jcef:jcef:3.3683.1920.g9f41a27-3'
-*/
 
 ## Bug
-- Fixed issue with Portals not displaying/crashing on Linux (#68)
-- Fixed Portal scaling issues on 4k displays (#107)
-- Fixed issue with Portal location starting at top left of IDE (#108)
+- Fixed issue with "Parent Stack" not navigating back to caller function
+- Fixed issue with environment dialog not recognizing activate environment when updated
+- Disable activate button on first saved environment ([#110](https://github.com/sourceplusplus/Assistant/issues/110))
+- Disabled buildSearchableOptions (causes HeadlessException on Travis CI)
+- Fixed missing logging issue when using "Setup via Docker"
 
 ## Improvement
+- Registered `SourcePluginConsoleService` to dispose on project disposal
 - Replaced deprecated `PluginSettingsComponent` for `PropertiesComponent` implementation
-- Auto-attach agent to Gradle based application runs (#116)
+- Auto-attach agent to Gradle based application runs ([#116](https://github.com/sourceplusplus/Assistant/issues/116))
 - Build with JDK 11 instead of JDK 8
 - Use @Slf4j instead of static final Loggers
 - Specify charset when using URLDecoder.encode/URLDecoder.decode
-- Upgrade IntelliJ plugin version from 
-- Allow JitPack & Travis-CI to use default JDK
-- Allow Travis-CI to use default Docker Compose
-- Force Travis-CI to use https.protocols TLSv1.2
+- Allow Travis CI to use default Docker Compose
+- Force Travis CI to use https.protocols TLSv1.2
 - Use ignore variable names on catch clauses where appropriate
 - Various code refactorings
-- Removed Journey dependency (switched to IntelliJ embedded JCEF)
-- Added Java to IntelliJ plugin depends
+- Added gradle, Java, and properties to IntelliJ plugin depends
 - Added IntelliJ plugin icon for marketplace display
 - Added logging to Portal overview page
 - Removed unused handler from Portal overview page
+- Updated agent log format to include more information
 
 ## Dependency upgrade
-- Upgraded Portal //todo: echarts
-- Upgraded Portal //todo: moment
-- Upgraded Portal //todo: sockjs
-- Upgraded Portal //todo: eventbus
-- Upgraded Portal //todo: semantic/formantic
-
 - Upgraded Groovy (2.4.15 -> 2.4.17)
 - Upgraded IntelliJ plugin (2018.3.6 -> 2019.3.4)
+- Upgraded Apache ECharts (4.2.1 -> 4.7.0)
+- Upgraded Moment.js (2.20.1 -> 2.24.0)
+- Upgraded SockJS (1.3.0 -> 1.4.0)
+- Upgraded vertx-eventbus.min.js (n/a -> 3.8.3)
+- Upgraded from Semantic 2.4.0 to Fomantic UI 2.8.4
+- Upgraded JetBrains intellij plugin (0.4.16 -> 0.4.17)
+- Upgraded GitSocratic (5d33d30262 -> b50580b3c7)
 
 # 0.2.3-alpha (2020-02-14)
 
@@ -63,12 +51,12 @@
 ## Improvement
 - Switched docs from using GitHub `access_token` query param to basic authentication
 - Removed usage of deprecated `ApplicationComponent`
-- Added additional logging output to Travis-CI builds
+- Added additional logging output to Travis CI builds
 - Added favicon.ico redirect to docs
 - Using `skywalking-oap` as Apache SkyWalking Docker host universally
 - Groovy/Kotlin no longer optional IntelliJ plugins
 - Removed usage of `Json.mapper.findAndRegisterModules`
-- Force Travis-CI to use JDK8
+- Force Travis CI to use JDK8
 - Removed unused files from agent jar
 
 ## Dependency upgrade
@@ -149,7 +137,7 @@
 - Upgrade Semantic UI and create tooltip build task ([#43](https://github.com/sourceplusplus/Assistant/issues/43))
 - Responsive Source++ Tooltip UI ([#44](https://github.com/sourceplusplus/Assistant/issues/44))
 - Core standalone functionality ([#60](https://github.com/sourceplusplus/Assistant/issues/60))
-- Automatic GitHub release artifact uploads via Travis-CI ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
+- Automatic GitHub release artifact uploads via Travis CI ([#66](https://github.com/sourceplusplus/Assistant/issues/66))
 - Added ability for agent to detect integration connection information via API ([#73](https://github.com/sourceplusplus/Assistant/issues/73))
 
 # 0.1.4-alpha (2019-03-30)
