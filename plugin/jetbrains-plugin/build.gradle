@@ -27,7 +27,7 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
     implementation "io.vertx:vertx-web:$VERTX_VERSION"
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
-    implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: 'b50580b3c7') {
+    implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: 'b2f70f677a') {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
     implementation('com.github.sourceplusplus.SourceMarker:marker-provider:0eb756dc17') { //todo: real version
