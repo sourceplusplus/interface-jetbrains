@@ -41,7 +41,11 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
                 SourcePluginConfig.current.activeEnvironment.appUuid, true, {
             if (it.succeeded()) {
-                it.result().each { PENDING_SUBSCRIBED.add(it.artifactQualifiedName()) }
+                it.result().each {
+                    if (it.automaticSubscription() || it.forceSubscription()) {
+                        PENDING_SUBSCRIBED.add(it.artifactQualifiedName())
+                    }
+                }
             } else {
                 log.error("Failed to get application subscriptions", it.cause())
             }
