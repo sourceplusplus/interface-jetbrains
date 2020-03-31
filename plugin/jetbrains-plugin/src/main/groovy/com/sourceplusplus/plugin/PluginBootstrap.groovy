@@ -3,6 +3,7 @@ package com.sourceplusplus.plugin
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.artifact.SourceArtifact
@@ -15,10 +16,16 @@ import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
+import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMarkComponentProvider
 import com.sourceplusplus.portal.PortalBootstrap
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.jackson.DatabindCodec
+import org.jetbrains.annotations.NotNull
+import plus.sourceplus.marker.SourceFileMarker
+import plus.sourceplus.marker.SourceFileMarkerProvider
+import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 
 /**
  * Used to bootstrap the Source++ Plugin.
@@ -34,6 +41,16 @@ class PluginBootstrap extends AbstractVerticle {
 
     PluginBootstrap(SourcePlugin sourcePlugin) {
         PluginBootstrap.sourcePlugin = sourcePlugin
+
+        //setup SourceMarker
+        SourceMarkerPlugin.INSTANCE.enabled = true
+        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new IntelliJGutterMarkComponentProvider()
+        SourceMarkerPlugin.configuration.sourceFileMarkerProvider = new SourceFileMarkerProvider() {
+            @Override
+            SourceFileMarker createSourceFileMarker(@NotNull PsiFile psiFile) {
+                return new IntelliJSourceFileMarker(psiFile)
+            }
+        }
     }
 
     @Override

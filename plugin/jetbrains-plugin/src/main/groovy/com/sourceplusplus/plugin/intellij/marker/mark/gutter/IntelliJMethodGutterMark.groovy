@@ -17,7 +17,6 @@ import org.jetbrains.uast.java.JavaUAnnotation
 import plus.sourceplus.marker.SourceFileMarker
 import plus.sourceplus.marker.source.mark.gutter.MethodGutterMark
 import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
-import plus.sourceplus.marker.source.mark.gutter.config.GutterMarkIcon
 
 import java.time.Instant
 
@@ -74,7 +73,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void markArtifactSubscribed() {
         if (!artifactSubscribed) {
-            configuration.icon = GutterMarkIcon.sppActive
+            configuration.icon = artifactDataAvailable ? sppActive : sppInactive
             putUserData(IntelliJKeys.ArtifactSubscribed, true)
             putUserData(IntelliJKeys.ArtifactSubscribeTime, Instant.now())
             sourceFileMarker.refresh()
@@ -87,7 +86,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void markArtifactUnsubscribed() {
         if (artifactSubscribed) {
-            configuration.icon = null
+            configuration.icon = artifactDataAvailable ? sppActive : null
             putUserData(IntelliJKeys.ArtifactSubscribed, false)
             putUserData(IntelliJKeys.ArtifactUnsubscribeTime, Instant.now())
             sourceFileMarker.refresh()
@@ -100,7 +99,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void markArtifactHasData() {
         if (!artifactDataAvailable) {
-            configuration.icon = GutterMarkIcon.sppActive
+            configuration.icon = sppActive
             putUserData(IntelliJKeys.ArtifactDataAvailable, true)
             sourceFileMarker.refresh()
         }

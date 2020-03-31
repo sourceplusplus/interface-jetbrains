@@ -67,6 +67,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity {
             return //don't need to boot everything for unit tests
         }
         System.setProperty("vertx.disableFileCPResolving", "true")
+        SourceMarkerPlugin.INSTANCE.enabled = false
 
         //redirect loggers to console
         def consoleView = ServiceManager.getService(project, SourcePluginConsoleService.class).getConsoleView()
@@ -144,19 +145,8 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity {
             notifyNoConnection()
         }
 
-        setupSourceMarker()
         super.runActivity(project)
         log.info("Source++ loaded for project: {} ({})", project.name, project.getPresentableUrl())
-    }
-
-    private static setupSourceMarker() {
-        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new IntelliJGutterMarkComponentProvider()
-        SourceMarkerPlugin.configuration.sourceFileMarkerProvider = new SourceFileMarkerProvider() {
-            @Override
-            SourceFileMarker createSourceFileMarker(@NotNull PsiFile psiFile) {
-                return new IntelliJSourceFileMarker(psiFile)
-            }
-        }
     }
 
     private static notifyNoConnection() {
