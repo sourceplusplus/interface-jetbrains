@@ -65,8 +65,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             PluginBootstrap.sourcePlugin.vertx.eventBus().send(UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
         } else  if (sourceMarkEvent.eventCode == SourceMarkEventCode.NAME_CHANGED) {
             //todo: this
-        } else {
-            throw new UnsupportedOperationException("Event: " + sourceMarkEvent.eventCode)
         }
     }
 
