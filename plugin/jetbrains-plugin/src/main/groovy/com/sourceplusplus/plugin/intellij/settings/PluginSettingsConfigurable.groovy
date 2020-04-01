@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
+import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 
 import javax.swing.*
 
@@ -63,7 +64,7 @@ class PluginSettingsConfigurable implements Configurable {
             PropertiesComponent.getInstance().setValue(
                     "spp_plugin_config", Json.encode(SourcePluginConfig.current))
 
-            PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+            SourceMarkerPlugin.INSTANCE.refreshActiveSourceFileMarkers()
         }
     }
 

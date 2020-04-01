@@ -2,7 +2,6 @@ package com.sourceplusplus.plugin
 
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.client.SourceCoreClient
-import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
@@ -19,8 +18,6 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import plus.sourceplus.marker.plugin.SourceMarkerPlugin
-
-import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
 
 /**
  * todo: description
@@ -78,60 +75,6 @@ class SourcePlugin {
         Router router = Router.router(vertx)
         router.route("/eventbus/*").handler(sockJSHandler)
         vertx.createHttpServer().requestHandler(router).listen(0, listenHandler)
-    }
-
-    void clearActiveSourceFileMarkers() {
-        availableSourceFileMarkers.each {
-            deactivateSourceFileMarker(it)
-        }
-        availableSourceFileMarkers.clear()
-    }
-
-    void refreshActiveSourceFileMarkers() {
-        availableSourceFileMarkers.each {
-            it.refresh()
-        }
-    }
-
-//    void activateSourceFileMarker(IntelliJSourceFileMarker sourceFileMarker) {
-//        if (availableSourceFileMarkers.add(Objects.requireNonNull(sourceFileMarker))) {
-//            def sourceMarks = sourceFileMarker.createSourceMarks()
-//            sourceFileMarker.setSourceMarks(sourceMarks)
-//            log.info("Activated source file marker: {} - Mark count: {}", sourceFileMarker, sourceMarks.size())
-//            vertx.eventBus().publish(SOURCE_FILE_MARKER_ACTIVATED, sourceFileMarker.sourceFile.qualifiedClassName)
-//        }
-//    }
-
-    void deactivateSourceFileMarker(IntelliJSourceFileMarker sourceFileMarker) {
-        if (availableSourceFileMarkers.remove(Objects.requireNonNull(sourceFileMarker))) {
-            def sourceMarks = sourceFileMarker.getSourceMarks()
-
-            log.info("Deactivated source file marker: {} - Mark count: {}", sourceFileMarker, sourceMarks.size())
-            sourceMarks.each {
-                if (it.artifactSubscribed) {
-                    def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
-                            .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
-                            .artifactQualifiedName(it.artifactQualifiedName)
-                            .removeAllArtifactSubscriptions(true)
-                            .build()
-                    vertx.eventBus().send(UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
-                }
-
-                sourceFileMarker.removeSourceMark(it)
-                log.trace("Removed source mark: {}", it)
-            }
-            sourceFileMarker.refresh()
-        }
-    }
-
-    @Nullable
-    IntelliJSourceFileMarker getSourceFileMarker(String classQualifiedName) {
-        return SourceMarkerPlugin.INSTANCE.getSourceFileMarker(classQualifiedName) as IntelliJSourceFileMarker
-    }
-
-    @NotNull
-    Set<IntelliJSourceFileMarker> getAvailableSourceFileMarkers() {
-        return SourceMarkerPlugin.INSTANCE.getAvailableSourceFileMarkers().toSet() as Set<IntelliJSourceFileMarker>
     }
 
     IntelliJSourceFileMarker getSourceFileMarker(PsiFile psiFile) {

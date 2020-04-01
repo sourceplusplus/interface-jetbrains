@@ -9,7 +9,6 @@ import com.intellij.util.IncorrectOperationException
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
-import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod

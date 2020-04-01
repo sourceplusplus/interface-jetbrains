@@ -2,7 +2,9 @@ package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 
 import com.intellij.openapi.application.ReadAction
 import com.intellij.psi.PsiLiteral
+import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
 import com.sourceplusplus.portal.SourcePortal
@@ -11,14 +13,20 @@ import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
+import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.java.JavaUAnnotation
 import plus.sourceplus.marker.SourceFileMarker
+import plus.sourceplus.marker.source.mark.api.event.SourceMarkEvent
+import plus.sourceplus.marker.source.mark.api.event.SourceMarkEventCode
+import plus.sourceplus.marker.source.mark.api.event.SourceMarkEventListener
 import plus.sourceplus.marker.source.mark.gutter.MethodGutterMark
 import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
 
 import java.time.Instant
+
+import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
 
 /**
  * todo: description
@@ -28,10 +36,38 @@ import java.time.Instant
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 //@Slf4j //todo: can't override log
-class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutterMark {
+class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutterMark, SourceMarkEventListener {
 
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, UMethod psiMethod) {
         super(sourceFileMarker, psiMethod)
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void apply() {
+        addEventListener(this)
+        super.apply()
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void handleEvent(@NotNull SourceMarkEvent sourceMarkEvent) {
+        if (sourceMarkEvent.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+            def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
+                    .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
+                    .artifactQualifiedName(artifactQualifiedName)
+                    .removeAllArtifactSubscriptions(true)
+                    .build()
+            PluginBootstrap.sourcePlugin.vertx.eventBus().send(UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
+        } else  if (sourceMarkEvent.eventCode == SourceMarkEventCode.NAME_CHANGED) {
+            //todo: this
+        } else {
+            throw new UnsupportedOperationException("Event: " + sourceMarkEvent.eventCode)
+        }
     }
 
     void getMethodAnnotations(Handler<AsyncResult<List<SourceMethodAnnotation>>> handler) {
