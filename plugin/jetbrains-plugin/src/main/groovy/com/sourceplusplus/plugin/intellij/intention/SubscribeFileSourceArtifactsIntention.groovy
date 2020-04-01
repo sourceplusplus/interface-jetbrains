@@ -13,10 +13,12 @@ import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceOrderType
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
+import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
+import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 
 import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
 
@@ -45,7 +47,8 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
         }
         if (!inMethod) {
             //check for unsubscribed source marks
-            def fileMarker = sourcePlugin.getSourceFileMarker(originalElement.containingFile)
+            def fileMarker = SourceMarkerPlugin.INSTANCE.getSourceFileMarker(
+                    originalElement.containingFile) as IntelliJSourceFileMarker
             if (fileMarker) {
                 return fileMarker.sourceMarks.find { !it.artifactSubscribed }
             }
@@ -57,7 +60,8 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
     @SuppressWarnings("GroovyVariableNotAssigned")
     void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element)
             throws IncorrectOperationException {
-        def fileMarker = sourcePlugin.getSourceFileMarker(element.containingFile)
+        def fileMarker = SourceMarkerPlugin.INSTANCE.getSourceFileMarker(
+                element.containingFile) as IntelliJSourceFileMarker
         if (fileMarker) {
             fileMarker.sourceMarks.each {
                 if (!it.artifactSubscribed) {

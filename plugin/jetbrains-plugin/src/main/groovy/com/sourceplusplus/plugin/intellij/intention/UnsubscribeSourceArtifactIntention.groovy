@@ -9,11 +9,13 @@ import com.intellij.util.IncorrectOperationException
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
+import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
+import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 
 import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
 
@@ -35,7 +37,7 @@ class UnsubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
             def uMethod = UastContextKt.toUElement(element)
             if (uMethod instanceof UMethod) {
                 def qualifiedName = IntelliUtils.getArtifactQualifiedName(uMethod)
-                def sourceMark = sourcePlugin.getSourceMark(qualifiedName)
+                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(qualifiedName) as IntelliJSourceMark
                 if (sourceMark != null && sourceMark.artifactSubscribed) {
                     return true
                 }

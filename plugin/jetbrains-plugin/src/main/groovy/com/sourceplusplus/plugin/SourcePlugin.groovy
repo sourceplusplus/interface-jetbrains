@@ -1,11 +1,8 @@
 package com.sourceplusplus.plugin
 
-import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
-import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
-import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import groovy.util.logging.Slf4j
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -16,8 +13,6 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
-import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 
 /**
  * todo: description
@@ -75,15 +70,6 @@ class SourcePlugin {
         Router router = Router.router(vertx)
         router.route("/eventbus/*").handler(sockJSHandler)
         vertx.createHttpServer().requestHandler(router).listen(0, listenHandler)
-    }
-
-    IntelliJSourceFileMarker getSourceFileMarker(PsiFile psiFile) {
-        return SourceMarkerPlugin.INSTANCE.getSourceFileMarker(psiFile) as IntelliJSourceFileMarker
-    }
-
-    @Nullable
-    IntelliJSourceMark getSourceMark(String artifactQualifiedName) {
-        return SourceMarkerPlugin.INSTANCE.getSourceMark(artifactQualifiedName) as IntelliJSourceMark
     }
 
     @NotNull

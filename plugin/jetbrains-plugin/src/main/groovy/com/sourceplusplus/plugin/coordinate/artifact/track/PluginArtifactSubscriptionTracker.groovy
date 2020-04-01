@@ -12,6 +12,7 @@ import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.portal.SourcePortal
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
+import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 
 import java.util.concurrent.TimeUnit
 
@@ -83,7 +84,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def artifactMetricResult = it.body() as ArtifactMetricResult
             if (SourcePluginConfig.current.methodGutterMarksEnabled
                     && artifactMetricResult.appUuid() == SourcePluginConfig.current.activeEnvironment.appUuid) {
-                def gutterMark = sourcePlugin.getSourceMark(
+                def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                         artifactMetricResult.artifactQualifiedName()) as IntelliJGutterMark
                 if (gutterMark != null) {
                     gutterMark.markArtifactDataAvailable()
@@ -103,7 +104,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                 if (it.succeeded()) {
                     resp.reply(request)
 
-                    def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as IntelliJGutterMark
+                    def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                            request.artifactQualifiedName()) as IntelliJGutterMark
                     if (gutterMark != null) {
                         gutterMark.markArtifactSubscribed()
                         PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
@@ -126,7 +128,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     resp.reply(request)
                     PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
 
-                    def gutterMark = sourcePlugin.getSourceMark(request.artifactQualifiedName()) as IntelliJGutterMark
+                    def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                            request.artifactQualifiedName()) as IntelliJGutterMark
                     if (gutterMark) {
                         gutterMark.markArtifactUnsubscribed()
                         if (gutterMark.portalRegistered) {

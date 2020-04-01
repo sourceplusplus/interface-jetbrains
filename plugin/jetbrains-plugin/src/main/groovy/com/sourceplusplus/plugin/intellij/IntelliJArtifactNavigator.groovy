@@ -2,7 +2,7 @@ package com.sourceplusplus.plugin.intellij
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
@@ -36,7 +36,8 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
                         IntelliJStartupActivity.currentProject, artifactQualifiedName)) {
                     def internalPortal = SourcePortal.getInternalPortal(appUuid, artifactQualifiedName)
                     if (!internalPortal.isPresent()) {
-                        def sourceMark = PluginBootstrap.sourcePlugin.getSourceMark(artifactQualifiedName)
+                        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                                artifactQualifiedName) as IntelliJGutterMark
                         if (sourceMark) {
                             sourceMark.registerPortal()
                             message.reply(true)
@@ -63,13 +64,15 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
                 SourceMarkerPlugin.INSTANCE.artifactNavigator.navigateToMethod(
                         IntelliJStartupActivity.currentProject, artifactQualifiedName)
 
-                def sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark
+                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                        artifactQualifiedName) as IntelliJMethodGutterMark
                 if (sourceMark != null) {
                     handleMark(sourceMark)
                 } else {
                     //todo: smarter
                     vertx.setPeriodic(1000, {
-                        sourceMark = PluginBootstrap.getSourcePlugin().getSourceMark(artifactQualifiedName) as IntelliJMethodGutterMark
+                        sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                                artifactQualifiedName) as IntelliJMethodGutterMark
                         if (sourceMark != null) {
                             vertx.cancelTimer(it)
                             message.reply(true)
