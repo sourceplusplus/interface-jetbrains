@@ -1,14 +1,11 @@
 package com.sourceplusplus.plugin.intellij.marker
 
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
-import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import plus.sourceplus.marker.SourceFileMarker
 import plus.sourceplus.marker.source.mark.api.SourceMark
@@ -30,35 +27,13 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
-    List<IntelliJGutterMark> getRejectedSourceMarks() {
-        return super.getRejectedSourceMarks() as List<IntelliJGutterMark>
+    List<IntelliJSourceMark> getSourceMarks() {
+        return super.getSourceMarks() as List<IntelliJSourceMark>
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    List<IntelliJGutterMark> getSourceMarks() {
-        return super.getSourceMarks() as List<IntelliJGutterMark>
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    IntelliJGutterMark getSourceMark(@Nullable String artifactQualifiedName) {
-        return super.getSourceMark(artifactQualifiedName) as IntelliJGutterMark
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    IntelliJMethodGutterMark getMethodSourceMark(@NotNull PsiElement psiMethod) {
-        return super.getMethodSourceMark(psiMethod) as IntelliJMethodGutterMark
-    }
-
+    @NotNull
     @Override
     SourceMark createSourceMark(@NotNull UMethod psiMethod, @NotNull SourceMark.Type type) {
         if (type == SourceMark.Type.GUTTER) {
