@@ -6,7 +6,6 @@ import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
-import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.portal.SourcePortal
@@ -15,8 +14,6 @@ import io.vertx.core.AbstractVerticle
 import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 
 import java.util.concurrent.TimeUnit
-
-import static com.sourceplusplus.plugin.PluginBootstrap.sourcePlugin
 
 /**
  * Keeps track of all artifact subscriptions.
@@ -67,7 +64,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         })
 
         //refresh markers when they become available
-        vertx.eventBus().consumer(SourcePlugin.SOURCE_MARKER_ACTIVATED, {
+        vertx.eventBus().consumer(IntelliJSourceMark.SOURCE_MARK_CREATED, {
             def sourceMark = it.body() as IntelliJSourceMark
 
             //pending data available/subscriptions

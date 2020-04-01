@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull
 @Slf4j
 class SourcePlugin {
 
-    public static final String SOURCE_MARKER_ACTIVATED = "SourceMarkerActivated"
     public static final String SOURCE_ENVIRONMENT_UPDATED = "SourceEnvironmentUpdated"
 
     private final Vertx vertx

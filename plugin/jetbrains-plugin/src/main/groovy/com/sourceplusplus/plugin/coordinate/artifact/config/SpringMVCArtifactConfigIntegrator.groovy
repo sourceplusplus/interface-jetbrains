@@ -3,7 +3,7 @@ package com.sourceplusplus.plugin.coordinate.artifact.config
 import com.google.common.collect.Sets
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.plugin.SourcePlugin
+import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
@@ -29,7 +29,7 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
-        vertx.eventBus().consumer(SourcePlugin.SOURCE_MARKER_ACTIVATED, {
+        vertx.eventBus().consumer(IntelliJSourceMark.SOURCE_MARK_CREATED, {
             handleSourceMark(it.body() as IntelliJMethodGutterMark)
         })
     }
