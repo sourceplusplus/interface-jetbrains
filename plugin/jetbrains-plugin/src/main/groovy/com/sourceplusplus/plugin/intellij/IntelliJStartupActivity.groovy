@@ -153,7 +153,9 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
 
     @Override
     void dispose() {
-        SourceMarkerPlugin.INSTANCE.clearActiveSourceFileMarkers()
+        if (SourceMarkerPlugin.INSTANCE.enabled) {
+            SourceMarkerPlugin.INSTANCE.clearActiveSourceFileMarkers()
+        }
     }
 
     private static notifyNoConnection() {
