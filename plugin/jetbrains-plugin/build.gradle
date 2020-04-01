@@ -5,10 +5,12 @@ plugins {
 apply plugin: 'groovy'
 intellij {
     version '201.6073-EAP-CANDIDATE-SNAPSHOT'
-    updateSinceUntilBuild = false
     pluginName 'jetbrains-source-plugin'
     plugins = ["java", "Groovy", "Kotlin", "properties", "gradle"]
     buildSearchableOptions.enabled = false
+}
+patchPluginXml {
+    sinceBuild = "201"
 }
 runIde {
     systemProperty('ide.browser.jcef.enabled', 'true')
