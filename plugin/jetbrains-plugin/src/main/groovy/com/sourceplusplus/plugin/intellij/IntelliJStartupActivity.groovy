@@ -8,6 +8,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
@@ -46,7 +47,7 @@ import java.util.concurrent.CountDownLatch
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Slf4j
-class IntelliJStartupActivity extends SourceMarkerStartupActivity {
+class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Disposable {
 
     //todo: fix https://github.com/sourceplusplus/Assistant/issues/1 and remove static block below
     static {
@@ -68,6 +69,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity {
         }
         System.setProperty("vertx.disableFileCPResolving", "true")
         SourceMarkerPlugin.INSTANCE.enabled = false
+        Disposer.register(project, this)
 
         //redirect loggers to console
         def consoleView = ServiceManager.getService(project, SourcePluginConsoleService.class).getConsoleView()
@@ -147,6 +149,11 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity {
 
         super.runActivity(project)
         log.info("Source++ loaded for project: {} ({})", project.name, project.getPresentableUrl())
+    }
+
+    @Override
+    void dispose() {
+        sourcePlugin.clearActiveSourceFileMarkers()
     }
 
     private static notifyNoConnection() {
