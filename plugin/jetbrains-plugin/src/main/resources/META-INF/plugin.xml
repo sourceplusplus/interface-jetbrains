@@ -9,7 +9,7 @@
         Source++ is a strictly observant programming assistant and aims to integrate APM solutions with the IDE for tighter feedback loops.
     ]]></description>
 
-    <idea-version since-build="201.6073"/>
+    <idea-version since-build="201"/>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>org.intellij.groovy</depends>
