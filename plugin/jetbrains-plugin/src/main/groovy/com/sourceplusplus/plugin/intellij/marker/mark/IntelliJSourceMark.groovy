@@ -20,6 +20,4 @@ interface IntelliJSourceMark extends SourceMark {
     boolean isArtifactSubscribed()
 
     boolean isArtifactDataAvailable()
-
-    boolean isViewable()
 }

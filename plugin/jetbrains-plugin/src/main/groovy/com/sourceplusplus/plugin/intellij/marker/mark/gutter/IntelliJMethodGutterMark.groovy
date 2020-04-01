@@ -161,14 +161,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
-    boolean isViewable() {
-        return false //todo: this
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     boolean isPortalRegistered() {
         return getUserData(IntelliJKeys.PortalUUID) != null
     }
