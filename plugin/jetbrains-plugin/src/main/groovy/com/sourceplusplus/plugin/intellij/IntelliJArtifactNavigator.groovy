@@ -83,7 +83,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
     }
 
     private static void handleMark(IntelliJMethodGutterMark mark) {
-        mark.markArtifactHasData()
+        mark.markArtifactDataAvailable()
 
         ApplicationManager.getApplication().invokeLater({
             ApplicationManager.getApplication().runReadAction({

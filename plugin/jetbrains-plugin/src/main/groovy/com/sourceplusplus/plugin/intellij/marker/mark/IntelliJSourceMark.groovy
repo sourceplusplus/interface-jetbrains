@@ -15,7 +15,7 @@ interface IntelliJSourceMark extends SourceMark {
 
     void markArtifactUnsubscribed()
 
-    void markArtifactHasData()
+    void markArtifactDataAvailable()
 
     boolean isArtifactSubscribed()
 

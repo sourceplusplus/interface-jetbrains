@@ -133,7 +133,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
-    void markArtifactHasData() {
+    void markArtifactDataAvailable() {
         if (!artifactDataAvailable) {
             configuration.icon = sppActive
             putUserData(IntelliJKeys.ArtifactDataAvailable, true)

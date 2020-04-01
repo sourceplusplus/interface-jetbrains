@@ -71,7 +71,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
             //pending data available/subscriptions
             if (PENDING_DATA_AVAILABLE.remove(sourceMark.artifactQualifiedName)) {
-                sourceMark.markArtifactHasData()
+                sourceMark.markArtifactDataAvailable()
             }
             if (PENDING_SUBSCRIBED.remove(sourceMark.artifactQualifiedName)) {
                 sourceMark.markArtifactSubscribed()
@@ -86,7 +86,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                 def gutterMark = sourcePlugin.getSourceMark(
                         artifactMetricResult.artifactQualifiedName()) as IntelliJGutterMark
                 if (gutterMark != null) {
-                    gutterMark.markArtifactHasData()
+                    gutterMark.markArtifactDataAvailable()
                     PENDING_DATA_AVAILABLE.remove(artifactMetricResult.artifactQualifiedName())
                 } else {
                     PENDING_DATA_AVAILABLE.add(artifactMetricResult.artifactQualifiedName())
