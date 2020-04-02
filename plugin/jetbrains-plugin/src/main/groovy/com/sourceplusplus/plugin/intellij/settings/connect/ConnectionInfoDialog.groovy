@@ -28,6 +28,7 @@ class ConnectionInfoDialog extends JDialog {
 
     void log(String data) {
         connectionInfoTextArea.text += data
+        connectionInfoTextArea.setCaretPosition(connectionInfoTextArea.document.length)
     }
 
     void setStatus(String status) {
