@@ -53,7 +53,13 @@ class TracesTab extends AbstractTab {
         vertx.eventBus().consumer(TRACES_TAB_OPENED, {
             log.info("Traces tab opened")
             def message = JsonObject.mapFrom(it.body())
-            def portal = SourcePortal.getPortal(message.getString("portal_uuid"))
+            def portalUuid = message.getString("portal_uuid")
+            def portal = SourcePortal.getPortal(portalUuid)
+            if (portal == null) {
+                log.warn("Ignoring traces tab opened event. Unable to find portal: $portalUuid")
+                return
+            }
+
             def orderType = message.getString("trace_order_type")
             if (orderType) {
                 //user possibly changed current trace order type; todo: create event
@@ -84,8 +90,11 @@ class TracesTab extends AbstractTab {
         //external portals hold more traces;
         //this will prepopulate those portals and ensure slowest traces remain current
         vertx.eventBus().consumer(TRACES_TAB_OPENED, {
-            def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
-            if (portal.external) {
+            def portalUuid = JsonObject.mapFrom(it.body()).getString("portal_uuid")
+            def portal = SourcePortal.getPortal(portalUuid)
+            if (portal == null) {
+                log.warn("Ignoring traces tab opened event. Unable to find portal: $portalUuid")
+            } else if (portal.external) {
                 def traceQuery = TraceQuery.builder().orderType(portal.portalUI.tracesView.orderType)
                         .pageSize(25)
                         .appUuid(portal.appUuid)
