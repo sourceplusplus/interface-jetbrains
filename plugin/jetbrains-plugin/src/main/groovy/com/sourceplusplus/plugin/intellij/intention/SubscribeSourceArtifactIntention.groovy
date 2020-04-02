@@ -6,20 +6,22 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.IncorrectOperationException
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
-import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceOrderType
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
+import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.util.IntelliUtils
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
-import static com.sourceplusplus.plugin.PluginBootstrap.*
+import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
 
 /**
  * Intention used to subscribe to source code artifacts.
@@ -32,27 +34,6 @@ import static com.sourceplusplus.plugin.PluginBootstrap.*
  */
 class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
 
-    @NotNull
-    String getText() {
-        return "Subscribe to source artifact"
-    }
-
-    @NotNull
-    String getFamilyName() {
-        return getText()
-    }
-
-    @Override
-    boolean startInWriteAction() {
-        return false
-    }
-
-    @Nullable
-    @Override
-    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
-        return currentFile
-    }
-
     @Override
     boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
         if (sourcePlugin == null) return false
@@ -60,7 +41,7 @@ class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
             def uMethod = UastContextKt.toUElement(element)
             if (uMethod instanceof UMethod) {
                 def qualifiedName = IntelliUtils.getArtifactQualifiedName(uMethod)
-                def sourceMark = sourcePlugin.getSourceMark(qualifiedName)
+                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(qualifiedName) as IntelliJSourceMark
                 if (sourceMark != null && !sourceMark.artifactSubscribed) {
                     return true
                 }
@@ -109,5 +90,26 @@ class SubscribeSourceArtifactIntention extends PsiElementBaseIntentionAction {
                 .build()
         sourcePlugin.vertx.eventBus().send(
                 PluginArtifactSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT, traceSubscribeRequest)
+    }
+
+    @NotNull
+    String getText() {
+        return "Subscribe to source artifact"
+    }
+
+    @NotNull
+    String getFamilyName() {
+        return getText()
+    }
+
+    @Override
+    boolean startInWriteAction() {
+        return false
+    }
+
+    @Nullable
+    @Override
+    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
+        return currentFile
     }
 }

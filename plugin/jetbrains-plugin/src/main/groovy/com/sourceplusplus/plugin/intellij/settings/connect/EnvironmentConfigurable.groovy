@@ -4,19 +4,18 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
-import com.intellij.psi.PsiClassOwner
-import com.intellij.psi.PsiManager
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
-import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
+import com.sourceplusplus.marker.plugin.FileActivityListener
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import javax.swing.*
 
@@ -72,7 +71,7 @@ class EnvironmentConfigurable implements Configurable {
                 return //nothing left to do
             }
 
-            PluginBootstrap.sourcePlugin.clearActiveSourceFileMarkers()
+            SourceMarkerPlugin.INSTANCE.clearAvailableSourceFileMarkers()
             def coreClient = new SourceCoreClient(pluginConfig.activeEnvironment.sppUrl)
             if (pluginConfig.activeEnvironment.apiKey) {
                 coreClient.apiKey = pluginConfig.activeEnvironment.apiKey
@@ -89,12 +88,9 @@ class EnvironmentConfigurable implements Configurable {
                                     @Override
                                     void run() {
                                         manager.getSelectedFiles().each {
-                                            def psiFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
-                                            psiFile.virtualFile.putUserData(IntelliJSourceFileMarker.KEY, null)
-                                            IntelliJStartupActivity.coordinateSourceFileOpened(
-                                                    PluginBootstrap.sourcePlugin, (PsiClassOwner) psiFile)
+                                            FileActivityListener.triggerFileOpened(manager, it)
                                         }
-                                        PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+                                        SourceMarkerPlugin.INSTANCE.refreshAvailableSourceFileMarkers(true)
                                     }
                                 })
                             } else if (it.succeeded()) {

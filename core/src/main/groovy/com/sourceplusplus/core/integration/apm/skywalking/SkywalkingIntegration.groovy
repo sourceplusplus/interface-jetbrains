@@ -170,7 +170,7 @@ class SkywalkingIntegration extends APMIntegration {
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
                                     .values(data.getJsonObject("getEndpointThroughputTrend")
-                                    .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
+                                            .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
                             break
@@ -178,7 +178,7 @@ class SkywalkingIntegration extends APMIntegration {
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
                                     .values(data.getJsonObject("getEndpointResponseTimeTrend")
-                                    .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
+                                            .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
                             break
@@ -186,7 +186,7 @@ class SkywalkingIntegration extends APMIntegration {
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
                                     .values(data.getJsonObject("getEndpointSLATrend")
-                                    .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
+                                            .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
                             break
@@ -194,7 +194,7 @@ class SkywalkingIntegration extends APMIntegration {
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
                                     .values(data.getJsonObject("getEndpointResponseTimeP99Trend")
-                                    .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
+                                            .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
                             break
@@ -202,7 +202,7 @@ class SkywalkingIntegration extends APMIntegration {
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
                                     .values(data.getJsonObject("getEndpointResponseTimeP95Trend")
-                                    .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
+                                            .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
                             break
@@ -210,7 +210,7 @@ class SkywalkingIntegration extends APMIntegration {
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
                                     .values(data.getJsonObject("getEndpointResponseTimeP90Trend")
-                                    .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
+                                            .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
                             break
@@ -218,7 +218,7 @@ class SkywalkingIntegration extends APMIntegration {
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
                                     .values(data.getJsonObject("getEndpointResponseTimeP75Trend")
-                                    .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
+                                            .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
                             break
@@ -226,7 +226,7 @@ class SkywalkingIntegration extends APMIntegration {
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
                                     .values(data.getJsonObject("getEndpointResponseTimeP50Trend")
-                                    .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
+                                            .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
                             break
@@ -290,8 +290,13 @@ class SkywalkingIntegration extends APMIntegration {
                         .total(result.getInteger("total"))
                         .build()
 
-                log.info("Got SkyWalking traces. Artifact: {} - Traces: {} - Total: {}",
-                        traceQuery.artifactQualifiedName(), traceQueryResult.traces().size(), traceQueryResult.total())
+                if (traceQuery.artifactQualifiedName() == null) {
+                    log.info("Got SkyWalking traces. Endpoint: {} - Traces: {} - Total: {}",
+                            traceQuery.endpointId(), traceQueryResult.traces().size(), traceQueryResult.total())
+                } else {
+                    log.info("Got SkyWalking traces. Artifact: {} - Traces: {} - Total: {}",
+                            traceQuery.artifactQualifiedName(), traceQueryResult.traces().size(), traceQueryResult.total())
+                }
                 handler.handle(Future.succeededFuture(traceQueryResult))
             }
         })
@@ -388,7 +393,7 @@ class SkywalkingIntegration extends APMIntegration {
                     } else {
                         artifactAPI.getSourceArtifactByEndpointName(appUuid, endpointName, fut)
                     }
-                    futures.add(fut.future())
+                    futures.add(fut as Future)  //see: #130
                 }
                 CompositeFuture.all(futures).setHandler({
                     if (it.succeeded()) {

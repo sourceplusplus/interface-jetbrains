@@ -13,6 +13,7 @@ import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import org.jetbrains.annotations.Nullable
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import javax.swing.*
 
@@ -79,7 +80,7 @@ class ApplicationSettingsDialogWrapper extends DialogWrapper {
         SourcePortalConfig.current.addCoreClient(SourcePluginConfig.current.activeEnvironment.appUuid, coreClient)
         if (PluginBootstrap.getSourcePlugin() == null) {
             IntelliJStartupActivity.startSourcePlugin(coreClient)
-            PluginBootstrap.sourcePlugin.refreshActiveSourceFileMarkers()
+            SourceMarkerPlugin.INSTANCE.refreshAvailableSourceFileMarkers(true)
         }
         PropertiesComponent.getInstance().setValue(
                 "spp_plugin_config", Json.encode(SourcePluginConfig.current))

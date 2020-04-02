@@ -19,7 +19,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
-import com.sourceplusplus.portal.display.PortalInterface
+import com.sourceplusplus.portal.display.PortalUI
 import com.sourceplusplus.portal.display.tabs.ConfigurationTab
 import com.sourceplusplus.portal.display.tabs.OverviewTab
 import com.sourceplusplus.portal.display.tabs.TracesTab
@@ -102,7 +102,7 @@ class PortalBootstrap extends AbstractVerticle {
     @Override
     void start(Promise<Void> startFuture) throws Exception {
         if (pluginAvailable) {
-            PortalInterface.assignVertx(vertx)
+            PortalUI.assignVertx(vertx)
         } else {
             registerCodecs()
             SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
@@ -212,7 +212,7 @@ class PortalBootstrap extends AbstractVerticle {
                 def portalUuid = SourcePortal.register(appUuid, artifactQualifiedName, true)
                 if (activePortals) {
                     log.info("Registered new portal with cloned view from portal: " + activePortals[0].portalUuid)
-                    SourcePortal.getPortal(portalUuid).interface.cloneViews(activePortals[0].interface)
+                    SourcePortal.getPortal(portalUuid).portalUI.cloneUI(activePortals[0].portalUI)
                 } else {
                     log.info("Registered new portal with blank view")
                 }

@@ -65,21 +65,21 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications/:appUuid", SPP_API_VERSION);
     private static final String GET_APPLICATIONS_ENDPOINT = String.format(
             "/%s/applications", SPP_API_VERSION);
-    private static final String CREATE_SOURCE_ARTIFACT_ENDPOINT = String.format(
+    private static final String SOURCE_ARTIFACT_ENDPOINT = String.format(
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName", SPP_API_VERSION);
-    private static final String GET_SOURCE_ARTIFACT_ENDPOINT = CREATE_SOURCE_ARTIFACT_ENDPOINT;
+    private static final String GET_SOURCE_ARTIFACT_ENDPOINT = SOURCE_ARTIFACT_ENDPOINT;
     private static final String CONFIGURE_SOURCE_ARTIFACT_ENDPOINT = String.format(
-            CREATE_SOURCE_ARTIFACT_ENDPOINT + "/config", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT + "/config", SPP_API_VERSION);
     private static final String UNSUBSCRIBE_SOURCE_ARTIFACT_ENDPOINT = String.format(
-            CREATE_SOURCE_ARTIFACT_ENDPOINT + "/unsubscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT + "/unsubscribe", SPP_API_VERSION);
     private static final String SUBSCRIBE_SOURCE_ARTIFACT_METRICS_ENDPOINT = String.format(
-            CREATE_SOURCE_ARTIFACT_ENDPOINT + "/metrics/subscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT + "/metrics/subscribe", SPP_API_VERSION);
     private static final String UNSUBSCRIBE_SOURCE_ARTIFACT_METRICS_ENDPOINT = String.format(
-            CREATE_SOURCE_ARTIFACT_ENDPOINT + "/metrics/unsubscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT + "/metrics/unsubscribe", SPP_API_VERSION);
     private static final String SUBSCRIBE_SOURCE_ARTIFACT_TRACES_ENDPOINT = String.format(
-            CREATE_SOURCE_ARTIFACT_ENDPOINT + "/traces/subscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT + "/traces/subscribe", SPP_API_VERSION);
     private static final String UNSUBSCRIBE_SOURCE_ARTIFACT_TRACES_ENDPOINT = String.format(
-            CREATE_SOURCE_ARTIFACT_ENDPOINT + "/traces/unsubscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT + "/traces/unsubscribe", SPP_API_VERSION);
     private static final String GET_SOURCE_ARTIFACT_CONFIGURATION_ENDPOINT = CONFIGURE_SOURCE_ARTIFACT_ENDPOINT;
     private static final String GET_TRACES_ENDPOINT = String.format(
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces?orderType=:orderType&pageSize=:pageSize" +
@@ -472,7 +472,7 @@ public class SourceCoreClient implements SourceClient {
 
     public void createArtifact(String appUuid, SourceArtifact createRequest,
                                Handler<AsyncResult<SourceArtifact>> handler) {
-        String url = sppUrl + CREATE_SOURCE_ARTIFACT_ENDPOINT
+        String url = sppUrl + SOURCE_ARTIFACT_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":artifactQualifiedName", URLEncoder.encode(createRequest.artifactQualifiedName()));
         Request.Builder request = new Request.Builder().url(url)

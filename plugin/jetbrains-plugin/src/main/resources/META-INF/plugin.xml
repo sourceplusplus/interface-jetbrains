@@ -9,7 +9,8 @@
         Source++ is a strictly observant programming assistant and aims to integrate APM solutions with the IDE for tighter feedback loops.
     ]]></description>
 
-    <idea-version since-build="171"/>
+    <idea-version since-build="201"/>
+    <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>org.intellij.groovy</depends>
     <depends>org.jetbrains.kotlin</depends>
@@ -18,14 +19,20 @@
         <taskManager implementation="com.sourceplusplus.plugin.intellij.patcher.GradleAgentPatcher"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="com.sourceplusplus.plugin.intellij.IntelliJStartupActivity"/>
+
+        <codeInsight.lineMarkerProvider language="Groovy"
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$GroovyDescriptor"/>
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$JavaDescriptor"/>
+        <codeInsight.lineMarkerProvider language="kotlin"
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$KotlinDescriptor"/>
+
         <projectService
                 serviceImplementation="com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService"/>
         <toolWindow id="Source++ Console" icon="/icons/s.png" anchor="bottom"
                     factoryClass="com.sourceplusplus.plugin.intellij.tool.SourcePluginToolWindowFactory"/>
-        <postStartupActivity implementation="com.sourceplusplus.plugin.intellij.IntelliJStartupActivity"/>
         <java.programPatcher implementation="com.sourceplusplus.plugin.intellij.patcher.MavenAgentPatcher"/>
-        <inspectionToolProvider
-                implementation="com.sourceplusplus.plugin.intellij.inspect.IntelliJInspectionProvider"/>
         <applicationConfigurable
                 instance="com.sourceplusplus.plugin.intellij.settings.PluginSettingsConfigurable"
                 groupId="Source++"
@@ -39,11 +46,6 @@
                                  displayName="About"
                                  id="About"
                                  instance="com.sourceplusplus.plugin.intellij.settings.about.AboutConfigurable"/>
-
-        <codeInsight.lineMarkerProvider language=""
-                                        implementationClass="com.sourceplusplus.plugin.intellij.marker.mark.gutter.provider.ActiveSourceArtifactMarkProvider"/>
-        <codeInsight.lineMarkerProvider language=""
-                                        implementationClass="com.sourceplusplus.plugin.intellij.marker.mark.gutter.provider.SubscribedSourceArtifactMarkProvider"/>
 
         <intentionAction>
             <className>com.sourceplusplus.plugin.intellij.intention.SubscribeSourceArtifactIntention</className>
@@ -66,4 +68,9 @@
             <descriptionDirectoryName>UnsubscribeFileSourceArtifacts</descriptionDirectoryName>
         </intentionAction>
     </extensions>
+
+    <projectListeners>
+        <listener class="com.sourceplusplus.marker.plugin.FileActivityListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </projectListeners>
 </idea-plugin>

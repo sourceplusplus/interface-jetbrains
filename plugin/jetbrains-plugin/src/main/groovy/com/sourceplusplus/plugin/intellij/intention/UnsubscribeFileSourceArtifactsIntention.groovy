@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
 
@@ -27,6 +28,51 @@ import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 class UnsubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionAction {
+
+    @Override
+    boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
+        if (sourcePlugin == null || element == null) return false
+        def originalElement = element
+        boolean inMethod = false
+        while (element != null && !inMethod) {
+            def uMethod = UastContextKt.toUElement(element)
+            if (uMethod instanceof UMethod) {
+                inMethod = true
+            }
+            element = element.parent
+        }
+        if (!inMethod) {
+            //check for subscribed source marks
+            def fileMarker = SourceMarkerPlugin.INSTANCE.getSourceFileMarker(
+                    originalElement.containingFile) as IntelliJSourceFileMarker
+            if (fileMarker) {
+                return fileMarker.sourceMarks.find { it.artifactSubscribed }
+            }
+        }
+        return false
+    }
+
+    @Override
+    @SuppressWarnings("GroovyVariableNotAssigned")
+    void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element)
+            throws IncorrectOperationException {
+        def fileMarker = SourceMarkerPlugin.INSTANCE.getSourceFileMarker(
+                element.containingFile) as IntelliJSourceFileMarker
+        if (fileMarker) {
+            fileMarker.sourceMarks.each {
+                if (it.artifactSubscribed) {
+                    //unsubscribe from artifact
+                    def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
+                            .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
+                            .artifactQualifiedName(it.artifactQualifiedName)
+                            .removeAllArtifactSubscriptions(true)
+                            .build()
+                    sourcePlugin.vertx.eventBus().send(
+                            PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
+                }
+            }
+        }
+    }
 
     @NotNull
     String getText() {
@@ -47,50 +93,5 @@ class UnsubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionAct
     @Override
     PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
         return currentFile
-    }
-
-    @Override
-    boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
-        if (sourcePlugin == null || element == null) return false
-        def originalElement = element
-        boolean inMethod = false
-        while (element != null && !inMethod) {
-            def uMethod = UastContextKt.toUElement(element)
-            if (uMethod instanceof UMethod) {
-                inMethod = true
-            }
-            element = element.parent
-        }
-        if (!inMethod) {
-            //check for subscribed source marks
-            def fileMarkers = sourcePlugin.getAvailableSourceFileMarkers() as List<IntelliJSourceFileMarker>
-            def fileMarker = fileMarkers.find { it.psiFile == originalElement.containingFile }
-            if (fileMarker) {
-                return fileMarker.sourceMarks.find { it.artifactSubscribed }
-            }
-        }
-        return false
-    }
-
-    @Override
-    @SuppressWarnings("GroovyVariableNotAssigned")
-    void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element)
-            throws IncorrectOperationException {
-        def fileMarkers = sourcePlugin.getAvailableSourceFileMarkers() as List<IntelliJSourceFileMarker>
-        def fileMarker = fileMarkers.find { it.psiFile == element.containingFile }
-        if (fileMarker) {
-            fileMarker.sourceMarks.each {
-                if (it.artifactSubscribed) {
-                    //unsubscribe from artifact
-                    def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
-                            .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
-                            .artifactQualifiedName(it.artifactQualifiedName)
-                            .removeAllArtifactSubscriptions(true)
-                            .build()
-                    sourcePlugin.vertx.eventBus().send(
-                            PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
-                }
-            }
-        }
     }
 }
