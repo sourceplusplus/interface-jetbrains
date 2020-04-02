@@ -4,7 +4,7 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.SourcePluginDefines
 import com.sourceplusplus.plugin.intellij.patcher.tail.LogTailer
-import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalInterface
+import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
@@ -48,13 +48,13 @@ trait SourceAgentPatcher {
             def pluginsUrl = SourceAgentPatcher.class.getResource("/plugins")
             def pluginsDir = new File(destDir, "plugins")
             pluginsDir.mkdir()
-            IntelliJPortalInterface.extract(pluginsUrl, "/plugins", pluginsDir.absolutePath)
+            IntelliJPortalUI.extract(pluginsUrl, "/plugins", pluginsDir.absolutePath)
 
             //extract activations
             def activationsUrl = SourceAgentPatcher.class.getResource("/activations")
             def activationsDir = new File(destDir, "activations")
             activationsDir.mkdir()
-            IntelliJPortalInterface.extract(activationsUrl, "/activations", activationsDir.absolutePath)
+            IntelliJPortalUI.extract(activationsUrl, "/activations", activationsDir.absolutePath)
 
             //redirect agent logs to console
             def logFile = new File(destDir.absolutePath + File.separator + "source-agent.log")

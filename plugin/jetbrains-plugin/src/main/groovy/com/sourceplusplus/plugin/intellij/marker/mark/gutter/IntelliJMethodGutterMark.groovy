@@ -6,7 +6,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
-import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalInterface
+import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
 import com.sourceplusplus.portal.display.PortalTab
@@ -182,10 +182,10 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             putUserData(IntelliJKeys.PortalUUID, portalUuid)
 
             def markComponent = gutterMarkComponent as GutterMarkJcefComponent
-            markComponent.configuration.initialUrl = IntelliJPortalInterface.getPortalUrl(PortalTab.Overview, portalUuid)
+            markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(PortalTab.Overview, portalUuid)
             markComponent.initialize()
             IntelliJSourcePortal.register(appUuid, portalUuid, artifactQualifiedName,
-                    new IntelliJPortalInterface(portalUuid, markComponent.browser))
+                    new IntelliJPortalUI(portalUuid, markComponent.browser))
         }
     }
 }

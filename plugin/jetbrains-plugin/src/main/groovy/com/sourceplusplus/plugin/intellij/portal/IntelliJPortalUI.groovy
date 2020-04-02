@@ -2,7 +2,7 @@ package com.sourceplusplus.plugin.intellij.portal
 
 import com.google.common.base.Joiner
 import com.intellij.ui.jcef.JBCefBrowser
-import com.sourceplusplus.portal.display.PortalInterface
+import com.sourceplusplus.portal.display.PortalUI
 import com.sourceplusplus.portal.display.PortalTab
 import io.netty.handler.codec.http.QueryStringDecoder
 import org.cef.browser.CefBrowser
@@ -21,14 +21,14 @@ import java.awt.event.WindowEvent
  * @since 0.2.5
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-class IntelliJPortalInterface extends PortalInterface implements CefLifeSpanHandler {
+class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
 
     private JBCefBrowser parentBrowser
     private JBCefBrowser browser
     private Map<String, String> currentQueryParams = [:]
     private static boolean DARK_MODE
 
-    IntelliJPortalInterface(String portalUuid, JBCefBrowser browser) {
+    IntelliJPortalUI(String portalUuid, JBCefBrowser browser) {
         super(portalUuid)
         this.browser = browser
         if (browser != null) {
@@ -36,7 +36,7 @@ class IntelliJPortalInterface extends PortalInterface implements CefLifeSpanHand
         }
     }
 
-    void cloneViews(IntelliJPortalInterface portalInterface) {
+    void cloneViews(IntelliJPortalUI portalInterface) {
         parentBrowser = portalInterface.parentBrowser
         super.cloneViews(portalInterface)
     }
@@ -68,7 +68,7 @@ class IntelliJPortalInterface extends PortalInterface implements CefLifeSpanHand
     static void updateTheme(boolean dark) {
         DARK_MODE = dark
         IntelliJSourcePortal.getPortals().each {
-            it.interface.reload()
+            it.portalUI.reload()
         }
     }
 
@@ -76,18 +76,18 @@ class IntelliJPortalInterface extends PortalInterface implements CefLifeSpanHand
     boolean onBeforePopup(CefBrowser browser, CefFrame frame, String targetUrl, String targetFrameName) {
         def portal = IntelliJSourcePortal.getPortal(new QueryStringDecoder(
                 targetUrl).parameters().get("portal_uuid").get(0))
-        if (portal.interface.parentBrowser == null) {
-            portal.interface.parentBrowser = JBCefBrowser.getJBCefBrowser(browser)
+        if (portal.portalUI.parentBrowser == null) {
+            portal.portalUI.parentBrowser = JBCefBrowser.getJBCefBrowser(browser)
         }
         def popupBrowser = browser.client.createBrowser(targetUrl, false, false)
         popupBrowser.createImmediately()
-        portal.interface.browser = new JBCefBrowser(popupBrowser)
-        portal.interface.parentBrowser.JBCefClient.addLifeSpanHandler(this, portal.interface.browser.cefBrowser)
+        portal.portalUI.browser = new JBCefBrowser(popupBrowser)
+        portal.portalUI.parentBrowser.JBCefClient.addLifeSpanHandler(this, portal.portalUI.browser.cefBrowser)
 
-        def popupFrame = new JFrame(portal.interface.viewingPortalArtifact)
+        def popupFrame = new JFrame(portal.portalUI.viewingPortalArtifact)
         popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
         popupFrame.setPreferredSize(new Dimension(800, 600))
-        popupFrame.add(portal.interface.browser.component)
+        popupFrame.add(portal.portalUI.browser.component)
         popupFrame.pack()
         popupFrame.setLocationByPlatform(true)
         popupFrame.setVisible(true)

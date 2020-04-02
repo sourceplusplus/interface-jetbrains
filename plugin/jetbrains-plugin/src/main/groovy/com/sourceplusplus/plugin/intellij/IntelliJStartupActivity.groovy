@@ -18,7 +18,7 @@ import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
-import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalInterface
+import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
 import com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentDialogWrapper
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
@@ -200,19 +200,19 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         //register coordinators
         sourcePlugin.vertx.deployVerticle(new IntelliJArtifactNavigator())
 
-        sourcePlugin.vertx.eventBus().consumer(IntelliJPortalInterface.PORTAL_READY, {
+        sourcePlugin.vertx.eventBus().consumer(IntelliJPortalUI.PORTAL_READY, {
             //set portal theme
             UIManager.addPropertyChangeListener({
                 if (it.newValue instanceof IntelliJLaf) {
-                    IntelliJPortalInterface.updateTheme(false)
+                    IntelliJPortalUI.updateTheme(false)
                 } else {
-                    IntelliJPortalInterface.updateTheme(true)
+                    IntelliJPortalUI.updateTheme(true)
                 }
             })
             if (UIManager.lookAndFeel instanceof IntelliJLaf) {
-                IntelliJPortalInterface.updateTheme(false)
+                IntelliJPortalUI.updateTheme(false)
             } else {
-                IntelliJPortalInterface.updateTheme(true)
+                IntelliJPortalUI.updateTheme(true)
             }
         })
         DaemonCodeAnalyzerImpl.getInstance(currentProject).restart()

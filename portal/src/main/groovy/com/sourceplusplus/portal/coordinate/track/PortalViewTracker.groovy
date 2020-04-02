@@ -70,8 +70,8 @@ class PortalViewTracker extends AbstractVerticle {
             def artifactQualifiedName = request.getString("artifact_qualified_name")
 
             def portal = SourcePortal.getPortal(portalUuid)
-            if (artifactQualifiedName != portal.interface.viewingPortalArtifact) {
-                portal.interface.viewingPortalArtifact = artifactQualifiedName
+            if (artifactQualifiedName != portal.portalUI.viewingPortalArtifact) {
+                portal.portalUI.viewingPortalArtifact = artifactQualifiedName
                 vertx.eventBus().publish(CHANGED_PORTAL_ARTIFACT,
                         new JsonObject().put("portal_uuid", portalUuid)
                                 .put("artifact_qualified_name", artifactQualifiedName)

@@ -2,7 +2,7 @@ package com.sourceplusplus.portal.display.tabs.views
 
 import com.sourceplusplus.api.model.trace.ArtifactTraceResult
 import com.sourceplusplus.api.model.trace.TraceOrderType
-import com.sourceplusplus.portal.display.PortalInterface
+import com.sourceplusplus.portal.display.PortalUI
 import groovy.transform.Canonical
 import io.vertx.core.json.JsonArray
 
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Canonical
 class TracesView {
 
-    private final PortalInterface portalInterface
+    private final PortalUI portalInterface
     private Map<TraceOrderType, ArtifactTraceResult> traceResultCache = new ConcurrentHashMap<>()
     private Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
     int innerLevel = 0
@@ -31,7 +31,7 @@ class TracesView {
     String traceId
     int spanId
 
-    TracesView(PortalInterface portalInterface) {
+    TracesView(PortalUI portalInterface) {
         this.portalInterface = portalInterface
     }
 

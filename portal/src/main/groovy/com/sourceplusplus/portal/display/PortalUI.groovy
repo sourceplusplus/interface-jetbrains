@@ -21,7 +21,7 @@ import java.util.zip.ZipFile
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Slf4j
-class PortalInterface { //todo: rename to PortalUI
+class PortalUI {
 
     public static final String PORTAL_READY = "PortalReady"
 
@@ -35,7 +35,7 @@ class PortalInterface { //todo: rename to PortalUI
     public PortalTab currentTab = PortalTab.Overview
     //todo: isn't DARK_MODE needed here?
 
-    PortalInterface(String portalUuid) {
+    PortalUI(String portalUuid) {
         this.portalUuid = portalUuid
         this.overviewView = new OverviewView(this)
         this.tracesView = new TracesView(this)
@@ -54,7 +54,7 @@ class PortalInterface { //todo: rename to PortalUI
         return configurationView
     }
 
-    void cloneViews(PortalInterface portalInterface) {
+    void cloneViews(PortalUI portalInterface) {
         this.overviewView.cloneView(portalInterface.overviewView)
         this.tracesView.cloneView(portalInterface.tracesView)
     }
@@ -83,7 +83,7 @@ class PortalInterface { //todo: rename to PortalUI
         _uiDirectory = File.createTempDir()
         _uiDirectory.deleteOnExit()
 
-        def url = PortalInterface.class.getResource("/ui")
+        def url = PortalUI.class.getResource("/ui")
         extract(url, "/ui", _uiDirectory.absolutePath)
         log.debug("Using portal ui directory: " + _uiDirectory.absolutePath)
 

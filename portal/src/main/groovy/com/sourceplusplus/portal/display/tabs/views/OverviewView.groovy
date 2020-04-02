@@ -3,7 +3,7 @@ package com.sourceplusplus.portal.display.tabs.views
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.MetricType
-import com.sourceplusplus.portal.display.PortalInterface
+import com.sourceplusplus.portal.display.PortalUI
 import groovy.transform.Canonical
 
 import java.util.concurrent.ConcurrentHashMap
@@ -20,12 +20,12 @@ import static com.sourceplusplus.api.model.metric.MetricType.ResponseTime_Averag
 @Canonical
 class OverviewView {
 
-    private final PortalInterface portalInterface
+    private final PortalUI portalInterface
     private Map<String, Map<QueryTimeFrame, ArtifactMetricResult>> metricResultCache = new ConcurrentHashMap<>()
     QueryTimeFrame timeFrame = QueryTimeFrame.LAST_15_MINUTES
     MetricType activeChartMetric = ResponseTime_Average
 
-    OverviewView(PortalInterface portalInterface) {
+    OverviewView(PortalUI portalInterface) {
         this.portalInterface = portalInterface
     }
 

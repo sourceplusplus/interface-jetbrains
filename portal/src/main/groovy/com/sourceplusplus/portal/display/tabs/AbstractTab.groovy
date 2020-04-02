@@ -25,7 +25,7 @@ abstract class AbstractTab extends AbstractVerticle {
     void start() throws Exception {
         vertx.eventBus().consumer(PortalViewTracker.OPENED_PORTAL, {
             def portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))
-            if (portal.interface.currentTab == thisTab) {
+            if (portal.portalUI.currentTab == thisTab) {
                 updateUI(portal)
             }
         })

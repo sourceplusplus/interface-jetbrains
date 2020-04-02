@@ -19,15 +19,15 @@ class IntelliJSourcePortal extends SourcePortal {
 
     static Optional<IntelliJSourcePortal> getInternalPortal(String appUuid, String artifactQualifiedName) {
         return Optional.ofNullable(portalMap.asMap().values().find {
-            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && !it.external
+            it.appUuid == appUuid && it.portalUI.viewingPortalArtifact == artifactQualifiedName && !it.external
         }) as Optional<IntelliJSourcePortal>
     }
 
     static List<IntelliJSourcePortal> getSimilarPortals(SourcePortal portal) {
         return portalMap.asMap().values().findAll {
             it.appUuid == portal.appUuid &&
-                    it.interface.viewingPortalArtifact == portal.interface.viewingPortalArtifact &&
-                    it.interface.currentTab == portal.interface.currentTab
+                    it.portalUI.viewingPortalArtifact == portal.portalUI.viewingPortalArtifact &&
+                    it.portalUI.currentTab == portal.portalUI.currentTab
         } as List<IntelliJSourcePortal>
     }
 
@@ -43,20 +43,20 @@ class IntelliJSourcePortal extends SourcePortal {
 
     static List<IntelliJSourcePortal> getExternalPortals(String appUuid, String artifactQualifiedName) {
         return portalMap.asMap().values().findAll {
-            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName && it.external
+            it.appUuid == appUuid && it.portalUI.viewingPortalArtifact == artifactQualifiedName && it.external
         } as List<IntelliJSourcePortal>
     }
 
     static List<IntelliJSourcePortal> getPortals(String appUuid, String artifactQualifiedName) {
         return portalMap.asMap().values().findAll {
-            it.appUuid == appUuid && it.interface.viewingPortalArtifact == artifactQualifiedName
+            it.appUuid == appUuid && it.portalUI.viewingPortalArtifact == artifactQualifiedName
         } as List<IntelliJSourcePortal>
     }
 
     static String register(String appUuid, String artifactQualifiedName) {
         def portalUuid = UUID.randomUUID().toString()
         def portal = new IntelliJSourcePortal(portalUuid, Objects.requireNonNull(appUuid), true)
-        portal.portalUI = new IntelliJPortalInterface(portalUuid, null)
+        portal.portalUI = new IntelliJPortalUI(portalUuid, null)
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalUuid, portal)
@@ -66,7 +66,7 @@ class IntelliJSourcePortal extends SourcePortal {
     }
 
     static String register(String appUuid, String portalUuid, String artifactQualifiedName,
-                           IntelliJPortalInterface portalInterface) {
+                           IntelliJPortalUI portalInterface) {
         def portal = new IntelliJSourcePortal(portalUuid, Objects.requireNonNull(appUuid), false)
         portal.portalUI = portalInterface
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
@@ -85,20 +85,20 @@ class IntelliJSourcePortal extends SourcePortal {
         return portalMap.getIfPresent(portalUuid) as IntelliJSourcePortal
     }
 
-    IntelliJPortalInterface getInterface() {
-        return super.getInterface() as IntelliJPortalInterface
+    IntelliJPortalUI getPortalUI() {
+        return super.portalUI as IntelliJPortalUI
     }
 
     @Override
     void close() throws IOException {
-        getInterface().close()
+        portalUI.close()
         super.close()
     }
 
     @Override
     SourcePortal createExternalPortal() {
         def portalClone = getPortal(register(appUuid, portalUI.viewingPortalArtifact))
-        portalClone.getInterface().cloneViews(this.interface)
+        portalClone.portalUI.cloneViews(portalUI)
         return portalClone
     }
 }
