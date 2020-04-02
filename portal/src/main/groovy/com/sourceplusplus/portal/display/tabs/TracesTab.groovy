@@ -185,7 +185,7 @@ class TracesTab extends AbstractTab {
                 representation.innerLevel = 0
                 updateUI(portal)
             } else {
-                vertx.eventBus().send("NavigateToArtifact",
+                vertx.eventBus().send("NavigateToArtifact", //todo: use NAVIGATE_TO_ARTIFACT
                         new JsonObject().put("portal_uuid", portal.portalUuid)
                                 .put("artifact_qualified_name", representation.rootArtifactQualifiedName)
                 )
@@ -314,7 +314,7 @@ class TracesTab extends AbstractTab {
                     vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
                     log.info("Displayed trace span info: " + span)
                 } else {
-                    vertx.eventBus().request("CanNavigateToArtifact", new JsonObject()
+                    vertx.eventBus().request("CanNavigateToArtifact", new JsonObject() //todo: use CAN_NAVIGATE_TO_ARTIFACT
                             .put("app_uuid", portal.appUuid)
                             .put("artifact_qualified_name", spanArtifactQualifiedName), {
                         if (it.succeeded() && it.result().body() == true) {
@@ -355,7 +355,7 @@ class TracesTab extends AbstractTab {
                                     spanTracesView.innerLevel = innerLevel
                                     spanTracesView.innerTraceStack = handleTraceStack(
                                             portal.appUuid, portal.interface.viewingPortalArtifact, queryResult)
-                                    vertx.eventBus().send("NavigateToArtifact",
+                                    vertx.eventBus().send("NavigateToArtifact", //todo: use NAVIGATE_TO_ARTIFACT
                                             new JsonObject().put("portal_uuid", spanPortal.get().portalUuid)
                                                     .put("artifact_qualified_name", spanArtifactQualifiedName))
                                 }
