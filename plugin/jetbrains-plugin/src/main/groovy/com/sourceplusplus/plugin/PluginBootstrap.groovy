@@ -23,9 +23,9 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.jackson.DatabindCodec
 import org.jetbrains.annotations.NotNull
-import plus.sourceplus.marker.SourceFileMarker
-import plus.sourceplus.marker.SourceFileMarkerProvider
-import plus.sourceplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.SourceFileMarker
+import com.sourceplusplus.marker.SourceFileMarkerProvider
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 /**
  * Used to bootstrap the Source++ Plugin.

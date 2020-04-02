@@ -17,12 +17,12 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.java.JavaUAnnotation
-import plus.sourceplus.marker.SourceFileMarker
-import plus.sourceplus.marker.source.mark.api.event.SourceMarkEvent
-import plus.sourceplus.marker.source.mark.api.event.SourceMarkEventCode
-import plus.sourceplus.marker.source.mark.api.event.SourceMarkEventListener
-import plus.sourceplus.marker.source.mark.gutter.MethodGutterMark
-import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
+import com.sourceplusplus.marker.SourceFileMarker
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
+import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
 
 import java.time.Instant
 
@@ -107,7 +107,12 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void markArtifactSubscribed() {
         if (!artifactSubscribed) {
-            configuration.icon = artifactDataAvailable ? sppActive : sppInactive
+            if (SourcePluginConfig.current.methodGutterMarksEnabled) {
+                configuration.icon = artifactDataAvailable ? sppActive : sppInactive
+            } else {
+                configuration.icon = null
+            }
+
             putUserData(IntelliJKeys.ArtifactSubscribed, true)
             putUserData(IntelliJKeys.ArtifactSubscribeTime, Instant.now())
             sourceFileMarker.refresh()
@@ -120,7 +125,12 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void markArtifactUnsubscribed() {
         if (artifactSubscribed) {
-            configuration.icon = artifactDataAvailable ? sppActive : null
+            if (SourcePluginConfig.current.methodGutterMarksEnabled) {
+                configuration.icon = artifactDataAvailable ? sppActive : null
+            } else {
+                configuration.icon = null
+            }
+
             putUserData(IntelliJKeys.ArtifactSubscribed, false)
             putUserData(IntelliJKeys.ArtifactUnsubscribeTime, Instant.now())
             sourceFileMarker.refresh()
@@ -133,7 +143,12 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void markArtifactDataAvailable() {
         if (!artifactDataAvailable) {
-            configuration.icon = sppActive
+            if (SourcePluginConfig.current.methodGutterMarksEnabled) {
+                configuration.icon = sppActive
+            } else {
+                configuration.icon = null
+            }
+
             putUserData(IntelliJKeys.ArtifactDataAvailable, true)
             sourceFileMarker.refresh()
         }

@@ -14,8 +14,8 @@ import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
-import plus.sourceplus.marker.plugin.FileActivityListener
-import plus.sourceplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.plugin.FileActivityListener
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import javax.swing.*
 
@@ -71,7 +71,7 @@ class EnvironmentConfigurable implements Configurable {
                 return //nothing left to do
             }
 
-            SourceMarkerPlugin.INSTANCE.clearActiveSourceFileMarkers()
+            SourceMarkerPlugin.INSTANCE.clearAvailableSourceFileMarkers()
             def coreClient = new SourceCoreClient(pluginConfig.activeEnvironment.sppUrl)
             if (pluginConfig.activeEnvironment.apiKey) {
                 coreClient.apiKey = pluginConfig.activeEnvironment.apiKey
@@ -90,7 +90,7 @@ class EnvironmentConfigurable implements Configurable {
                                         manager.getSelectedFiles().each {
                                             FileActivityListener.triggerFileOpened(manager, it)
                                         }
-                                        SourceMarkerPlugin.INSTANCE.refreshActiveSourceFileMarkers()
+                                        SourceMarkerPlugin.INSTANCE.refreshAvailableSourceFileMarkers(true)
                                     }
                                 })
                             } else if (it.succeeded()) {

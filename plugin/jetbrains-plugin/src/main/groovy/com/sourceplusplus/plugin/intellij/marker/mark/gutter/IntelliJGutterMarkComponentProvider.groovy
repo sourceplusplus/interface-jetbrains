@@ -1,10 +1,10 @@
 package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 
 import org.jetbrains.annotations.NotNull
-import plus.sourceplus.marker.source.mark.api.event.SourceMarkEvent
-import plus.sourceplus.marker.source.mark.api.event.SourceMarkEventListener
-import plus.sourceplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponentProvider
-import plus.sourceplus.marker.source.mark.gutter.event.GutterMarkEventCode
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponentProvider
+import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 
 import java.awt.Dimension
 

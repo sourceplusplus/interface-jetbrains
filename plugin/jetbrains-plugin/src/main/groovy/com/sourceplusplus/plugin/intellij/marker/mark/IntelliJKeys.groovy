@@ -1,6 +1,6 @@
 package com.sourceplusplus.plugin.intellij.marker.mark
 
-import plus.sourceplus.marker.source.mark.api.key.SourceKey
+import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 
 import java.time.Instant
 

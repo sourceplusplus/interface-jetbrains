@@ -2,13 +2,14 @@ package com.sourceplusplus.plugin.intellij.marker
 
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.UMethod
-import plus.sourceplus.marker.SourceFileMarker
-import plus.sourceplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.SourceFileMarker
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 
 /**
  * todo: description
@@ -22,6 +23,9 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
 
     IntelliJSourceFileMarker(@NotNull PsiFile psiFile) {
         super(psiFile)
+
+        PluginBootstrap.sourcePlugin.vertx.eventBus().send(
+                PluginArtifactSubscriptionTracker.SYNC_AUTOMATIC_SUBSCRIPTIONS, true)
     }
 
     /**
@@ -33,6 +37,9 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
         return super.getSourceMarks() as List<IntelliJSourceMark>
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @NotNull
     @Override
     SourceMark createSourceMark(@NotNull UMethod psiMethod, @NotNull SourceMark.Type type) {

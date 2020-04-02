@@ -11,7 +11,7 @@ import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
-import plus.sourceplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import java.util.concurrent.TimeUnit
 
@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit
 @Slf4j
 class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
+    public static final String SYNC_AUTOMATIC_SUBSCRIPTIONS = "SyncAutomaticSubscriptions"
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
 
@@ -34,19 +35,10 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
-        //todo: change to just subscriber
         //subscribe to automatic subscriptions
-        SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
-                SourcePluginConfig.current.activeEnvironment.appUuid, true, {
-            if (it.succeeded()) {
-                it.result().each {
-                    if (it.automaticSubscription() || it.forceSubscription()) {
-                        PENDING_SUBSCRIBED.add(it.artifactQualifiedName())
-                    }
-                }
-            } else {
-                log.error("Failed to get application subscriptions", it.cause())
-            }
+        syncAutomaticSubscriptions()
+        vertx.eventBus().consumer(SYNC_AUTOMATIC_SUBSCRIPTIONS, {
+            syncAutomaticSubscriptions()
         })
 
         //keep subscriptions alive
@@ -79,12 +71,11 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
         //artifact has data
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
-            if (SourcePluginConfig.current.methodGutterMarksEnabled
-                    && artifactMetricResult.appUuid() == SourcePluginConfig.current.activeEnvironment.appUuid) {
-                def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                        artifactMetricResult.artifactQualifiedName()) as IntelliJGutterMark
-                if (gutterMark != null) {
-                    gutterMark.markArtifactDataAvailable()
+            if (artifactMetricResult.appUuid() == SourcePluginConfig.current.activeEnvironment.appUuid) {
+                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                        artifactMetricResult.artifactQualifiedName()) as IntelliJSourceMark
+                if (sourceMark != null) {
+                    sourceMark.markArtifactDataAvailable()
                     PENDING_DATA_AVAILABLE.remove(artifactMetricResult.artifactQualifiedName())
                 } else {
                     PENDING_DATA_AVAILABLE.add(artifactMetricResult.artifactQualifiedName())
@@ -140,5 +131,28 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             })
         })
         log.info("{} started", getClass().getSimpleName())
+    }
+
+    private static void syncAutomaticSubscriptions() {
+        //todo: ignore calls which start while this method is already running
+        //todo: change to just subscriber
+        SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
+                SourcePluginConfig.current.activeEnvironment.appUuid, true, {
+            if (it.succeeded()) {
+                it.result().each {
+                    if (it.automaticSubscription() || it.forceSubscription()) {
+                        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                                it.artifactQualifiedName()) as IntelliJSourceMark
+                        if (sourceMark != null) {
+                            sourceMark.markArtifactSubscribed()
+                        } else {
+                            PENDING_SUBSCRIBED.add(it.artifactQualifiedName())
+                        }
+                    }
+                }
+            } else {
+                log.error("Failed to get application subscriptions", it.cause())
+            }
+        })
     }
 }

@@ -88,12 +88,18 @@ class IntelliJSourcePortal extends SourcePortal {
         return super.portalUI as IntelliJPortalUI
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void close() throws IOException {
         portalUI.close()
         super.close()
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     SourcePortal createExternalPortal() {
         def portalClone = getPortal(register(appUuid, portalUI.viewingPortalArtifact))

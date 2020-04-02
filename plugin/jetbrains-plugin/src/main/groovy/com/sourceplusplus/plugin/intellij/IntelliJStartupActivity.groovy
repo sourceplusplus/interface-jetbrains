@@ -27,8 +27,8 @@ import io.vertx.core.json.Json
 import org.apache.log4j.*
 import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
-import plus.sourceplus.marker.plugin.SourceMarkerPlugin
-import plus.sourceplus.marker.plugin.SourceMarkerStartupActivity
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
 
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
@@ -149,7 +149,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
     @Override
     void dispose() {
         if (SourceMarkerPlugin.INSTANCE.enabled) {
-            SourceMarkerPlugin.INSTANCE.clearActiveSourceFileMarkers()
+            SourceMarkerPlugin.INSTANCE.clearAvailableSourceFileMarkers()
         }
     }
 

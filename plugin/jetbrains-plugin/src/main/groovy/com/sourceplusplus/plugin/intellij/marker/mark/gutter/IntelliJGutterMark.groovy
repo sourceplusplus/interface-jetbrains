@@ -2,7 +2,7 @@ package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 
 import com.intellij.openapi.util.IconLoader
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
-import plus.sourceplus.marker.source.mark.gutter.GutterMark
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 
 import javax.swing.*
 

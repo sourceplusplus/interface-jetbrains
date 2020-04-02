@@ -4,13 +4,12 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.plugin.PluginBootstrap
 import io.vertx.core.json.Json
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
-import plus.sourceplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import javax.swing.*
 
@@ -64,7 +63,7 @@ class PluginSettingsConfigurable implements Configurable {
             PropertiesComponent.getInstance().setValue(
                     "spp_plugin_config", Json.encode(SourcePluginConfig.current))
 
-            SourceMarkerPlugin.INSTANCE.refreshActiveSourceFileMarkers()
+            SourceMarkerPlugin.INSTANCE.refreshAvailableSourceFileMarkers(true)
         }
     }
 

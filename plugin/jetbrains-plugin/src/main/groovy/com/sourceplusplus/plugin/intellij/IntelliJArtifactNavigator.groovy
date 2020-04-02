@@ -9,8 +9,8 @@ import com.sourceplusplus.portal.display.PortalTab
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
-import plus.sourceplus.marker.plugin.SourceMarkerPlugin
-import plus.sourceplus.marker.source.mark.gutter.GutterMark
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 
 /**
  * todo: description

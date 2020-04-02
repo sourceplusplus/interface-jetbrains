@@ -22,11 +22,11 @@
         <postStartupActivity implementation="com.sourceplusplus.plugin.intellij.IntelliJStartupActivity"/>
 
         <codeInsight.lineMarkerProvider language="Groovy"
-                                        implementationClass="plus.sourceplus.marker.plugin.SourceLineMarkerProvider$GroovyDescriptor"/>
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$GroovyDescriptor"/>
         <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="plus.sourceplus.marker.plugin.SourceLineMarkerProvider$JavaDescriptor"/>
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$JavaDescriptor"/>
         <codeInsight.lineMarkerProvider language="kotlin"
-                                        implementationClass="plus.sourceplus.marker.plugin.SourceLineMarkerProvider$KotlinDescriptor"/>
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$KotlinDescriptor"/>
 
         <projectService
                 serviceImplementation="com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService"/>
@@ -70,7 +70,7 @@
     </extensions>
 
     <projectListeners>
-        <listener class="plus.sourceplus.marker.plugin.FileActivityListener"
+        <listener class="com.sourceplusplus.marker.plugin.FileActivityListener"
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </projectListeners>
 </idea-plugin>

@@ -1,6 +1,6 @@
 package com.sourceplusplus.plugin.intellij.marker.mark
 
-import plus.sourceplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 
 /**
  * todo: description
