@@ -3,7 +3,6 @@ package com.sourceplusplus.portal
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
-import com.intellij.ui.jcef.JBCefBrowser
 import com.sourceplusplus.portal.display.PortalInterface
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
@@ -21,20 +20,20 @@ import java.util.concurrent.TimeUnit
 @Canonical
 class SourcePortal implements Closeable {
 
-    private static final LoadingCache<String, SourcePortal> portalMap = CacheBuilder.newBuilder()
+    protected static final LoadingCache<String, SourcePortal> portalMap = CacheBuilder.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build(new CacheLoader<String, SourcePortal>() {
-        @Override
-        SourcePortal load(String portalUuid) throws Exception {
-            return getPortal(portalUuid)
-        }
-    })
+                @Override
+                SourcePortal load(String portalUuid) throws Exception {
+                    return getPortal(portalUuid)
+                }
+            })
     private final String portalUuid
     private final String appUuid
     private final boolean external
-    private PortalInterface portalUI
+    protected PortalInterface portalUI
 
-    private SourcePortal(String portalUuid, String appUuid, boolean external) {
+    protected SourcePortal(String portalUuid, String appUuid, boolean external) {
         this.portalUuid = portalUuid
         this.appUuid = appUuid
         this.external = external
@@ -82,17 +81,6 @@ class SourcePortal implements Closeable {
         }
     }
 
-    static void registerInternal(String appUuid, String portalUuid, String artifactQualifiedName, JBCefBrowser browser) {
-        //todo: ensure portal uuid valid
-        def portal = new SourcePortal(portalUuid, Objects.requireNonNull(appUuid), false)
-        portal.portalUI = new PortalInterface(portalUuid, browser)
-        portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
-
-        portalMap.put(portalUuid, portal)
-        log.info("Registered internal Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
-        log.info("Active portals: " + portalMap.size())
-    }
-
     static String register(String appUuid, String artifactQualifiedName, boolean external) {
         def portalUuid = UUID.randomUUID().toString()
         def portal = new SourcePortal(portalUuid, Objects.requireNonNull(appUuid), external)
@@ -129,7 +117,6 @@ class SourcePortal implements Closeable {
     void close() throws IOException {
         log.info("Closed portal: $portalUuid")
         portalMap.invalidate(portalUuid)
-        portalUI.close()
         log.info("Active portals: " + portalMap.size())
     }
 

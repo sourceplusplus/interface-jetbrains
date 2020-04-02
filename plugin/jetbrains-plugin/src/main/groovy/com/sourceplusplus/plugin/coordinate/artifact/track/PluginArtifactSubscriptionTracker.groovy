@@ -8,7 +8,7 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
-import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import plus.sourceplus.marker.plugin.SourceMarkerPlugin
@@ -130,7 +130,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     if (gutterMark) {
                         gutterMark.markArtifactUnsubscribed()
                         if (gutterMark.portalRegistered) {
-                            SourcePortal.getPortal(gutterMark.portalUuid)?.close()
+                            IntelliJSourcePortal.getPortal(gutterMark.portalUuid)?.close()
                         }
                     }
                 } else {

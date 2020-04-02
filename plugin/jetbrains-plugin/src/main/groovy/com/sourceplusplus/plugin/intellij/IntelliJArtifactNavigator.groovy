@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
-import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import com.sourceplusplus.portal.display.PortalTab
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
@@ -34,7 +34,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
             ApplicationManager.getApplication().invokeLater({
                 if (SourceMarkerPlugin.INSTANCE.artifactNavigator.canNavigateToMethod(
                         IntelliJStartupActivity.currentProject, artifactQualifiedName)) {
-                    def internalPortal = SourcePortal.getInternalPortal(appUuid, artifactQualifiedName)
+                    def internalPortal = IntelliJSourcePortal.getInternalPortal(appUuid, artifactQualifiedName)
                     if (!internalPortal.isPresent()) {
                         def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                                 artifactQualifiedName) as IntelliJGutterMark
@@ -54,7 +54,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
         })
         vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT, { message ->
             def request = message.body() as JsonObject
-            def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
+            def portal = IntelliJSourcePortal.getPortal(request.getString("portal_uuid"))
             def artifactQualifiedName = request.getString("artifact_qualified_name")
             ApplicationManager.getApplication().invokeLater({
                 GutterMark.closeOpenPortals()

@@ -1,9 +1,6 @@
 package com.sourceplusplus.portal.display
 
-import com.google.common.base.Joiner
-import com.intellij.ui.jcef.JBCefBrowser
 import com.sourceplusplus.api.model.config.SourcePortalConfig
-import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.tabs.views.ConfigurationView
 import com.sourceplusplus.portal.display.tabs.views.OverviewView
 import com.sourceplusplus.portal.display.tabs.views.TracesView
@@ -24,46 +21,25 @@ import java.util.zip.ZipFile
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Slf4j
-class PortalInterface {
+class PortalInterface { //todo: rename to PortalUI
 
     public static final String PORTAL_READY = "PortalReady"
 
     private static File _uiDirectory
     private static Vertx vertx
-    private final String portalUuid
+    protected final String portalUuid
     private final OverviewView overviewView
     private final TracesView tracesView
     private final ConfigurationView configurationView
-    private JBCefBrowser browser
     public String viewingPortalArtifact
     public PortalTab currentTab = PortalTab.Overview
-    private Map<String, String> currentQueryParams = [:]
-    private static boolean DARK_MODE
+    //todo: isn't DARK_MODE needed here?
 
     PortalInterface(String portalUuid) {
-        this(portalUuid, null)
-    }
-
-    PortalInterface(String portalUuid, JBCefBrowser browser) {
         this.portalUuid = portalUuid
-        this.browser = browser
         this.overviewView = new OverviewView(this)
         this.tracesView = new TracesView(this)
         this.configurationView = new ConfigurationView()
-    }
-
-    void loadPage(PortalTab tab) {
-        loadPage(tab, [:])
-    }
-
-    void loadPage(PortalTab tab, Map<String, String> queryParams) {
-        queryParams.put("dark_mode", Boolean.toString(DARK_MODE))
-        currentQueryParams = new HashMap<>(queryParams)
-        def userQuery = Joiner.on("&").withKeyValueSeparator("=").join(queryParams)
-        if (userQuery) {
-            userQuery = "&$userQuery"
-        }
-        browser.cefBrowser.loadURL(getPortalUrl(tab, portalUuid, userQuery))
     }
 
     OverviewView getOverviewView() {
@@ -78,26 +54,9 @@ class PortalInterface {
         return configurationView
     }
 
-    void close() {
-        browser.cefBrowser.close(true)
-    }
-
-    void reload() {
-        if (browser != null) {
-            loadPage(currentTab, currentQueryParams)
-        }
-    }
-
     void cloneViews(PortalInterface portalInterface) {
         this.overviewView.cloneView(portalInterface.overviewView)
         this.tracesView.cloneView(portalInterface.tracesView)
-    }
-
-    static void updateTheme(boolean dark) {
-        DARK_MODE = dark
-        SourcePortal.getPortals().each {
-            it.interface.reload()
-        }
     }
 
     static void assignVertx(Vertx vertx) {

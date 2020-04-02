@@ -13,25 +13,20 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
-import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.SourcePlugin
-import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
-import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMarkComponentProvider
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
+import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalInterface
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
 import com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentDialogWrapper
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
-import com.sourceplusplus.portal.display.PortalInterface
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import org.apache.log4j.*
 import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
-import plus.sourceplus.marker.SourceFileMarker
-import plus.sourceplus.marker.SourceFileMarkerProvider
 import plus.sourceplus.marker.plugin.SourceMarkerPlugin
 import plus.sourceplus.marker.plugin.SourceMarkerStartupActivity
 
@@ -205,19 +200,19 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         //register coordinators
         sourcePlugin.vertx.deployVerticle(new IntelliJArtifactNavigator())
 
-        sourcePlugin.vertx.eventBus().consumer(PortalInterface.PORTAL_READY, {
+        sourcePlugin.vertx.eventBus().consumer(IntelliJPortalInterface.PORTAL_READY, {
             //set portal theme
             UIManager.addPropertyChangeListener({
                 if (it.newValue instanceof IntelliJLaf) {
-                    PortalInterface.updateTheme(false)
+                    IntelliJPortalInterface.updateTheme(false)
                 } else {
-                    PortalInterface.updateTheme(true)
+                    IntelliJPortalInterface.updateTheme(true)
                 }
             })
             if (UIManager.lookAndFeel instanceof IntelliJLaf) {
-                PortalInterface.updateTheme(false)
+                IntelliJPortalInterface.updateTheme(false)
             } else {
-                PortalInterface.updateTheme(true)
+                IntelliJPortalInterface.updateTheme(true)
             }
         })
         DaemonCodeAnalyzerImpl.getInstance(currentProject).restart()

@@ -6,9 +6,9 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
+import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalInterface
+import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
-import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.display.PortalInterface
 import com.sourceplusplus.portal.display.PortalTab
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
@@ -63,7 +63,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                     .removeAllArtifactSubscriptions(true)
                     .build()
             PluginBootstrap.sourcePlugin.vertx.eventBus().send(UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
-        } else  if (sourceMarkEvent.eventCode == SourceMarkEventCode.NAME_CHANGED) {
+        } else if (sourceMarkEvent.eventCode == SourceMarkEventCode.NAME_CHANGED) {
             //todo: this
         }
     }
@@ -182,9 +182,10 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             putUserData(IntelliJKeys.PortalUUID, portalUuid)
 
             def markComponent = gutterMarkComponent as GutterMarkJcefComponent
-            markComponent.configuration.initialUrl = PortalInterface.getPortalUrl(PortalTab.Overview, portalUuid)
+            markComponent.configuration.initialUrl = IntelliJPortalInterface.getPortalUrl(PortalTab.Overview, portalUuid)
             markComponent.initialize()
-            SourcePortal.registerInternal(appUuid, portalUuid, artifactQualifiedName, markComponent.browser)
+            IntelliJSourcePortal.register(appUuid, portalUuid, artifactQualifiedName,
+                    new IntelliJPortalInterface(portalUuid, markComponent.browser))
         }
     }
 }
