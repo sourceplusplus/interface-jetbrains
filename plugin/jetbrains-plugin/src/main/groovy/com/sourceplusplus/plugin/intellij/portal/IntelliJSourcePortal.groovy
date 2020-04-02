@@ -65,10 +65,9 @@ class IntelliJSourcePortal extends SourcePortal {
         return portalUuid
     }
 
-    static String register(String appUuid, String portalUuid, String artifactQualifiedName,
-                           IntelliJPortalUI portalInterface) {
+    static String register(String appUuid, String portalUuid, String artifactQualifiedName, IntelliJPortalUI portalUI) {
         def portal = new IntelliJSourcePortal(portalUuid, Objects.requireNonNull(appUuid), false)
-        portal.portalUI = portalInterface
+        portal.portalUI = portalUI
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalUuid, portal)
@@ -98,7 +97,7 @@ class IntelliJSourcePortal extends SourcePortal {
     @Override
     SourcePortal createExternalPortal() {
         def portalClone = getPortal(register(appUuid, portalUI.viewingPortalArtifact))
-        portalClone.portalUI.cloneViews(portalUI)
+        portalClone.portalUI.cloneUI(portalUI)
         return portalClone
     }
 }

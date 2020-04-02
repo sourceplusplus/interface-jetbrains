@@ -54,9 +54,9 @@ class PortalUI {
         return configurationView
     }
 
-    void cloneViews(PortalUI portalInterface) {
-        this.overviewView.cloneView(portalInterface.overviewView)
-        this.tracesView.cloneView(portalInterface.tracesView)
+    void cloneUI(PortalUI portalUI) {
+        this.overviewView.cloneView(portalUI.overviewView)
+        this.tracesView.cloneView(portalUI.tracesView)
     }
 
     static void assignVertx(Vertx vertx) {

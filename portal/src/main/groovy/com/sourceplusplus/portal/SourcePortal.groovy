@@ -126,7 +126,7 @@ class SourcePortal implements Closeable {
 
     SourcePortal createExternalPortal() {
         def portalClone = getPortal(register(appUuid, portalUI.viewingPortalArtifact, true))
-        portalClone.portalUI.cloneViews(portalUI)
+        portalClone.portalUI.cloneUI(portalUI)
         return portalClone
     }
 }

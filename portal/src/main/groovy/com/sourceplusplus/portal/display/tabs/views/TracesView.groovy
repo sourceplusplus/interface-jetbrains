@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Canonical
 class TracesView {
 
-    private final PortalUI portalInterface
+    private final PortalUI portalUI
     private Map<TraceOrderType, ArtifactTraceResult> traceResultCache = new ConcurrentHashMap<>()
     private Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
     int innerLevel = 0
@@ -31,8 +31,8 @@ class TracesView {
     String traceId
     int spanId
 
-    TracesView(PortalUI portalInterface) {
-        this.portalInterface = portalInterface
+    TracesView(PortalUI portalUI) {
+        this.portalUI = portalUI
     }
 
     void cacheArtifactTraceResult(ArtifactTraceResult artifactTraceResult) {

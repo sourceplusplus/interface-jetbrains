@@ -212,7 +212,7 @@ class PortalBootstrap extends AbstractVerticle {
                 def portalUuid = SourcePortal.register(appUuid, artifactQualifiedName, true)
                 if (activePortals) {
                     log.info("Registered new portal with cloned view from portal: " + activePortals[0].portalUuid)
-                    SourcePortal.getPortal(portalUuid).portalUI.cloneViews(activePortals[0].portalUI)
+                    SourcePortal.getPortal(portalUuid).portalUI.cloneUI(activePortals[0].portalUI)
                 } else {
                     log.info("Registered new portal with blank view")
                 }
