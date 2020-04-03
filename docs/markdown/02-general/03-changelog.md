@@ -1,4 +1,4 @@
-# 0.2.5-alpha (2020-04-04)
+# 0.2.5-alpha (2020-04-03)
 
 ## Bug
 - Fixed issue causing Portals to crash on Linux ([#68](https://github.com/sourceplusplus/Assistant/issues/68))
