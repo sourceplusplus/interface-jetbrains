@@ -12,8 +12,8 @@
     <idea-version since-build="201"/>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
-    <depends>org.intellij.groovy</depends>
-    <depends>org.jetbrains.kotlin</depends>
+    <depends optional="true" config-file="withGroovy.xml">org.intellij.groovy</depends>
+    <depends optional="true" config-file="withKotlin.xml">org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
         <taskManager implementation="com.sourceplusplus.plugin.intellij.patcher.GradleAgentPatcher"/>
@@ -21,12 +21,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.sourceplusplus.plugin.intellij.IntelliJStartupActivity"/>
 
-        <codeInsight.lineMarkerProvider language="Groovy"
-                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$GroovyDescriptor"/>
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$JavaDescriptor"/>
-        <codeInsight.lineMarkerProvider language="kotlin"
-                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$KotlinDescriptor"/>
 
         <projectService
                 serviceImplementation="com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService"/>
