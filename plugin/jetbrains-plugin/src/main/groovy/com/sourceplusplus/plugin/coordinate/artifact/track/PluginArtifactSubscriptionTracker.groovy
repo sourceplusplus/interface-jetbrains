@@ -92,10 +92,10 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                 if (it.succeeded()) {
                     resp.reply(request)
 
-                    def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                            request.artifactQualifiedName()) as IntelliJGutterMark
-                    if (gutterMark != null) {
-                        gutterMark.markArtifactSubscribed()
+                    def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                            request.artifactQualifiedName()) as IntelliJSourceMark
+                    if (sourceMark != null) {
+                        sourceMark.markArtifactSubscribed()
                         PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
                     } else {
                         PENDING_SUBSCRIBED.add(request.artifactQualifiedName())
