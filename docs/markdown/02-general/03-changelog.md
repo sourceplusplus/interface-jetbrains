@@ -1,4 +1,4 @@
-# 0.2.5-alpha (2020-04-03)
+# 0.2.5-alpha (2020-04-04)
 
 ## Bug
 - Fixed issue causing Portals to crash on Linux ([#68](https://github.com/sourceplusplus/Assistant/issues/68))
@@ -17,6 +17,7 @@
 - Docker setup dialog auto-scroll ([#132](https://github.com/sourceplusplus/Assistant/issues/132))
 - Closing project now closes all active source file markers ([#129](https://github.com/sourceplusplus/Assistant/issues/129))
 - Groovy/Kotlin correctly managed as optional IntelliJ plugins
+- Increased usage of SPP_API_HOST in agent
 
 ## Dependency upgrade
 - Upgraded Vert.x (3.8.5 -> 3.9.0)
