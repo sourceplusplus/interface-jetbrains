@@ -2,8 +2,8 @@ package com.sourceplusplus.plugin.intellij.portal
 
 import com.google.common.base.Joiner
 import com.intellij.ui.jcef.JBCefBrowser
-import com.sourceplusplus.portal.display.PortalUI
 import com.sourceplusplus.portal.display.PortalTab
+import com.sourceplusplus.portal.display.PortalUI
 import io.netty.handler.codec.http.QueryStringDecoder
 import org.cef.browser.CefBrowser
 import org.cef.browser.CefFrame
@@ -80,7 +80,9 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
             portal.portalUI.parentBrowser = JBCefBrowser.getJBCefBrowser(browser)
         }
         def popupBrowser = browser.client.createBrowser(targetUrl, false, false)
-        popupBrowser.createImmediately()
+        if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+            popupBrowser.createImmediately()
+        }
         portal.portalUI.browser = new JBCefBrowser(popupBrowser)
         portal.portalUI.parentBrowser.JBCefClient.addLifeSpanHandler(this, portal.portalUI.browser.cefBrowser)
 
