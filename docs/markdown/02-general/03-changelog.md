@@ -1,3 +1,34 @@
+# 0.2.5-alpha (2020-04-03)
+
+## Bug
+- Fixed issue causing Portals to crash on Linux ([#68](https://github.com/sourceplusplus/Assistant/issues/68))
+- Fixed Portal scaling issues on 4k displays ([#107](https://github.com/sourceplusplus/Assistant/issues/107))
+- Fixed issue with "Setup via Docker" not propagating hostname ([#110](https://github.com/sourceplusplus/Assistant/issues/110))
+- Fixed /admin/core/shutdown functionality and renamed restartServer to shutdownServer
+
+## Improvement
+- Improved source marking functionality via [SourceMarker](https://github.com/sourceplusplus/sourcemarker) integration ([#135](https://github.com/sourceplusplus/Assistant/issues/135))
+- Added auto-deploy to Docker Hub on release via GitHub Actions ([#128](https://github.com/sourceplusplus/Assistant/issues/128))
+- Added proper restrictions on IntelliJ plugin since-build (ver. 201) ([#125](https://github.com/sourceplusplus/Assistant/issues/125))
+- Switched compile/testCompile to implementation/testImplementation where applicable
+- Merged source-plugin-commons into jetbrains-plugin
+- Removed CefBrowser from Portal dependencies ([#112](https://github.com/sourceplusplus/Assistant/issues/112))
+- Renamed PortalInterface to PortalUI
+- Docker setup dialog auto-scroll ([#132](https://github.com/sourceplusplus/Assistant/issues/132))
+- Closing project now closes all active source file markers ([#129](https://github.com/sourceplusplus/Assistant/issues/129))
+- Groovy/Kotlin correctly managed as optional IntelliJ plugins
+
+## Dependency upgrade
+- Upgraded Vert.x (3.8.5 -> 3.9.0)
+- Upgraded jackson (2.10.2 -> 2.10.3)
+- Upgraded JetBrains annotations (18.0.0 -> 19.0.0)
+- Upgraded log4j (2.13.0 -> 2.13.1)
+- Upgraded okhttp (3.14.6 -> 4.4.1)
+- Upgraded JetBrains intellij plugin (0.4.17 -> 0.4.18)
+- Upgraded metrics-core (4.1.2 -> 4.1.5)
+- Upgraded GitSocratic (b50580b3c7 -> 5097fbbef8)
+- Upgraded IntelliJ plugin IntelliJ version (2019.3.4 -> 201.6073-EAP-CANDIDATE-SNAPSHOT)
+
 # 0.2.4-alpha (2020-03-29)
 
 ## Bug
@@ -79,7 +110,7 @@
 
 - Upgraded Journey browser version to 0.3.3
 - Increased IntelliJ Linux plugin compatibility ([#68](https://github.com/sourceplusplus/Assistant/issues/68))
-- Cloned portal views share data instead of copying ([#91](https://github.com/sourceplusplus/Assistant/issues/91))
+- Cloned Portal views share data instead of copying ([#91](https://github.com/sourceplusplus/Assistant/issues/91))
 
 # 0.2.1-alpha (2019-07-04)
 
@@ -91,12 +122,12 @@
 - Added AdminAPI.shutdown API endpoint ([#85](https://github.com/sourceplusplus/Assistant/issues/85))
 - Implemented ability for Source++ to monitor itself ([#81](https://github.com/sourceplusplus/Assistant/issues/81))
 - Closing files now correctly unsubscribe artifacts ([#86](https://github.com/sourceplusplus/Assistant/issues/86))
-- Unsubscribed artifacts now correctly close internal portal ([#95](https://github.com/sourceplusplus/Assistant/issues/95))
+- Unsubscribed artifacts now correctly close internal Portal ([#95](https://github.com/sourceplusplus/Assistant/issues/95))
 - Force unique application names ([#88](https://github.com/sourceplusplus/Assistant/issues/88))
 - Ability to configure agent with application name instead of id ([#89](https://github.com/sourceplusplus/Assistant/issues/89))
-- Better portal caching ([#70](https://github.com/sourceplusplus/Assistant/issues/70))
+- Better Portal caching ([#70](https://github.com/sourceplusplus/Assistant/issues/70))
 - More efficient SkyWalking endpoint sync mechanism ([#90](https://github.com/sourceplusplus/Assistant/issues/90))
-- Increased ability to change portal theme ([#87](https://github.com/sourceplusplus/Assistant/issues/87))
+- Increased ability to change Portal theme ([#87](https://github.com/sourceplusplus/Assistant/issues/87))
 - Skip tracing Groovy generated functions ([#84](https://github.com/sourceplusplus/Assistant/issues/84))
 
 # 0.2.0-alpha (2019-06-18)
@@ -112,16 +143,16 @@
 - Use RequestMapping.method in determining correct artifact ([#10](https://github.com/sourceplusplus/Assistant/issues/10))
 - Upgrade to SkyWalking 6.1 ([#30](https://github.com/sourceplusplus/Assistant/issues/30))
 - Fix bridge reconnection issue ([#61](https://github.com/sourceplusplus/Assistant/issues/61))
-- Fix portal pre-loading bug ([#57](https://github.com/sourceplusplus/Assistant/issues/57))
-- Remove inactive portals ([#59](https://github.com/sourceplusplus/Assistant/issues/59))
+- Fix Portal pre-loading bug ([#57](https://github.com/sourceplusplus/Assistant/issues/57))
+- Remove inactive Portals ([#59](https://github.com/sourceplusplus/Assistant/issues/59))
 - H2 database storage ([#14](https://github.com/sourceplusplus/Assistant/issues/14))
 - Application/environment switching ([#16](https://github.com/sourceplusplus/Assistant/issues/16))
 - Get rid of eventbus bridge port ([#56](https://github.com/sourceplusplus/Assistant/issues/56))
 - IDE restart required after S++ Core connection bug ([#26](https://github.com/sourceplusplus/Assistant/issues/26))
 - Implement artifact config tab in tooltip UI ([#13](https://github.com/sourceplusplus/Assistant/issues/13))
-- Register external portals as new ([#52](https://github.com/sourceplusplus/Assistant/issues/52))
+- Register external Portals as new ([#52](https://github.com/sourceplusplus/Assistant/issues/52))
 - Change portalId to portalUuid ([#50](https://github.com/sourceplusplus/Assistant/issues/50))
-- Ability to change portal active tab ([#51](https://github.com/sourceplusplus/Assistant/issues/51))
+- Ability to change Portal active tab ([#51](https://github.com/sourceplusplus/Assistant/issues/51))
 - Add status column to trace stack table ([#46](https://github.com/sourceplusplus/Assistant/issues/46))
 - Truncate extra 0 in time occurred on Traces tab ([#45](https://github.com/sourceplusplus/Assistant/issues/45))
 - View artifact slowest traces ([#19](https://github.com/sourceplusplus/Assistant/issues/19))

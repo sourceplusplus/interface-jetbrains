@@ -12,7 +12,7 @@ import io.vertx.core.streams.Pump
 /**
  * todo: description
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -64,7 +64,7 @@ class IntegrationProxy extends AbstractVerticle {
                 }
             }
         }
-        CompositeFuture.all(proxyIntegrationFutures).setHandler({
+        CompositeFuture.all(proxyIntegrationFutures).onComplete({
             if (it.succeeded()) {
                 log.info("IntegrationProxy started", getClass().getSimpleName())
                 fut.complete()

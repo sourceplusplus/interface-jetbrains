@@ -8,7 +8,7 @@ import java.util.Set;
  * Represents an exception thrown by Source++ Core API.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.1.4
+ * @version 0.2.5
  * @since 0.1.4
  */
 public class APIException extends RuntimeException {

@@ -18,7 +18,7 @@ import javax.swing.event.DocumentListener
 /**
  * todo: description
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -64,6 +64,7 @@ class EnvironmentDialog extends JDialog {
                 }
             }
             Thread.startDaemon { //todo: ensure thread closes
+                ConfigOption.docker_apache_skywalking_hostname.setValue("skywalking-oap")
                 if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
                     ConfigOption.docker_host.setValue("192.168.99.100")
                 }

@@ -18,7 +18,7 @@ import io.vertx.ext.web.RoutingContext
 /**
  * todo: description
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -50,8 +50,12 @@ class AdminAPI extends AbstractVerticle {
 
         vertx.close({
             if (it.succeeded()) {
-                def restartServer = routingContext.request().getParam("restartServer")
-                shutdown(restartServer && Boolean.valueOf(restartServer))
+                def shutdownServer = routingContext.request().getParam("shutdownServer")
+                if (shutdownServer == null || shutdownServer.isBlank()) {
+                    //todo: deprecate restartServer
+                    shutdownServer = routingContext.request().getParam("restartServer")
+                }
+                shutdown(shutdownServer && Boolean.valueOf(shutdownServer))
             } else {
                 log.error("Failed to shutdown Source++ Core", it.cause())
             }
@@ -151,16 +155,16 @@ class AdminAPI extends AbstractVerticle {
         }
     }
 
-    private static void shutdown(boolean restartServer) throws RuntimeException, IOException {
-        if (restartServer) {
+    private static void shutdown(boolean shutdownServer) throws RuntimeException, IOException {
+        if (shutdownServer) {
             String shutdownCommand
-            String operatingSystem = System.getProperty("os.name")
-            if ("Linux" == operatingSystem || "Mac OS X" == operatingSystem) {
+            String operatingSystem = System.getProperty("os.name").toLowerCase()
+            if (operatingSystem.startsWith("linux") || operatingSystem.startsWith("mac")) {
                 shutdownCommand = "shutdown -r now"
-            } else if ("Windows" == operatingSystem) {
+            } else if (operatingSystem.startsWith("windows")) {
                 shutdownCommand = "shutdown.exe -s -t 0"
             } else {
-                throw new RuntimeException("Unsupported operating system.")
+                throw new RuntimeException("Unsupported operating system: " + System.getProperty("os.name"))
             }
             Runtime.getRuntime().exec(shutdownCommand)
         }

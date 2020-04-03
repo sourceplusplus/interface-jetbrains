@@ -20,7 +20,7 @@
 
 ## Introduction
 
-Source++ is an open-source automated programming assistant with runtime-aware and context-aware functionality. Source++ is an observant-only programming assistant and aims to bridge application performance management (APM) solutions and the software developer's integrated development environment (IDE) to enable tighter feedback loops.
+Source++ is an open-source automated programming assistant with runtime-aware and context-aware functionality. Source++ is an observant-only programming assistant and aims to bridge application performance management (APM) solutions with the software developer's integrated development environment (IDE), enabling tighter feedback loops.
 
 Source++ will not write source code for you. Source++ can be used to help debug and prevent runtime issues by providing contextualized behavior about your source code throughout development. Future versions of Source++ aspire to provide additional AI-based pair programming features.
 
@@ -46,7 +46,7 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 
 - Supported APMs: [Apache SkyWalking](https://github.com/apache/incubator-skywalking)
 - Supported IDEs: JetBrains
-- Supported OSes: ~~Linux~~ ([see](https://github.com/sourceplusplus/Assistant/issues/68)), macOS, and Windows
+- Supported OSes: Linux, macOS, and Windows
 
 ### Installation
 
@@ -65,7 +65,7 @@ Install a JetBrains IDE if you don’t already have one.
 4. Press `Install`.
 5. Click `OK` in the `Settings` dialog and restart your IDE.
 
-After installation you will need to configure the Source++ Plugin (see [Configure Plugin](https://sourceplusplus.com/knowledge/introduction/configure-plugin/)).
+After installation, you will need to configure the Source++ Plugin (see [Configure Plugin](https://sourceplusplus.com/knowledge/introduction/configure-plugin/)).
 
 ## Code Structure
 
@@ -75,7 +75,6 @@ After installation you will need to configure the Source++ Plugin (see [Configur
 | :api                          | Holds common data models and communication clients       | Java 8+     |
 | :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.4+ |
 | :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.4+ |
-| :plugin:source-plugin-commons | Common Source++ Plugin functionality                     | Groovy 2.4+ |
 | :portal                       | Used to visually display contextualized artifact data    | Groovy 2.4+ |
 
 ## Building/Testing

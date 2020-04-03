@@ -13,7 +13,7 @@ import io.vertx.core.json.JsonObject
  *  - user hovered over S++ icon
  *  - user opened/closed portal
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -70,8 +70,8 @@ class PortalViewTracker extends AbstractVerticle {
             def artifactQualifiedName = request.getString("artifact_qualified_name")
 
             def portal = SourcePortal.getPortal(portalUuid)
-            if (artifactQualifiedName != portal.interface.viewingPortalArtifact) {
-                portal.interface.viewingPortalArtifact = artifactQualifiedName
+            if (artifactQualifiedName != portal.portalUI.viewingPortalArtifact) {
+                portal.portalUI.viewingPortalArtifact = artifactQualifiedName
                 vertx.eventBus().publish(CHANGED_PORTAL_ARTIFACT,
                         new JsonObject().put("portal_uuid", portalUuid)
                                 .put("artifact_qualified_name", artifactQualifiedName)

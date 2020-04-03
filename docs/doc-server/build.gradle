@@ -6,11 +6,11 @@ archivesBaseName = 'source-doc-server'
 mainClassName = 'com.sourceplusplus.docserver.DocServerBootstrap'
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.17'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.0'
-    compile "io.vertx:vertx-web:$VERTX_VERSION"
-    compile "io.vertx:vertx-web-client:$VERTX_VERSION"
-    compile group: 'net.jodah', name: 'expiringmap', version: '0.5.9'
+    implementation 'org.codehaus.groovy:groovy-all:2.4.17'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.1'
+    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+    implementation "io.vertx:vertx-web-client:$VERTX_VERSION"
+    implementation group: 'net.jodah', name: 'expiringmap', version: '0.5.9'
 }
 
 task createProperties(dependsOn: processResources) {
@@ -44,7 +44,6 @@ groovydoc {
               '../../api/src/main/java',
               '../../core/src/main/groovy',
               //'../../plugin/jetbrains-plugin/src/main/groovy',
-              '../../plugin/source-plugin-commons/src/main/groovy',
               '../../portal/src/main/groovy',
               '../../api/build/generated/source/apt/main']
 

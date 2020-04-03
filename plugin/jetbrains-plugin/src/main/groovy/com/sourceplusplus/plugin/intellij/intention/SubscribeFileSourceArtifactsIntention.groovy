@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
 
@@ -26,32 +27,11 @@ import static com.sourceplusplus.plugin.PluginBootstrap.getSourcePlugin
  * Artifacts currently supported:
  *  - methods
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionAction {
-
-    @NotNull
-    String getText() {
-        return "Subscribe to all source artifacts"
-    }
-
-    @NotNull
-    String getFamilyName() {
-        return getText()
-    }
-
-    @Override
-    boolean startInWriteAction() {
-        return false
-    }
-
-    @Nullable
-    @Override
-    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
-        return currentFile
-    }
 
     @Override
     boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
@@ -67,8 +47,8 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
         }
         if (!inMethod) {
             //check for unsubscribed source marks
-            def fileMarkers = sourcePlugin.getAvailableSourceFileMarkers() as List<IntelliJSourceFileMarker>
-            def fileMarker = fileMarkers.find { it.psiFile == originalElement.containingFile }
+            def fileMarker = SourceMarkerPlugin.INSTANCE.getSourceFileMarker(
+                    originalElement.containingFile) as IntelliJSourceFileMarker
             if (fileMarker) {
                 return fileMarker.sourceMarks.find { !it.artifactSubscribed }
             }
@@ -80,8 +60,8 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
     @SuppressWarnings("GroovyVariableNotAssigned")
     void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element)
             throws IncorrectOperationException {
-        def fileMarkers = sourcePlugin.getAvailableSourceFileMarkers() as List<IntelliJSourceFileMarker>
-        def fileMarker = fileMarkers.find { it.psiFile == element.containingFile }
+        def fileMarker = SourceMarkerPlugin.INSTANCE.getSourceFileMarker(
+                element.containingFile) as IntelliJSourceFileMarker
         if (fileMarker) {
             fileMarker.sourceMarks.each {
                 if (!it.artifactSubscribed) {
@@ -113,5 +93,26 @@ class SubscribeFileSourceArtifactsIntention extends PsiElementBaseIntentionActio
                 }
             }
         }
+    }
+
+    @NotNull
+    String getText() {
+        return "Subscribe to all source artifacts"
+    }
+
+    @NotNull
+    String getFamilyName() {
+        return getText()
+    }
+
+    @Override
+    boolean startInWriteAction() {
+        return false
+    }
+
+    @Nullable
+    @Override
+    PsiElement getElementToMakeWritable(@NotNull PsiFile currentFile) {
+        return currentFile
     }
 }

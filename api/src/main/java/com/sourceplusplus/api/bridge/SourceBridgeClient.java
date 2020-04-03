@@ -11,10 +11,10 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 
 /**
- * todo: this
+ * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.2.0
  */
 public class SourceBridgeClient {

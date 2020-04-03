@@ -1,30 +1,40 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.4.17"
+    id "org.jetbrains.intellij" version "0.4.18"
 }
-
 apply plugin: 'groovy'
+
 intellij {
-    version '2019.3.4'
-    updateSinceUntilBuild = false
+    version '201.6073-EAP-CANDIDATE-SNAPSHOT'
     pluginName 'jetbrains-source-plugin'
     plugins = ["java", "Groovy", "Kotlin", "properties", "gradle"]
     buildSearchableOptions.enabled = false
+}
+patchPluginXml {
+    sinceBuild = "201"
+}
+runIde {
+    systemProperty('ide.browser.jcef.enabled', 'true')
 }
 
 group = 'com.sourceplusplus.plugin'
 archivesBaseName = 'jetbrains-source-plugin'
 
 dependencies {
-    compile project(":api")
-    compile project(":portal")
-    compile project(":plugin:source-plugin-commons")
-    compile 'org.codehaus.groovy:groovy-all:2.4.17'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
-    compile(group: 'com.github.codebrig', name: 'gitsocratic', version: 'b50580b3c7') {
+    implementation project(":api")
+    implementation(project(":portal")) {
+        exclude group: 'com.jetbrains.intellij.platform'
+    }
+    implementation 'org.codehaus.groovy:groovy-all:2.4.17'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
+    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+    implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
+    implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5097fbbef8') { //todo: real version
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
-    compile 'com.github.codebrig:journey:0.4.0-online'
+    implementation('com.github.sourceplusplus.sourcemarker:marker-provider:v0.1.0') {
+        transitive = false
+    }
 }
 
 task createProperties(dependsOn: processResources) {

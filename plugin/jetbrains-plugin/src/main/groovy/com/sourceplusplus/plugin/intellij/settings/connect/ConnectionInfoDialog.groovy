@@ -10,7 +10,7 @@ import javax.swing.*
  * todo: description
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  */
 class ConnectionInfoDialog extends JDialog {
@@ -28,6 +28,7 @@ class ConnectionInfoDialog extends JDialog {
 
     void log(String data) {
         connectionInfoTextArea.text += data
+        connectionInfoTextArea.setCaretPosition(connectionInfoTextArea.document.length)
     }
 
     void setStatus(String status) {

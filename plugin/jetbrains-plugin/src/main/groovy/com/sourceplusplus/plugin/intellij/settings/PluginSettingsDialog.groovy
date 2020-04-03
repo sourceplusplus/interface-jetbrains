@@ -10,6 +10,7 @@ import com.sourceplusplus.plugin.intellij.settings.application.EditApplicationSe
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.StringUtils
 import org.jetbrains.annotations.NotNull
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import javax.swing.*
 import java.awt.event.ActionEvent
@@ -18,7 +19,7 @@ import java.awt.event.ActionListener
 /**
  * todo: description
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -113,6 +114,7 @@ class PluginSettingsDialog extends JDialog {
                 applicationSettings.show()
 
                 if (applicationSettings.getOkayAction()) {
+                    SourceMarkerPlugin.INSTANCE.refreshAvailableSourceFileMarkers(true)
                     updateApplicationDetails(coreClient)
                 }
             }

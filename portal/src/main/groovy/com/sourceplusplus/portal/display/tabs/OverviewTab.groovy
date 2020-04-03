@@ -34,7 +34,7 @@ import static com.sourceplusplus.api.model.metric.MetricType.*
  *  - Minimum/Maximum response time
  *  - Average SLA
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -60,14 +60,14 @@ class OverviewTab extends AbstractTab {
             log.info("Overview tab opened")
             def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
             def portal = SourcePortal.getPortal(portalUuid)
-            portal.interface.currentTab = PortalTab.Overview
+            portal.portalUI.currentTab = PortalTab.Overview
             updateUI(portal)
             SourcePortal.ensurePortalActive(portal)
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
             SourcePortal.getPortals(artifactMetricResult.appUuid(), artifactMetricResult.artifactQualifiedName()).each {
-                it.interface.overviewView.cacheMetricResult(artifactMetricResult)
+                it.portalUI.overviewView.cacheMetricResult(artifactMetricResult)
                 updateUI(it)
             }
         })
@@ -75,7 +75,7 @@ class OverviewTab extends AbstractTab {
         vertx.eventBus().consumer(SET_METRIC_TIME_FRAME, {
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
-            def view = portal.interface.overviewView
+            def view = portal.portalUI.overviewView
             view.timeFrame = QueryTimeFrame.valueOf(request.getString("metric_time_frame").toUpperCase())
             log.info("Overview time frame set to: " + view.timeFrame)
             updateUI(portal)
@@ -83,7 +83,7 @@ class OverviewTab extends AbstractTab {
             //subscribe (re-subscribe) to get latest stats
             def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
                     .appUuid(portal.appUuid)
-                    .artifactQualifiedName(portal.interface.viewingPortalArtifact)
+                    .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
                     .timeFrame(view.timeFrame)
                     .metricTypes([Throughput_Average, ResponseTime_Average, ServiceLevelAgreement_Average]).build()
             SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
@@ -97,7 +97,7 @@ class OverviewTab extends AbstractTab {
         vertx.eventBus().consumer(SET_ACTIVE_CHART_METRIC, {
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
-            portal.interface.overviewView.activeChartMetric = valueOf(request.getString("metric_type"))
+            portal.portalUI.overviewView.activeChartMetric = valueOf(request.getString("metric_type"))
             updateUI(portal)
         })
         log.info("{} started", getClass().getSimpleName())
@@ -105,11 +105,11 @@ class OverviewTab extends AbstractTab {
 
     @Override
     void updateUI(SourcePortal portal) {
-        if (portal.interface.currentTab != thisTab) {
+        if (portal.portalUI.currentTab != thisTab) {
             return
         }
 
-        def artifactMetricResult = portal.interface.overviewView.metricResult
+        def artifactMetricResult = portal.portalUI.overviewView.metricResult
         if (artifactMetricResult) {
             if (log.traceEnabled) {
                 log.trace(String.format("Artifact metrics updated. Portal uuid: %s - App uuid: %s - Artifact qualified name: %s - Time frame: %s",
@@ -118,7 +118,7 @@ class OverviewTab extends AbstractTab {
 
             artifactMetricResult.artifactMetrics().each {
                 updateCard(portal, artifactMetricResult, it)
-                if (it.metricType() == portal.interface.overviewView.activeChartMetric) {
+                if (it.metricType() == portal.portalUI.overviewView.activeChartMetric) {
                     updateSplineGraph(portal, artifactMetricResult, it)
                 }
             }

@@ -1,50 +1,31 @@
 package com.sourceplusplus.plugin.intellij.marker
 
-import com.google.common.collect.Lists
-import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
-import com.sourceplusplus.plugin.PluginSourceFile
-import com.sourceplusplus.plugin.intellij.inspect.IntelliJSourceMarkInspection
-import com.sourceplusplus.plugin.marker.SourceFileMarker
-import com.sourceplusplus.plugin.marker.mark.SourceMark
-import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
+import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.uast.UMethod
+import com.sourceplusplus.marker.SourceFileMarker
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 
 /**
  * todo: description
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Slf4j
 class IntelliJSourceFileMarker extends SourceFileMarker {
 
-    public static final Key<IntelliJSourceFileMarker> KEY = Key.create("IntelliJSourceFileMarker")
-    private final PsiFile psiFile
-    private final List<SourceMark> sourceMarks
+    IntelliJSourceFileMarker(@NotNull PsiFile psiFile) {
+        super(psiFile)
 
-    IntelliJSourceFileMarker(@NotNull PsiFile psiFile, @NotNull PluginSourceFile sourceFile) {
-        super(sourceFile)
-        this.psiFile = psiFile
-        this.sourceMarks = Lists.newArrayList()
-    }
-
-    PsiFile getPsiFile() {
-        return psiFile
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void refresh() {
-        if (!psiFile.project.isDisposed()) {
-            DaemonCodeAnalyzer.getInstance(psiFile.project).restart(psiFile)
-        }
+        PluginBootstrap.sourcePlugin.vertx.eventBus().send(
+                PluginArtifactSubscriptionTracker.SYNC_AUTOMATIC_SUBSCRIPTIONS, true)
     }
 
     /**
@@ -52,27 +33,8 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
      */
     @NotNull
     @Override
-    List<SourceMark> getSourceMarks() {
-        return Lists.newArrayList(sourceMarks)
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void clearSourceMarks() {
-        sourceMarks.clear()
-        refresh()
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void setSourceMarks(@NotNull List<SourceMark> sourceMarks) {
-        this.sourceMarks.clear()
-        this.sourceMarks.addAll(sourceMarks)
-        refresh()
+    List<IntelliJSourceMark> getSourceMarks() {
+        return super.getSourceMarks() as List<IntelliJSourceMark>
     }
 
     /**
@@ -80,61 +42,13 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
      */
     @NotNull
     @Override
-    List<SourceMark> createSourceMarks() {
-        return ApplicationManager.getApplication().runReadAction(new IntelliJSourceMarkInspection(this, psiFile))
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    boolean removeSourceMark(@NotNull SourceMark sourceMark) {
-        log.trace("Removing source mark for artifact: " + sourceMark.artifactQualifiedName)
-        if (sourceMarks.remove(sourceMark)) {
-            if (sourceMark.portalRegistered) {
-                SourcePortal.getPortal(sourceMark.portalUuid)?.close()
-            }
-            refresh()
-            log.trace("Removed source mark for artifact: " + sourceMark.artifactQualifiedName)
-            return true
+    SourceMark createSourceMark(@NotNull UMethod psiMethod, @NotNull SourceMark.Type type) {
+        if (type == SourceMark.Type.GUTTER) {
+            def sourceMark = new IntelliJMethodGutterMark(this, psiMethod)
+            PluginBootstrap.sourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
+            return sourceMark
         } else {
-            return false
+            throw new IllegalStateException("Unsupported mark type: " + type)
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    boolean applySourceMark(@NotNull SourceMark sourceMark) {
-        log.trace("Applying source mark for artifact: " + sourceMark.artifactQualifiedName)
-        if (sourceMarks.add(sourceMark)) {
-            refresh()
-            log.trace("Applied source mark for artifact: " + sourceMark.artifactQualifiedName)
-            return true
-        } else {
-            return false
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (getClass() != o.class) return false
-
-        IntelliJSourceFileMarker that = (IntelliJSourceFileMarker) o
-        if (sourceFile != that.sourceFile) return false
-        return true
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    int hashCode() {
-        return sourceFile.hashCode()
     }
 }

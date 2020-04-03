@@ -17,7 +17,7 @@ import java.time.Instant
 /**
  * todo: description
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -181,6 +181,7 @@ class TraceAPI extends AbstractVerticle {
             throw new UnsupportedOperationException("todo: this")
         }
 
+        log.debug("Getting traces. App UUID: {} - Query: {}", appUuid, traceQuery)
         core.artifactAPI.getSourceArtifactConfig(appUuid, traceQuery.artifactQualifiedName(), {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
@@ -194,7 +195,7 @@ class TraceAPI extends AbstractVerticle {
                                 core.APMIntegration.getTraces(traceQuery, fut)
                                 futures.add(fut)
                             }
-                            CompositeFuture.all(futures).setHandler({
+                            CompositeFuture.all(futures).onComplete({
                                 if (it.succeeded()) {
                                     List<Trace> totalTraces = []
                                     (it.result().list() as List<TraceQueryResult>).each {
@@ -234,6 +235,8 @@ class TraceAPI extends AbstractVerticle {
 
     void getTraceSpans(String appUuid, String artifactQualifiedName, TraceSpanStackQuery traceSpanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
+        log.info("Getting trace spans. App UUID: {} - Artifact qualified name: {} - Query: {}",
+                appUuid, artifactQualifiedName, traceSpanQuery)
         if (traceSpanQuery.oneLevelDeep()) {
             core.artifactAPI.getSourceArtifact(appUuid, artifactQualifiedName, {
                 if (it.succeeded()) {
