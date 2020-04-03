@@ -57,7 +57,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
             def portal = IntelliJSourcePortal.getPortal(request.getString("portal_uuid"))
             def artifactQualifiedName = request.getString("artifact_qualified_name")
             ApplicationManager.getApplication().invokeLater({
-                GutterMark.closeOpenPortals()
+                GutterMark.closeOpenPopups()
 
                 //todo: don't think the params are necessary
                 portal.portalUI.loadPage(PortalTab.Traces, ["order_type": portal.portalUI.tracesView.orderType.toString()])
@@ -91,7 +91,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
         ApplicationManager.getApplication().invokeLater({
             ApplicationManager.getApplication().runReadAction({
                 def editor = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject).getSelectedTextEditor()
-                mark.displayPortal(editor)
+                mark.displayPopup(editor)
             })
         })
     }
