@@ -20,20 +20,20 @@ jobs:
         run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
 
       - name: Build the tagged Docker image
-        run: docker build . --file Dockerfile --tag sourceplusplus/assistant:${{ steps.vars.outputs.tag }}
+        run: docker build . --file Dockerfile --tag sourceplusplus/core:${{ steps.vars.outputs.tag }}
         working-directory: ${{ env.working-directory }}
 
       - name: Push the tagged Docker image
-        run: docker push sourceplusplus/assistant:${{ steps.vars.outputs.tag }}
+        run: docker push sourceplusplus/core:${{ steps.vars.outputs.tag }}
 
       - name: Retag the tagged Docker image to latest
-        run: docker tag sourceplusplus/assistant:${{ steps.vars.outputs.tag }} sourceplusplus/assistant:latest
+        run: docker tag sourceplusplus/core:${{ steps.vars.outputs.tag }} sourceplusplus/core:latest
 
       - name: Remove the tagged Docker image
-        run: docker rmi sourceplusplus/assistant:${{ steps.vars.outputs.tag }}
+        run: docker rmi sourceplusplus/core:${{ steps.vars.outputs.tag }}
 
       - name: Push the latest Docker image
-        run: docker push sourceplusplus/assistant:latest
+        run: docker push sourceplusplus/core:latest
 
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v2
