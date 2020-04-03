@@ -249,7 +249,6 @@ public class SourceAgent {
             System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
             System.setProperty("skywalking.agent.application_code", "test_mode");
             System.setProperty("skywalking.agent.service_name", "test_mode");
-            Config.Collector.BACKEND_SERVICE = "localhost:" + connection.getPort();
             try {
                 SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
             } catch (IOException e) {

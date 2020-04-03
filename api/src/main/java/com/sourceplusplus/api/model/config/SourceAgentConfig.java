@@ -76,7 +76,10 @@ public final class SourceAgentConfig {
         JsonObject apiConfig = agentConfig.getJsonObject("api");
         if (apiConfig != null) {
             if (apiConfig.containsKey("version")) apiVersion = apiConfig.getString("version");
-            if (apiConfig.containsKey("host")) apiHost = apiConfig.getString("host");
+            if (apiConfig.containsKey("host")) {
+                apiHost = System.getenv().getOrDefault("SPP_API_HOST", System.getProperty("SPP_API_HOST",
+                        apiConfig.getString("host")));
+            }
             if (apiConfig.containsKey("port")) apiPort = apiConfig.getInteger("port");
             if (apiConfig.containsKey("ssl")) apiSslEnabled = apiConfig.getBoolean("ssl");
             if (apiConfig.containsKey("key")) apiKey = apiConfig.getString("key");
