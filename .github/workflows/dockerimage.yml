@@ -7,19 +7,32 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      working-directory: ./docker/hub
 
     steps:
       - uses: actions/checkout@v1
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        working-directory: ${{env.working-directory}}
+      
       - name: Get the version
         id: vars
         run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
+        working-directory: ${{env.working-directory}}
+      
       - name: Build the tagged Docker image
         run: docker build . --file docker/hub/Dockerfile --tag sourceplusplus/assistant:${{steps.vars.outputs.tag}}
+        working-directory: ${{env.working-directory}}
+      
       - name: Push the tagged Docker image
         run: docker push sourceplusplus/assistant:${{steps.vars.outputs.tag}}
+        working-directory: ${{env.working-directory}}
+      
       - name: Build the latest Docker image
         run: docker build . --file docker/hub/Dockerfile --tag sourceplusplus/assistant:latest
+        working-directory: ${{env.working-directory}}
+      
       - name: Push the latest Docker image
         run: docker push sourceplusplus/assistant:latest
+        working-directory: ${{env.working-directory}}
