@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Hub Auto-Release
 
 on:
   release:
