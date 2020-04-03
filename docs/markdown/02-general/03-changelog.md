@@ -5,6 +5,7 @@
 - Upgraded JetBrains annotations (18.0.0 -> 19.0.0)
 - Upgraded log4j (2.13.0 -> 2.13.1)
 - Upgraded okhttp (3.14.6 -> 4.4.1)
+- Upgraded JetBrains intellij plugin (0.4.17 -> 0.4.18)
 
 # 0.2.4-alpha (2020-03-29)
 
