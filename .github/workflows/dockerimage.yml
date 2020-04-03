@@ -26,9 +26,11 @@ jobs:
       - name: Push the tagged Docker image
         run: docker push sourceplusplus/assistant:${{ steps.vars.outputs.tag }}
 
-      - name: Build the latest Docker image
-        run: docker build . --file Dockerfile --tag sourceplusplus/assistant:latest
-        working-directory: ${{ env.working-directory }}
+      - name: Retag the tagged Docker image to latest
+        run: docker tag sourceplusplus/assistant:${{ steps.vars.outputs.tag }} sourceplusplus/assistant:latest
+
+      - name: Remove the tagged Docker image
+        run: docker rmi sourceplusplus/assistant:${{ steps.vars.outputs.tag }}
 
       - name: Push the latest Docker image
         run: docker push sourceplusplus/assistant:latest
