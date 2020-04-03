@@ -4,6 +4,7 @@
 - Fixed issue causing Portals to crash on Linux ([#68](https://github.com/sourceplusplus/Assistant/issues/68))
 - Fixed Portal scaling issues on 4k displays ([#107](https://github.com/sourceplusplus/Assistant/issues/107))
 - Fixed issue with "Setup via Docker" not propagating hostname ([#110](https://github.com/sourceplusplus/Assistant/issues/110))
+- Fixed /admin/core/shutdown functionality and renamed restartServer to shutdownServer
 
 ## Improvement
 - Improved source marking functionality via [SourceMarker](https://github.com/sourceplusplus/sourcemarker) integration ([#135](https://github.com/sourceplusplus/Assistant/issues/135))
