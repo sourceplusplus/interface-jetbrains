@@ -33,7 +33,6 @@ class PortalUI {
     private final ConfigurationView configurationView
     public String viewingPortalArtifact
     public PortalTab currentTab = PortalTab.Overview
-    //todo: isn't DARK_MODE needed here?
 
     PortalUI(String portalUuid) {
         this.portalUuid = portalUuid
