@@ -24,8 +24,6 @@ import org.jetbrains.annotations.NotNull
 @Slf4j
 class SourcePlugin {
 
-    public static final String SOURCE_ENVIRONMENT_UPDATED = "SourceEnvironmentUpdated"
-
     private final Vertx vertx
     private PluginBootstrap pluginBootstrap
 
@@ -56,7 +54,6 @@ class SourcePlugin {
         if (SourcePluginConfig.current.activeEnvironment.appUuid) {
             SourcePortalConfig.current.addCoreClient(SourcePluginConfig.current.activeEnvironment.appUuid, coreClient)
         }
-        vertx.eventBus().publish(SOURCE_ENVIRONMENT_UPDATED, SourcePluginConfig.current.activeEnvironment.environmentName)
     }
 
     private void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
