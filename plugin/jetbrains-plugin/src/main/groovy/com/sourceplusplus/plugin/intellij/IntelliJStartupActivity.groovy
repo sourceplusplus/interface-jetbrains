@@ -32,6 +32,7 @@ import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
 
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
+import java.awt.Desktop
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -59,11 +60,27 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
 
     @Override
     void runActivity(@NotNull Project project) {
+        SourceMarkerPlugin.INSTANCE.enabled = false
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             return //don't need to boot everything for unit tests
+        } else if (System.getProperty("ide.browser.jcef.enabled") != "true") {
+            Notifications.Bus.notify(
+                    new Notification("Source++", "JCEF Disabled",
+                            "Source++ requires JCEF enabled on IntelliJ IDEA. " +
+                                    "For more information visit: <a href=\"#\">https://youtrack.jetbrains.com/issue/IDEA-231833#focus=streamItem-27-3941624.0-0</a>",
+                            NotificationType.INFORMATION, new NotificationListener() {
+                        @Override
+                        void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
+                            try {
+                                Desktop.getDesktop().browse(URI.create("https://youtrack.jetbrains.com/issue/IDEA-231833#focus=streamItem-27-3941624.0-0"))
+                            } catch (Exception e) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }))
+            return
         }
         System.setProperty("vertx.disableFileCPResolving", "true")
-        SourceMarkerPlugin.INSTANCE.enabled = false
         Disposer.register(project, this)
 
         //redirect loggers to console
