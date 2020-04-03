@@ -22,7 +22,7 @@ jobs:
         working-directory: ${{env.working-directory}}
       
       - name: Build the tagged Docker image
-        run: docker build . --file docker/hub/Dockerfile --tag sourceplusplus/assistant:${{steps.vars.outputs.tag}}
+        run: docker build . --file Dockerfile --tag sourceplusplus/assistant:${{steps.vars.outputs.tag}}
         working-directory: ${{env.working-directory}}
       
       - name: Push the tagged Docker image
@@ -30,7 +30,7 @@ jobs:
         working-directory: ${{env.working-directory}}
       
       - name: Build the latest Docker image
-        run: docker build . --file docker/hub/Dockerfile --tag sourceplusplus/assistant:latest
+        run: docker build . --file Dockerfile --tag sourceplusplus/assistant:latest
         working-directory: ${{env.working-directory}}
       
       - name: Push the latest Docker image
