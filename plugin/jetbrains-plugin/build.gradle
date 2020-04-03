@@ -1,8 +1,8 @@
 plugins {
     id "org.jetbrains.intellij" version "0.4.18"
 }
-
 apply plugin: 'groovy'
+
 intellij {
     version '201.6073-EAP-CANDIDATE-SNAPSHOT'
     pluginName 'jetbrains-source-plugin'
@@ -29,10 +29,10 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
     implementation "io.vertx:vertx-web:$VERTX_VERSION"
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
-    implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5097fbbef8') {
+    implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5097fbbef8') { //todo: real version
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
     }
-    implementation('com.github.sourceplusplus.sourcemarker:marker-provider:10541bd0cc') { //todo: real version
+    implementation('com.github.sourceplusplus.sourcemarker:marker-provider:9b5907b6aa') { //todo: real version
         transitive = false
     }
 }
