@@ -597,7 +597,7 @@ class H2DAO extends SourceStorage {
             params.add(it.value)
             client.updateWithParams(UPDATE_ARTIFACT_SUBSCRIPTION, params, future)
         }
-        CompositeFuture.all(futures).setHandler({
+        CompositeFuture.all(futures).onComplete({
             if (it.succeeded()) {
                 getArtifactSubscription(subscription.subscriberUuid(), subscription.appUuid(),
                         subscription.artifactQualifiedName(), handler)

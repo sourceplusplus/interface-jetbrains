@@ -395,7 +395,7 @@ class SkywalkingIntegration extends APMIntegration {
                     }
                     futures.add(fut as Future)  //see: #130
                 }
-                CompositeFuture.all(futures).setHandler({
+                CompositeFuture.all(futures).onComplete({
                     if (it.succeeded()) {
                         def results = it.result().list()
                         def traceSpanList = new ArrayList<TraceSpan>()

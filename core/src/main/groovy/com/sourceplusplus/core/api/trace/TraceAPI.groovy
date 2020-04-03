@@ -195,7 +195,7 @@ class TraceAPI extends AbstractVerticle {
                                 core.APMIntegration.getTraces(traceQuery, fut)
                                 futures.add(fut)
                             }
-                            CompositeFuture.all(futures).setHandler({
+                            CompositeFuture.all(futures).onComplete({
                                 if (it.succeeded()) {
                                     List<Trace> totalTraces = []
                                     (it.result().list() as List<TraceQueryResult>).each {

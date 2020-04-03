@@ -229,7 +229,7 @@ class PortalBootstrap extends AbstractVerticle {
                 .setConfig(config()).setWorker(true), tracesTabFut)
         vertx.deployVerticle(new ConfigurationTab(pluginAvailable), new DeploymentOptions()
                 .setConfig(config()).setWorker(true), configurationTabFut)
-        CompositeFuture.all(overviewTabFut, tracesTabFut, configurationTabFut).setHandler({
+        CompositeFuture.all(overviewTabFut, tracesTabFut, configurationTabFut).onComplete({
             if (it.succeeded()) {
                 //track
                 vertx.deployVerticle(new PortalViewTracker(), new DeploymentOptions().setWorker(true), startFuture)

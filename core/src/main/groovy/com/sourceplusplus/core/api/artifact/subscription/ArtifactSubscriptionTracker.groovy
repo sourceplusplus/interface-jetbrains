@@ -102,7 +102,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                         futures.add(future)
                         core.storage.setArtifactSubscription(it.withSubscriptionLastAccessed(updatedAccess), future)
                     }
-                    CompositeFuture.all(futures).setHandler({
+                    CompositeFuture.all(futures).onComplete({
                         if (it.succeeded()) {
                             msg.reply(true)
                         } else {
@@ -158,7 +158,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                         core.storage.setArtifactSubscription(sub, future)
                     }
                 }
-                CompositeFuture.all(futures).setHandler({
+                CompositeFuture.all(futures).onComplete({
                     if (it.failed()) {
                         it.cause().printStackTrace()
                         log.error("Failed to remove inactive artifact subscriptions", it.cause())

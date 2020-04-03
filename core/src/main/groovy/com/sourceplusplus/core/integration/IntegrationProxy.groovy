@@ -64,7 +64,7 @@ class IntegrationProxy extends AbstractVerticle {
                 }
             }
         }
-        CompositeFuture.all(proxyIntegrationFutures).setHandler({
+        CompositeFuture.all(proxyIntegrationFutures).onComplete({
             if (it.succeeded()) {
                 log.info("IntegrationProxy started", getClass().getSimpleName())
                 fut.complete()

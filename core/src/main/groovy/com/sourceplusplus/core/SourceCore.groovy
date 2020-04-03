@@ -79,7 +79,7 @@ class SourceCore extends AbstractVerticle {
         vertx.deployVerticle(applicationAPI, deploymentConfig, applicationAPIFuture)
         def artifactAPIFuture = Promise.promise().future()
         vertx.deployVerticle(artifactAPI, deploymentConfig, artifactAPIFuture)
-        CompositeFuture.all(adminAPIFuture, applicationAPIFuture, artifactAPIFuture).setHandler({
+        CompositeFuture.all(adminAPIFuture, applicationAPIFuture, artifactAPIFuture).onComplete({
             if (it.succeeded()) {
                 log.info("Connecting Source++ integrations...")
                 deployIntegrations(startFuture)
@@ -118,11 +118,11 @@ class SourceCore extends AbstractVerticle {
                 vertx.undeploy(it, fut)
                 return true
             })
-            CompositeFuture.all(undeployFutures).setHandler({
+            CompositeFuture.all(undeployFutures).onComplete({
                 if (it.succeeded()) {
                     //redeploy integrations
                     def fut = Promise.promise().future()
-                    fut.setHandler({
+                    fut.onComplete({
                         if (it.succeeded()) {
                             msg.reply(true)
                         } else {
@@ -177,12 +177,12 @@ class SourceCore extends AbstractVerticle {
                 futures.add(traceAPIFuture)
                 vertx.deployVerticle(traceAPI, deploymentOptions, traceAPIFuture)
             }
-            CompositeFuture.all(futures).setHandler({
+            CompositeFuture.all(futures).onComplete({
                 if (it.succeeded()) {
                     it.result().list().each {
                         deployedIntegrationAPIs.add(it as String)
                     }
-                    CompositeFuture.all(integrationFutures).setHandler(handler)
+                    CompositeFuture.all(integrationFutures).onComplete(handler)
                 } else {
                     handler.handle(Future.failedFuture(it.cause()))
                 }

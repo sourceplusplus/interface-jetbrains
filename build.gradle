@@ -15,7 +15,7 @@ subprojects {
     targetCompatibility = 11
 
     project.ext.APACHE_SKYWALKING_VERSION = "6.5.0"
-    project.ext.VERTX_VERSION = "3.8.5"
+    project.ext.VERTX_VERSION = "3.9.0"
 
     repositories {
         mavenCentral()
@@ -37,7 +37,7 @@ subprojects {
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.3'
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.10.3'
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: '2.10.3'
-        implementation group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.1.2'
+        implementation group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.1.5'
     }
 
     test {

@@ -174,7 +174,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                         }
                     })
                 }
-                CompositeFuture.all(futures).setHandler(handler)
+                CompositeFuture.all(futures).onComplete(handler)
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -221,7 +221,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 }
             })
         }
-        CompositeFuture.all(futures).setHandler(handler)
+        CompositeFuture.all(futures).onComplete(handler)
     }
 
     private void searchServiceId(String appUuid, String endpointId, String endpointName,
@@ -307,7 +307,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                         })
                     }
                 }
-                CompositeFuture.all(futures).setHandler(handler)
+                CompositeFuture.all(futures).onComplete(handler)
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -349,7 +349,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 }
             }
         }
-        CompositeFuture.all(futures).setHandler(handler)
+        CompositeFuture.all(futures).onComplete(handler)
     }
 
     private void addEndpointIdsToArtifactConfig(SourceArtifact artifact, Set<String> endpointIds,
