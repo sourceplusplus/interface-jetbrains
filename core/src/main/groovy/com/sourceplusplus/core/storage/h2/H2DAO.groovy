@@ -23,7 +23,7 @@ import java.time.Instant
 /**
  * todo: description
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -15,7 +15,7 @@ import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 /**
  * todo: description
  *
- * @version 0.2.4
+ * @version 0.2.5
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
