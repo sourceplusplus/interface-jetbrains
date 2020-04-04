@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.display.tabs.views
 
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import groovy.transform.Canonical
 
 /**
@@ -11,8 +12,10 @@ import groovy.transform.Canonical
  */
 @Canonical
 class ConfigurationView {
-    //SourceArtifact artifact
+
+    SourceArtifact artifact
 
     void cloneView(ConfigurationView view) {
+        artifact = view.artifact
     }
 }
