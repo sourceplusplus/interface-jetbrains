@@ -2,6 +2,8 @@ package com.sourceplusplus.plugin.intellij
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
@@ -9,8 +11,8 @@ import com.sourceplusplus.portal.display.PortalTab
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
-import com.sourceplusplus.marker.source.mark.gutter.GutterMark
+
+import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.*
 
 /**
  * todo: description
@@ -22,12 +24,9 @@ import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 @Slf4j
 class IntelliJArtifactNavigator extends AbstractVerticle {
 
-    public static final String CAN_NAVIGATE_TO_ARTIFACT = "CanNavigateToArtifact"
-    public static final String NAVIGATE_TO_ARTIFACT = "NavigateToArtifact"
-
     @Override
     void start() throws Exception {
-        vertx.eventBus().consumer(CAN_NAVIGATE_TO_ARTIFACT, { message ->
+        vertx.eventBus().consumer(CAN_NAVIGATE_TO_ARTIFACT.address, { message ->
             def request = message.body() as JsonObject
             def appUuid = request.getString("app_uuid")
             def artifactQualifiedName = request.getString("artifact_qualified_name")
@@ -52,7 +51,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
                 }
             })
         })
-        vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT, { message ->
+        vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT.address, { message ->
             def request = message.body() as JsonObject
             def portal = IntelliJSourcePortal.getPortal(request.getString("portal_uuid"))
             def artifactQualifiedName = request.getString("artifact_qualified_name")
