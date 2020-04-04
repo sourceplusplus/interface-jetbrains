@@ -45,6 +45,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
     SourceMark createSourceMark(@NotNull UMethod psiMethod, @NotNull SourceMark.Type type) {
         if (type == SourceMark.Type.GUTTER) {
             def sourceMark = new IntelliJMethodGutterMark(this, psiMethod)
+            log.info("Created gutter mark: " + sourceMark)
             PluginBootstrap.sourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
             return sourceMark
         } else {

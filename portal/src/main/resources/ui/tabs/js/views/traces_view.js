@@ -20,6 +20,7 @@ var displayedTraceIds = new Map();
 
 function displayTraces(traceResult) {
     if (traceResult.order_type != traceOrderType) {
+        eb.send('PortalLogger', 'Ignoring display traces');
         console.log("Ignoring display traces")
         return
     }
@@ -43,7 +44,7 @@ function displayTraces(traceResult) {
 
     var appUuid = traceResult.app_uuid;
     eb.send('PortalLogger', 'Displaying traces - Size: ' + traceResult.traces.length);
-    // console.log('Displaying traces - Size: ' + traceResult.traces.length);
+    console.log('Displaying traces - Size: ' + traceResult.traces.length);
 
     $('#traces_start_field').val(moment.unix(Number(traceResult.start)).format());
     $('#traces_stop_field').val(moment.unix(Number(traceResult.stop)).format());
