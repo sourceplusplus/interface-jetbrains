@@ -58,8 +58,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
             ApplicationManager.getApplication().invokeLater({
                 GutterMark.closeOpenPopups()
 
-                //todo: don't think the params are necessary
-                portal.portalUI.loadPage(PortalTab.Traces, ["order_type": portal.portalUI.tracesView.orderType.toString()])
+                portal.portalUI.loadPage(PortalTab.Traces)
                 SourceMarkerPlugin.INSTANCE.artifactNavigator.navigateToMethod(
                         IntelliJStartupActivity.currentProject, artifactQualifiedName)
 
