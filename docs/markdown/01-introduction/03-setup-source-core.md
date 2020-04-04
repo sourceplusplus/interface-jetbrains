@@ -11,10 +11,10 @@ apt-get update && sudo apt install -y openjdk-8-jdk
 # Download Apache SkyWalking OAP
 ```sh
 cd /opt
-wget https://www-us.apache.org/dist/skywalking/6.5.0/apache-skywalking-apm-6.5.0.tar.gz
-gunzip apache-skywalking-apm-6.5.0.tar.gz
-tar -xvf apache-skywalking-apm-6.5.0.tar
-rm apache-skywalking-apm-6.5.0.tar
+wget https://www-us.apache.org/dist/skywalking/7.0.0/apache-skywalking-apm-7.0.0.tar.gz
+gunzip apache-skywalking-apm-7.0.0.tar.gz
+tar -xvf apache-skywalking-apm-7.0.0.tar
+rm apache-skywalking-apm-7.0.0.tar
 mv apache-skywalking-apm-bin apache-skywalking
 ```
 

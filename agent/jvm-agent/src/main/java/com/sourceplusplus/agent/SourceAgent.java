@@ -249,11 +249,7 @@ public class SourceAgent {
             System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
             System.setProperty("skywalking.agent.application_code", "test_mode");
             System.setProperty("skywalking.agent.service_name", "test_mode");
-            try {
-                SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
         } else {
             if (SourceAgentConfig.current.skywalkingEnabled) {
                 if (SourceAgentConfig.current.appUuid == null) {
@@ -261,11 +257,7 @@ public class SourceAgent {
                 }
                 Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
                 System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
-                try {
-                    SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
 
                 Logger.info("Waiting for Apache SkyWalking to finish setup");
                 while (RemoteDownstreamConfig.Agent.SERVICE_ID == DictionaryUtil.nullValue()

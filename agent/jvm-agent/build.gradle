@@ -96,7 +96,7 @@ task prepareExternalAgent(type: JavaExec) {
             FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 if (file.toString().startsWith("/META-INF/") &&
                         !file.toString().startsWith("/META-INF/MANIFEST.MF") &&
-                        !file.toString().startsWith("/META-INF/services/org.apache.skywalking.apm.agent.") &&
+                        !file.toString().startsWith("/META-INF/services/org.apache.skywalking.apm.") &&
                         !file.toString().startsWith("/META-INF/services/com.sourceplusplus.")) {
                     Files.delete(file)
                 } else if (file.toString() == "/LICENSE.txt" || file.toString() == "/LICENSE-junit.txt" ||
