@@ -107,7 +107,6 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
         ApplicationManager.getApplication().invokeLater({
             ApplicationManager.getApplication().runReadAction({
                 def editor = FileEditorManager.getInstance(IntelliJStartupActivity.currentProject).getSelectedTextEditor()
-                mark.gutterMarkComponent.configuration.hideOnScroll = false //todo: put on delay
                 mark.displayPopup(editor)
             })
         })
