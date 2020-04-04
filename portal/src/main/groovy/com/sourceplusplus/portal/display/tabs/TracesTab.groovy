@@ -195,9 +195,11 @@ class TracesTab extends AbstractTab {
                 representation.innerLevel = 0
                 updateUI(portal)
             } else {
+                //navigating back to parent stack
                 vertx.eventBus().send(NAVIGATE_TO_ARTIFACT.address,
                         new JsonObject().put("portal_uuid", portal.portalUuid)
                                 .put("artifact_qualified_name", representation.rootArtifactQualifiedName)
+                                .put("parent_stack_navigation", true)
                 )
             }
         })

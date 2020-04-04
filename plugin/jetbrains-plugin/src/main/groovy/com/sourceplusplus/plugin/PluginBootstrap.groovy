@@ -15,17 +15,19 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.TimeFramedMetricType
 import com.sourceplusplus.api.model.trace.*
+import com.sourceplusplus.marker.SourceFileMarker
+import com.sourceplusplus.marker.SourceFileMarkerProvider
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponentProvider
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
-import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMarkComponentProvider
 import com.sourceplusplus.portal.PortalBootstrap
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.jackson.DatabindCodec
 import org.jetbrains.annotations.NotNull
-import com.sourceplusplus.marker.SourceFileMarker
-import com.sourceplusplus.marker.SourceFileMarkerProvider
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+
+import java.awt.*
 
 /**
  * Used to bootstrap the Source++ Plugin.
@@ -44,7 +46,13 @@ class PluginBootstrap extends AbstractVerticle {
 
         //setup SourceMarker
         SourceMarkerPlugin.INSTANCE.enabled = true
-        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new IntelliJGutterMarkComponentProvider()
+        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new GutterMarkJcefComponentProvider()
+        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider.with {
+            defaultConfiguration.preloadJcefBrowser = false
+            defaultConfiguration.setComponentSize(new Dimension(775, 250))
+            //todo: measure size of editor and make short if it will extend past IDE
+            //defaultConfiguration.setComponentSize(new Dimension(620, 250))
+        }
         SourceMarkerPlugin.configuration.sourceFileMarkerProvider = new SourceFileMarkerProvider() {
             @Override
             SourceFileMarker createSourceFileMarker(@NotNull PsiFile psiFile) {

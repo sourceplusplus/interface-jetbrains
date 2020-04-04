@@ -12,6 +12,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 interface IntelliJSourceMark extends SourceMark {
 
     static final String SOURCE_MARK_CREATED = "SourceMarkCreated"
+    static final String SOURCE_MARK_APPLIED = "SourceMarkApplied"
 
     void markArtifactSubscribed()
 

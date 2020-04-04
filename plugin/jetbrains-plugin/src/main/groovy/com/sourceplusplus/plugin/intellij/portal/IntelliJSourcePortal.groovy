@@ -53,14 +53,14 @@ class IntelliJSourcePortal extends SourcePortal {
         } as List<IntelliJSourcePortal>
     }
 
-    static String register(String appUuid, String artifactQualifiedName) {
+    static String register(String appUuid, String artifactQualifiedName, boolean external) {
         def portalUuid = UUID.randomUUID().toString()
-        def portal = new IntelliJSourcePortal(portalUuid, Objects.requireNonNull(appUuid), true)
+        def portal = new IntelliJSourcePortal(portalUuid, Objects.requireNonNull(appUuid), external)
         portal.portalUI = new IntelliJPortalUI(portalUuid, null)
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalUuid, portal)
-        log.info("Registered external Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
+        log.info("Registered Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
         log.info("Active portals: " + portalMap.size())
         return portalUuid
     }
@@ -71,7 +71,7 @@ class IntelliJSourcePortal extends SourcePortal {
         portal.portalUI.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
         portalMap.put(portalUuid, portal)
-        log.info("Registered internal Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
+        log.info("Registered Source++ Portal. Portal UUID: $portalUuid - App UUID: $appUuid - Artifact: $artifactQualifiedName")
         log.info("Active portals: " + portalMap.size())
         return portalUuid
     }
@@ -102,7 +102,7 @@ class IntelliJSourcePortal extends SourcePortal {
      */
     @Override
     SourcePortal createExternalPortal() {
-        def portalClone = getPortal(register(appUuid, portalUI.viewingPortalArtifact))
+        def portalClone = getPortal(register(appUuid, portalUI.viewingPortalArtifact, true))
         portalClone.portalUI.cloneUI(portalUI)
         return portalClone
     }

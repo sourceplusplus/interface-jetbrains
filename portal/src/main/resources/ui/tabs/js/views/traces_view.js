@@ -20,8 +20,7 @@ var displayedTraceIds = new Map();
 
 function displayTraces(traceResult) {
     if (traceResult.order_type != traceOrderType) {
-        // console.log("Ignoring card for time frame: " + card.time_frame
-        //     + " - Current time frame: " + currentTimeFrame);
+        console.log("Ignoring display traces")
         return
     }
 
