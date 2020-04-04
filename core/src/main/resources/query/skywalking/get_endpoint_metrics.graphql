@@ -35,62 +35,14 @@
         value
       }
     }
-    getEndpointResponseTimeP99Trend: getLinearIntValues(metric: {
-          name: "endpoint_p99"
+    getEndpointResponseTimePercentileTrend: getMultipleLinearIntValues(metric: {
+          name: "endpoint_percentile"
           id: "$endpointId"
         }, duration: {
             start: "$durationStart",
             end: "$durationEnd",
             step: $durationStep
-    }) {
-      values {
-        value
-      }
-    }
-    getEndpointResponseTimeP95Trend: getLinearIntValues(metric: {
-          name: "endpoint_p95"
-          id: "$endpointId"
-        }, duration: {
-            start: "$durationStart",
-            end: "$durationEnd",
-            step: $durationStep
-    }) {
-      values {
-        value
-      }
-    }
-    getEndpointResponseTimeP90Trend: getLinearIntValues(metric: {
-          name: "endpoint_p90"
-          id: "$endpointId"
-        }, duration: {
-            start: "$durationStart",
-            end: "$durationEnd",
-            step: $durationStep
-    }) {
-      values {
-        value
-      }
-    }
-    getEndpointResponseTimeP75Trend: getLinearIntValues(metric: {
-          name: "endpoint_p75"
-          id: "$endpointId"
-        }, duration: {
-            start: "$durationStart",
-            end: "$durationEnd",
-            step: $durationStep
-    }) {
-      values {
-        value
-      }
-    }
-    getEndpointResponseTimeP50Trend: getLinearIntValues(metric: {
-          name: "endpoint_p50"
-          id: "$endpointId"
-        }, duration: {
-            start: "$durationStart",
-            end: "$durationEnd",
-            step: $durationStep
-    }) {
+    }, numOfLinear: 5) {
       values {
         value
       }

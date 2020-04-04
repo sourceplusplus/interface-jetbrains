@@ -14,7 +14,7 @@ subprojects {
     sourceCompatibility = 11
     targetCompatibility = 11
 
-    project.ext.APACHE_SKYWALKING_VERSION = "6.5.0"
+    project.ext.APACHE_SKYWALKING_VERSION = "7.0.0"
     project.ext.VERTX_VERSION = "3.9.0"
 
     repositories {

@@ -97,11 +97,19 @@ class SkywalkingIntegration extends APMIntegration {
     void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler) {
         log.info("Getting all SkyWalking services. Start: " + start + " - End: " + end)
         def graphqlQuery = new JsonObject()
-        graphqlQuery.put("query", GET_ALL_SERVICES
-                .replace('$durationStart', DATE_TIME_FORMATTER_SECONDS.format(start))
-                .replace('$durationEnd', DATE_TIME_FORMATTER_SECONDS.format(end))
-                .replace('$durationStep', step)
-        )
+        if ("second".equalsIgnoreCase(step)) {
+            graphqlQuery.put("query", GET_ALL_SERVICES
+                    .replace('$durationStart', DATE_TIME_FORMATTER_SECONDS.format(start))
+                    .replace('$durationEnd', DATE_TIME_FORMATTER_SECONDS.format(end))
+                    .replace('$durationStep', step)
+            )
+        } else {
+            graphqlQuery.put("query", GET_ALL_SERVICES
+                    .replace('$durationStart', DATE_TIME_FORMATTER_MINUTES.format(start))
+                    .replace('$durationEnd', DATE_TIME_FORMATTER_MINUTES.format(end))
+                    .replace('$durationStep', step)
+            )
+        }
 
         webClient.post(skywalkingOAPPort, skywalkingOAPHost,
                 "/graphql").sendJsonObject(graphqlQuery, {
@@ -193,7 +201,7 @@ class SkywalkingIntegration extends APMIntegration {
                         case MetricType.ResponseTime_99Percentile:
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
-                                    .values(data.getJsonObject("getEndpointResponseTimeP99Trend")
+                                    .values(data.getJsonArray("getEndpointResponseTimePercentileTrend").getJsonObject(4)
                                             .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
@@ -201,7 +209,7 @@ class SkywalkingIntegration extends APMIntegration {
                         case MetricType.ResponseTime_95Percentile:
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
-                                    .values(data.getJsonObject("getEndpointResponseTimeP95Trend")
+                                    .values(data.getJsonArray("getEndpointResponseTimePercentileTrend").getJsonObject(3)
                                             .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
@@ -209,7 +217,7 @@ class SkywalkingIntegration extends APMIntegration {
                         case MetricType.ResponseTime_90Percentile:
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
-                                    .values(data.getJsonObject("getEndpointResponseTimeP90Trend")
+                                    .values(data.getJsonArray("getEndpointResponseTimePercentileTrend").getJsonObject(2)
                                             .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
@@ -217,7 +225,7 @@ class SkywalkingIntegration extends APMIntegration {
                         case MetricType.ResponseTime_75Percentile:
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
-                                    .values(data.getJsonObject("getEndpointResponseTimeP75Trend")
+                                    .values(data.getJsonArray("getEndpointResponseTimePercentileTrend").getJsonObject(1)
                                             .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
@@ -225,7 +233,7 @@ class SkywalkingIntegration extends APMIntegration {
                         case MetricType.ResponseTime_50Percentile:
                             def metrics = ArtifactMetrics.builder()
                                     .metricType(it)
-                                    .values(data.getJsonObject("getEndpointResponseTimeP50Trend")
+                                    .values(data.getJsonArray("getEndpointResponseTimePercentileTrend").getJsonObject(0)
                                             .getJsonArray("values").flatten { it.getInteger("value") } as List<Integer>)
                                     .build()
                             artifactMetrics.add(metrics)
