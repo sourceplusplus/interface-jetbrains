@@ -147,7 +147,8 @@ public class SourceAgent {
                 instrumentation.addTransformer(sTransformer, true);
                 traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient);
 
-                if (!SourceAgentConfig.current.manualSetupMode) {
+                if (SourceAgentConfig.current.manualTraceSyncMode == null
+                        || !SourceAgentConfig.current.manualTraceSyncMode) {
                     startArtifactTraceSubscriptionSync(coreClient);
                 }
             } else if ((SourceAgentConfig.current.appUuid != null || SourceAgentConfig.current.appName != null)
@@ -208,8 +209,13 @@ public class SourceAgent {
 
     private static void startArtifactTraceSubscriptionSync(SourceCoreClient coreClient) {
         Thread daemonThread = new Thread(() -> {
-            workScheduler.scheduleAtFixedRate(traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient),
-                    0, ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);
+            if (traceSubscriptionSync == null) {
+                workScheduler.scheduleAtFixedRate(traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient),
+                        0, ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);
+            } else {
+                workScheduler.scheduleAtFixedRate(traceSubscriptionSync, 0,
+                        ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);
+            }
         });
         daemonThread.setDaemon(true);
         daemonThread.start();
