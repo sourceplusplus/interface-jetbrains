@@ -11,6 +11,11 @@ import org.junit.Test
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+/**
+ * @version 0.2.6
+ * @since 0.2.6
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ */
 class TraceAPITest extends SourceCoreAPITest {
 
     @Test
@@ -18,25 +23,14 @@ class TraceAPITest extends SourceCoreAPITest {
         SourceApplication application
         TestSuite.create("subscribe_to_artifact_traces-setup").before({ test ->
             def async = test.async(1)
-            coreClient.getApplication("99999999-9999-9999-9999-999999999999", {
-                if (it.succeeded()) {
-                    if (it.result().present) {
-                        application = it.result().get()
-                        async.countDown()
-                    } else {
-                        coreClient.createApplication(SourceApplication.builder().isCreateRequest(true)
-                                .appUuid("99999999-9999-9999-9999-999999999999").build(), {
-                            if (it.failed()) {
-                                test.fail(it.cause())
-                            }
-
-                            application = it.result()
-                            async.countDown()
-                        })
-                    }
-                } else {
+            coreClient.createApplication(SourceApplication.builder().isCreateRequest(true)
+                    .appUuid("99999999-9999-9999-9999-999999999999").build(), {
+                if (it.failed()) {
                     test.fail(it.cause())
                 }
+
+                application = it.result()
+                async.countDown()
             })
         }).test("subscribe_to_artifact_traces", { test ->
             def async = test.async()
