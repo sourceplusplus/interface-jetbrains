@@ -246,6 +246,7 @@ public class SourceAgent {
             Config.Collector.BACKEND_SERVICE = connection.getHost() + ":" + connection.getPort();
         }
         Config.Collector.GRPC_CHANNEL_CHECK_INTERVAL = Integer.MAX_VALUE;
+        Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
         Config.Agent.IS_OPEN_DEBUGGING_CLASS = SourceAgentConfig.current.outputEnhancedClasses;
         Config.Agent.SAMPLE_N_PER_3_SECS = SourceAgentConfig.current.sampleNPer3Secs;
         Config.Agent.SPAN_LIMIT_PER_SEGMENT = SourceAgentConfig.current.spanLimitPerSegment;
@@ -256,16 +257,12 @@ public class SourceAgent {
 
         if (SourceAgentConfig.current.testMode) {
             Logger.info("Test mode enabled");
-            System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
-            System.setProperty("skywalking.agent.service_name", SourceAgentConfig.current.appUuid); //todo: copies below settings
             SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
         } else {
             if (SourceAgentConfig.current.skywalkingEnabled) {
                 if (SourceAgentConfig.current.appUuid == null) {
                     throw new RuntimeException("Missing application UUID in Source++ Agent configuration");
                 }
-                Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
-                System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
                 SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
 
                 Logger.info("Waiting for Apache SkyWalking to finish setup");
