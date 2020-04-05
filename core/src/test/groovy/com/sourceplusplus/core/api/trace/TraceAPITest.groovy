@@ -1,14 +1,12 @@
 package com.sourceplusplus.core.api.trace
 
-import com.google.common.base.Charsets
-import com.google.common.io.Resources
 import com.sourceplusplus.api.model.application.SourceApplication
+import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceOrderType
 import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpanStackQuery
 import com.sourceplusplus.core.api.SourceCoreAPITest
-import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestSuite
 import org.junit.Test
 import test.integration.trace.TraceTest
@@ -23,16 +21,16 @@ import java.time.temporal.ChronoUnit
  */
 class TraceAPITest extends SourceCoreAPITest {
 
-    private static final JsonObject testAgentConfig = new JsonObject(Resources.toString(Resources.getResource(
-            "source-agent.json"), Charsets.UTF_8))
-
     @Test
     void testCallDepth1() {
+        SourceAgentConfig.current.appUuid = UUID.randomUUID().toString()
+        Eval.me("org.apache.skywalking.apm.agent.core.conf.Config.Agent.SERVICE_NAME = '" + SourceAgentConfig.current.appUuid + "'")
+
         SourceApplication application
         TestSuite.create("testCallDepth1-setup").before({ test ->
             def async = test.async(1)
             coreClient.createApplication(SourceApplication.builder().isCreateRequest(true)
-                    .appUuid(testAgentConfig.getJsonObject("application").getString("app_uuid")).build(), {
+                    .appUuid(SourceAgentConfig.current.appUuid).build(), {
                 if (it.failed()) {
                     test.fail(it.cause())
                 }
