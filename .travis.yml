@@ -33,4 +33,4 @@ deploy:
   on:
     tags: true
 
-after_deploy: curl -v -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/sourceplusplus/assistant/dispatches -d '{"event_type":"test-event"}'
+# after_deploy: curl -v -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/sourceplusplus/assistant/dispatches -d '{"event_type":"test-event"}'
