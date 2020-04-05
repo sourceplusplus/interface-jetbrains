@@ -42,17 +42,17 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             def artifact = it.body() as SourceArtifact
             if (artifact.config() != null) {
                 if (artifact.config().subscribeAutomatically() || artifact.config().forceSubscribe()) {
-                    AUTOMATICALLY_SUBSCRIBED.add(artifact.artifactQualifiedName())
-
-                    def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                            artifact.artifactQualifiedName()) as IntelliJSourceMark
-                    sourceMark?.markArtifactSubscribed()
+                    if (AUTOMATICALLY_SUBSCRIBED.add(artifact.artifactQualifiedName())) {
+                        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                                artifact.artifactQualifiedName()) as IntelliJSourceMark
+                        sourceMark?.markArtifactSubscribed()
+                    }
                 } else {
-                    AUTOMATICALLY_SUBSCRIBED.remove(artifact.artifactQualifiedName())
-
-                    def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                            artifact.artifactQualifiedName()) as IntelliJSourceMark
-                    sourceMark?.markArtifactUnsubscribed()
+                    if (AUTOMATICALLY_SUBSCRIBED.remove(artifact.artifactQualifiedName())) {
+                        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                                artifact.artifactQualifiedName()) as IntelliJSourceMark
+                        sourceMark?.markArtifactUnsubscribed()
+                    }
                 }
             }
         })
