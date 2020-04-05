@@ -3,15 +3,16 @@ package com.sourceplusplus.plugin.coordinate.artifact.track
 import com.google.common.collect.Sets
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import java.util.concurrent.TimeUnit
 
@@ -30,15 +31,30 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
 
+    private static final Set<String> AUTOMATICALLY_SUBSCRIBED = Sets.newConcurrentHashSet()
     private static final Set<String> PENDING_DATA_AVAILABLE = Sets.newConcurrentHashSet()
-    private static final Set<String> PENDING_SUBSCRIBED = Sets.newConcurrentHashSet()
 
     @Override
     void start() throws Exception {
-        //subscribe to automatic subscriptions
+        //sync and subscribe to automatic subscriptions
         syncAutomaticSubscriptions()
-        vertx.eventBus().consumer(SYNC_AUTOMATIC_SUBSCRIPTIONS, {
-            syncAutomaticSubscriptions()
+        vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
+            def artifact = it.body() as SourceArtifact
+            if (artifact.config() != null) {
+                if (artifact.config().subscribeAutomatically() || artifact.config().forceSubscribe()) {
+                    AUTOMATICALLY_SUBSCRIBED.add(artifact.artifactQualifiedName())
+
+                    def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                            artifact.artifactQualifiedName()) as IntelliJSourceMark
+                    sourceMark?.markArtifactSubscribed()
+                } else {
+                    AUTOMATICALLY_SUBSCRIBED.remove(artifact.artifactQualifiedName())
+
+                    def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                            artifact.artifactQualifiedName()) as IntelliJSourceMark
+                    sourceMark?.markArtifactUnsubscribed()
+                }
+            }
         })
 
         //keep subscriptions alive
@@ -63,7 +79,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             if (PENDING_DATA_AVAILABLE.remove(sourceMark.artifactQualifiedName)) {
                 sourceMark.markArtifactDataAvailable()
             }
-            if (PENDING_SUBSCRIBED.remove(sourceMark.artifactQualifiedName)) {
+            if (AUTOMATICALLY_SUBSCRIBED.contains(sourceMark.artifactQualifiedName)) {
                 sourceMark.markArtifactSubscribed()
             }
         })
@@ -94,12 +110,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
                     def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                             request.artifactQualifiedName()) as IntelliJSourceMark
-                    if (sourceMark != null) {
-                        sourceMark.markArtifactSubscribed()
-                        PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
-                    } else {
-                        PENDING_SUBSCRIBED.add(request.artifactQualifiedName())
-                    }
+                    sourceMark.markArtifactSubscribed()
                 } else {
                     it.cause().printStackTrace()
                     resp.fail(500, it.cause().message)
@@ -114,7 +125,6 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             SourcePluginConfig.current.activeEnvironment.coreClient.unsubscribeFromArtifact(request, {
                 if (it.succeeded()) {
                     resp.reply(request)
-                    PENDING_SUBSCRIBED.remove(request.artifactQualifiedName())
 
                     def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                             request.artifactQualifiedName()) as IntelliJGutterMark
@@ -134,7 +144,6 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     }
 
     private static void syncAutomaticSubscriptions() {
-        //todo: ignore calls which start while this method is already running
         //todo: change to just subscriber
         SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
                 SourcePluginConfig.current.activeEnvironment.appUuid, true, {
@@ -143,11 +152,8 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     if (it.automaticSubscription() || it.forceSubscription()) {
                         def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                                 it.artifactQualifiedName()) as IntelliJSourceMark
-                        if (sourceMark != null) {
-                            sourceMark.markArtifactSubscribed()
-                        } else {
-                            PENDING_SUBSCRIBED.add(it.artifactQualifiedName())
-                        }
+                        sourceMark?.markArtifactSubscribed()
+                        AUTOMATICALLY_SUBSCRIBED.add(it.artifactQualifiedName())
                     }
                 }
             } else {
