@@ -56,6 +56,7 @@ class PluginBootstrap extends AbstractVerticle {
         SourceMarkerPlugin.configuration.sourceFileMarkerProvider = new SourceFileMarkerProvider() {
             @Override
             SourceFileMarker createSourceFileMarker(@NotNull PsiFile psiFile) {
+                log.debug("Creating source file marker for file: " + psiFile)
                 return new IntelliJSourceFileMarker(psiFile)
             }
         }
