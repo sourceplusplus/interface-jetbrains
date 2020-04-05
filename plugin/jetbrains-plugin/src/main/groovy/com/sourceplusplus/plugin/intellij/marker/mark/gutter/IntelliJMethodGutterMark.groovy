@@ -90,7 +90,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                             if (it.name) {
                                 attributeMap.put(it.name, (it.expression as ULiteralExpression).value)
                             } else {
-                                log.warn("Unknown annotation expression: " + it)
+                                //log.warn("Unknown annotation expression: " + it)
                             }
                         }
                         annotations.add(new SourceMethodAnnotation(qualifiedName, attributeMap))
