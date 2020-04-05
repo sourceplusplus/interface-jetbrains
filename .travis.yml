@@ -12,7 +12,7 @@ env:
 
 before_install:
  - chmod +x gradlew
- - curl -v -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/sourceplusplus/assistant/dispatches -d '{"event_type":"test-event"}'
+ - 'curl -v -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/sourceplusplus/assistant/dispatches/test-event'
 
 before_cache:
   - rm -rf $HOME/.gradle/caches/modules-2/modules-2.lock
