@@ -1,12 +1,17 @@
 package com.sourceplusplus.core.api.trace
 
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceOrderType
 import com.sourceplusplus.api.model.trace.TraceQuery
+import com.sourceplusplus.api.model.trace.TraceSpanStackQuery
 import com.sourceplusplus.core.api.SourceCoreAPITest
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestSuite
 import org.junit.Test
+import test.integration.trace.TraceTest
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -18,13 +23,16 @@ import java.time.temporal.ChronoUnit
  */
 class TraceAPITest extends SourceCoreAPITest {
 
+    private static final JsonObject testAgentConfig = new JsonObject(Resources.toString(Resources.getResource(
+            "source-agent.json"), Charsets.UTF_8))
+
     @Test
-    void testSomething() {
+    void testCallDepth1() {
         SourceApplication application
-        TestSuite.create("subscribe_to_artifact_traces-setup").before({ test ->
+        TestSuite.create("testCallDepth1-setup").before({ test ->
             def async = test.async(1)
             coreClient.createApplication(SourceApplication.builder().isCreateRequest(true)
-                    .appUuid("99999999-9999-9999-9999-999999999999").build(), {
+                    .appUuid(testAgentConfig.getJsonObject("application").getString("app_uuid")).build(), {
                 if (it.failed()) {
                     test.fail(it.cause())
                 }
@@ -32,38 +40,67 @@ class TraceAPITest extends SourceCoreAPITest {
                 application = it.result()
                 async.countDown()
             })
-        }).test("subscribe_to_artifact_traces", { test ->
+        }).test("testCallDepth1-check_trace_data", { test ->
             def async = test.async()
             def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
                     .addOrderTypes(TraceOrderType.LATEST_TRACES)
                     .appUuid(application.appUuid())
-                    .artifactQualifiedName("com.sourceplusplus.core.api.trace.TesterClass.staticMethod()").build()
+                    .artifactQualifiedName("test.integration.trace.TraceTest.threeStaticMethodCallDepth()").build()
             coreClient.subscribeToArtifact(traceSubscribeRequest, {
                 if (it.failed()) {
                     test.fail(it.cause())
                 }
 
                 for (int i = 0; i < 40; i++) {
-                    TesterClass.staticMethod()
+                    TraceTest.threeStaticMethodCallDepth()
                 }
 
                 def traceQuery = TraceQuery.builder()
-                        .appUuid("99999999-9999-9999-9999-999999999999")
-                        .artifactQualifiedName("com.sourceplusplus.core.api.trace.TesterClass.staticMethod()")
+                        .appUuid(application.appUuid())
+                        .artifactQualifiedName("test.integration.trace.TraceTest.threeStaticMethodCallDepth()")
                         .orderType(TraceOrderType.LATEST_TRACES)
                         .pageSize(10)
                         .durationStart(Instant.now().minus(14, ChronoUnit.MINUTES))
                         .durationStop(Instant.now())
                         .durationStep("SECOND").build()
                 coreClient.getTraces(traceQuery, {
-                    if (it.succeeded()) {
-                        test.assertEquals(10, it.result().traces().size())
-                        //todo: verify trace structure and stuff
-                        //todo: lookup spans and stuff
-                        async.countDown()
-                    } else {
+                    if (it.failed()) {
                         test.fail(it.cause())
                     }
+
+                    test.assertEquals(10, it.result().traces().size())
+                    it.result().traces().each {
+                        test.assertEquals(1, it.operationNames().size())
+                        test.assertEquals(1, it.traceIds().size())
+                        test.assertEquals(false, it.error)
+                        test.assertEquals("test.integration.trace.TraceTest.threeStaticMethodCallDepth()", it.operationNames()[0])
+                        test.assertInRange(500, it.duration(), 100)
+                    }
+
+                    def queryTraceId = it.result().traces()[0].traceIds()[0]
+                    def spanStackQuery = TraceSpanStackQuery.builder()
+                            .oneLevelDeep(true)
+                            .traceId(queryTraceId).build()
+                    coreClient.getTraceSpans(application.appUuid(),
+                            "test.integration.trace.TraceTest.threeStaticMethodCallDepth()",
+                            spanStackQuery, {
+                        if (it.failed()) {
+                            test.fail(it.cause())
+                        }
+
+                        test.assertEquals(1, it.result().total())
+                        test.assertEquals(1, it.result().traceSpans().size())
+                        def traceSpan = it.result().traceSpans()[0]
+                        test.assertEquals(false, traceSpan.error)
+                        test.assertEquals(-1L, traceSpan.parentSpanId())
+                        test.assertEquals(0L, traceSpan.spanId())
+                        test.assertEquals(application.appUuid(), traceSpan.serviceCode())
+                        test.assertEquals("test.integration.trace.TraceTest.threeStaticMethodCallDepth()", traceSpan.endpointName())
+                        test.assertEquals("test.integration.trace.TraceTest.threeStaticMethodCallDepth()", traceSpan.artifactQualifiedName())
+                        test.assertEquals("Entry", traceSpan.type())
+
+                        async.countDown()
+                    })
                 })
             })
         }).run().awaitSuccess()

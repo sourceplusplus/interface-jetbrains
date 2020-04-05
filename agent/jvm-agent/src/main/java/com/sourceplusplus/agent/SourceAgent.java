@@ -256,9 +256,8 @@ public class SourceAgent {
 
         if (SourceAgentConfig.current.testMode) {
             Logger.info("Test mode enabled");
-            System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
-            System.setProperty("skywalking.agent.application_code", "99999999-9999-9999-9999-999999999999");
-            System.setProperty("skywalking.agent.service_name", "99999999-9999-9999-9999-999999999999");
+            System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
+            System.setProperty("skywalking.agent.service_name", SourceAgentConfig.current.appUuid); //todo: copies below settings
             SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
         } else {
             if (SourceAgentConfig.current.skywalkingEnabled) {

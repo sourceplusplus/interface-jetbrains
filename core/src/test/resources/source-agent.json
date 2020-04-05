@@ -9,7 +9,7 @@
     "app_uuid": "99999999-9999-9999-9999-999999999999",
     "application_source_code": {
       "packages": [
-        "com/sourceplusplus/core/.*"
+        "test/integration/.*"
       ]
     }
   },
