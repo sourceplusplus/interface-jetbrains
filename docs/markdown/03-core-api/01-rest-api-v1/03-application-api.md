@@ -62,7 +62,7 @@ The Application API allows you to create and retrieve Source++ augmented applica
 **Response [Application]**:
 ```json
 {
-    "app_uuid": "2017-09-16-f03b9e65-2ef8-46a1-a8c9-6478cdd79ecf",
+    "app_uuid": "fd4ba998-7ecc-40f5-b9cb-1880a3f1c93b",
     "app_name": "red-fox",
     "create_date": 1510808253.041000000,
     "agent_config":{
@@ -105,7 +105,7 @@ n/a
 **Response [Application]**:
 ```json
 {
-    "app_uuid": "2017-09-16-f03b9e65-2ef8-46a1-a8c9-6478cdd79ecf",
+    "app_uuid": "fd4ba998-7ecc-40f5-b9cb-1880a3f1c93b",
     "app_name": "red-fox",
     "create_date": 1510808253.041000000,
     "agent_config":{

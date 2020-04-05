@@ -151,6 +151,7 @@ class ApplicationAPI extends AbstractVerticle {
 
     void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
                                      Handler<AsyncResult<Set<SourceApplicationSubscription>>> handler) {
+        log.info("Getting appliction subscriptions. App UUID: $appUuid - Include automatic: $includeAutomatic")
         vertx.eventBus().request(ArtifactSubscriptionTracker.GET_APPLICATION_SUBSCRIPTIONS, appUuid, {
             if (it.succeeded()) {
                 def subscribers = JacksonCodec.decodeValue(it.result().body() as String,

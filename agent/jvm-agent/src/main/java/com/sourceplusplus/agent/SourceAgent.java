@@ -146,6 +146,10 @@ public class SourceAgent {
                 ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
                 instrumentation.addTransformer(sTransformer, true);
                 traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient);
+
+                if (!SourceAgentConfig.current.manualSetupMode) {
+                    startArtifactTraceSubscriptionSync(coreClient);
+                }
             } else if ((SourceAgentConfig.current.appUuid != null || SourceAgentConfig.current.appName != null)
                     || SourceAgentConfig.current.manualSetupMode) {
                 if (!SourceAgentConfig.current.manualSetupMode) {
@@ -247,8 +251,8 @@ public class SourceAgent {
         if (SourceAgentConfig.current.testMode) {
             Logger.info("Test mode enabled");
             System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
-            System.setProperty("skywalking.agent.application_code", "test_mode");
-            System.setProperty("skywalking.agent.service_name", "test_mode");
+            System.setProperty("skywalking.agent.application_code", "99999999-9999-9999-9999-999999999999");
+            System.setProperty("skywalking.agent.service_name", "99999999-9999-9999-9999-999999999999");
             SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
         } else {
             if (SourceAgentConfig.current.skywalkingEnabled) {
