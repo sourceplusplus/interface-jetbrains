@@ -146,6 +146,11 @@ public class SourceAgent {
                 ClassFileTransformer sTransformer = new ClassFileTransformerImpl(SourceAgentConfig.current.packages);
                 instrumentation.addTransformer(sTransformer, true);
                 traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient);
+
+                if (SourceAgentConfig.current.manualTraceSyncMode == null
+                        || !SourceAgentConfig.current.manualTraceSyncMode) {
+                    startArtifactTraceSubscriptionSync(coreClient);
+                }
             } else if ((SourceAgentConfig.current.appUuid != null || SourceAgentConfig.current.appName != null)
                     || SourceAgentConfig.current.manualSetupMode) {
                 if (!SourceAgentConfig.current.manualSetupMode) {
@@ -204,8 +209,13 @@ public class SourceAgent {
 
     private static void startArtifactTraceSubscriptionSync(SourceCoreClient coreClient) {
         Thread daemonThread = new Thread(() -> {
-            workScheduler.scheduleAtFixedRate(traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient),
-                    0, ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);
+            if (traceSubscriptionSync == null) {
+                workScheduler.scheduleAtFixedRate(traceSubscriptionSync = new ArtifactTraceSubscriptionSync(coreClient),
+                        0, ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);
+            } else {
+                workScheduler.scheduleAtFixedRate(traceSubscriptionSync, 0,
+                        ArtifactTraceSubscriptionSync.WORK_SYNC_DELAY, MILLISECONDS);
+            }
         });
         daemonThread.setDaemon(true);
         daemonThread.start();
@@ -236,6 +246,7 @@ public class SourceAgent {
             Config.Collector.BACKEND_SERVICE = connection.getHost() + ":" + connection.getPort();
         }
         Config.Collector.GRPC_CHANNEL_CHECK_INTERVAL = Integer.MAX_VALUE;
+        Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
         Config.Agent.IS_OPEN_DEBUGGING_CLASS = SourceAgentConfig.current.outputEnhancedClasses;
         Config.Agent.SAMPLE_N_PER_3_SECS = SourceAgentConfig.current.sampleNPer3Secs;
         Config.Agent.SPAN_LIMIT_PER_SEGMENT = SourceAgentConfig.current.spanLimitPerSegment;
@@ -246,17 +257,13 @@ public class SourceAgent {
 
         if (SourceAgentConfig.current.testMode) {
             Logger.info("Test mode enabled");
-            System.setProperty("skywalking.logging.level", SourceAgentConfig.current.logLevel);
-            System.setProperty("skywalking.agent.application_code", "test_mode");
-            System.setProperty("skywalking.agent.service_name", "test_mode");
+            Config.Agent.SERVICE_NAME = "99999999-9999-9999-9999-999999999999";
             SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
         } else {
             if (SourceAgentConfig.current.skywalkingEnabled) {
                 if (SourceAgentConfig.current.appUuid == null) {
                     throw new RuntimeException("Missing application UUID in Source++ Agent configuration");
                 }
-                Config.Agent.SERVICE_NAME = SourceAgentConfig.current.appUuid;
-                System.setProperty("skywalking.agent.application_code", SourceAgentConfig.current.appUuid);
                 SkyWalkingAgent.premain(null, SourceAgent.instrumentation);
 
                 Logger.info("Waiting for Apache SkyWalking to finish setup");

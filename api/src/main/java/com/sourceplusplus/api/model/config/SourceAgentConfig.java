@@ -38,6 +38,7 @@ public final class SourceAgentConfig {
     public volatile Boolean agentEnabled;
     public volatile Boolean testMode;
     public volatile Boolean manualSetupMode;
+    public volatile Boolean manualTraceSyncMode;
     public volatile Boolean skywalkingEnabled;
     public volatile String appUuid;
     public volatile String appName;
@@ -58,6 +59,7 @@ public final class SourceAgentConfig {
         if (agentConfig.containsKey("enabled")) agentEnabled = agentConfig.getBoolean("enabled");
         if (agentConfig.containsKey("test_mode")) testMode = agentConfig.getBoolean("test_mode");
         if (agentConfig.containsKey("manual_setup_mode")) manualSetupMode = agentConfig.getBoolean("manual_setup_mode");
+        if (agentConfig.containsKey("manual_trace_sync_mode")) manualTraceSyncMode = agentConfig.getBoolean("manual_trace_sync_mode");
         if (agentConfig.containsKey("log_level")) logLevel = agentConfig.getString("log_level").toUpperCase();
         if (agentConfig.containsKey("log_location")) logLocation = agentConfig.getString("log_location");
         if (agentConfig.containsKey("log_metrics")) logMetrics = agentConfig.getBoolean("log_metrics");
@@ -130,6 +132,7 @@ public final class SourceAgentConfig {
             if (value.agentEnabled != null) gen.writeBooleanField("enabled", value.agentEnabled);
             if (value.testMode != null) gen.writeBooleanField("test_mode", value.testMode);
             if (value.manualSetupMode != null) gen.writeBooleanField("manual_setup_mode", value.manualSetupMode);
+            if (value.manualTraceSyncMode != null) gen.writeBooleanField("manual_trace_sync_mode", value.manualTraceSyncMode);
             if (value.logLevel != null) gen.writeStringField("log_level", value.logLevel);
             if (value.logLocation != null) gen.writeStringField("log_location", value.logLocation);
             if (value.logMetrics != null) gen.writeBooleanField("log_metrics", value.logMetrics);

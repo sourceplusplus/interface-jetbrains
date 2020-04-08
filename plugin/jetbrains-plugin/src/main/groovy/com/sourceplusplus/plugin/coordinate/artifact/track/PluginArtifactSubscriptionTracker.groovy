@@ -31,6 +31,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
 
+    //todo: properly refresh when app uuid changes
     private static final Set<String> AUTOMATICALLY_SUBSCRIBED = Sets.newConcurrentHashSet()
     private static final Set<String> PENDING_DATA_AVAILABLE = Sets.newConcurrentHashSet()
 

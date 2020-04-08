@@ -2,15 +2,14 @@
   "enabled": true,
   "test_mode": true,
   "manual_setup_mode": false,
-  "manual_trace_sync_mode": true,
   "log_level": "debug",
   "log_location": "logs/",
   "log_metrics": true,
   "application": {
-    "app_uuid": null,
+    "app_uuid": "99999999-9999-9999-9999-999999999999",
     "application_source_code": {
       "packages": [
-        "com/sourceplusplus/agent/.*"
+        "test/integration/.*"
       ]
     }
   },
