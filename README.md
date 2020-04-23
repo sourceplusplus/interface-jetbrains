@@ -44,7 +44,7 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 
 ### Prerequisites
 
-- Supported APMs: [Apache SkyWalking](https://github.com/apache/incubator-skywalking)
+- Supported APMs: [Apache SkyWalking](https://github.com/apache/skywalking)
 - Supported IDEs: JetBrains
 - Supported OSes: Linux, macOS, and Windows
 
