@@ -1,7 +1,7 @@
 package com.sourceplusplus.api.model.integration;
 
 /**
- * todo: description
+ * Different types of integrations core supports.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

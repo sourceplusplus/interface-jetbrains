@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom
 import java.util.regex.Pattern
 
 /**
- * todo: description
+ * Used to add/modify applications and get/refresh application subscriptions.
  *
  * @version 0.2.5
  * @since 0.1.0

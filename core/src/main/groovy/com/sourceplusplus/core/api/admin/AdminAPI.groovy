@@ -16,7 +16,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 
 /**
- * todo: description
+ * Used to control the core server.
  *
  * @version 0.2.5
  * @since 0.1.0

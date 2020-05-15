@@ -11,7 +11,6 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
-import com.sourceplusplus.api.model.artifact.SourceArtifactVersion
 import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.api.model.config.SourceCoreConfig
 import com.sourceplusplus.api.model.error.SourceAPIError
@@ -52,7 +51,7 @@ import java.time.Instant
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE
 
 /**
- * todo: description
+ * Main entry point to launch core server.
  *
  * @version 0.2.5
  * @since 0.1.0
@@ -344,7 +343,6 @@ class CoreBootstrap extends AbstractVerticle {
         //api
         vertx.eventBus().registerDefaultCodec(SourceCoreInfo.class, SourceMessage.messageCodec(SourceCoreInfo.class))
         vertx.eventBus().registerDefaultCodec(SourceApplication.class, SourceMessage.messageCodec(SourceApplication.class))
-        vertx.eventBus().registerDefaultCodec(SourceArtifactVersion.class, SourceMessage.messageCodec(SourceArtifactVersion.class))
         vertx.eventBus().registerDefaultCodec(ArtifactMetrics.class, SourceMessage.messageCodec(ArtifactMetrics.class))
         vertx.eventBus().registerDefaultCodec(ArtifactMetricResult.class, SourceMessage.messageCodec(ArtifactMetricResult.class))
         vertx.eventBus().registerDefaultCodec(SourceArtifactConfig.class, SourceMessage.messageCodec(SourceArtifactConfig.class))

@@ -25,8 +25,7 @@ import java.util.concurrent.TimeUnit
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
 
 /**
- * todo: description
- *
+ * Used to add/modify/fetch artifact subscriptions and configurations.
  * todo: artifact caching
  *
  * @version 0.2.5

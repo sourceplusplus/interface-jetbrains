@@ -16,11 +16,9 @@ import io.vertx.core.Handler
 import io.vertx.core.json.Json
 import io.vertx.core.shareddata.SharedData
 import io.vertx.ext.web.RoutingContext
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
- * todo: description
+ * Used to add/modify/fetch artifact metric subscriptions.
  *
  * @version 0.2.5
  * @since 0.1.0

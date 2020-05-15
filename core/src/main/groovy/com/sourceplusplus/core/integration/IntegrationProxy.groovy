@@ -10,7 +10,7 @@ import io.vertx.core.net.NetSocket
 import io.vertx.core.streams.Pump
 
 /**
- * todo: description
+ * Allows integration servers to be proxied through core.
  *
  * @version 0.2.5
  * @since 0.1.0

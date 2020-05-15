@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.Map;
 
 /**
- * todo: description
+ * Used to report current artifact metrics/traces.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

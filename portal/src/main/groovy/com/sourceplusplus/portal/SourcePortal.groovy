@@ -10,7 +10,7 @@ import groovy.util.logging.Slf4j
 import java.util.concurrent.TimeUnit
 
 /**
- * todo: description
+ * Represents a view into a specific source artifact.
  *
  * @version 0.2.5
  * @since 0.2.0

@@ -27,7 +27,7 @@ import io.vertx.core.json.JsonObject
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * todo: description
+ * Represents a Elasticsearch storage for saving/fetching core data.
  *
  * @version 0.2.5
  * @since 0.1.0

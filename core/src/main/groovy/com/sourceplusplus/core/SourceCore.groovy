@@ -22,7 +22,7 @@ import org.apache.commons.io.IOUtils
 import java.nio.charset.StandardCharsets
 
 /**
- * todo: description
+ * Used to setup storage, APIs, and integrations.
  *
  * @version 0.2.5
  * @since 0.2.0

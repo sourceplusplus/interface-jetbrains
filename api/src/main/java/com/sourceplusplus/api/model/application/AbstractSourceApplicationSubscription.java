@@ -11,7 +11,7 @@ import org.immutables.value.Value;
 import java.util.Set;
 
 /**
- * todo: description
+ * Used to report current application artifact subscriptions.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

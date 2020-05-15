@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
- * todo: description
+ * Used to provide additional configuration to source artifacts.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

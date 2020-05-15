@@ -15,7 +15,7 @@ import io.vertx.ext.web.RoutingContext
 import java.time.Instant
 
 /**
- * todo: description
+ * Used to add/modify/fetch artifact trace subscriptions.
  *
  * @version 0.2.5
  * @since 0.1.0

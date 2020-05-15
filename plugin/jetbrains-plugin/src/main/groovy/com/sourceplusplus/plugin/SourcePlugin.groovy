@@ -24,6 +24,9 @@ import org.jetbrains.annotations.NotNull
 @Slf4j
 class SourcePlugin {
 
+    public static final ResourceBundle BUILD = ResourceBundle.getBundle(
+            "source-plugin_build", Locale.default, SourcePlugin.classLoader)
+
     private final Vertx vertx
     private PluginBootstrap pluginBootstrap
 

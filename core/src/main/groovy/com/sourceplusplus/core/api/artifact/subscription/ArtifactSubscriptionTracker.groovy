@@ -21,7 +21,7 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 /**
- * todo: description
+ * Keeps track of artifact subscriptions.
  *
  * @version 0.2.5
  * @since 0.1.0

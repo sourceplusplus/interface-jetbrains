@@ -1,7 +1,7 @@
 package com.sourceplusplus.api.model.artifact;
 
 /**
- * todo: description
+ * Different types of subscriptions artifacts accept.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

@@ -8,7 +8,7 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 
 /**
- * todo: description
+ * Represents a storage for saving/fetching core data.
  *
  * @version 0.2.5
  * @since 0.2.0

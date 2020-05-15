@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import java.time.Instant;
 
 /**
- * todo: description
+ * Used to create/update source applications.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

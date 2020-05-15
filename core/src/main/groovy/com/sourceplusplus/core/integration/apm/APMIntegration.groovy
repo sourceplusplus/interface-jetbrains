@@ -12,7 +12,7 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 
 /**
- * todo: description
+ * Represents integration with an APM.
  *
  * @version 0.2.5
  * @since 0.2.0

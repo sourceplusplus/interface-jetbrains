@@ -12,7 +12,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 
 /**
- * todo: description
+ * Used to setup a bridge client to core which allows for pub/sub communication.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

@@ -2,7 +2,6 @@ package com.sourceplusplus.plugin.intellij.settings.about
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
-import com.sourceplusplus.plugin.SourcePluginDefines
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.NotNull
@@ -10,6 +9,8 @@ import org.jetbrains.annotations.Nullable
 
 import javax.swing.*
 import java.awt.*
+
+import static com.sourceplusplus.plugin.SourcePlugin.BUILD
 
 /**
  * todo: description
@@ -43,7 +44,7 @@ class AboutConfigurable implements Configurable {
             form = new AboutDialog()
         }
 
-        form.versionLabel.setText("Version " + SourcePluginDefines.VERSION + ", © 2020 CodeBrig, LLC.")
+        form.versionLabel.setText("Version " + BUILD.getString("version") + ", © 2020 CodeBrig, LLC.")
         form.websiteLabel.setCursor(new Cursor(Cursor.HAND_CURSOR))
         form.websiteLabel.addMouseListener(new HyperlinkMouseListener(form.websiteLabel,
                 "https://sourceplusplus.com"))
