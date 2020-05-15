@@ -16,6 +16,13 @@
 - Added dynamic version to GitSocratic ([#145](https://github.com/sourceplusplus/Assistant/issues/145))
 - Increased JavaDocs ([#143](https://github.com/sourceplusplus/Assistant/issues/143))
 
+## Dependency upgrade
+- Upgraded log4j (2.13.1 -> 2.13.3)
+- Upgraded jackson (2.10.3 -> 2.11.0)
+- Upgraded immutables (2.8.3 -> 2.8.8)
+- Upgraded okhttp (4.4.1 -> 4.6.0)
+- Upgraded guava (28.2-jre -> 29.0-jre)
+
 # 0.2.5-alpha (2020-04-03)
 
 ## Bug
