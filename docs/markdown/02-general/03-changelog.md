@@ -1,4 +1,4 @@
-# 0.2.6-alpha (2020-05-15)
+# 0.2.6-alpha (2020-05-16)
 
 ## Bug
 - Fixed Docker Hub auto-release functionality ([#161](https://github.com/sourceplusplus/Assistant/issues/161))
