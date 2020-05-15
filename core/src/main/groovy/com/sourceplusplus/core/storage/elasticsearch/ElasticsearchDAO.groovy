@@ -23,15 +23,13 @@ import io.vertx.core.Handler
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * todo: description
+ * Represents a Elasticsearch storage for saving/fetching core data.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

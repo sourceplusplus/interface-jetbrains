@@ -16,10 +16,10 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
- * todo: description
+ * General information about a core integration.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.1
  */
 @SourceStyle

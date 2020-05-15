@@ -1,3 +1,29 @@
+# 0.2.6-alpha (2020-05-15)
+
+## Bug
+- Fixed Docker Hub auto-release functionality ([#161](https://github.com/sourceplusplus/Assistant/issues/161))
+
+## Improvement
+- Make usage of Apache SkyWalking's getMultipleLinearIntValues ([#165](https://github.com/sourceplusplus/Assistant/issues/165))
+- Configuration view automatically updates without refreshing  ([#139](https://github.com/sourceplusplus/Assistant/issues/139))
+- Use NAVIGATE_TO_ARTIFACT/CAN_NAVIGATE_TO_ARTIFACT instead of hardcoded strings ([#153](https://github.com/sourceplusplus/Assistant/issues/153))
+- Ability to navigate to artifact with non-existent mark ([#168](https://github.com/sourceplusplus/Assistant/issues/168))
+- Remove NAVIGATE_TO_ARTIFACT periodic timer hack ([#157](https://github.com/sourceplusplus/Assistant/issues/157))
+- Ignore concurrent syncAutomaticSubscriptions() calls ([#148](https://github.com/sourceplusplus/Assistant/issues/148))
+- Add default readmes in knowledge base ([#120](https://github.com/sourceplusplus/Assistant/issues/120))
+- Auto-detect common source package ([#138](https://github.com/sourceplusplus/Assistant/issues/138))
+- Added TraceAPI tests ([#131](https://github.com/sourceplusplus/Assistant/issues/131))
+- Added dynamic version to GitSocratic ([#145](https://github.com/sourceplusplus/Assistant/issues/145))
+- Increased JavaDocs ([#143](https://github.com/sourceplusplus/Assistant/issues/143))
+
+## Dependency upgrade
+- Upgraded log4j (2.13.1 -> 2.13.3)
+- Upgraded jackson (2.10.3 -> 2.11.0)
+- Upgraded immutables (2.8.3 -> 2.8.8)
+- Upgraded okhttp (4.4.1 -> 4.6.0)
+- Upgraded guava (28.2-jre -> 29.0-jre)
+- Upgraded SourceMarker (fbcdb4a296 -> 0.1.3)
+
 # 0.2.5-alpha (2020-04-03)
 
 ## Bug

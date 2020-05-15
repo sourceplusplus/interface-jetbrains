@@ -12,9 +12,9 @@ import com.sourceplusplus.marker.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 
 /**
- * todo: description
+ * Extension of the SourceMarker for handling IntelliJ.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -45,6 +45,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
     SourceMark createSourceMark(@NotNull UMethod psiMethod, @NotNull SourceMark.Type type) {
         if (type == SourceMark.Type.GUTTER) {
             def sourceMark = new IntelliJMethodGutterMark(this, psiMethod)
+            log.info("Created gutter mark: " + sourceMark)
             PluginBootstrap.sourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
             return sourceMark
         } else {

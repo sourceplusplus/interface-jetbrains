@@ -2,6 +2,7 @@
   "enabled": true,
   "test_mode": true,
   "manual_setup_mode": false,
+  "manual_trace_sync_mode": true,
   "log_level": "debug",
   "log_location": "logs/",
   "log_metrics": true,

@@ -4,9 +4,9 @@ import groovy.transform.Immutable
 import groovy.transform.TupleConstructor
 
 /**
- * todo: description
+ * Turns @ annotations into a single format.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

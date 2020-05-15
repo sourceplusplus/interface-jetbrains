@@ -15,14 +15,17 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.jetbrains.annotations.NotNull
 
 /**
- * todo: description
+ * Used to bootstrap the Source++ Plugin.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Slf4j
 class SourcePlugin {
+
+    public static final ResourceBundle BUILD = ResourceBundle.getBundle(
+            "source-plugin_build", Locale.default, SourcePlugin.classLoader)
 
     private final Vertx vertx
     private PluginBootstrap pluginBootstrap

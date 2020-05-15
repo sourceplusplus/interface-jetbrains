@@ -24,9 +24,9 @@ import java.util.concurrent.ThreadLocalRandom
 import java.util.regex.Pattern
 
 /**
- * todo: description
+ * Used to add/modify applications and get/refresh application subscriptions.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -151,6 +151,7 @@ class ApplicationAPI extends AbstractVerticle {
 
     void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
                                      Handler<AsyncResult<Set<SourceApplicationSubscription>>> handler) {
+        log.info("Getting appliction subscriptions. App UUID: $appUuid - Include automatic: $includeAutomatic")
         vertx.eventBus().request(ArtifactSubscriptionTracker.GET_APPLICATION_SUBSCRIPTIONS, appUuid, {
             if (it.succeeded()) {
                 def subscribers = JacksonCodec.decodeValue(it.result().body() as String,

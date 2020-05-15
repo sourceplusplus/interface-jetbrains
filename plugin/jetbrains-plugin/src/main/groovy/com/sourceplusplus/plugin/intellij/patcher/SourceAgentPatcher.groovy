@@ -2,7 +2,6 @@ package com.sourceplusplus.plugin.intellij.patcher
 
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
-import com.sourceplusplus.plugin.SourcePluginDefines
 import com.sourceplusplus.plugin.intellij.patcher.tail.LogTailer
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import groovy.transform.PackageScope
@@ -17,10 +16,12 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicBoolean
 
+import static com.sourceplusplus.plugin.SourcePlugin.*
+
 /**
- * todo: description
+ * Used to add the Source++ Agent to project executions.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -37,9 +38,9 @@ trait SourceAgentPatcher {
         }
         if (PluginBootstrap.sourcePlugin != null && !patched.getAndSet(true)) {
             log.info("Patching Source++ Agent for executing program...")
-            URL inputUrl = SourceAgentPatcher.class.getResource("/source-agent-" + SourcePluginDefines.VERSION + ".jar")
+            URL inputUrl = SourceAgentPatcher.class.getResource("/source-agent-" + BUILD.getString("version") + ".jar")
             File destDir = File.createTempDir()
-            agentFile = new File(destDir, "source-agent-" + SourcePluginDefines.VERSION + ".jar")
+            agentFile = new File(destDir, "source-agent-" + BUILD.getString("version") + ".jar")
             FileUtils.copyURLToFile(inputUrl, agentFile)
             agentFile.deleteOnExit()
             destDir.deleteOnExit()

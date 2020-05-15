@@ -7,10 +7,10 @@ import com.sourceplusplus.api.model.SourceStyle;
 import org.immutables.value.Value;
 
 /**
- * todo: description
+ * Reference data in a trace span result.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  */
 @SourceStyle

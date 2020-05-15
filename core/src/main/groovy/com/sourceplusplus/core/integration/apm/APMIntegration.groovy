@@ -12,9 +12,9 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 
 /**
- * todo: description
+ * Represents integration with an APM.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

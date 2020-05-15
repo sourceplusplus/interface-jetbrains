@@ -18,8 +18,8 @@ targetCompatibility = 1.8
 
 dependencies {
     testImplementation group: 'com.ea.agentloader', name: 'ea-agent-loader', version: '1.0.3'
-    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.1'
-    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.1'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
 
     compile project(":api")
     compile files('../lib/skywalking-agent.jar')
@@ -29,7 +29,7 @@ dependencies {
     compile(group: 'org.mutabilitydetector', name: 'asm-nonclassloadingextensions', version: '1.0-rc2') {
         exclude group: 'org.ow2.asm', module: 'asm-debug-all'
     }
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.3'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
 }
 
 task createProperties(dependsOn: processResources) {
@@ -96,7 +96,7 @@ task prepareExternalAgent(type: JavaExec) {
             FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 if (file.toString().startsWith("/META-INF/") &&
                         !file.toString().startsWith("/META-INF/MANIFEST.MF") &&
-                        !file.toString().startsWith("/META-INF/services/org.apache.skywalking.apm.agent.") &&
+                        !file.toString().startsWith("/META-INF/services/org.apache.skywalking.apm.") &&
                         !file.toString().startsWith("/META-INF/services/com.sourceplusplus.")) {
                     Files.delete(file)
                 } else if (file.toString() == "/LICENSE.txt" || file.toString() == "/LICENSE-junit.txt" ||

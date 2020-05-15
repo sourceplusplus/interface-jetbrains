@@ -1,25 +1,17 @@
 package com.sourceplusplus.plugin.intellij.util
 
 import com.intellij.ide.util.JavaAnonymousClassesHelper
-import com.intellij.openapi.editor.Document
-import com.intellij.openapi.editor.FoldRegion
-import com.intellij.openapi.editor.ex.util.EditorUtil
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.ClassUtil
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiUtil
-import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.uast.UMethod
 
-import java.awt.*
-
 /**
- * todo: description
+ * General IntelliJ utility functions.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -67,18 +59,6 @@ final class IntelliUtils {
                     JavaAnonymousClassesHelper.getName((PsiAnonymousClass) containingClass)
         }
         return ClassUtil.getJVMClassName(containingClass)
-    }
-
-    @Nullable
-    static PsiClass findClass(@NotNull PsiElement psiElement) {
-        PsiClass containingClass = PsiTreeUtil.getParentOfType(psiElement, PsiClass.class, false)
-        while (containingClass instanceof PsiTypeParameter) {
-            containingClass = PsiTreeUtil.getParentOfType(containingClass, PsiClass.class)
-        }
-        if (containingClass == null) {
-            return null
-        }
-        return containingClass
     }
 
     private static int getArrayDimensions(final String s) {

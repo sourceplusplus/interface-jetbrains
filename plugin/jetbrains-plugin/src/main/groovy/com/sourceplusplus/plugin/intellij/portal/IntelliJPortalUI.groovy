@@ -15,9 +15,9 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 
 /**
- * todo: description
+ * Used to display the Source++ Portal UI.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.5
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -34,6 +34,11 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
         if (browser != null) {
             browser.JBCefClient.addLifeSpanHandler(this, browser.cefBrowser)
         }
+    }
+
+    void lateInitBrowser(JBCefBrowser browser) {
+        this.browser = Objects.requireNonNull(browser)
+        browser.JBCefClient.addLifeSpanHandler(this, browser.cefBrowser)
     }
 
     void cloneUI(IntelliJPortalUI portalUI) {

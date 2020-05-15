@@ -11,10 +11,10 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * todo: description
+ * A specific trace result.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  */
 @SourceStyle

@@ -1,10 +1,10 @@
 package com.sourceplusplus.api.model.error;
 
 /**
- * todo: description
+ * Possible errors core API is able to throw.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  */
 public interface SourceAPIErrors {

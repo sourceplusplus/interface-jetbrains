@@ -22,9 +22,9 @@ import org.apache.commons.io.IOUtils
 import java.nio.charset.StandardCharsets
 
 /**
- * todo: description
+ * Used to setup storage, APIs, and integrations.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -1,8 +1,8 @@
 FROM openjdk:11-jre
-ADD ./source-core-0.2.5.zip /source-core-0.2.5.zip
+ADD ./source-core-0.2.6.zip /source-core-0.2.6.zip
 
 ENV SOURCE_CONFIG=docker.json
 #ENV JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
 RUN unzip *.zip
-CMD ["./source-core-0.2.5/bin/source-core"]
+CMD ["./source-core-0.2.6/bin/source-core"]

@@ -36,9 +36,9 @@ import java.awt.Desktop
 import java.util.concurrent.CountDownLatch
 
 /**
- * todo: description
+ * Starts up the plugin source marker.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

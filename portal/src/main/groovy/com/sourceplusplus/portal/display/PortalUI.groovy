@@ -16,7 +16,7 @@ import java.util.zip.ZipFile
 /**
  * Used to render the Source++ Portal's Semantic UI.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -56,6 +56,7 @@ class PortalUI {
     void cloneUI(PortalUI portalUI) {
         this.overviewView.cloneView(portalUI.overviewView)
         this.tracesView.cloneView(portalUI.tracesView)
+        this.configurationView.cloneView(portalUI.configurationView)
     }
 
     static void assignVertx(Vertx vertx) {

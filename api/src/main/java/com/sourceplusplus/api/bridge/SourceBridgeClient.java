@@ -6,15 +6,16 @@ import com.sourceplusplus.api.model.trace.ArtifactTraceResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 
 /**
- * todo: description
+ * Used to setup a bridge client to core which allows for pub/sub communication.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.0
  */
 public class SourceBridgeClient {
@@ -37,49 +38,52 @@ public class SourceBridgeClient {
     public void setupSubscriptions() {
         active = true;
         client = vertx.createHttpClient(new HttpClientOptions().setSsl(ssl));
-        client.websocket(apiPort, apiHost, "/eventbus/websocket", ws -> {
-            reconnecting = false;
-            JsonObject pingMsg = new JsonObject().put("type", "ping");
-            ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true));
-            vertx.setPeriodic(5000, it -> {
-                if (active && !reconnecting) {
-                    ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true));
-                } else {
-                    vertx.cancelTimer(it);
-                }
-            });
-            ws.closeHandler(it -> {
-                if (active) {
-                    reconnect();
-                }
-            });
+        client.webSocket(apiPort, apiHost, "/eventbus/websocket", conn -> {
+            if (conn.succeeded()) {
+                WebSocket ws = conn.result();
+                reconnecting = false;
+                JsonObject pingMsg = new JsonObject().put("type", "ping");
+                ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true));
+                vertx.setPeriodic(5000, it -> {
+                    if (active && !reconnecting) {
+                        ws.writeFrame(WebSocketFrame.textFrame(pingMsg.encode(), true));
+                    } else {
+                        vertx.cancelTimer(it);
+                    }
+                });
+                ws.closeHandler(it -> {
+                    if (active) {
+                        reconnect();
+                    }
+                });
 
-            JsonObject msg = new JsonObject().put("type", "register")
-                    .put("address", PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress());
-            ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
-            msg = new JsonObject().put("type", "register")
-                    .put("address", PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.getAddress());
-            ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
-            msg = new JsonObject().put("type", "register")
-                    .put("address", PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.getAddress());
-            ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
-            ws.handler(it -> {
-                JsonObject ob = new JsonObject(it.toString());
-                if (PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress().equals(ob.getString("address"))) {
-                    handleArtifactConfigUpdated(ob);
-                } else if (PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.getAddress().equals(ob.getString("address"))) {
-                    handleArtifactMetricUpdated(ob);
-                } else if (PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.getAddress().equals(ob.getString("address"))) {
-                    handleArtifactTraceUpdated(ob);
-                } else {
-                    throw new IllegalArgumentException("Unsupported bridge address: " + ob.getString("address"));
-                }
-            });
-        }, err -> {
-            if (reconnecting) {
-                reconnect();
+                JsonObject msg = new JsonObject().put("type", "register")
+                        .put("address", PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress());
+                ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
+                msg = new JsonObject().put("type", "register")
+                        .put("address", PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.getAddress());
+                ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
+                msg = new JsonObject().put("type", "register")
+                        .put("address", PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.getAddress());
+                ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
+                ws.handler(it -> {
+                    JsonObject ob = new JsonObject(it.toString());
+                    if (PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress().equals(ob.getString("address"))) {
+                        handleArtifactConfigUpdated(ob);
+                    } else if (PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.getAddress().equals(ob.getString("address"))) {
+                        handleArtifactMetricUpdated(ob);
+                    } else if (PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.getAddress().equals(ob.getString("address"))) {
+                        handleArtifactTraceUpdated(ob);
+                    } else {
+                        throw new IllegalArgumentException("Unsupported bridge address: " + ob.getString("address"));
+                    }
+                });
             } else {
-                err.printStackTrace();
+                if (reconnecting) {
+                    reconnect();
+                } else {
+                    conn.cause().printStackTrace();
+                }
             }
         });
     }
