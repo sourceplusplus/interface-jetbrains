@@ -44,6 +44,10 @@ task createProperties(dependsOn: processResources) {
             p['version'] = project.version.toString()
             p['build_date'] = new Date().toInstant().toString()
             p['ide'] = 'jetbrains'
+            p['release'] = "alpha"
+            p['full_version'] = p['version'] + "-" + p['release']
+            p['apache_skywalking_version'] = APACHE_SKYWALKING_VERSION
+            p['apache_skywalking_full_version'] = APACHE_SKYWALKING_VERSION + "-es6"
             p.store w, null
         }
     }

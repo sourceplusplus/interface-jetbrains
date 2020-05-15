@@ -15,6 +15,8 @@ import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
+import static com.sourceplusplus.plugin.SourcePlugin.*
+
 /**
  * todo: description
  *
@@ -70,6 +72,7 @@ class EnvironmentDialog extends JDialog {
                 }
                 connectDialog.setStatus("Initializing Apache SkyWalking...")
                 def initSkywalking = SocraticAPI.administration().initApacheSkyWalking()
+                        .skywalkingVersion(BUILD.getString("apache_skywalking_full_version"))
                         .build().execute(output) as InitDockerCommandResult
                 if (initSkywalking.status != 0) {
                     connectDialog.setStatus("<font color='red'>Failed to initialize Apache SkyWalking service</font>")
@@ -93,6 +96,7 @@ class EnvironmentDialog extends JDialog {
 
                 connectDialog.setStatus("Initializing Source++...")
                 def initSpp = SocraticAPI.administration().initSourcePlusPlus()
+                        .sppVersion(BUILD.getString("full_version"))
                         .link("Apache_SkyWalking")
                         .build().execute(output) as InitDockerCommandResult
                 if (initSpp.status != 0) {
