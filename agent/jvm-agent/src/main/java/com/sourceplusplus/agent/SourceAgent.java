@@ -3,7 +3,6 @@ package com.sourceplusplus.agent;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.sourceplusplus.agent.inject.ClassFileTransformerImpl;
-import com.sourceplusplus.agent.intercept.logger.SourceLoggerResolver;
 import com.sourceplusplus.agent.sync.ArtifactTraceSubscriptionSync;
 import com.sourceplusplus.api.client.SourceCoreClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
@@ -20,7 +19,6 @@ import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
-import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.pmw.tinylog.Configurator;
@@ -40,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
- * todo: description
+ * Connects to core, boots APM agent, and adds trace subscribed artifact spans.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5
@@ -236,7 +234,6 @@ public class SourceAgent {
 
     private static void bootApacheSkyWalking(IntegrationInfo info) {
         Logger.info("Booting Apache SkyWalking");
-        LogManager.setLogResolver(new SourceLoggerResolver());
 
         IntegrationConnection connection = info.connections().get(ConnectionType.gRPC);
         if ("localhost".equals(connection.getHost()) || "127.0.0.1".equals(connection.getHost())
