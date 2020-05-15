@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import java.time.Instant;
 
 /**
- * todo: description
+ * Used to query core for an artifact's traces.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

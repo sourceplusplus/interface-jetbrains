@@ -19,7 +19,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.CAN_NAVIGATE_T
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.NAVIGATE_TO_ARTIFACT
 
 /**
- * todo: description
+ * Used to navigate between artifacts via the Source++ Portal.
  *
  * @version 0.2.5
  * @since 0.1.0

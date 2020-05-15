@@ -8,7 +8,7 @@ import org.apache.commons.io.input.Tailer
 import org.apache.commons.io.input.TailerListenerAdapter
 
 /**
- * todo: description
+ * Used to tail agent/skywalking logs and send them to the plugin console.
  *
  * @version 0.2.5
  * @since 0.2.4

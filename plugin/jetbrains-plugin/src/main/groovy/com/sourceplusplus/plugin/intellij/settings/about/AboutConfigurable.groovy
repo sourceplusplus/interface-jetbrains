@@ -13,7 +13,7 @@ import java.awt.*
 import static com.sourceplusplus.plugin.SourcePlugin.BUILD
 
 /**
- * todo: description
+ * Displays general information about Source++.
  *
  * @version 0.2.5
  * @since 0.1.0

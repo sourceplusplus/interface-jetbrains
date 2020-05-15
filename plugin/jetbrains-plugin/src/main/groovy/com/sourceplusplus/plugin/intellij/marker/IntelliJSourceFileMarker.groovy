@@ -12,7 +12,7 @@ import com.sourceplusplus.marker.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 
 /**
- * todo: description
+ * Extension of the SourceMarker for handling IntelliJ.
  *
  * @version 0.2.5
  * @since 0.1.0

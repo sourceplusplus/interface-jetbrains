@@ -11,7 +11,7 @@ import org.immutables.value.Value;
 import java.util.List;
 
 /**
- * todo: description
+ * Represents an artifact's spline chart data.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

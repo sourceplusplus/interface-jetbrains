@@ -7,7 +7,7 @@ import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import javax.swing.*
 
 /**
- * todo: description
+ * Extension of the GutterMark for handling IntelliJ.
  *
  * @version 0.2.5
  * @since 0.2.5

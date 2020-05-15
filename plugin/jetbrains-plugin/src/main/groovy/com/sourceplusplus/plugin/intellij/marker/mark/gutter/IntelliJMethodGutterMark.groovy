@@ -31,7 +31,7 @@ import java.time.Instant
 import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
 
 /**
- * todo: description
+ * Extension of the MethodGutterMark for handling IntelliJ.
  *
  * @version 0.2.5
  * @since 0.1.0

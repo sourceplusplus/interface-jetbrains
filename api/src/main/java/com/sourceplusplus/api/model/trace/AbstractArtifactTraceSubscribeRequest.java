@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * todo: description
+ * Used to subscribe to artifact traces.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

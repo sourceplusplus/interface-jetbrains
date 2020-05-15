@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable
 import javax.swing.*
 
 /**
- * todo: description
+ * Displays core connection information.
  *
  * @version 0.2.5
  * @since 0.1.0

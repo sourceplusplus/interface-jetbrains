@@ -6,7 +6,7 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 
 /**
- * todo: description
+ * Opens mouse-clicked links with the default browser.
  *
  * @version 0.2.5
  * @since 0.1.0

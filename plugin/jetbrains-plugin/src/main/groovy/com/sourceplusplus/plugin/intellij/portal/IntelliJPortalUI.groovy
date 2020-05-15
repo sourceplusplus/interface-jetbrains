@@ -15,7 +15,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 
 /**
- * todo: description
+ * Used to display the Source++ Portal UI.
  *
  * @version 0.2.5
  * @since 0.2.5

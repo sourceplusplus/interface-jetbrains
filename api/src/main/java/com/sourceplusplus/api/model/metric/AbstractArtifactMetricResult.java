@@ -12,7 +12,7 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * todo: description
+ * Metrics result for a given artifact.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

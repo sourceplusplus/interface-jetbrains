@@ -6,7 +6,7 @@ import com.sourceplusplus.api.model.config.SourceAgentConfig
 import javax.swing.*
 
 /**
- * todo: description
+ * Used to modify the existing application associated with the current project.
  *
  * @version 0.2.5
  * @since 0.1.0

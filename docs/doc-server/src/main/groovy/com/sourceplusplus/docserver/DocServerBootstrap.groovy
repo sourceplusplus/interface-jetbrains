@@ -21,7 +21,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 /**
- * todo: description
+ * Used to handle the Source++ website documentation.
  *
  * @version 0.2.5
  * @since 0.1.0

@@ -20,7 +20,7 @@ import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import javax.swing.*
 
 /**
- * todo: description
+ * Used to create, remove, and configure core environments.
  *
  * @version 0.2.5
  * @since 0.2.0

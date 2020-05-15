@@ -4,7 +4,7 @@ import com.sourceplusplus.portal.SourcePortal
 import groovy.util.logging.Slf4j
 
 /**
- * todo: description
+ * Used to display the Source++ Portal UI.
  *
  * @version 0.2.5
  * @since 0.2.5

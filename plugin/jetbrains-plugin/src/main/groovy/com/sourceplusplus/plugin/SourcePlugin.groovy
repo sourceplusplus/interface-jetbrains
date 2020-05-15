@@ -15,7 +15,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.jetbrains.annotations.NotNull
 
 /**
- * todo: description
+ * Used to bootstrap the Source++ Plugin.
  *
  * @version 0.2.5
  * @since 0.1.0

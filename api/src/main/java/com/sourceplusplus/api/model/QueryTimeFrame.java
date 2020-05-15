@@ -1,7 +1,7 @@
 package com.sourceplusplus.api.model;
 
 /**
- * todo: description
+ * Time frames the core supports for artifact metrics/traces.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

@@ -5,7 +5,7 @@ import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import java.time.Instant
 
 /**
- * todo: description
+ * Keys used by Source++ to attribute data to IntelliJ elements.
  *
  * @version 0.2.5
  * @since 0.2.5

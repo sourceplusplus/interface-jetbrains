@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * todo: description
+ * Represents an artifact's spline series data.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

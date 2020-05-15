@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import static com.sourceplusplus.plugin.SourcePlugin.*
 
 /**
- * todo: description
+ * Used to add the Source++ Agent to project executions.
  *
  * @version 0.2.5
  * @since 0.1.0

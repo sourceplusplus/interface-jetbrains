@@ -4,7 +4,6 @@ import com.codahale.metrics.MetricRegistry
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.coordinate.artifact.config.SkywalkingTraceConfigIntegrator
 import com.sourceplusplus.plugin.coordinate.artifact.config.SpringMVCArtifactConfigIntegrator
-import com.sourceplusplus.plugin.coordinate.artifact.track.ArtifactConfigTracker
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
@@ -60,7 +59,6 @@ class PluginCoordinator extends AbstractVerticle {
         vertx.deployVerticle(new SkywalkingTraceConfigIntegrator(), new DeploymentOptions().setWorker(true))
 
         //track
-        vertx.deployVerticle(new ArtifactConfigTracker(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new PluginArtifactSubscriptionTracker(), new DeploymentOptions().setWorker(true))
     }
 }

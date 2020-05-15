@@ -10,7 +10,7 @@ import org.immutables.value.Value;
 import javax.annotation.Nullable;
 
 /**
- * todo: description
+ * Represents some general artifact statistics.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

@@ -3,7 +3,7 @@ package com.sourceplusplus.plugin.intellij.settings.about
 import javax.swing.*
 
 /**
- * todo: description
+ * Displays general information about Source++.
  *
  * @version 0.2.5
  * @since 0.1.0

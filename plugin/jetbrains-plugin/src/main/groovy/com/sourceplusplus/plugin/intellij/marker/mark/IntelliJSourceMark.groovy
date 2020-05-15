@@ -3,7 +3,7 @@ package com.sourceplusplus.plugin.intellij.marker.mark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 
 /**
- * todo: description
+ * Extension of the SourceMark for handling IntelliJ.
  *
  * @version 0.2.5
  * @since 0.2.5

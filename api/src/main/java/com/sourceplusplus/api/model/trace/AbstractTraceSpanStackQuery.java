@@ -8,7 +8,7 @@ import org.immutables.value.Value;
 import javax.annotation.Nullable;
 
 /**
- * todo: description
+ * Used to query core for an artifact's trace spans stacks.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

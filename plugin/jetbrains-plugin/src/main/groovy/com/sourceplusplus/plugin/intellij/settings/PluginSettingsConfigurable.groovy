@@ -14,7 +14,7 @@ import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import javax.swing.*
 
 /**
- * todo: description
+ * Used to view and edit plugin settings.
  *
  * @version 0.2.5
  * @since 0.1.0

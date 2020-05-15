@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * todo: description
+ * A specific trace span result.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

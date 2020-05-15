@@ -18,7 +18,7 @@ import javax.swing.event.DocumentListener
 import static com.sourceplusplus.plugin.SourcePlugin.*
 
 /**
- * todo: description
+ * Used to create, remove, and configure core environments.
  *
  * @version 0.2.5
  * @since 0.2.0

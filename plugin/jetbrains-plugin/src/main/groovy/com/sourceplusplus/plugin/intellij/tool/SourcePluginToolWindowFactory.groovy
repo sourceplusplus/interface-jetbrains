@@ -9,7 +9,7 @@ import com.intellij.ui.content.Content
 import org.jetbrains.annotations.NotNull
 
 /**
- * todo: description
+ * Displays logs from the agent and plugin in a console window.
  *
  * @version 0.2.5
  * @since 0.1.0

@@ -9,7 +9,8 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 
 /**
- * todo: description
+ * Automatically appends the appropriate artifact configuration
+ * on artifacts annotated with Spring Framework's web binding annotations.
  *
  * @version 0.2.5
  * @since 0.1.0

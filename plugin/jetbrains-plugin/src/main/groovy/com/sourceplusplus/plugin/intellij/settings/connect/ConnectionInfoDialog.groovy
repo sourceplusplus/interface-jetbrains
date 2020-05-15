@@ -7,7 +7,7 @@ import io.vertx.core.json.Json
 import javax.swing.*
 
 /**
- * todo: description
+ * Displays core connection information.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

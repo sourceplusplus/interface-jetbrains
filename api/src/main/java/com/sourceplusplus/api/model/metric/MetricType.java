@@ -1,7 +1,7 @@
 package com.sourceplusplus.api.model.metric;
 
 /**
- * todo: description
+ * Different metric order types core can be queried by.
  *
  * @version 0.2.5
  * @since 0.1.0

@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
- * todo: description
+ * General information about a core integration.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5

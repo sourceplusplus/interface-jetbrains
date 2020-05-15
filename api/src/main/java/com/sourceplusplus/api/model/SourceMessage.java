@@ -7,7 +7,7 @@ import io.vertx.core.eventbus.MessageCodec;
 import java.io.Serializable;
 
 /**
- * todo: description
+ * Base message for all Source++ API messages.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.5
@@ -45,5 +45,4 @@ public interface SourceMessage extends Serializable {
             }
         };
     }
-
 }

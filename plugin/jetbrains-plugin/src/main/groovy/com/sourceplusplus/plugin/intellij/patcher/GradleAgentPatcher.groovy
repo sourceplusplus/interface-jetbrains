@@ -11,7 +11,7 @@ import org.jetbrains.plugins.gradle.service.task.GradleTaskManagerExtension
 import org.jetbrains.plugins.gradle.settings.GradleExecutionSettings
 
 /**
- * todo: description
+ * Adds the Source++ Agent to any Gradle-based project executions.
  *
  * @version 0.2.5
  * @since 0.2.4
