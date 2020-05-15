@@ -22,6 +22,7 @@
 - Upgraded immutables (2.8.3 -> 2.8.8)
 - Upgraded okhttp (4.4.1 -> 4.6.0)
 - Upgraded guava (28.2-jre -> 29.0-jre)
+- Upgraded SourceMarker (fbcdb4a296 -> 0.1.3)
 
 # 0.2.5-alpha (2020-04-03)
 
