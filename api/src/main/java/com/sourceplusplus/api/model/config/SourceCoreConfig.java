@@ -8,7 +8,7 @@ import java.util.Objects;
  * Holds the current configuration used by the core.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  */
 @JsonAutoDetect

@@ -15,7 +15,7 @@ import io.vertx.core.json.JsonObject;
  * Used to setup a bridge client to core which allows for pub/sub communication.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.0
  */
 public class SourceBridgeClient {

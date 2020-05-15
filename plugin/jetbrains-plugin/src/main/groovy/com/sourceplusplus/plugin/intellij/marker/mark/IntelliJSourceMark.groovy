@@ -5,7 +5,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 /**
  * Extension of the SourceMark for handling IntelliJ.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.5
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -6,7 +6,7 @@ LABEL maintainer="github.com/sourceplusplus"
 
 ENV SOURCE_HOME=/opt/source-core
 ENV SOURCE_CONFIG=${SOURCE_HOME}/config/source-core.json
-ARG SOURCE_PLUS_PLUS_VERSION="0.2.5"
+ARG SOURCE_PLUS_PLUS_VERSION="0.2.6"
 ARG SOURCE_PLUS_PLUS_RELEASE="alpha"
 
 RUN wget https://github.com/sourceplusplus/Assistant/releases/download/v${SOURCE_PLUS_PLUS_VERSION}-${SOURCE_PLUS_PLUS_RELEASE}/source-core-${SOURCE_PLUS_PLUS_VERSION}.zip && \

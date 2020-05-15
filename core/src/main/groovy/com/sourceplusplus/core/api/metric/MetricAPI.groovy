@@ -20,7 +20,7 @@ import io.vertx.ext.web.RoutingContext
 /**
  * Used to add/modify/fetch artifact metric subscriptions.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

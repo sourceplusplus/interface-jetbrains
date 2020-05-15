@@ -13,7 +13,7 @@ import io.vertx.core.json.JsonObject
 /**
  * Used to display and configure a given source code artifact.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

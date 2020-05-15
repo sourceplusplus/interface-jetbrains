@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
  * Connection information for a core integration.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.0
  */
 @SourceStyle

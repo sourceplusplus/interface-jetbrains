@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Syncs the currently trace subscribed artifacts with core.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  */
 public class ArtifactTraceSubscriptionSync implements Runnable {

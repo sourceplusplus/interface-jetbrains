@@ -13,7 +13,7 @@ import java.util.Set;
  * Used to provide additional configuration to source artifacts.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  */
 @SourceStyle

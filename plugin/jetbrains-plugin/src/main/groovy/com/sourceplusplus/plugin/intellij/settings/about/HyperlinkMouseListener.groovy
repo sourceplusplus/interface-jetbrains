@@ -8,7 +8,7 @@ import java.awt.event.MouseListener
 /**
  * Opens mouse-clicked links with the default browser.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

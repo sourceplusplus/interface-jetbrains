@@ -17,7 +17,7 @@ import java.awt.event.WindowEvent
 /**
  * Used to display the Source++ Portal UI.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.2.5
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

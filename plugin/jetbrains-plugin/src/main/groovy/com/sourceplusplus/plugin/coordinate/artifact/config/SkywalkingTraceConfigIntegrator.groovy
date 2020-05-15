@@ -12,7 +12,7 @@ import io.vertx.core.AbstractVerticle
  * Automatically appends the appropriate artifact configuration
  * on artifacts annotated with Apache SkyWalking's @Trace.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

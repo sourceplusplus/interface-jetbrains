@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull
 /**
  * Displays logs from the agent and plugin in a console window.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

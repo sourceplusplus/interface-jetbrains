@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * Todo: Can likely be replaced with apm-customize-enhance-plugin
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  */
 public class ClassFileTransformerImpl implements ClassFileTransformer {

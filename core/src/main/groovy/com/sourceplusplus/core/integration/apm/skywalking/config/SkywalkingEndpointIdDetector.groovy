@@ -25,7 +25,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
 /**
  * Used to match artifacts to SkyWalking endpoint ids.
  *
- * @version 0.2.5
+ * @version 0.2.6
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
