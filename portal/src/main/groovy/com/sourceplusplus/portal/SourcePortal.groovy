@@ -40,9 +40,9 @@ class SourcePortal implements Closeable {
     }
 
     static void ensurePortalActive(SourcePortal portal) {
-        log.info("Keep alive portal: " + Objects.requireNonNull(portal).portalUuid)
+        log.debug("Keep alive portal: " + Objects.requireNonNull(portal).portalUuid)
         portalMap.refresh(portal.portalUuid)
-        log.info("Active portals: " + portalMap.size())
+        log.debug("Active portals: " + portalMap.size())
     }
 
     static Optional<SourcePortal> getInternalPortal(String appUuid, String artifactQualifiedName) {
