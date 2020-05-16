@@ -17,7 +17,7 @@ jobs:
 
       - name: Get the version
         id: vars
-        run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
+        run: echo ::set-output name=tag::$(git describe --abbrev=0 --tags)
 
       - name: Build the tagged Docker image
         run: docker build . --file Dockerfile --tag sourceplusplus/core:${{ steps.vars.outputs.tag }}
