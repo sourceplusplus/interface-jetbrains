@@ -1,8 +1,9 @@
 name: Docker Hub Auto-Release
 
-on:
-  repository_dispatch:
-    types: [publish-docker-image]
+on: push
+# on:
+#   repository_dispatch:
+#     types: [publish-docker-image]
 
 jobs:
   build:
