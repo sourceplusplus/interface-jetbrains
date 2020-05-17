@@ -65,7 +65,7 @@ Install a JetBrains IDE if you don’t already have one.
 4. Press `Install`.
 5. Click `OK` in the `Settings` dialog and restart your IDE.
 
-After installation, you will need to configure the Source++ Plugin (see [Configure Plugin](https://sourceplusplus.com/knowledge/introduction/configure-plugin/)).
+After installation, you will need to configure the Source++ Plugin (see [Configure Plugin](docs/markdown/01-introduction/06-configure-source-plugin.md)).
 
 ## Code Structure
 
@@ -106,11 +106,11 @@ After installation, you will need to configure the Source++ Plugin (see [Configu
 
 ## Documentation
 
-For full documentation, visit the [knowledge base](https://sourceplusplus.com/knowledge).
+For full documentation, visit the [knowledge base](docs).
 
 ## Roadmap
 
-To know what is going on, see the [roadmap](https://sourceplusplus.com/knowledge/general/roadmap).
+To know what is going on, see the [roadmap](docs/markdown/02-general/02-roadmap.md).
 
 ## Contributing
 
