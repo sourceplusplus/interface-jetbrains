@@ -12,8 +12,8 @@
 
 <p align="center">
   <a href="https://sourceplusplus.com">Website</a> ::
-  <a href="https://github.com/sourceplusplus/Assistant/tree/master/docs/markdown">Knowledge Base</a> ::
-  <a href="https://github.com/sourceplusplus/Assistant/blob/master/docs/markdown/02-general/02-roadmap.md">Roadmap</a>
+  <a href="docs/markdown">Knowledge Base</a> ::
+  <a href="docs/markdown/02-general/02-roadmap.md">Roadmap</a>
 </p>
 
 ---
@@ -106,7 +106,7 @@ After installation, you will need to configure the Source++ Plugin (see [Configu
 
 ## Documentation
 
-For full documentation, visit the [knowledge base](docs).
+For full documentation, visit the [knowledge base](docs/markdown).
 
 ## Roadmap
 
