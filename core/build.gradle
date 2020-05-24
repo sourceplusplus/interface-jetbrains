@@ -30,7 +30,17 @@ configurations {
 }
 
 test {
-    jvmArgs '-javaagent:../agent/jvm-agent/build/libs/source-agent-' + version + '_prepare.jar'
+    filter {
+        includeTestsMatching "com.sourceplusplus.core.*"
+    }
+
+    if (project.hasProperty("run_integration_tests")) {
+        jvmArgs '-javaagent:' + new File(projectDir, "build/apache-skywalking-apm-bin/agent/skywalking-agent.jar")
+
+        filter {
+            includeTestsMatching "test.integration.*"
+        }
+    }
 
     dependsOn "buildAndMove", "startDocker"
     finalizedBy "stopDocker"
@@ -85,4 +95,32 @@ task createProperties(dependsOn: processResources) {
 }
 classes {
     dependsOn createProperties
+}
+
+
+test.doFirst {
+    if (project.hasProperty("run_integration_tests")) {
+        println "Downloading Apache SkyWalking"
+        def f = new File(projectDir, 'build/apache-skywalking-apm-7.0.0.tar.gz')
+        if (!f.exists()) {
+            new URL('http://mirror.23media.de/apache/skywalking/7.0.0/apache-skywalking-apm-7.0.0.tar.gz')
+                    .withInputStream { i -> f.withOutputStream { it << i } }
+        }
+        println "Downloaded Apache SkyWalking"
+
+        copy {
+            from tarTree(resources.gzip(f.getAbsolutePath()))
+            into f.parentFile
+        }
+
+        //todo: temp; add as PR to skywalking
+        java.nio.file.Files.copy(new File(projectDir, "src/test/resources/apm-customize-enhance-plugin-7.0.0.jar").toPath(),
+                new File(projectDir, "build/apache-skywalking-apm-bin/agent/plugins/apm-customize-enhance-plugin-7.0.0.jar").toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+
+        PrintWriter output = new PrintWriter(new FileWriter(
+                new File(projectDir, "build/apache-skywalking-apm-bin/agent/config/agent.config"), true))
+        output.println("plugin.customize.enhance_file=/home/brandon/IdeaProjects/Assistant/core/src/test/resources/customize_enhance.xml")
+        output.close()
+    }
 }
