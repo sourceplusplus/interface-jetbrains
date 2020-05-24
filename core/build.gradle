@@ -32,7 +32,7 @@ configurations {
 test {
     jvmArgs '-javaagent:../agent/jvm-agent/build/libs/source-agent-' + version + '_prepare.jar'
 
-    dependsOn "buildAndMove", "startDocker", ":agent:jvm-agent:buildAgent"
+    dependsOn "buildAndMove", "startDocker"
     finalizedBy "stopDocker"
 }
 

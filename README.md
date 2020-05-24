@@ -71,7 +71,6 @@ After installation, you will need to configure the Source++ Plugin (see [Configu
 
 | Module                        | Description                                              | Language    |
 | ----------------------------- | -------------------------------------------------------- | ----------- |
-| :agent:jvm-agent              | Used to activate and configure APMs' JVM agents          | Java 8+     |
 | :api                          | Holds common data models and communication clients       | Java 8+     |
 | :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.4+ |
 | :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.4+ |
@@ -82,11 +81,6 @@ After installation, you will need to configure the Source++ Plugin (see [Configu
 #### Run all Source++ tests:
 ```
 ./gradlew test
-```
-
-#### Build Source++ Agent:
-```
-./gradlew buildAgent
 ```
 
 #### Build Source++ Plugin:

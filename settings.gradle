@@ -1,4 +1,3 @@
-include ":agent:jvm-agent"
 include "api"
 include "core"
 include ":docs:doc-server"

@@ -3,7 +3,7 @@ plugins {
 }
 
 subprojects {
-    if (it.name == "agent" || it.name == "docs" || it.name == "plugin") return
+    if (it.name == "docs" || it.name == "plugin") return
 
     apply plugin: 'idea'
     apply plugin: 'java'

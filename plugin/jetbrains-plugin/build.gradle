@@ -56,7 +56,7 @@ classes {
     dependsOn createProperties
 }
 
-task updatePluginResources(dependsOn: [":agent:jvm-agent:buildAgent"]) {
+task updatePluginResources {
     doLast {
         copy {
             from '../../portal/src/main/resources'
@@ -69,9 +69,6 @@ task updatePluginResources(dependsOn: [":agent:jvm-agent:buildAgent"]) {
             into 'build/resources/main'
         }
         file("build/resources/main/").mkdirs()
-        file("build/resources/main/source-agent-$version" + ".jar").delete()
-        file("build/resources/main/source-agent-$version" + ".jar") <<
-                file("../../agent/jvm-agent/build/libs/source-agent-$version" + ".jar").bytes
     }
 }
 compileJava.mustRunAfter updatePluginResources
