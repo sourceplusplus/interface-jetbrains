@@ -44,7 +44,7 @@ trait SourceAgentPatcher {
         }
         if (PluginBootstrap.sourcePlugin != null && !patched.getAndSet(true)) {
             log.info("Patching Source++ Agent for executing program...")
-            URL apmArchiveResource = SourceAgentPatcher.class.getResource("/apm-agent/apache-skywalking-apm-7.0.0.tar.gz")
+            URL apmArchiveResource = SourceAgentPatcher.class.getResource("/skywalking/apache-skywalking-apm-7.0.0.tar.gz")
             File destDir = File.createTempDir()
             File skywalkingArchive = new File(destDir, "apache-skywalking-apm-7.0.0.tar.gz")
             FileUtils.copyURLToFile(apmArchiveResource, skywalkingArchive)
@@ -57,7 +57,7 @@ trait SourceAgentPatcher {
             agentFile.deleteOnExit()
 
             //move apm-customize-enhance-plugin-*.jar to plugins
-            URL customEnhancePlugin = SourceAgentPatcher.class.getResource("/apm-agent/apm-customize-enhance-plugin-7.0.0.jar")
+            URL customEnhancePlugin = SourceAgentPatcher.class.getResource("/skywalking/apm-customize-enhance-plugin-7.0.0.jar")
             FileUtils.copyURLToFile(customEnhancePlugin, new File(agentFile.parentFile,
                     "plugins" + File.separator + "apm-customize-enhance-plugin-7.0.0.jar"))
 //            Files.move(new File(agentFile.parentFile, "optional-plugins" + File.separator + "apm-customize-enhance-plugin-7.0.0.jar").toPath(),

@@ -65,10 +65,9 @@ task updatePluginResources {
         file("build/resources/main/source-portal_build.properties").delete()
 
         copy {
-            from '../../agent/lib/skywalking'
+            from '../../3rd_party'
             into 'build/resources/main'
         }
-        file("build/resources/main/").mkdirs()
     }
 }
 compileJava.mustRunAfter updatePluginResources
