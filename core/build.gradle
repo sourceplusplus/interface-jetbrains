@@ -102,7 +102,7 @@ test.doFirst {
         println "Downloading Apache SkyWalking"
         def f = new File(projectDir, 'build/apache-skywalking-apm-7.0.0.tar.gz')
         if (!f.exists()) {
-            new URL('http://mirror.23media.de/apache/skywalking/7.0.0/apache-skywalking-apm-7.0.0.tar.gz')
+            new URL('https://downloads.apache.org/skywalking/7.0.0/apache-skywalking-apm-7.0.0.tar.gz')
                     .withInputStream { i -> f.withOutputStream { it << i } }
         }
         println "Downloaded Apache SkyWalking"
