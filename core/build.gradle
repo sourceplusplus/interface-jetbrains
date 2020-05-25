@@ -99,14 +99,14 @@ classes {
 
 test.doFirst {
     if (System.getenv("TRAVIS_BRANCH") != null || project.hasProperty("run_integration_tests")) {
-        def f = new File(projectDir, '../3rd_party/skywalking/apache-skywalking-apm-7.0.0.tar.gz')
+        def skywalkingArchive = new File(projectDir, '../3rd_party/skywalking/apache-skywalking-apm-7.0.0.tar.gz')
         copy {
-            from tarTree(resources.gzip(f.getAbsolutePath()))
-            into f.parentFile
+            from tarTree(resources.gzip(skywalkingArchive.getAbsolutePath()))
+            into skywalkingArchive.parentFile
         }
 
         //todo: temp; add as PR to skywalking
-        java.nio.file.Files.copy(new File(projectDir, "src/test/resources/apm-customize-enhance-plugin-7.0.0.jar").toPath(),
+        java.nio.file.Files.copy(new File(projectDir, "../3rd_party/skywalking/apm-customize-enhance-plugin-7.0.0.jar").toPath(),
                 new File(projectDir, "build/apache-skywalking-apm-bin/agent/plugins/apm-customize-enhance-plugin-7.0.0.jar").toPath(),
                 java.nio.file.StandardCopyOption.REPLACE_EXISTING)
 
