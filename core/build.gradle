@@ -111,7 +111,7 @@ test.doFirst {
                 java.nio.file.StandardCopyOption.REPLACE_EXISTING)
 
         PrintWriter output = new PrintWriter(new FileWriter(
-                new File(projectDir, "build/apache-skywalking-apm-bin/agent/config/agent.config"), true))
+                new File(skywalkingArchive.parentFile, "apache-skywalking-apm-bin/agent/config/agent.config"), true))
         output.println("\nplugin.customize.enhance_file=" + new File(projectDir, "/src/test/resources/customize_enhance.xml"))
         output.close()
     }
