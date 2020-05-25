@@ -48,6 +48,9 @@ abstract class SourceStorage {
     abstract void findArtifactBySubscribeAutomatically(String appUuid,
                                                        Handler<AsyncResult<List<SourceArtifact>>> handler)
 
+    abstract void findArtifactByEndpoint(String appUuid,
+                                         Handler<AsyncResult<List<SourceArtifact>>> handler)
+
     abstract void getApplicationArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler)
 
     abstract void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,

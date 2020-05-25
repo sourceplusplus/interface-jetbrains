@@ -56,6 +56,8 @@ class H2DAO extends SourceStorage {
             "storage/h2/queries/get_artifact_by_endpoint_id.sql"), Charsets.UTF_8)
     private static final String GET_ARTIFACT_BY_SUBSCRIBE_AUTOMATICALLY = Resources.toString(Resources.getResource(
             "storage/h2/queries/get_artifact_by_subscribe_automatically.sql"), Charsets.UTF_8)
+    private static final String GET_ARTIFACT_BY_ENDPOINT = Resources.toString(Resources.getResource(
+            "storage/h2/queries/get_artifact_by_endpoint.sql"), Charsets.UTF_8)
     private static final String GET_APPLICATION_ARTIFACTS = Resources.toString(Resources.getResource(
             "storage/h2/queries/get_application_artifacts.sql"), Charsets.UTF_8)
     private static final String GET_ARTIFACT_SUBSCRIPTIONS = Resources.toString(Resources.getResource(
@@ -443,6 +445,39 @@ class H2DAO extends SourceStorage {
         def params = new JsonArray()
         params.add(appUuid)
         client.queryWithParams(GET_ARTIFACT_BY_SUBSCRIBE_AUTOMATICALLY, params, {
+            if (it.succeeded()) {
+                def artifacts = new ArrayList<SourceArtifact>()
+                def results = it.result().results
+                results.each {
+                    def artifact = SourceArtifact.builder()
+                            .appUuid(it.getString(0))
+                            .artifactQualifiedName(it.getString(1))
+                            .createDate(Instant.parse(it.getString(2)))
+                            .lastUpdated(Instant.parse(it.getString(3))).build()
+                    def config = SourceArtifactConfig.builder()
+                            .endpoint(it.getBoolean(4))
+                            .subscribeAutomatically(it.getBoolean(5))
+                            .forceSubscribe(it.getBoolean(6))
+                            .moduleName(it.getString(7))
+                            .component(it.getString(8))
+                            .endpointName(it.getString(9))
+                    if (it.getString(10)) {
+                        config.addEndpointIds(it.getString(10))
+                    }
+                    artifacts.add(artifact.withConfig(config.build()))
+                }
+                handler.handle(Future.succeededFuture(artifacts))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    @Override
+    void findArtifactByEndpoint(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        def params = new JsonArray()
+        params.add(appUuid)
+        client.queryWithParams(GET_ARTIFACT_BY_ENDPOINT, params, {
             if (it.succeeded()) {
                 def artifacts = new ArrayList<SourceArtifact>()
                 def results = it.result().results

@@ -22,6 +22,7 @@ class ConfigurationTab extends AbstractTab {
 
     public static final String CONFIGURATION_TAB_OPENED = "ConfigurationTabOpened"
     public static final String DISPLAY_ARTIFACT_CONFIGURATION = "DisplayArtifactConfiguration"
+    public static final String UPDATE_ARTIFACT_ENTRY_METHOD = "UpdateArtifactEntryMethod"
     public static final String UPDATE_ARTIFACT_FORCE_SUBSCRIBE = "UpdateArtifactForceSubscribe"
 
     private final boolean pluginAvailable
@@ -54,6 +55,28 @@ class ConfigurationTab extends AbstractTab {
             }
         })
 
+        vertx.eventBus().consumer(UPDATE_ARTIFACT_ENTRY_METHOD, {
+            def request = JsonObject.mapFrom(it.body())
+            def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
+            if (!updateConfigurationPermitted) {
+                log.warn("Rejected artifact entry method update")
+                updateUI(portal)
+                return
+            }
+
+            log.info("Updating artifact entry method")
+            def config = SourceArtifactConfig.builder()
+                    .endpoint(request.getBoolean("entry_method"))
+                    .build()
+            SourcePortalConfig.current.getCoreClient(portal.appUuid).createOrUpdateArtifactConfig(
+                    portal.appUuid, portal.portalUI.viewingPortalArtifact, config, {
+                if (it.succeeded()) {
+                    log.info("Successfully updated artifact entry method")
+                } else {
+                    log.error("Failed to update artifact config: " + portal.portalUI.viewingPortalArtifact, it.cause())
+                }
+            })
+        })
         vertx.eventBus().consumer(UPDATE_ARTIFACT_FORCE_SUBSCRIBE, {
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
@@ -70,9 +93,7 @@ class ConfigurationTab extends AbstractTab {
             SourcePortalConfig.current.getCoreClient(portal.appUuid).createOrUpdateArtifactConfig(
                     portal.appUuid, portal.portalUI.viewingPortalArtifact, config, {
                 if (it.succeeded()) {
-                    SourcePortal.getSimilarPortals(portal).each {
-                        updateUI(it)
-                    }
+                    log.info("Successfully updated artifact force subscribe")
                 } else {
                     log.error("Failed to update artifact config: " + portal.portalUI.viewingPortalArtifact, it.cause())
                 }

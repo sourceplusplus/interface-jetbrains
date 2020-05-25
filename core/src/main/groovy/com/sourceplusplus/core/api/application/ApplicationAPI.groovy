@@ -3,6 +3,7 @@ package com.sourceplusplus.core.api.application
 import com.fasterxml.jackson.core.type.TypeReference
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
@@ -53,6 +54,7 @@ class ApplicationAPI extends AbstractVerticle {
         core.baseRouter.get("/applications/search").handler(this.&searchApplicationsRoute)
         core.baseRouter.get("/applications/:appUuid").handler(this.&getApplicationRoute)
         core.baseRouter.get("/applications/:appUuid/subscriptions").handler(this.&getApplicationSubscriptionsRoute)
+        core.baseRouter.get("/applications/:appUuid/endpoints").handler(this.&getApplicationEndpointsRoute)
         core.baseRouter.get("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions")
                 .handler(this.&getSubscriberApplicationSubscriptionsRoute)
         core.baseRouter.put("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions/refresh")
@@ -149,6 +151,24 @@ class ApplicationAPI extends AbstractVerticle {
         })
     }
 
+    private getApplicationEndpointsRoute(RoutingContext routingContext) {
+        def appUuid = routingContext.request().getParam("appUuid")
+        if (!appUuid) {
+            routingContext.response().setStatusCode(400)
+                    .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
+            return
+        }
+        getApplicationEndpoints(appUuid, {
+            if (it.succeeded()) {
+                routingContext.response().setStatusCode(200)
+                        .end(Json.encode(it.result()))
+            } else {
+                routingContext.response().setStatusCode(400)
+                        .end(Json.encode(new SourceAPIError().addError(it.cause().message)))
+            }
+        })
+    }
+
     void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
                                      Handler<AsyncResult<Set<SourceApplicationSubscription>>> handler) {
         log.info("Getting appliction subscriptions. App UUID: $appUuid - Include automatic: $includeAutomatic")
@@ -192,6 +212,11 @@ class ApplicationAPI extends AbstractVerticle {
                 handler.handle(Future.failedFuture(it.cause()))
             }
         })
+    }
+
+    void getApplicationEndpoints(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        log.info("Getting appliction endpoints. App UUID: $appUuid")
+        core.storage.findArtifactByEndpoint(appUuid, handler)
     }
 
     private void updateApplicationRoute(RoutingContext routingContext) {

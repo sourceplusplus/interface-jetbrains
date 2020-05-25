@@ -22,6 +22,10 @@ eb.onopen = function () {
     eb.publish('ConfigurationTabOpened', {'portal_uuid': portalUuid});
 };
 
+function toggledEntryMethod(entryMethod) {
+    eb.send('UpdateArtifactEntryMethod', {'portal_uuid': portalUuid, "entry_method": entryMethod});
+}
+
 function toggledForceSubscription(forceSubscribe) {
     eb.send('UpdateArtifactForceSubscribe', {'portal_uuid': portalUuid, "force_subscribe": forceSubscribe});
 }

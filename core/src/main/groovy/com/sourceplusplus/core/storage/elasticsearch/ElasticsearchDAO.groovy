@@ -577,7 +577,59 @@ class ElasticsearchDAO extends SourceStorage {
 
             @Override
             void failed(Exception ex) {
-                log.error("Failed to search for artifact by endpoint name", ex)
+                log.error("Failed to search for artifact by subscribe automatically", ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
+    }
+
+    @Override
+    void findArtifactByEndpoint(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        String query = '{\n' +
+                '   "query":{\n' +
+                '      "bool":{\n' +
+                '         "must":[\n' +
+                '            { "term":{ "app_uuid":"' + appUuid + '" } },\n' +
+                '            {\n' +
+                '               "bool":{\n' +
+                '                  "should":[\n' +
+                '                     { "match":{ "config.endpoint":true } }\n' +
+                '                  ]\n' +
+                '               }\n' +
+                '            }\n' +
+                '         ]\n' +
+                '      }\n' +
+                '   }\n' +
+                '}'
+        def search = new Search.Builder(query)
+                .addIndex(SPP_INDEX + "_artifact")
+                .build()
+
+        client.executeAsync(search, new JestResultHandler<SearchResult>() {
+
+            @Override
+            void completed(SearchResult result) {
+                if (result.succeeded || result.responseCode == 404) {
+                    def results = result.getSourceAsStringList()
+                    if (results == null || results.isEmpty()) {
+                        log.debug(String.format("Could not find any artifacts which are endpoints"))
+                        handler.handle(Future.succeededFuture(new ArrayList<>()))
+                    } else {
+                        def rtnList = new ArrayList<SourceArtifact>()
+                        results.each {
+                            rtnList.add(Json.decodeValue(it, SourceArtifact.class))
+                        }
+                        handler.handle(Future.succeededFuture(rtnList))
+                    }
+                } else {
+                    log.error(result.errorMessage)
+                    handler.handle(Future.failedFuture(result.errorMessage))
+                }
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to search for artifact by endpoint", ex)
                 handler.handle(Future.failedFuture(ex))
             }
         })

@@ -53,6 +53,8 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications", SPP_API_VERSION);
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/subscriptions?includeAutomatic=:includeAutomatic", SPP_API_VERSION);
+    private static final String GET_APPLICATION_ENDPOINTS_ENDPOINT = String.format(
+            "/%s/applications/:appUuid/endpoints", SPP_API_VERSION);
     private static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/subscribers/:subscriberUuid/subscriptions", SPP_API_VERSION);
     private static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
@@ -463,6 +465,37 @@ public class SourceCoreClient implements SourceClient {
         try (Response response = client.newCall(request.build()).execute()) {
             List<SourceApplicationSubscription> subscribers = JacksonCodec.decodeValue(response.body().string(),
                     new TypeReference<List<SourceApplicationSubscription>>() {
+                    });
+            handler.handle(Future.succeededFuture(subscribers));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public List<SourceArtifact> getApplicationEndpoints(String appUuid) {
+        String url = sppUrl + GET_APPLICATION_ENDPOINTS_ENDPOINT
+                .replace(":appUuid", appUuid);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            return JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<SourceArtifact>>() {
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void getApplicationEndpoints(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        String url = sppUrl + GET_APPLICATION_ENDPOINTS_ENDPOINT
+                .replace(":appUuid", appUuid);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            List<SourceArtifact> subscribers = JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<SourceArtifact>>() {
                     });
             handler.handle(Future.succeededFuture(subscribers));
         } catch (Exception e) {

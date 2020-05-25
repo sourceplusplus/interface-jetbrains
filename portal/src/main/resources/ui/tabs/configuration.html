@@ -93,8 +93,14 @@
             <div class="ui form">
                 <div class="ui segment secondary_background_color">
                     <div class="field">
+                        <div class="ui toggle checkbox" id="entry_method_toggle">
+                            <input id="entry_method_checkbox" type="checkbox">
+                            <label class="secondary_background_color">Entry method</label>
+                        </div>
+                    </div>
+                    <div class="field">
                         <div class="ui toggle checkbox" id="force_subscribe_toggle">
-                            <input type="checkbox" tabindex="0" class="hidden">
+                            <input id="force_subscribe_checkbox" type="checkbox">
                             <label class="secondary_background_color">Force subscription</label>
                         </div>
                     </div>
@@ -155,15 +161,6 @@
 <script src='../jquery-3.1.1.min.js'></script>
 <script src='../semantic.min.js'></script>
 <script>
-    $('.ui.checkbox').checkbox({
-        onChecked: function () {
-            toggledForceSubscription(true);
-        },
-        onUnchecked: function () {
-            toggledForceSubscription(false);
-        }
-    });
-
     $(document).ready(function () {
         $('.ui.dropdown').dropdown();
         $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
