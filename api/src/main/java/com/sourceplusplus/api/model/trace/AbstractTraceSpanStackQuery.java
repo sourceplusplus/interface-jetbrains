@@ -20,6 +20,11 @@ import javax.annotation.Nullable;
 @JsonDeserialize(as = TraceSpanStackQuery.class)
 public interface AbstractTraceSpanStackQuery {
 
+    @Value.Default
+    default boolean skipEntryComponent() {
+        return true;
+    }
+
     boolean oneLevelDeep();
 
     String traceId();

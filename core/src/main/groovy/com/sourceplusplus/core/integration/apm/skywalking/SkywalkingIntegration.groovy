@@ -338,10 +338,20 @@ class SkywalkingIntegration extends APMIntegration {
                     def prevSpanId = -1
                     def exitSegmentId = null
                     long exitSpanId = -1
+                    def entryComponent = null
 
                     def stack = data.getJsonArray("spans")
                     for (int i = 0; i < stack.size(); i++) {
                         def traceSpan = Json.decodeValue(stack.getJsonObject(i).toString(), TraceSpan.class)
+
+                        if (spanQuery.skipEntryComponent() && !traceSpan.component().isEmpty()) {
+                            if (entryComponent == null) {
+                                entryComponent = traceSpan.component()
+                                continue
+                            } else if (traceSpan.component() == entryComponent) {
+                                continue
+                            }
+                        }
 
                         if (artifact && spanQuery.oneLevelDeep()) {
                             if (parentSpanId != -1 && prevSpanId != -1 && traceSpan.spanId() < prevSpanId) {
@@ -375,8 +385,7 @@ class SkywalkingIntegration extends APMIntegration {
                                         parentSpanId = traceSpan.spanId()
                                     }
                                 }
-                            } else if (parentSpanId == -1 && (traceSpan.endpointName() == artifact.artifactQualifiedName()
-                                    || (artifact.config() && traceSpan.endpointName() == artifact.config().endpointName()))) {
+                            } else if (parentSpanId == -1 && isMatchingArtifact(traceSpan, artifact)) {
                                 if (!spanList.isEmpty() || traceSpan.type() != "Exit") {
                                     spanList.add(traceSpan)
                                     parentSpanId = traceSpan.spanId()
@@ -429,5 +438,16 @@ class SkywalkingIntegration extends APMIntegration {
                 })
             }
         })
+    }
+
+    private boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact) {
+        def endpointId = vertx.sharedData().getLocalMap("skywalking_endpoints")
+                .get(traceSpan.endpointName()) as String
+        if (endpointId && artifact.config()?.endpointIds()) {
+            return artifact.config().endpointIds().contains(endpointId)
+        } else {
+            return traceSpan.endpointName() == artifact.artifactQualifiedName() ||
+                    (artifact.config() && traceSpan.endpointName() == artifact.config().endpointName())
+        }
     }
 }

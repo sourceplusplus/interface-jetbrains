@@ -11,7 +11,6 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
-import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.api.model.config.SourceCoreConfig
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.info.SourceCoreInfo
@@ -138,8 +137,7 @@ class CoreBootstrap extends AbstractVerticle {
         if (config().getJsonObject("core").getBoolean("secure_mode")) {
             log.info("Using secure mode")
             SourceCoreConfig.current.secureApi = true
-            def provider = JWTAuth.create(vertx, new JWTAuthOptions()
-                    .addPubSecKey(new PubSecKeyOptions()
+            def provider = JWTAuth.create(vertx, new JWTAuthOptions().addPubSecKey(new PubSecKeyOptions()
                     .setAlgorithm("HS256")
                     .setPublicKey(config().getJsonObject("core").getString("api_key"))
                     .setSymmetric(true)))
@@ -251,41 +249,20 @@ class CoreBootstrap extends AbstractVerticle {
         return router
     }
 
-    private void enableSelfMonitoring(SourceCore core) {
-        Class agentClass
+    private static void enableSelfMonitoring(SourceCore core) {
         try {
-            agentClass = Class.forName("com.sourceplusplus.agent.SourceAgent")
+            Class.forName("org.apache.skywalking.apm.agent.SkyWalkingAgent")
         } catch (ClassNotFoundException ignore) {
             log.info("Self monitoring disabled")
             return
         }
 
         def sourceCoreApplication = SourceApplication.builder()
+                .appUuid("99999999-9999-9999-9999-999999999999")
                 .appName("source-core").isCreateRequest(true).build()
         core.applicationAPI.createApplication(sourceCoreApplication, {
             if (it.succeeded()) {
-                def application = it.result()
-                def agentConfig = new SourceAgentConfig()
-                agentConfig.appUuid = application.appUuid()
-
-                vertx.executeBlocking({
-                    try {
-                        agentClass.getMethod("overrideSourceAgentConfig", SourceAgentConfig.class)
-                                .invoke(null, agentConfig)
-                        agentClass.getMethod("startArtifactTraceSubscriptionSync").invoke(null)
-                        agentClass.getMethod("bootIntegrations", SourceCoreInfo.class)
-                                .invoke(null, getSourceCoreInfo(core))
-                        it.complete()
-                    } catch (all) {
-                        it.fail(all)
-                    }
-                }, false, {
-                    if (it.succeeded()) {
-                        log.info("Self monitoring enabled")
-                    } else {
-                        log.error("Failed to enable self monitoring", it.cause())
-                    }
-                })
+                log.info("Self monitoring enabled")
             } else {
                 log.error("Failed to create application for self monitoring", it.cause())
             }

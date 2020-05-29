@@ -150,6 +150,7 @@ class TraceAPI extends AbstractVerticle {
         }
         def oneLevelDeep = routingContext.request().getParam("oneLevelDeep") as boolean
         def followExit = routingContext.request().getParam("followExit") as boolean
+        def skipEntryComponent = routingContext.request().getParam("skipEntryComponent")
         def segmentId = routingContext.request().getParam("segmentId")
         def spanId = routingContext.request().getParam("spanId")
 
@@ -162,6 +163,9 @@ class TraceAPI extends AbstractVerticle {
         }
         if (spanId) {
             traceSpanQuery.spanId(spanId as long)
+        }
+        if (skipEntryComponent != null) {
+            traceSpanQuery.skipEntryComponent(Boolean.valueOf(skipEntryComponent))
         }
 
         getTraceSpans(appUuid, artifactQualifiedName, traceSpanQuery.build(), {
