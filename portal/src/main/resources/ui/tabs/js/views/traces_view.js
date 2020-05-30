@@ -79,7 +79,7 @@ function displayTraces(traceResult) {
             rowHtml += '<td class="collapsing">' + trace.pretty_duration + '</td>';
 
             if (trace.error) {
-                rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="bug red icon"></i></td></tr>';
+                rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
             } else {
                 rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
             }
@@ -178,7 +178,15 @@ function displayInnerTraces(message) {
 
         rowHtml += '<td class="collapsing">' + spanInfo.time_took + '</td>';
         rowHtml += '<td><div class="ui red progress" id="trace_bar_' + i + '" style="margin: 0">';
-        rowHtml += '<div class="bar"></div></div></td></tr>';
+        rowHtml += '<div class="bar"></div></div></td>';
+
+        if (span.error) {
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="skull crossbones red icon"></i></td></tr>';
+        } else if (span.child_error && i > 0) {
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
+        } else {
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
+        }
         $('#stack_table').append(rowHtml);
 
         $('#trace_bar_' + i).progress({
@@ -313,7 +321,9 @@ function displayTraceStack(traceStack) {
         rowHtml += '<div class="bar"></div></div></td>';
 
         if (span.error) {
-            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="bug red icon"></i></td></tr>';
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="skull crossbones red icon"></i></td></tr>';
+        } else if (span.child_error && i > 0) {
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
         } else {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
         }

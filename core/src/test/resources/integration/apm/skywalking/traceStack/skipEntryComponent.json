@@ -1,0 +1,200 @@
+{
+  "spans": [
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845480",
+      "spanId": 0,
+      "parentSpanId": -1,
+      "refs": [],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353785,
+      "endpointName": "/v1/applications/99999999-9999-9999-9999-999999999999/artifacts",
+      "type": "Entry",
+      "peer": "",
+      "component": "Vertx",
+      "isError": false,
+      "layer": "Http",
+      "tags": [
+        {
+          "key": "http.method",
+          "value": "GET"
+        },
+        {
+          "key": "url",
+          "value": "/v1/applications/99999999-9999-9999-9999-999999999999/artifacts"
+        },
+        {
+          "key": "status_code",
+          "value": "200"
+        }
+      ],
+      "logs": []
+    },
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845480",
+      "spanId": 1,
+      "parentSpanId": 0,
+      "refs": [],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353784,
+      "endpointName": "io.vertx.ext.web.handler.impl.BodyHandlerImpl.handle(RoutingContext)",
+      "type": "Local",
+      "peer": "",
+      "component": "Vertx",
+      "isError": false,
+      "layer": "Http",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845482",
+      "spanId": 3,
+      "parentSpanId": 2,
+      "refs": [
+        {
+          "traceId": "11.36.15908373537845481",
+          "parentSegmentId": "11.36.15908373537845480",
+          "parentSpanId": 0,
+          "type": "CROSS_THREAD"
+        }
+      ],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353784,
+      "endpointName": "com.sun.proxy.$Proxy37.handle(RoutingContext)",
+      "type": "Local",
+      "peer": "",
+      "component": "Vertx",
+      "isError": false,
+      "layer": "Http",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845482",
+      "spanId": 4,
+      "parentSpanId": 3,
+      "refs": [],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353784,
+      "endpointName": "com.sourceplusplus.core.api.artifact.ArtifactAPI.getApplicationSourceArtifactsRoute(io.vertx.ext.web.RoutingContext)",
+      "type": "Local",
+      "peer": "",
+      "component": "",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845482",
+      "spanId": 5,
+      "parentSpanId": 4,
+      "refs": [],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353784,
+      "endpointName": "com.sourceplusplus.core.api.artifact.ArtifactAPI.getApplicationSourceArtifacts(java.lang.String,io.vertx.core.Handler)",
+      "type": "Local",
+      "peer": "",
+      "component": "",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845482",
+      "spanId": 6,
+      "parentSpanId": 5,
+      "refs": [],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353784,
+      "endpointName": "com.sourceplusplus.core.storage.h2.H2DAO.getApplicationArtifacts(java.lang.String,io.vertx.core.Handler)",
+      "type": "Local",
+      "peer": "",
+      "component": "",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845482",
+      "spanId": 2,
+      "parentSpanId": 1,
+      "refs": [
+        {
+          "traceId": "11.36.15908373537845481",
+          "parentSegmentId": "11.36.15908373537845480",
+          "parentSpanId": 0,
+          "type": "CROSS_THREAD"
+        }
+      ],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353784,
+      "endpointName": "io.vertx.ext.web.impl.RouteImpl$$Lambda$.handle(RoutingContext)",
+      "type": "Local",
+      "peer": "",
+      "component": "Vertx",
+      "isError": false,
+      "layer": "Http",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845482",
+      "spanId": 0,
+      "parentSpanId": -1,
+      "refs": [
+        {
+          "traceId": "11.36.15908373537845481",
+          "parentSegmentId": "11.36.15908373537845480",
+          "parentSpanId": 0,
+          "type": "CROSS_THREAD"
+        }
+      ],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353784,
+      "endpointName": "com.sun.proxy.$Proxy37.handle(RoutingContext)",
+      "type": "Local",
+      "peer": "",
+      "component": "Vertx",
+      "isError": false,
+      "layer": "Http",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "11.36.15908373537845481",
+      "segmentId": "11.36.15908373537845482",
+      "spanId": 1,
+      "parentSpanId": 0,
+      "refs": [],
+      "serviceCode": "99999999-9999-9999-9999-999999999999",
+      "startTime": 1590837353784,
+      "endTime": 1590837353784,
+      "endpointName": "com.sourceplusplus.core.CoreBootstrap$_createRouter_closure6.doCall(java.lang.Object)",
+      "type": "Local",
+      "peer": "",
+      "component": "",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    }
+  ]
+}

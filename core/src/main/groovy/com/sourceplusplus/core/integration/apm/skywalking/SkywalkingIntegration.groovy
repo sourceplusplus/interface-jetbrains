@@ -379,71 +379,49 @@ class SkywalkingIntegration extends APMIntegration {
                                                   SourceArtifact artifact, Map<String, String> skywalkingEndpoints) {
         def spanList = new ArrayList<TraceSpan>()
         if (traceStackData != null) {
-            def parentSpanId = -1
-            def prevSpanId = -1
-            def exitSegmentId = null
-            long exitSpanId = -1
-            def entryComponent = null
-
             def stack = traceStackData.getJsonArray("spans")
+            def segments = new HashMap<String, List<TraceSpan>>()
             for (int i = 0; i < stack.size(); i++) {
                 def traceSpan = Json.decodeValue(stack.getJsonObject(i).toString(), TraceSpan.class)
+                segments.putIfAbsent(traceSpan.segmentId(), new ArrayList<TraceSpan>())
+                segments.get(traceSpan.segmentId()).add(traceSpan)
+            }
 
-                if (spanQuery.skipEntryComponent() && !traceSpan.component().isEmpty()) {
-                    if (entryComponent == null) {
-                        entryComponent = traceSpan.component()
-                        continue
-                    } else if (traceSpan.component() == entryComponent) {
-                        continue
+            def parentSpanId = -2L
+            for (def traceSpans : segments.values()) {
+                if (spanQuery.oneLevelDeep()) {
+                    if (spanQuery.spanId() != null) {
+                        parentSpanId = spanQuery.spanId()
+                    } else {
+                        def parentSpan = traceSpans.find { isMatchingArtifact(it, artifact, skywalkingEndpoints) }
+                        parentSpanId = parentSpan?.spanId()
                     }
                 }
 
-                if (artifact && spanQuery.oneLevelDeep()) {
-                    if (parentSpanId != -1 && prevSpanId != -1 && traceSpan.spanId() < prevSpanId) {
-                        break
-                    } else {
-                        prevSpanId = traceSpan.spanId()
+                def orderedTraceSpans = traceSpans.sort { it.spanId() }.reverse()
+                def childErrors = new HashSet<Long>()
+                for (def traceSpan : orderedTraceSpans) {
+                    if (traceSpan.isError()) {
+                        childErrors.add(traceSpan.parentSpanId())
                     }
 
-                    if (parentSpanId == -1 && spanQuery.segmentId() != null) {
-                        if ((spanQuery.segmentId() == traceSpan.segmentId()
-                                && spanQuery.spanId() == traceSpan.spanId()) || exitSegmentId != null) {
-                            if (traceSpan.type() == "Exit" && exitSegmentId == null && spanQuery.followExit()) {
-                                exitSegmentId = traceSpan.segmentId()
-                                exitSpanId = traceSpan.spanId()
-                            } else if (exitSegmentId != null && spanQuery.followExit()) {
-                                boolean foundEntry = false
-                                def refs = traceSpan.refs()
-                                refs.each {
-                                    if (exitSegmentId == it.parentSegmentId()
-                                            && exitSpanId == it.parentSpanId()
-                                            && it.type() == "CROSS_PROCESS") {
-                                        foundEntry = true
-                                    }
-                                }
-                                if (foundEntry) {
-                                    spanList.add(traceSpan)
-                                    parentSpanId = traceSpan.spanId()
-                                }
-                            } else {
-                                spanList.add(traceSpan)
-                                parentSpanId = traceSpan.spanId()
-                            }
-                        }
-                    } else if (parentSpanId == -1 && isMatchingArtifact(traceSpan, artifact, skywalkingEndpoints)) {
-                        if (!spanList.isEmpty() || traceSpan.type() != "Exit") {
-                            spanList.add(traceSpan)
-                            parentSpanId = traceSpan.spanId()
-                        }
-                    } else if (parentSpanId != -1 && traceSpan.parentSpanId() == parentSpanId) {
-                        spanList.add(traceSpan)
+                    def processedSpan = traceSpan
+                    if (childErrors.contains(traceSpan.spanId())) {
+                        processedSpan = traceSpan.withIsChildError(true)
+                        childErrors.add(traceSpan.parentSpanId())
                     }
-                } else {
-                    spanList.add(traceSpan)
+                    if (spanQuery.oneLevelDeep() && traceSpan.spanId() != parentSpanId &&
+                            traceSpan.parentSpanId() != parentSpanId) {
+                        processedSpan = null
+                    }
+
+                    if (processedSpan != null) {
+                        spanList.add(processedSpan)
+                    }
                 }
             }
         }
-        return spanList
+        return spanList.reverse()
     }
 
     private static boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact,

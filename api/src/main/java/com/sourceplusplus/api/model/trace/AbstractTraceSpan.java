@@ -71,6 +71,7 @@ public interface AbstractTraceSpan {
     boolean isError();
 
     @Value.Default
+    @JsonAlias({"isChildError", "child_error"})
     default boolean isChildError() {
         return false;
     }

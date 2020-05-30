@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 @JsonDeserialize(as = TraceSpanStackQuery.class)
 public interface AbstractTraceSpanStackQuery {
 
-    @Value.Default
+    @Value.Default //todo: might not need
     default boolean skipEntryComponent() {
         return true;
     }
