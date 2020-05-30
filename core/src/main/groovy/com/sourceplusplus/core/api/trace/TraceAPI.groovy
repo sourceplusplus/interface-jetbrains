@@ -1,5 +1,6 @@
 package com.sourceplusplus.core.api.trace
 
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.trace.*
@@ -13,6 +14,7 @@ import io.vertx.core.shareddata.SharedData
 import io.vertx.ext.web.RoutingContext
 
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 /**
  * Used to add/modify/fetch artifact trace subscriptions.
@@ -119,10 +121,18 @@ class TraceAPI extends AbstractVerticle {
                 .artifactQualifiedName(artifactQualifiedName)
         def orderType = routingContext.request().getParam("orderType")
         if (orderType) traceQueryBuilder.orderType(TraceOrderType.valueOf(orderType.toUpperCase()))
-        def queryDurationStart = routingContext.request().getParam("durationStart")
-        if (queryDurationStart) traceQueryBuilder.durationStart(Instant.parse(queryDurationStart))
-        def queryDurationStop = routingContext.request().getParam("durationStop")
-        if (queryDurationStop) traceQueryBuilder.durationStop(Instant.parse(queryDurationStop))
+
+        def timeFrame = routingContext.request().getParam("timeFrame")
+        if (timeFrame) {
+            def queryTimeFrame = QueryTimeFrame.valueOf(timeFrame.toUpperCase())
+            traceQueryBuilder.durationStart(Instant.now().minus(queryTimeFrame.minutes, ChronoUnit.MINUTES))
+                    .durationStop(Instant.now())
+        } else {
+            def queryDurationStart = routingContext.request().getParam("durationStart")
+            if (queryDurationStart) traceQueryBuilder.durationStart(Instant.parse(queryDurationStart))
+            def queryDurationStop = routingContext.request().getParam("durationStop")
+            if (queryDurationStop) traceQueryBuilder.durationStop(Instant.parse(queryDurationStop))
+        }
         def queryDurationStep = routingContext.request().getParam("durationStep")
         if (queryDurationStep) traceQueryBuilder.durationStep(queryDurationStep)
         def pageSize = routingContext.request().getParam("pageSize")
