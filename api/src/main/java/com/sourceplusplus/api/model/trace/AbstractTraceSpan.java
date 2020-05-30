@@ -70,6 +70,11 @@ public interface AbstractTraceSpan {
     @JsonAlias({"isError", "error"})
     boolean isError();
 
+    @Value.Default
+    default boolean isChildError() {
+        return false;
+    }
+
     String layer();
 
     @JsonDeserialize(using = KeyValuePair.class)
