@@ -35,7 +35,7 @@ test {
     }
 
     if (System.getenv("TRAVIS_BRANCH") != null || project.hasProperty("run_integration_tests")) {
-        jvmArgs '-javaagent:' + new File(projectDir, "../3rd_party/apache-skywalking-apm-bin/agent/skywalking-agent.jar")
+        jvmArgs '-javaagent:' + new File(projectDir, "../3rd_party/skywalking/apache-skywalking-apm-bin/agent/skywalking-agent.jar")
 
         filter {
             includeTestsMatching "test.integration.*"
