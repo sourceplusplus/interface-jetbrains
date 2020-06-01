@@ -137,6 +137,7 @@ trait SourceAgentPatcher {
             def sourceFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
             if (sourceFile instanceof PsiClassOwner) {
                 sourceFile.classes.each {
+                    //todo: don't write class if no methods are found
                     writer.append("\t<class class_name=\"" + it.qualifiedName + "\">\n")
                     it.methods.each {
                         try {
