@@ -35,7 +35,13 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
 @Slf4j
 class ArtifactAPI extends AbstractVerticle {
 
-    private static final Map<ApplicationArtifact, SourceArtifact> ARTIFACT_CACHE = ExpiringMap.builder()
+    private static final Map<ApplicationArtifact, SourceArtifact> APPLICATION_ARTIFACT_CACHE = ExpiringMap.builder()
+            .expirationPolicy(ExpirationPolicy.ACCESSED)
+            .expiration(1, TimeUnit.MINUTES).build()
+    private static final Map<String, SourceArtifact> ENDPOINT_NAME_ARTIFACT_CACHE = ExpiringMap.builder()
+            .expirationPolicy(ExpirationPolicy.ACCESSED)
+            .expiration(1, TimeUnit.MINUTES).build()
+    private static final Map<String, SourceArtifact> ENDPOINT_ID_ARTIFACT_CACHE = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.ACCESSED)
             .expiration(1, TimeUnit.MINUTES).build()
     private final SourceCore core
@@ -203,7 +209,16 @@ class ArtifactAPI extends AbstractVerticle {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
                                     .artifactQualifiedName(artifact.artifactQualifiedName()).build()
-                            ARTIFACT_CACHE.put(appArtifact, it.result())
+                            APPLICATION_ARTIFACT_CACHE.put(appArtifact, it.result())
+
+                            if (it.result().config() && it.result().config().endpointName()) {
+                                ENDPOINT_NAME_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + it.result().config().endpointName(), it.result())
+                            }
+                            if (it.result().config() && it.result().config().endpointIds()) {
+                                it.result().config().endpointIds().each { endpointId ->
+                                    ENDPOINT_ID_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + endpointId, it.result())
+                                }
+                            }
                         }
                         handler.handle(it)
                     })
@@ -214,7 +229,16 @@ class ArtifactAPI extends AbstractVerticle {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
                                     .artifactQualifiedName(artifact.artifactQualifiedName()).build()
-                            ARTIFACT_CACHE.put(appArtifact, it.result())
+                            APPLICATION_ARTIFACT_CACHE.put(appArtifact, it.result())
+
+                            if (it.result().config() && it.result().config().endpointName()) {
+                                ENDPOINT_NAME_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + it.result().config().endpointName(), it.result())
+                            }
+                            if (it.result().config() && it.result().config().endpointIds()) {
+                                it.result().config().endpointIds().each { endpointId ->
+                                    ENDPOINT_ID_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + endpointId, it.result())
+                                }
+                            }
                         }
                         handler.handle(it)
                     })
@@ -281,14 +305,14 @@ class ArtifactAPI extends AbstractVerticle {
 
     void getSourceArtifactByEndpointName(String appUuid, String endpointName,
                                          Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.info("Getting source artifact. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
-        core.storage.findArtifactByEndpointName(appUuid, endpointName, handler)
+        log.debug("Getting source artifact. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
+        getAndCacheSourceArtifactByEndpointName(appUuid, endpointName, handler)
     }
 
     void getSourceArtifactByEndpointId(String appUuid, String endpointId,
                                        Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.info("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
-        core.storage.findArtifactByEndpointId(appUuid, endpointId, handler)
+        log.debug("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
+        getAndCacheSourceArtifactByEndpointId(appUuid, endpointId, handler)
     }
 
     private createOrUpdateSourceArtifactConfigRoute(RoutingContext routingContext) {
@@ -380,10 +404,9 @@ class ArtifactAPI extends AbstractVerticle {
 
     private void getAndCacheSourceArtifact(String appUuid, String artifactQualifiedName,
                                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-
         def appArtifact = ApplicationArtifact.builder().appUuid(appUuid)
                 .artifactQualifiedName(artifactQualifiedName).build()
-        def cachedArtifact = ARTIFACT_CACHE.get(appArtifact)
+        def cachedArtifact = APPLICATION_ARTIFACT_CACHE.get(appArtifact)
         if (cachedArtifact) {
             handler.handle(Future.succeededFuture(Optional.of(cachedArtifact)))
         } else {
@@ -394,7 +417,51 @@ class ArtifactAPI extends AbstractVerticle {
                     handler.handle(Future.failedFuture(it.cause()))
                 } else {
                     if (it.result().isPresent()) {
-                        ARTIFACT_CACHE.put(appArtifact, it.result().get())
+                        APPLICATION_ARTIFACT_CACHE.put(appArtifact, it.result().get())
+                    }
+                    handler.handle(Future.succeededFuture(it.result()))
+                }
+            })
+        }
+    }
+
+    private void getAndCacheSourceArtifactByEndpointName(String appUuid, String endpointName,
+                                                         Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
+        if (ENDPOINT_NAME_ARTIFACT_CACHE.containsKey(appUuid + ":" + endpointName)) {
+            handler.handle(Future.succeededFuture(Optional.ofNullable(
+                    ENDPOINT_NAME_ARTIFACT_CACHE.get(appUuid + ":" + endpointName))))
+        } else {
+            log.info("Getting source artifact from storage. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
+            core.storage.findArtifactByEndpointName(appUuid, endpointName, {
+                if (it.failed()) {
+                    handler.handle(Future.failedFuture(it.cause()))
+                } else {
+                    if (it.result().isPresent()) {
+                        ENDPOINT_NAME_ARTIFACT_CACHE.put(appUuid + ":" + endpointName, it.result().get())
+                    } else {
+                        ENDPOINT_NAME_ARTIFACT_CACHE.put(appUuid + ":" + endpointName, null)
+                    }
+                    handler.handle(Future.succeededFuture(it.result()))
+                }
+            })
+        }
+    }
+
+    private void getAndCacheSourceArtifactByEndpointId(String appUuid, String endpointId,
+                                                       Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
+        if (ENDPOINT_ID_ARTIFACT_CACHE.containsKey(appUuid + ":" + endpointId)) {
+            handler.handle(Future.succeededFuture(Optional.ofNullable(
+                    ENDPOINT_ID_ARTIFACT_CACHE.get(appUuid + ":" + endpointId))))
+        } else {
+            log.info("Getting source artifact from storage. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
+            core.storage.findArtifactByEndpointId(appUuid, endpointId, {
+                if (it.failed()) {
+                    handler.handle(Future.failedFuture(it.cause()))
+                } else {
+                    if (it.result().isPresent()) {
+                        ENDPOINT_ID_ARTIFACT_CACHE.put(appUuid + ":" + endpointId, it.result().get())
+                    } else {
+                        ENDPOINT_ID_ARTIFACT_CACHE.put(appUuid + ":" + endpointId, null)
                     }
                     handler.handle(Future.succeededFuture(it.result()))
                 }
