@@ -1,10 +1,10 @@
 WITH existing_artifact(
   app_uuid, artifact_qualified_name, endpoint, subscribe_automatically, force_subscribe,
-  module_name, component, endpoint_name, endpoint_id
+  module_name, component, endpoint_name, endpoint_ids
 ) AS (
     SELECT
       app_uuid, artifact_qualified_name, endpoint, subscribe_automatically, force_subscribe,
-      module_name, component, endpoint_name, endpoint_id
+      module_name, component, endpoint_name, endpoint_ids
     FROM source_artifact
     WHERE 1=1
     AND app_uuid = ?
@@ -18,7 +18,7 @@ SET
   module_name = COALESCE (?, (SELECT module_name FROM existing_artifact)),
   component = COALESCE (?, (SELECT component FROM existing_artifact)),
   endpoint_name = COALESCE (?, (SELECT endpoint_name FROM existing_artifact)),
-  endpoint_id = COALESCE (?, (SELECT endpoint_id FROM existing_artifact))
+  endpoint_ids = COALESCE (?, (SELECT endpoint_ids FROM existing_artifact))
 WHERE 1=1
 AND app_uuid = (SELECT app_uuid FROM existing_artifact)
 AND artifact_qualified_name = (SELECT artifact_qualified_name FROM existing_artifact);

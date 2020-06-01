@@ -16,7 +16,7 @@ CREATE TABLE source_artifact (
   module_name             VARCHAR,
   component               VARCHAR,
   endpoint_name           VARCHAR,
-  endpoint_id             VARCHAR,
+  endpoint_ids            VARCHAR,
   PRIMARY KEY(app_uuid, artifact_qualified_name)
 );
 
