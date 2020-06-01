@@ -186,7 +186,7 @@ class CoreBootstrap extends AbstractVerticle {
             if (it.succeeded()) {
                 vertx.deployVerticle(core, new DeploymentOptions().setConfig(config()), {
                     if (it.succeeded()) {
-                        //enableSelfMonitoring(core)
+                        enableSelfMonitoring(core)
                         log.info("Source++ Core online!")
                         startFuture.complete()
                     } else {
