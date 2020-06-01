@@ -72,4 +72,10 @@ public interface AbstractTraceQuery {
     default TraceOrderType orderType() {
         return TraceOrderType.LATEST_TRACES;
     }
+
+    @Nullable
+    @Value.Default
+    default Boolean systemRequest() {
+        return null;
+    }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
 import com.sourceplusplus.api.model.artifact.SourceArtifact
+import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.trace.TraceSpanStackQuery
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
@@ -20,6 +21,8 @@ class SkywalkingIntegrationTest {
             "integration/apm/skywalking/traceStack/innerError.json"), Charsets.UTF_8)
     private static final String SKIP_ENTRY_COMPONENT = Resources.toString(Resources.getResource(
             "integration/apm/skywalking/traceStack/skipEntryComponent.json"), Charsets.UTF_8)
+    private static final String MULTIPLE_SEGMENTS = Resources.toString(Resources.getResource(
+            "integration/apm/skywalking/traceStack/multipleSegments.json"), Charsets.UTF_8)
 
     @BeforeClass
     static void setup() {
@@ -81,6 +84,25 @@ class SkywalkingIntegrationTest {
         assertEquals(5L, processedTraceStack.get(1).spanId())
         assertEquals(false, processedTraceStack.get(1).isError())
         assertEquals(false, processedTraceStack.get(1).isChildError())
+    }
+
+    @Test
+    void multipleSegments() {
+        def skywalkingEndpoints = ["/todos": "2"]
+        def topLevelArtifact = SourceArtifact.builder()
+                .artifactQualifiedName("io.vertx.blueprint.todolist.verticle.RxTodoVerticle.handleGetAll(io.vertx.ext.web.RoutingContext)")
+                .config(SourceArtifactConfig.builder().endpointIds(["2"]).build()).build()
+        def spanQuery = TraceSpanStackQuery.builder()
+                .traceId("5.33.15909406654770173")
+                .oneLevelDeep(true).build()
+        def processedTraceStack = processTraceStack(new JsonObject(MULTIPLE_SEGMENTS), spanQuery, topLevelArtifact, skywalkingEndpoints)
+
+        assertNotNull(processedTraceStack)
+        assertEquals(2, processedTraceStack.size())
+        assertEquals(2L, processedTraceStack.get(0).spanId())
+        assertEquals("5.33.15909406654770174", processedTraceStack.get(0).segmentId())
+        assertEquals(3L, processedTraceStack.get(1).spanId())
+        assertEquals("5.33.15909406654770174", processedTraceStack.get(1).segmentId())
     }
 
     //todo: followExit test

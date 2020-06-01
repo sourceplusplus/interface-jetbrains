@@ -311,9 +311,11 @@ class SkywalkingIntegration extends APMIntegration {
     }
 
     @Override
-    void getTraceStack(String appUuid, String traceId,
-                       Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
-        def query = TraceSpanStackQuery.builder().oneLevelDeep(false).traceId(traceId).build()
+    void getTraceStack(String appUuid, String traceId, Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
+        def query = TraceSpanStackQuery.builder()
+                .systemRequest(true)
+                .oneLevelDeep(false)
+                .traceId(traceId).build()
         getTraceStack(appUuid, null, query, handler)
     }
 
@@ -387,14 +389,20 @@ class SkywalkingIntegration extends APMIntegration {
                 segments.get(traceSpan.segmentId()).add(traceSpan)
             }
 
-            def parentSpanId = -2L
             for (def traceSpans : segments.values()) {
+                def parentSpanId = -2L
                 if (spanQuery.oneLevelDeep()) {
                     if (spanQuery.spanId() != null) {
                         parentSpanId = spanQuery.spanId()
                     } else {
-                        def parentSpan = traceSpans.find { isMatchingArtifact(it, artifact, skywalkingEndpoints) }
-                        parentSpanId = parentSpan?.spanId()
+                        def parentSpan = traceSpans.find {
+                            isMatchingArtifact(it, artifact, skywalkingEndpoints)
+                        }
+                        if (parentSpan) {
+                            parentSpanId = parentSpan.spanId()
+                        } else {
+                            continue
+                        }
                     }
                 }
 
@@ -426,9 +434,13 @@ class SkywalkingIntegration extends APMIntegration {
 
     private static boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact,
                                               Map<String, String> skywalkingEndpoints) {
+        if (traceSpan.component()) {
+            return false //skip entry component spans
+        }
+
         def endpointId = skywalkingEndpoints.get(traceSpan.endpointName())
-        if (endpointId && artifact.config()?.endpointIds()) {
-            return artifact.config().endpointIds().contains(endpointId)
+        if (endpointId && artifact.config()?.endpointIds() && artifact.config().endpointIds().contains(endpointId)) {
+            return true
         } else {
             return traceSpan.endpointName() == artifact.artifactQualifiedName() ||
                     (artifact.config() && traceSpan.endpointName() == artifact.config().endpointName())

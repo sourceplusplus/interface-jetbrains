@@ -20,11 +20,6 @@ import javax.annotation.Nullable;
 @JsonDeserialize(as = TraceSpanStackQuery.class)
 public interface AbstractTraceSpanStackQuery {
 
-    @Value.Default //todo: might not need
-    default boolean skipEntryComponent() {
-        return true;
-    }
-
     boolean oneLevelDeep();
 
     String traceId();
@@ -38,6 +33,12 @@ public interface AbstractTraceSpanStackQuery {
     @Value.Default
     default boolean followExit() {
         return false;
+    }
+
+    @Nullable
+    @Value.Default
+    default Boolean systemRequest() {
+        return null;
     }
 
     //todo: spanId and segmentId can't be null at same time
