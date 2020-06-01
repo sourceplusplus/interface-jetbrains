@@ -281,6 +281,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         log.info("Analayzing endpoint traces. App UUID: $appUuid - Endpoint id: $endpointId")
         //todo: should be a limit in this query and should look further back than 15 minutes
         def traceQuery = TraceQuery.builder()
+                .systemRequest(true)
                 .appUuid(appUuid)
                 .endpointId(endpointId)
                 .durationStart(Instant.now().minus(14, ChronoUnit.MINUTES))
@@ -323,20 +324,28 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 def endpointId = vertx.sharedData().getLocalMap("skywalking_pending_endpoints")
                         .get(span.endpointName()) as String
                 if (endpointId) {
+                    if (!span.component().isEmpty()) {
+                        while (!span.component().isEmpty() && i + 1 < spans.size()) {
+                            span = spans.get(++i) //skip entry component spans
+                        }
+                        --i //step back so nextSpan is span after entry component
+                    }
+
                     if (i + 1 < spans.size()) {
                         def nextSpan = spans.get(i + 1)
-                        if (nextSpan.artifactQualifiedName()) {
+                        if (nextSpan.artifactQualifiedName() || nextSpan.endpointName()) {
+                            def possibleArtifactQualifiedName = nextSpan.artifactQualifiedName()
+                            if (!possibleArtifactQualifiedName) {
+                                possibleArtifactQualifiedName = nextSpan.endpointName()
+                            }
+
                             def fut = Promise.promise()
                             futures.add(fut)
-                            artifactAPI.getSourceArtifact(appUuid, nextSpan.artifactQualifiedName(), {
+                            artifactAPI.getSourceArtifact(appUuid, possibleArtifactQualifiedName, {
                                 if (it.succeeded()) {
                                     if (it.result().isPresent()) {
                                         def artifact = it.result().get()
-                                        if (artifact.config() && artifact.config().endpoint()) {
-                                            addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), fut)
-                                        } else {
-                                            fut.complete()
-                                        }
+                                        addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), fut)
                                     } else {
                                         fut.complete()
                                     }
@@ -360,7 +369,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
             artifact = artifact.withConfig(SourceArtifactConfig.builder().build())
         }
         artifactAPI.createOrUpdateSourceArtifactConfig(artifact.appUuid(), artifact.artifactQualifiedName(),
-                artifact.config().withEndpointIds(artifact.config().endpointIds() == null
+                artifact.config().withEndpoint(true).withEndpointIds(artifact.config().endpointIds() == null
                         ? endpointIds : artifact.config().endpointIds() + endpointIds), handler)
     }
 }
