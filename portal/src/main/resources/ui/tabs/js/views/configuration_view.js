@@ -11,9 +11,9 @@ function updateArtifactConfigurationTable(artifact) {
     $('#artifact_last_updated').text(moment.unix(artifact.last_updated).format('LLLL'));
 
     if (artifact.config && artifact.config.endpoint_name) {
-        $('#artifact_endpoint').text(artifact.config.endpoint_name + " (id: " + artifact.config.endpoint_ids[0] + ")");
+        $('#artifact_endpoint').text(artifact.config.endpoint_name + " (" + artifact.config.endpoint_ids + ")");
     } else if (artifact.config && artifact.config.endpoint_ids) {
-        $('#artifact_endpoint').text("id: " + artifact.config.endpoint_ids[0]);
+        $('#artifact_endpoint').text(artifact.config.endpoint_ids);
     }
 
     if (artifact.config) {
