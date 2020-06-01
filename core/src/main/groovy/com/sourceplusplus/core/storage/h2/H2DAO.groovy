@@ -313,7 +313,7 @@ class H2DAO extends SourceStorage {
             params.addNull()
         }
         if (artifact.config()?.endpointIds() != null) {
-            params.add(artifact.config().endpointIds().collect().get(0))
+            params.add(artifact.config().endpointIds().collect().get(0)) //todo: support multiple endpoints
         } else {
             params.addNull()
         }

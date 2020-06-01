@@ -155,7 +155,11 @@ class MetricAPI extends AbstractVerticle {
                         log.warn("Could not find endpoint id for artifact: " + metricQuery.artifactQualifiedName())
                         //todo: doesn't complete handler
                     }
+                } else {
+                    //todo: doesn't complete handler
                 }
+            } else {
+                //todo: doesn't complete handler
             }
         })
     }
