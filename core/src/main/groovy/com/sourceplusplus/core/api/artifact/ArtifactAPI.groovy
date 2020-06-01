@@ -54,7 +54,7 @@ class ArtifactAPI extends AbstractVerticle {
     void start(Promise<Void> startFuture) throws Exception {
         core.baseRouter.get("/applications/:appUuid/artifacts")
                 .handler(this.&getApplicationSourceArtifactsRoute)
-        core.baseRouter.post("/applications/:appUuid/artifacts/:artifactQualifiedName")
+        core.baseRouter.post("/applications/:appUuid/artifacts")
                 .handler(this.&createOrUpdateSourceArtifactRoute)
         core.baseRouter.get("/applications/:appUuid/artifacts/:artifactQualifiedName")
                 .handler(this.&getSourceArtifactRoute)
@@ -151,8 +151,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private void createOrUpdateSourceArtifactRoute(RoutingContext routingContext) {
         def appUuid = routingContext.request().getParam("appUuid")
-        def artifactQualifiedName = URLDecoder.decode(routingContext.pathParam("artifactQualifiedName"), "UTF-8")
-        if (!appUuid || !artifactQualifiedName) {
+        if (!appUuid) {
             routingContext.response().setStatusCode(400)
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
             return
@@ -167,7 +166,7 @@ class ArtifactAPI extends AbstractVerticle {
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
             return
         }
-        request = request.withAppUuid(appUuid).withArtifactQualifiedName(artifactQualifiedName)
+        request = request.withAppUuid(appUuid)
 
         createOrUpdateSourceArtifact(request, {
             if (it.succeeded()) {
