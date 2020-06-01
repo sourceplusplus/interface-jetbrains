@@ -6,7 +6,7 @@ ADD ./agent.config /apache-skywalking-apm-bin/agent/config/agent.config
 ADD ./customize_enhance.xml /apache-skywalking-apm-bin/agent/config/customize_enhance.xml
 
 ENV SOURCE_CONFIG=docker.json
-ENV JAVA_OPTS=-javaagent:/apache-skywalking-apm-bin/agent/skywalking-agent.jar
+ENV JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -javaagent:/apache-skywalking-apm-bin/agent/skywalking-agent.jar"
 
 RUN unzip *.zip
 CMD ["./source-core-0.2.6/bin/source-core"]
