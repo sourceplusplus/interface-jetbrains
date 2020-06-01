@@ -59,6 +59,7 @@ public interface AbstractTraceSpan {
     String endpointName();
 
     @Nullable
+    @JsonAlias({"artifactQualifiedName", "artifact_qualified_name"})
     String artifactQualifiedName();
 
     String type();
