@@ -69,6 +69,8 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications", SPP_API_VERSION);
     private static final String CREATE_SOURCE_ARTIFACT_ENDPOINT = String.format(
             "/%s/applications/:appUuid/artifacts", SPP_API_VERSION);
+    private static final String GET_SOURCE_ARTIFACTS_ENDPOINT = String.format(
+            "/%s/applications/:appUuid/artifacts", SPP_API_VERSION);
     private static final String SOURCE_ARTIFACT_ENDPOINT_BASE = String.format(
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName", SPP_API_VERSION);
     private static final String GET_SOURCE_ARTIFACT_ENDPOINT = SOURCE_ARTIFACT_ENDPOINT_BASE;
@@ -496,10 +498,10 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            List<SourceArtifact> subscribers = JacksonCodec.decodeValue(response.body().string(),
+            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
                     new TypeReference<List<SourceArtifact>>() {
                     });
-            handler.handle(Future.succeededFuture(subscribers));
+            handler.handle(Future.succeededFuture(artifacts));
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
         }
@@ -532,6 +534,22 @@ public class SourceCoreClient implements SourceClient {
             SourceArtifact artifact = Json.decodeValue(response.body().string(), SourceArtifact.class);
             artifact = artifact.withAppUuid(appUuid).withArtifactQualifiedName(artifactQualifiedName);
             handler.handle(Future.succeededFuture(artifact));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public void getArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        String url = sppUrl + GET_SOURCE_ARTIFACTS_ENDPOINT
+                .replace(":appUuid", appUuid);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<SourceArtifact>>() {
+                    });
+            handler.handle(Future.succeededFuture(artifacts));
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
         }
