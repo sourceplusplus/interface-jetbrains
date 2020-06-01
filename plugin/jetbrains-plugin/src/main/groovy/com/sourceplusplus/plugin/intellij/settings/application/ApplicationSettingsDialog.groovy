@@ -1,6 +1,7 @@
 package com.sourceplusplus.plugin.intellij.settings.application
 
 import com.intellij.psi.JavaPsiFacade
+import com.intellij.psi.PsiPackage
 import com.intellij.psi.search.ProjectScope
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
@@ -34,8 +35,13 @@ class ApplicationSettingsDialog extends JDialog {
         setModal(true)
         existingApplicationsComboBox.addItem(new ApplicationChoice(null))
 
-        def basePackages = JavaPsiFacade.getInstance(IntelliJStartupActivity.currentProject).findPackage("")
+        PsiPackage[] basePackages = JavaPsiFacade.getInstance(IntelliJStartupActivity.currentProject).findPackage("")
                 ?.getSubPackages(ProjectScope.getProjectScope(IntelliJStartupActivity.currentProject))
+
+        //remove non-code packages
+        basePackages = basePackages?.findAll { it.qualifiedName != "asciidoc" }?.toArray(new PsiPackage[0])
+
+        //determine deepest common source package
         if (basePackages) {
             def rootPackage = null
             while (basePackages.length == 1) {
@@ -75,7 +81,7 @@ class ApplicationSettingsDialog extends JDialog {
         return ((ApplicationChoice) Objects.requireNonNull(existingApplicationsComboBox.getSelectedItem())).application
     }
 
-   private static final class ApplicationChoice {
+    private static final class ApplicationChoice {
         final SourceApplication application
 
         ApplicationChoice(SourceApplication application) {
@@ -88,7 +94,7 @@ class ApplicationSettingsDialog extends JDialog {
         }
     }
 
-   private static class GhostText implements FocusListener, DocumentListener, PropertyChangeListener {
+    private static class GhostText implements FocusListener, DocumentListener, PropertyChangeListener {
         private final JTextField textfield
         private final String ghostText
         private Color ghostColor
