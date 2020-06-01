@@ -1,15 +1,16 @@
 package com.sourceplusplus.plugin.intellij.patcher
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.lang.jvm.JvmModifier
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.indexing.FileBasedIndex
-import com.sourceplusplus.api.client.SourceCoreClient
-import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.patcher.tail.LogTailer
@@ -19,6 +20,10 @@ import org.apache.commons.compress.archivers.ArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.io.FileUtils
+import org.jetbrains.kotlin.idea.KotlinFileType
+import org.jetbrains.plugins.groovy.GroovyFileType
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UastContextKt
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -85,40 +90,29 @@ trait SourceAgentPatcher {
             writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
             writer.append("<enhanced>\n")
 
-            def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
-            if (SourcePluginConfig.current.activeEnvironment.apiKey) {
-                coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
-            }
-            def endpointArtifacts = coreClient.getApplicationEndpoints(SourcePluginConfig.current.activeEnvironment.appUuid)
-            Map<String, List<SourceArtifact>> classEndpoints = new HashMap<>()
-            endpointArtifacts.each {
-                def className = getClassName(it.artifactQualifiedName())
-                classEndpoints.putIfAbsent(className, new ArrayList<>())
-                classEndpoints.get(className).add(it)
-            }
+            def endpointArtifacts = SourcePluginConfig.current.activeEnvironment.coreClient
+                    .getApplicationEndpoints(SourcePluginConfig.current.activeEnvironment.appUuid)
+            Set<String> artifactEndpoints = new HashSet<>()
+            endpointArtifacts.each { artifactEndpoints.add(it.artifactQualifiedName()) }
 
             ApplicationManager.getApplication().runReadAction {
-                def sourceFiles = FileBasedIndex.getInstance().getContainingFiles(
+                //include groovy source files
+                def groovySourceFiles = FileBasedIndex.getInstance().getContainingFiles(
+                        FileTypeIndex.NAME, GroovyFileType.GROOVY_FILE_TYPE,
+                        GlobalSearchScope.projectScope(IntelliJStartupActivity.currentProject))
+                processSourceFiles(groovySourceFiles, writer, artifactEndpoints)
+
+                //include java source files
+                def javaSourceFiles = FileBasedIndex.getInstance().getContainingFiles(
                         FileTypeIndex.NAME, JavaFileType.INSTANCE,
                         GlobalSearchScope.projectScope(IntelliJStartupActivity.currentProject))
-                sourceFiles.each {
-                    def sourceFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
-                    if (sourceFile instanceof PsiClassOwner) {
-                        sourceFile.classes.each {
-                            writer.append("\t<class class_name=\"" + it.qualifiedName + "\">\n")
-                            if (classEndpoints.containsKey(it.qualifiedName)) {
-                                classEndpoints.get(it.qualifiedName).each {
-                                    def methodName = removePackageAndClassName(it.artifactQualifiedName())
-                                    def isStatic = "true" //todo: dynamic
-                                    writer.append("\t\t<method method=\"$methodName\" static=\"$isStatic\" entry_method=\"true\"></method>\n")
-                                }
-                            }
-                            writer.append("\t\t<method method=\"*\" static=\"true\"></method>\n")
-                            writer.append("\t\t<method method=\"*\" static=\"false\"></method>\n")
-                            writer.append("\t</class>\n")
-                        }
-                    }
-                }
+                processSourceFiles(javaSourceFiles, writer, artifactEndpoints)
+
+                //include kotlin source files
+                def kotlinSourceFiles = FileBasedIndex.getInstance().getContainingFiles(
+                        FileTypeIndex.NAME, KotlinFileType.INSTANCE,
+                        GlobalSearchScope.projectScope(IntelliJStartupActivity.currentProject))
+                processSourceFiles(kotlinSourceFiles, writer, artifactEndpoints)
             }
             writer.append("</enhanced>")
         }
@@ -134,6 +128,30 @@ trait SourceAgentPatcher {
             prop.setProperty("agent.service_name", SourcePluginConfig.current.activeEnvironment.appUuid)
             prop.setProperty("plugin.customize.enhance_file", customizeEnhanceFile.absolutePath)
             prop.store(output, null)
+        }
+    }
+
+    private static void processSourceFiles(Collection<VirtualFile> sourceFiles, BufferedWriter writer,
+                                           Set<String> artifactEndpoints) {
+        sourceFiles.each {
+            def sourceFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
+            if (sourceFile instanceof PsiClassOwner) {
+                sourceFile.classes.each {
+                    writer.append("\t<class class_name=\"" + it.qualifiedName + "\">\n")
+                    it.methods.each {
+                        try {
+                            def artifactQualifiedName = MarkerUtils.getFullyQualifiedName(UastContextKt.toUElement(it) as UMethod)
+                            def methodName = removePackageAndClassName(artifactQualifiedName)
+                            def entryMethod = artifactEndpoints.contains(artifactQualifiedName)
+                            def isStatic = it.hasModifier(JvmModifier.STATIC)
+                            writer.append("\t\t<method method=\"$methodName\" static=\"$isStatic\" entry_method=\"$entryMethod\"></method>\n")
+                        } catch (Throwable ignored) {
+                            log.warn("Failed to determine artifact qualified name of: " + it)
+                        }
+                    }
+                    writer.append("\t</class>\n")
+                }
+            }
         }
     }
 
