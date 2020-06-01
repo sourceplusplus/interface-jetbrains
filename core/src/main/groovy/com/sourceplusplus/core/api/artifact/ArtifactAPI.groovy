@@ -406,9 +406,9 @@ class ArtifactAPI extends AbstractVerticle {
                                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         def appArtifact = ApplicationArtifact.builder().appUuid(appUuid)
                 .artifactQualifiedName(artifactQualifiedName).build()
-        def cachedArtifact = APPLICATION_ARTIFACT_CACHE.get(appArtifact)
-        if (cachedArtifact) {
-            handler.handle(Future.succeededFuture(Optional.of(cachedArtifact)))
+        if (APPLICATION_ARTIFACT_CACHE.containsKey(appArtifact)) {
+            handler.handle(Future.succeededFuture(Optional.ofNullable(
+                    APPLICATION_ARTIFACT_CACHE.get(appArtifact))))
         } else {
             log.info("Getting source artifact from storage. App UUID: {} - Artifact qualified name: {}",
                     appUuid, artifactQualifiedName)
@@ -418,6 +418,8 @@ class ArtifactAPI extends AbstractVerticle {
                 } else {
                     if (it.result().isPresent()) {
                         APPLICATION_ARTIFACT_CACHE.put(appArtifact, it.result().get())
+                    } else {
+                        APPLICATION_ARTIFACT_CACHE.put(appArtifact, null)
                     }
                     handler.handle(Future.succeededFuture(it.result()))
                 }
