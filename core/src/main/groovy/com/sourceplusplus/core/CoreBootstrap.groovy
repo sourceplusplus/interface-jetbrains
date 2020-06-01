@@ -39,6 +39,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.JWTAuthHandler
+import io.vertx.ext.web.handler.ResponseContentTypeHandler
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
@@ -46,8 +47,6 @@ import org.jetbrains.annotations.NotNull
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-
-import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE
 
 /**
  * Main entry point to launch core server.
@@ -120,7 +119,11 @@ class CoreBootstrap extends AbstractVerticle {
     void start(Promise<Void> startFuture) throws Exception {
         registerCodecs()
 
-        def baseRouter = createRouter()
+        def baseRouter = Router.router(vertx)
+        baseRouter.route().failureHandler(createFailureHandler())
+        baseRouter.route().consumes("application/json").handler(BodyHandler.create())
+        baseRouter.route().produces("application/json").handler(ResponseContentTypeHandler.create())
+
         def v1ApiRouter = Router.router(vertx)
         baseRouter.mountSubRouter("/v1", v1ApiRouter)
         def core = new SourceCore(v1ApiRouter)
@@ -229,26 +232,6 @@ class CoreBootstrap extends AbstractVerticle {
         return options
     }
 
-    @NotNull
-    private Router createRouter() {
-        def router = Router.router(vertx)
-        router.route().failureHandler(getFailureHandler())
-
-        //consume/produce JSON only
-        router.route().consumes("application/json")
-        router.route().produces("application/json")
-
-        //enable the body parser so we can handle JSON input
-        router.route().handler(BodyHandler.create())
-
-        //ensure no matter what responses are returned as JSON
-        router.route().handler({ context ->
-            context.response().headers().add(CONTENT_TYPE, "application/json")
-            context.next()
-        })
-        return router
-    }
-
     private static void enableSelfMonitoring(SourceCore core) {
         try {
             Class.forName("org.apache.skywalking.apm.agent.SkyWalkingAgent")
@@ -295,7 +278,7 @@ class CoreBootstrap extends AbstractVerticle {
     }
 
     @NotNull
-    private static Handler<RoutingContext> getFailureHandler() {
+    private static Handler<RoutingContext> createFailureHandler() {
         return {
             RoutingContext ctx ->
                 if (ctx.statusCode() == 401) {
