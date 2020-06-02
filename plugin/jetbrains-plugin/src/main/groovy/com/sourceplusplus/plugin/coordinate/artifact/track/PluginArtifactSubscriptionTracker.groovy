@@ -3,7 +3,6 @@ package com.sourceplusplus.plugin.coordinate.artifact.track
 import com.google.common.collect.Sets
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest
-import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
@@ -32,32 +31,10 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
 
     //todo: properly refresh when app uuid changes
-    private static final Set<String> AUTOMATICALLY_SUBSCRIBED = Sets.newConcurrentHashSet()
     private static final Set<String> PENDING_DATA_AVAILABLE = Sets.newConcurrentHashSet()
 
     @Override
     void start() throws Exception {
-        //sync and subscribe to automatic subscriptions
-        syncAutomaticSubscriptions()
-        vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
-            def artifact = it.body() as SourceArtifact
-            if (artifact.config() != null) {
-                if (artifact.config().subscribeAutomatically() || artifact.config().forceSubscribe()) {
-                    if (AUTOMATICALLY_SUBSCRIBED.add(artifact.artifactQualifiedName())) {
-                        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                                artifact.artifactQualifiedName()) as IntelliJSourceMark
-                        sourceMark?.markArtifactSubscribed()
-                    }
-                } else {
-                    if (AUTOMATICALLY_SUBSCRIBED.remove(artifact.artifactQualifiedName())) {
-                        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                                artifact.artifactQualifiedName()) as IntelliJSourceMark
-                        sourceMark?.markArtifactUnsubscribed()
-                    }
-                }
-            }
-        })
-
         //keep subscriptions alive
         vertx.setPeriodic(TimeUnit.MINUTES.toMillis(5), {
             if (SourcePluginConfig.current.activeEnvironment?.appUuid) {
@@ -80,12 +57,10 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             if (PENDING_DATA_AVAILABLE.remove(sourceMark.artifactQualifiedName)) {
                 sourceMark.markArtifactDataAvailable()
             }
-            if (AUTOMATICALLY_SUBSCRIBED.contains(sourceMark.artifactQualifiedName)) {
-                sourceMark.markArtifactSubscribed()
-            }
         })
 
         //artifact has data
+        //todo: could watch ARTIFACT_TRACE_UPDATED too
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult
             if (artifactMetricResult.appUuid() == SourcePluginConfig.current.activeEnvironment.appUuid) {
@@ -142,24 +117,5 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
             })
         })
         log.info("{} started", getClass().getSimpleName())
-    }
-
-    private static void syncAutomaticSubscriptions() {
-        //todo: change to just subscriber
-        SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationSubscriptions(
-                SourcePluginConfig.current.activeEnvironment.appUuid, true, {
-            if (it.succeeded()) {
-                it.result().each {
-                    if (it.automaticSubscription() || it.forceSubscription()) {
-                        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                                it.artifactQualifiedName()) as IntelliJSourceMark
-                        sourceMark?.markArtifactSubscribed()
-                        AUTOMATICALLY_SUBSCRIBED.add(it.artifactQualifiedName())
-                    }
-                }
-            } else {
-                log.error("Failed to get application subscriptions", it.cause())
-            }
-        })
     }
 }

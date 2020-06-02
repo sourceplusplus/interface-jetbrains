@@ -2,6 +2,7 @@ package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 
 import com.intellij.openapi.application.ReadAction
 import com.intellij.psi.PsiLiteral
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.marker.SourceFileMarker
@@ -18,6 +19,7 @@ import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
+import groovy.util.logging.Slf4j
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
@@ -27,6 +29,7 @@ import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.java.JavaUAnnotation
 
+import javax.swing.*
 import java.time.Instant
 
 import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
@@ -38,11 +41,24 @@ import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifact
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
-//@Slf4j //todo: can't override log
+@Slf4j
 class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutterMark, SourceMarkEventListener {
 
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, UMethod psiMethod) {
         super(sourceFileMarker, psiMethod)
+
+        //create artifact (if necessary)
+        def appUuid = SourcePluginConfig.current.activeEnvironment.appUuid
+        def sourceArtifact = SourceArtifact.builder()
+                .appUuid(appUuid).artifactQualifiedName(artifactQualifiedName).build()
+        putUserData(IntelliJKeys.SourceArtifact, sourceArtifact)
+        SourcePluginConfig.current.activeEnvironment.coreClient.createArtifact(appUuid, sourceArtifact, {
+            if (it.succeeded()) {
+                updateSourceArtifact(it.result())
+            } else {
+                log.erro("Failed to create artifact: " + artifactQualifiedName, it.cause())
+            }
+        })
     }
 
     /**
@@ -116,16 +132,32 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
+    void updateSourceArtifact(SourceArtifact sourceArtifact) {
+        putUserData(IntelliJKeys.SourceArtifact, sourceArtifact)
+        def updatedIcon = determineMostSuitableIcon()
+        if (configuration.icon != updatedIcon) {
+            configuration.icon = updatedIcon
+            sourceFileMarker.refresh()
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    SourceArtifact getSourceArtifact() {
+        return getUserData(IntelliJKeys.SourceArtifact)
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     void markArtifactSubscribed() {
         if (!artifactSubscribed) {
-            if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                configuration.icon = artifactDataAvailable ? sppActive : sppInactive
-            } else {
-                configuration.icon = null
-            }
-
             putUserData(IntelliJKeys.ArtifactSubscribed, true)
             putUserData(IntelliJKeys.ArtifactSubscribeTime, Instant.now())
+            configuration.icon = determineMostSuitableIcon()
             sourceFileMarker.refresh()
         }
     }
@@ -136,14 +168,9 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void markArtifactUnsubscribed() {
         if (artifactSubscribed) {
-            if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                configuration.icon = artifactDataAvailable ? sppActive : null
-            } else {
-                configuration.icon = null
-            }
-
             putUserData(IntelliJKeys.ArtifactSubscribed, false)
             putUserData(IntelliJKeys.ArtifactUnsubscribeTime, Instant.now())
+            configuration.icon = determineMostSuitableIcon()
             sourceFileMarker.refresh()
         }
     }
@@ -154,13 +181,8 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void markArtifactDataAvailable() {
         if (!artifactDataAvailable) {
-            if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-                configuration.icon = sppActive
-            } else {
-                configuration.icon = null
-            }
-
             putUserData(IntelliJKeys.ArtifactDataAvailable, true)
+            configuration.icon = determineMostSuitableIcon()
             sourceFileMarker.refresh()
         }
     }
@@ -170,7 +192,13 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      */
     @Override
     boolean isArtifactSubscribed() {
-        return getUserData(IntelliJKeys.ArtifactSubscribed)
+        boolean activelySubscribed = getUserData(IntelliJKeys.ArtifactSubscribed)
+        if (activelySubscribed) {
+            return true
+        }
+
+        def config = getUserData(IntelliJKeys.SourceArtifact).config()
+        return config != null && (config.subscribeAutomatically() || config.forceSubscribe())
     }
 
     /**
@@ -227,5 +255,18 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                         new IntelliJPortalUI(portalUuid, markComponent.browser))
             }
         }
+    }
+
+    private Icon determineMostSuitableIcon() {
+        if (SourcePluginConfig.current.methodGutterMarksEnabled) {
+            if (sourceArtifact.config()?.endpoint()) {
+                return entryMethod
+            } else if (artifactDataAvailable) {
+                return sppActive
+            } else if (artifactSubscribed) {
+                return sppInactive
+            }
+        }
+        return null
     }
 }

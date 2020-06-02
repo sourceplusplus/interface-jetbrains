@@ -1,6 +1,10 @@
 package com.sourceplusplus.plugin.intellij.marker
 
 import com.intellij.psi.PsiFile
+import com.sourceplusplus.api.model.artifact.SourceArtifact
+import com.sourceplusplus.marker.SourceFileMarker
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
@@ -8,8 +12,10 @@ import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutte
 import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.UMethod
-import com.sourceplusplus.marker.SourceFileMarker
-import com.sourceplusplus.marker.source.mark.api.SourceMark
+
+import java.util.concurrent.atomic.AtomicBoolean
+
+import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
 
 /**
  * Extension of the SourceMarker for handling IntelliJ.
@@ -21,8 +27,22 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 @Slf4j
 class IntelliJSourceFileMarker extends SourceFileMarker {
 
+    static AtomicBoolean setupSourceMarkArtifactSyncer = new AtomicBoolean()
+
+    static void keepSourceMarkArtifactsUpToDate() {
+        if (!setupSourceMarkArtifactSyncer.getAndSet(true)) {
+            PluginBootstrap.sourcePlugin.vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, {
+                def artifact = it.body() as SourceArtifact
+                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                        artifact.artifactQualifiedName()) as IntelliJSourceMark
+                sourceMark?.updateSourceArtifact(artifact)
+            })
+        }
+    }
+
     IntelliJSourceFileMarker(@NotNull PsiFile psiFile) {
         super(psiFile)
+        keepSourceMarkArtifactsUpToDate()
 
         PluginBootstrap.sourcePlugin.vertx.eventBus().send(
                 PluginArtifactSubscriptionTracker.SYNC_AUTOMATIC_SUBSCRIPTIONS, true)

@@ -1,5 +1,6 @@
 package com.sourceplusplus.plugin.intellij.marker.mark
 
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 
 /**
@@ -13,6 +14,10 @@ interface IntelliJSourceMark extends SourceMark {
 
     static final String SOURCE_MARK_CREATED = "SourceMarkCreated" //todo: ensure used only when necessary
     static final String SOURCE_MARK_APPLIED = "SourceMarkApplied"
+
+    void updateSourceArtifact(SourceArtifact sourceArtifact)
+
+    SourceArtifact getSourceArtifact()
 
     void markArtifactSubscribed()
 
