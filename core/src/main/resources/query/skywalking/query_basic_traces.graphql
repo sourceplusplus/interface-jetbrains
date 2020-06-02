@@ -1,0 +1,25 @@
+{
+    queryBasicTraces(condition: {
+        queryDuration: {
+            start: "$queryDurationStart",
+            end: "$queryDurationEnd",
+            step: $queryDurationStep
+        },
+        endpointId: "$endpointId",
+        traceState: $traceState,
+        queryOrder: $queryOrder,
+        paging: {
+            pageSize: $pageSize
+        }
+    }) {
+        traces {
+            key: segmentId
+            operationNames: endpointNames
+            duration
+            start
+            isError
+            traceIds
+        }
+        total
+    }
+}

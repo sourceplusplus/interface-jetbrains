@@ -39,10 +39,8 @@ class SkywalkingIntegration extends APMIntegration {
             "query/skywalking/get_service_endpoints.graphql"), Charsets.UTF_8)
     private static final String GET_ENDPOINT_METRICS = Resources.toString(Resources.getResource(
             "query/skywalking/get_endpoint_metrics.graphql"), Charsets.UTF_8)
-    private static final String GET_LATEST_TRACES = Resources.toString(Resources.getResource(
-            "query/skywalking/get_latest_traces.graphql"), Charsets.UTF_8)
-    private static final String GET_SLOWEST_TRACES = Resources.toString(Resources.getResource(
-            "query/skywalking/get_slowest_traces.graphql"), Charsets.UTF_8)
+    private static final String QUERY_BASIC_TRACES = Resources.toString(Resources.getResource(
+            "query/skywalking/query_basic_traces.graphql"), Charsets.UTF_8)
     private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
     private final ArtifactAPI artifactAPI
@@ -144,6 +142,7 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    @Override
     void getEndpointMetrics(String endpointId, ArtifactMetricQuery metricQuery,
                             Handler<AsyncResult<ArtifactMetricResult>> handler) {
         log.debug("Getting SkyWalking endpoint metrics: " + Objects.requireNonNull(metricQuery))
@@ -261,17 +260,14 @@ class SkywalkingIntegration extends APMIntegration {
     void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
         log.debug("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
         def graphqlQuery = new JsonObject()
-        def fullQuery
-        if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
-            fullQuery = GET_LATEST_TRACES
-        } else {
-            fullQuery = GET_SLOWEST_TRACES
-        }
-        graphqlQuery.put("query", fullQuery
+        def queryOrder = traceQuery.orderType() == TraceOrderType.LATEST_TRACES ? "BY_START_TIME" : "BY_DURATION"
+        graphqlQuery.put("query", QUERY_BASIC_TRACES
                 .replace('$endpointId', traceQuery.endpointId())
                 .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
                 .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
                 .replace('$queryDurationStep', traceQuery.durationStep())
+                .replace('$traceState', traceQuery.traceState())
+                .replace('$queryOrder', queryOrder)
                 .replace('$pageSize', Integer.toString(traceQuery.pageSize()))
         )
 
