@@ -280,6 +280,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     private void analyzeEndpointTraces(String appUuid, String endpointId, Handler<AsyncResult<Void>> handler) {
         log.info("Analayzing endpoint traces. App UUID: $appUuid - Endpoint id: $endpointId")
         //todo: should be a limit in this query and should look further back than 15 minutes
+        //todo: related to #186
         def traceQuery = TraceQuery.builder()
                 .systemRequest(true)
                 .appUuid(appUuid)
@@ -290,6 +291,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         skywalking.getTraces(traceQuery, {
             if (it.succeeded()) {
                 def futures = []
+                //todo: likely don't need to check all traces
                 it.result().traces().each {
                     it.traceIds().each {
                         def fut = Promise.promise()
