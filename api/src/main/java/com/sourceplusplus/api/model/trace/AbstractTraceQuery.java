@@ -45,8 +45,10 @@ public interface AbstractTraceQuery {
     @Nullable
     Integer maxTraceDuration();
 
-    @Nullable
-    String traceState();
+    @Value.Default
+    default String traceState() {
+        return "ALL";
+    }
 
     @Nullable
     String queryOrder();
