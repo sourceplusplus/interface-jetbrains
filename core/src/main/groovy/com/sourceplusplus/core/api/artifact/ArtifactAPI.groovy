@@ -37,13 +37,13 @@ class ArtifactAPI extends AbstractVerticle {
 
     private static final Map<ApplicationArtifact, SourceArtifact> APPLICATION_ARTIFACT_CACHE = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.ACCESSED)
-            .expiration(1, TimeUnit.MINUTES).build()
+            .expiration(5, TimeUnit.MINUTES).build()
     private static final Map<String, SourceArtifact> ENDPOINT_NAME_ARTIFACT_CACHE = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.ACCESSED)
-            .expiration(1, TimeUnit.MINUTES).build()
+            .expiration(5, TimeUnit.MINUTES).build()
     private static final Map<String, SourceArtifact> ENDPOINT_ID_ARTIFACT_CACHE = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.ACCESSED)
-            .expiration(1, TimeUnit.MINUTES).build()
+            .expiration(5, TimeUnit.MINUTES).build()
     private final SourceCore core
 
     ArtifactAPI(SourceCore core) {
