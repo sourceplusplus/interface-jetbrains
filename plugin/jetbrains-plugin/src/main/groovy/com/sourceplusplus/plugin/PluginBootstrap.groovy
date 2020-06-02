@@ -45,6 +45,9 @@ class PluginBootstrap extends AbstractVerticle {
 
         //setup SourceMarker
         SourceMarkerPlugin.INSTANCE.enabled = true
+        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.activateOnMouseHover = false
+        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.activateOnMouseClick = true
+        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new GutterMarkJcefComponentProvider()
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider.with {
             defaultConfiguration.preloadJcefBrowser = false
