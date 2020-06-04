@@ -6,6 +6,7 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
+import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.searchbox.client.JestClient
@@ -20,6 +21,7 @@ import io.searchbox.indices.mapping.PutMapping
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
+import io.vertx.core.Promise
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -49,7 +51,7 @@ class ElasticsearchDAO extends SourceStorage {
     private final int elasticSearchPort
     private final JestClient client
 
-    ElasticsearchDAO(EventBus eventBus, JsonObject config) {
+    ElasticsearchDAO(EventBus eventBus, JsonObject config, Promise completer) {
         this.elasticSearchHost = config.getString("host")
         this.elasticSearchPort = config.getInteger("port")
         eventBus.consumer(REFRESH_STORAGE).handler({ msg ->
@@ -70,9 +72,10 @@ class ElasticsearchDAO extends SourceStorage {
                 installIndexes({
                     if (it.failed()) {
                         log.error("Failed to create index mappings in Elasticsearch", it.cause())
-                        System.exit(-1)
+                        completer.fail(it.cause())
                     } else {
                         log.info("Elasticsearch connected")
+                        completer.complete()
                     }
                 })
             }
@@ -80,7 +83,7 @@ class ElasticsearchDAO extends SourceStorage {
             @Override
             void failed(Exception ex) {
                 log.error("Failed to connect to Elasticsearch", ex)
-                System.exit(-1)
+                completer.fail(ex)
             }
         })
     }
@@ -155,6 +158,22 @@ class ElasticsearchDAO extends SourceStorage {
                 handler.handle(Future.failedFuture(ex))
             }
         })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getCoreConfig(Handler<AsyncResult<Optional<CoreConfig>>> handler) {
+        //todo: this
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void updateCoreConfig(CoreConfig coreConfig, Handler<AsyncResult<CoreConfig>> handler) {
+        //todo: this
     }
 
     @Override

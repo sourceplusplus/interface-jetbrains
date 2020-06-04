@@ -61,6 +61,9 @@ public class SourceBridgeClient {
                         .put("address", PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress());
                 ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
                 msg = new JsonObject().put("type", "register")
+                        .put("address", PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED.getAddress());
+                ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
+                msg = new JsonObject().put("type", "register")
                         .put("address", PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.getAddress());
                 ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
                 msg = new JsonObject().put("type", "register")
@@ -70,6 +73,8 @@ public class SourceBridgeClient {
                     JsonObject ob = new JsonObject(it.toString());
                     if (PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress().equals(ob.getString("address"))) {
                         handleArtifactConfigUpdated(ob);
+                    } else if (PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED.getAddress().equals(ob.getString("address"))) {
+                        handleArtifactStatusUpdated(ob);
                     } else if (PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.getAddress().equals(ob.getString("address"))) {
                         handleArtifactMetricUpdated(ob);
                     } else if (PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.getAddress().equals(ob.getString("address"))) {
@@ -104,6 +109,11 @@ public class SourceBridgeClient {
     private void handleArtifactConfigUpdated(JsonObject msg) {
         SourceArtifact artifact = Json.decodeValue(msg.getJsonObject("body").toString(), SourceArtifact.class);
         vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress(), artifact);
+    }
+
+    private void handleArtifactStatusUpdated(JsonObject msg) {
+        SourceArtifact artifact = Json.decodeValue(msg.getJsonObject("body").toString(), SourceArtifact.class);
+        vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED.getAddress(), artifact);
     }
 
     private void handleArtifactMetricUpdated(JsonObject msg) {

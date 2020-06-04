@@ -1,3 +1,7 @@
+CREATE TABLE core_config (
+    json_data VARCHAR
+);
+
 CREATE TABLE source_application (
   app_uuid      VARCHAR PRIMARY KEY,
   app_name      VARCHAR NOT NULL UNIQUE,
@@ -17,6 +21,7 @@ CREATE TABLE source_artifact (
   component               VARCHAR,
   endpoint_name           VARCHAR,
   endpoint_ids            VARCHAR,
+  status                  VARCHAR,
   PRIMARY KEY(app_uuid, artifact_qualified_name)
 );
 

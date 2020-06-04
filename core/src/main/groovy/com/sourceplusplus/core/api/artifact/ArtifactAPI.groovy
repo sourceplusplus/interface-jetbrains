@@ -204,6 +204,8 @@ class ArtifactAPI extends AbstractVerticle {
                         }
                         artifact = artifact.withConfig(newConfig)
                     }
+
+                    //todo: ability to update artifact config above without triggering ARTIFACT_CONFIG_UPDATED
                     core.storage.updateArtifact(artifact, {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
@@ -296,6 +298,26 @@ class ArtifactAPI extends AbstractVerticle {
         })
     }
 
+    void findSourceArtifact(String appUuid, String search, Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
+        getSourceArtifact(appUuid, search, {
+            if (it.succeeded()) {
+                if (it.result().isPresent()) {
+                    handler.handle(Future.succeededFuture(it.result()))
+                } else {
+                    getSourceArtifactByEndpointName(appUuid, search, {
+                        if (it.succeeded()) {
+                            handler.handle(Future.succeededFuture(it.result()))
+                        } else {
+                            handler.handle(Future.failedFuture(it.cause()))
+                        }
+                    })
+                }
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
     void getSourceArtifact(String appUuid, String artifactQualifiedName,
                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         log.debug("Getting source artifact. App UUID: {} - Artifact qualified name: {}", appUuid, artifactQualifiedName)
@@ -357,6 +379,7 @@ class ArtifactAPI extends AbstractVerticle {
                 handler.handle(Future.succeededFuture(artifact.config()))
 
                 //artifact config updated
+                //todo: should be in createOrUpdateSourceArtifact
                 vertx.eventBus().publish(ARTIFACT_CONFIG_UPDATED.address, new JsonObject(Json.encode(artifact)))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))

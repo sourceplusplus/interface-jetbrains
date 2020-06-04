@@ -6,9 +6,11 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
+import com.sourceplusplus.api.model.artifact.SourceArtifactStatus
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType
 import com.sourceplusplus.api.model.config.SourceAgentConfig
+import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
@@ -33,6 +35,10 @@ class H2DAO extends SourceStorage {
 
     private static final String SOURCE_CORE_SCHEMA = Resources.toString(Resources.getResource(
             "storage/h2/schema/source_core.sql"), Charsets.UTF_8)
+    private static final String GET_CORE_CONFIG = Resources.toString(Resources.getResource(
+            "storage/h2/queries/get_core_config.sql"), Charsets.UTF_8)
+    private static final String UPDATE_CORE_CONFIG = Resources.toString(Resources.getResource(
+            "storage/h2/queries/update_core_config.sql"), Charsets.UTF_8)
     private static final String CREATE_APPLICATION = Resources.toString(Resources.getResource(
             "storage/h2/queries/create_application.sql"), Charsets.UTF_8)
     private static final String UPDATE_APPLICATION = Resources.toString(Resources.getResource(
@@ -45,10 +51,8 @@ class H2DAO extends SourceStorage {
             "storage/h2/queries/get_all_applications.sql"), Charsets.UTF_8)
     private static final String CREATE_ARTIFACT = Resources.toString(Resources.getResource(
             "storage/h2/queries/create_artifact.sql"), Charsets.UTF_8)
-    private static final String CREATE_ARTIFACT_WITH_CONFIG = Resources.toString(Resources.getResource(
-            "storage/h2/queries/create_artifact_with_config.sql"), Charsets.UTF_8)
-    private static final String UPDATE_ARTIFACT_CONFIG = Resources.toString(Resources.getResource(
-            "storage/h2/queries/update_artifact_config.sql"), Charsets.UTF_8)
+    private static final String UPDATE_ARTIFACT = Resources.toString(Resources.getResource(
+            "storage/h2/queries/update_artifact.sql"), Charsets.UTF_8)
     private static final String GET_ARTIFACT = Resources.toString(Resources.getResource(
             "storage/h2/queries/get_artifact.sql"), Charsets.UTF_8)
     private static final String GET_ARTIFACT_BY_ENDPOINT_NAME = Resources.toString(Resources.getResource(
@@ -77,15 +81,50 @@ class H2DAO extends SourceStorage {
             "storage/h2/queries/delete_artifact_subscription.sql"), Charsets.UTF_8)
     final JDBCClient client
 
-    H2DAO(Vertx vertx, JsonObject config) {
+    H2DAO(Vertx vertx, JsonObject config, Promise storageCompleter) {
         client = JDBCClient.createShared(vertx, new JsonObject()
                 .put("url", "jdbc:h2:mem:spp;DB_CLOSE_DELAY=-1")
                 .put("driver_class", "org.h2.Driver"))
 
         client.update(SOURCE_CORE_SCHEMA, {
-            if (it.failed()) {
+            if (it.succeeded()) {
+                storageCompleter.complete()
+            } else {
                 log.error("Failed to create Source++ Core schema in H2", it.cause())
-                System.exit(-1)
+                storageCompleter.fail(it.cause())
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getCoreConfig(Handler<AsyncResult<Optional<CoreConfig>>> handler) {
+        client.query(GET_CORE_CONFIG, {
+            if (it.succeeded()) {
+                def results = it.result().results
+                if (!results.isEmpty()) {
+                    handler.handle(Future.succeededFuture(Optional.of(CoreConfig.fromJson(results.get(0).getString(0)))))
+                } else {
+                    handler.handle(Future.succeededFuture(Optional.empty()))
+                }
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void updateCoreConfig(CoreConfig coreConfig, Handler<AsyncResult<CoreConfig>> handler) {
+        client.updateWithParams(UPDATE_CORE_CONFIG, new JsonArray().add(coreConfig.toString()), {
+            if (it.succeeded()) {
+                handler.handle(Future.succeededFuture(coreConfig))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
             }
         })
     }
@@ -241,50 +280,52 @@ class H2DAO extends SourceStorage {
      */
     @Override
     void createArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
-        def queryTemplate = CREATE_ARTIFACT
         def params = new JsonArray()
         params.add(artifact.appUuid())
         params.add(artifact.artifactQualifiedName())
         params.add(artifact.createDate())
-        if (artifact.config() != null) {
-            queryTemplate = CREATE_ARTIFACT_WITH_CONFIG
-            if (artifact.config().endpoint() != null) {
-                params.add(artifact.config().endpoint())
-            } else {
-                params.addNull()
-            }
-            if (artifact.config().subscribeAutomatically() != null) {
-                params.add(artifact.config().subscribeAutomatically())
-            } else {
-                params.addNull()
-            }
-            if (artifact.config().forceSubscribe() != null) {
-                params.add(artifact.config().forceSubscribe())
-            } else {
-                params.addNull()
-            }
-            if (artifact.config().moduleName() != null) {
-                params.add(artifact.config().moduleName())
-            } else {
-                params.addNull()
-            }
-            if (artifact.config().component() != null) {
-                params.add(artifact.config().component())
-            } else {
-                params.addNull()
-            }
-            if (artifact.config().endpointName() != null) {
-                params.add(artifact.config().endpointName())
-            } else {
-                params.addNull()
-            }
-            if (artifact.config().endpointIds() != null) {
-                params.add("[" + artifact.config().endpointIds().stream().collect(Collectors.joining(",")) + "]")
-            } else {
-                params.addNull()
-            }
+        if (artifact.config()?.endpoint() != null) {
+            params.add(artifact.config().endpoint())
+        } else {
+            params.addNull()
         }
-        client.updateWithParams(queryTemplate, params, {
+        if (artifact.config()?.subscribeAutomatically() != null) {
+            params.add(artifact.config().subscribeAutomatically())
+        } else {
+            params.addNull()
+        }
+        if (artifact.config()?.forceSubscribe() != null) {
+            params.add(artifact.config().forceSubscribe())
+        } else {
+            params.addNull()
+        }
+        if (artifact.config()?.moduleName() != null) {
+            params.add(artifact.config().moduleName())
+        } else {
+            params.addNull()
+        }
+        if (artifact.config()?.component() != null) {
+            params.add(artifact.config().component())
+        } else {
+            params.addNull()
+        }
+        if (artifact.config()?.endpointName() != null) {
+            params.add(artifact.config().endpointName())
+        } else {
+            params.addNull()
+        }
+        if (artifact.config()?.endpointIds() != null) {
+            params.add("[" + artifact.config().endpointIds().stream().collect(Collectors.joining(",")) + "]")
+        } else {
+            params.addNull()
+        }
+        if (artifact.status() != null) {
+            params.add(Json.encode(artifact.status()))
+        } else {
+            params.addNull()
+        }
+
+        client.updateWithParams(CREATE_ARTIFACT, params, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture(artifact))
             } else {
@@ -336,7 +377,13 @@ class H2DAO extends SourceStorage {
         } else {
             params.addNull()
         }
-        client.updateWithParams(UPDATE_ARTIFACT_CONFIG, params, {
+        if (artifact.status() != null) {
+            params.add(Json.encode(artifact.status()))
+        } else {
+            params.addNull()
+        }
+
+        client.updateWithParams(UPDATE_ARTIFACT, params, {
             if (it.succeeded()) {
                 getArtifact(artifact.appUuid(), artifact.artifactQualifiedName(), {
                     if (it.succeeded()) {
@@ -380,6 +427,10 @@ class H2DAO extends SourceStorage {
                     if (artifactDetails.getString(10)) {
                         config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
                     }
+                    if (artifactDetails.getString(11)) {
+                        artifact = artifact.withStatus(
+                                Json.decodeValue(artifactDetails.getString(11), SourceArtifactStatus.class))
+                    }
                     handler.handle(Future.succeededFuture(Optional.of(artifact.withConfig(config.build()))))
                 } else {
                     handler.handle(Future.succeededFuture(Optional.empty()))
@@ -418,6 +469,10 @@ class H2DAO extends SourceStorage {
                             .endpointName(artifactDetails.getString(9))
                     if (artifactDetails.getString(10)) {
                         config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
+                    }
+                    if (artifactDetails.getString(11)) {
+                        artifact = artifact.withStatus(
+                                Json.decodeValue(artifactDetails.getString(11), SourceArtifactStatus.class))
                     }
                     handler.handle(Future.succeededFuture(Optional.of(artifact.withConfig(config.build()))))
                 } else {
@@ -464,6 +519,10 @@ class H2DAO extends SourceStorage {
                     if (artifactDetails.getString(10)) {
                         config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
                     }
+                    if (artifactDetails.getString(11)) {
+                        artifact = artifact.withStatus(
+                                Json.decodeValue(artifactDetails.getString(11), SourceArtifactStatus.class))
+                    }
                     handler.handle(Future.succeededFuture(Optional.of(artifact.withConfig(config.build()))))
                 } else {
                     handler.handle(Future.succeededFuture(Optional.empty()))
@@ -501,6 +560,10 @@ class H2DAO extends SourceStorage {
                     if (it.getString(10)) {
                         config.addEndpointIds(it.getString(10)[1..-2].split(","))
                     }
+                    if (it.getString(11)) {
+                        artifact = artifact.withStatus(
+                                Json.decodeValue(it.getString(11), SourceArtifactStatus.class))
+                    }
                     artifacts.add(artifact.withConfig(config.build()))
                 }
                 handler.handle(Future.succeededFuture(artifacts))
@@ -537,6 +600,10 @@ class H2DAO extends SourceStorage {
                     if (it.getString(10)) {
                         config.addEndpointIds(it.getString(10)[1..-2].split(","))
                     }
+                    if (it.getString(11)) {
+                        artifact = artifact.withStatus(
+                                Json.decodeValue(it.getString(11), SourceArtifactStatus.class))
+                    }
                     artifacts.add(artifact.withConfig(config.build()))
                 }
                 handler.handle(Future.succeededFuture(artifacts))
@@ -572,6 +639,10 @@ class H2DAO extends SourceStorage {
                             .endpointName(it.getString(9))
                     if (it.getString(10)) {
                         config.addEndpointIds(it.getString(10)[1..-2].split(","))
+                    }
+                    if (it.getString(11)) {
+                        artifact = artifact.withStatus(
+                                Json.decodeValue(it.getString(11), SourceArtifactStatus.class))
                     }
                     artifacts.add(artifact.withConfig(config.build()))
                 }

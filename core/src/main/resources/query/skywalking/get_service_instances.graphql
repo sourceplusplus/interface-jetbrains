@@ -1,0 +1,10 @@
+{
+    getServiceInstances(duration: {
+        start: "$durationStart",
+        end: "$durationEnd",
+        step: $durationStep
+    }, serviceId: "$serviceId") {
+        key: id
+        label: name
+    }
+}

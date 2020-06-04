@@ -49,6 +49,9 @@ public interface AbstractTraceSpan {
     @JsonAlias({"serviceCode", "service_code"})
     String serviceCode();
 
+    @JsonAlias({"serviceInstanceName", "service_instance_name"})
+    String serviceInstanceName();
+
     @JsonAlias({"startTime", "start_time"})
     long startTime();
 

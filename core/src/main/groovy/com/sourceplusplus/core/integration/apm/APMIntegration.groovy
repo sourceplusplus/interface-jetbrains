@@ -30,4 +30,6 @@ abstract class APMIntegration extends AbstractVerticle {
 
     abstract void getTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
                                 Handler<AsyncResult<TraceSpanStackQueryResult>> handler)
+
+    abstract void getFailingArtifacts(Handler<AsyncResult<List<SourceArtifact>>> handler)
 }

@@ -16,6 +16,10 @@ import io.vertx.core.Handler
  */
 abstract class SourceStorage {
 
+    abstract void getCoreConfig(Handler<AsyncResult<Optional<CoreConfig>>> handler)
+
+    abstract void updateCoreConfig(CoreConfig coreConfig, Handler<AsyncResult<CoreConfig>> handler)
+
     abstract void createApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler)
 
     abstract void updateApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler)

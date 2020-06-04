@@ -34,7 +34,8 @@
       },
       "config": {
         "timezone": null,
-        "endpoint_detection_interval_seconds": 15
+        "endpoint_detection_interval_seconds": 15,
+        "failing_artifact_detection_interval_seconds": 15
       }
     }
   ]

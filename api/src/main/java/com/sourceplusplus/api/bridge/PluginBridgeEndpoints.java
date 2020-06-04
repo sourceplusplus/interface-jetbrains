@@ -12,6 +12,7 @@ package com.sourceplusplus.api.bridge;
 public enum PluginBridgeEndpoints {
 
     ARTIFACT_CONFIG_UPDATED("public-events.ARTIFACT_CONFIG_UPDATED"),
+    ARTIFACT_STATUS_UPDATED("public-events.ARTIFACT_STATUS_UPDATED"),
     ARTIFACT_METRIC_UPDATED("public-events.ARTIFACT_METRIC_UPDATED"),
     ARTIFACT_TRACE_UPDATED("public-events.ARTIFACT_TRACE_UPDATED"),
     CAN_NAVIGATE_TO_ARTIFACT("CAN_NAVIGATE_TO_ARTIFACT"),

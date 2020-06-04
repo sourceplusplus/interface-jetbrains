@@ -6,7 +6,10 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
+import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
+import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingFailingArtifacts
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
+import com.sourceplusplus.core.storage.CoreConfig
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
@@ -21,6 +24,7 @@ import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
+import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.*
 
 /**
  * Used to match artifacts to SkyWalking endpoint ids.
@@ -37,14 +41,19 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     private static final Map<String, Long[]> endpointCheckBackoff = new ConcurrentHashMap<>()
     private final SkywalkingIntegration skywalking
     private final ArtifactAPI artifactAPI
+    private final APMIntegrationConfig integrationConfig
 
     SkywalkingEndpointIdDetector(SkywalkingIntegration skywalking, ArtifactAPI artifactAPI) {
         this.skywalking = skywalking
         this.artifactAPI = artifactAPI
+        this.integrationConfig = CoreConfig.INSTANCE.apmIntegrationConfig
     }
 
     @Override
     void start(Promise<Void> startFuture) throws Exception {
+        vertx.deployVerticle(new SkywalkingFailingArtifacts(skywalking, artifactAPI),
+                new DeploymentOptions().setConfig(config()))
+
         vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, { message ->
             def artifact = Json.decodeValue((message.body() as JsonObject).toString(), SourceArtifact.class)
             if (artifact.config().endpointName() != null) {
@@ -128,17 +137,13 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     private void searchForNewEndpoints(Handler<AsyncResult<Void>> handler) {
         log.debug("Searching for new SkyWalking service endpoints")
-        skywalking.getAllServices(Instant.now().minus(7, ChronoUnit.DAYS), Instant.now(), "MINUTE", {
+        determineSourceServices({
             if (it.succeeded()) {
                 def futures = []
-                def services = it.result()
-                for (int i = 0; i < services.size(); i++) {
-                    def service = it.result().getJsonObject(i)
-                    def appUuid = service.getString("label")
-
+                for (def service : it.result()) {
                     def fut = Promise.promise()
                     futures.add(fut)
-                    skywalking.getServiceEndpoints(service.getString("key"), {
+                    skywalking.getServiceEndpoints(service.id, {
                         if (it.succeeded()) {
                             def searchEndpoints = new JsonArray()
                             for (int z = 0; z < it.result().size(); z++) {
@@ -165,7 +170,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                                 }
                             }
                             if (searchEndpoints.size() > 0) {
-                                searchServiceEndpoints(appUuid, searchEndpoints, fut)
+                                searchServiceEndpoints(service.appUuid, searchEndpoints, fut)
                             } else {
                                 fut.complete()
                             }
@@ -175,6 +180,31 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                     })
                 }
                 CompositeFuture.all(futures).onComplete(handler)
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    private void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
+        def searchServiceStartTime
+        if (integrationConfig.endpointDetection.latestSearchedService == null) {
+            searchServiceStartTime = Instant.now()
+        } else {
+            searchServiceStartTime = integrationConfig.endpointDetection.latestSearchedService
+        }
+        def searchServiceEndTime = Instant.now()
+
+        skywalking.getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
+            if (it.succeeded()) {
+                integrationConfig.endpointDetection.latestSearchedService = searchServiceEndTime
+                for (int i = 0; i < it.result().size(); i++) {
+                    def service = it.result().getJsonObject(i)
+                    def serviceId = service.getString("key")
+                    def appUuid = service.getString("label") //todo: verify is app-uuid
+                    integrationConfig.addSourceService(new SourceService(serviceId, appUuid))
+                }
+                handler.handle(Future.succeededFuture(integrationConfig.sourceServices))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
