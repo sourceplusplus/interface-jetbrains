@@ -11,6 +11,7 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
+import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
@@ -76,7 +77,9 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      */
     @Override
     void handleEvent(@NotNull SourceMarkEvent event) {
-        if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+        if (event.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
+            (event.sourceMark as IntelliJGutterMark).registerPortal()
+        } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
             if (portalRegistered) {
                 SourcePortal.getPortal(portalUuid).close()
             }
