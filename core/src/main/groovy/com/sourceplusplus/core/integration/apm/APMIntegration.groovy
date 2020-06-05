@@ -11,7 +11,6 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.json.JsonArray
-import org.jetbrains.annotations.NotNull
 
 import java.time.Instant
 
@@ -24,25 +23,23 @@ import java.time.Instant
  */
 abstract class APMIntegration extends AbstractVerticle {
 
-    abstract void getAllServices(@NotNull Instant start, @NotNull Instant end, @NotNull String step,
-                                 @NotNull Handler<AsyncResult<JsonArray>> handler)
+    abstract void getAllServices(Instant start, Instant end, String step,
+                                 Handler<AsyncResult<JsonArray>> handler)
 
-    abstract void getServiceInstances(@NotNull Instant start, @NotNull Instant end, @NotNull String step,
-                                      @NotNull String serviceId,
-                                      @NotNull Handler<AsyncResult<JsonArray>> handler)
+    abstract void getServiceInstances(Instant start, Instant end, String step, String serviceId,
+                                      Handler<AsyncResult<JsonArray>> handler)
 
-    abstract void getActiveServiceInstances(@NotNull Handler<AsyncResult<JsonArray>> handler)
+    abstract void getActiveServiceInstances(Handler<AsyncResult<JsonArray>> handler)
 
-    abstract void getEndpointMetrics(@NotNull String endpointId, @NotNull ArtifactMetricQuery metricQuery,
-                                     @NotNull Handler<AsyncResult<ArtifactMetricResult>> handler)
+    abstract void getEndpointMetrics(String endpointId, ArtifactMetricQuery metricQuery,
+                                     Handler<AsyncResult<ArtifactMetricResult>> handler)
 
-    abstract void getTraces(@NotNull TraceQuery traceQuery,
-                            @NotNull Handler<AsyncResult<TraceQueryResult>> handler)
+    abstract void getTraces(TraceQuery traceQuery,
+                            Handler<AsyncResult<TraceQueryResult>> handler)
 
-    abstract void getTraceStack(@NotNull String appUuid, @NotNull String traceId,
-                                @NotNull Handler<AsyncResult<TraceSpanStackQueryResult>> handler)
+    abstract void getTraceStack(String appUuid, String traceId,
+                                Handler<AsyncResult<TraceSpanStackQueryResult>> handler)
 
-    abstract void getTraceStack(@NotNull String appUuid, @NotNull SourceArtifact artifact,
-                                @NotNull TraceSpanStackQuery spanQuery,
-                                @NotNull Handler<AsyncResult<TraceSpanStackQueryResult>> handler)
+    abstract void getTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
+                                Handler<AsyncResult<TraceSpanStackQueryResult>> handler)
 }

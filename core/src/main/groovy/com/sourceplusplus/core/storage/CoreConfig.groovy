@@ -4,7 +4,6 @@ import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import org.jetbrains.annotations.NotNull
 
 @Slf4j
 class CoreConfig {
@@ -36,7 +35,7 @@ class CoreConfig {
         return Json.encode(this)
     }
 
-    static CoreConfig fromJson(@NotNull String json) {
+    static CoreConfig fromJson(String json) {
         CoreConfig coreConfig = Json.decodeValue(json, CoreConfig.class)
         if (coreConfig != null) {
             coreConfig.apmIntegrationConfig?.setupCoreConfig(coreConfig)

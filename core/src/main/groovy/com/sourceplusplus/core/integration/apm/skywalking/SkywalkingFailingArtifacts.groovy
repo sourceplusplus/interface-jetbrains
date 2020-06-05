@@ -9,16 +9,12 @@ import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import com.sourceplusplus.core.storage.CoreConfig
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
-import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
-import org.jetbrains.annotations.NotNull
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
-import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED
 import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
 
 /**
@@ -70,7 +66,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         })
     }
 
-    private void doThing(@NotNull Set<SourceService> sourceServices, @NotNull Handler<AsyncResult<Void>> handler) {
+    private void doThing(Set<SourceService> sourceServices, Handler<AsyncResult<Void>> handler) {
         def futures = []
         for (def sourceService : sourceServices) {
             def future = Promise.promise()
@@ -88,8 +84,8 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         CompositeFuture.all(futures).onComplete(handler)
     }
 
-    private void doThing2(@NotNull SourceService sourceService,
-                          @NotNull Handler<AsyncResult<Void>> handler) {
+    private void doThing2(SourceService sourceService,
+                          Handler<AsyncResult<Void>> handler) {
         def traceQuery = TraceQuery.builder()
                 .systemRequest(true)
                 .serviceId(sourceService.id)
@@ -106,7 +102,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         })
     }
 
-    private void determineSourceServices(@NotNull Handler<AsyncResult<Set<SourceService>>> handler) {
+    private void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
         def searchServiceStartTime
         if (integrationConfig.failedArtifactTracker.latestSearchedService == null) {
             searchServiceStartTime = Instant.now()
@@ -131,8 +127,8 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         })
     }
 
-    private void determineActiveServiceInstances(@NotNull SourceService sourceService,
-                                                 @NotNull Handler<AsyncResult<JsonArray>> handler) {
+    private void determineActiveServiceInstances(SourceService sourceService,
+                                                 Handler<AsyncResult<JsonArray>> handler) {
         def searchServiceStartTime
         if (integrationConfig.failedArtifactTracker.latestSearchedServiceInstance == null) {
             searchServiceStartTime = Instant.now()
@@ -163,7 +159,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         })
     }
 
-    private void analyzeFailingTraces(@NotNull List<Trace> traces, @NotNull Handler<AsyncResult<Void>> handler) {
+    private void analyzeFailingTraces(List<Trace> traces, Handler<AsyncResult<Void>> handler) {
         def futures = []
         for (def trace : traces) {
             trace.traceIds().each {
@@ -181,8 +177,8 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         CompositeFuture.all(futures).onComplete(handler)
     }
 
-    private void processFailingTraceStack(@NotNull List<TraceSpan> failingTraceSpans,
-                                          @NotNull Handler<AsyncResult<Void>> handler) {
+    private void processFailingTraceStack(List<TraceSpan> failingTraceSpans,
+                                          Handler<AsyncResult<Void>> handler) {
         def futures = []
         for (def failingSpan : failingTraceSpans) {
             if (!failingSpan.error) {

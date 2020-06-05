@@ -2,7 +2,6 @@ package com.sourceplusplus.core.integration.apm
 
 import com.sourceplusplus.core.storage.CoreConfig
 import groovy.transform.EqualsAndHashCode
-import org.jetbrains.annotations.NotNull
 
 import java.time.Instant
 
@@ -86,7 +85,7 @@ class APMIntegrationConfig {
         return failedArtifactTracker
     }
 
-    static void setupCoreConfig(@NotNull CoreConfig coreConfig) {
+    static void setupCoreConfig(CoreConfig coreConfig) {
         _coreConfig = coreConfig
     }
 }
