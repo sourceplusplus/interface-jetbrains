@@ -21,7 +21,7 @@ CREATE TABLE source_artifact (
   component               VARCHAR,
   endpoint_name           VARCHAR,
   endpoint_ids            VARCHAR,
-  status                  VARCHAR,
+  latest_failed_span      VARCHAR,
   PRIMARY KEY(app_uuid, artifact_qualified_name)
 );
 

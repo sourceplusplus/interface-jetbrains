@@ -23,5 +23,5 @@ import javax.annotation.Nullable;
 public interface AbstractSourceArtifactStatus extends SourceMessage {
 
     @Nullable
-    TraceSpan latestFailedTraceSpan();
+    TraceSpan latestFailedSpan();
 }

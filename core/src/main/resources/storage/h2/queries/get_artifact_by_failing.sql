@@ -4,9 +4,4 @@ SELECT
 FROM source_artifact
 WHERE 1=1
 AND app_uuid = ?
-AND (
-    endpoint_ids LIKE ? OR
-    endpoint_ids LIKE ? OR
-    endpoint_ids LIKE ? OR
-    endpoint_ids LIKE ?
-);
+AND latest_failed_span IS NOT NULL;

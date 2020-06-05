@@ -259,7 +259,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
 
     private Icon determineMostSuitableIcon() {
         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-            if (sourceArtifact.status()?.latestFailedTraceSpan()) {
+            if (sourceArtifact.status()?.latestFailedSpan()) {
                 return failingMethod
             } else if (sourceArtifact.config()?.endpoint()) {
                 return entryMethod

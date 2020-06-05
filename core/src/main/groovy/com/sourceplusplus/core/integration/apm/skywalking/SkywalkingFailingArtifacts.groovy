@@ -78,7 +78,8 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
 
             determineActiveServiceInstances(sourceService, {
                 if (it.succeeded()) {
-                    doThing2(sourceService, it.result(), future)
+                    //todo: result not used
+                    doThing2(sourceService, future)
                 } else {
                     future.fail(it.cause())
                 }
@@ -87,30 +88,22 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         CompositeFuture.all(futures).onComplete(handler)
     }
 
-    private void doThing2(@NotNull SourceService sourceService, @NotNull JsonArray serviceInstances,
+    private void doThing2(@NotNull SourceService sourceService,
                           @NotNull Handler<AsyncResult<Void>> handler) {
-        def futures = []
-        for (int i = 0; i < serviceInstances.size(); i++) {
-            def future = Promise.promise()
-            futures.add(future.future())
-
-            def serviceInstance = serviceInstances.getJsonObject(i)
-            def traceQuery = TraceQuery.builder()
-                    .systemRequest(true)
-                    .serviceId(sourceService.id)
-                    .traceState("ERROR")
-                    .durationStart(Instant.now().minus(140, ChronoUnit.MINUTES)) //todo:
-                    .durationStop(Instant.now())
-                    .durationStep("SECOND").build()
-            skywalking.getTraces(traceQuery, {
-                if (it.succeeded()) {
-                    analyzeFailingTraces(sourceService, serviceInstance, it.result().traces(), handler)
-                } else {
-                    future.fail(it.cause())
-                }
-            })
-        }
-        CompositeFuture.all(futures).onComplete(handler)
+        def traceQuery = TraceQuery.builder()
+                .systemRequest(true)
+                .serviceId(sourceService.id)
+                .traceState("ERROR")
+                .durationStart(Instant.now().minus(140, ChronoUnit.MINUTES)) //todo:
+                .durationStop(Instant.now())
+                .durationStep("SECOND").build()
+        skywalking.getTraces(traceQuery, {
+            if (it.succeeded()) {
+                analyzeFailingTraces(it.result().traces(), handler)
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
     }
 
     private void determineSourceServices(@NotNull Handler<AsyncResult<Set<SourceService>>> handler) {
@@ -151,22 +144,33 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         skywalking.getServiceInstances(searchServiceStartTime, searchServiceEndTime, "MINUTE", sourceService.id, {
             if (it.succeeded()) {
                 integrationConfig.failedArtifactTracker.latestSearchedServiceInstance = searchServiceEndTime
-                handler.handle(Future.succeededFuture(it.result()))
+                def serviceInstances = it.result()
+                Set<String> serviceInstanceIds = new HashSet<>()
+                for (int i = 0; i < serviceInstances.size(); i++) {
+                    serviceInstanceIds.add(serviceInstances.getJsonObject(i).getString("label"))
+                }
+
+                artifactAPI.updateFailingArtifacts(sourceService.appUuid, serviceInstanceIds, {
+                    if (it.succeeded()) {
+                        handler.handle(Future.succeededFuture(serviceInstances))
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
         })
     }
 
-    private void analyzeFailingTraces(@NotNull SourceService sourceService, @NotNull JsonObject serviceInstance,
-                                      @NotNull List<Trace> traces, @NotNull Handler<AsyncResult<Void>> handler) {
+    private void analyzeFailingTraces(@NotNull List<Trace> traces, @NotNull Handler<AsyncResult<Void>> handler) {
         def futures = []
         for (def trace : traces) {
             trace.traceIds().each {
                 def future = Promise.promise()
                 skywalking.getTraceStack(null, it, {
                     if (it.succeeded()) {
-                        processFailingTraceStack(sourceService, serviceInstance, it.result().traceSpans(), future)
+                        processFailingTraceStack(it.result().traceSpans(), future)
                     } else {
                         future.fail(it.cause())
                     }
@@ -177,8 +181,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         CompositeFuture.all(futures).onComplete(handler)
     }
 
-    private void processFailingTraceStack(@NotNull SourceService sourceService, @NotNull JsonObject serviceInstance,
-                                          @NotNull List<TraceSpan> failingTraceSpans,
+    private void processFailingTraceStack(@NotNull List<TraceSpan> failingTraceSpans,
                                           @NotNull Handler<AsyncResult<Void>> handler) {
         def futures = []
         for (def failingSpan : failingTraceSpans) {
@@ -197,30 +200,22 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
                         def status
                         if (artifact.status() == null) {
                             status = SourceArtifactStatus.builder()
-                                    .latestFailedTraceSpan(failingSpan)
+                                    .latestFailedSpan(failingSpan)
                                     .build()
                         } else {
-                            if (artifact.status().latestFailedTraceSpan() != null) {
-                                if (artifact.status().latestFailedTraceSpan().traceId() != failingSpan.traceId()) {
+                            if (artifact.status().latestFailedSpan() != null) {
+                                if (artifact.status().latestFailedSpan().traceId() != failingSpan.traceId()) {
                                     status = artifact.status()
-                                            .withLatestFailedTraceSpan(failingSpan)
+                                            .withLatestFailedSpan(failingSpan)
                                 }
                             } else {
                                 status = artifact.status()
-                                        .withLatestFailedTraceSpan(failingSpan)
+                                        .withLatestFailedSpan(failingSpan)
                             }
                         }
 
                         if (status != null) {
-                            artifactAPI.createOrUpdateSourceArtifact(artifact.withStatus(status), {
-                                if (it.succeeded()) {
-                                    vertx.eventBus().publish(ARTIFACT_STATUS_UPDATED.address,
-                                            new JsonObject(Json.encode(it.result())))
-                                    future.complete()
-                                } else {
-                                    future.fail(it.cause())
-                                }
-                            })
+                            artifactAPI.createOrUpdateSourceArtifact(artifact.withStatus(status), future)
                         } else {
                             future.complete()
                         }

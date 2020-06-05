@@ -176,6 +176,9 @@ class ElasticsearchDAO extends SourceStorage {
         //todo: this
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void createApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler) {
         findApplicationByName(application.appName(), {
@@ -213,6 +216,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void updateApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler) {
         def updatedApplication = new JsonObject(Json.encode(application))
@@ -252,6 +258,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void findApplicationByName(String appName, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
         String query = '{\n' +
@@ -327,6 +336,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getAllApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
         String query = '{\n' +
@@ -368,6 +380,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void createArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
         def index = new Index.Builder(Json.encode(artifact)).index(SPP_INDEX + "_artifact")
@@ -391,6 +406,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void updateArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
         def update = new Update.Builder(new JsonObject().put("doc", new JsonObject(Json.encode(artifact))).toString())
@@ -427,6 +445,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getArtifact(String appUuid, String artifactQualifiedName,
                      Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
@@ -461,6 +482,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void findArtifactByEndpointName(String appUuid, String endpointName,
                                     Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
@@ -505,6 +529,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void findArtifactByEndpointId(String appUuid, String endpointId,
                                   Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
@@ -549,6 +576,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void findArtifactBySubscribeAutomatically(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         String query = '{\n' +
@@ -602,6 +632,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void findArtifactByEndpoint(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         String query = '{\n' +
@@ -654,6 +687,17 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void findArtifactByFailing(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        //todo: this
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getApplicationArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         String query = '{\n' +
@@ -699,6 +743,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,
                                   Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
@@ -746,6 +793,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid,
                                             Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
@@ -793,6 +843,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getArtifactSubscriptions(Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
         String query = '{\n' +
@@ -837,6 +890,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void updateArtifactSubscription(SourceArtifactSubscription subscription,
                                     Handler<AsyncResult<SourceArtifactSubscription>> handler) {
@@ -882,6 +938,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void deleteArtifactSubscription(SourceArtifactSubscription subscription, Handler<AsyncResult<Void>> handler) {
         def delete = new Delete.Builder(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName(), "UTF-8"))
@@ -911,6 +970,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void setArtifactSubscription(SourceArtifactSubscription subscription,
                                  Handler<AsyncResult<SourceArtifactSubscription>> handler) {
@@ -940,6 +1002,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getArtifactSubscription(String subscriberUuid, String appUuid, String artifactQualifiedName,
                                  Handler<AsyncResult<Optional<SourceArtifactSubscription>>> handler) {
@@ -987,6 +1052,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getApplicationSubscriptions(String appUuid,
                                      Handler<AsyncResult<List<SourceApplicationSubscription>>> handler) {
@@ -1041,6 +1109,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void refreshDatabase(Handler<AsyncResult<Void>> handler) {
         log.info("Refreshing storage")
@@ -1060,6 +1131,9 @@ class ElasticsearchDAO extends SourceStorage {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     boolean needsManualRefresh() {
         return true

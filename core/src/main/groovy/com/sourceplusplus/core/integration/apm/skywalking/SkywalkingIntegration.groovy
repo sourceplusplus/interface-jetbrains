@@ -56,7 +56,7 @@ class SkywalkingIntegration extends APMIntegration {
     private int skywalkingOAPPort
     private WebClient webClient
 
-    SkywalkingIntegration(ArtifactAPI artifactAPI, SourceStorage storage) {
+    SkywalkingIntegration(@NotNull ArtifactAPI artifactAPI, @NotNull SourceStorage storage) {
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
     }
@@ -97,6 +97,10 @@ class SkywalkingIntegration extends APMIntegration {
         log.info("{} stopped", getClass().getSimpleName())
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     void getAllServices(@NotNull Instant start, @NotNull Instant end, @NotNull String step,
                         @NotNull Handler<AsyncResult<JsonArray>> handler) {
         log.info("Getting all SkyWalking services. Start: " + start + " - End: " + end)
@@ -128,8 +132,12 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     void getServiceInstances(@NotNull Instant start, @NotNull Instant end, @NotNull String step,
-                              @NotNull String serviceId, @NotNull Handler<AsyncResult<JsonArray>> handler) {
+                             @NotNull String serviceId, @NotNull Handler<AsyncResult<JsonArray>> handler) {
         log.info("Getting all SkyWalking service instances. Start: $start - End: $end - Service id: $serviceId")
         def graphqlQuery = new JsonObject()
         if ("second".equalsIgnoreCase(step)) {
@@ -161,6 +169,37 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getActiveServiceInstances(@NotNull Handler<AsyncResult<JsonArray>> handler) {
+        log.info("Getting all active SkyWalking service instances")
+        def start = Instant.now(), end = Instant.now(), step = "MINUTE"
+        getAllServices(start, end, "MINUTE", {
+            if (it.succeeded()) {
+                def futures = []
+                for (int i = 0; i < it.result().size(); i++) {
+                    def future = Promise.promise()
+                    futures.add(future.future())
+
+                    def service = it.result().getJsonObject(i)
+                    getServiceInstances(start, end, step, service.getString("label"), future)
+                }
+
+                CompositeFuture.all(futures).onComplete({
+                    if (it.succeeded()) {
+                        println("wef")
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
     void getServiceEndpoints(@NotNull String serviceId, @NotNull Handler<AsyncResult<JsonArray>> handler) {
         log.info("Getting SkyWalking service endpoints for service id: " + serviceId)
         def graphqlQuery = new JsonObject()
@@ -181,6 +220,9 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getEndpointMetrics(@NotNull String endpointId, @NotNull ArtifactMetricQuery metricQuery,
                             @NotNull Handler<AsyncResult<ArtifactMetricResult>> handler) {
@@ -295,6 +337,9 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getTraces(@NotNull TraceQuery traceQuery, @NotNull Handler<AsyncResult<TraceQueryResult>> handler) {
         log.debug("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
@@ -351,6 +396,9 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getTraceStack(@NotNull String appUuid, @NotNull String traceId,
                        @NotNull Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
@@ -361,6 +409,9 @@ class SkywalkingIntegration extends APMIntegration {
         getTraceStack(appUuid, null, query, handler)
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getTraceStack(@NotNull String appUuid, @NotNull SourceArtifact artifact, @NotNull TraceSpanStackQuery spanQuery,
                        @NotNull Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
@@ -419,13 +470,10 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
-    @Override
-    void getFailingArtifacts(@NotNull Handler<AsyncResult<List<SourceArtifact>>> handler) {
-
-    }
-
-    static ArrayList<TraceSpan> processTraceStack(JsonObject traceStackData, TraceSpanStackQuery spanQuery,
-                                                  SourceArtifact artifact, Map<String, String> skywalkingEndpoints) {
+    static ArrayList<TraceSpan> processTraceStack(@NotNull JsonObject traceStackData,
+                                                  @NotNull TraceSpanStackQuery spanQuery,
+                                                  @NotNull SourceArtifact artifact,
+                                                  @NotNull Map<String, String> skywalkingEndpoints) {
         def spanList = new ArrayList<TraceSpan>()
         if (traceStackData != null) {
             def stack = traceStackData.getJsonArray("spans")
