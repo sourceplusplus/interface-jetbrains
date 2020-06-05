@@ -8,6 +8,7 @@
       "refs": [
       ],
       "serviceCode": "b4c8f3f5-c8d2-4de6-a223-80dd3e7c3cd9",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
       "startTime": 1590831645272,
       "endTime": 1590831645772,
       "endpointName": "com.company.JavaErrorExample.invokesMethod()",
@@ -29,6 +30,7 @@
       "refs": [
       ],
       "serviceCode": "b4c8f3f5-c8d2-4de6-a223-80dd3e7c3cd9",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
       "startTime": 1590831645772,
       "endTime": 1590831645772,
       "endpointName": "com.company.JavaErrorExample.innerInvokesMethod()",
@@ -50,6 +52,7 @@
       "refs": [
       ],
       "serviceCode": "b4c8f3f5-c8d2-4de6-a223-80dd3e7c3cd9",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
       "startTime": 1590831645772,
       "endTime": 1590831645772,
       "endpointName": "com.company.JavaErrorExample.innerInnerThrowsException()",
@@ -92,6 +95,7 @@
       "refs": [
       ],
       "serviceCode": "b4c8f3f5-c8d2-4de6-a223-80dd3e7c3cd9",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
       "startTime": 1590831645772,
       "endTime": 1590831645772,
       "endpointName": "com.company.OtherFile.main()",
