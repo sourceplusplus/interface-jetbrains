@@ -67,7 +67,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     void apply() {
         super.apply()
 
-        registerPortal()
         PluginBootstrap.sourcePlugin.vertx.eventBus().publish(SOURCE_MARK_APPLIED, this)
         addEventListener(this)
     }

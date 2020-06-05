@@ -1,10 +1,7 @@
 package com.sourceplusplus.core.api.artifact
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
-import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
-import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
+import com.sourceplusplus.api.model.artifact.*
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
@@ -36,6 +33,8 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_STATU
 @Slf4j
 class ArtifactAPI extends AbstractVerticle {
 
+    private static final SourceArtifactConfig EMPTY_CONFIG = SourceArtifactConfig.builder().build()
+    private static final SourceArtifactStatus EMPTY_STATUS = SourceArtifactStatus.builder().build()
     private static final Map<ApplicationArtifact, SourceArtifact> APPLICATION_ARTIFACT_CACHE = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.ACCESSED)
             .expiration(5, TimeUnit.MINUTES).build()
@@ -181,6 +180,11 @@ class ArtifactAPI extends AbstractVerticle {
     }
 
     void createOrUpdateSourceArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
+        createOrUpdateSourceArtifact(artifact, false, handler)
+    }
+
+    void createOrUpdateSourceArtifact(SourceArtifact artifact, boolean overrideStatus,
+                                      Handler<AsyncResult<SourceArtifact>> handler) {
         getAndCacheSourceArtifact(artifact.appUuid(), artifact.artifactQualifiedName(), {
             if (it.succeeded()) {
                 def now = Instant.now()
@@ -190,7 +194,6 @@ class ArtifactAPI extends AbstractVerticle {
                     def oldConfig = oldArtifact.config()
                     def newConfig = artifact.config()
                     def oldStatus = oldArtifact.status()
-                    def newStatus = artifact.status()
 
                     artifact = artifact.withLastUpdated(now)
                     if (artifact.config().endpointIds() != null) {
@@ -207,6 +210,11 @@ class ArtifactAPI extends AbstractVerticle {
                     }
                     artifact = artifact.withConfig(newConfig)
 
+                    //todo: overrideConfig
+                    if (artifact.status() == EMPTY_STATUS && !overrideStatus) {
+                        artifact = artifact.withStatus(oldStatus)
+                    }
+
                     core.storage.updateArtifact(artifact, {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
@@ -222,36 +230,11 @@ class ArtifactAPI extends AbstractVerticle {
                                 }
                             }
 
-                            def artifactConfigUpdated = false
-                            if (oldConfig == null && newConfig == null) {
-                                //no update
-                            } else if (oldConfig != null && newConfig == null) {
-                                //no update
-                            } else if (oldConfig == null && newConfig != null) {
-                                artifactConfigUpdated = true
-                            } else if (Json.encode(oldConfig) != Json.encode(newConfig)) {
-                                artifactConfigUpdated = true
-                            } else {
-                                //no update
-                            }
-                            if (artifactConfigUpdated) {
+                            if (Json.encode(oldConfig) != Json.encode(it.result().config())) {
                                 vertx.eventBus().publish(ARTIFACT_CONFIG_UPDATED.address,
                                         new JsonObject(Json.encode(it.result())))
                             }
-
-                            def artifactStatusUpdated = false
-                            if (oldStatus == null && newStatus == null) {
-                                //no update
-                            } else if (oldStatus != null && newStatus == null) {
-                                artifactStatusUpdated = true
-                            } else if (oldStatus == null && newStatus != null) {
-                                artifactStatusUpdated = true
-                            } else if (Json.encode(oldStatus) != Json.encode(newStatus)) {
-                                artifactStatusUpdated = true
-                            } else {
-                                //no update
-                            }
-                            if (artifactStatusUpdated) {
+                            if (Json.encode(oldStatus) != Json.encode(it.result().status())) {
                                 vertx.eventBus().publish(ARTIFACT_STATUS_UPDATED.address,
                                         new JsonObject(Json.encode(it.result())))
                             }
@@ -413,7 +396,7 @@ class ArtifactAPI extends AbstractVerticle {
                                 futures.add(future)
 
                                 def updatedArtifact = it.withStatus(it.status().withLatestFailedSpan(null))
-                                createOrUpdateSourceArtifact(updatedArtifact, future)
+                                createOrUpdateSourceArtifactStatus(updatedArtifact, future)
                             }
                         }
                         CompositeFuture.all(futures).onComplete({
@@ -471,6 +454,33 @@ class ArtifactAPI extends AbstractVerticle {
         createOrUpdateSourceArtifact(artifactWithConfig, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture(it.result().config()))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    void createOrUpdateSourceArtifactStatus(String appUuid, String artifactQualifiedName,
+                                            SourceArtifactStatus artifactStatus,
+                                            Handler<AsyncResult<SourceArtifactStatus>> handler) {
+        def artifactWithStatus = SourceArtifact.builder()
+                .appUuid(appUuid)
+                .artifactQualifiedName(artifactQualifiedName)
+                .status(artifactStatus).build()
+        createOrUpdateSourceArtifact(artifactWithStatus, true,{
+            if (it.succeeded()) {
+                handler.handle(Future.succeededFuture(it.result().status()))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    void createOrUpdateSourceArtifactStatus(SourceArtifact artifactWithStatus,
+                                            Handler<AsyncResult<SourceArtifactStatus>> handler) {
+        createOrUpdateSourceArtifact(artifactWithStatus, true,{
+            if (it.succeeded()) {
+                handler.handle(Future.succeededFuture(it.result().status()))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

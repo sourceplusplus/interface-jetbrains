@@ -198,7 +198,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
                         }
 
                         if (status != null) {
-                            artifactAPI.createOrUpdateSourceArtifact(artifact.withStatus(status), future)
+                            artifactAPI.createOrUpdateSourceArtifactStatus(artifact.withStatus(status), future)
                         } else {
                             future.complete()
                         }
