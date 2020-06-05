@@ -179,16 +179,23 @@ class SkywalkingIntegration extends APMIntegration {
             if (it.succeeded()) {
                 def futures = []
                 for (int i = 0; i < it.result().size(); i++) {
-                    def future = Promise.promise()
-                    futures.add(future.future())
+                    def promise = Promise.promise()
+                    futures.add(promise.future())
 
                     def service = it.result().getJsonObject(i)
-                    getServiceInstances(start, end, step, service.getString("label"), future)
+                    getServiceInstances(start, end, step, service.getString("label"), promise)
                 }
 
                 CompositeFuture.all(futures).onComplete({
                     if (it.succeeded()) {
-                        println("wef")
+                        def resultArray = new JsonArray()
+                        for (int i = 0; i < it.result().size(); i++) {
+                            def serviceInstance = it.result().resultAt(i) as JsonArray
+                            if (!serviceInstance.isEmpty()) {
+                                resultArray.add(serviceInstance)
+                            }
+                        }
+                        handler.handle(Future.succeededFuture(resultArray))
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
                     }

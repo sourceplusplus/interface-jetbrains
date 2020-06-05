@@ -46,7 +46,7 @@ class APMIntegrationConfig {
 
     static class FailedArtifactTracker {
         private Instant latestSearchedService
-        private Instant latestSearchedServiceInstance
+        private Map<SourceService, Instant> serviceLatestSearchedFailingTraces = new HashMap<>()
 
         Instant getLatestSearchedService() {
             return latestSearchedService
@@ -57,12 +57,12 @@ class APMIntegrationConfig {
             _coreConfig.save()
         }
 
-        Instant getLatestSearchedServiceInstance() {
-            return latestSearchedServiceInstance
+        Map<SourceService, Instant> getServiceLatestSearchedFailingTraces() {
+            return serviceLatestSearchedFailingTraces
         }
 
-        void setLatestSearchedServiceInstance(Instant latestSearchedServiceInstance) {
-            this.latestSearchedServiceInstance = latestSearchedServiceInstance
+        void addServiceLatestSearchedFailingTraces(SourceService sourceService, Instant latestSearchedFailingTraces) {
+            serviceLatestSearchedFailingTraces.put(sourceService, latestSearchedFailingTraces)
             _coreConfig.save()
         }
     }

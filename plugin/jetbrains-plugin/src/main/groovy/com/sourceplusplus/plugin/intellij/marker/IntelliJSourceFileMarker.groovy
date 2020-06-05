@@ -34,12 +34,16 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
         if (!setupSourceMarkArtifactSyncer.getAndSet(true)) {
             PluginBootstrap.sourcePlugin.vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, {
                 def artifact = it.body() as SourceArtifact
+                log.info("Artifact config updated. Artifact qualified name: {}", artifact.artifactQualifiedName())
+
                 def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                         artifact.artifactQualifiedName()) as IntelliJSourceMark
                 sourceMark?.updateSourceArtifact(artifact)
             })
             PluginBootstrap.sourcePlugin.vertx.eventBus().consumer(ARTIFACT_STATUS_UPDATED.address, {
                 def artifact = it.body() as SourceArtifact
+                log.info("Artifact status updated. Artifact qualified name: {}", artifact.artifactQualifiedName())
+
                 def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                         artifact.artifactQualifiedName()) as IntelliJSourceMark
                 sourceMark?.updateSourceArtifact(artifact)

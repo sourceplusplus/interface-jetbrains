@@ -9,10 +9,8 @@ import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import com.sourceplusplus.core.storage.CoreConfig
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
-import io.vertx.core.json.JsonArray
 
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
@@ -59,43 +57,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
     void searchForFailingArtifacts(Handler<AsyncResult<Void>> handler) {
         determineSourceServices({
             if (it.succeeded()) {
-                doThing(it.result(), handler)
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
-    }
-
-    private void doThing(Set<SourceService> sourceServices, Handler<AsyncResult<Void>> handler) {
-        def futures = []
-        for (def sourceService : sourceServices) {
-            def future = Promise.promise()
-            futures.add(future.future())
-
-            determineActiveServiceInstances(sourceService, {
-                if (it.succeeded()) {
-                    //todo: result not used
-                    doThing2(sourceService, future)
-                } else {
-                    future.fail(it.cause())
-                }
-            })
-        }
-        CompositeFuture.all(futures).onComplete(handler)
-    }
-
-    private void doThing2(SourceService sourceService,
-                          Handler<AsyncResult<Void>> handler) {
-        def traceQuery = TraceQuery.builder()
-                .systemRequest(true)
-                .serviceId(sourceService.id)
-                .traceState("ERROR")
-                .durationStart(Instant.now().minus(140, ChronoUnit.MINUTES)) //todo:
-                .durationStop(Instant.now())
-                .durationStep("SECOND").build()
-        skywalking.getTraces(traceQuery, {
-            if (it.succeeded()) {
-                analyzeFailingTraces(it.result().traces(), handler)
+                processServices(it.result(), handler)
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -127,39 +89,69 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         })
     }
 
-    private void determineActiveServiceInstances(SourceService sourceService,
-                                                 Handler<AsyncResult<JsonArray>> handler) {
-        def searchServiceStartTime
-        if (integrationConfig.failedArtifactTracker.latestSearchedServiceInstance == null) {
-            searchServiceStartTime = Instant.now()
-        } else {
-            searchServiceStartTime = integrationConfig.failedArtifactTracker.latestSearchedServiceInstance
-        }
-        def searchServiceEndTime = Instant.now()
+    private void processServices(Set<SourceService> sourceServices, Handler<AsyncResult<Void>> handler) {
+        def futures = []
+        for (def sourceService : sourceServices) {
+            def promise = Promise.promise()
+            futures.add(promise.future())
 
-        skywalking.getServiceInstances(searchServiceStartTime, searchServiceEndTime, "MINUTE", sourceService.id, {
+            refreshServiceFailingArtifacts(sourceService, {
+                if (it.succeeded()) {
+                    processServiceFailingTraces(sourceService, promise)
+                } else {
+                    promise.fail(it.cause())
+                }
+            })
+        }
+        CompositeFuture.all(futures).onComplete(handler)
+    }
+
+    private void refreshServiceFailingArtifacts(SourceService sourceService, Handler<AsyncResult<Void>> handler) {
+        def start = Instant.now(), end = Instant.now(), step = "MINUTE"
+        skywalking.getServiceInstances(start, end, step, sourceService.id, {
             if (it.succeeded()) {
-                integrationConfig.failedArtifactTracker.latestSearchedServiceInstance = searchServiceEndTime
                 def serviceInstances = it.result()
                 Set<String> serviceInstanceIds = new HashSet<>()
                 for (int i = 0; i < serviceInstances.size(); i++) {
                     serviceInstanceIds.add(serviceInstances.getJsonObject(i).getString("label"))
                 }
 
-                artifactAPI.updateFailingArtifacts(sourceService.appUuid, serviceInstanceIds, {
-                    if (it.succeeded()) {
-                        handler.handle(Future.succeededFuture(serviceInstances))
-                    } else {
-                        handler.handle(Future.failedFuture(it.cause()))
-                    }
-                })
+                artifactAPI.updateFailingArtifacts(sourceService.appUuid, serviceInstanceIds, handler)
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
         })
     }
 
-    private void analyzeFailingTraces(List<Trace> traces, Handler<AsyncResult<Void>> handler) {
+    private void processServiceFailingTraces(SourceService sourceService, Handler<AsyncResult<Void>> handler) {
+        def searchStartTime
+        if (integrationConfig.failedArtifactTracker.serviceLatestSearchedFailingTraces.containsKey(sourceService)) {
+            searchStartTime = integrationConfig.failedArtifactTracker.serviceLatestSearchedFailingTraces.get(sourceService)
+        } else {
+            searchStartTime = Instant.now()
+        }
+        def searchEndTime = Instant.now()
+
+        def traceQuery = TraceQuery.builder()
+                .systemRequest(true)
+                .serviceId(sourceService.id)
+                .traceState("ERROR")
+                .durationStart(searchStartTime)
+                .durationStop(searchEndTime)
+                .durationStep("SECOND").build()
+        skywalking.getTraces(traceQuery, {
+            if (it.succeeded()) {
+                integrationConfig.failedArtifactTracker.addServiceLatestSearchedFailingTraces(
+                        sourceService, searchEndTime)
+
+                processFailingTraces(it.result().traces(), handler)
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    private void processFailingTraces(List<Trace> traces, Handler<AsyncResult<Void>> handler) {
         def futures = []
         for (def trace : traces) {
             trace.traceIds().each {

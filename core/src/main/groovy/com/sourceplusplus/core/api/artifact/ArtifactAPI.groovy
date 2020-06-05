@@ -228,7 +228,7 @@ class ArtifactAPI extends AbstractVerticle {
                             if (oldConfig == null && newConfig == null) {
                                 //no update
                             } else if (oldConfig != null && newConfig == null) {
-                                artifactConfigUpdated = true
+                                //no update
                             } else if (oldConfig == null && newConfig != null) {
                                 artifactConfigUpdated = true
                             } else if (Json.encode(oldConfig) != Json.encode(newConfig)) {
@@ -393,21 +393,8 @@ class ArtifactAPI extends AbstractVerticle {
     }
 
     void getFailingArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
-        core.storage.findArtifactByFailing(appUuid, {
-            if (it.succeeded()) {
-                def failingArtifacts = it.result()
-                core.APMIntegration.getActiveServiceInstances({
-                    if (it.succeeded()) {
-                        //todo: update failing artifacts if service instance not active
-                        println(failingArtifacts)
-                    } else {
-                        handler.handle(Future.failedFuture(it.cause()))
-                    }
-                })
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
+        log.info("Getting failing source artifacts. App UUID: {}", appUuid)
+        core.storage.findArtifactByFailing(appUuid, handler)
     }
 
     void updateFailingArtifacts(String appUuid, Set<String> activeServiceInstances,

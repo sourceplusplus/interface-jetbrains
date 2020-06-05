@@ -68,6 +68,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     void apply() {
         super.apply()
 
+        registerPortal()
         PluginBootstrap.sourcePlugin.vertx.eventBus().publish(SOURCE_MARK_APPLIED, this)
         addEventListener(this)
     }
@@ -77,9 +78,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      */
     @Override
     void handleEvent(@NotNull SourceMarkEvent event) {
-        if (event.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
-            (event.sourceMark as IntelliJGutterMark).registerPortal()
-        } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+        if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
             if (portalRegistered) {
                 SourcePortal.getPortal(portalUuid).close()
             }

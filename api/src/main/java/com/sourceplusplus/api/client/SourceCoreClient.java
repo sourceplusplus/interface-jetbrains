@@ -555,6 +555,22 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
+    public void getFailingArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        String url = sppUrl + GET_SOURCE_ARTIFACTS_ENDPOINT
+                .replace(":appUuid", appUuid) + "?includeOnlyFailing=true";
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<SourceArtifact>>() {
+                    });
+            handler.handle(Future.succeededFuture(artifacts));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
     public void createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName, SourceArtifactConfig createRequest,
                                              Handler<AsyncResult<SourceArtifactConfig>> handler) {
         String url = sppUrl + CONFIGURE_SOURCE_ARTIFACT_ENDPOINT
