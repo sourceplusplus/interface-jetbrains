@@ -3,6 +3,8 @@ package com.sourceplusplus.core.api.artifact
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
+import com.sourceplusplus.api.model.artifact.SourceArtifactStatus
+import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.SourceCoreAPITest
 import io.vertx.core.json.Json
 import io.vertx.ext.unit.TestSuite
@@ -33,7 +35,7 @@ class ArtifactAPITest extends SourceCoreAPITest {
             def async = test.async()
             def artifact = SourceArtifact.builder()
                     .artifactQualifiedName("test-name").build()
-            coreClient.createArtifact(application.appUuid(), artifact, {
+            coreClient.upsertArtifact(application.appUuid(), artifact, {
                 if (it.failed()) {
                     test.fail(it.cause())
                 }
@@ -66,7 +68,7 @@ class ArtifactAPITest extends SourceCoreAPITest {
                 //create artifact to retrieve in test
                 def createArtifact = SourceArtifact.builder()
                         .artifactQualifiedName("test-name").build()
-                coreClient.createArtifact(application.appUuid(), createArtifact, {
+                coreClient.upsertArtifact(application.appUuid(), createArtifact, {
                     if (it.failed()) {
                         test.fail(it.cause())
                     }
@@ -160,6 +162,74 @@ class ArtifactAPITest extends SourceCoreAPITest {
                 test.assertNotNull(fetchedArtifactConfig)
                 test.assertEquals(Json.encode(artifactConfig), Json.encode(fetchedArtifactConfig))
                 async.complete()
+            })
+        }).run().awaitSuccess()
+    }
+
+    @Test
+    void updateArtifactStatusTest() {
+        SourceApplication application = null
+
+        TestSuite.create("ArtifactAPITest-updateArtifactStatusTest").before({ test ->
+            //create application to use in test
+            def async = test.async()
+            coreClient.createApplication({
+                if (it.failed()) {
+                    test.fail(it.cause())
+                }
+                application = it.result()
+                async.complete()
+            })
+        }).test("updateArtifactStatusTest", { test ->
+            def async = test.async()
+            def artifact = SourceArtifact.builder()
+                    .artifactQualifiedName("test-name").build()
+
+            coreClient.upsertArtifact(application.appUuid(), artifact, {
+                if (it.succeeded()) {
+                    test.assertEquals(SourceArtifactStatus.builder().build(), it.result().status())
+
+                    def span = TraceSpan.builder()
+                            .traceId("traceId")
+                            .segmentId("segmentId")
+                            .spanId(0)
+                            .parentSpanId(0)
+                            .serviceCode("serviceCode")
+                            .serviceInstanceName("serviceInstanceName")
+                            .startTime(0)
+                            .endTime(0)
+                            .endpointName("endpointName")
+                            .type("type")
+                            .peer("peer")
+                            .component("component")
+                            .isError(true)
+                            .isChildError(false)
+                            .layer("Local")
+                            .build()
+
+                    def updatedArtifact = it.result().withStatus(
+                            SourceArtifactStatus.builder().latestFailedSpan(span).build())
+                    coreClient.upsertArtifact(application.appUuid(), updatedArtifact, {
+                        if (it.succeeded()) {
+                            test.assertNotNull(it.result().status().latestFailedSpan())
+
+                            updatedArtifact = it.result().withStatus(
+                                    SourceArtifactStatus.builder().latestFailedSpan(null).build())
+                            coreClient.upsertArtifact(application.appUuid(), updatedArtifact, {
+                                if (it.succeeded()) {
+                                    test.assertEquals(SourceArtifactStatus.builder().build(), it.result().status())
+                                    async.complete()
+                                } else {
+                                    test.fail(it.cause())
+                                }
+                            })
+                        } else {
+                            test.fail(it.cause())
+                        }
+                    })
+                } else {
+                    test.fail(it.cause())
+                }
             })
         }).run().awaitSuccess()
     }

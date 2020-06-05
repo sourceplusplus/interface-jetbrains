@@ -67,7 +67,7 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications/:appUuid", SPP_API_VERSION);
     private static final String GET_APPLICATIONS_ENDPOINT = String.format(
             "/%s/applications", SPP_API_VERSION);
-    private static final String CREATE_SOURCE_ARTIFACT_ENDPOINT = String.format(
+    private static final String UPSERT_SOURCE_ARTIFACT_ENDPOINT = String.format(
             "/%s/applications/:appUuid/artifacts", SPP_API_VERSION);
     private static final String GET_SOURCE_ARTIFACTS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/artifacts", SPP_API_VERSION);
@@ -507,9 +507,9 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void createArtifact(String appUuid, SourceArtifact createRequest,
+    public void upsertArtifact(String appUuid, SourceArtifact createRequest,
                                Handler<AsyncResult<SourceArtifact>> handler) {
-        String url = sppUrl + CREATE_SOURCE_ARTIFACT_ENDPOINT
+        String url = sppUrl + UPSERT_SOURCE_ARTIFACT_ENDPOINT
                 .replace(":appUuid", appUuid);
         Request.Builder request = new Request.Builder().url(url)
                 .post(RequestBody.create(JSON, Json.encode(createRequest)));
@@ -571,7 +571,8 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName, SourceArtifactConfig createRequest,
+    public void createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName,
+                                             SourceArtifactConfig createRequest,
                                              Handler<AsyncResult<SourceArtifactConfig>> handler) {
         String url = sppUrl + CONFIGURE_SOURCE_ARTIFACT_ENDPOINT
                 .replace(":appUuid", appUuid)

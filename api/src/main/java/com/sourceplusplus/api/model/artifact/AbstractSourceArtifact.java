@@ -36,9 +36,13 @@ public interface AbstractSourceArtifact extends SourceMessage {
     @Nullable
     Instant lastUpdated();
 
-    @Nullable
-    SourceArtifactConfig config();
+    @Value.Default
+    default SourceArtifactConfig config() {
+        return SourceArtifactConfig.builder().build();
+    }
 
-    @Nullable
-    SourceArtifactStatus status();
+    @Value.Default
+    default SourceArtifactStatus status() {
+        return SourceArtifactStatus.builder().build();
+    }
 }

@@ -227,7 +227,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 if (it.succeeded()) {
                     if (it.result().isPresent()) {
                         def artifact = it.result().get()
-                        if (artifact.config() == null || artifact.config().endpointIds() == null
+                        if (artifact.config().endpointIds() == null
                                 || !artifact.config().endpointIds().contains(endpointId)) {
                             addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), fut)
                         } else {
@@ -397,9 +397,6 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                                                 Handler<AsyncResult<SourceArtifactConfig>> handler) {
         log.info(String.format("Adding endpoints %s to artifact config for artifact: %s",
                 endpointIds, artifact.artifactQualifiedName()))
-        if (artifact.config() == null) {
-            artifact = artifact.withConfig(SourceArtifactConfig.builder().build())
-        }
         artifactAPI.createOrUpdateSourceArtifactConfig(artifact.appUuid(), artifact.artifactQualifiedName(),
                 artifact.config().withEndpoint(true).withEndpointIds(artifact.config().endpointIds() == null
                         ? endpointIds : artifact.config().endpointIds() + endpointIds), handler)

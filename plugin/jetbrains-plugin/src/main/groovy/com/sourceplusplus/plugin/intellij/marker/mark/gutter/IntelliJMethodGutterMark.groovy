@@ -11,7 +11,6 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
-import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
@@ -52,7 +51,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
         def sourceArtifact = SourceArtifact.builder()
                 .appUuid(appUuid).artifactQualifiedName(artifactQualifiedName).build()
         putUserData(IntelliJKeys.SourceArtifact, sourceArtifact)
-        SourcePluginConfig.current.activeEnvironment.coreClient.createArtifact(appUuid, sourceArtifact, {
+        SourcePluginConfig.current.activeEnvironment.coreClient.upsertArtifact(appUuid, sourceArtifact, {
             if (it.succeeded()) {
                 updateSourceArtifact(it.result())
             } else {
@@ -258,9 +257,9 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
 
     private Icon determineMostSuitableIcon() {
         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-            if (sourceArtifact.status()?.latestFailedSpan()) {
+            if (sourceArtifact.status().latestFailedSpan()) {
                 return failingMethod
-            } else if (sourceArtifact.config()?.endpoint()) {
+            } else if (sourceArtifact.config().endpoint()) {
                 return entryMethod
             } else if (artifactDataAvailable) {
                 return sppActive

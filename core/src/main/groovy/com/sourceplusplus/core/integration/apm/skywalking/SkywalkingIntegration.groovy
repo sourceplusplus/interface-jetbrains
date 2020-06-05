@@ -538,7 +538,7 @@ class SkywalkingIntegration extends APMIntegration {
         }
 
         def endpointId = skywalkingEndpoints.get(traceSpan.endpointName())
-        if (endpointId && artifact.config()?.endpointIds() && artifact.config().endpointIds().contains(endpointId)) {
+        if (endpointId && artifact.config().endpointIds() && artifact.config().endpointIds().contains(endpointId)) {
             return true
         } else {
             return traceSpan.endpointName() == artifact.artifactQualifiedName() ||

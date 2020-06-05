@@ -187,27 +187,25 @@ class ArtifactAPI extends AbstractVerticle {
                 if (it.result().isPresent()) {
                     //update
                     def oldArtifact = it.result().get()
-                    def oldConfig = it.result().get().config()
+                    def oldConfig = oldArtifact.config()
                     def newConfig = artifact.config()
-                    def oldStatus = it.result().get().status()
+                    def oldStatus = oldArtifact.status()
                     def newStatus = artifact.status()
 
                     artifact = artifact.withLastUpdated(now)
-                    if (artifact.config() != null && oldArtifact.config() != null) {
-                        if (artifact.config().endpointIds() != null) {
-                            if (artifact.config().endpointIds().isEmpty()) {
-                                newConfig = newConfig.withEndpointIds()
+                    if (artifact.config().endpointIds() != null) {
+                        if (artifact.config().endpointIds().isEmpty()) {
+                            newConfig = newConfig.withEndpointIds()
+                        } else {
+                            if (oldConfig.endpointIds() == null) {
+                                newConfig = newConfig.withEndpointIds(artifact.config().endpointIds())
                             } else {
-                                if (oldConfig.endpointIds() == null) {
-                                    newConfig = newConfig.withEndpointIds(artifact.config().endpointIds())
-                                } else {
-                                    newConfig = newConfig.withEndpointIds(
-                                            oldConfig.endpointIds() + artifact.config().endpointIds())
-                                }
+                                newConfig = newConfig.withEndpointIds(
+                                        oldConfig.endpointIds() + artifact.config().endpointIds())
                             }
                         }
-                        artifact = artifact.withConfig(newConfig)
                     }
+                    artifact = artifact.withConfig(newConfig)
 
                     core.storage.updateArtifact(artifact, {
                         if (it.succeeded()) {

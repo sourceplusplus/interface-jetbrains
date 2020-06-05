@@ -290,42 +290,42 @@ class H2DAO extends SourceStorage {
         params.add(artifact.appUuid())
         params.add(artifact.artifactQualifiedName())
         params.add(artifact.createDate())
-        if (artifact.config()?.endpoint() != null) {
+        if (artifact.config().endpoint() != null) {
             params.add(artifact.config().endpoint())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.subscribeAutomatically() != null) {
+        if (artifact.config().subscribeAutomatically() != null) {
             params.add(artifact.config().subscribeAutomatically())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.forceSubscribe() != null) {
+        if (artifact.config().forceSubscribe() != null) {
             params.add(artifact.config().forceSubscribe())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.moduleName() != null) {
+        if (artifact.config().moduleName() != null) {
             params.add(artifact.config().moduleName())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.component() != null) {
+        if (artifact.config().component() != null) {
             params.add(artifact.config().component())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.endpointName() != null) {
+        if (artifact.config().endpointName() != null) {
             params.add(artifact.config().endpointName())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.endpointIds() != null) {
+        if (artifact.config().endpointIds() != null) {
             params.add("[" + artifact.config().endpointIds().stream().collect(Collectors.joining(",")) + "]")
         } else {
             params.addNull()
         }
-        if (artifact.status()?.latestFailedSpan() != null) {
+        if (artifact.status().latestFailedSpan() != null) {
             params.add(Json.encode(artifact.status().latestFailedSpan()))
         } else {
             params.addNull()
@@ -348,42 +348,42 @@ class H2DAO extends SourceStorage {
         def params = new JsonArray()
         params.add(artifact.appUuid())
         params.add(artifact.artifactQualifiedName())
-        if (artifact.config()?.endpoint() != null) {
+        if (artifact.config().endpoint() != null) {
             params.add(artifact.config().endpoint())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.subscribeAutomatically() != null) {
+        if (artifact.config().subscribeAutomatically() != null) {
             params.add(artifact.config().subscribeAutomatically())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.forceSubscribe() != null) {
+        if (artifact.config().forceSubscribe() != null) {
             params.add(artifact.config().forceSubscribe())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.moduleName() != null) {
+        if (artifact.config().moduleName() != null) {
             params.add(artifact.config().moduleName())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.component() != null) {
+        if (artifact.config().component() != null) {
             params.add(artifact.config().component())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.endpointName() != null) {
+        if (artifact.config().endpointName() != null) {
             params.add(artifact.config().endpointName())
         } else {
             params.addNull()
         }
-        if (artifact.config()?.endpointIds() != null) {
+        if (artifact.config().endpointIds() != null) {
             params.add("[" + artifact.config().endpointIds().stream().collect(Collectors.joining(",")) + "]")
         } else {
             params.addNull()
         }
-        if (artifact.status()?.latestFailedSpan() != null) {
+        if (artifact.status().latestFailedSpan() != null) {
             params.add(Json.encode(artifact.status().latestFailedSpan()))
         } else {
             params.addNull()

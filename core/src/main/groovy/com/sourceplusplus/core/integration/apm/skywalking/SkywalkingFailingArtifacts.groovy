@@ -1,5 +1,6 @@
 package com.sourceplusplus.core.integration.apm.skywalking
 
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactStatus
 import com.sourceplusplus.api.model.trace.Trace
 import com.sourceplusplus.api.model.trace.TraceQuery
@@ -184,22 +185,16 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
             artifactAPI.findSourceArtifact(appUuid, endpointName, {
                 if (it.succeeded()) {
                     if (it.result().isPresent()) {
-                        def artifact = it.result().get()
-                        def status
-                        if (artifact.status() == null) {
-                            status = SourceArtifactStatus.builder()
-                                    .latestFailedSpan(failingSpan)
-                                    .build()
-                        } else {
-                            if (artifact.status().latestFailedSpan() != null) {
-                                if (artifact.status().latestFailedSpan().traceId() != failingSpan.traceId()) {
-                                    status = artifact.status()
-                                            .withLatestFailedSpan(failingSpan)
-                                }
-                            } else {
+                        SourceArtifact artifact = it.result().get()
+                        SourceArtifactStatus status
+                        if (artifact.status().latestFailedSpan() != null) {
+                            if (artifact.status().latestFailedSpan().traceId() != failingSpan.traceId()) {
                                 status = artifact.status()
                                         .withLatestFailedSpan(failingSpan)
                             }
+                        } else {
+                            status = artifact.status()
+                                    .withLatestFailedSpan(failingSpan)
                         }
 
                         if (status != null) {
