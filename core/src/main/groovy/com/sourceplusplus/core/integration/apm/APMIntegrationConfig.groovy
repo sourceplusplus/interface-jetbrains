@@ -5,6 +5,13 @@ import groovy.transform.EqualsAndHashCode
 
 import java.time.Instant
 
+/**
+ * Persistent configuration for the APM integration.
+ *
+ * @version 0.3.0
+ * @since 0.3.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ */
 class APMIntegrationConfig {
 
     private static CoreConfig _coreConfig
