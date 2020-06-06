@@ -16,8 +16,6 @@ import io.vertx.ext.web.RoutingContext
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import static com.sourceplusplus.api.model.trace.TraceOrderType.*
-
 /**
  * Used to add/modify/fetch artifact trace subscriptions.
  *
@@ -122,7 +120,7 @@ class TraceAPI extends AbstractVerticle {
         def traceQueryBuilder = TraceQuery.builder()
                 .artifactQualifiedName(artifactQualifiedName)
         def orderType = routingContext.request().getParam("orderType")
-        if (orderType) traceQueryBuilder.orderType(valueOf(orderType.toUpperCase()))
+        if (orderType) traceQueryBuilder.orderType(TraceOrderType.valueOf(orderType.toUpperCase()))
 
         def timeFrame = routingContext.request().getParam("timeFrame")
         if (timeFrame) {
@@ -209,10 +207,10 @@ class TraceAPI extends AbstractVerticle {
                                     (it.result().list() as List<TraceQueryResult>).each {
                                         totalTraces.addAll(it.traces())
                                     }
-                                    if (traceQuery.orderType() == LATEST_TRACES
-                                            || traceQuery.orderType() == FAILED_TRACES) {
+                                    if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES
+                                            || traceQuery.orderType() == TraceOrderType.FAILED_TRACES) {
                                         totalTraces.sort({ it.start() })
-                                    } else if (traceQuery.orderType() == SLOWEST_TRACES) {
+                                    } else if (traceQuery.orderType() == TraceOrderType.SLOWEST_TRACES) {
                                         totalTraces.sort({ it.duration() })
                                     }
 
@@ -228,7 +226,7 @@ class TraceAPI extends AbstractVerticle {
                             log.debug("Could not find endpoint id for endpoint. Artifact qualified name: " + traceQuery.artifactQualifiedName())
                             handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                         }
-                    } else if (traceQuery.orderType() == FAILED_TRACES) {
+                    } else if (traceQuery.orderType() == TraceOrderType.FAILED_TRACES) {
                         core.storage.getArtifactFailures(artifact, traceQuery, {
                             if (it.succeeded()) {
                                 def finalResult = TraceQueryResult.builder()
