@@ -97,7 +97,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
 
     private void handleMark(IntelliJMethodGutterMark mark) {
         artifactNavigationPendingPopup = null
-        def portal = SourcePortal.getPortal(mark.portalUuid)
+        def portal = IntelliJSourcePortal.getPortal(mark.portalUuid)
         portal.portalUI.loadPage(PortalTab.Traces, ["order_type": portal.portalUI.tracesView.orderType.toString()])
 
         if (portal.portalUI.tracesView.innerTrace) {

@@ -4,4 +4,7 @@ FROM source_artifact_failure
 WHERE 1=1
 AND app_uuid = ?
 AND artifact_qualified_name = ?
-ORDER BY start_time DESC;
+AND start_time >= ?
+AND start_time <= ?
+ORDER BY start_time DESC
+LIMIT ?;

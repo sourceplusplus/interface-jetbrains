@@ -903,6 +903,10 @@ class H2DAO extends SourceStorage {
         def params = new JsonArray()
         params.add(artifact.appUuid())
         params.add(artifact.artifactQualifiedName())
+        params.add(traceQuery.durationStart())
+        params.add(traceQuery.durationStop())
+        params.add(traceQuery.pageSize())
+
         client.queryWithParams(GET_ARTIFACT_FAILURES, params, {
             if (it.succeeded()) {
                 def artifactFailureTraces = new ArrayList<Trace>()
