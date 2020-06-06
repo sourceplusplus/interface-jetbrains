@@ -3,6 +3,8 @@ function setupUI() {
         $('#latest_traces_header_text').text('Latest Traces');
     } else if (traceOrderType == 'SLOWEST_TRACES') {
         $('#latest_traces_header_text').text('Slowest Traces');
+    } else if (traceOrderType == 'FAILED_TRACES') {
+        $('#latest_traces_header_text').text('Failed Traces');
     }
 
     $("input[type='text']").on("click", function () {

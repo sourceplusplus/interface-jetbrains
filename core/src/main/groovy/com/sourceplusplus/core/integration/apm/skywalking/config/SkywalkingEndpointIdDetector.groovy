@@ -5,6 +5,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
+import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingFailingArtifacts
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
-import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.*
+import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
 
 /**
  * Used to match artifacts to SkyWalking endpoint ids.
@@ -38,20 +39,23 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     public static final String SEARCH_FOR_NEW_ENDPOINTS = "SearchForNewEndpoints"
 
+    private static final String UNKNOWN_COMPONENT = "Unknown"
     private static final Map<String, Long[]> endpointCheckBackoff = new ConcurrentHashMap<>()
     private final SkywalkingIntegration skywalking
+    private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final APMIntegrationConfig integrationConfig
 
-    SkywalkingEndpointIdDetector(SkywalkingIntegration skywalking, ArtifactAPI artifactAPI) {
+    SkywalkingEndpointIdDetector(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI, ArtifactAPI artifactAPI) {
         this.skywalking = skywalking
+        this.applicationAPI = applicationAPI
         this.artifactAPI = artifactAPI
         this.integrationConfig = CoreConfig.INSTANCE.apmIntegrationConfig
     }
 
     @Override
     void start(Promise<Void> startFuture) throws Exception {
-        vertx.deployVerticle(new SkywalkingFailingArtifacts(skywalking, artifactAPI),
+        vertx.deployVerticle(new SkywalkingFailingArtifacts(skywalking, applicationAPI, artifactAPI),
                 new DeploymentOptions().setConfig(config()))
 
         vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, { message ->
@@ -198,13 +202,35 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         skywalking.getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
             if (it.succeeded()) {
                 integrationConfig.endpointDetection.latestSearchedService = searchServiceEndTime
+
+                def futures = []
                 for (int i = 0; i < it.result().size(); i++) {
                     def service = it.result().getJsonObject(i)
                     def serviceId = service.getString("key")
-                    def appUuid = service.getString("label") //todo: verify is app-uuid
-                    integrationConfig.addSourceService(new SourceService(serviceId, appUuid))
+                    def appUuid = service.getString("label")
+
+                    //verify appUuid is valid
+                    def promise = Promise.promise()
+                    futures.add(promise)
+                    applicationAPI.getApplication(appUuid, {
+                        if (it.succeeded()) {
+                            if (it.result().isPresent()) {
+                                integrationConfig.addSourceService(new SourceService(serviceId, appUuid))
+                            }
+                            promise.complete()
+                        } else {
+                            promise.fail(it.cause())
+                        }
+                    })
                 }
-                handler.handle(Future.succeededFuture(integrationConfig.sourceServices))
+
+                CompositeFuture.all(futures).onComplete({
+                    if (it.succeeded()) {
+                        handler.handle(Future.succeededFuture(integrationConfig.sourceServices))
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -286,7 +312,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
                     def sourceArtifact = it.result().get()
-                    if (!sourceArtifact.config() || !sourceArtifact.config().endpointIds()
+                    if (!sourceArtifact.config().endpointIds()
                             || !sourceArtifact.config().endpointIds().contains(endpointId)) {
                         addEndpointIdsToArtifactConfig(sourceArtifact, Sets.newHashSet(endpointId), {
                             if (it.succeeded()) {
@@ -356,41 +382,58 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                 def endpointId = vertx.sharedData().getLocalMap("skywalking_pending_endpoints")
                         .get(span.endpointName()) as String
                 if (endpointId) {
-                    if (!span.component().isEmpty()) {
-                        while (!span.component().isEmpty() && i + 1 < spans.size()) {
+                    if (!span.component().isEmpty() && UNKNOWN_COMPONENT != span.component()) {
+                        while (!span.component().isEmpty() && UNKNOWN_COMPONENT != span.component()
+                                && i + 1 < spans.size()) {
                             span = spans.get(++i) //skip entry component spans
                         }
                         --i //step back so nextSpan is span after entry component
                     }
 
-                    if (i + 1 < spans.size()) {
-                        def nextSpan = spans.get(i + 1)
-                        if (nextSpan.artifactQualifiedName() || nextSpan.endpointName()) {
-                            def possibleArtifactQualifiedName = nextSpan.artifactQualifiedName()
-                            if (!possibleArtifactQualifiedName) {
-                                possibleArtifactQualifiedName = nextSpan.endpointName()
-                            }
-
-                            def fut = Promise.promise()
-                            futures.add(fut)
-                            artifactAPI.getSourceArtifact(appUuid, possibleArtifactQualifiedName, {
-                                if (it.succeeded()) {
-                                    if (it.result().isPresent()) {
-                                        def artifact = it.result().get()
-                                        addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), fut)
-                                    } else {
-                                        fut.complete()
-                                    }
-                                } else {
-                                    fut.fail(it.cause())
-                                }
-                            })
-                        }
+                    if (i == 0 && span.type() == "Entry" && span.component() == UNKNOWN_COMPONENT) {
+                        def fut = Promise.promise()
+                        futures.add(fut)
+                        lookupSpanArtifact(span, appUuid, endpointId, fut)
+                    } else if (i + 1 < spans.size()) {
+                        def fut = Promise.promise()
+                        futures.add(fut)
+                        lookupSpanArtifact(spans.get(i + 1), appUuid, endpointId, fut)
                     }
                 }
             }
         }
         CompositeFuture.all(futures).onComplete(handler)
+    }
+
+    private void lookupSpanArtifact(TraceSpan span, String appUuid, String endpointId,
+                                    Handler<AsyncResult<Void>> handler) {
+        if (span.artifactQualifiedName() || span.endpointName()) {
+            def possibleArtifactQualifiedName = span.artifactQualifiedName()
+            if (!possibleArtifactQualifiedName) {
+                possibleArtifactQualifiedName = span.endpointName()
+            }
+
+            artifactAPI.getSourceArtifact(appUuid, possibleArtifactQualifiedName, {
+                if (it.succeeded()) {
+                    if (it.result().isPresent()) {
+                        def artifact = it.result().get()
+                        addEndpointIdsToArtifactConfig(artifact, Sets.newHashSet(endpointId), {
+                            if (it.succeeded()) {
+                                handler.handle(Future.succeededFuture())
+                            } else {
+                                handler.handle(Future.failedFuture(it.cause()))
+                            }
+                        })
+                    } else {
+                        handler.handle(Future.succeededFuture())
+                    }
+                } else {
+                    handler.handle(Future.failedFuture(it.cause()))
+                }
+            })
+        } else {
+            handler.handle(Future.succeededFuture())
+        }
     }
 
     private void addEndpointIdsToArtifactConfig(SourceArtifact artifact, Set<String> endpointIds,

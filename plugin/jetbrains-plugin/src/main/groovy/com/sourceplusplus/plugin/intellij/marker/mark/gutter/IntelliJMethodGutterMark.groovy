@@ -32,8 +32,6 @@ import org.jetbrains.uast.java.JavaUAnnotation
 import javax.swing.*
 import java.time.Instant
 
-import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
-
 /**
  * Extension of the MethodGutterMark for handling IntelliJ.
  *
@@ -89,7 +87,11 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                     .artifactQualifiedName(artifactQualifiedName)
                     .removeAllArtifactSubscriptions(true)
                     .build()
-            PluginBootstrap.sourcePlugin.vertx.eventBus().send(UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
+            SourcePluginConfig.current.activeEnvironment.coreClient.unsubscribeFromArtifact(unsubscribeRequest, {
+                if (it.failed()) {
+                    log.error("Failed to unsubscribe from artifact: $artifactQualifiedName", it.cause())
+                }
+            })
         } else if (event.eventCode == SourceMarkEventCode.NAME_CHANGED) {
             //todo: this
         }

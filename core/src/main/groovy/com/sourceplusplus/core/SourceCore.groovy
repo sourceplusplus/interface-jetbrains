@@ -70,7 +70,7 @@ class SourceCore extends AbstractVerticle {
                 throw new IllegalArgumentException("Unknown storage type: " + storageConfig.getString("type"))
         }
 
-        storageCompleter.future().onComplete({
+        (storageCompleter as Future).onComplete({
             if (it.succeeded()) {
                 storage.getCoreConfig({
                     if (it.succeeded()) {
@@ -214,7 +214,7 @@ class SourceCore extends AbstractVerticle {
 
     private void connectToApacheSkyWalking(JsonObject integration, Handler<AsyncResult<Void>> handler) {
         log.info("Connecting to Apache SkyWalking...")
-        apmIntegration = new SkywalkingIntegration(artifactAPI, storage)
+        apmIntegration = new SkywalkingIntegration(applicationAPI, artifactAPI, storage)
         vertx.deployVerticle(apmIntegration, new DeploymentOptions().setConfig(integration), {
             if (it.succeeded()) {
                 deployedIntegrations.add(it.result())

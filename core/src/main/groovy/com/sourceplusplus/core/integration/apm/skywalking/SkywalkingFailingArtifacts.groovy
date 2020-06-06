@@ -5,6 +5,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactStatus
 import com.sourceplusplus.api.model.trace.Trace
 import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
+import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import com.sourceplusplus.core.storage.CoreConfig
@@ -27,11 +28,13 @@ import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.Sourc
 class SkywalkingFailingArtifacts extends AbstractVerticle {
 
     private final SkywalkingIntegration skywalking
+    private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final APMIntegrationConfig integrationConfig
 
-    SkywalkingFailingArtifacts(SkywalkingIntegration skywalking, ArtifactAPI artifactAPI) {
+    SkywalkingFailingArtifacts(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI, ArtifactAPI artifactAPI) {
         this.skywalking = skywalking
+        this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = artifactAPI
         this.integrationConfig = CoreConfig.INSTANCE.apmIntegrationConfig
     }
@@ -65,6 +68,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         })
     }
 
+    //todo: merge with EndpointIdDetector's
     private void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
         def searchServiceStartTime
         if (integrationConfig.failedArtifactTracker.latestSearchedService == null) {
@@ -77,13 +81,35 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         skywalking.getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
             if (it.succeeded()) {
                 integrationConfig.failedArtifactTracker.latestSearchedService = searchServiceEndTime
+
+                def futures = []
                 for (int i = 0; i < it.result().size(); i++) {
                     def service = it.result().getJsonObject(i)
                     def serviceId = service.getString("key")
-                    def appUuid = service.getString("label") //todo: verify is app-uuid
-                    integrationConfig.addSourceService(new SourceService(serviceId, appUuid))
+                    def appUuid = service.getString("label")
+
+                    //verify appUuid is valid
+                    def promise = Promise.promise()
+                    futures.add(promise)
+                    applicationAPI.getApplication(appUuid, {
+                        if (it.succeeded()) {
+                            if (it.result().isPresent()) {
+                                integrationConfig.addSourceService(new SourceService(serviceId, appUuid))
+                            }
+                            promise.complete()
+                        } else {
+                            promise.fail(it.cause())
+                        }
+                    })
                 }
-                handler.handle(Future.succeededFuture(integrationConfig.sourceServices))
+
+                CompositeFuture.all(futures).onComplete({
+                    if (it.succeeded()) {
+                        handler.handle(Future.succeededFuture(integrationConfig.sourceServices))
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -94,7 +120,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         def futures = []
         for (def sourceService : sourceServices) {
             def promise = Promise.promise()
-            futures.add(promise.future())
+            futures.add(promise)
 
             refreshServiceFailingArtifacts(sourceService, {
                 if (it.succeeded()) {
@@ -178,7 +204,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
                 continue
             }
             def future = Promise.promise()
-            futures.add(future.future())
+            futures.add(future)
 
             def appUuid = failingSpan.serviceCode()
             def endpointName = failingSpan.endpointName()

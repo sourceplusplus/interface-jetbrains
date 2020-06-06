@@ -8,6 +8,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.*
+import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
@@ -22,6 +23,8 @@ import io.vertx.ext.web.client.WebClient
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+
+import static com.sourceplusplus.api.model.trace.TraceOrderType.*
 
 /**
  * Represents integration with the Apache SkyWalking APM.
@@ -47,6 +50,7 @@ class SkywalkingIntegration extends APMIntegration {
             "query/skywalking/query_failing_traces.graphql"), Charsets.UTF_8)
     private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
+    private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final SourceStorage storage
     private DateTimeFormatter DATE_TIME_FORMATTER_MINUTES
@@ -55,7 +59,8 @@ class SkywalkingIntegration extends APMIntegration {
     private int skywalkingOAPPort
     private WebClient webClient
 
-    SkywalkingIntegration(ArtifactAPI artifactAPI, SourceStorage storage) {
+    SkywalkingIntegration(ApplicationAPI applicationAPI, ArtifactAPI artifactAPI, SourceStorage storage) {
+        this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
     }
@@ -80,7 +85,7 @@ class SkywalkingIntegration extends APMIntegration {
         skywalkingOAPPort = Objects.requireNonNull(restHost.getInteger("port"))
 
         webClient = WebClient.create(vertx)
-        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, artifactAPI),
+        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, applicationAPI, artifactAPI),
                 new DeploymentOptions().setConfig(config()), {
             if (it.succeeded()) {
                 log.info("SkywalkingIntegration started")
@@ -180,7 +185,7 @@ class SkywalkingIntegration extends APMIntegration {
                 def futures = []
                 for (int i = 0; i < it.result().size(); i++) {
                     def promise = Promise.promise()
-                    futures.add(promise.future())
+                    futures.add(promise)
 
                     def service = it.result().getJsonObject(i)
                     getServiceInstances(start, end, step, service.getString("label"), promise)
@@ -350,13 +355,14 @@ class SkywalkingIntegration extends APMIntegration {
     void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
         log.debug("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
         def actualQuery
-        if (traceQuery.endpointId() == null && traceQuery.traceState() == "ERROR") {
+        if (traceQuery.orderType() == FAILED_TRACES
+                || (traceQuery.endpointId() == null && traceQuery.traceState() == "ERROR")) {
             actualQuery = QUERY_FAILING_TRACES
         } else {
             actualQuery = QUERY_BASIC_TRACES
                     .replace('$endpointId', traceQuery.endpointId())
         }
-        def queryOrder = traceQuery.orderType() == TraceOrderType.LATEST_TRACES ? "BY_START_TIME" : "BY_DURATION"
+        def queryOrder = traceQuery.orderType() == SLOWEST_TRACES ? "BY_DURATION" : "BY_START_TIME"
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", actualQuery
                 .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
@@ -379,9 +385,9 @@ class SkywalkingIntegration extends APMIntegration {
                 for (int i = 0; i < traces.size(); i++) {
                     traceList.add(Json.decodeValue(traces.getJsonObject(i).toString(), Trace.class))
                 }
-                if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
+                if (traceQuery.orderType() == LATEST_TRACES || traceQuery.orderType() == FAILED_TRACES) {
                     traceList.sort({ it.start() })
-                } else if (traceQuery.orderType() == TraceOrderType.SLOWEST_TRACES) {
+                } else if (traceQuery.orderType() == SLOWEST_TRACES) {
                     traceList.sort({ it.duration() })
                 }
 
