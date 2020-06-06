@@ -7,7 +7,8 @@ import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import org.jetbrains.annotations.NotNull
 
 /**
- * todo: this
+ * Allows the Source++ Portal to be displayed via keyboard action.
+ * Ensures the portal is registered before popup.
  *
  * @version 0.3.0
  * @since 0.3.0

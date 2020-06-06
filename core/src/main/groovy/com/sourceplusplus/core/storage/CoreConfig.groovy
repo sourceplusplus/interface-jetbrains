@@ -5,6 +5,13 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 
+/**
+ * Persistent configuration for the core system.
+ *
+ * @version 0.3.0
+ * @since 0.3.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ */
 @Slf4j
 class CoreConfig {
 

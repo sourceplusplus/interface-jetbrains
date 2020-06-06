@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
 
 /**
- * todo: this
+ * Queries Apache SkyWalking for failing traces and correlates them to stored sources code artifacts.
  *
  * @version 0.3.0
  * @since 0.3.0
