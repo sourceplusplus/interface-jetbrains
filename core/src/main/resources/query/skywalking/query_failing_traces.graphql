@@ -5,6 +5,7 @@
             end: "$queryDurationEnd",
             step: $queryDurationStep
         },
+        endpointName: $endpointName,
         traceState: $traceState,
         queryOrder: $queryOrder,
         paging: {

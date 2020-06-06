@@ -47,7 +47,11 @@ public interface AbstractTraceQuery {
 
     @Value.Default
     default String traceState() {
-        return "ALL";
+        if (orderType() == TraceOrderType.FAILED_TRACES) {
+            return "ERROR";
+        } else {
+            return "ALL";
+        }
     }
 
     @Nullable

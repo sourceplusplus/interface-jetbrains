@@ -1,10 +1,10 @@
 WITH existing_artifact(
   app_uuid, artifact_qualified_name, endpoint, subscribe_automatically, force_subscribe,
-  module_name, component, endpoint_name, endpoint_ids
+  module_name, component, endpoint_name, endpoint_ids, active_failing, latest_failed_service_instance
 ) AS (
     SELECT
       app_uuid, artifact_qualified_name, endpoint, subscribe_automatically, force_subscribe,
-      module_name, component, endpoint_name, endpoint_ids
+      module_name, component, endpoint_name, endpoint_ids, active_failing, latest_failed_service_instance
     FROM source_artifact
     WHERE 1=1
     AND app_uuid = ?
@@ -19,7 +19,8 @@ SET
   component = COALESCE (?, (SELECT component FROM existing_artifact)),
   endpoint_name = COALESCE (?, (SELECT endpoint_name FROM existing_artifact)),
   endpoint_ids = COALESCE (?, (SELECT endpoint_ids FROM existing_artifact)),
-  latest_failed_span = ?
+  active_failing = COALESCE (?, (SELECT active_failing FROM existing_artifact)),
+  latest_failed_service_instance = COALESCE (?, (SELECT latest_failed_service_instance FROM existing_artifact))
 WHERE 1=1
 AND app_uuid = (SELECT app_uuid FROM existing_artifact)
 AND artifact_qualified_name = (SELECT artifact_qualified_name FROM existing_artifact);

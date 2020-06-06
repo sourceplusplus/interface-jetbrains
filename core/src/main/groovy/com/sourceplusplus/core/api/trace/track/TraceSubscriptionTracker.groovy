@@ -118,6 +118,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
      */
     private void publishLatestTraces(ApplicationArtifact appArtifact) {
         def traceQuery = TraceQuery.builder().orderType(TraceOrderType.LATEST_TRACES)
+                .systemRequest(true)
                 .appUuid(appArtifact.appUuid())
                 .artifactQualifiedName(appArtifact.artifactQualifiedName())
                 .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
@@ -158,6 +159,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
      */
     private void publishSlowestTraces(ApplicationArtifact appArtifact) {
         def traceQuery = TraceQuery.builder().orderType(TraceOrderType.SLOWEST_TRACES)
+                .systemRequest(true)
                 .appUuid(appArtifact.appUuid())
                 .artifactQualifiedName(appArtifact.artifactQualifiedName())
                 .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
@@ -198,6 +200,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
      */
     private void publishFailedTraces(ApplicationArtifact appArtifact) {
         def traceQuery = TraceQuery.builder().orderType(TraceOrderType.FAILED_TRACES)
+                .systemRequest(true)
                 .appUuid(appArtifact.appUuid())
                 .artifactQualifiedName(appArtifact.artifactQualifiedName())
                 .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))

@@ -14,9 +14,6 @@ import java.time.Instant
  */
 class IntelliJKeys {
     public static final SourceKey<SourceArtifact> SourceArtifact = new SourceKey<>("SourceArtifact")
-    public static final SourceKey<Boolean> ArtifactSubscribed = new SourceKey<>("ArtifactSubscribed")
     public static final SourceKey<Boolean> ArtifactDataAvailable = new SourceKey<>("ArtifactDataAvailable")
-    public static final SourceKey<Instant> ArtifactSubscribeTime = new SourceKey<>("ArtifactSubscribeTime")
-    public static final SourceKey<Instant> ArtifactUnsubscribeTime = new SourceKey<>("ArtifactUnsubscribeTime")
     public static final SourceKey<String> PortalUUID = new SourceKey<>("PortalUUID")
 }

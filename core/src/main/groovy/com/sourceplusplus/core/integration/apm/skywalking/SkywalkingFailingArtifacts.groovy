@@ -9,6 +9,7 @@ import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import com.sourceplusplus.core.storage.CoreConfig
+import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
 
@@ -30,12 +31,15 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
     private final SkywalkingIntegration skywalking
     private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
+    private final SourceStorage storage
     private final APMIntegrationConfig integrationConfig
 
-    SkywalkingFailingArtifacts(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI, ArtifactAPI artifactAPI) {
-        this.skywalking = skywalking
+    SkywalkingFailingArtifacts(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI,
+                               ArtifactAPI artifactAPI, SourceStorage storage) {
+        this.skywalking = Objects.requireNonNull(skywalking)
         this.applicationAPI = Objects.requireNonNull(applicationAPI)
-        this.artifactAPI = artifactAPI
+        this.artifactAPI = Objects.requireNonNull(artifactAPI)
+        this.storage = Objects.requireNonNull(storage)
         this.integrationConfig = CoreConfig.INSTANCE.apmIntegrationConfig
     }
 
@@ -171,19 +175,20 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
                 integrationConfig.failedArtifactTracker.addServiceLatestSearchedFailingTraces(
                         sourceService, searchEndTime)
 
-                processFailingTraces(it.result().traces(), handler)
+                processFailingTraces(sourceService, it.result().traces(), handler)
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
         })
     }
 
-    private void processFailingTraces(List<Trace> traces, Handler<AsyncResult<Void>> handler) {
+    private void processFailingTraces(SourceService sourceService, List<Trace> traces,
+                                      Handler<AsyncResult<Void>> handler) {
         def futures = []
         for (def trace : traces) {
             trace.traceIds().each {
                 def future = Promise.promise()
-                skywalking.getTraceStack(null, it, {
+                skywalking.getTraceStack(sourceService.appUuid, it, {
                     if (it.succeeded()) {
                         processFailingTraceStack(it.result().traceSpans(), future)
                     } else {
@@ -196,8 +201,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         CompositeFuture.all(futures).onComplete(handler)
     }
 
-    private void processFailingTraceStack(List<TraceSpan> failingTraceSpans,
-                                          Handler<AsyncResult<Void>> handler) {
+    private void processFailingTraceStack(List<TraceSpan> failingTraceSpans, Handler<AsyncResult<Void>> handler) {
         def futures = []
         for (def failingSpan : failingTraceSpans) {
             if (!failingSpan.error) {
@@ -213,21 +217,29 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
                     if (it.result().isPresent()) {
                         SourceArtifact artifact = it.result().get()
                         SourceArtifactStatus status
-                        if (artifact.status().latestFailedSpan() != null) {
-                            if (artifact.status().latestFailedSpan().traceId() != failingSpan.traceId()) {
+                        if (artifact.status().latestFailedServiceInstance() != null) {
+                            if (artifact.status().latestFailedServiceInstance() != failingSpan.serviceInstanceName()) {
                                 status = artifact.status()
-                                        .withLatestFailedSpan(failingSpan)
+                                        .withActivelyFailing(true)
+                                        .withLatestFailedServiceInstance(failingSpan.serviceInstanceName())
                             }
                         } else {
                             status = artifact.status()
-                                    .withLatestFailedSpan(failingSpan)
+                                    .withActivelyFailing(true)
+                                    .withLatestFailedServiceInstance(failingSpan.serviceInstanceName())
                         }
 
-                        if (status != null) {
-                            artifactAPI.createOrUpdateSourceArtifactStatus(artifact.withStatus(status), future)
-                        } else {
-                            future.complete()
-                        }
+                        storage.addArtifactFailure(artifact, failingSpan, {
+                            if (it.succeeded()) {
+                                if (status != null) {
+                                    artifactAPI.createOrUpdateSourceArtifactStatus(artifact.withStatus(status), future)
+                                } else {
+                                    future.complete()
+                                }
+                            } else {
+                                future.fail(it.cause())
+                            }
+                        })
                     } else {
                         future.complete()
                     }

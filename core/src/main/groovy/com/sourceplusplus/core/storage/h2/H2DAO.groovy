@@ -4,12 +4,10 @@ import com.google.common.base.Charsets
 import com.google.common.io.Resources
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
-import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
-import com.sourceplusplus.api.model.artifact.SourceArtifactStatus
-import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
-import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType
+import com.sourceplusplus.api.model.artifact.*
 import com.sourceplusplus.api.model.config.SourceAgentConfig
+import com.sourceplusplus.api.model.trace.Trace
+import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
@@ -82,7 +80,11 @@ class H2DAO extends SourceStorage {
             "storage/h2/queries/get_application_subscriptions.sql"), Charsets.UTF_8)
     private static final String DELETE_ARTIFACT_SUBSCRIPTION = Resources.toString(Resources.getResource(
             "storage/h2/queries/delete_artifact_subscription.sql"), Charsets.UTF_8)
-    final JDBCClient client
+    private static final String ADD_ARTIFACT_FAILURE = Resources.toString(Resources.getResource(
+            "storage/h2/queries/add_artifact_failure.sql"), Charsets.UTF_8)
+    private static final String GET_ARTIFACT_FAILURES = Resources.toString(Resources.getResource(
+            "storage/h2/queries/get_artifact_failures.sql"), Charsets.UTF_8)
+    private final JDBCClient client
 
     H2DAO(Vertx vertx, JsonObject config, Promise storageCompleter) {
         client = JDBCClient.createShared(vertx, new JsonObject()
@@ -290,46 +292,19 @@ class H2DAO extends SourceStorage {
         params.add(artifact.appUuid())
         params.add(artifact.artifactQualifiedName())
         params.add(artifact.createDate())
-        if (artifact.config().endpoint() != null) {
-            params.add(artifact.config().endpoint())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().subscribeAutomatically() != null) {
-            params.add(artifact.config().subscribeAutomatically())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().forceSubscribe() != null) {
-            params.add(artifact.config().forceSubscribe())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().moduleName() != null) {
-            params.add(artifact.config().moduleName())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().component() != null) {
-            params.add(artifact.config().component())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().endpointName() != null) {
-            params.add(artifact.config().endpointName())
-        } else {
-            params.addNull()
-        }
+        params.add(artifact.config().endpoint())
+        params.add(artifact.config().subscribeAutomatically())
+        params.add(artifact.config().forceSubscribe())
+        params.add(artifact.config().moduleName())
+        params.add(artifact.config().component())
+        params.add(artifact.config().endpointName())
         if (artifact.config().endpointIds() != null) {
             params.add("[" + artifact.config().endpointIds().stream().collect(Collectors.joining(",")) + "]")
         } else {
             params.addNull()
         }
-        if (artifact.status().latestFailedSpan() != null) {
-            params.add(Json.encode(artifact.status().latestFailedSpan()))
-        } else {
-            params.addNull()
-        }
+        params.add(artifact.status().activelyFailing())
+        params.add(artifact.status().latestFailedServiceInstance())
 
         client.updateWithParams(CREATE_ARTIFACT, params, {
             if (it.succeeded()) {
@@ -348,46 +323,19 @@ class H2DAO extends SourceStorage {
         def params = new JsonArray()
         params.add(artifact.appUuid())
         params.add(artifact.artifactQualifiedName())
-        if (artifact.config().endpoint() != null) {
-            params.add(artifact.config().endpoint())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().subscribeAutomatically() != null) {
-            params.add(artifact.config().subscribeAutomatically())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().forceSubscribe() != null) {
-            params.add(artifact.config().forceSubscribe())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().moduleName() != null) {
-            params.add(artifact.config().moduleName())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().component() != null) {
-            params.add(artifact.config().component())
-        } else {
-            params.addNull()
-        }
-        if (artifact.config().endpointName() != null) {
-            params.add(artifact.config().endpointName())
-        } else {
-            params.addNull()
-        }
+        params.add(artifact.config().endpoint())
+        params.add(artifact.config().subscribeAutomatically())
+        params.add(artifact.config().forceSubscribe())
+        params.add(artifact.config().moduleName())
+        params.add(artifact.config().component())
+        params.add(artifact.config().endpointName())
         if (artifact.config().endpointIds() != null) {
             params.add("[" + artifact.config().endpointIds().stream().collect(Collectors.joining(",")) + "]")
         } else {
             params.addNull()
         }
-        if (artifact.status().latestFailedSpan() != null) {
-            params.add(Json.encode(artifact.status().latestFailedSpan()))
-        } else {
-            params.addNull()
-        }
+        params.add(artifact.status().activelyFailing())
+        params.add(artifact.status().latestFailedServiceInstance())
 
         client.updateWithParams(UPDATE_ARTIFACT, params, {
             if (it.succeeded()) {
@@ -433,12 +381,12 @@ class H2DAO extends SourceStorage {
                     if (artifactDetails.getString(10)) {
                         config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
                     }
-                    if (artifactDetails.getString(11)) {
-                        def latestFailedSpan = Json.decodeValue(artifactDetails.getString(11), TraceSpan.class)
-                        artifact = artifact.withStatus(
-                                SourceArtifactStatus.builder().latestFailedSpan(latestFailedSpan).build())
-                    }
-                    handler.handle(Future.succeededFuture(Optional.of(artifact.withConfig(config.build()))))
+                    def status = SourceArtifactStatus.builder()
+                            .activelyFailing(artifactDetails.getBoolean(11))
+                            .latestFailedServiceInstance(artifactDetails.getString(12))
+
+                    handler.handle(Future.succeededFuture(Optional.of(
+                            artifact.withConfig(config.build()).withStatus(status.build()))))
                 } else {
                     handler.handle(Future.succeededFuture(Optional.empty()))
                 }
@@ -477,12 +425,12 @@ class H2DAO extends SourceStorage {
                     if (artifactDetails.getString(10)) {
                         config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
                     }
-                    if (artifactDetails.getString(11)) {
-                        def latestFailedSpan = Json.decodeValue(artifactDetails.getString(11), TraceSpan.class)
-                        artifact = artifact.withStatus(
-                                SourceArtifactStatus.builder().latestFailedSpan(latestFailedSpan).build())
-                    }
-                    handler.handle(Future.succeededFuture(Optional.of(artifact.withConfig(config.build()))))
+                    def status = SourceArtifactStatus.builder()
+                            .activelyFailing(artifactDetails.getBoolean(11))
+                            .latestFailedServiceInstance(artifactDetails.getString(12))
+
+                    handler.handle(Future.succeededFuture(Optional.of(
+                            artifact.withConfig(config.build()).withStatus(status.build()))))
                 } else {
                     handler.handle(Future.succeededFuture(Optional.empty()))
                 }
@@ -527,12 +475,12 @@ class H2DAO extends SourceStorage {
                     if (artifactDetails.getString(10)) {
                         config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
                     }
-                    if (artifactDetails.getString(11)) {
-                        def latestFailedSpan = Json.decodeValue(artifactDetails.getString(11), TraceSpan.class)
-                        artifact = artifact.withStatus(
-                                SourceArtifactStatus.builder().latestFailedSpan(latestFailedSpan).build())
-                    }
-                    handler.handle(Future.succeededFuture(Optional.of(artifact.withConfig(config.build()))))
+                    def status = SourceArtifactStatus.builder()
+                            .activelyFailing(artifactDetails.getBoolean(11))
+                            .latestFailedServiceInstance(artifactDetails.getString(12))
+
+                    handler.handle(Future.succeededFuture(Optional.of(
+                            artifact.withConfig(config.build()).withStatus(status.build()))))
                 } else {
                     handler.handle(Future.succeededFuture(Optional.empty()))
                 }
@@ -546,8 +494,7 @@ class H2DAO extends SourceStorage {
      * {@inheritDoc}
      */
     @Override
-    void findArtifactBySubscribeAutomatically(String appUuid,
-                                              Handler<AsyncResult<List<SourceArtifact>>> handler) {
+    void findArtifactBySubscribeAutomatically(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         def params = new JsonArray()
         params.add(appUuid)
         client.queryWithParams(GET_ARTIFACT_BY_SUBSCRIBE_AUTOMATICALLY, params, {
@@ -570,12 +517,11 @@ class H2DAO extends SourceStorage {
                     if (it.getString(10)) {
                         config.addEndpointIds(it.getString(10)[1..-2].split(","))
                     }
-                    if (it.getString(11)) {
-                        def latestFailedSpan = Json.decodeValue(it.getString(11), TraceSpan.class)
-                        artifact = artifact.withStatus(
-                                SourceArtifactStatus.builder().latestFailedSpan(latestFailedSpan).build())
-                    }
-                    artifacts.add(artifact.withConfig(config.build()))
+                    def status = SourceArtifactStatus.builder()
+                            .activelyFailing(it.getBoolean(11))
+                            .latestFailedServiceInstance(it.getString(12))
+
+                    artifacts.add(artifact.withConfig(config.build()).withStatus(status.build()))
                 }
                 handler.handle(Future.succeededFuture(artifacts))
             } else {
@@ -611,12 +557,11 @@ class H2DAO extends SourceStorage {
                     if (it.getString(10)) {
                         config.addEndpointIds(it.getString(10)[1..-2].split(","))
                     }
-                    if (it.getString(11)) {
-                        def latestFailedSpan = Json.decodeValue(it.getString(11), TraceSpan.class)
-                        artifact = artifact.withStatus(
-                                SourceArtifactStatus.builder().latestFailedSpan(latestFailedSpan).build())
-                    }
-                    artifacts.add(artifact.withConfig(config.build()))
+                    def status = SourceArtifactStatus.builder()
+                            .activelyFailing(it.getBoolean(11))
+                            .latestFailedServiceInstance(it.getString(12))
+
+                    artifacts.add(artifact.withConfig(config.build()).withStatus(status.build()))
                 }
                 handler.handle(Future.succeededFuture(artifacts))
             } else {
@@ -652,12 +597,11 @@ class H2DAO extends SourceStorage {
                     if (it.getString(10)) {
                         config.addEndpointIds(it.getString(10)[1..-2].split(","))
                     }
-                    if (it.getString(11)) {
-                        def latestFailedSpan = Json.decodeValue(it.getString(11), TraceSpan.class)
-                        artifact = artifact.withStatus(
-                                SourceArtifactStatus.builder().latestFailedSpan(latestFailedSpan).build())
-                    }
-                    artifacts.add(artifact.withConfig(config.build()))
+                    def status = SourceArtifactStatus.builder()
+                            .activelyFailing(it.getBoolean(11))
+                            .latestFailedServiceInstance(it.getString(12))
+
+                    artifacts.add(artifact.withConfig(config.build()).withStatus(status.build()))
                 }
                 handler.handle(Future.succeededFuture(artifacts))
             } else {
@@ -693,12 +637,11 @@ class H2DAO extends SourceStorage {
                     if (it.getString(10)) {
                         config.addEndpointIds(it.getString(10)[1..-2].split(","))
                     }
-                    if (it.getString(11)) {
-                        def latestFailedSpan = Json.decodeValue(it.getString(11), TraceSpan.class)
-                        artifact = artifact.withStatus(
-                                SourceArtifactStatus.builder().latestFailedSpan(latestFailedSpan).build())
-                    }
-                    artifacts.add(artifact.withConfig(config.build()))
+                    def status = SourceArtifactStatus.builder()
+                            .activelyFailing(it.getBoolean(11))
+                            .latestFailedServiceInstance(it.getString(12))
+
+                    artifacts.add(artifact.withConfig(config.build()).withStatus(status.build()))
                 }
                 handler.handle(Future.succeededFuture(artifacts))
             } else {
@@ -924,6 +867,57 @@ class H2DAO extends SourceStorage {
                     appSubscription.addAllTypes(subscription.subscriptionLastAccessed().keySet())
                 }
                 handler.handle(Future.succeededFuture(applicationSubscriptions.values().collect { it.build() }))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void addArtifactFailure(SourceArtifact artifact, TraceSpan failingSpan, Handler<AsyncResult<Void>> handler) {
+        def params = new JsonArray()
+        params.add(artifact.appUuid())
+        params.add(artifact.artifactQualifiedName())
+        params.add(failingSpan.traceId())
+        params.add(Instant.ofEpochMilli(failingSpan.startTime()))
+        params.add(failingSpan.endTime() - failingSpan.startTime())
+
+        client.updateWithParams(ADD_ARTIFACT_FAILURE, params, {
+            if (it.succeeded()) {
+                handler.handle(Future.succeededFuture())
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getArtifactFailures(SourceArtifact artifact, TraceQuery traceQuery,
+                             Handler<AsyncResult<List<Trace>>> handler) {
+        def params = new JsonArray()
+        params.add(artifact.appUuid())
+        params.add(artifact.artifactQualifiedName())
+        client.queryWithParams(GET_ARTIFACT_FAILURES, params, {
+            if (it.succeeded()) {
+                def artifactFailureTraces = new ArrayList<Trace>()
+                def results = it.result().results
+                results.each {
+                    artifactFailureTraces.add(Trace.builder()
+                            .addOperationNames(it.getString(0))
+                            .addTraceIds(it.getString(1))
+                            .start(it.getInstant(2).toEpochMilli())
+                            .duration(it.getInteger(3))
+                            .isError(true)
+                            .isPartial(true).build()
+                    )
+                }
+                handler.handle(Future.succeededFuture(artifactFailureTraces))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

@@ -6,6 +6,9 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
+import com.sourceplusplus.api.model.trace.Trace
+import com.sourceplusplus.api.model.trace.TraceQuery
+import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
@@ -1107,6 +1110,22 @@ class ElasticsearchDAO extends SourceStorage {
                 handler.handle(Future.failedFuture(ex))
             }
         })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void addArtifactFailure(SourceArtifact artifact, TraceSpan failingSpan, Handler<AsyncResult<Void>> handler) {
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getArtifactFailures(SourceArtifact artifact, TraceQuery traceQuery, Handler<AsyncResult<List<Trace>>> handler) {
+
     }
 
     /**

@@ -11,6 +11,7 @@ import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingFailingArtifacts
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
 import com.sourceplusplus.core.storage.CoreConfig
+import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
@@ -26,6 +27,7 @@ import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
 import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
+import static com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration.UNKNOWN_COMPONENT
 
 /**
  * Used to match artifacts to SkyWalking endpoint ids.
@@ -39,23 +41,25 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     public static final String SEARCH_FOR_NEW_ENDPOINTS = "SearchForNewEndpoints"
 
-    private static final String UNKNOWN_COMPONENT = "Unknown"
     private static final Map<String, Long[]> endpointCheckBackoff = new ConcurrentHashMap<>()
     private final SkywalkingIntegration skywalking
     private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
+    private final SourceStorage storage
     private final APMIntegrationConfig integrationConfig
 
-    SkywalkingEndpointIdDetector(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI, ArtifactAPI artifactAPI) {
-        this.skywalking = skywalking
-        this.applicationAPI = applicationAPI
-        this.artifactAPI = artifactAPI
+    SkywalkingEndpointIdDetector(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI,
+                                 ArtifactAPI artifactAPI, SourceStorage storage) {
+        this.skywalking = Objects.requireNonNull(skywalking)
+        this.applicationAPI = Objects.requireNonNull(applicationAPI)
+        this.artifactAPI = Objects.requireNonNull(artifactAPI)
+        this.storage = Objects.requireNonNull(storage)
         this.integrationConfig = CoreConfig.INSTANCE.apmIntegrationConfig
     }
 
     @Override
     void start(Promise<Void> startFuture) throws Exception {
-        vertx.deployVerticle(new SkywalkingFailingArtifacts(skywalking, applicationAPI, artifactAPI),
+        vertx.deployVerticle(new SkywalkingFailingArtifacts(skywalking, applicationAPI, artifactAPI, storage),
                 new DeploymentOptions().setConfig(config()))
 
         vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, { message ->

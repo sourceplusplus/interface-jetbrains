@@ -155,32 +155,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
-    void markArtifactSubscribed() {
-        if (!artifactSubscribed) {
-            putUserData(IntelliJKeys.ArtifactSubscribed, true)
-            putUserData(IntelliJKeys.ArtifactSubscribeTime, Instant.now())
-            configuration.icon = determineMostSuitableIcon()
-            sourceFileMarker.refresh()
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void markArtifactUnsubscribed() {
-        if (artifactSubscribed) {
-            putUserData(IntelliJKeys.ArtifactSubscribed, false)
-            putUserData(IntelliJKeys.ArtifactUnsubscribeTime, Instant.now())
-            configuration.icon = determineMostSuitableIcon()
-            sourceFileMarker.refresh()
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     void markArtifactDataAvailable() {
         if (!artifactDataAvailable) {
             putUserData(IntelliJKeys.ArtifactDataAvailable, true)
@@ -194,13 +168,8 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      */
     @Override
     boolean isArtifactSubscribed() {
-        boolean activelySubscribed = getUserData(IntelliJKeys.ArtifactSubscribed)
-        if (activelySubscribed) {
-            return true
-        }
-
         def config = getUserData(IntelliJKeys.SourceArtifact).config()
-        return config != null && (config.subscribeAutomatically() || config.forceSubscribe())
+        return config.subscribeAutomatically() || config.forceSubscribe()
     }
 
     /**
@@ -261,7 +230,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
 
     private Icon determineMostSuitableIcon() {
         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-            if (sourceArtifact.status().latestFailedSpan()) {
+            if (sourceArtifact.status().activelyFailing()) {
                 return failingMethod
             } else if (sourceArtifact.config().endpoint()) {
                 return entryMethod

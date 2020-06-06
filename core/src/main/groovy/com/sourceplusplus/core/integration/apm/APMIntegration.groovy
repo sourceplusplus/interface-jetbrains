@@ -23,8 +23,7 @@ import java.time.Instant
  */
 abstract class APMIntegration extends AbstractVerticle {
 
-    abstract void getAllServices(Instant start, Instant end, String step,
-                                 Handler<AsyncResult<JsonArray>> handler)
+    abstract void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler)
 
     abstract void getServiceInstances(Instant start, Instant end, String step, String serviceId,
                                       Handler<AsyncResult<JsonArray>> handler)
@@ -34,8 +33,7 @@ abstract class APMIntegration extends AbstractVerticle {
     abstract void getEndpointMetrics(String endpointId, ArtifactMetricQuery metricQuery,
                                      Handler<AsyncResult<ArtifactMetricResult>> handler)
 
-    abstract void getTraces(TraceQuery traceQuery,
-                            Handler<AsyncResult<TraceQueryResult>> handler)
+    abstract void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler)
 
     abstract void getTraceStack(String appUuid, String traceId,
                                 Handler<AsyncResult<TraceSpanStackQueryResult>> handler)

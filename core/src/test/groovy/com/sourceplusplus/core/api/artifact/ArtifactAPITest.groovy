@@ -4,7 +4,6 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
 import com.sourceplusplus.api.model.artifact.SourceArtifactStatus
-import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.SourceCoreAPITest
 import io.vertx.core.json.Json
 import io.vertx.ext.unit.TestSuite
@@ -189,35 +188,21 @@ class ArtifactAPITest extends SourceCoreAPITest {
                 if (it.succeeded()) {
                     test.assertEquals(SourceArtifactStatus.builder().build(), it.result().status())
 
-                    def span = TraceSpan.builder()
-                            .traceId("traceId")
-                            .segmentId("segmentId")
-                            .spanId(0)
-                            .parentSpanId(0)
-                            .serviceCode("serviceCode")
-                            .serviceInstanceName("serviceInstanceName")
-                            .startTime(0)
-                            .endTime(0)
-                            .endpointName("endpointName")
-                            .type("type")
-                            .peer("peer")
-                            .component("component")
-                            .isError(true)
-                            .isChildError(false)
-                            .layer("Local")
-                            .build()
-
                     def updatedArtifact = it.result().withStatus(
-                            SourceArtifactStatus.builder().latestFailedSpan(span).build())
+                            SourceArtifactStatus.builder()
+                                    .latestFailedServiceInstance("serviceInstanceName1")
+                                    .build())
                     coreClient.upsertArtifact(application.appUuid(), updatedArtifact, {
                         if (it.succeeded()) {
-                            test.assertNotNull(it.result().status().latestFailedSpan())
+                            test.assertEquals("serviceInstanceName1", it.result().status().latestFailedServiceInstance())
 
                             updatedArtifact = it.result().withStatus(
-                                    SourceArtifactStatus.builder().latestFailedSpan(null).build())
+                                    SourceArtifactStatus.builder()
+                                            .latestFailedServiceInstance("serviceInstanceName2")
+                                            .build())
                             coreClient.upsertArtifact(application.appUuid(), updatedArtifact, {
                                 if (it.succeeded()) {
-                                    test.assertEquals(SourceArtifactStatus.builder().build(), it.result().status())
+                                    test.assertEquals("serviceInstanceName2", it.result().status().latestFailedServiceInstance())
                                     async.complete()
                                 } else {
                                     test.fail(it.cause())

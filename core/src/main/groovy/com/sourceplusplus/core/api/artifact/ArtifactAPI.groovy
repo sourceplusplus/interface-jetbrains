@@ -391,11 +391,11 @@ class ArtifactAPI extends AbstractVerticle {
                     } else {
                         def futures = []
                         failingArtifacts.each {
-                            if (!activeServiceInstances.contains(it.status().latestFailedSpan().serviceInstanceName())) {
+                            if (!activeServiceInstances.contains(it.status().latestFailedServiceInstance())) {
                                 def future = Promise.promise()
                                 futures.add(future)
 
-                                def updatedArtifact = it.withStatus(it.status().withLatestFailedSpan(null))
+                                def updatedArtifact = it.withStatus(it.status().withActivelyFailing(false))
                                 createOrUpdateSourceArtifactStatus(updatedArtifact, future)
                             }
                         }
@@ -460,25 +460,9 @@ class ArtifactAPI extends AbstractVerticle {
         })
     }
 
-    void createOrUpdateSourceArtifactStatus(String appUuid, String artifactQualifiedName,
-                                            SourceArtifactStatus artifactStatus,
-                                            Handler<AsyncResult<SourceArtifactStatus>> handler) {
-        def artifactWithStatus = SourceArtifact.builder()
-                .appUuid(appUuid)
-                .artifactQualifiedName(artifactQualifiedName)
-                .status(artifactStatus).build()
-        createOrUpdateSourceArtifact(artifactWithStatus, true,{
-            if (it.succeeded()) {
-                handler.handle(Future.succeededFuture(it.result().status()))
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
-    }
-
     void createOrUpdateSourceArtifactStatus(SourceArtifact artifactWithStatus,
                                             Handler<AsyncResult<SourceArtifactStatus>> handler) {
-        createOrUpdateSourceArtifact(artifactWithStatus, true,{
+        createOrUpdateSourceArtifact(artifactWithStatus, true, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture(it.result().status()))
             } else {

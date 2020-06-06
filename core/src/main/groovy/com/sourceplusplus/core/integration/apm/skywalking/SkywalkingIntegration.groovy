@@ -36,6 +36,8 @@ import static com.sourceplusplus.api.model.trace.TraceOrderType.*
 @Slf4j
 class SkywalkingIntegration extends APMIntegration {
 
+    public static final String UNKNOWN_COMPONENT = "Unknown"
+
     private static final String GET_ALL_SERVICES = Resources.toString(Resources.getResource(
             "query/skywalking/get_all_services.graphql"), Charsets.UTF_8)
     private static final String GET_SERVICE_INSTANCES = Resources.toString(Resources.getResource(
@@ -85,7 +87,7 @@ class SkywalkingIntegration extends APMIntegration {
         skywalkingOAPPort = Objects.requireNonNull(restHost.getInteger("port"))
 
         webClient = WebClient.create(vertx)
-        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, applicationAPI, artifactAPI),
+        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, applicationAPI, artifactAPI, storage),
                 new DeploymentOptions().setConfig(config()), {
             if (it.succeeded()) {
                 log.info("SkywalkingIntegration started")
@@ -364,7 +366,15 @@ class SkywalkingIntegration extends APMIntegration {
         }
         def queryOrder = traceQuery.orderType() == SLOWEST_TRACES ? "BY_DURATION" : "BY_START_TIME"
         def graphqlQuery = new JsonObject()
+
+        def endpointNameStr = "null"
+        if (traceQuery.artifactQualifiedName() != null) {
+            endpointNameStr = '"' + traceQuery.artifactQualifiedName() + '"'
+        } else if (traceQuery.endpointName() != null) {
+            endpointNameStr = '"' + traceQuery.endpointName() + '"'
+        }
         graphqlQuery.put("query", actualQuery
+                .replace('$endpointName', endpointNameStr)
                 .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
                 .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
                 .replace('$queryDurationStep', traceQuery.durationStep())
@@ -412,8 +422,7 @@ class SkywalkingIntegration extends APMIntegration {
      * {@inheritDoc}
      */
     @Override
-    void getTraceStack(String appUuid, String traceId,
-                       Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
+    void getTraceStack(String appUuid, String traceId, Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
         def query = TraceSpanStackQuery.builder()
                 .systemRequest(true)
                 .oneLevelDeep(false)
@@ -539,7 +548,7 @@ class SkywalkingIntegration extends APMIntegration {
 
     private static boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact,
                                               Map<String, String> skywalkingEndpoints) {
-        if (traceSpan.component()) {
+        if (traceSpan.component() && traceSpan.component() != UNKNOWN_COMPONENT) {
             return false //skip entry component spans
         }
 
