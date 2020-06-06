@@ -9,7 +9,7 @@ import org.immutables.value.Value;
 import javax.annotation.Nullable;
 
 /**
- * todo: this
+ * Used to hold temporary status indicators for source artifacts.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.3.0
