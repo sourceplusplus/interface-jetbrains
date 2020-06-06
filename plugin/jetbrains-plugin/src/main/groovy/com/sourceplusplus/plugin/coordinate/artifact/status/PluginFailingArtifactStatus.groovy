@@ -8,6 +8,13 @@ import io.vertx.core.AbstractVerticle
 
 import java.util.concurrent.TimeUnit
 
+/**
+ * Periodically fetches failing source artifacts from Source++ Core.
+ *
+ * @version 0.3.0
+ * @since 0.3.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ */
 @Slf4j
 class PluginFailingArtifactStatus extends AbstractVerticle {
 
