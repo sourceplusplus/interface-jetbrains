@@ -15,6 +15,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
+import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
@@ -156,7 +157,25 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                 }
             })
         } else {
-            notifyNoConnection()
+            //auto-detect local core
+            def coreClient = new SourceCoreClient("localhost", 8080, false)
+            coreClient.info({
+                if (it.succeeded()) {
+                    //found local core
+                    saveAutoDetectedEnvironment(coreClient, "localhost", "Local")
+                } else {
+                    //auto-detect docker core
+                    coreClient = new SourceCoreClient("192.168.99.100", 8080, false)
+                    coreClient.info({
+                        if (it.succeeded()) {
+                            //found docker core
+                            saveAutoDetectedEnvironment(coreClient, "192.168.99.100", "Docker")
+                        } else {
+                            notifyNoConnection()
+                        }
+                    })
+                }
+            })
         }
 
         super.runActivity(project)
@@ -168,6 +187,18 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         if (SourceMarkerPlugin.INSTANCE.enabled) {
             SourceMarkerPlugin.INSTANCE.clearAvailableSourceFileMarkers()
         }
+    }
+
+    private static void saveAutoDetectedEnvironment(SourceCoreClient coreClient, String host, String environmentName) {
+        def env = new SourceEnvironmentConfig()
+        env.environmentName = environmentName
+        env.apiHost = host
+        env.apiPort = 8080
+        SourcePluginConfig.current.setEnvironments([env])
+        SourcePluginConfig.current.activeEnvironment = env
+        PropertiesComponent.getInstance().setValue(
+                "spp_plugin_config", Json.encode(SourcePluginConfig.current))
+        doApplicationSettingsDialog(currentProject, coreClient)
     }
 
     private static notifyNoConnection() {
