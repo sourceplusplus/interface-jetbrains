@@ -40,7 +40,7 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.JWTAuthHandler
 import io.vertx.ext.web.handler.ResponseContentTypeHandler
-import io.vertx.ext.web.handler.sockjs.BridgeOptions
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
 
@@ -130,7 +130,7 @@ class CoreBootstrap extends AbstractVerticle {
         //start bridge
         log.info("Booting Source++ Core eventbus bridge...")
         SockJSHandler sock = SockJSHandler.create(vertx)
-        sock.bridge(new BridgeOptions()
+        sock.bridge(new SockJSBridgeOptions()
                 .addInboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+"))
                 .addOutboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+")))
         baseRouter.route("/eventbus/*").handler(sock)

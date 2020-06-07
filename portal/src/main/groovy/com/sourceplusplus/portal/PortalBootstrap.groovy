@@ -30,7 +30,7 @@ import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.core.net.JksOptions
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.sockjs.BridgeOptions
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
 import org.apache.log4j.ConsoleAppender
@@ -105,7 +105,7 @@ class PortalBootstrap extends AbstractVerticle {
         } else {
             registerCodecs()
             SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
-            BridgeOptions portalBridgeOptions = new BridgeOptions()
+            SockJSBridgeOptions portalBridgeOptions = new SockJSBridgeOptions()
                     .addInboundPermitted(new PermittedOptions().setAddressRegex(".+"))
                     .addOutboundPermitted(new PermittedOptions().setAddressRegex(".+"))
             sockJSHandler.bridge(portalBridgeOptions)

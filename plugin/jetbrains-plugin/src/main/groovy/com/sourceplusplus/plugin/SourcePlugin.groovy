@@ -10,7 +10,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.sockjs.BridgeOptions
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.jetbrains.annotations.NotNull
 
@@ -61,7 +61,7 @@ class SourcePlugin {
 
     private void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
-        BridgeOptions portalBridgeOptions = new BridgeOptions()
+        SockJSBridgeOptions portalBridgeOptions = new SockJSBridgeOptions()
                 .addInboundPermitted(new PermittedOptions().setAddressRegex(".+"))
                 .addOutboundPermitted(new PermittedOptions().setAddressRegex(".+"))
         sockJSHandler.bridge(portalBridgeOptions)
