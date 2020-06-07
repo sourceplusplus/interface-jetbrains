@@ -1,3 +1,8 @@
+if (hideOverviewTab) {
+    $('#overview_link').css('display', 'none');
+    $('#sidebar_overview_link').css('display', 'none');
+}
+
 function setupUI() {
     if (traceOrderType == 'LATEST_TRACES') {
         $('#latest_traces_header_text').text('Latest Traces');

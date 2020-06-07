@@ -1,3 +1,8 @@
+if (hideOverviewTab) {
+    $('#overview_link').css('display', 'none');
+    $('#sidebar_overview_link').css('display', 'none');
+}
+
 $('#entry_method_toggle').change(function (e) {
     toggledEntryMethod(e.target.checked === true);
 });

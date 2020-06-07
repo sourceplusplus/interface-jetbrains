@@ -218,8 +218,10 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             def markComponent = gutterMarkComponent as GutterMarkJcefComponent
             if (initialTab == null) {
                 if (sourceArtifact.status().activelyFailing()) {
-                    markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(
-                            PortalTab.Traces, portalUuid) + "&order_type=" + TraceOrderType.FAILED_TRACES
+                    markComponent.configuration.initialUrl =
+                            IntelliJPortalUI.getPortalUrl(PortalTab.Traces, portalUuid) +
+                                    "&order_type=" + TraceOrderType.FAILED_TRACES +
+                                    "&hide_overview_tab=true"
 
                     markComponent.initialize()
                     newPortal = new IntelliJPortalUI(portalUuid, markComponent.browser)

@@ -10,21 +10,30 @@ if (traceOrderType) {
     traceOrderType = traceOrderType.toUpperCase();
 }
 var getExternal = findGetParameter("external");
-var externalPortal = (getExternal) ? (getExternal == 'true') : false;
+var externalPortal = (getExternal) ? (getExternal === 'true') : false;
 var getDarkMode = findGetParameter("dark_mode");
-var darkMode = (getDarkMode) ? (getDarkMode == 'true') : false;
+var darkMode = (getDarkMode) ? (getDarkMode === 'true') : false;
+var getHideOverviewTab = findGetParameter("hide_overview_tab");
+var hideOverviewTab = (getHideOverviewTab) ? (getHideOverviewTab === 'true') : false;
 
 var mainGetQuery = '?portal_uuid=' + portalUuid;
+var mainGetQueryWithoutPortalUuid = "";
+if (traceOrderType) {
+    mainGetQueryWithoutPortalUuid += '&order_type=' + traceOrderType;
+}
 if (externalPortal) {
-    mainGetQuery += '&external=true';
+    mainGetQueryWithoutPortalUuid += '&external=true';
 }
 if (darkMode) {
-    mainGetQuery += '&dark_mode=true';
+    mainGetQueryWithoutPortalUuid += '&dark_mode=true';
 }
+if (hideOverviewTab) {
+    mainGetQueryWithoutPortalUuid += '&hide_overview_tab=true';
+}
+mainGetQuery += mainGetQueryWithoutPortalUuid;
 
 function findGetParameter(parameterName) {
-    var result = null,
-        tmp = [];
+    let result = null, tmp = [];
     location.search
         .substr(1)
         .split("&")
@@ -39,13 +48,8 @@ function clickedViewAsExternalPortal() {
     eb.send('ClickedViewAsExternalPortal', {
         'portal_uuid': portalUuid
     }, function (error, message) {
-        if (traceOrderType) {
-            window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
-                + '&external=true&order_type=' + traceOrderType + '&dark_mode=' + darkMode, '_blank');
-        } else {
-            window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
-                + '&external=true&dark_mode=' + darkMode, '_blank');
-        }
+        window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
+            + '&external=true' + mainGetQueryWithoutPortalUuid, '_blank');
     });
 }
 
@@ -56,12 +60,8 @@ function portalConnected() {
             'app_uuid': findGetParameter("app_uuid"),
             'artifact_qualified_name': findGetParameter("artifact_qualified_name")
         }, function (error, message) {
-            if (traceOrderType) {
-                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
-                    + '&order_type=' + traceOrderType, '_self');
-            } else {
-                window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid, '_self');
-            }
+            window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
+                + mainGetQueryWithoutPortalUuid, '_self');
         });
     } else {
         window.setInterval(keepPortalAlive, 60000 * 4);
