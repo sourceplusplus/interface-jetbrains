@@ -3,17 +3,19 @@ package com.sourceplusplus.plugin.intellij.settings.application
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.Messages
+import com.sourceplusplus.api.APIException
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import org.jetbrains.annotations.Nullable
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import javax.swing.*
 
@@ -74,8 +76,14 @@ class ApplicationSettingsDialogWrapper extends DialogWrapper {
                 createRequest.agentConfig(config)
             }
 
-            def newApplication = coreClient.createApplication(createRequest.build())
-            SourcePluginConfig.current.activeEnvironment.appUuid = newApplication.appUuid()
+            try {
+                def newApplication = coreClient.createApplication(createRequest.build())
+                SourcePluginConfig.current.activeEnvironment.appUuid = newApplication.appUuid()
+            } catch (APIException ex) {
+                Messages.showMessageDialog(project, ex.message,
+                        "Create Application - API Exception", Messages.getErrorIcon())
+                return
+            }
         }
         SourcePortalConfig.current.addCoreClient(SourcePluginConfig.current.activeEnvironment.appUuid, coreClient)
         if (PluginBootstrap.getSourcePlugin() == null) {

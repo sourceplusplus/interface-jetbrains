@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.jackson.JacksonCodec;
 import okhttp3.*;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -161,7 +162,7 @@ public class SourceCoreClient implements SourceClient {
             if (response.isSuccessful()) {
                 handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, IntegrationInfo.class)));
             } else {
-                handler.handle(extractAPIException(responseBody));
+                handler.handle(asyncAPIException(responseBody));
             }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
@@ -191,7 +192,7 @@ public class SourceCoreClient implements SourceClient {
             if (response.isSuccessful()) {
                 handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceCoreInfo.class)));
             } else {
-                handler.handle(extractAPIException(responseBody));
+                handler.handle(asyncAPIException(responseBody));
             }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
@@ -300,8 +301,12 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            return Json.decodeValue(response.body().string(), SourceApplication.class);
-        } catch (Exception e) {
+            if (response.isSuccessful()) {
+                return Json.decodeValue(response.body().string(), SourceApplication.class);
+            } else {
+                throw getAPIException(response.body().string());
+            }
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -811,12 +816,21 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    private <T> Future<T> extractAPIException(String responseBody) {
+    private <T> Future<T> asyncAPIException(String responseBody) {
         JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
         String[] strErrors = new String[errors.size()];
         for (int i = 0; i < errors.size(); i++) {
             strErrors[i] = errors.getString(i);
         }
         return Future.failedFuture(new APIException(strErrors));
+    }
+
+    private APIException getAPIException(String responseBody) {
+        JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
+        String[] strErrors = new String[errors.size()];
+        for (int i = 0; i < errors.size(); i++) {
+            strErrors[i] = errors.getString(i);
+        }
+        return new APIException(strErrors);
     }
 }
