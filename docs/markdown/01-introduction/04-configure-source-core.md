@@ -39,7 +39,8 @@
       },
       "config": {
         "timezone": null,
-        "endpoint_detection_interval_seconds": 15
+        "endpoint_detection_interval_seconds": 15,
+        "failing_artifact_detection_interval_seconds": 10
       }
     }
   ]
@@ -107,6 +108,7 @@
 | ----------------------------------- | --------- | ------------------------------------------------------------ |
 | timezone                            | null      | Timezone to use when querying SkyWalking OAP (defaults to system) |
 | endpoint_detection_interval_seconds | 15        | Seconds to wait before scanning for new endpoints            |
+| failing_artifact_detection_interval_seconds | 10 | Seconds to wait before scanning for failing artifacts       |
 
 # Next Step
 

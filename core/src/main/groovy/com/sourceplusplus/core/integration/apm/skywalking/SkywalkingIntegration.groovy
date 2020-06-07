@@ -8,6 +8,7 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.*
+import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
@@ -23,6 +24,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+import static com.sourceplusplus.api.model.trace.TraceOrderType.*
+
 /**
  * Represents integration with the Apache SkyWalking APM.
  *
@@ -33,16 +36,23 @@ import java.time.format.DateTimeFormatter
 @Slf4j
 class SkywalkingIntegration extends APMIntegration {
 
+    public static final String UNKNOWN_COMPONENT = "Unknown"
+
     private static final String GET_ALL_SERVICES = Resources.toString(Resources.getResource(
             "query/skywalking/get_all_services.graphql"), Charsets.UTF_8)
+    private static final String GET_SERVICE_INSTANCES = Resources.toString(Resources.getResource(
+            "query/skywalking/get_service_instances.graphql"), Charsets.UTF_8)
     private static final String GET_SERVICE_ENDPOINTS = Resources.toString(Resources.getResource(
             "query/skywalking/get_service_endpoints.graphql"), Charsets.UTF_8)
     private static final String GET_ENDPOINT_METRICS = Resources.toString(Resources.getResource(
             "query/skywalking/get_endpoint_metrics.graphql"), Charsets.UTF_8)
     private static final String QUERY_BASIC_TRACES = Resources.toString(Resources.getResource(
             "query/skywalking/query_basic_traces.graphql"), Charsets.UTF_8)
+    private static final String QUERY_FAILING_TRACES = Resources.toString(Resources.getResource(
+            "query/skywalking/query_failing_traces.graphql"), Charsets.UTF_8)
     private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
+    private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final SourceStorage storage
     private DateTimeFormatter DATE_TIME_FORMATTER_MINUTES
@@ -51,7 +61,8 @@ class SkywalkingIntegration extends APMIntegration {
     private int skywalkingOAPPort
     private WebClient webClient
 
-    SkywalkingIntegration(ArtifactAPI artifactAPI, SourceStorage storage) {
+    SkywalkingIntegration(ApplicationAPI applicationAPI, ArtifactAPI artifactAPI, SourceStorage storage) {
+        this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
     }
@@ -76,7 +87,7 @@ class SkywalkingIntegration extends APMIntegration {
         skywalkingOAPPort = Objects.requireNonNull(restHost.getInteger("port"))
 
         webClient = WebClient.create(vertx)
-        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, artifactAPI),
+        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, applicationAPI, artifactAPI, storage),
                 new DeploymentOptions().setConfig(config()), {
             if (it.succeeded()) {
                 log.info("SkywalkingIntegration started")
@@ -92,7 +103,12 @@ class SkywalkingIntegration extends APMIntegration {
         log.info("{} stopped", getClass().getSimpleName())
     }
 
-    void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getAllServices(Instant start, Instant end, String step,
+                        Handler<AsyncResult<JsonArray>> handler) {
         log.info("Getting all SkyWalking services. Start: " + start + " - End: " + end)
         def graphqlQuery = new JsonObject()
         if ("second".equalsIgnoreCase(step)) {
@@ -122,6 +138,81 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getServiceInstances(Instant start, Instant end, String step, String serviceId,
+                             Handler<AsyncResult<JsonArray>> handler) {
+        log.info("Getting all SkyWalking service instances. Start: $start - End: $end - Service id: $serviceId")
+        def graphqlQuery = new JsonObject()
+        if ("second".equalsIgnoreCase(step)) {
+            graphqlQuery.put("query", GET_SERVICE_INSTANCES
+                    .replace('$serviceId', serviceId)
+                    .replace('$durationStart', DATE_TIME_FORMATTER_SECONDS.format(start))
+                    .replace('$durationEnd', DATE_TIME_FORMATTER_SECONDS.format(end))
+                    .replace('$durationStep', step)
+            )
+        } else {
+            graphqlQuery.put("query", GET_SERVICE_INSTANCES
+                    .replace('$serviceId', serviceId)
+                    .replace('$durationStart', DATE_TIME_FORMATTER_MINUTES.format(start))
+                    .replace('$durationEnd', DATE_TIME_FORMATTER_MINUTES.format(end))
+                    .replace('$durationStep', step)
+            )
+        }
+
+        webClient.post(skywalkingOAPPort, skywalkingOAPHost,
+                "/graphql").sendJsonObject(graphqlQuery, {
+            if (it.failed()) {
+                handler.handle(Future.failedFuture(it.cause()))
+            } else {
+                def result = it.result().bodyAsJsonObject()
+                        .getJsonObject("data").getJsonArray("getServiceInstances")
+                log.info("Got all SkyWalking service instances: " + result)
+                handler.handle(Future.succeededFuture(result))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getActiveServiceInstances(Handler<AsyncResult<JsonArray>> handler) {
+        log.info("Getting all active SkyWalking service instances")
+        def start = Instant.now(), end = Instant.now(), step = "MINUTE"
+        getAllServices(start, end, "MINUTE", {
+            if (it.succeeded()) {
+                def futures = []
+                for (int i = 0; i < it.result().size(); i++) {
+                    def promise = Promise.promise()
+                    futures.add(promise)
+
+                    def service = it.result().getJsonObject(i)
+                    getServiceInstances(start, end, step, service.getString("label"), promise)
+                }
+
+                CompositeFuture.all(futures).onComplete({
+                    if (it.succeeded()) {
+                        def resultArray = new JsonArray()
+                        for (int i = 0; i < it.result().size(); i++) {
+                            def serviceInstance = it.result().resultAt(i) as JsonArray
+                            if (!serviceInstance.isEmpty()) {
+                                resultArray.add(serviceInstance)
+                            }
+                        }
+                        handler.handle(Future.succeededFuture(resultArray))
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
     void getServiceEndpoints(String serviceId, Handler<AsyncResult<JsonArray>> handler) {
         log.info("Getting SkyWalking service endpoints for service id: " + serviceId)
         def graphqlQuery = new JsonObject()
@@ -142,6 +233,9 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getEndpointMetrics(String endpointId, ArtifactMetricQuery metricQuery,
                             Handler<AsyncResult<ArtifactMetricResult>> handler) {
@@ -256,13 +350,31 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
         log.debug("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
+        def actualQuery
+        if (traceQuery.orderType() == FAILED_TRACES
+                || (traceQuery.endpointId() == null && traceQuery.traceState() == "ERROR")) {
+            actualQuery = QUERY_FAILING_TRACES
+        } else {
+            actualQuery = QUERY_BASIC_TRACES
+                    .replace('$endpointId', traceQuery.endpointId())
+        }
+        def queryOrder = traceQuery.orderType() == SLOWEST_TRACES ? "BY_DURATION" : "BY_START_TIME"
         def graphqlQuery = new JsonObject()
-        def queryOrder = traceQuery.orderType() == TraceOrderType.LATEST_TRACES ? "BY_START_TIME" : "BY_DURATION"
-        graphqlQuery.put("query", QUERY_BASIC_TRACES
-                .replace('$endpointId', traceQuery.endpointId())
+
+        def endpointNameStr = "null"
+        if (traceQuery.artifactQualifiedName() != null) {
+            endpointNameStr = '"' + traceQuery.artifactQualifiedName() + '"'
+        } else if (traceQuery.endpointName() != null) {
+            endpointNameStr = '"' + traceQuery.endpointName() + '"'
+        }
+        graphqlQuery.put("query", actualQuery
+                .replace('$endpointName', endpointNameStr)
                 .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
                 .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
                 .replace('$queryDurationStep', traceQuery.durationStep())
@@ -283,9 +395,9 @@ class SkywalkingIntegration extends APMIntegration {
                 for (int i = 0; i < traces.size(); i++) {
                     traceList.add(Json.decodeValue(traces.getJsonObject(i).toString(), Trace.class))
                 }
-                if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
+                if (traceQuery.orderType() == LATEST_TRACES || traceQuery.orderType() == FAILED_TRACES) {
                     traceList.sort({ it.start() })
-                } else if (traceQuery.orderType() == TraceOrderType.SLOWEST_TRACES) {
+                } else if (traceQuery.orderType() == SLOWEST_TRACES) {
                     traceList.sort({ it.duration() })
                 }
 
@@ -306,6 +418,9 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getTraceStack(String appUuid, String traceId, Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
         def query = TraceSpanStackQuery.builder()
@@ -315,6 +430,9 @@ class SkywalkingIntegration extends APMIntegration {
         getTraceStack(appUuid, null, query, handler)
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
@@ -430,12 +548,12 @@ class SkywalkingIntegration extends APMIntegration {
 
     private static boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact,
                                               Map<String, String> skywalkingEndpoints) {
-        if (traceSpan.component()) {
+        if (traceSpan.component() && traceSpan.component() != UNKNOWN_COMPONENT) {
             return false //skip entry component spans
         }
 
         def endpointId = skywalkingEndpoints.get(traceSpan.endpointName())
-        if (endpointId && artifact.config()?.endpointIds() && artifact.config().endpointIds().contains(endpointId)) {
+        if (endpointId && artifact.config().endpointIds() && artifact.config().endpointIds().contains(endpointId)) {
             return true
         } else {
             return traceSpan.endpointName() == artifact.artifactQualifiedName() ||

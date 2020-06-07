@@ -10,5 +10,6 @@ package com.sourceplusplus.api.model.trace;
 public enum TraceOrderType {
 
     LATEST_TRACES,
-    SLOWEST_TRACES
+    SLOWEST_TRACES,
+    FAILED_TRACES
 }

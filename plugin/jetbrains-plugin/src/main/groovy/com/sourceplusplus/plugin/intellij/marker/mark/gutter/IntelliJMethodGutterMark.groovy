@@ -5,6 +5,7 @@ import com.intellij.psi.PsiLiteral
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.api.model.trace.TraceOrderType
 import com.sourceplusplus.marker.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
@@ -17,7 +18,6 @@ import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
-import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
 import groovy.util.logging.Slf4j
 import io.vertx.core.AsyncResult
@@ -30,9 +30,6 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.java.JavaUAnnotation
 
 import javax.swing.*
-import java.time.Instant
-
-import static com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT
 
 /**
  * Extension of the MethodGutterMark for handling IntelliJ.
@@ -52,7 +49,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
         def sourceArtifact = SourceArtifact.builder()
                 .appUuid(appUuid).artifactQualifiedName(artifactQualifiedName).build()
         putUserData(IntelliJKeys.SourceArtifact, sourceArtifact)
-        SourcePluginConfig.current.activeEnvironment.coreClient.createArtifact(appUuid, sourceArtifact, {
+        SourcePluginConfig.current.activeEnvironment.coreClient.upsertArtifact(appUuid, sourceArtifact, {
             if (it.succeeded()) {
                 updateSourceArtifact(it.result())
             } else {
@@ -81,7 +78,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             (event.sourceMark as IntelliJGutterMark).registerPortal()
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
             if (portalRegistered) {
-                SourcePortal.getPortal(portalUuid).close()
+                IntelliJSourcePortal.getPortal(portalUuid).close()
             }
 
             def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
@@ -89,7 +86,11 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                     .artifactQualifiedName(artifactQualifiedName)
                     .removeAllArtifactSubscriptions(true)
                     .build()
-            PluginBootstrap.sourcePlugin.vertx.eventBus().send(UNSUBSCRIBE_FROM_ARTIFACT, unsubscribeRequest)
+            SourcePluginConfig.current.activeEnvironment.coreClient.unsubscribeFromArtifact(unsubscribeRequest, {
+                if (it.failed()) {
+                    log.error("Failed to unsubscribe from artifact: $artifactQualifiedName", it.cause())
+                }
+            })
         } else if (event.eventCode == SourceMarkEventCode.NAME_CHANGED) {
             //todo: this
         }
@@ -153,32 +154,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
-    void markArtifactSubscribed() {
-        if (!artifactSubscribed) {
-            putUserData(IntelliJKeys.ArtifactSubscribed, true)
-            putUserData(IntelliJKeys.ArtifactSubscribeTime, Instant.now())
-            configuration.icon = determineMostSuitableIcon()
-            sourceFileMarker.refresh()
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void markArtifactUnsubscribed() {
-        if (artifactSubscribed) {
-            putUserData(IntelliJKeys.ArtifactSubscribed, false)
-            putUserData(IntelliJKeys.ArtifactUnsubscribeTime, Instant.now())
-            configuration.icon = determineMostSuitableIcon()
-            sourceFileMarker.refresh()
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     void markArtifactDataAvailable() {
         if (!artifactDataAvailable) {
             putUserData(IntelliJKeys.ArtifactDataAvailable, true)
@@ -192,13 +167,8 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      */
     @Override
     boolean isArtifactSubscribed() {
-        boolean activelySubscribed = getUserData(IntelliJKeys.ArtifactSubscribed)
-        if (activelySubscribed) {
-            return true
-        }
-
         def config = getUserData(IntelliJKeys.SourceArtifact).config()
-        return config != null && (config.subscribeAutomatically() || config.forceSubscribe())
+        return config.subscribeAutomatically() || config.forceSubscribe()
     }
 
     /**
@@ -230,7 +200,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      */
     @Override
     void registerPortal() {
-        registerPortal(PortalTab.Overview)
+        registerPortal(null)
     }
 
     void registerPortal(PortalTab initialTab) {
@@ -244,22 +214,42 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                 putUserData(IntelliJKeys.PortalUUID, portalUuid)
             }
 
+            def newPortal = null
             def markComponent = gutterMarkComponent as GutterMarkJcefComponent
-            markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(initialTab, portalUuid)
-            markComponent.initialize()
+            if (initialTab == null) {
+                if (sourceArtifact.status().activelyFailing()) {
+                    markComponent.configuration.initialUrl =
+                            IntelliJPortalUI.getPortalUrl(PortalTab.Traces, portalUuid) +
+                                    "&order_type=" + TraceOrderType.FAILED_TRACES +
+                                    "&hide_overview_tab=true"
+
+                    markComponent.initialize()
+                    newPortal = new IntelliJPortalUI(portalUuid, markComponent.browser)
+                    newPortal.tracesView.orderType = TraceOrderType.FAILED_TRACES
+                } else {
+                    markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(PortalTab.Overview, portalUuid)
+
+                    markComponent.initialize()
+                    newPortal = new IntelliJPortalUI(portalUuid, markComponent.browser)
+                }
+            } else {
+                markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(initialTab, portalUuid)
+                markComponent.initialize()
+            }
 
             if (existingPortal.present) {
                 existingPortal.get().portalUI.lateInitBrowser(markComponent.browser)
             } else {
-                IntelliJSourcePortal.register(appUuid, portalUuid, artifactQualifiedName,
-                        new IntelliJPortalUI(portalUuid, markComponent.browser))
+                IntelliJSourcePortal.register(appUuid, portalUuid, artifactQualifiedName, newPortal)
             }
         }
     }
 
     private Icon determineMostSuitableIcon() {
         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-            if (sourceArtifact.config()?.endpoint()) {
+            if (sourceArtifact.status().activelyFailing()) {
+                return failingMethod
+            } else if (sourceArtifact.config().endpoint()) {
                 return entryMethod
             } else if (artifactDataAvailable) {
                 return sppActive

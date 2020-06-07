@@ -186,16 +186,12 @@ class TraceAPI extends AbstractVerticle {
     }
 
     void getTraces(String appUuid, TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
-        if (traceQuery.endpointId() != null || traceQuery.endpointName()) {
-            //todo: query without getting artifact config
-            throw new UnsupportedOperationException("todo: this")
-        }
-
         log.debug("Getting traces. App UUID: {} - Query: {}", appUuid, traceQuery)
-        core.artifactAPI.getSourceArtifactConfig(appUuid, traceQuery.artifactQualifiedName(), {
+        core.artifactAPI.getSourceArtifact(appUuid, traceQuery.artifactQualifiedName(), {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
-                    def artifactConfig = it.result().get()
+                    def artifact = it.result().get()
+                    def artifactConfig = artifact.config()
                     if (artifactConfig.endpoint() || artifactConfig.endpointIds()) {
                         if (artifactConfig.endpointIds()) {
                             def futures = new ArrayList<Future>()
@@ -211,7 +207,8 @@ class TraceAPI extends AbstractVerticle {
                                     (it.result().list() as List<TraceQueryResult>).each {
                                         totalTraces.addAll(it.traces())
                                     }
-                                    if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
+                                    if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES
+                                            || traceQuery.orderType() == TraceOrderType.FAILED_TRACES) {
                                         totalTraces.sort({ it.start() })
                                     } else if (traceQuery.orderType() == TraceOrderType.SLOWEST_TRACES) {
                                         totalTraces.sort({ it.duration() })
@@ -229,6 +226,17 @@ class TraceAPI extends AbstractVerticle {
                             log.debug("Could not find endpoint id for endpoint. Artifact qualified name: " + traceQuery.artifactQualifiedName())
                             handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                         }
+                    } else if (traceQuery.orderType() == TraceOrderType.FAILED_TRACES) {
+                        core.storage.getArtifactFailures(artifact, traceQuery, {
+                            if (it.succeeded()) {
+                                def finalResult = TraceQueryResult.builder()
+                                        .addAllTraces(it.result())
+                                        .total(it.result().size()).build()
+                                handler.handle(Future.succeededFuture(finalResult))
+                            } else {
+                                handler.handle(Future.failedFuture(it.cause()))
+                            }
+                        })
                     } else {
                         log.debug("No traces exists for artifact. Artifact qualified name: " + traceQuery.artifactQualifiedName())
                         handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))

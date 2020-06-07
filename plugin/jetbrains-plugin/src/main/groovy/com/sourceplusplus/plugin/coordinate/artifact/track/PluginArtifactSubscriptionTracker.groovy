@@ -27,8 +27,6 @@ import java.util.concurrent.TimeUnit
 class PluginArtifactSubscriptionTracker extends AbstractVerticle {
 
     public static final String SYNC_AUTOMATIC_SUBSCRIPTIONS = "SyncAutomaticSubscriptions"
-    public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
-    public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
 
     //todo: properly refresh when app uuid changes
     private static final Set<String> PENDING_DATA_AVAILABLE = Sets.newConcurrentHashSet()
@@ -73,48 +71,6 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
                     PENDING_DATA_AVAILABLE.add(artifactMetricResult.artifactQualifiedName())
                 }
             }
-        })
-
-        //subscribe to artifact
-        vertx.eventBus().consumer(SUBSCRIBE_TO_ARTIFACT, { resp ->
-            ArtifactSubscribeRequest request = resp.body() as ArtifactSubscribeRequest
-            log.info("Sending artifact subscription request: " + request)
-
-            SourcePluginConfig.current.activeEnvironment.coreClient.subscribeToArtifact(request, {
-                if (it.succeeded()) {
-                    resp.reply(request)
-
-                    def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                            request.artifactQualifiedName()) as IntelliJSourceMark
-                    sourceMark.markArtifactSubscribed()
-                } else {
-                    it.cause().printStackTrace()
-                    resp.fail(500, it.cause().message)
-                }
-            })
-        })
-        //unsubscribe from artifact
-        vertx.eventBus().consumer(UNSUBSCRIBE_FROM_ARTIFACT, { resp ->
-            SourceArtifactUnsubscribeRequest request = resp.body() as SourceArtifactUnsubscribeRequest
-            log.info("Sending artifact unsubscription request: " + request)
-
-            SourcePluginConfig.current.activeEnvironment.coreClient.unsubscribeFromArtifact(request, {
-                if (it.succeeded()) {
-                    resp.reply(request)
-
-                    def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                            request.artifactQualifiedName()) as IntelliJGutterMark
-                    if (gutterMark) {
-                        gutterMark.markArtifactUnsubscribed()
-                        if (gutterMark.portalRegistered) {
-                            IntelliJSourcePortal.getPortal(gutterMark.portalUuid)?.close()
-                        }
-                    }
-                } else {
-                    it.cause().printStackTrace()
-                    resp.fail(500, it.cause().message)
-                }
-            })
         })
         log.info("{} started", getClass().getSimpleName())
     }

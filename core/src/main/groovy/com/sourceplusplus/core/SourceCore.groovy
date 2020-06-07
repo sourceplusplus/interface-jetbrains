@@ -8,11 +8,13 @@ import com.sourceplusplus.core.api.metric.MetricAPI
 import com.sourceplusplus.core.api.trace.TraceAPI
 import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
+import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
 import com.sourceplusplus.core.storage.h2.H2DAO
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
+import io.vertx.core.eventbus.Message
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -50,21 +52,41 @@ class SourceCore extends AbstractVerticle {
 
     @Override
     void start(Promise<Void> startFuture) throws Exception {
+        vertx.eventBus().consumer(UPDATE_INTEGRATIONS, this.&updateIntegrations)
+
         log.info("Booting Source++ Core storage...")
+        def storageCompleter = Promise.promise()
         def storageConfig = config().getJsonObject("storage")
         switch (storageConfig.getString("type")) {
             case "elasticsearch":
                 log.info("Using storage: Elasticsearch")
-                storage = new ElasticsearchDAO(vertx.eventBus(), storageConfig.getJsonObject("elasticsearch"))
+                storage = new ElasticsearchDAO(vertx.eventBus(), storageConfig.getJsonObject("elasticsearch"), storageCompleter)
                 break
             case "h2":
                 log.info("Using storage: H2")
-                storage = new H2DAO(vertx, storageConfig.getJsonObject("h2"))
+                storage = new H2DAO(vertx, storageConfig.getJsonObject("h2"), storageCompleter)
                 break
             default:
                 throw new IllegalArgumentException("Unknown storage type: " + storageConfig.getString("type"))
         }
 
+        (storageCompleter as Future).onComplete({
+            if (it.succeeded()) {
+                storage.getCoreConfig({
+                    if (it.succeeded()) {
+                        CoreConfig.setupCoreConfig(config(), it.result(), storage)
+                        bootCoreAPIs(startFuture)
+                    } else {
+                        startFuture.fail(it.cause())
+                    }
+                })
+            } else {
+                startFuture.fail(it.cause())
+            }
+        })
+    }
+
+    private void bootCoreAPIs(Promise<Void> startFuture) {
         log.info("Booting Source++ Core APIs...")
         adminAPI = new AdminAPI(this)
         applicationAPI = new ApplicationAPI(this)
@@ -87,55 +109,55 @@ class SourceCore extends AbstractVerticle {
                 startFuture.fail(it.cause())
             }
         })
+    }
 
-        vertx.eventBus().consumer(UPDATE_INTEGRATIONS, { msg ->
-            def integrations = msg.body() as JsonArray
-            config().put("integrations", integrations)
+    private void updateIntegrations(Message<Object> msg) {
+        def integrations = msg.body() as JsonArray
+        config().put("integrations", integrations)
 
-            def configFileLocation = System.getenv("SOURCE_CONFIG")
-            if (configFileLocation) {
-                def configFile = new File(configFileLocation)
-                if (configFile.exists() && configFile.canWrite()) {
-                    def configData = IOUtils.toString(configFile.newInputStream(), StandardCharsets.UTF_8)
-                    def updatedConfig = new JsonObject(configData)
-                    updatedConfig.put("integrations", integrations)
-                    configFile.newWriter().withWriter { it << updatedConfig.encodePrettily() }
-                    log.info("Saved updated Source++ integration configuration to disk")
-                }
+        def configFileLocation = System.getenv("SOURCE_CONFIG")
+        if (configFileLocation) {
+            def configFile = new File(configFileLocation)
+            if (configFile.exists() && configFile.canWrite()) {
+                def configData = IOUtils.toString(configFile.newInputStream(), StandardCharsets.UTF_8)
+                def updatedConfig = new JsonObject(configData)
+                updatedConfig.put("integrations", integrations)
+                configFile.newWriter().withWriter { it << updatedConfig.encodePrettily() }
+                log.info("Saved updated Source++ integration configuration to disk")
             }
+        }
 
-            //undeploy integrations
-            def undeployFutures = []
-            deployedIntegrationAPIs.removeIf({
+        //undeploy integrations
+        def undeployFutures = []
+        deployedIntegrationAPIs.removeIf({
+            def fut = Promise.promise().future()
+            undeployFutures += fut
+            vertx.undeploy(it, fut)
+            return true
+        })
+        deployedIntegrations.removeIf({
+            def fut = Promise.promise().future()
+            undeployFutures += fut
+            vertx.undeploy(it, fut)
+            return true
+        })
+        CompositeFuture.all(undeployFutures).onComplete({
+            if (it.succeeded()) {
+                //redeploy integrations
                 def fut = Promise.promise().future()
-                undeployFutures += fut
-                vertx.undeploy(it, fut)
-                return true
-            })
-            deployedIntegrations.removeIf({
-                def fut = Promise.promise().future()
-                undeployFutures += fut
-                vertx.undeploy(it, fut)
-                return true
-            })
-            CompositeFuture.all(undeployFutures).onComplete({
-                if (it.succeeded()) {
-                    //redeploy integrations
-                    def fut = Promise.promise().future()
-                    fut.onComplete({
-                        if (it.succeeded()) {
-                            msg.reply(true)
-                        } else {
-                            it.cause().printStackTrace()
-                            msg.fail(500, "Failed to deploy integrations")
-                        }
-                    })
-                    deployIntegrations(fut)
-                } else {
-                    it.cause().printStackTrace()
-                    msg.fail(500, "Failed to undeploy integrations")
-                }
-            })
+                fut.onComplete({
+                    if (it.succeeded()) {
+                        msg.reply(true)
+                    } else {
+                        it.cause().printStackTrace()
+                        msg.fail(500, "Failed to deploy integrations")
+                    }
+                })
+                deployIntegrations(fut)
+            } else {
+                it.cause().printStackTrace()
+                msg.fail(500, "Failed to undeploy integrations")
+            }
         })
     }
 
@@ -192,7 +214,7 @@ class SourceCore extends AbstractVerticle {
 
     private void connectToApacheSkyWalking(JsonObject integration, Handler<AsyncResult<Void>> handler) {
         log.info("Connecting to Apache SkyWalking...")
-        apmIntegration = new SkywalkingIntegration(artifactAPI, storage)
+        apmIntegration = new SkywalkingIntegration(applicationAPI, artifactAPI, storage)
         vertx.deployVerticle(apmIntegration, new DeploymentOptions().setConfig(integration), {
             if (it.succeeded()) {
                 deployedIntegrations.add(it.result())

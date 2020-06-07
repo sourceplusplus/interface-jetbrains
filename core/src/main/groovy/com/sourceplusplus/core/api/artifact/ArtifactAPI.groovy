@@ -1,10 +1,7 @@
 package com.sourceplusplus.core.api.artifact
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
-import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
-import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
+import com.sourceplusplus.api.model.artifact.*
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.internal.ApplicationArtifact
@@ -23,6 +20,7 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
+import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED
 
 /**
  * Used to add/modify/fetch artifact subscriptions and configurations.
@@ -35,6 +33,8 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
 @Slf4j
 class ArtifactAPI extends AbstractVerticle {
 
+    private static final SourceArtifactConfig EMPTY_CONFIG = SourceArtifactConfig.builder().build()
+    private static final SourceArtifactStatus EMPTY_STATUS = SourceArtifactStatus.builder().build()
     private static final Map<ApplicationArtifact, SourceArtifact> APPLICATION_ARTIFACT_CACHE = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.ACCESSED)
             .expiration(5, TimeUnit.MINUTES).build()
@@ -180,30 +180,41 @@ class ArtifactAPI extends AbstractVerticle {
     }
 
     void createOrUpdateSourceArtifact(SourceArtifact artifact, Handler<AsyncResult<SourceArtifact>> handler) {
+        createOrUpdateSourceArtifact(artifact, false, handler)
+    }
+
+    void createOrUpdateSourceArtifact(SourceArtifact artifact, boolean overrideStatus,
+                                      Handler<AsyncResult<SourceArtifact>> handler) {
         getAndCacheSourceArtifact(artifact.appUuid(), artifact.artifactQualifiedName(), {
             if (it.succeeded()) {
                 def now = Instant.now()
                 if (it.result().isPresent()) {
                     //update
                     def oldArtifact = it.result().get()
+                    def oldConfig = oldArtifact.config()
+                    def newConfig = artifact.config()
+                    def oldStatus = oldArtifact.status()
+
                     artifact = artifact.withLastUpdated(now)
-                    if (artifact.config() != null && oldArtifact.config() != null) {
-                        def oldConfig = oldArtifact.config()
-                        def newConfig = artifact.config()
-                        if (artifact.config().endpointIds() != null) {
-                            if (artifact.config().endpointIds().isEmpty()) {
-                                newConfig = newConfig.withEndpointIds()
+                    if (artifact.config().endpointIds() != null) {
+                        if (artifact.config().endpointIds().isEmpty()) {
+                            newConfig = newConfig.withEndpointIds()
+                        } else {
+                            if (oldConfig.endpointIds() == null) {
+                                newConfig = newConfig.withEndpointIds(artifact.config().endpointIds())
                             } else {
-                                if (oldConfig.endpointIds() == null) {
-                                    newConfig = newConfig.withEndpointIds(artifact.config().endpointIds())
-                                } else {
-                                    newConfig = newConfig.withEndpointIds(
-                                            oldConfig.endpointIds() + artifact.config().endpointIds())
-                                }
+                                newConfig = newConfig.withEndpointIds(
+                                        oldConfig.endpointIds() + artifact.config().endpointIds())
                             }
                         }
-                        artifact = artifact.withConfig(newConfig)
                     }
+                    artifact = artifact.withConfig(newConfig)
+
+                    //todo: overrideConfig
+                    if (artifact.status() == EMPTY_STATUS && !overrideStatus) {
+                        artifact = artifact.withStatus(oldStatus)
+                    }
+
                     core.storage.updateArtifact(artifact, {
                         if (it.succeeded()) {
                             def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
@@ -218,8 +229,20 @@ class ArtifactAPI extends AbstractVerticle {
                                     ENDPOINT_ID_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + endpointId, it.result())
                                 }
                             }
+
+                            if (Json.encode(oldConfig) != Json.encode(it.result().config())) {
+                                vertx.eventBus().publish(ARTIFACT_CONFIG_UPDATED.address,
+                                        new JsonObject(Json.encode(it.result())))
+                            }
+                            if (Json.encode(oldStatus) != Json.encode(it.result().status())) {
+                                vertx.eventBus().publish(ARTIFACT_STATUS_UPDATED.address,
+                                        new JsonObject(Json.encode(it.result())))
+                            }
+
+                            handler.handle(Future.succeededFuture(it.result()))
+                        } else {
+                            handler.handle(Future.failedFuture(it.cause()))
                         }
-                        handler.handle(it)
                     })
                 } else {
                     //create
@@ -238,8 +261,10 @@ class ArtifactAPI extends AbstractVerticle {
                                     ENDPOINT_ID_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + endpointId, it.result())
                                 }
                             }
+                            handler.handle(Future.succeededFuture(it.result()))
+                        } else {
+                            handler.handle(Future.failedFuture(it.cause()))
                         }
-                        handler.handle(it)
                     })
                 }
             } else {
@@ -256,15 +281,28 @@ class ArtifactAPI extends AbstractVerticle {
             return
         }
 
-        getApplicationSourceArtifacts(appUuid, {
-            if (it.succeeded()) {
-                routingContext.response().setStatusCode(200)
-                        .end(Json.encode(it.result()))
-            } else {
-                routingContext.response().setStatusCode(400)
-                        .end(Json.encode(new SourceAPIError().addError(it.cause().message)))
-            }
-        })
+        def includeOnlyFailing = Boolean.valueOf(routingContext.request().getParam("includeOnlyFailing"))
+        if (includeOnlyFailing) {
+            getFailingArtifacts(appUuid, {
+                if (it.succeeded()) {
+                    routingContext.response().setStatusCode(200)
+                            .end(Json.encode(it.result()))
+                } else {
+                    routingContext.response().setStatusCode(400)
+                            .end(Json.encode(new SourceAPIError().addError(it.cause().message)))
+                }
+            })
+        } else {
+            getApplicationSourceArtifacts(appUuid, {
+                if (it.succeeded()) {
+                    routingContext.response().setStatusCode(200)
+                            .end(Json.encode(it.result()))
+                } else {
+                    routingContext.response().setStatusCode(400)
+                            .end(Json.encode(new SourceAPIError().addError(it.cause().message)))
+                }
+            })
+        }
     }
 
     void getApplicationSourceArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
@@ -296,6 +334,27 @@ class ArtifactAPI extends AbstractVerticle {
         })
     }
 
+    void findSourceArtifact(String appUuid, String search,
+                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
+        getSourceArtifact(appUuid, search, {
+            if (it.succeeded()) {
+                if (it.result().isPresent()) {
+                    handler.handle(Future.succeededFuture(it.result()))
+                } else {
+                    getSourceArtifactByEndpointName(appUuid, search, {
+                        if (it.succeeded()) {
+                            handler.handle(Future.succeededFuture(it.result()))
+                        } else {
+                            handler.handle(Future.failedFuture(it.cause()))
+                        }
+                    })
+                }
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
     void getSourceArtifact(String appUuid, String artifactQualifiedName,
                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         log.debug("Getting source artifact. App UUID: {} - Artifact qualified name: {}", appUuid, artifactQualifiedName)
@@ -312,6 +371,47 @@ class ArtifactAPI extends AbstractVerticle {
                                        Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
         log.debug("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
         getAndCacheSourceArtifactByEndpointId(appUuid, endpointId, handler)
+    }
+
+    void getFailingArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        log.info("Getting failing source artifacts. App UUID: {}", appUuid)
+        core.storage.findArtifactByFailing(appUuid, handler)
+    }
+
+    void updateFailingArtifacts(String appUuid, Set<String> activeServiceInstances,
+                                Handler<AsyncResult<Void>> handler) {
+        if (activeServiceInstances.isEmpty()) {
+            handler.handle(Future.succeededFuture())
+        } else {
+            core.storage.findArtifactByFailing(appUuid, {
+                if (it.succeeded()) {
+                    def failingArtifacts = it.result()
+                    if (failingArtifacts.isEmpty()) {
+                        handler.handle(Future.succeededFuture())
+                    } else {
+                        def futures = []
+                        failingArtifacts.each {
+                            if (!activeServiceInstances.contains(it.status().latestFailedServiceInstance())) {
+                                def future = Promise.promise()
+                                futures.add(future)
+
+                                def updatedArtifact = it.withStatus(it.status().withActivelyFailing(false))
+                                createOrUpdateSourceArtifactStatus(updatedArtifact, future)
+                            }
+                        }
+                        CompositeFuture.all(futures).onComplete({
+                            if (it.succeeded()) {
+                                handler.handle(Future.succeededFuture())
+                            } else {
+                                handler.handle(Future.failedFuture(it.cause()))
+                            }
+                        })
+                    }
+                } else {
+                    handler.handle(Future.failedFuture(it.cause()))
+                }
+            })
+        }
     }
 
     private createOrUpdateSourceArtifactConfigRoute(RoutingContext routingContext) {
@@ -353,11 +453,18 @@ class ArtifactAPI extends AbstractVerticle {
                 .config(artifactConfig).build()
         createOrUpdateSourceArtifact(artifactWithConfig, {
             if (it.succeeded()) {
-                def artifact = it.result()
-                handler.handle(Future.succeededFuture(artifact.config()))
+                handler.handle(Future.succeededFuture(it.result().config()))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
 
-                //artifact config updated
-                vertx.eventBus().publish(ARTIFACT_CONFIG_UPDATED.address, new JsonObject(Json.encode(artifact)))
+    void createOrUpdateSourceArtifactStatus(SourceArtifact artifactWithStatus,
+                                            Handler<AsyncResult<SourceArtifactStatus>> handler) {
+        createOrUpdateSourceArtifact(artifactWithStatus, true, {
+            if (it.succeeded()) {
+                handler.handle(Future.succeededFuture(it.result().status()))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

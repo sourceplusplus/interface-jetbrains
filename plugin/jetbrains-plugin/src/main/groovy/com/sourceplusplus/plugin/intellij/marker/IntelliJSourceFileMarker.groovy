@@ -16,6 +16,7 @@ import org.jetbrains.uast.UMethod
 import java.util.concurrent.atomic.AtomicBoolean
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
+import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED
 
 /**
  * Extension of the SourceMarker for handling IntelliJ.
@@ -33,6 +34,16 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
         if (!setupSourceMarkArtifactSyncer.getAndSet(true)) {
             PluginBootstrap.sourcePlugin.vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, {
                 def artifact = it.body() as SourceArtifact
+                log.info("Artifact config updated. Artifact qualified name: {}", artifact.artifactQualifiedName())
+
+                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                        artifact.artifactQualifiedName()) as IntelliJSourceMark
+                sourceMark?.updateSourceArtifact(artifact)
+            })
+            PluginBootstrap.sourcePlugin.vertx.eventBus().consumer(ARTIFACT_STATUS_UPDATED.address, {
+                def artifact = it.body() as SourceArtifact
+                log.info("Artifact status updated. Artifact qualified name: {}", artifact.artifactQualifiedName())
+
                 def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                         artifact.artifactQualifiedName()) as IntelliJSourceMark
                 sourceMark?.updateSourceArtifact(artifact)

@@ -4,6 +4,9 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
+import com.sourceplusplus.api.model.trace.Trace
+import com.sourceplusplus.api.model.trace.TraceQuery
+import com.sourceplusplus.api.model.trace.TraceSpan
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 
@@ -15,6 +18,10 @@ import io.vertx.core.Handler
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 abstract class SourceStorage {
+
+    abstract void getCoreConfig(Handler<AsyncResult<Optional<CoreConfig>>> handler)
+
+    abstract void updateCoreConfig(CoreConfig coreConfig, Handler<AsyncResult<CoreConfig>> handler)
 
     abstract void createApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler)
 
@@ -51,6 +58,8 @@ abstract class SourceStorage {
     abstract void findArtifactByEndpoint(String appUuid,
                                          Handler<AsyncResult<List<SourceArtifact>>> handler)
 
+    abstract void findArtifactByFailing(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler)
+
     abstract void getApplicationArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler)
 
     abstract void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,
@@ -74,6 +83,11 @@ abstract class SourceStorage {
 
     abstract void getApplicationSubscriptions(String appUuid,
                                               Handler<AsyncResult<List<SourceApplicationSubscription>>> handler)
+
+    abstract void addArtifactFailure(SourceArtifact artifact, TraceSpan failingSpan, Handler<AsyncResult<Void>> handler)
+
+    abstract void getArtifactFailures(SourceArtifact artifact, TraceQuery traceQuery,
+                                      Handler<AsyncResult<List<Trace>>> handler)
 
     abstract void refreshDatabase(Handler<AsyncResult<Void>> handler)
 

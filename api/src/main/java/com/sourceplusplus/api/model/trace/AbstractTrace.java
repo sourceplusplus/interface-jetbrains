@@ -24,6 +24,7 @@ import java.util.List;
 @JsonDeserialize(as = Trace.class)
 public interface AbstractTrace {
 
+    @Nullable
     String key();
 
     @JsonAlias({"operationNames"})
@@ -41,4 +42,8 @@ public interface AbstractTrace {
 
     @Nullable
     String prettyDuration();
+
+    @Nullable
+    @JsonAlias({"isPartial", "partial"})
+    Boolean isPartial();
 }

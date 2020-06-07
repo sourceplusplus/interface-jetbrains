@@ -1,8 +1,15 @@
+if (hideOverviewTab) {
+    $('#overview_link').css('display', 'none');
+    $('#sidebar_overview_link').css('display', 'none');
+}
+
 function setupUI() {
     if (traceOrderType == 'LATEST_TRACES') {
         $('#latest_traces_header_text').text('Latest Traces');
     } else if (traceOrderType == 'SLOWEST_TRACES') {
         $('#latest_traces_header_text').text('Slowest Traces');
+    } else if (traceOrderType == 'FAILED_TRACES') {
+        $('#latest_traces_header_text').text('Failed Traces');
     }
 
     $("input[type='text']").on("click", function () {
@@ -85,18 +92,18 @@ function displayTraces(traceResult) {
             }
 
             var insertIndex = displayedTraces.length;
-            if (traceResult.order_type == "LATEST_TRACES") {
-                //sort by time
+            if (traceResult.order_type == "SLOWEST_TRACES") {
+                //sort by duration
                 for (var z = 0; z < displayedTraces.length; z++) {
-                    if (trace.start >= displayedTraces[z].start) {
+                    if (trace.duration >= displayedTraces[z].duration) {
                         insertIndex = z;
                         break;
                     }
                 }
             } else {
-                //sort by duration
+                //sort by time
                 for (var z = 0; z < displayedTraces.length; z++) {
-                    if (trace.duration >= displayedTraces[z].duration) {
+                    if (trace.start >= displayedTraces[z].start) {
                         insertIndex = z;
                         break;
                     }

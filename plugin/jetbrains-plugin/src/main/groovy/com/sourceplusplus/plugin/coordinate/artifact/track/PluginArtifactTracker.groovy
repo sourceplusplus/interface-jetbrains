@@ -92,7 +92,7 @@ class PluginArtifactTracker extends AbstractVerticle {
                                         def sourceArtifact = SourceArtifact.builder()
                                                 .appUuid(appUuid)
                                                 .artifactQualifiedName(artifactQualifiedName).build()
-                                        SourcePluginConfig.current.activeEnvironment.coreClient.createArtifact(
+                                        SourcePluginConfig.current.activeEnvironment.coreClient.upsertArtifact(
                                                 appUuid, sourceArtifact, {
                                             if (it.succeeded()) {
                                                 log.debug("Created artifact: " + artifactQualifiedName)

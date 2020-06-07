@@ -20,6 +20,7 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.*
+import static com.sourceplusplus.api.model.trace.TraceOrderType.*
 
 /**
  * Displays traces (and the underlying spans) for a given source code artifact.
@@ -74,7 +75,7 @@ class TracesTab extends AbstractTab {
             def subscribeRequest = ArtifactTraceSubscribeRequest.builder()
                     .appUuid(portal.appUuid)
                     .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
-                    .addOrderTypes(TraceOrderType.LATEST_TRACES, TraceOrderType.SLOWEST_TRACES)
+                    .addOrderTypes(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                     .build()
             SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
                 if (it.succeeded()) {
@@ -96,7 +97,8 @@ class TracesTab extends AbstractTab {
             if (portal == null) {
                 log.warn("Ignoring traces tab opened event. Unable to find portal: $portalUuid")
             } else if (portal.external) {
-                def traceQuery = TraceQuery.builder().orderType(portal.portalUI.tracesView.orderType)
+                def traceQuery = TraceQuery.builder()
+                        .orderType(portal.portalUI.tracesView.orderType)
                         .pageSize(25)
                         .appUuid(portal.appUuid)
                         .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
@@ -125,8 +127,9 @@ class TracesTab extends AbstractTab {
         vertx.setPeriodic(60_000, {
             SourcePortal.getExternalPortals().each {
                 if (it.portalUI.currentTab == PortalTab.Traces
-                        && it.portalUI.tracesView.orderType == TraceOrderType.SLOWEST_TRACES) {
-                    def traceQuery = TraceQuery.builder().orderType(it.portalUI.tracesView.orderType)
+                        && it.portalUI.tracesView.orderType == SLOWEST_TRACES) {
+                    def traceQuery = TraceQuery.builder()
+                            .orderType(it.portalUI.tracesView.orderType)
                             .pageSize(25)
                             .appUuid(it.appUuid)
                             .artifactQualifiedName(it.portalUI.viewingPortalArtifact)

@@ -43,7 +43,6 @@ import io.vertx.ext.web.handler.ResponseContentTypeHandler
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
-import org.jetbrains.annotations.NotNull
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
@@ -213,7 +212,6 @@ class CoreBootstrap extends AbstractVerticle {
         log.info("{} stopped", getClass().getSimpleName())
     }
 
-    @NotNull
     private HttpServerOptions createSeverOptions() {
         def options = new HttpServerOptions()
         def coreConfig = config().getJsonObject("core")
@@ -277,7 +275,6 @@ class CoreBootstrap extends AbstractVerticle {
         return coreInfo.build()
     }
 
-    @NotNull
     private static Handler<RoutingContext> createFailureHandler() {
         return {
             RoutingContext ctx ->

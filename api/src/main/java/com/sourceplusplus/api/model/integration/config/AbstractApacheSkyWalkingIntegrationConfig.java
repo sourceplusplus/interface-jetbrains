@@ -25,4 +25,7 @@ public interface AbstractApacheSkyWalkingIntegrationConfig extends IntegrationCo
 
     @Nullable
     Integer endpointDetectionIntervalSeconds();
+
+    @Nullable
+    Integer failingArtifactDetectionIntervalSeconds();
 }
