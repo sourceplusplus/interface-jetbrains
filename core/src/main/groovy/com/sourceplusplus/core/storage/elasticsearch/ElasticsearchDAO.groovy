@@ -21,6 +21,7 @@ import io.searchbox.core.*
 import io.searchbox.indices.CreateIndex
 import io.searchbox.indices.Refresh
 import io.searchbox.indices.mapping.PutMapping
+import io.searchbox.params.Parameters
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
@@ -49,6 +50,8 @@ class ElasticsearchDAO extends SourceStorage {
             "config/elasticsearch/artifact_index_mappings.json"), Charsets.UTF_8)
     private static final String SOURCE_ARTIFACT_SUBSCRIPTION_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
             "config/elasticsearch/artifact_subscription_index_mappings.json"), Charsets.UTF_8)
+    private static final String SOURCE_ARTIFACT_FAILURE_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
+            "config/elasticsearch/artifact_failure_index_mappings.json"), Charsets.UTF_8)
     private final static String SPP_INDEX = "source_plus_plus"
     private final String elasticSearchHost
     private final int elasticSearchPort
@@ -98,7 +101,13 @@ class ElasticsearchDAO extends SourceStorage {
                     if (it.succeeded()) {
                         installIndex("artifact_subscription", SOURCE_ARTIFACT_SUBSCRIPTION_INDEX_MAPPINGS, {
                             if (it.succeeded()) {
-                                handler.handle(Future.succeededFuture())
+                                installIndex("artifact_failure", SOURCE_ARTIFACT_FAILURE_INDEX_MAPPINGS, {
+                                    if (it.succeeded()) {
+                                        handler.handle(Future.succeededFuture())
+                                    } else {
+                                        handler.handle(Future.failedFuture(it.cause()))
+                                    }
+                                })
                             } else {
                                 handler.handle(Future.failedFuture(it.cause()))
                             }
@@ -168,7 +177,29 @@ class ElasticsearchDAO extends SourceStorage {
      */
     @Override
     void getCoreConfig(Handler<AsyncResult<Optional<CoreConfig>>> handler) {
-        //todo: this
+        def get = new Get.Builder(SPP_INDEX + "_core_config", "core_config")
+                .type("core_config").build()
+        client.executeAsync(get, new JestResultHandler<DocumentResult>() {
+
+            @Override
+            void completed(DocumentResult result) {
+                if (result.responseCode == 404) {
+                    log.warn("Could not find core config")
+                    handler.handle(Future.succeededFuture(Optional.empty()))
+                } else if (result.succeeded) {
+                    handler.handle(Future.succeededFuture(Optional.of(CoreConfig.fromJson(result.sourceAsString))))
+                } else {
+                    log.error(result.errorMessage)
+                    handler.handle(Future.failedFuture(result.errorMessage))
+                }
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to get core config", ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
     }
 
     /**
@@ -176,7 +207,32 @@ class ElasticsearchDAO extends SourceStorage {
      */
     @Override
     void updateCoreConfig(CoreConfig coreConfig, Handler<AsyncResult<CoreConfig>> handler) {
-        //todo: this
+        def jsonCoreConfig = new JsonObject().put("doc", new JsonObject(coreConfig.toString()))
+                .put("doc_as_upsert", true)
+        def update = new Update.Builder(jsonCoreConfig.toString())
+                .setParameter("retry_on_conflict", 5)
+                .index(SPP_INDEX + "_core_config")
+                .type("core_config")
+                .id("core_config")
+                .build()
+        client.executeAsync(update, new JestResultHandler<DocumentResult>() {
+
+            @Override
+            void completed(DocumentResult result) {
+                if (result.succeeded) {
+                    handler.handle(Future.succeededFuture(coreConfig))
+                } else {
+                    log.error(result.errorMessage)
+                    handler.handle(Future.failedFuture(result.errorMessage))
+                }
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to update core config", ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
     }
 
     /**
@@ -645,13 +701,7 @@ class ElasticsearchDAO extends SourceStorage {
                 '      "bool":{\n' +
                 '         "must":[\n' +
                 '            { "term":{ "app_uuid":"' + appUuid + '" } },\n' +
-                '            {\n' +
-                '               "bool":{\n' +
-                '                  "should":[\n' +
-                '                     { "match":{ "config.endpoint":true } }\n' +
-                '                  ]\n' +
-                '               }\n' +
-                '            }\n' +
+                '            { "match":{ "config.endpoint":true } }\n' +
                 '         ]\n' +
                 '      }\n' +
                 '   }\n' +
@@ -695,7 +745,48 @@ class ElasticsearchDAO extends SourceStorage {
      */
     @Override
     void findArtifactByFailing(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
-        //todo: this
+        String query = '{\n' +
+                '   "query":{\n' +
+                '      "bool":{\n' +
+                '         "must":[\n' +
+                '            { "term":{ "app_uuid":"' + appUuid + '" } },\n' +
+                '            { "match":{ "status.actively_failing":true } }\n' +
+                '         ]\n' +
+                '      }\n' +
+                '   }\n' +
+                '}'
+        def search = new Search.Builder(query)
+                .addIndex(SPP_INDEX + "_artifact")
+                .build()
+
+        client.executeAsync(search, new JestResultHandler<SearchResult>() {
+
+            @Override
+            void completed(SearchResult result) {
+                if (result.succeeded || result.responseCode == 404) {
+                    def results = result.getSourceAsStringList()
+                    if (results == null || results.isEmpty()) {
+                        log.debug(String.format("Could not find any failing artifacts"))
+                        handler.handle(Future.succeededFuture(new ArrayList<>()))
+                    } else {
+                        def rtnList = new ArrayList<SourceArtifact>()
+                        results.each {
+                            rtnList.add(Json.decodeValue(it, SourceArtifact.class))
+                        }
+                        handler.handle(Future.succeededFuture(rtnList))
+                    }
+                } else {
+                    log.error(result.errorMessage)
+                    handler.handle(Future.failedFuture(result.errorMessage))
+                }
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to search for failing artifacts", ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
     }
 
     /**
@@ -1117,15 +1208,104 @@ class ElasticsearchDAO extends SourceStorage {
      */
     @Override
     void addArtifactFailure(SourceArtifact artifact, TraceSpan failingSpan, Handler<AsyncResult<Void>> handler) {
+        def failureObject = new JsonObject()
+        failureObject.put("app_uuid", artifact.appUuid())
+        failureObject.put("artifact_qualified_name", artifact.artifactQualifiedName())
+        failureObject.put("trace_id", failingSpan.traceId())
+        failureObject.put("start_time", failingSpan.startTime())
+        failureObject.put("duration", failingSpan.endTime() - failingSpan.startTime())
+        def jsonSubscription = new JsonObject().put("doc", new JsonObject(Json.encode(failureObject)))
+                .put("doc_as_upsert", true)
+        def update = new Update.Builder(jsonSubscription.toString())
+                .setParameter("retry_on_conflict", 5)
+                .index(SPP_INDEX + "_artifact_failure")
+                .type("artifact_failure")
+                .id(URLEncoder.encode("${artifact.appUuid()}-${artifact.artifactQualifiedName()}-${failingSpan.traceId()}", "UTF-8"))
+                .build()
+        client.executeAsync(update, new JestResultHandler<DocumentResult>() {
 
+            @Override
+            void completed(DocumentResult result) {
+                if (result.succeeded) {
+                    handler.handle(Future.succeededFuture())
+                } else {
+                    log.error(result.errorMessage)
+                    handler.handle(Future.failedFuture(result.errorMessage))
+                }
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to add artifact failure", ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    void getArtifactFailures(SourceArtifact artifact, TraceQuery traceQuery, Handler<AsyncResult<List<Trace>>> handler) {
+    void getArtifactFailures(SourceArtifact artifact, TraceQuery traceQuery,
+                             Handler<AsyncResult<List<Trace>>> handler) {
+        String query = '{\n' +
+                '   "query":{\n' +
+                '      "bool":{\n' +
+                '         "must":[\n' +
+                '            { "term":{ "app_uuid":"' + artifact.appUuid() + '" } },\n' +
+                '            { "term":{ "artifact_qualified_name":"' + artifact.artifactQualifiedName() + '" } },\n' +
+                '            { "range":{ "start_time":' +
+                '                           {' +
+                '                               "gte": ' + traceQuery.durationStart().toEpochMilli() + ',' +
+                '                               "lte": ' + traceQuery.durationStop().toEpochMilli() +
+                '                           }' +
+                '                      }' +
+                '            }\n' +
+                '         ]\n' +
+                '      }\n' +
+                '   }\n' +
+                '}'
+        def search = new Search.Builder(query)
+                .addIndex(SPP_INDEX + "_artifact_failure")
+                .setParameter(Parameters.SIZE, traceQuery.pageSize())
+                .build()
 
+        client.executeAsync(search, new JestResultHandler<SearchResult>() {
+
+            @Override
+            void completed(SearchResult result) {
+                if (result.succeeded || result.responseCode == 404) {
+                    def results = result.getSourceAsStringList()
+                    if (results == null || results.isEmpty()) {
+                        log.debug(String.format("Could not find any failing artifact traces"))
+                        handler.handle(Future.succeededFuture(new ArrayList<>()))
+                    } else {
+                        def rtnList = new ArrayList<Trace>()
+                        results.each {
+                            def failure = new JsonObject(it)
+                            rtnList.add(Trace.builder()
+                                    .addOperationNames(failure.getString("artifact_qualified_name"))
+                                    .addTraceIds(failure.getString("trace_id"))
+                                    .start(failure.getLong("start_time"))
+                                    .duration(failure.getInteger("duration"))
+                                    .isError(true)
+                                    .isPartial(true).build()
+                            )
+                        }
+                        handler.handle(Future.succeededFuture(rtnList))
+                    }
+                } else {
+                    log.error(result.errorMessage)
+                    handler.handle(Future.failedFuture(result.errorMessage))
+                }
+            }
+
+            @Override
+            void failed(Exception ex) {
+                log.error("Failed to search for failing artifact traces", ex)
+                handler.handle(Future.failedFuture(ex))
+            }
+        })
     }
 
     /**

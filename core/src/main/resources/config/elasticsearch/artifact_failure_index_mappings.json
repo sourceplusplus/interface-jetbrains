@@ -1,0 +1,14 @@
+{
+  "artifact_failure": {
+    "properties": {
+      "app_uuid": {
+        "type": "keyword",
+        "index": true
+      },
+      "artifact_qualified_name": {
+        "type": "keyword",
+        "index": true
+      }
+    }
+  }
+}

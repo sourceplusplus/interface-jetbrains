@@ -25,11 +25,11 @@ class CoreConfig {
 
     void setApmIntegrationConfig(APMIntegrationConfig apmIntegrationConfig) {
         this.apmIntegrationConfig = apmIntegrationConfig
-        save()
+        INSTANCE?.save()
     }
 
     void save() {
-        log.debug("Saving updated core config")
+        log.info("Saving updated core config")
         _storage.updateCoreConfig(this, {
             if (it.failed()) {
                 log.error("Failed to update core config", it.cause())
@@ -43,18 +43,14 @@ class CoreConfig {
     }
 
     static CoreConfig fromJson(String json) {
-        CoreConfig coreConfig = Json.decodeValue(json, CoreConfig.class)
-        if (coreConfig != null) {
-            coreConfig.apmIntegrationConfig?.setupCoreConfig(coreConfig)
-        }
-        return coreConfig
+        return Json.decodeValue(json, CoreConfig.class)
     }
 
     static void setupCoreConfig(JsonObject deployConfig, Optional<CoreConfig> currentConfig, SourceStorage storage) {
         _storage = storage
 
         CoreConfig coreConfig
-        if (currentConfig.ifPresent()) {
+        if (currentConfig.isPresent()) {
             coreConfig = currentConfig.get()
         } else {
             coreConfig = new CoreConfig()
@@ -63,7 +59,6 @@ class CoreConfig {
                 def integration = integrations.getJsonObject(i)
                 if (integration.getString("category") == "APM") {
                     coreConfig.apmIntegrationConfig = new APMIntegrationConfig()
-                    coreConfig.apmIntegrationConfig.setupCoreConfig(coreConfig)
                     break
                 }
             }
