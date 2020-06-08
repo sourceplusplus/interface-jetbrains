@@ -7,7 +7,6 @@ import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
-import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
 import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
@@ -25,7 +24,7 @@ import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
-import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
+import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.*
 import static com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration.UNKNOWN_COMPONENT
 
 /**
@@ -45,7 +44,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final SourceStorage storage
-    private final APMIntegrationConfig integrationConfig
+    private final EndpointDetection endpointDetection
 
     SkywalkingEndpointIdDetector(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI,
                                  ArtifactAPI artifactAPI, SourceStorage storage) {
@@ -53,7 +52,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
-        this.integrationConfig = CoreConfig.INSTANCE.apmIntegrationConfig
+        this.endpointDetection = CoreConfig.INSTANCE.apmIntegrationConfig.endpointDetection
     }
 
     @Override
@@ -192,16 +191,16 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     private void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
         def searchServiceStartTime
-        if (integrationConfig.endpointDetection.latestSearchedService == null) {
+        if (endpointDetection.latestSearchedService == null) {
             searchServiceStartTime = Instant.now()
         } else {
-            searchServiceStartTime = integrationConfig.endpointDetection.latestSearchedService
+            searchServiceStartTime = endpointDetection.latestSearchedService
         }
         def searchServiceEndTime = Instant.now()
 
         skywalking.getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
             if (it.succeeded()) {
-                integrationConfig.endpointDetection.latestSearchedService = searchServiceEndTime
+                endpointDetection.latestSearchedService = searchServiceEndTime
 
                 def futures = []
                 for (int i = 0; i < it.result().size(); i++) {
@@ -215,7 +214,8 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                     applicationAPI.getApplication(appUuid, {
                         if (it.succeeded()) {
                             if (it.result().isPresent()) {
-                                integrationConfig.addSourceService(new SourceService(serviceId, appUuid))
+                                CoreConfig.INSTANCE.apmIntegrationConfig.addSourceService(
+                                        new SourceService(serviceId, appUuid))
                             }
                             promise.complete()
                         } else {
@@ -226,7 +226,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
                 CompositeFuture.all(futures).onComplete({
                     if (it.succeeded()) {
-                        handler.handle(Future.succeededFuture(integrationConfig.sourceServices))
+                        handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
                     }

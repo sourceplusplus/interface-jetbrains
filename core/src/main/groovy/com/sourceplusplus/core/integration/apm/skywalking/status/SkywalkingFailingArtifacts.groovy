@@ -7,7 +7,6 @@ import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
-import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
 import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
@@ -17,7 +16,7 @@ import io.vertx.core.*
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
+import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.*
 
 /**
  * Queries Apache SkyWalking for failing traces and correlates them to stored sources code artifacts.
@@ -33,7 +32,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
     private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final SourceStorage storage
-    private final APMIntegrationConfig integrationConfig
+    private final FailedArtifactTracker failedArtifactTracker
 
     SkywalkingFailingArtifacts(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI,
                                ArtifactAPI artifactAPI, SourceStorage storage) {
@@ -41,7 +40,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
-        this.integrationConfig = CoreConfig.INSTANCE.apmIntegrationConfig
+        this.failedArtifactTracker = CoreConfig.INSTANCE.apmIntegrationConfig.failedArtifactTracker
     }
 
     @Override
@@ -76,16 +75,16 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
     //todo: merge with EndpointIdDetector's
     private void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
         def searchServiceStartTime
-        if (integrationConfig.failedArtifactTracker.latestSearchedService == null) {
+        if (failedArtifactTracker.latestSearchedService == null) {
             searchServiceStartTime = Instant.now()
         } else {
-            searchServiceStartTime = integrationConfig.failedArtifactTracker.latestSearchedService
+            searchServiceStartTime = failedArtifactTracker.latestSearchedService
         }
         def searchServiceEndTime = Instant.now()
 
         skywalking.getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
             if (it.succeeded()) {
-                integrationConfig.failedArtifactTracker.latestSearchedService = searchServiceEndTime
+                failedArtifactTracker.latestSearchedService = searchServiceEndTime
 
                 def futures = []
                 for (int i = 0; i < it.result().size(); i++) {
@@ -99,7 +98,8 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
                     applicationAPI.getApplication(appUuid, {
                         if (it.succeeded()) {
                             if (it.result().isPresent()) {
-                                integrationConfig.addSourceService(new SourceService(serviceId, appUuid))
+                                CoreConfig.INSTANCE.apmIntegrationConfig.addSourceService(
+                                        new SourceService(serviceId, appUuid))
                             }
                             promise.complete()
                         } else {
@@ -110,7 +110,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
 
                 CompositeFuture.all(futures).onComplete({
                     if (it.succeeded()) {
-                        handler.handle(Future.succeededFuture(integrationConfig.sourceServices))
+                        handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
                     }
@@ -157,8 +157,8 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
 
     private void processServiceFailingTraces(SourceService sourceService, Handler<AsyncResult<Void>> handler) {
         def searchStartTime
-        if (integrationConfig.failedArtifactTracker.serviceLatestSearchedFailingTraces.containsKey(sourceService)) {
-            searchStartTime = integrationConfig.failedArtifactTracker.serviceLatestSearchedFailingTraces.get(sourceService)
+        if (failedArtifactTracker.serviceLatestSearchedFailingTraces.containsKey(sourceService)) {
+            searchStartTime = failedArtifactTracker.serviceLatestSearchedFailingTraces.get(sourceService)
         } else {
             searchStartTime = Instant.now()
         }
@@ -173,8 +173,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
                 .durationStep("SECOND").build()
         skywalking.getTraces(traceQuery, {
             if (it.succeeded()) {
-                integrationConfig.failedArtifactTracker.addServiceLatestSearchedFailingTraces(
-                        sourceService, searchEndTime)
+                failedArtifactTracker.addServiceLatestSearchedFailingTraces(sourceService, searchEndTime)
 
                 processFailingTraces(sourceService, it.result().traces(), handler)
             } else {
