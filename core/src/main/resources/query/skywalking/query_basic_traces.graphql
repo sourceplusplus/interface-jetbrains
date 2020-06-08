@@ -5,6 +5,8 @@
             end: "$queryDurationEnd",
             step: $queryDurationStep
         },
+        serviceId: $serviceId,
+        serviceInstanceId: $serviceInstanceId,
         endpointId: "$endpointId",
         traceState: $traceState,
         queryOrder: $queryOrder,

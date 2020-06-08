@@ -80,7 +80,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
 
             refreshServiceFailingArtifacts(sourceService, {
                 if (it.succeeded()) {
-                    processServiceFailingTraces(sourceService, promise)
+                    processServiceInstances(sourceService, it.result(), promise)
                 } else {
                     promise.fail(it.cause())
                 }
@@ -89,24 +89,47 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         CompositeFuture.all(futures).onComplete(handler)
     }
 
-    private void refreshServiceFailingArtifacts(SourceService sourceService, Handler<AsyncResult<Void>> handler) {
+    private void refreshServiceFailingArtifacts(SourceService sourceService,
+                                                Handler<AsyncResult<Set<String>>> handler) {
         def start = Instant.now(), end = Instant.now(), step = "MINUTE"
         skywalking.getServiceInstances(start, end, step, sourceService.id, {
             if (it.succeeded()) {
                 def serviceInstances = it.result()
                 Set<String> serviceInstanceIds = new HashSet<>()
+                Set<String> serviceInstanceNames = new HashSet<>()
                 for (int i = 0; i < serviceInstances.size(); i++) {
-                    serviceInstanceIds.add(serviceInstances.getJsonObject(i).getString("label"))
+                    def serviceInstance = serviceInstances.getJsonObject(i)
+                    serviceInstanceIds.add(serviceInstance.getString("key"))
+                    serviceInstanceNames.add(serviceInstance.getString("label"))
                 }
 
-                artifactAPI.updateFailingArtifacts(sourceService.appUuid, serviceInstanceIds, handler)
+                artifactAPI.updateFailingArtifacts(sourceService.appUuid, serviceInstanceNames, {
+                    if (it.succeeded()) {
+                        handler.handle(Future.succeededFuture(serviceInstanceIds))
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
         })
     }
 
-    private void processServiceFailingTraces(SourceService sourceService, Handler<AsyncResult<Void>> handler) {
+    private void processServiceInstances(SourceService sourceService, Set<String> sourceServiceInstanceIds,
+                                         Handler<AsyncResult<Void>> handler) {
+        def futures = []
+        for (def sourceServiceInstanceId : sourceServiceInstanceIds) {
+            def promise = Promise.promise()
+            futures.add(promise)
+
+            processServiceInstanceFailingTraces(sourceService, sourceServiceInstanceId, promise)
+        }
+        CompositeFuture.all(futures).onComplete(handler)
+    }
+
+    private void processServiceInstanceFailingTraces(SourceService sourceService, String serviceInstanceId,
+                                                     Handler<AsyncResult<Void>> handler) {
         def searchStartTime
         if (failedArtifactTracker.serviceLatestSearchedFailingTraces.containsKey(sourceService)) {
             searchStartTime = failedArtifactTracker.serviceLatestSearchedFailingTraces.get(sourceService)
@@ -118,6 +141,7 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         def traceQuery = TraceQuery.builder()
                 .systemRequest(true)
                 .serviceId(sourceService.id)
+                .serviceInstanceId(serviceInstanceId)
                 .traceState("ERROR")
                 .durationStart(searchStartTime)
                 .durationStop(searchEndTime)

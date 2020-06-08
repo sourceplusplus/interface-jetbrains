@@ -31,6 +31,9 @@ public interface AbstractTraceQuery {
     String serviceId();
 
     @Nullable
+    String serviceInstanceId();
+
+    @Nullable
     String traceId();
 
     @Nullable
