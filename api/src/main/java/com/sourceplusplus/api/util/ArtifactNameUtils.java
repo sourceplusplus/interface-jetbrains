@@ -37,7 +37,7 @@ public class ArtifactNameUtils {
     }
 
     public static String removePackageNames(String qualifiedMethodName) {
-        if (qualifiedMethodName == null || qualifiedMethodName.isEmpty() || qualifiedMethodName.indexOf('.') == -1) {
+        if (qualifiedMethodName == null || qualifiedMethodName.isEmpty() || !qualifiedMethodName.contains(".")) {
             return qualifiedMethodName;
         }
         String className = qualifiedMethodName.substring(0, qualifiedMethodName.substring(
@@ -67,13 +67,13 @@ public class ArtifactNameUtils {
         if (methodNameArr.length == 1) {
             return methodNameArr[0] + argText.toString();
         } else {
-            return methodNameArr[methodNameArr.length - 2] + '.' + methodNameArr[methodNameArr.length - 1] + argText.toString();
+            return methodNameArr[methodNameArr.length - 2] + "." + methodNameArr[methodNameArr.length - 1] + argText.toString();
         }
     }
 
     public static String removePackageAndClassName(String qualifiedMethodName) {
         if (qualifiedMethodName == null || qualifiedMethodName.isEmpty()
-                || qualifiedMethodName.indexOf('.') == -1 || qualifiedMethodName.indexOf('(') == -1) {
+                || !qualifiedMethodName.contains(".") || !qualifiedMethodName.contains("(")) {
             return qualifiedMethodName;
         }
         return qualifiedMethodName.substring(qualifiedMethodName.substring(
