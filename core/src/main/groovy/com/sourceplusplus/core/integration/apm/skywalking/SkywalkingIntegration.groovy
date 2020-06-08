@@ -13,6 +13,7 @@ import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
 import com.sourceplusplus.core.integration.apm.skywalking.status.SkywalkingFailingArtifacts
+import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
@@ -26,6 +27,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 import static com.sourceplusplus.api.model.trace.TraceOrderType.*
+import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.*
 
 /**
  * Represents integration with the Apache SkyWalking APM.
@@ -494,6 +496,54 @@ class SkywalkingIntegration extends APMIntegration {
                         handler.handle(Future.failedFuture(it.cause()))
                     }
                 })
+            }
+        })
+    }
+
+    void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
+        def searchServiceStartTime
+        if (CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService == null) {
+            searchServiceStartTime = Instant.now()
+        } else {
+            searchServiceStartTime = CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService
+        }
+        def searchServiceEndTime = Instant.now()
+
+        getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
+            if (it.succeeded()) {
+                CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService = searchServiceEndTime
+
+                def futures = []
+                for (int i = 0; i < it.result().size(); i++) {
+                    def service = it.result().getJsonObject(i)
+                    def serviceId = service.getString("key")
+                    def appUuid = service.getString("label")
+
+                    //verify appUuid is valid
+                    def promise = Promise.promise()
+                    futures.add(promise)
+                    applicationAPI.getApplication(appUuid, {
+                        if (it.succeeded()) {
+                            if (it.result().isPresent()) {
+                                CoreConfig.INSTANCE.apmIntegrationConfig.addSourceService(
+                                        new SourceService(serviceId, appUuid))
+                            }
+                            promise.complete()
+                        } else {
+                            promise.fail(it.cause())
+                        }
+                    })
+                }
+
+                CompositeFuture.all(futures).onComplete({
+                    if (it.succeeded()) {
+                        handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
             }
         })
     }

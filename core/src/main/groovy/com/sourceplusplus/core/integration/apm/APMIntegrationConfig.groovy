@@ -26,8 +26,8 @@ import java.time.Instant
  */
 class APMIntegrationConfig {
 
+    private Instant latestSearchedService
     private Set<SourceService> sourceServices = new HashSet<>()
-    private EndpointDetection endpointDetection = new EndpointDetection()
     private FailedArtifactTracker failedArtifactTracker = new FailedArtifactTracker()
 
     @EqualsAndHashCode(includeFields = true, cache = true)
@@ -50,33 +50,10 @@ class APMIntegrationConfig {
         }
     }
 
-    static class EndpointDetection {
-        private Instant latestSearchedService
-
-        Instant getLatestSearchedService() {
-            return latestSearchedService
-        }
-
-        void setLatestSearchedService(Instant latestSearchedService) {
-            this.latestSearchedService = latestSearchedService
-            CoreConfig.INSTANCE?.save()
-        }
-    }
-
     static class FailedArtifactTracker {
-        private Instant latestSearchedService
         @JsonSerialize(using = ServiceLatestSearchedFailingTracesSerializer.class)
         @JsonDeserialize(using = ServiceLatestSearchedFailingTracesDeserializer.class)
         private Map<SourceService, Instant> serviceLatestSearchedFailingTraces = new HashMap<>()
-
-        Instant getLatestSearchedService() {
-            return latestSearchedService
-        }
-
-        void setLatestSearchedService(Instant latestSearchedService) {
-            this.latestSearchedService = latestSearchedService
-            CoreConfig.INSTANCE?.save()
-        }
 
         Map<SourceService, Instant> getServiceLatestSearchedFailingTraces() {
             return serviceLatestSearchedFailingTraces
@@ -88,6 +65,15 @@ class APMIntegrationConfig {
         }
     }
 
+    Instant getLatestSearchedService() {
+        return latestSearchedService
+    }
+
+    void setLatestSearchedService(Instant latestSearchedService) {
+        this.latestSearchedService = latestSearchedService
+        CoreConfig.INSTANCE?.save()
+    }
+
     void addSourceService(SourceService service) {
         if (this.sourceServices.add(service)) {
             CoreConfig.INSTANCE?.save()
@@ -96,10 +82,6 @@ class APMIntegrationConfig {
 
     Set<SourceService> getSourceServices() {
         return sourceServices
-    }
-
-    EndpointDetection getEndpointDetection() {
-        return endpointDetection
     }
 
     FailedArtifactTracker getFailedArtifactTracker() {

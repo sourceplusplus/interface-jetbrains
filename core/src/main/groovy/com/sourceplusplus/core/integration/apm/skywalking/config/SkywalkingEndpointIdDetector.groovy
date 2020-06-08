@@ -8,7 +8,6 @@ import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
-import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
@@ -24,7 +23,6 @@ import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
-import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.*
 import static com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration.UNKNOWN_COMPONENT
 
 /**
@@ -44,7 +42,6 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final SourceStorage storage
-    private final EndpointDetection endpointDetection
 
     SkywalkingEndpointIdDetector(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI,
                                  ArtifactAPI artifactAPI, SourceStorage storage) {
@@ -52,7 +49,6 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
-        this.endpointDetection = CoreConfig.INSTANCE.apmIntegrationConfig.endpointDetection
     }
 
     @Override
@@ -140,7 +136,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     private void searchForNewEndpoints(Handler<AsyncResult<Void>> handler) {
         log.debug("Searching for new SkyWalking service endpoints")
-        determineSourceServices({
+        skywalking.determineSourceServices({
             if (it.succeeded()) {
                 def futures = []
                 for (def service : it.result()) {
@@ -183,54 +179,6 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                     })
                 }
                 CompositeFuture.all(futures).onComplete(handler)
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
-    }
-
-    private void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
-        def searchServiceStartTime
-        if (endpointDetection.latestSearchedService == null) {
-            searchServiceStartTime = Instant.now()
-        } else {
-            searchServiceStartTime = endpointDetection.latestSearchedService
-        }
-        def searchServiceEndTime = Instant.now()
-
-        skywalking.getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
-            if (it.succeeded()) {
-                endpointDetection.latestSearchedService = searchServiceEndTime
-
-                def futures = []
-                for (int i = 0; i < it.result().size(); i++) {
-                    def service = it.result().getJsonObject(i)
-                    def serviceId = service.getString("key")
-                    def appUuid = service.getString("label")
-
-                    //verify appUuid is valid
-                    def promise = Promise.promise()
-                    futures.add(promise)
-                    applicationAPI.getApplication(appUuid, {
-                        if (it.succeeded()) {
-                            if (it.result().isPresent()) {
-                                CoreConfig.INSTANCE.apmIntegrationConfig.addSourceService(
-                                        new SourceService(serviceId, appUuid))
-                            }
-                            promise.complete()
-                        } else {
-                            promise.fail(it.cause())
-                        }
-                    })
-                }
-
-                CompositeFuture.all(futures).onComplete({
-                    if (it.succeeded()) {
-                        handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
-                    } else {
-                        handler.handle(Future.failedFuture(it.cause()))
-                    }
-                })
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

@@ -63,58 +63,9 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
     }
 
     void searchForFailingArtifacts(Handler<AsyncResult<Void>> handler) {
-        determineSourceServices({
+        skywalking.determineSourceServices({
             if (it.succeeded()) {
                 processServices(it.result(), handler)
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
-    }
-
-    //todo: merge with EndpointIdDetector's
-    private void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
-        def searchServiceStartTime
-        if (failedArtifactTracker.latestSearchedService == null) {
-            searchServiceStartTime = Instant.now()
-        } else {
-            searchServiceStartTime = failedArtifactTracker.latestSearchedService
-        }
-        def searchServiceEndTime = Instant.now()
-
-        skywalking.getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
-            if (it.succeeded()) {
-                failedArtifactTracker.latestSearchedService = searchServiceEndTime
-
-                def futures = []
-                for (int i = 0; i < it.result().size(); i++) {
-                    def service = it.result().getJsonObject(i)
-                    def serviceId = service.getString("key")
-                    def appUuid = service.getString("label")
-
-                    //verify appUuid is valid
-                    def promise = Promise.promise()
-                    futures.add(promise)
-                    applicationAPI.getApplication(appUuid, {
-                        if (it.succeeded()) {
-                            if (it.result().isPresent()) {
-                                CoreConfig.INSTANCE.apmIntegrationConfig.addSourceService(
-                                        new SourceService(serviceId, appUuid))
-                            }
-                            promise.complete()
-                        } else {
-                            promise.fail(it.cause())
-                        }
-                    })
-                }
-
-                CompositeFuture.all(futures).onComplete({
-                    if (it.succeeded()) {
-                        handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
-                    } else {
-                        handler.handle(Future.failedFuture(it.cause()))
-                    }
-                })
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
