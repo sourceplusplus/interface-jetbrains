@@ -16,6 +16,8 @@ import io.vertx.ext.web.RoutingContext
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
+
 /**
  * Used to add/modify/fetch artifact trace subscriptions.
  *
@@ -223,7 +225,8 @@ class TraceAPI extends AbstractVerticle {
                                 }
                             })
                         } else {
-                            log.debug("Could not find endpoint id for endpoint. Artifact qualified name: " + traceQuery.artifactQualifiedName())
+                            log.debug("Could not find endpoint id for endpoint. Artifact qualified name: {}",
+                                    getShortQualifiedFunctionName(traceQuery.artifactQualifiedName()))
                             handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                         }
                     } else if (traceQuery.orderType() == TraceOrderType.FAILED_TRACES) {
@@ -238,11 +241,13 @@ class TraceAPI extends AbstractVerticle {
                             }
                         })
                     } else {
-                        log.debug("No traces exists for artifact. Artifact qualified name: " + traceQuery.artifactQualifiedName())
+                        log.debug("No traces exists for artifact. Artifact qualified name: {}",
+                                getShortQualifiedFunctionName(traceQuery.artifactQualifiedName()))
                         handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                     }
                 } else {
-                    log.debug("Could not find artifact config. Artifact qualified name: " + traceQuery.artifactQualifiedName())
+                    log.debug("Could not find artifact config. Artifact qualified name: {}",
+                            getShortQualifiedFunctionName(traceQuery.artifactQualifiedName()))
                     handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                 }
             } else {
@@ -254,7 +259,7 @@ class TraceAPI extends AbstractVerticle {
     void getTraceSpans(String appUuid, String artifactQualifiedName, TraceSpanStackQuery traceSpanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
         log.info("Getting trace spans. App UUID: {} - Artifact qualified name: {} - Query: {}",
-                appUuid, artifactQualifiedName, traceSpanQuery)
+                appUuid, getShortQualifiedFunctionName(artifactQualifiedName), traceSpanQuery)
         if (traceSpanQuery.oneLevelDeep()) {
             core.artifactAPI.getSourceArtifact(appUuid, artifactQualifiedName, {
                 if (it.succeeded()) {

@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED
+import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
 
 /**
  * Used to add/modify/fetch artifact subscriptions and configurations.
@@ -357,7 +358,8 @@ class ArtifactAPI extends AbstractVerticle {
 
     void getSourceArtifact(String appUuid, String artifactQualifiedName,
                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.debug("Getting source artifact. App UUID: {} - Artifact qualified name: {}", appUuid, artifactQualifiedName)
+        log.debug("Getting source artifact. App UUID: {} - Artifact qualified name: {}",
+                appUuid, getShortQualifiedFunctionName(artifactQualifiedName))
         getAndCacheSourceArtifact(appUuid, artifactQualifiedName, handler)
     }
 
@@ -498,7 +500,7 @@ class ArtifactAPI extends AbstractVerticle {
     void getSourceArtifactConfig(String appUuid, String artifactQualifiedName,
                                  Handler<AsyncResult<Optional<SourceArtifactConfig>>> handler) {
         log.debug("Getting source artifact config. App UUID: {} - Artifact qualified name: {}",
-                appUuid, artifactQualifiedName)
+                appUuid, getShortQualifiedFunctionName(artifactQualifiedName))
         getAndCacheSourceArtifact(appUuid, artifactQualifiedName, {
             if (it.succeeded() && it.result().isPresent()) {
                 handler.handle(Future.succeededFuture(Optional.ofNullable(it.result().get().config())))

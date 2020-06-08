@@ -32,6 +32,8 @@ import io.vertx.core.json.JsonObject
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
+
 /**
  * Represents a Elasticsearch storage for saving/fetching core data.
  *
@@ -453,7 +455,7 @@ class ElasticsearchDAO extends SourceStorage {
             @Override
             void completed(Object result) {
                 log.info(String.format("Created artifact. App UUID: %s - Artifact qualified name: %s",
-                        artifact.appUuid(), artifact.artifactQualifiedName()))
+                        artifact.appUuid(), getShortQualifiedFunctionName(artifact.artifactQualifiedName())))
                 handler.handle(Future.succeededFuture(artifact))
             }
 
@@ -480,7 +482,7 @@ class ElasticsearchDAO extends SourceStorage {
             @Override
             void completed(DocumentResult result) {
                 log.info(String.format("Updated artifact. App UUID: %s - Artifact qualified name: %s",
-                        artifact.appUuid(), artifact.artifactQualifiedName()))
+                        artifact.appUuid(), getShortQualifiedFunctionName(artifact.artifactQualifiedName())))
                 if (result.succeeded) {
                     getArtifact(artifact.appUuid(), artifact.artifactQualifiedName(), {
                         if (it.succeeded()) {
@@ -517,15 +519,15 @@ class ElasticsearchDAO extends SourceStorage {
             @Override
             void completed(DocumentResult result) {
                 if (result.responseCode == 404) {
-                    log.debug(String.format("Could not find artifact. Artifact qualified name: %s",
-                            artifactQualifiedName))
+                    log.debug("Could not find artifact. Artifact qualified name: {}",
+                            getShortQualifiedFunctionName(artifactQualifiedName))
                     handler.handle(Future.succeededFuture(Optional.empty()))
                 } else if (result.succeeded) {
                     def artifact = Json.decodeValue(result.sourceAsString, SourceArtifact.class)
                     artifact = artifact.withAppUuid(appUuid).withArtifactQualifiedName(artifactQualifiedName)
 
-                    log.debug(String.format("Found artifact. Artifact qualified name: %s",
-                            artifact.artifactQualifiedName()))
+                    log.debug("Found artifact. Artifact qualified name: {}",
+                            getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
                     handler.handle(Future.succeededFuture(Optional.of(artifact)))
                 } else {
                     log.error(result.errorMessage)

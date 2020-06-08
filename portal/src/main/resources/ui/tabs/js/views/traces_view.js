@@ -301,7 +301,6 @@ function displayTraceStack(traceStack) {
     $('#span_info_header').removeClass('active_sub_tab');
     $('#span_info_header').css('visibility', 'hidden');
 
-    eb.send('PortalLogger', 'Displaying trace stack: ' + traceStack);
     $('#stack_table tr').remove();
 
     viewingInnerTrace = false;

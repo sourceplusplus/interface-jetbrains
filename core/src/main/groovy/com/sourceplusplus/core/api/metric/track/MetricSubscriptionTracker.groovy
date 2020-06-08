@@ -19,6 +19,8 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 
+import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
+
 /**
  * Keeps track of artifact metric subscriptions.
  *
@@ -121,7 +123,7 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
                 def metricResult = it.result()
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address,
                         new JsonObject(Json.encode(metricResult)))
-                log.debug("Published updated metrics for artifact: " + metricResult.artifactQualifiedName())
+                log.debug("Published updated metrics for artifact: " + getShortQualifiedFunctionName(metricResult.artifactQualifiedName()))
             } else {
                 it.cause().printStackTrace()
             }

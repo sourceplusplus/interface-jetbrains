@@ -6,6 +6,8 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
 
+import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
+
 /**
  * Used to track the current viewable state of the Source++ Portal.
  *
@@ -51,7 +53,7 @@ class PortalViewTracker extends AbstractVerticle {
         vertx.eventBus().consumer(OPENED_PORTAL, {
             if (it.body() instanceof SourceArtifact) {
                 def artifact = it.body() as SourceArtifact
-                log.info("Showing Source++ Portal for artifact: {}", artifact.artifactQualifiedName())
+                log.info("Showing Source++ Portal for artifact: {}", getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
                 //todo: reset ui if artifact different than last artifact
             }
         })
@@ -60,7 +62,7 @@ class PortalViewTracker extends AbstractVerticle {
         vertx.eventBus().consumer(CLOSED_PORTAL, {
             if (it.body() instanceof SourceArtifact) {
                 def artifact = it.body() as SourceArtifact
-                log.info("Hiding Source++ Portal for artifact: {}", artifact.artifactQualifiedName())
+                log.info("Hiding Source++ Portal for artifact: {}", getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
             }
         })
 

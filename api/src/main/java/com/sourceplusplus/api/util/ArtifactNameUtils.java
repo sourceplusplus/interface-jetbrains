@@ -35,4 +35,48 @@ public class ArtifactNameUtils {
                 .replaceAll("\\(java.lang.", "\\(").replaceAll("<java.lang.", "<")
                 .replaceAll(",java.lang.", ",").replaceAll("~", "");
     }
+
+    public static String removePackageNames(String qualifiedMethodName) {
+        if (qualifiedMethodName == null || qualifiedMethodName.isEmpty() || qualifiedMethodName.indexOf('.') == -1) {
+            return qualifiedMethodName;
+        }
+        String className = qualifiedMethodName.substring(0, qualifiedMethodName.substring(
+                0, qualifiedMethodName.indexOf("(")).lastIndexOf("."));
+        if (className.contains("$")) {
+            className = className.substring(0, className.indexOf("$"));
+        }
+
+        String arguments = qualifiedMethodName.substring(qualifiedMethodName.indexOf("("));
+        String[] argArray = arguments.substring(1, arguments.length() - 1).split(",");
+        StringBuilder argText = new StringBuilder("(");
+        for (int i = 0; i < argArray.length; i++) {
+            String qualifiedArgument = argArray[i];
+            String newArgText = qualifiedArgument.substring(qualifiedArgument.lastIndexOf(".") + 1);
+            if (qualifiedArgument.startsWith(className + "$")) {
+                newArgText = qualifiedArgument.substring(qualifiedArgument.lastIndexOf("$") + 1);
+            }
+            argText.append(newArgText);
+
+            if ((i + 1) < argArray.length) {
+                argText.append(",");
+            }
+        }
+        argText.append(")");
+
+        String[] methodNameArr = qualifiedMethodName.substring(0, qualifiedMethodName.indexOf("(")).split("\\.");
+        if (methodNameArr.length == 1) {
+            return methodNameArr[0] + argText.toString();
+        } else {
+            return methodNameArr[methodNameArr.length - 2] + '.' + methodNameArr[methodNameArr.length - 1] + argText.toString();
+        }
+    }
+
+    public static String removePackageAndClassName(String qualifiedMethodName) {
+        if (qualifiedMethodName == null || qualifiedMethodName.isEmpty()
+                || qualifiedMethodName.indexOf('.') == -1 || qualifiedMethodName.indexOf('(') == -1) {
+            return qualifiedMethodName;
+        }
+        return qualifiedMethodName.substring(qualifiedMethodName.substring(
+                0, qualifiedMethodName.indexOf("(")).lastIndexOf(".") + 1);
+    }
 }

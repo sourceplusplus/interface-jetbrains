@@ -21,6 +21,7 @@ import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.*
 import static com.sourceplusplus.api.model.trace.TraceOrderType.*
+import static com.sourceplusplus.api.util.ArtifactNameUtils.*
 
 /**
  * Displays traces (and the underlying spans) for a given source code artifact.
@@ -58,7 +59,7 @@ class TracesTab extends AbstractTab {
             def portalUuid = message.getString("portal_uuid")
             def portal = SourcePortal.getPortal(portalUuid)
             if (portal == null) {
-                log.warn("Ignoring traces tab opened event. Unable to find portal: $portalUuid")
+                log.warn("Ignoring traces tab opened event. Unable to find portal: {}", portalUuid)
                 return
             }
 
@@ -79,7 +80,7 @@ class TracesTab extends AbstractTab {
                     .build()
             SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
                 if (it.succeeded()) {
-                    log.info("Successfully subscribed to traces with request: " + subscribeRequest)
+                    log.info("Successfully subscribed to traces with request: {}", subscribeRequest)
                 } else {
                     log.error("Failed to subscribe to artifact traces", it.cause())
                 }
@@ -95,7 +96,7 @@ class TracesTab extends AbstractTab {
             def portalUuid = JsonObject.mapFrom(it.body()).getString("portal_uuid")
             def portal = SourcePortal.getPortal(portalUuid)
             if (portal == null) {
-                log.warn("Ignoring traces tab opened event. Unable to find portal: $portalUuid")
+                log.warn("Ignoring traces tab opened event. Unable to find portal: {}", portalUuid)
             } else if (portal.external) {
                 def traceQuery = TraceQuery.builder()
                         .orderType(portal.portalUI.tracesView.orderType)
@@ -166,7 +167,7 @@ class TracesTab extends AbstractTab {
         //user clicked into trace stack
         vertx.eventBus().consumer(CLICKED_DISPLAY_TRACE_STACK, { messageHandler ->
             def request = messageHandler.body() as JsonObject
-            log.debug("Displaying trace stack: " + request)
+            log.debug("Displaying trace stack: {}", request)
 
             if (request.getString("trace_id") == null) {
                 def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
@@ -210,7 +211,7 @@ class TracesTab extends AbstractTab {
         //user clicked into span
         vertx.eventBus().consumer(CLICKED_DISPLAY_SPAN_INFO, { messageHandler ->
             def spanInfoRequest = messageHandler.body() as JsonObject
-            log.debug("Clicked display span info: " + spanInfoRequest)
+            log.debug("Clicked display span info: {}", spanInfoRequest)
 
             def portalUuid = spanInfoRequest.getString("portal_uuid")
             def portal = SourcePortal.getPortal(portalUuid)
@@ -230,14 +231,14 @@ class TracesTab extends AbstractTab {
             def appUuid = request.getString("app_uuid")
             def artifactQualifiedName = request.getString("artifact_qualified_name")
             def globalTraceId = request.getString("trace_id")
-            log.trace("Getting trace spans. Artifact qualified name: %s - Trace id: %s",
-                    artifactQualifiedName, globalTraceId)
+            log.trace("Getting trace spans. Artifact qualified name: {} - Trace id: {}",
+                    getShortQualifiedFunctionName(artifactQualifiedName), globalTraceId)
 
             def portal = SourcePortal.getPortal(portalUuid)
             def representation = portal.portalUI.tracesView
             def traceStack = representation.getTraceStack(globalTraceId)
             if (traceStack != null) {
-                log.trace("Got trace spans: $globalTraceId from cache - Stack size: " + traceStack.size())
+                log.trace("Got trace spans: {} from cache - Stack size: {}", globalTraceId, traceStack.size())
                 messageHandler.reply(traceStack)
                 context.stop()
             } else {
@@ -283,9 +284,9 @@ class TracesTab extends AbstractTab {
             def artifactTraceResult = portal.portalUI.tracesView.artifactTraceResult
             vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_TRACES",
                     new JsonObject(Json.encode(artifactTraceResult)))
-            log.debug("Displayed traces for artifact: " + artifactTraceResult.artifactQualifiedName()
-                    + " - Type: " + artifactTraceResult.orderType()
-                    + " - Trace size: " + artifactTraceResult.traces().size())
+            log.debug("Displayed traces for artifact: {} - Type: {} - Trace size: {}",
+                    getShortQualifiedFunctionName(artifactTraceResult.artifactQualifiedName()),
+                    artifactTraceResult.orderType(), artifactTraceResult.traces().size())
         }
     }
 
@@ -296,7 +297,7 @@ class TracesTab extends AbstractTab {
 
         if (traceStack && !traceStack.isEmpty()) {
             vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_TRACE_STACK", representation.traceStack)
-            log.info("Displayed trace stack for id: $traceId - Stack size: " + traceStack.size())
+            log.info("Displayed trace stack for id: {} - Stack size: {}", traceId, traceStack.size())
         } else if (representation.innerTrace && representation.viewType != TracesView.ViewType.SPAN_INFO) {
             def innerTraceStackInfo = InnerTraceStackInfo.builder()
                     .innerLevel(representation.innerLevel)
@@ -304,7 +305,7 @@ class TracesTab extends AbstractTab {
             vertx.eventBus().publish(portal.portalUuid + "-DisplayInnerTraceStack",
                     new JsonObject(Json.encode(innerTraceStackInfo))
             )
-            log.info("Displayed inner trace stack. Stack size: " + representation.innerTraceStack.size())
+            log.info("Displayed inner trace stack. Stack size: {}", representation.innerTraceStack.size())
         }
     }
 
@@ -327,7 +328,7 @@ class TracesTab extends AbstractTab {
                         || spanArtifactQualifiedName == null
                         || spanArtifactQualifiedName == portal.portalUI.viewingPortalArtifact) {
                     vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
-                    log.info("Displayed trace span info: " + span)
+                    log.info("Displayed trace span info: {}", span)
                 } else {
                     vertx.eventBus().request(CAN_NAVIGATE_TO_ARTIFACT.address, new JsonObject()
                             .put("app_uuid", portal.appUuid)
@@ -341,7 +342,7 @@ class TracesTab extends AbstractTab {
 
                             def spanPortal = SourcePortal.getInternalPortal(portal.appUuid, spanArtifactQualifiedName)
                             if (!spanPortal.isPresent()) {
-                                log.error("Failed to get span portal:" + spanArtifactQualifiedName)
+                                log.error("Failed to get span portal: {}", spanArtifactQualifiedName)
                                 vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
                                 return
                             }
@@ -377,7 +378,7 @@ class TracesTab extends AbstractTab {
                             })
                         } else {
                             vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
-                            log.info("Displayed trace span info: " + span)
+                            log.info("Displayed trace span info: {}", span)
                         }
                     })
                 }
@@ -436,47 +437,6 @@ class TracesTab extends AbstractTab {
             spanInfos.add(spanInfo.build())
         }
         return new JsonArray(Json.encode(spanInfos))
-    }
-
-    static String removePackageNames(String qualifiedMethodName) {
-        if (!qualifiedMethodName || qualifiedMethodName.indexOf('.') == -1) return qualifiedMethodName
-        def className = qualifiedMethodName.substring(0, qualifiedMethodName.substring(
-                0, qualifiedMethodName.indexOf("(")).lastIndexOf("."))
-        if (className.contains('$')) {
-            className = className.substring(0, className.indexOf('$'))
-        }
-
-        def arguments = qualifiedMethodName.substring(qualifiedMethodName.indexOf("("))
-        def argArray = arguments.substring(1, arguments.length() - 1).split(",")
-        def argText = "("
-        for (def i = 0; i < argArray.length; i++) {
-            def qualifiedArgument = argArray[i]
-            def newArgText = qualifiedArgument.substring(qualifiedArgument.lastIndexOf(".") + 1)
-            if (qualifiedArgument.startsWith(className + '$')) {
-                newArgText = qualifiedArgument.substring(qualifiedArgument.lastIndexOf('$') + 1)
-            }
-            argText += newArgText
-
-            if ((i + 1) < argArray.length) {
-                argText += ","
-            }
-        }
-        argText += ")"
-
-        def methodNameArr = qualifiedMethodName.substring(0, qualifiedMethodName.indexOf("(")).split('\\.')
-        if (methodNameArr.length == 1) {
-            return methodNameArr[0] + argText
-        } else {
-            return methodNameArr[methodNameArr.length - 2] + '.' + methodNameArr[methodNameArr.length - 1] + argText
-        }
-    }
-
-    static removePackageAndClassName(String qualifiedMethodName) {
-        if (!qualifiedMethodName || qualifiedMethodName.indexOf('.') == -1 || qualifiedMethodName.indexOf('(') == -1) {
-            return qualifiedMethodName
-        }
-        return qualifiedMethodName.substring(qualifiedMethodName.substring(
-                0, qualifiedMethodName.indexOf("(")).lastIndexOf(".") + 1)
     }
 
     static String humanReadableDuration(Duration duration) {

@@ -17,6 +17,8 @@ import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
@@ -25,15 +27,15 @@ import com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentDialogWrap
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
-import org.apache.log4j.*
+import org.apache.log4j.AppenderSkeleton
+import org.apache.log4j.Level
+import org.apache.log4j.Logger
 import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
-import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
 
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
-import java.awt.Desktop
+import java.awt.*
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -45,16 +47,6 @@ import java.util.concurrent.CountDownLatch
  */
 @Slf4j
 class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Disposable {
-
-    //todo: fix https://github.com/sourceplusplus/Assistant/issues/1 and remove static block below
-    static {
-        ConsoleAppender console = new ConsoleAppender()
-        console.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"))
-        console.activateOptions()
-
-        Logger.rootLogger.loggerRepository.resetConfiguration()
-        Logger.getLogger("com.sourceplusplus").addAppender(console)
-    }
 
     private static SourcePlugin sourcePlugin
     public static Project currentProject

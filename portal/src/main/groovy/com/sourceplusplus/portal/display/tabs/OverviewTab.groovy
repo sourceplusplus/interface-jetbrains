@@ -22,6 +22,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import static com.sourceplusplus.api.model.metric.MetricType.*
+import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
 
 /**
  * Displays general source code artifact statistics.
@@ -112,8 +113,10 @@ class OverviewTab extends AbstractTab {
         def artifactMetricResult = portal.portalUI.overviewView.metricResult
         if (artifactMetricResult) {
             if (log.traceEnabled) {
-                log.trace(String.format("Artifact metrics updated. Portal uuid: %s - App uuid: %s - Artifact qualified name: %s - Time frame: %s",
-                        portal.portalUuid, artifactMetricResult.appUuid(), artifactMetricResult.artifactQualifiedName(), artifactMetricResult.timeFrame()))
+                log.trace("Artifact metrics updated. Portal uuid: {} - App uuid: {} - Artifact qualified name: {} - Time frame: {}",
+                        portal.portalUuid, artifactMetricResult.appUuid(),
+                        getShortQualifiedFunctionName(artifactMetricResult.artifactQualifiedName()),
+                        artifactMetricResult.timeFrame())
             }
 
             artifactMetricResult.artifactMetrics().each {
