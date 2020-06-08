@@ -26,6 +26,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+import static com.sourceplusplus.api.util.ArtifactNameUtils.*
 import static com.sourceplusplus.api.model.trace.TraceOrderType.*
 import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
 
@@ -430,7 +431,7 @@ class SkywalkingIntegration extends APMIntegration {
 
                 def primarySelector = ""
                 if (traceQuery.artifactQualifiedName() != null) {
-                    primarySelector = "Artifact: ${traceQuery.artifactQualifiedName()} - "
+                    primarySelector = "Artifact: ${getShortQualifiedFunctionName(traceQuery.artifactQualifiedName())} - "
                 } else if (traceQuery.endpointId() != null) {
                     primarySelector = "Endpoint: ${traceQuery.endpointId()} - "
                 } else if (traceQuery.endpointName() != null) {
@@ -440,8 +441,8 @@ class SkywalkingIntegration extends APMIntegration {
                 } else if (traceQuery.serviceId() != null) {
                     primarySelector = "Service id: ${traceQuery.serviceId()} - "
                 }
-                log.info("Got SkyWalking traces. {}State: {} - Traces: {} - Total: {}",
-                        primarySelector, traceQuery.traceState(),
+                log.info("Got SkyWalking traces. {}State: {} - Order: {} - Traces: {} - Total: {}",
+                        primarySelector, traceQuery.traceState(), queryOrder,
                         traceQueryResult.traces().size(), traceQueryResult.total())
 
                 handler.handle(Future.succeededFuture(traceQueryResult))
