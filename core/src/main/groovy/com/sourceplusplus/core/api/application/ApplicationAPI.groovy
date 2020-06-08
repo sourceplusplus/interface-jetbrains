@@ -18,10 +18,13 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.JacksonCodec
 import io.vertx.ext.web.RoutingContext
+import net.jodah.expiringmap.ExpirationPolicy
+import net.jodah.expiringmap.ExpiringMap
 import org.apache.commons.io.IOUtils
 
 import java.time.Instant
 import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 /**
@@ -40,6 +43,9 @@ class ApplicationAPI extends AbstractVerticle {
             IOUtils.readLines(ApplicationAPI.getResourceAsStream("/appname_gen/color-list.txt"), "UTF-8")
     private final static List<String> ANIMAL_NAMES =
             IOUtils.readLines(ApplicationAPI.getResourceAsStream("/appname_gen/animal-list.txt"), "UTF-8")
+    private static final Map<String, SourceApplication> SOURCE_APPLICATION_CACHE = ExpiringMap.builder()
+            .expirationPolicy(ExpirationPolicy.ACCESSED)
+            .expiration(5, TimeUnit.MINUTES).build()
     private final SourceCore core
 
     ApplicationAPI(SourceCore core) {
@@ -256,7 +262,15 @@ class ApplicationAPI extends AbstractVerticle {
     void updateApplication(SourceApplication updateRequest, Handler<AsyncResult<SourceApplication>> handler) {
         log.info(String.format("Updating application. App uuid: %s - App name: %s",
                 updateRequest.appUuid(), updateRequest.appName()))
-        core.storage.updateApplication(updateRequest, handler)
+        core.storage.updateApplication(updateRequest, {
+            if (it.succeeded()) {
+                def application = it.result()
+                SOURCE_APPLICATION_CACHE.put(application.appUuid(), application)
+                handler.handle(Future.succeededFuture(application))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
     }
 
     private void createApplicationRoute(RoutingContext routingContext) {
@@ -305,7 +319,15 @@ class ApplicationAPI extends AbstractVerticle {
                                     .withIsUpdateRequest(null)
                             log.info(String.format("Creating application. App uuid: %s - App name: %s",
                                     createRequest.appUuid(), createRequest.appName()))
-                            core.storage.createApplication(createRequest, handler)
+                            core.storage.createApplication(createRequest, {
+                                if (it.succeeded()) {
+                                    def application = it.result()
+                                    SOURCE_APPLICATION_CACHE.put(application.appUuid(), application)
+                                    handler.handle(Future.succeededFuture(application))
+                                } else {
+                                    handler.handle(Future.failedFuture(it.cause()))
+                                }
+                            })
                         }
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
@@ -320,7 +342,15 @@ class ApplicationAPI extends AbstractVerticle {
                     .withIsUpdateRequest(null)
             log.info(String.format("Creating application. App uuid: %s - App name: %s",
                     createRequest.appUuid(), createRequest.appName()))
-            core.storage.createApplication(createRequest, handler)
+            core.storage.createApplication(createRequest, {
+                if (it.succeeded()) {
+                    def application = it.result()
+                    SOURCE_APPLICATION_CACHE.put(application.appUuid(), application)
+                    handler.handle(Future.succeededFuture(application))
+                } else {
+                    handler.handle(Future.failedFuture(it.cause()))
+                }
+            })
         }
     }
 
@@ -374,8 +404,8 @@ class ApplicationAPI extends AbstractVerticle {
     }
 
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
-        log.info("Getting application. App uuid: {}", appUuid)
-        core.storage.getApplication(appUuid, handler)
+        log.debug("Getting application. App uuid: {}", appUuid)
+        getAndCacheSourceApplication(appUuid, handler)
     }
 
     private void getApplicationsRoute(RoutingContext routingContext) {
@@ -393,6 +423,27 @@ class ApplicationAPI extends AbstractVerticle {
     void getApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
         log.info("Getting all applications")
         core.storage.getAllApplications(handler)
+    }
+
+    private void getAndCacheSourceApplication(String appUuid,
+                                              Handler<AsyncResult<Optional<SourceApplication>>> handler) {
+        if (SOURCE_APPLICATION_CACHE.containsKey(appUuid)) {
+            handler.handle(Future.succeededFuture(Optional.ofNullable(SOURCE_APPLICATION_CACHE.get(appUuid))))
+        } else {
+            log.info("Getting source application from storage. App UUID: {}", appUuid)
+            core.storage.getApplication(appUuid, {
+                if (it.failed()) {
+                    handler.handle(Future.failedFuture(it.cause()))
+                } else {
+                    if (it.result().isPresent()) {
+                        SOURCE_APPLICATION_CACHE.put(appUuid, it.result().get())
+                    } else {
+                        SOURCE_APPLICATION_CACHE.put(appUuid, null)
+                    }
+                    handler.handle(Future.succeededFuture(it.result()))
+                }
+            })
+        }
     }
 
     /**
