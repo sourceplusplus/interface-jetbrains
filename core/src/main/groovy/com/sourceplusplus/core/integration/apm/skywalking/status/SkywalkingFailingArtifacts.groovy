@@ -1,4 +1,4 @@
-package com.sourceplusplus.core.integration.apm.skywalking
+package com.sourceplusplus.core.integration.apm.skywalking.status
 
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactStatus
@@ -8,6 +8,7 @@ import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
+import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
 import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j

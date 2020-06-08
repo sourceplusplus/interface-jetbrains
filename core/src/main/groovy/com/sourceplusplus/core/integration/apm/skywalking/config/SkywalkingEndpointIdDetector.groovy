@@ -8,7 +8,6 @@ import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
-import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingFailingArtifacts
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
 import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
@@ -59,9 +58,6 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     @Override
     void start(Promise<Void> startFuture) throws Exception {
-        vertx.deployVerticle(new SkywalkingFailingArtifacts(skywalking, applicationAPI, artifactAPI, storage),
-                new DeploymentOptions().setConfig(config()))
-
         vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, { message ->
             def artifact = Json.decodeValue((message.body() as JsonObject).toString(), SourceArtifact.class)
             if (artifact.config().endpointName() != null) {

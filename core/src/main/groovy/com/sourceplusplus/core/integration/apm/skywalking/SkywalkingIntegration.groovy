@@ -12,6 +12,7 @@ import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
+import com.sourceplusplus.core.integration.apm.skywalking.status.SkywalkingFailingArtifacts
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
@@ -85,10 +86,16 @@ class SkywalkingIntegration extends APMIntegration {
         def restHost = Objects.requireNonNull(config().getJsonObject("connections").getJsonObject("REST"))
         skywalkingOAPHost = Objects.requireNonNull(restHost.getString("host"))
         skywalkingOAPPort = Objects.requireNonNull(restHost.getInteger("port"))
-
         webClient = WebClient.create(vertx)
+
+        def deploymentConfig = new DeploymentOptions().setConfig(config())
+        def failingArtifactsPromise = Promise.promise().future()
+        def endpointIdDetectorPromise = Promise.promise().future()
+        vertx.deployVerticle(new SkywalkingFailingArtifacts(this, applicationAPI, artifactAPI, storage),
+                deploymentConfig, failingArtifactsPromise)
         vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, applicationAPI, artifactAPI, storage),
-                new DeploymentOptions().setConfig(config()), {
+                deploymentConfig, endpointIdDetectorPromise)
+        CompositeFuture.all(failingArtifactsPromise, endpointIdDetectorPromise).onComplete({
             if (it.succeeded()) {
                 log.info("SkywalkingIntegration started")
                 startFuture.complete()
