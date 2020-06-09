@@ -5,7 +5,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.marker.SourceFileMarker
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.marker.source.mark.api.SourceMark
-import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
@@ -33,7 +33,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
 
     static void keepSourceMarkArtifactsUpToDate() {
         if (!setupSourceMarkArtifactSyncer.getAndSet(true)) {
-            PluginBootstrap.sourcePlugin.vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, {
+            SourcePlugin.vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, {
                 def artifact = it.body() as SourceArtifact
                 log.info("Artifact config updated. Artifact qualified name: {}",
                         getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
@@ -42,7 +42,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
                         artifact.artifactQualifiedName()) as IntelliJSourceMark
                 sourceMark?.updateSourceArtifact(artifact)
             })
-            PluginBootstrap.sourcePlugin.vertx.eventBus().consumer(ARTIFACT_STATUS_UPDATED.address, {
+            SourcePlugin.vertx.eventBus().consumer(ARTIFACT_STATUS_UPDATED.address, {
                 def artifact = it.body() as SourceArtifact
                 log.info("Artifact status updated. Artifact qualified name: {}",
                         getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
@@ -58,7 +58,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
         super(psiFile)
         keepSourceMarkArtifactsUpToDate()
 
-        PluginBootstrap.sourcePlugin.vertx.eventBus().send(
+        SourcePlugin.vertx.eventBus().send(
                 PluginArtifactSubscriptionTracker.SYNC_AUTOMATIC_SUBSCRIPTIONS, true)
     }
 
@@ -80,7 +80,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
         if (type == SourceMark.Type.GUTTER) {
             def sourceMark = new IntelliJMethodGutterMark(this, psiMethod)
             log.info("Created gutter mark: " + sourceMark)
-            PluginBootstrap.sourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
+            SourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
             return sourceMark
         } else {
             throw new IllegalStateException("Unsupported mark type: " + type)

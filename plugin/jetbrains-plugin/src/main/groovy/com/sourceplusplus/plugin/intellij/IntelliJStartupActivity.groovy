@@ -121,7 +121,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         currentProject = project
         if (sourcePlugin != null) {
             CountDownLatch latch = new CountDownLatch(1)
-            sourcePlugin.vertx.close({
+            SourcePlugin.vertx.close({
                 latch.countDown()
             })
             latch.await()
@@ -159,7 +159,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
     void dispose() {
         if (SourceMarkerPlugin.INSTANCE.enabled) {
             SourceMarkerPlugin.INSTANCE.clearAvailableSourceFileMarkers()
-            sourcePlugin.vertx.close()
+            SourcePlugin.vertx.close()
         }
     }
 
@@ -267,9 +267,9 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         coreClient.registerIP()
 
         //register coordinators
-        sourcePlugin.vertx.deployVerticle(new IntelliJArtifactNavigator())
+        SourcePlugin.vertx.deployVerticle(new IntelliJArtifactNavigator())
 
-        sourcePlugin.vertx.eventBus().consumer(IntelliJPortalUI.PORTAL_READY, {
+        SourcePlugin.vertx.eventBus().consumer(IntelliJPortalUI.PORTAL_READY, {
             //set portal theme
             UIManager.addPropertyChangeListener({
                 if (it.newValue instanceof IntelliJLaf) {
