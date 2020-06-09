@@ -77,7 +77,7 @@ class PortalBootstrap extends AbstractVerticle {
         if (pluginAvailable) {
             PortalUI.assignVertx(vertx)
         } else {
-            SourceMessage.registerCodecs()
+            SourceMessage.registerCodecs(vertx)
             SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
             SockJSBridgeOptions portalBridgeOptions = new SockJSBridgeOptions()
                     .addInboundPermitted(new PermittedOptions().setAddressRegex(".+"))

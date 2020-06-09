@@ -232,12 +232,10 @@ class ArtifactAPI extends AbstractVerticle {
                             }
 
                             if (Json.encode(oldConfig) != Json.encode(it.result().config())) {
-                                vertx.eventBus().publish(ARTIFACT_CONFIG_UPDATED.address,
-                                        new JsonObject(Json.encode(it.result())))
+                                vertx.eventBus().publish(ARTIFACT_CONFIG_UPDATED.address, it.result())
                             }
                             if (Json.encode(oldStatus) != Json.encode(it.result().status())) {
-                                vertx.eventBus().publish(ARTIFACT_STATUS_UPDATED.address,
-                                        new JsonObject(Json.encode(it.result())))
+                                vertx.eventBus().publish(ARTIFACT_STATUS_UPDATED.address, it.result())
                             }
 
                             handler.handle(Future.succeededFuture(it.result()))

@@ -51,7 +51,9 @@ class SourcePlugin {
 
     static void updateEnvironment(SourceCoreClient coreClient) {
         SourcePluginConfig.current.activeEnvironment.coreClient = coreClient
-        coreClient.attachBridge(vertx)
+        if (!SourcePluginConfig.current.embeddedCoreServer) {
+            coreClient.attachBridge(vertx)
+        }
         if (SourcePluginConfig.current.activeEnvironment.appUuid) {
             SourcePortalConfig.current.addCoreClient(SourcePluginConfig.current.activeEnvironment.appUuid, coreClient)
         }

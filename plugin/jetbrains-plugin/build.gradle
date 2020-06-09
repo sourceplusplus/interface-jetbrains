@@ -28,7 +28,8 @@ dependencies {
     implementation 'org.codehaus.groovy:groovy-all:2.4.17'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
-    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+//    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+    implementation files('../../3rd_party/vertx/vertx-web-3.9.1.jar')
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
     implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5097fbbef8') { //todo: real version
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
@@ -45,7 +46,8 @@ dependencies {
     implementation group: 'io.vertx', name: 'vertx-dropwizard-metrics', version: "$VERTX_VERSION"
     implementation group: 'io.vertx', name: 'vertx-web-client', version: "$VERTX_VERSION"
     implementation "io.vertx:vertx-auth-jwt:$VERTX_VERSION"
-    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+//    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+//    implementation files('../3rd_party/vertx/vertx-web-3.9.1.jar')
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
     implementation "io.vertx:vertx-jdbc-client:$VERTX_VERSION"
     implementation group: 'io.searchbox', name: 'jest', version: '6.3.1'

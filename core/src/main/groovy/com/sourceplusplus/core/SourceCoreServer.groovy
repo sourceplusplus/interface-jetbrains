@@ -13,6 +13,7 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Handler
 import io.vertx.core.Promise
+import io.vertx.core.eventbus.Message
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -28,8 +29,13 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.JWTAuthHandler
 import io.vertx.ext.web.handler.ResponseContentTypeHandler
+import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions
+import io.vertx.ext.web.handler.sockjs.SockJSSocket
+import io.vertx.ext.web.handler.sockjs.impl.EventBusBridgeImpl
+import io.vertx.ext.web.handler.sockjs.impl.SockJSHandlerImpl
 
 import java.time.Instant
 
@@ -70,7 +76,21 @@ class SourceCoreServer extends AbstractVerticle {
 
         //start bridge
         log.info("Booting Source++ Core eventbus bridge...")
-        SockJSHandler sock = SockJSHandler.create(vertx)
+        SockJSHandler sock = new SockJSHandlerImpl(vertx, new SockJSHandlerOptions()) {
+            Router bridge(SockJSBridgeOptions bridgeOptions, Handler<BridgeEvent> bridgeEventHandler) {
+                return socketHandler(new EventBusBridgeImpl(vertx, bridgeOptions, bridgeEventHandler) {
+                    void deliverMessage(SockJSSocket sock, String address, Message message) {
+                        if (message."sentBody" != null) {
+                            message."sentBody" = new JsonObject(Json.encode(message."sentBody"))
+                        }
+                        if (message."receivedBody" != null) {
+                            message."receivedBody" = new JsonObject(Json.encode(message."receivedBody"))
+                        }
+                        super.deliverMessage(sock, address, message)
+                    }
+                })
+            }
+        }
         sock.bridge(new SockJSBridgeOptions()
                 .addInboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+"))
                 .addOutboundPermitted(new PermittedOptions().setAddressRegex("public-events\\..+")))

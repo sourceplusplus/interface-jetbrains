@@ -141,8 +141,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                             .traces(traceQueryResult.traces())
                             .total(traceQueryResult.total())
                             .build()
-                    vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address,
-                            new JsonObject(Json.encode(traceResult)))
+                    vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, traceResult)
                     log.debug("Published latest traces for artifact: " + traceResult.artifactQualifiedName())
                 }
             } else {
@@ -183,8 +182,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                             .traces(traceQueryResult.traces())
                             .total(traceQueryResult.total())
                             .build()
-                    vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address,
-                            new JsonObject(Json.encode(traceResult)))
+                    vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, traceResult)
                     log.debug("Published slowest traces for artifact: " + traceResult.artifactQualifiedName())
                 }
             } else {
@@ -225,8 +223,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                             .traces(traceQueryResult.traces())
                             .total(traceQueryResult.total())
                             .build()
-                    vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address,
-                            new JsonObject(Json.encode(traceResult)))
+                    vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, traceResult)
                     log.debug("Published failed traces for artifact: " + traceResult.artifactQualifiedName())
                 }
             } else {

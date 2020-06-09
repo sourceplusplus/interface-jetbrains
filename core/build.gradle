@@ -16,7 +16,8 @@ dependencies {
     implementation group: 'io.vertx', name: 'vertx-dropwizard-metrics', version: "$VERTX_VERSION"
     implementation group: 'io.vertx', name: 'vertx-web-client', version: "$VERTX_VERSION"
     implementation "io.vertx:vertx-auth-jwt:$VERTX_VERSION"
-    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+//    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+    implementation files('../3rd_party/vertx/vertx-web-3.9.1.jar')
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
     implementation "io.vertx:vertx-jdbc-client:$VERTX_VERSION"
     implementation group: 'io.searchbox', name: 'jest', version: '6.3.1'
