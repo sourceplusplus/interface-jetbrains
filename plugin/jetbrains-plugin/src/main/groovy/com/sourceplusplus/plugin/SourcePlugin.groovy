@@ -27,11 +27,11 @@ class SourcePlugin {
     public static final ResourceBundle BUILD = ResourceBundle.getBundle(
             "source-plugin_build", Locale.default, SourcePlugin.classLoader)
 
-    private final Vertx vertx
+    private static Vertx vertx
     private PluginBootstrap pluginBootstrap
 
     SourcePlugin(SourceCoreClient coreClient) {
-        vertx = Vertx.vertx()
+        if (vertx == null) vertx = Vertx.vertx()
         System.addShutdownHook {
             vertx.close()
         }
@@ -74,5 +74,9 @@ class SourcePlugin {
     @NotNull
     Vertx getVertx() {
         return vertx
+    }
+
+    static void setVertx(Vertx vertx) {
+        this.vertx = vertx
     }
 }

@@ -25,6 +25,7 @@ public final class SourcePluginConfig {
     public volatile String remoteAgentHost = "localhost";
     public volatile int remoteAgentPort = -1;
     public volatile boolean agentPatcherEnabled = true;
+    public volatile boolean embeddedCoreServer = true;
 
     private SourcePluginConfig() {
     }
@@ -40,6 +41,7 @@ public final class SourcePluginConfig {
         remoteAgentHost = config.remoteAgentHost;
         remoteAgentPort = config.remoteAgentPort;
         agentPatcherEnabled = config.agentPatcherEnabled;
+        embeddedCoreServer = config.embeddedCoreServer;
     }
 
     public List<SourceEnvironmentConfig> getEnvironments() {

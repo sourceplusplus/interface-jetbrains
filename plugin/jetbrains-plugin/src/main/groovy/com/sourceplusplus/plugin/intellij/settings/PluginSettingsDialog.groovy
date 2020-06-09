@@ -3,6 +3,7 @@ package com.sourceplusplus.plugin.intellij.settings
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
@@ -10,7 +11,6 @@ import com.sourceplusplus.plugin.intellij.settings.application.EditApplicationSe
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.StringUtils
 import org.jetbrains.annotations.NotNull
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 
 import javax.swing.*
 import java.awt.event.ActionEvent
@@ -32,6 +32,7 @@ class PluginSettingsDialog extends JDialog {
     private JLabel applicationDetailsLabel
     private JButton editApplicationButton
     private JCheckBox agentPatcherEnabledCheckBox
+    private JCheckBox embeddedCoreServerCheckBox
     private ActionListener connectActionListener
     private SourceEnvironmentConfig currentEnvironment
 
@@ -42,7 +43,7 @@ class PluginSettingsDialog extends JDialog {
         editApplicationButton.addActionListener(new AbstractAction() {
             @Override
             void actionPerformed(ActionEvent actionEvent) {
-                EditApplicationSettingsDialogWrapper applicationSettings = new EditApplicationSettingsDialogWrapper(
+                def applicationSettings = new EditApplicationSettingsDialogWrapper(
                         IntelliJStartupActivity.currentProject)
                 applicationSettings.createCenterPanel()
                 applicationSettings.show()
@@ -61,8 +62,7 @@ class PluginSettingsDialog extends JDialog {
             updateConnectButton(false, null)
         } else {
             currentEnvironment = SourcePluginConfig.current.activeEnvironment
-            SourceCoreClient newCoreClient = new SourceCoreClient(
-                    SourcePluginConfig.current.activeEnvironment.getSppUrl())
+            def newCoreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.getSppUrl())
             if (SourcePluginConfig.current.activeEnvironment.apiKey) {
                 newCoreClient.setApiKey(SourcePluginConfig.current.activeEnvironment.apiKey)
             }
@@ -108,7 +108,7 @@ class PluginSettingsDialog extends JDialog {
         connectButton.addActionListener(connectActionListener = new AbstractAction() {
             @Override
             void actionPerformed(ActionEvent actionEvent) {
-                ApplicationSettingsDialogWrapper applicationSettings = new ApplicationSettingsDialogWrapper(
+                def applicationSettings = new ApplicationSettingsDialogWrapper(
                         IntelliJStartupActivity.currentProject, coreClient)
                 applicationSettings.createCenterPanel()
                 applicationSettings.show()
@@ -155,10 +155,12 @@ class PluginSettingsDialog extends JDialog {
 
     void setData(@NotNull SourcePluginConfig config) {
         agentPatcherEnabledCheckBox.setSelected(config.agentPatcherEnabled)
+        embeddedCoreServerCheckBox.setSelected(config.embeddedCoreServer)
     }
 
     void getData(@NotNull SourcePluginConfig data) {
         data.agentPatcherEnabled = agentPatcherEnabledCheckBox.isSelected()
+        data.embeddedCoreServer = embeddedCoreServerCheckBox.isSelected()
     }
 
     boolean isModified(@NotNull SourcePluginConfig data) {
@@ -169,8 +171,7 @@ class PluginSettingsDialog extends JDialog {
             if (SourcePluginConfig.current.activeEnvironment.coreClient) {
                 updateConnectButton(true, SourcePluginConfig.current.activeEnvironment.coreClient)
             } else {
-                SourceCoreClient newCoreClient = new SourceCoreClient(
-                        SourcePluginConfig.current.activeEnvironment.getSppUrl())
+                def newCoreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.getSppUrl())
                 if (SourcePluginConfig.current.activeEnvironment.apiKey) {
                     newCoreClient.setApiKey(SourcePluginConfig.current.activeEnvironment.apiKey)
                 }
@@ -183,7 +184,8 @@ class PluginSettingsDialog extends JDialog {
                 })
             }
         }
-        return agentPatcherEnabledCheckBox.isSelected() != data.agentPatcherEnabled
+        return agentPatcherEnabledCheckBox.isSelected() != data.agentPatcherEnabled ||
+                embeddedCoreServerCheckBox.isSelected() != data.embeddedCoreServer
     }
 
     void setDataCustom(@NotNull SourcePluginConfig settings) {

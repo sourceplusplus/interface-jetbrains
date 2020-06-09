@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter
 
 import static com.sourceplusplus.api.util.ArtifactNameUtils.*
 import static com.sourceplusplus.api.model.trace.TraceOrderType.*
+import static com.sourceplusplus.core.SourceCoreServer.RESOURCE_LOADER
 import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
 
 /**
@@ -42,19 +43,19 @@ class SkywalkingIntegration extends APMIntegration {
 
     public static final String UNKNOWN_COMPONENT = "Unknown"
 
-    private static final String GET_ALL_SERVICES = Resources.toString(Resources.getResource(
+    private static final String GET_ALL_SERVICES = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_all_services.graphql"), Charsets.UTF_8)
-    private static final String GET_SERVICE_INSTANCES = Resources.toString(Resources.getResource(
+    private static final String GET_SERVICE_INSTANCES = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_service_instances.graphql"), Charsets.UTF_8)
-    private static final String GET_SERVICE_ENDPOINTS = Resources.toString(Resources.getResource(
+    private static final String GET_SERVICE_ENDPOINTS = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_service_endpoints.graphql"), Charsets.UTF_8)
-    private static final String GET_ENDPOINT_METRICS = Resources.toString(Resources.getResource(
+    private static final String GET_ENDPOINT_METRICS = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_endpoint_metrics.graphql"), Charsets.UTF_8)
-    private static final String QUERY_BASIC_TRACES = Resources.toString(Resources.getResource(
+    private static final String QUERY_BASIC_TRACES = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/query_basic_traces.graphql"), Charsets.UTF_8)
-    private static final String QUERY_FAILING_TRACES = Resources.toString(Resources.getResource(
+    private static final String QUERY_FAILING_TRACES = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/query_failing_traces.graphql"), Charsets.UTF_8)
-    private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
+    private static final String GET_TRACE_STACK = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
     private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI

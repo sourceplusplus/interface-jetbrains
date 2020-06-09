@@ -17,6 +17,7 @@ import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.core.SourceCoreServer
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
 import com.sourceplusplus.plugin.SourcePlugin
@@ -26,7 +27,10 @@ import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettin
 import com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentDialogWrapper
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import groovy.util.logging.Slf4j
+import io.vertx.core.Vertx
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
+import org.apache.commons.io.IOUtils
 import org.apache.log4j.AppenderSkeleton
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
@@ -36,6 +40,7 @@ import org.jetbrains.annotations.NotNull
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
 import java.awt.*
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -86,13 +91,17 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                     if (message.toString().startsWith("[PORTAL]")) {
                         consoleView.print(message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
                     } else {
-                        consoleView.print("[PLUGIN] - " + message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
+                        def module = loggingEvent.logger.getName().replace("com.sourceplusplus.", "")
+                        module = module.substring(0, module.indexOf(".")).toUpperCase()
+                        consoleView.print("[$module] - " + message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
                     }
                 } else if (loggingEvent.level.isGreaterOrEqual(Level.INFO)) {
                     if (message.toString().startsWith("[PORTAL]")) {
                         consoleView.print(message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
                     } else {
-                        consoleView.print("[PLUGIN] - " + message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
+                        def module = loggingEvent.logger.getName().replace("com.sourceplusplus.", "")
+                        module = module.substring(0, module.indexOf(".")).toUpperCase()
+                        consoleView.print("[$module] - " + message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
                     }
                 }
             }
@@ -108,6 +117,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         })
         Disposer.register(project, consoleView)
 
+        log.info("Loading Source++ for project: {} ({})", project.name, project.getPresentableUrl())
         currentProject = project
         if (sourcePlugin != null) {
             CountDownLatch latch = new CountDownLatch(1)
@@ -123,6 +133,37 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
             SourcePluginConfig.current.applyConfig(Json.decodeValue(pluginConfig, SourcePluginConfig.class))
         }
 
+        if (SourcePluginConfig.current.embeddedCoreServer) {
+            log.info("Booting embedded Source++ Core")
+            def vertx = Vertx.vertx()
+            def configInputStream = IntelliJStartupActivity.class.getResourceAsStream("/config/embedded-core.json")
+            def configData = IOUtils.toString(configInputStream, StandardCharsets.UTF_8)
+            def serverConfig = new JsonObject(configData)
+
+            vertx.deployVerticle(new SourceCoreServer(serverConfig, "embedded", null), {
+                if (it.succeeded()) {
+                    SourcePlugin.setVertx(vertx)
+                    connectToEnvironment(true)
+                } else {
+                    log.error("Failed to boot embedded Source++ Core", it.cause())
+                }
+            })
+        } else {
+            connectToEnvironment(false)
+        }
+
+        super.runActivity(project)
+    }
+
+    @Override
+    void dispose() {
+        if (SourceMarkerPlugin.INSTANCE.enabled) {
+            SourceMarkerPlugin.INSTANCE.clearAvailableSourceFileMarkers()
+            sourcePlugin.vertx.close()
+        }
+    }
+
+    private static void connectToEnvironment(boolean embeddedBooted) {
         if (SourcePluginConfig.current.activeEnvironment != null) {
             def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
             if (SourcePluginConfig.current.activeEnvironment.apiKey) {
@@ -135,12 +176,12 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                 } else {
                     SourcePluginConfig.current.activeEnvironment.coreClient = coreClient
                     if (SourcePluginConfig.current.activeEnvironment.appUuid == null) {
-                        doApplicationSettingsDialog(project, coreClient)
+                        doApplicationSettingsDialog(currentProject, coreClient)
                     } else {
                         coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
                             if (it.failed() || !it.result().isPresent()) {
                                 SourcePluginConfig.current.activeEnvironment.appUuid = null
-                                doApplicationSettingsDialog(project, coreClient)
+                                doApplicationSettingsDialog(currentProject, coreClient)
                             } else {
                                 startSourcePlugin(coreClient)
                             }
@@ -153,14 +194,12 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
             def coreClient = new SourceCoreClient("localhost", 8080, false)
             coreClient.info({
                 if (it.succeeded()) {
-                    //found local core
-                    saveAutoDetectedEnvironment(coreClient, "localhost", "Local")
+                    saveAutoDetectedEnvironment(coreClient, "localhost", embeddedBooted ? "Embedded" : "Local")
                 } else {
                     //auto-detect docker core
                     coreClient = new SourceCoreClient("192.168.99.100", 8080, false)
                     coreClient.info({
                         if (it.succeeded()) {
-                            //found docker core
                             saveAutoDetectedEnvironment(coreClient, "192.168.99.100", "Docker")
                         } else {
                             notifyNoConnection()
@@ -168,16 +207,6 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                     })
                 }
             })
-        }
-
-        super.runActivity(project)
-        log.info("Source++ loaded for project: {} ({})", project.name, project.getPresentableUrl())
-    }
-
-    @Override
-    void dispose() {
-        if (SourceMarkerPlugin.INSTANCE.enabled) {
-            SourceMarkerPlugin.INSTANCE.clearAvailableSourceFileMarkers()
         }
     }
 
@@ -234,7 +263,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
     static void startSourcePlugin(SourceCoreClient coreClient) {
         //start plugin
         sourcePlugin = new SourcePlugin(Objects.requireNonNull(coreClient))
-        registerCodecs()
+        registerPluginCodecs()
         coreClient.registerIP()
 
         //register coordinators
@@ -272,7 +301,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                 }))
     }
 
-    private static void registerCodecs() {
+    private static void registerPluginCodecs() {
         sourcePlugin.vertx.eventBus().registerDefaultCodec(IntelliJMethodGutterMark.class,
                 SourceMessage.messageCodec(IntelliJMethodGutterMark.class))
     }

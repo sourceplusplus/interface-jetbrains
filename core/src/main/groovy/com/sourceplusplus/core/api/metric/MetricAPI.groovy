@@ -152,7 +152,7 @@ class MetricAPI extends AbstractVerticle {
                         def endpointId = endpointIds[0] //todo: not only use first endpoint id
                         core.APMIntegration.getEndpointMetrics(endpointId, metricQuery, handler)
                     } else {
-                        log.warn("Could not find endpoint id for artifact: " + metricQuery.artifactQualifiedName())
+                        log.debug("Could not find endpoint id for artifact: " + metricQuery.artifactQualifiedName())
                         //todo: doesn't complete handler
                     }
                 } else {
