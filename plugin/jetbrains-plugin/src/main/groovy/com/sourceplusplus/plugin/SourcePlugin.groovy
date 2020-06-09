@@ -12,7 +12,6 @@ import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import org.jetbrains.annotations.NotNull
 
 /**
  * Used to bootstrap the Source++ Plugin.
@@ -27,11 +26,10 @@ class SourcePlugin {
     public static final ResourceBundle BUILD = ResourceBundle.getBundle(
             "source-plugin_build", Locale.default, SourcePlugin.classLoader)
 
-    private static Vertx vertx
+    private static final Vertx vertx = Vertx.vertx()
     private PluginBootstrap pluginBootstrap
 
     SourcePlugin(SourceCoreClient coreClient) {
-        if (vertx == null) vertx = Vertx.vertx()
         System.addShutdownHook {
             vertx.close()
         }
@@ -71,12 +69,7 @@ class SourcePlugin {
         vertx.createHttpServer().requestHandler(router).listen(0, listenHandler)
     }
 
-    @NotNull
     static Vertx getVertx() {
         return vertx
-    }
-
-    static void setVertx(Vertx vertx) {
-        this.vertx = vertx
     }
 }

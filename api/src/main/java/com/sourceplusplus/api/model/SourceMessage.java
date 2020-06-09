@@ -27,58 +27,72 @@ import java.io.Serializable;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public interface SourceMessage extends Serializable {
 
-    static <T> MessageCodec<T, T> messageCodec(Class<T> type) {
-        return new MessageCodec<T, T>() {
-
-            @Override
-            public void encodeToWire(Buffer buffer, T o) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            @Override
-            public T decodeFromWire(int pos, Buffer buffer) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            @Override
-            public T transform(T o) {
-                return o;
-            }
-
-            @Override
-            public String name() {
-                return type.getSimpleName();
-            }
-
-            @Override
-            public byte systemCodecID() {
-                return -1;
-            }
-        };
-    }
-
     static void registerCodecs(@NotNull Vertx vertx) {
         SourceClient.initMappers();
 
-        vertx.eventBus().registerDefaultCodec(SourceCoreInfo.class, SourceMessage.messageCodec(SourceCoreInfo.class));
-        vertx.eventBus().registerDefaultCodec(SourceApplication.class, SourceMessage.messageCodec(SourceApplication.class));
-        vertx.eventBus().registerDefaultCodec(ArtifactMetrics.class, SourceMessage.messageCodec(ArtifactMetrics.class));
-        vertx.eventBus().registerDefaultCodec(ArtifactMetricResult.class, SourceMessage.messageCodec(ArtifactMetricResult.class));
-        vertx.eventBus().registerDefaultCodec(SourceArtifactConfig.class, SourceMessage.messageCodec(SourceArtifactConfig.class));
-        vertx.eventBus().registerDefaultCodec(SourceArtifact.class, SourceMessage.messageCodec(SourceArtifact.class));
-        vertx.eventBus().registerDefaultCodec(ApplicationArtifact.class, SourceMessage.messageCodec(ApplicationArtifact.class));
-        vertx.eventBus().registerDefaultCodec(TraceSpan.class, SourceMessage.messageCodec(TraceSpan.class));
-        vertx.eventBus().registerDefaultCodec(ArtifactMetricSubscribeRequest.class, SourceMessage.messageCodec(ArtifactMetricSubscribeRequest.class));
-        vertx.eventBus().registerDefaultCodec(ArtifactMetricUnsubscribeRequest.class, SourceMessage.messageCodec(ArtifactMetricUnsubscribeRequest.class));
-        vertx.eventBus().registerDefaultCodec(ArtifactTraceSubscribeRequest.class, SourceMessage.messageCodec(ArtifactTraceSubscribeRequest.class));
-        vertx.eventBus().registerDefaultCodec(ArtifactTraceUnsubscribeRequest.class, SourceMessage.messageCodec(ArtifactTraceUnsubscribeRequest.class));
-        vertx.eventBus().registerDefaultCodec(SourceArtifactUnsubscribeRequest.class, SourceMessage.messageCodec(SourceArtifactUnsubscribeRequest.class));
-        vertx.eventBus().registerDefaultCodec(TimeFramedMetricType.class, SourceMessage.messageCodec(TimeFramedMetricType.class));
-        vertx.eventBus().registerDefaultCodec(ArtifactTraceResult.class, SourceMessage.messageCodec(ArtifactTraceResult.class));
-        vertx.eventBus().registerDefaultCodec(TraceQuery.class, SourceMessage.messageCodec(TraceQuery.class));
-        vertx.eventBus().registerDefaultCodec(TraceQueryResult.class, SourceMessage.messageCodec(TraceQueryResult.class));
-        vertx.eventBus().registerDefaultCodec(Trace.class, SourceMessage.messageCodec(Trace.class));
-        vertx.eventBus().registerDefaultCodec(TraceSpanStackQuery.class, SourceMessage.messageCodec(TraceSpanStackQuery.class));
-        vertx.eventBus().registerDefaultCodec(TraceSpanStackQueryResult.class, SourceMessage.messageCodec(TraceSpanStackQueryResult.class));
+        registerCodec(vertx, SourceCoreInfo.class);
+        registerCodec(vertx, SourceApplication.class);
+        registerCodec(vertx, ArtifactMetrics.class);
+        registerCodec(vertx, ArtifactMetricResult.class);
+        registerCodec(vertx, SourceArtifactConfig.class);
+        registerCodec(vertx, SourceArtifact.class);
+        registerCodec(vertx, ApplicationArtifact.class);
+        registerCodec(vertx, TraceSpan.class);
+        registerCodec(vertx, ArtifactMetricSubscribeRequest.class);
+        registerCodec(vertx, ArtifactMetricUnsubscribeRequest.class);
+        registerCodec(vertx, ArtifactTraceSubscribeRequest.class);
+        registerCodec(vertx, ArtifactTraceUnsubscribeRequest.class);
+        registerCodec(vertx, SourceArtifactUnsubscribeRequest.class);
+        registerCodec(vertx, TimeFramedMetricType.class);
+        registerCodec(vertx, ArtifactTraceResult.class);
+        registerCodec(vertx, TraceQuery.class);
+        registerCodec(vertx, TraceQueryResult.class);
+        registerCodec(vertx, Trace.class);
+        registerCodec(vertx, TraceSpanStackQuery.class);
+        registerCodec(vertx, TraceSpanStackQueryResult.class);
+    }
+
+    static <T> void registerCodec(@NotNull Vertx vertx, @NotNull Class<T> type) {
+        if (vertx.sharedData().getLocalMap("registered_source_message_codecs")
+                .putIfAbsent(type.getCanonicalName(), true) == null) {
+            vertx.eventBus().registerDefaultCodec(type, new SourceMessageCodec<>(type));
+        }
+    }
+
+    class SourceMessageCodec<T> implements MessageCodec<T, T> {
+        private final Class<T> type;
+
+        SourceMessageCodec(Class<T> type) {
+            this.type = type;
+        }
+
+        @Override
+        public void encodeToWire(Buffer buffer, T o) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public T decodeFromWire(int pos, Buffer buffer) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public T transform(T o) {
+            return o;
+        }
+
+        @Override
+        public String name() {
+            return type.getSimpleName();
+        }
+
+        @Override
+        public byte systemCodecID() {
+            return -1;
+        }
+
+        public Class<T> type() {
+            return type;
+        }
     }
 }

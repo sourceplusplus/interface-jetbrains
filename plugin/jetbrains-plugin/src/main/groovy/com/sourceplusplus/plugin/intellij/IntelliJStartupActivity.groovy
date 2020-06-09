@@ -27,7 +27,6 @@ import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettin
 import com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentDialogWrapper
 import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import groovy.util.logging.Slf4j
-import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.apache.commons.io.IOUtils
@@ -135,14 +134,12 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
 
         if (SourcePluginConfig.current.embeddedCoreServer) {
             log.info("Booting embedded Source++ Core")
-            def vertx = Vertx.vertx()
             def configInputStream = IntelliJStartupActivity.class.getResourceAsStream("/config/embedded-core.json")
             def configData = IOUtils.toString(configInputStream, StandardCharsets.UTF_8)
             def serverConfig = new JsonObject(configData)
 
-            vertx.deployVerticle(new SourceCoreServer(serverConfig, "embedded", null), {
+            SourcePlugin.vertx.deployVerticle(new SourceCoreServer(serverConfig, "embedded", null), {
                 if (it.succeeded()) {
-                    SourcePlugin.setVertx(vertx)
                     connectToEnvironment(true)
                 } else {
                     log.error("Failed to boot embedded Source++ Core", it.cause())
@@ -302,7 +299,6 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
     }
 
     private static void registerPluginCodecs() {
-        sourcePlugin.vertx.eventBus().registerDefaultCodec(IntelliJMethodGutterMark.class,
-                SourceMessage.messageCodec(IntelliJMethodGutterMark.class))
+        SourceMessage.registerCodec(SourcePlugin.vertx, IntelliJMethodGutterMark.class)
     }
 }
