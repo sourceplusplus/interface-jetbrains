@@ -14,6 +14,9 @@
   },
   "storage": {
     "type": "h2",
+    "h2": {
+      "connection": "memory"
+    },
     "elasticsearch": {
       "host": "localhost",
       "port": 9200
@@ -67,10 +70,17 @@
 | -------- | ----- | -------------------------------------------------------- |
 | type     | h2    | The storage system type to use (`h2` or `elasticsearch`) |
 
+### H2 Settings
+
+| Property   | Value  | Description                                                                       |
+|------------|--------|-----------------------------------------------------------------------------------|
+| connection | memory | The H2 connection type (memory or disk)                                           |
+| location   | null   | The storage location of the H2 database (when disk connection is used) (optional) |
+
 ### Elasticsearch Settings
 
 | Property | Value     | Description                                             |
-| -------- | --------- | ------------------------------------------------------- |
+|----------|-----------|---------------------------------------------------------|
 | host     | localhost | The address of the Elasticsearch instance to connect to |
 | port     | 9200      | The port of the Elasticsearch instance to connect to    |
 

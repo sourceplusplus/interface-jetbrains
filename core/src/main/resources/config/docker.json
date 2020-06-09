@@ -11,6 +11,9 @@
   },
   "storage": {
     "type": "h2",
+    "h2": {
+      "connection": "memory"
+    },
     "elasticsearch": {
       "host": "es-server",
       "port": 9200

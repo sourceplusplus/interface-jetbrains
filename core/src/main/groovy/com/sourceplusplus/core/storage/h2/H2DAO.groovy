@@ -87,10 +87,27 @@ class H2DAO extends SourceStorage {
     private final JDBCClient client
 
     H2DAO(Vertx vertx, JsonObject config, Promise storageCompleter) {
-        client = JDBCClient.createShared(vertx, new JsonObject()
-                .put("url", "jdbc:h2:mem:spp;DB_CLOSE_DELAY=-1")
-                .put("driver_class", "org.h2.Driver"))
+        def h2Url
+        def h2Conn = config.getString("connection")
+        if (h2Conn == "memory") {
+            h2Url = "jdbc:h2:mem:spp;DB_CLOSE_DELAY=-1"
+        } else if (h2Conn == "disk") {
+            if (config.containsKey("location")) {
+                def dataFolder = new File(config.getString("location")).absolutePath
+                h2Url = "jdbc:h2:file:${dataFolder}/spp"
+            } else if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+                def dataFolder = new File(System.getenv("APPDATA")).absolutePath
+                h2Url = "jdbc:h2:file:${dataFolder}/spp-core/spp"
+            } else {
+                h2Url = "jdbc:h2:file:~/.spp-core/spp"
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid H2 connection type: $h2Conn")
+        }
 
+        client = JDBCClient.createShared(vertx, new JsonObject()
+                .put("url", h2Url)
+                .put("driver_class", "org.h2.Driver"))
         client.update(SOURCE_CORE_SCHEMA, {
             if (it.succeeded()) {
                 storageCompleter.complete()

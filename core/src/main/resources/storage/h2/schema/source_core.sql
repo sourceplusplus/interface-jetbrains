@@ -1,9 +1,9 @@
-CREATE TABLE core_config
+CREATE TABLE IF NOT EXISTS core_config
 (
     json_data VARCHAR
 );
 
-CREATE TABLE source_application
+CREATE TABLE IF NOT EXISTS source_application
 (
     app_uuid     VARCHAR PRIMARY KEY,
     app_name     VARCHAR   NOT NULL UNIQUE,
@@ -11,7 +11,7 @@ CREATE TABLE source_application
     agent_config TEXT
 );
 
-CREATE TABLE source_artifact
+CREATE TABLE IF NOT EXISTS source_artifact
 (
     app_uuid                       VARCHAR   NOT NULL,
     artifact_qualified_name        VARCHAR   NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE source_artifact
     PRIMARY KEY (app_uuid, artifact_qualified_name)
 );
 
-CREATE TABLE source_artifact_subscription
+CREATE TABLE IF NOT EXISTS source_artifact_subscription
 (
     subscriber_uuid         VARCHAR   NOT NULL,
     app_uuid                VARCHAR   NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE source_artifact_subscription
     PRIMARY KEY (subscriber_uuid, app_uuid, artifact_qualified_name, subscription_type)
 );
 
-CREATE TABLE source_artifact_failure
+CREATE TABLE IF NOT EXISTS source_artifact_failure
 (
     app_uuid                VARCHAR   NOT NULL,
     artifact_qualified_name VARCHAR   NOT NULL,

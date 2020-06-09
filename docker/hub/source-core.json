@@ -10,7 +10,10 @@
     "subscription_inactive_limit_minutes": 15
   },
   "storage": {
-    "type": "h2"
+    "type": "h2",
+    "h2": {
+      "connection": "memory"
+    }
   },
   "integrations": [
     {
