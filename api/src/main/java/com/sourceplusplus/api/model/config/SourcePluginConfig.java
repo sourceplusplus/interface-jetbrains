@@ -2,6 +2,7 @@ package com.sourceplusplus.api.model.config;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -50,6 +51,15 @@ public final class SourcePluginConfig {
 
     public void setEnvironments(List<SourceEnvironmentConfig> environments) {
         this.environments = new HashSet<>(environments);
+    }
+
+    public SourceEnvironmentConfig getEnvironment(@NotNull String environmentName) {
+        for (SourceEnvironmentConfig envConfig : environments) {
+            if (environmentName.equals(envConfig.environmentName)) {
+                return envConfig;
+            }
+        }
+        return null;
     }
 
     @Override

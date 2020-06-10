@@ -24,6 +24,7 @@ public class SourceEnvironmentConfig {
     public volatile int apiPort;
     public volatile boolean apiSslEnabled;
     public volatile String apiKey;
+    public volatile boolean embedded;
 
     @Transient
     public String getSppUrl() {
@@ -44,12 +45,7 @@ public class SourceEnvironmentConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SourceEnvironmentConfig that = (SourceEnvironmentConfig) o;
-        return apiPort == that.apiPort &&
-                apiSslEnabled == that.apiSslEnabled &&
-                Objects.equals(environmentName, that.environmentName) &&
-                Objects.equals(apiHost, that.apiHost) &&
-                (((apiKey == null || apiKey.isEmpty()) && (that.apiKey == null || that.apiKey.isEmpty()))
-                        || Objects.equals(apiKey, that.apiKey));
+        return environmentName.equals(that.environmentName);
     }
 
     @Override

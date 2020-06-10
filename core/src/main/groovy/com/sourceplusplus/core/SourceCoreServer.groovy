@@ -54,6 +54,8 @@ class SourceCoreServer extends AbstractVerticle {
     private final JsonObject serverConfig
     private final String version
     private final Instant buildDate
+    private String listenHost
+    private int listenPort
 
     SourceCoreServer(JsonObject serverConfig, String version, Instant buildDate) {
         this.serverConfig = Objects.requireNonNull(serverConfig)
@@ -144,9 +146,14 @@ class SourceCoreServer extends AbstractVerticle {
 
         //start core HTTP server
         log.info("Booting Source++ Core HTTP server...")
-        def server = vertx.createHttpServer(createSeverOptions())
+        def serverOptions = createSeverOptions()
+        def server = vertx.createHttpServer(serverOptions)
         server.requestHandler(baseRouter).listen({
             if (it.succeeded()) {
+                listenHost = serverOptions.host
+                listenPort = it.result().actualPort()
+                log.info("Source++ Core listening on: $listenHost:$listenPort")
+
                 vertx.deployVerticle(core, new DeploymentOptions().setConfig(serverConfig), {
                     if (it.succeeded()) {
                         enableSelfMonitoring(core)
@@ -167,6 +174,14 @@ class SourceCoreServer extends AbstractVerticle {
         log.info("{} stopped", getClass().getSimpleName())
     }
 
+    String getHost() {
+        return listenHost
+    }
+
+    int getPort() {
+        return listenPort
+    }
+
     private HttpServerOptions createSeverOptions() {
         def options = new HttpServerOptions()
         def coreConfig = serverConfig.getJsonObject("core")
@@ -180,8 +195,6 @@ class SourceCoreServer extends AbstractVerticle {
             options.ssl = true
             options.keyStoreOptions = jksOptions
         }
-
-        log.info("Source++ Core listening on: $options.host:$options.port")
         return options
     }
 
