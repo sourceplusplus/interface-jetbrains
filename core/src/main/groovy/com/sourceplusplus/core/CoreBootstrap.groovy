@@ -47,18 +47,24 @@ class CoreBootstrap {
             serverConfig = new JsonObject(configData)
         }
 
-        def buildDate = BUILD.getString("build_date")
-        log.info("Build: " + buildDate)
+        def buildDate = BUILD.getString("build_date") ? Instant.parse(BUILD.getString("build_date")) : null
+        log.info("Build: {}", buildDate)
 
+        def vertxOptions = new VertxOptions()
         def version = BUILD.getString("version")
         if (version == "dev") {
-            //allow debug pauses
-            def vertxOptions = new VertxOptions()
-            vertxOptions.setBlockedThreadCheckInterval(Integer.MAX_VALUE)
-
-            Vertx.vertx(vertxOptions).deployVerticle(new SourceCoreServer(serverConfig, version, null))
-        } else {
-            Vertx.vertx().deployVerticle(new SourceCoreServer(serverConfig, version, Instant.parse(buildDate)))
+            vertxOptions.setBlockedThreadCheckInterval(Integer.MAX_VALUE) //allow debug pauses
         }
+        log.info("Version: {}", version)
+
+        def vertx = Vertx.vertx(vertxOptions)
+        vertx.deployVerticle(new SourceCoreServer(serverConfig, version, buildDate), {
+            if (it.failed()) {
+                it.cause().printStackTrace()
+                vertx.close({
+                    System.exit(-1)
+                })
+            }
+        })
     }
 }

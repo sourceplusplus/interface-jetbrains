@@ -154,16 +154,10 @@ class SourceCoreServer extends AbstractVerticle {
                         startFuture.complete()
                     } else {
                         startFuture.fail(it.cause())
-                        vertx.close({
-                            System.exit(-1)
-                        })
                     }
                 })
             } else {
                 startFuture.fail(it.cause())
-                vertx.close({
-                    System.exit(-1)
-                })
             }
         })
     }
