@@ -204,7 +204,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                 def coreClient = new SourceCoreClient("localhost", embeddedServerPort, false)
                 coreClient.info({
                     if (it.succeeded()) {
-                        saveAutoDetectedEnvironment("localhost", 0, "Embedded", true)
+                        saveAutoDetectedEnvironment("localhost", embeddedServerPort, "Embedded", true)
                     } else {
                         notifyNoConnection()
                     }
