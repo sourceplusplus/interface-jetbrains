@@ -40,7 +40,7 @@ import io.vertx.ext.web.handler.sockjs.impl.SockJSHandlerImpl
 import java.time.Instant
 
 /**
- * todo: this
+ * Setup the Source++ Core server.
  *
  * @version 0.3.0
  * @since 0.3.0

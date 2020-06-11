@@ -70,10 +70,6 @@ task updatePluginResources {
             from '../../core/build/resources/main'
             into 'build/resources/main'
         }
-        copy {
-            from '../../core/build/classes'
-            into 'build/classes'
-        }
 
         copy {
             from '../../3rd_party'
