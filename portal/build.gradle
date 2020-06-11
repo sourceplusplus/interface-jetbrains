@@ -6,7 +6,7 @@ archivesBaseName = 'source-portal'
 mainClassName = 'com.sourceplusplus.portal.PortalBootstrap'
 
 dependencies {
-    implementation 'org.codehaus.groovy:groovy-all:2.4.17'
+    implementation 'org.codehaus.groovy:groovy-all:2.5.11'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
 //    implementation "io.vertx:vertx-web:$VERTX_VERSION"
