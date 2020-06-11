@@ -223,23 +223,17 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                                     "&order_type=" + TraceOrderType.FAILED_TRACES +
                                     "&hide_overview_tab=true"
 
-                    markComponent.initialize()
                     newPortal = new IntelliJPortalUI(portalUuid, markComponent.browser)
                     newPortal.tracesView.orderType = TraceOrderType.FAILED_TRACES
                 } else {
                     markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(PortalTab.Overview, portalUuid)
-
-                    markComponent.initialize()
                     newPortal = new IntelliJPortalUI(portalUuid, markComponent.browser)
                 }
             } else {
                 markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(initialTab, portalUuid)
-                markComponent.initialize()
             }
 
-            if (existingPortal.present) {
-                existingPortal.get().portalUI.lateInitBrowser(markComponent.browser)
-            } else {
+            if (existingPortal.empty) {
                 IntelliJSourcePortal.register(appUuid, portalUuid, artifactQualifiedName, newPortal)
             }
         }

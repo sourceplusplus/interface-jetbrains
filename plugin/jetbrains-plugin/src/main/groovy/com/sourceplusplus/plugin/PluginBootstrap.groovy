@@ -14,7 +14,7 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import org.jetbrains.annotations.NotNull
 
-import java.awt.*
+import java.awt.Dimension
 
 /**
  * Used to bootstrap the Source++ Plugin.
@@ -39,6 +39,7 @@ class PluginBootstrap extends AbstractVerticle {
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new GutterMarkJcefComponentProvider()
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider.with {
             defaultConfiguration.preloadJcefBrowser = false
+            defaultConfiguration.autoDisposeBrowser = false //todo: should be able to dispose, see IntelliJPortalUI.close()
             defaultConfiguration.setComponentSize(new Dimension(775, 250))
             //todo: measure size of editor and make short if it will extend past IDE
             //defaultConfiguration.setComponentSize(new Dimension(620, 250))

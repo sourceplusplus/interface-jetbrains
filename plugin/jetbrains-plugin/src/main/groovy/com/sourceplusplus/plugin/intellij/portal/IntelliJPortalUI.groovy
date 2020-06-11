@@ -36,11 +36,6 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
         }
     }
 
-    void lateInitBrowser(JBCefBrowser browser) {
-        this.browser = Objects.requireNonNull(browser)
-        browser.JBCefClient.addLifeSpanHandler(this, browser.cefBrowser)
-    }
-
     void cloneUI(IntelliJPortalUI portalUI) {
         parentBrowser = portalUI.parentBrowser
         super.cloneUI(portalUI)
@@ -57,11 +52,15 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
         if (userQuery) {
             userQuery = "&$userQuery"
         }
-        browser.cefBrowser.loadURL(getPortalUrl(tab, portalUuid, userQuery))
+        browser.loadURL(getPortalUrl(tab, portalUuid, userQuery))
     }
 
     void close() {
-        browser.cefBrowser.close(true)
+        browser.getJBCefClient().removeLifeSpanHandler(this, browser.cefBrowser)
+        //todo: closing cefBrowser and disposing browser causes issues but it likely leading to a memory leak
+        //todo: issue when not being called. Can recreate by creating mark, opening portal, closing tab, opening tab
+        //todo: and displaying portal again
+        //Disposer.dispose(browser)
     }
 
     void reload() {
@@ -88,7 +87,7 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
         if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
             popupBrowser.createImmediately()
         }
-        portal.portalUI.browser = new JBCefBrowser(popupBrowser)
+        portal.portalUI.browser = new JBCefBrowser(popupBrowser, this.browser.JBCefClient, false, targetUrl)
         portal.portalUI.parentBrowser.JBCefClient.addLifeSpanHandler(this, portal.portalUI.browser.cefBrowser)
 
         def popupFrame = new JFrame(portal.portalUI.viewingPortalArtifact)
