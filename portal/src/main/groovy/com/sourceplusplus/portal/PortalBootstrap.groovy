@@ -1,22 +1,12 @@
 package com.sourceplusplus.portal
 
 import com.codahale.metrics.MetricRegistry
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.sourceplusplus.api.bridge.SourceBridgeClient
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.application.SourceApplication
-import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig
-import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePortalConfig
-import com.sourceplusplus.api.model.metric.ArtifactMetricResult
-import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
-import com.sourceplusplus.api.model.metric.ArtifactMetrics
-import com.sourceplusplus.api.model.metric.TimeFramedMetricType
-import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalUI
 import com.sourceplusplus.portal.display.tabs.ConfigurationTab
@@ -26,17 +16,12 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
-import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.core.net.JksOptions
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
-import org.apache.log4j.ConsoleAppender
-import org.apache.log4j.Level
-import org.apache.log4j.Logger
-import org.apache.log4j.PatternLayout
 
 import java.nio.charset.StandardCharsets
 
@@ -92,7 +77,7 @@ class PortalBootstrap extends AbstractVerticle {
         if (pluginAvailable) {
             PortalUI.assignVertx(vertx)
         } else {
-            registerCodecs()
+            SourceMessage.registerCodecs(vertx)
             SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
             SockJSBridgeOptions portalBridgeOptions = new SockJSBridgeOptions()
                     .addInboundPermitted(new PermittedOptions().setAddressRegex(".+"))
@@ -230,28 +215,5 @@ class PortalBootstrap extends AbstractVerticle {
             log.info("[PORTAL] - " + it.body())
         })
         log.info("{} started", getClass().getSimpleName())
-    }
-
-    private void registerCodecs() {
-        DatabindCodec.mapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-        DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-        DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
-
-        //api
-        vertx.eventBus().registerDefaultCodec(SourceApplication.class, SourceMessage.messageCodec(SourceApplication.class))
-        vertx.eventBus().registerDefaultCodec(SourceArtifact.class, SourceMessage.messageCodec(SourceArtifact.class))
-        vertx.eventBus().registerDefaultCodec(ArtifactMetrics.class, SourceMessage.messageCodec(ArtifactMetrics.class))
-        vertx.eventBus().registerDefaultCodec(ArtifactMetricResult.class, SourceMessage.messageCodec(ArtifactMetricResult.class))
-        vertx.eventBus().registerDefaultCodec(ArtifactMetricSubscribeRequest.class, SourceMessage.messageCodec(ArtifactMetricSubscribeRequest.class))
-        vertx.eventBus().registerDefaultCodec(ArtifactTraceSubscribeRequest.class, SourceMessage.messageCodec(ArtifactTraceSubscribeRequest.class))
-        vertx.eventBus().registerDefaultCodec(SourceArtifactUnsubscribeRequest.class, SourceMessage.messageCodec(SourceArtifactUnsubscribeRequest.class))
-        vertx.eventBus().registerDefaultCodec(ArtifactTraceResult.class, SourceMessage.messageCodec(ArtifactTraceResult.class))
-        vertx.eventBus().registerDefaultCodec(TraceQuery.class, SourceMessage.messageCodec(TraceQuery.class))
-        vertx.eventBus().registerDefaultCodec(TraceQueryResult.class, SourceMessage.messageCodec(TraceQueryResult.class))
-        vertx.eventBus().registerDefaultCodec(Trace.class, SourceMessage.messageCodec(Trace.class))
-        vertx.eventBus().registerDefaultCodec(TraceSpanStackQuery.class, SourceMessage.messageCodec(TraceSpanStackQuery.class))
-        vertx.eventBus().registerDefaultCodec(TraceSpanStackQueryResult.class, SourceMessage.messageCodec(TraceSpanStackQueryResult.class))
-        vertx.eventBus().registerDefaultCodec(TraceSpan.class, SourceMessage.messageCodec(TraceSpan.class))
-        vertx.eventBus().registerDefaultCodec(TimeFramedMetricType.class, SourceMessage.messageCodec(TimeFramedMetricType.class))
     }
 }

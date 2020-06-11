@@ -9,7 +9,8 @@ dependencies {
     implementation 'org.codehaus.groovy:groovy-all:2.4.17'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
-    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+//    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+    implementation files('../3rd_party/vertx/vertx-web-3.9.1.jar')
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
     implementation project(":api")
 }

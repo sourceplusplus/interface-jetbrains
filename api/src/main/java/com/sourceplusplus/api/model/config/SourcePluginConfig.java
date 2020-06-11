@@ -2,6 +2,7 @@ package com.sourceplusplus.api.model.config;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -25,6 +26,7 @@ public final class SourcePluginConfig {
     public volatile String remoteAgentHost = "localhost";
     public volatile int remoteAgentPort = -1;
     public volatile boolean agentPatcherEnabled = true;
+    public volatile boolean embeddedCoreServer = true;
 
     private SourcePluginConfig() {
     }
@@ -40,6 +42,7 @@ public final class SourcePluginConfig {
         remoteAgentHost = config.remoteAgentHost;
         remoteAgentPort = config.remoteAgentPort;
         agentPatcherEnabled = config.agentPatcherEnabled;
+        embeddedCoreServer = config.embeddedCoreServer;
     }
 
     public List<SourceEnvironmentConfig> getEnvironments() {
@@ -48,6 +51,15 @@ public final class SourcePluginConfig {
 
     public void setEnvironments(List<SourceEnvironmentConfig> environments) {
         this.environments = new HashSet<>(environments);
+    }
+
+    public SourceEnvironmentConfig getEnvironment(@NotNull String environmentName) {
+        for (SourceEnvironmentConfig envConfig : environments) {
+            if (environmentName.equals(envConfig.environmentName)) {
+                return envConfig;
+            }
+        }
+        return null;
     }
 
     @Override

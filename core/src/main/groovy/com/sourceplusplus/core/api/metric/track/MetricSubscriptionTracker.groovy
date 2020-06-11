@@ -121,8 +121,7 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
         core.metricAPI.getArtifactMetrics(metricQuery, {
             if (it.succeeded()) {
                 def metricResult = it.result()
-                vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address,
-                        new JsonObject(Json.encode(metricResult)))
+                vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, metricResult)
                 log.debug("Published updated metrics for artifact: " + getShortQualifiedFunctionName(metricResult.artifactQualifiedName()))
             } else {
                 it.cause().printStackTrace()

@@ -7,6 +7,7 @@ import com.intellij.openapi.options.ConfigurationException
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
@@ -78,7 +79,7 @@ class EnvironmentConfigurable implements Configurable {
             }
             coreClient.ping({
                 if (it.succeeded()) {
-                    PluginBootstrap.sourcePlugin.updateEnvironment(coreClient)
+                    SourcePlugin.updateEnvironment(coreClient)
 
                     if (pluginConfig.activeEnvironment?.appUuid) {
                         coreClient.getApplication(pluginConfig.activeEnvironment.appUuid, {

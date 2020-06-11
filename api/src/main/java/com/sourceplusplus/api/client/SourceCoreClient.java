@@ -39,6 +39,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class SourceCoreClient implements SourceClient {
 
+    static {
+        SourceClient.initMappers();
+    }
+
     private static final String SPP_API_VERSION = System.getenv().getOrDefault(
             "SPP_API_VERSION", System.getProperty("SPP_API_VERSION", "v1"));
     private static final String PING_ENDPOINT = "/ping";
@@ -95,8 +99,8 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans" +
                     "?followExit=:followExit&oneLevelDeep=:oneLevelDeep&segmentId=:segmentId&spanId=:spanId", SPP_API_VERSION);
 
-    private final OkHttpClient client = new OkHttpClient();
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private final static OkHttpClient client = new OkHttpClient();
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private final String sppUrl;
     private String apiKey;
 
@@ -110,12 +114,10 @@ public class SourceCoreClient implements SourceClient {
         } else {
             this.sppUrl = "http://" + Objects.requireNonNull(host) + ":" + port;
         }
-        SourceClient.initMappers();
     }
 
     public SourceCoreClient(String sppUrl) {
         this.sppUrl = Objects.requireNonNull(sppUrl);
-        SourceClient.initMappers();
     }
 
     public void attachBridge(Vertx vertx) {

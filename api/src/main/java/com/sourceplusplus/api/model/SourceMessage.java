@@ -1,8 +1,19 @@
 package com.sourceplusplus.api.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sourceplusplus.api.client.SourceClient;
+import com.sourceplusplus.api.model.application.SourceApplication;
+import com.sourceplusplus.api.model.artifact.SourceArtifact;
+import com.sourceplusplus.api.model.artifact.SourceArtifactConfig;
+import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest;
+import com.sourceplusplus.api.model.info.SourceCoreInfo;
+import com.sourceplusplus.api.model.internal.ApplicationArtifact;
+import com.sourceplusplus.api.model.metric.*;
+import com.sourceplusplus.api.model.trace.*;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 
@@ -16,33 +27,72 @@ import java.io.Serializable;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public interface SourceMessage extends Serializable {
 
-    static MessageCodec messageCodec(Class type) {
-        return new MessageCodec() {
+    static void registerCodecs(@NotNull Vertx vertx) {
+        SourceClient.initMappers();
 
-            @Override
-            public void encodeToWire(Buffer buffer, Object o) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
+        registerCodec(vertx, SourceCoreInfo.class);
+        registerCodec(vertx, SourceApplication.class);
+        registerCodec(vertx, ArtifactMetrics.class);
+        registerCodec(vertx, ArtifactMetricResult.class);
+        registerCodec(vertx, SourceArtifactConfig.class);
+        registerCodec(vertx, SourceArtifact.class);
+        registerCodec(vertx, ApplicationArtifact.class);
+        registerCodec(vertx, TraceSpan.class);
+        registerCodec(vertx, ArtifactMetricSubscribeRequest.class);
+        registerCodec(vertx, ArtifactMetricUnsubscribeRequest.class);
+        registerCodec(vertx, ArtifactTraceSubscribeRequest.class);
+        registerCodec(vertx, ArtifactTraceUnsubscribeRequest.class);
+        registerCodec(vertx, SourceArtifactUnsubscribeRequest.class);
+        registerCodec(vertx, TimeFramedMetricType.class);
+        registerCodec(vertx, ArtifactTraceResult.class);
+        registerCodec(vertx, TraceQuery.class);
+        registerCodec(vertx, TraceQueryResult.class);
+        registerCodec(vertx, Trace.class);
+        registerCodec(vertx, TraceSpanStackQuery.class);
+        registerCodec(vertx, TraceSpanStackQueryResult.class);
+    }
 
-            @Override
-            public Object decodeFromWire(int pos, Buffer buffer) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
+    static <T> void registerCodec(@NotNull Vertx vertx, @NotNull Class<T> type) {
+        if (vertx.sharedData().getLocalMap("registered_source_message_codecs")
+                .putIfAbsent(type.getCanonicalName(), true) == null) {
+            vertx.eventBus().registerDefaultCodec(type, new SourceMessageCodec<>(type));
+        }
+    }
 
-            @Override
-            public Object transform(Object o) {
-                return o;
-            }
+    class SourceMessageCodec<T> implements MessageCodec<T, T> {
+        private final Class<T> type;
 
-            @Override
-            public String name() {
-                return type.getSimpleName();
-            }
+        SourceMessageCodec(Class<T> type) {
+            this.type = type;
+        }
 
-            @Override
-            public byte systemCodecID() {
-                return -1;
-            }
-        };
+        @Override
+        public void encodeToWire(Buffer buffer, T o) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public T decodeFromWire(int pos, Buffer buffer) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public T transform(T o) {
+            return o;
+        }
+
+        @Override
+        public String name() {
+            return type.getSimpleName();
+        }
+
+        @Override
+        public byte systemCodecID() {
+            return -1;
+        }
+
+        public Class<T> type() {
+            return type;
+        }
     }
 }

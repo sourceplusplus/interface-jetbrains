@@ -13,7 +13,7 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
-import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
@@ -65,7 +65,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     void apply() {
         super.apply()
 
-        PluginBootstrap.sourcePlugin.vertx.eventBus().publish(SOURCE_MARK_APPLIED, this)
+        SourcePlugin.vertx.eventBus().publish(SOURCE_MARK_APPLIED, this)
         addEventListener(this)
     }
 

@@ -1,5 +1,5 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.4.18"
+    id "org.jetbrains.intellij" version "0.4.21"
 }
 apply plugin: 'groovy'
 
@@ -21,13 +21,15 @@ archivesBaseName = 'jetbrains-source-plugin'
 
 dependencies {
     implementation project(":api")
+    compile project(path: ":core", configuration: 'shadow')
     implementation(project(":portal")) {
         exclude group: 'com.jetbrains.intellij.platform'
     }
     implementation 'org.codehaus.groovy:groovy-all:2.4.17'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
-    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+//    implementation "io.vertx:vertx-web:$VERTX_VERSION"
+    implementation files('../../3rd_party/vertx/vertx-web-3.9.1.jar')
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
     implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5097fbbef8') { //todo: real version
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
@@ -63,6 +65,11 @@ task updatePluginResources {
             into 'build/resources/main'
         }
         file("build/resources/main/source-portal_build.properties").delete()
+
+        copy {
+            from '../../core/build/resources/main'
+            into 'build/resources/main'
+        }
 
         copy {
             from '../../3rd_party'

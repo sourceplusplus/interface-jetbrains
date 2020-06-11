@@ -54,7 +54,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     @Override
     void start(Promise<Void> startFuture) throws Exception {
         vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, { message ->
-            def artifact = Json.decodeValue((message.body() as JsonObject).toString(), SourceArtifact.class)
+            def artifact = message.body() as SourceArtifact
             if (artifact.config().endpointName() != null) {
                 Set<String> endpointIds = new HashSet<>()
                 if (artifact.config().endpointName().contains("{")) {

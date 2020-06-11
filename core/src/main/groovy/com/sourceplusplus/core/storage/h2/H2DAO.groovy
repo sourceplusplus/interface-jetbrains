@@ -22,6 +22,8 @@ import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import java.time.Instant
 import java.util.stream.Collectors
 
+import static com.sourceplusplus.core.SourceCoreServer.*
+
 /**
  * Represents a H2 storage for saving/fetching core data.
  *
@@ -32,57 +34,57 @@ import java.util.stream.Collectors
 @Slf4j
 class H2DAO extends SourceStorage {
 
-    private static final String SOURCE_CORE_SCHEMA = Resources.toString(Resources.getResource(
+    private static final String SOURCE_CORE_SCHEMA = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/schema/source_core.sql"), Charsets.UTF_8)
-    private static final String GET_CORE_CONFIG = Resources.toString(Resources.getResource(
+    private static final String GET_CORE_CONFIG = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_core_config.sql"), Charsets.UTF_8)
-    private static final String UPDATE_CORE_CONFIG = Resources.toString(Resources.getResource(
+    private static final String UPDATE_CORE_CONFIG = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/update_core_config.sql"), Charsets.UTF_8)
-    private static final String CREATE_APPLICATION = Resources.toString(Resources.getResource(
+    private static final String CREATE_APPLICATION = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/create_application.sql"), Charsets.UTF_8)
-    private static final String UPDATE_APPLICATION = Resources.toString(Resources.getResource(
+    private static final String UPDATE_APPLICATION = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/update_application.sql"), Charsets.UTF_8)
-    private static final String FIND_APPLICATION_BY_NAME = Resources.toString(Resources.getResource(
+    private static final String FIND_APPLICATION_BY_NAME = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/find_application_by_name.sql"), Charsets.UTF_8)
-    private static final String GET_APPLICATION = Resources.toString(Resources.getResource(
+    private static final String GET_APPLICATION = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_application.sql"), Charsets.UTF_8)
-    private static final String GET_ALL_APPLICATIONS = Resources.toString(Resources.getResource(
+    private static final String GET_ALL_APPLICATIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_all_applications.sql"), Charsets.UTF_8)
-    private static final String CREATE_ARTIFACT = Resources.toString(Resources.getResource(
+    private static final String CREATE_ARTIFACT = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/create_artifact.sql"), Charsets.UTF_8)
-    private static final String UPDATE_ARTIFACT = Resources.toString(Resources.getResource(
+    private static final String UPDATE_ARTIFACT = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/update_artifact.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT = Resources.toString(Resources.getResource(
+    private static final String GET_ARTIFACT = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT_BY_ENDPOINT_NAME = Resources.toString(Resources.getResource(
+    private static final String GET_ARTIFACT_BY_ENDPOINT_NAME = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_by_endpoint_name.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT_BY_ENDPOINT_ID = Resources.toString(Resources.getResource(
+    private static final String GET_ARTIFACT_BY_ENDPOINT_ID = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_by_endpoint_id.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT_BY_SUBSCRIBE_AUTOMATICALLY = Resources.toString(Resources.getResource(
+    private static final String GET_ARTIFACT_BY_SUBSCRIBE_AUTOMATICALLY = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_by_subscribe_automatically.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT_BY_ENDPOINT = Resources.toString(Resources.getResource(
+    private static final String GET_ARTIFACT_BY_ENDPOINT = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_by_endpoint.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT_BY_FAILING = Resources.toString(Resources.getResource(
+    private static final String GET_ARTIFACT_BY_FAILING = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_by_failing.sql"), Charsets.UTF_8)
-    private static final String GET_APPLICATION_ARTIFACTS = Resources.toString(Resources.getResource(
+    private static final String GET_APPLICATION_ARTIFACTS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_application_artifacts.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT_SUBSCRIPTIONS = Resources.toString(Resources.getResource(
+    private static final String GET_ARTIFACT_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_subscriptions.sql"), Charsets.UTF_8)
-    private static final String GET_SUBSCRIBER_ARTIFACT_SUBSCRIPTIONS = Resources.toString(Resources.getResource(
+    private static final String GET_SUBSCRIBER_ARTIFACT_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_subscriber_artifact_subscriptions.sql"), Charsets.UTF_8)
-    private static final String GET_ALL_ARTIFACT_SUBSCRIPTIONS = Resources.toString(Resources.getResource(
+    private static final String GET_ALL_ARTIFACT_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_all_artifact_subscriptions.sql"), Charsets.UTF_8)
-    private static final String UPDATE_ARTIFACT_SUBSCRIPTION = Resources.toString(Resources.getResource(
+    private static final String UPDATE_ARTIFACT_SUBSCRIPTION = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/update_artifact_subscription.sql"), Charsets.UTF_8)
-    private static final String GET_SUBSCRIBER_ARTIFACT_SUBSCRIPTION = Resources.toString(Resources.getResource(
+    private static final String GET_SUBSCRIBER_ARTIFACT_SUBSCRIPTION = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_subscriber_artifact_subscription.sql"), Charsets.UTF_8)
-    private static final String GET_APPLICATION_SUBSCRIPTIONS = Resources.toString(Resources.getResource(
+    private static final String GET_APPLICATION_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_application_subscriptions.sql"), Charsets.UTF_8)
-    private static final String DELETE_ARTIFACT_SUBSCRIPTION = Resources.toString(Resources.getResource(
+    private static final String DELETE_ARTIFACT_SUBSCRIPTION = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/delete_artifact_subscription.sql"), Charsets.UTF_8)
-    private static final String ADD_ARTIFACT_FAILURE = Resources.toString(Resources.getResource(
+    private static final String ADD_ARTIFACT_FAILURE = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/add_artifact_failure.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT_FAILURES = Resources.toString(Resources.getResource(
+    private static final String GET_ARTIFACT_FAILURES = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_failures.sql"), Charsets.UTF_8)
     private final JDBCClient client
 

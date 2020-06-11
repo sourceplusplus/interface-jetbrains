@@ -47,13 +47,13 @@ class ElasticsearchDAO extends SourceStorage {
     public static final String REFRESH_STORAGE = "REFRESH_STORAGE"
 
     private static final String SOURCE_APPLICATION_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
-            "config/elasticsearch/application_index_mappings.json"), Charsets.UTF_8)
+            "storage/elasticsearch/application_index_mappings.json"), Charsets.UTF_8)
     private static final String SOURCE_ARTIFACT_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
-            "config/elasticsearch/artifact_index_mappings.json"), Charsets.UTF_8)
+            "storage/elasticsearch/artifact_index_mappings.json"), Charsets.UTF_8)
     private static final String SOURCE_ARTIFACT_SUBSCRIPTION_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
-            "config/elasticsearch/artifact_subscription_index_mappings.json"), Charsets.UTF_8)
+            "storage/elasticsearch/artifact_subscription_index_mappings.json"), Charsets.UTF_8)
     private static final String SOURCE_ARTIFACT_FAILURE_INDEX_MAPPINGS = Resources.toString(Resources.getResource(
-            "config/elasticsearch/artifact_failure_index_mappings.json"), Charsets.UTF_8)
+            "storage/elasticsearch/artifact_failure_index_mappings.json"), Charsets.UTF_8)
     private final static String SPP_INDEX = "source_plus_plus"
     private final String elasticSearchHost
     private final int elasticSearchPort
