@@ -6,8 +6,6 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
 import com.sourceplusplus.api.model.artifact.*
 import com.sourceplusplus.api.model.config.SourceAgentConfig
-import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
-import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.Trace
 import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
