@@ -5,7 +5,6 @@ import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.integration.IntegrationInfo
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
-import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
@@ -146,9 +145,13 @@ class AdminAPI extends AbstractVerticle {
 
     private void refreshStorageRoute(RoutingContext routingContext) {
         if (core.storage.needsManualRefresh()) {
-            //todo: not hardcode elasticsearch
-            vertx.eventBus().request(ElasticsearchDAO.REFRESH_STORAGE, true, {
-                routingContext.response().setStatusCode(200).end()
+            core.storage.refreshDatabase({
+                if (it.succeeded()) {
+                    routingContext.response().setStatusCode(200).end()
+                } else {
+                    log.error("Failed to refresh storage", it.cause())
+                    routingContext.response().setStatusCode(500).end()
+                }
             })
         } else {
             routingContext.response().setStatusCode(200).end()

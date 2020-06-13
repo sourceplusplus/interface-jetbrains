@@ -2,14 +2,10 @@ package com.sourceplusplus.plugin.coordinate.artifact.track
 
 import com.google.common.collect.Sets
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
-import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest
-import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
-import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
-import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 

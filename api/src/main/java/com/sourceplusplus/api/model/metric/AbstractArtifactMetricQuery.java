@@ -9,7 +9,7 @@ import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Used to query core for an artifact's metrics.
@@ -33,7 +33,7 @@ public interface AbstractArtifactMetricQuery extends SourceMessage {
     @Nullable
     QueryTimeFrame timeFrame();
 
-    List<MetricType> metricTypes();
+    Set<MetricType> metricTypes();
 
     Instant start();
 

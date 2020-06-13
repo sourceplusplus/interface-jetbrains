@@ -84,7 +84,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
                     .appUuid(SourcePluginConfig.current.activeEnvironment.appUuid)
                     .artifactQualifiedName(artifactQualifiedName)
-                    .removeAllArtifactSubscriptions(true)
                     .build()
             SourcePluginConfig.current.activeEnvironment.coreClient.unsubscribeFromArtifact(unsubscribeRequest, {
                 if (it.failed()) {

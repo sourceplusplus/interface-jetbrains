@@ -3,6 +3,7 @@ package com.sourceplusplus.api.model.trace;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Preconditions;
 import com.sourceplusplus.api.model.QueryTimeFrame;
 import com.sourceplusplus.api.model.SourceStyle;
 import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest;
@@ -10,7 +11,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Used to subscribe to artifact traces.
@@ -26,14 +27,20 @@ import java.util.List;
 @JsonDeserialize(as = ArtifactTraceSubscribeRequest.class)
 public interface AbstractArtifactTraceSubscribeRequest extends ArtifactSubscribeRequest {
 
-    @Nullable
+    @Nullable //todo: remove
     QueryTimeFrame timeFrame();
 
-    List<TraceOrderType> orderTypes();
+    Set<TraceOrderType> orderTypes();
 
     @Override
     @Value.Default
     default SourceArtifactSubscriptionType getType() {
         return SourceArtifactSubscriptionType.TRACES;
+    }
+
+    @Value.Check
+    default void validate() {
+        Preconditions.checkState(!orderTypes().isEmpty(),
+                "Subscription must include at least one trace order type");
     }
 }

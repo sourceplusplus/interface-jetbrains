@@ -136,6 +136,8 @@ test.doFirst {
 
 shadowJar {
     dependencies {
-        exclude(dependency('org.apache.logging.log4j:log4j-slf4j-impl'))
+        exclude(dependency {
+            it.moduleGroup == 'org.apache.logging.log4j'
+        })
     }
 }

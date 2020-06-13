@@ -5,8 +5,6 @@ import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
 import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
 import com.sourceplusplus.core.SourceCore
-import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
-import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
@@ -20,6 +18,9 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
+import static com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker.*
+import static com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker.*
+
 /**
  * Keeps track of artifact subscriptions.
  *
@@ -32,7 +33,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
-    public static final String UPDATE_ARTIFACT_SUBSCRIPTIONS = "UpdateArtifactSubscriptions"
     public static final String GET_ARTIFACT_SUBSCRIPTIONS = "GetArtifactSubscriptions"
     public static final String GET_APPLICATION_SUBSCRIPTIONS = "GetApplicationSubscriptions"
     public static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "RefreshSubscriberApplicationSubscriptions"
@@ -52,13 +52,25 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             })
         }
         vertx.setPeriodic(TimeUnit.SECONDS.toMillis(5), {
-            vertx.eventBus().publish(UPDATE_ARTIFACT_SUBSCRIPTIONS, true)
+            core.storage.getSubscriberArtifactSubscriptions({
+                if (it.succeeded()) {
+                    it.result().keySet().each {
+                        if (it.type == SourceArtifactSubscriptionType.METRICS) {
+                            vertx.eventBus().publish(PUBLISH_ARTIFACT_METRICS, it)
+                        } else {
+                            vertx.eventBus().publish(PUBLISH_ARTIFACT_TRACES, it)
+                        }
+                    }
+                } else {
+                    log.error("Failed to get subscriber artifact subscriptions", it.cause())
+                }
+            })
         })
         vertx.eventBus().consumer(SUBSCRIBE_TO_ARTIFACT, {
             subscribeToArtifact(it as Message<ArtifactSubscribeRequest>)
         })
         vertx.eventBus().consumer(UNSUBSCRIBE_FROM_ARTIFACT, {
-            unsubscribeFromArtifact(it)
+            unsubscribeFromArtifact(it as Message<ArtifactUnsubscribeRequest>)
         })
         vertx.eventBus().consumer(GET_ARTIFACT_SUBSCRIPTIONS, { msg ->
             def appArtifact = msg.body() as ApplicationArtifact
@@ -87,20 +99,14 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             def appUuid = request.getString("app_uuid")
             def subscriberUuid = request.getString("subscriber_uuid")
 
-            core.storage.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
+            core.storage.getSubscriberApplicationSubscriptions(subscriberUuid, appUuid, {
                 if (it.succeeded()) {
                     def futures = []
                     def subscriberSubscriptions = it.result()
                     subscriberSubscriptions.each {
-                        def updatedAccess = new HashMap<>(it.subscriptionLastAccessed())
-                        updatedAccess.each {
-                            def now = Instant.now()
-                            updatedAccess.put(it.key, now)
-                        }
-
                         def future = Promise.promise()
                         futures.add(future)
-                        core.storage.setArtifactSubscription(it.withSubscriptionLastAccessed(updatedAccess), future)
+                        core.storage.updateArtifactSubscription(it, it, future)
                     }
                     CompositeFuture.all(futures).onComplete({
                         if (it.succeeded()) {
@@ -121,7 +127,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             def appUuid = request.getString("app_uuid")
             def subscriberUuid = request.getString("subscriber_uuid")
 
-            core.storage.getSubscriberArtifactSubscriptions(subscriberUuid, appUuid, {
+            core.storage.getSubscriberApplicationSubscriptions(subscriberUuid, appUuid, {
                 if (it.succeeded()) {
                     msg.reply(new JsonArray(Json.encode(it.result())))
                 } else {
@@ -136,26 +142,14 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     private void removeInactiveArtifactSubscriptions() {
         log.debug("Removing inactivate artifact subscriptions")
         def inactiveLimit = config().getJsonObject("core").getInteger("subscription_inactive_limit_minutes")
-        core.storage.getArtifactSubscriptions({
+        core.storage.getSubscriberArtifactSubscriptions({
             if (it.succeeded()) {
                 def futures = []
                 it.result().each { sub ->
-                    def updated = false
-                    def updatedSubscriptions = new HashMap<>(sub.subscriptionLastAccessed())
-                    sub.subscriptionLastAccessed().each {
-                        if (Duration.between(it.value, Instant.now()).toMinutes() > inactiveLimit) {
-                            updatedSubscriptions.remove(it.key)
-                            updated = true
-                        }
-                    }
-
-                    def future = Promise.promise()
-                    futures.add(future)
-                    if (updatedSubscriptions.isEmpty()) {
-                        core.storage.deleteArtifactSubscription(sub, future)
-                    } else if (updated) {
-                        sub = sub.withSubscriptionLastAccessed(updatedSubscriptions)
-                        core.storage.setArtifactSubscription(sub, future)
+                    if (Duration.between(sub.value, Instant.now()).toMinutes() > inactiveLimit) {
+                        def future = Promise.promise()
+                        futures.add(future)
+                        core.storage.deleteArtifactSubscription(sub.key, future)
                     }
                 }
                 CompositeFuture.all(futures).onComplete({
@@ -198,144 +192,62 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     }
 
     private void acceptArtifactSubscription(Message<ArtifactSubscribeRequest> request) {
-        log.info("Accepted artifact subscription: " + request.body())
-        def artifactSubscription = SourceArtifactSubscription.builder()
-                .subscriberUuid(request.body().subscriberClientId)
-                .appUuid(request.body().appUuid())
-                .artifactQualifiedName(request.body().artifactQualifiedName())
-                .putSubscriptionLastAccessed(request.body().type, Instant.now())
-                .build()
-        core.storage.updateArtifactSubscription(artifactSubscription, {
-            if (it.succeeded()) {
-                switch (request.body().type) {
-                    case SourceArtifactSubscriptionType.METRICS:
-                        vertx.eventBus().request(MetricSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT_METRICS, request.body(), {
-                            request.reply(it.result().body())
-                        })
-                        break
-                    case SourceArtifactSubscriptionType.TRACES:
-                        vertx.eventBus().request(TraceSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT_TRACES, request.body(), {
-                            request.reply(it.result().body())
-                        })
-                        break
-                    default:
-                        throw new IllegalStateException("Unknown subscription type: " + request.body().type)
-                }
-            } else {
-                log.error("Failed to add artifact subscription", it.cause())
-                request.fail(500, it.cause().message)
-            }
-        })
+        ArtifactSubscribeRequest subRequest = request.body()
+        log.info("Accepted artifact subscription: " + subRequest)
+
+        switch (subRequest.type) {
+            case SourceArtifactSubscriptionType.METRICS:
+                vertx.eventBus().request(SUBSCRIBE_TO_ARTIFACT_METRICS, subRequest, {
+                    request.reply(it.result().body())
+                })
+                break
+            case SourceArtifactSubscriptionType.TRACES:
+                vertx.eventBus().request(SUBSCRIBE_TO_ARTIFACT_TRACES, subRequest, {
+                    request.reply(it.result().body())
+                })
+                break
+            default:
+                request.fail(500, "Unknown subscription type: " + subRequest.type)
+                throw new IllegalStateException("Unknown subscription type: " + subRequest.type)
+        }
     }
 
-    private void unsubscribeFromArtifact(Message<Object> request) {
+    private void unsubscribeFromArtifact(Message<ArtifactUnsubscribeRequest> request) {
         def unsubRequest = request.body()
-        if (unsubRequest instanceof ArtifactMetricUnsubscribeRequest) {
-            def metricUnsubRequest = unsubRequest
-            vertx.eventBus().request(MetricSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT_METRICS, unsubRequest, {
-                if (it.succeeded()) {
-                    def removeArtifactSubscriber = it.result().body()
-                    if (removeArtifactSubscriber) {
-                        core.storage.getArtifactSubscription(metricUnsubRequest.subscriberClientId,
-                                metricUnsubRequest.appUuid(), metricUnsubRequest.artifactQualifiedName(), {
-                            if (it.succeeded()) {
-                                if (it.result().isPresent()) {
-                                    def subscription = it.result().get()
-                                    def updatedAccess = new HashMap<>(subscription.subscriptionLastAccessed())
-                                    updatedAccess.remove(SourceArtifactSubscriptionType.METRICS)
+        log.info("Accepted artifact unsubscription: " + unsubRequest)
 
-                                    if (updatedAccess.isEmpty()) {
-                                        core.storage.deleteArtifactSubscription(subscription, {
-                                            if (it.succeeded()) {
-                                                request.reply(true)
-                                            } else {
-                                                log.error("Failed to unsubscribe from artifact metrics", it.cause())
-                                                request.fail(500, it.cause().message)
-                                            }
-                                        })
-                                    } else {
-                                        subscription = subscription.withSubscriptionLastAccessed(updatedAccess)
-                                        core.storage.setArtifactSubscription(subscription, {
-                                            if (it.succeeded()) {
-                                                request.reply(true)
-                                            } else {
-                                                log.error("Failed to unsubscribe from artifact metrics", it.cause())
-                                                request.fail(500, it.cause().message)
-                                            }
-                                        })
-                                    }
-                                } else {
-                                    request.reply(true)
-                                }
-                            } else {
-                                log.error("Failed to unsubscribe from artifact metrics", it.cause())
-                                request.fail(500, it.cause().message)
-                            }
-                        })
-                    } else {
-                        request.reply(true)
-                    }
+        if (unsubRequest instanceof ArtifactMetricUnsubscribeRequest) {
+            vertx.eventBus().request(UNSUBSCRIBE_FROM_ARTIFACT_METRICS, unsubRequest, {
+                if (it.succeeded()) {
+                    request.reply(true)
                 } else {
                     log.error("Failed to unsubscribe from artifact metrics", it.cause())
                     request.fail(500, it.cause().message)
                 }
             })
         } else if (unsubRequest instanceof ArtifactTraceUnsubscribeRequest) {
-            def traceUnsubRequest = unsubRequest
-            vertx.eventBus().request(TraceSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT_TRACES, traceUnsubRequest, {
+            vertx.eventBus().request(UNSUBSCRIBE_FROM_ARTIFACT_TRACES, unsubRequest, {
                 if (it.succeeded()) {
-                    def removeArtifactSubscriber = it.result().body()
-                    if (removeArtifactSubscriber) {
-                        core.storage.getArtifactSubscription(traceUnsubRequest.subscriberClientId,
-                                traceUnsubRequest.appUuid(), traceUnsubRequest.artifactQualifiedName(), {
-                            if (it.succeeded()) {
-                                if (it.result().isPresent()) {
-                                    def subscription = it.result().get()
-                                    def updatedAccess = new HashMap<>(subscription.subscriptionLastAccessed())
-                                    updatedAccess.remove(SourceArtifactSubscriptionType.TRACES)
-
-                                    if (updatedAccess.isEmpty()) {
-                                        core.storage.deleteArtifactSubscription(subscription, {
-                                            if (it.succeeded()) {
-                                                request.reply(true)
-                                            } else {
-                                                log.error("Failed to unsubscribe from artifact traces", it.cause())
-                                                request.fail(500, it.cause().message)
-                                            }
-                                        })
-                                    } else {
-                                        subscription = subscription.withSubscriptionLastAccessed(updatedAccess)
-                                        core.storage.setArtifactSubscription(subscription, {
-                                            if (it.succeeded()) {
-                                                request.reply(true)
-                                            } else {
-                                                log.error("Failed to unsubscribe from artifact traces", it.cause())
-                                                request.fail(500, it.cause().message)
-                                            }
-                                        })
-                                    }
-                                } else {
-                                    request.reply(true)
-                                }
-                            } else {
-                                log.error("Failed to unsubscribe from artifact traces", it.cause())
-                                request.fail(500, it.cause().message)
-                            }
-                        })
-                    } else {
-                        request.reply(true)
-                    }
+                    request.reply(true)
                 } else {
                     log.error("Failed to unsubscribe from artifact traces", it.cause())
                     request.fail(500, it.cause().message)
                 }
             })
         } else if (unsubRequest instanceof SourceArtifactUnsubscribeRequest) {
-            core.storage.getArtifactSubscription(unsubRequest.subscriberClientId, unsubRequest.appUuid(),
+            core.storage.getSubscriberArtifactSubscriptions(unsubRequest.subscriberUuid(), unsubRequest.appUuid(),
                     unsubRequest.artifactQualifiedName(), {
                 if (it.succeeded()) {
-                    if (it.result().isPresent()) {
-                        core.storage.deleteArtifactSubscription(it.result().get(), {
+                    if (it.result().isEmpty()) {
+                        request.reply(true)
+                    } else {
+                        def futures = []
+                        it.result().each {
+                            def promise = Promise.promise()
+                            futures.add(promise)
+                            core.storage.deleteArtifactSubscription(it, promise)
+                        }
+                        CompositeFuture.all(futures).onComplete({
                             if (it.succeeded()) {
                                 request.reply(true)
                             } else {
@@ -343,8 +255,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                 request.fail(500, it.cause().message)
                             }
                         })
-                    } else {
-                        request.reply(true)
                     }
                 } else {
                     log.error("Failed to unsubscribe from artifact", it.cause())

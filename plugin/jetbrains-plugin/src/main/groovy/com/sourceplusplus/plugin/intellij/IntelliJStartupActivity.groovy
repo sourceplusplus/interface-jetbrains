@@ -38,7 +38,6 @@ import org.jetbrains.annotations.NotNull
 
 import javax.swing.*
 import javax.swing.event.HyperlinkEvent
-import java.awt.*
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CountDownLatch
 
