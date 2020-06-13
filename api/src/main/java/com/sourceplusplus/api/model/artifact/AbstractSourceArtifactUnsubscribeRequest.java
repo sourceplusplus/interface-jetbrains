@@ -20,5 +20,9 @@ import org.immutables.value.Value;
 @JsonDeserialize(as = SourceArtifactUnsubscribeRequest.class)
 public interface AbstractSourceArtifactUnsubscribeRequest extends ArtifactUnsubscribeRequest {
 
-    boolean removeAllArtifactSubscriptions();
+    @Override
+    @Value.Default
+    default SourceArtifactSubscriptionType getType() {
+        return SourceArtifactSubscriptionType.ALL;
+    }
 }

@@ -23,6 +23,7 @@ public interface ArtifactUnsubscribeRequest extends SourceMessage {
     @Nullable
     String artifactQualifiedName();
 
+    @Deprecated
     @Value.Default
     default String getSubscriberClientId() {
         return SourceClient.CLIENT_ID;

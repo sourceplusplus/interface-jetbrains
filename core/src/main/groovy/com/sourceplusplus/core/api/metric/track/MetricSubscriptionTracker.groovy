@@ -16,7 +16,7 @@ import io.vertx.core.Promise
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import static com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType.*
+import static com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType.METRICS
 import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
 
 /**
@@ -58,7 +58,7 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
                 if (it.succeeded()) {
                     boolean updatedSubscription = false
                     def futures = []
-                    it.result().each {
+                    it.result().findAll { it.type == METRICS }.each {
                         def currentSubscription = it as ArtifactMetricSubscribeRequest
                         if (subRequest.type == currentSubscription.type && subRequest.timeFrame() == currentSubscription.timeFrame()) {
                             def promise = Promise.promise()
@@ -178,7 +178,7 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
     }
 
     private void publishLatestMetrics(ApplicationArtifact appArtifact, QueryTimeFrame timeFrame,
-                                      List<MetricType> metricTypes) {
+                                      Set<MetricType> metricTypes) {
         def metricQuery = ArtifactMetricQuery.builder()
                 .appUuid(appArtifact.appUuid())
                 .artifactQualifiedName(appArtifact.artifactQualifiedName())

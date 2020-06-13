@@ -10,7 +10,7 @@ import com.sourceplusplus.api.model.artifact.ArtifactUnsubscribeRequest;
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType;
 import org.immutables.value.Value;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Used to unsubscribe to artifact metrics.
@@ -26,11 +26,11 @@ import java.util.List;
 @JsonDeserialize(as = ArtifactMetricUnsubscribeRequest.class)
 public interface AbstractArtifactMetricUnsubscribeRequest extends ArtifactUnsubscribeRequest {
 
-    List<TimeFramedMetricType> removeTimeFramedMetricTypes();
+    Set<TimeFramedMetricType> removeTimeFramedMetricTypes();
 
-    List<QueryTimeFrame> removeTimeFrames();
+    Set<QueryTimeFrame> removeTimeFrames();
 
-    List<MetricType> removeMetricTypes();
+    Set<MetricType> removeMetricTypes();
 
     @Value.Default
     default boolean removeAllArtifactMetricSubscriptions() {

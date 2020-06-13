@@ -10,7 +10,7 @@ import com.sourceplusplus.api.model.artifact.ArtifactUnsubscribeRequest;
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType;
 import org.immutables.value.Value;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Used to unsubscribe to artifact traces.
@@ -26,9 +26,9 @@ import java.util.List;
 @JsonDeserialize(as = ArtifactTraceUnsubscribeRequest.class)
 public interface AbstractArtifactTraceUnsubscribeRequest extends ArtifactUnsubscribeRequest {
 
-    List<QueryTimeFrame> removeTimeFrames();
+    Set<QueryTimeFrame> removeTimeFrames();
 
-    List<TraceOrderType> removeOrderTypes();
+    Set<TraceOrderType> removeOrderTypes();
 
     @Value.Default
     default boolean removeAllArtifactTraceSubscriptions() {

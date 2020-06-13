@@ -11,7 +11,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Used to subscribe to artifact traces.
@@ -30,7 +30,7 @@ public interface AbstractArtifactTraceSubscribeRequest extends ArtifactSubscribe
     @Nullable //todo: remove
     QueryTimeFrame timeFrame();
 
-    List<TraceOrderType> orderTypes();
+    Set<TraceOrderType> orderTypes();
 
     @Override
     @Value.Default

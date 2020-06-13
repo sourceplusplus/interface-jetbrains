@@ -10,7 +10,7 @@ import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest;
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType;
 import org.immutables.value.Value;
 
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +29,7 @@ public interface AbstractArtifactMetricSubscribeRequest extends ArtifactSubscrib
 
     QueryTimeFrame timeFrame();
 
-    List<MetricType> metricTypes();
+    Set<MetricType> metricTypes();
 
     @Override
     @Value.Default
@@ -44,9 +44,9 @@ public interface AbstractArtifactMetricSubscribeRequest extends ArtifactSubscrib
     }
 
     @Value.Lazy
-    default List<TimeFramedMetricType> asTimeFramedMetricTypes() {
+    default Set<TimeFramedMetricType> asTimeFramedMetricTypes() {
         return metricTypes().stream()
                 .map(it -> TimeFramedMetricType.builder().metricType(it).timeFrame(timeFrame()).build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 }

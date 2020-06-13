@@ -235,11 +235,19 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 }
             })
         } else if (unsubRequest instanceof SourceArtifactUnsubscribeRequest) {
-            core.storage.getArtifactSubscription(unsubRequest.subscriberClientId, unsubRequest.appUuid(),
+            core.storage.getSubscriberArtifactSubscriptions(unsubRequest.subscriberUuid(), unsubRequest.appUuid(),
                     unsubRequest.artifactQualifiedName(), {
                 if (it.succeeded()) {
-                    if (it.result().isPresent()) {
-                        core.storage.deleteArtifactSubscription(it.result().get(), {
+                    if (it.result().isEmpty()) {
+                        request.reply(true)
+                    } else {
+                        def futures = []
+                        it.result().each {
+                            def promise = Promise.promise()
+                            futures.add(promise)
+                            core.storage.deleteArtifactSubscription(it, promise)
+                        }
+                        CompositeFuture.all(futures).onComplete({
                             if (it.succeeded()) {
                                 request.reply(true)
                             } else {
@@ -247,8 +255,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                                 request.fail(500, it.cause().message)
                             }
                         })
-                    } else {
-                        request.reply(true)
                     }
                 } else {
                     log.error("Failed to unsubscribe from artifact", it.cause())
