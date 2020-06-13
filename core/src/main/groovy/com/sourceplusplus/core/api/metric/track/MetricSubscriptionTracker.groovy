@@ -29,9 +29,9 @@ import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFun
 @Slf4j
 class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
 
+    public static final String PUBLISH_ARTIFACT_METRICS = "PublishArtifactMetrics"
     public static final String SUBSCRIBE_TO_ARTIFACT_METRICS = "SubscribeToArtifactMetrics"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT_METRICS = "UnsubscribeFromArtifactMetrics"
-    //todo: is subscribed
 
     MetricSubscriptionTracker(SourceCore core) {
         super(core)
@@ -39,18 +39,12 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
 
     @Override
     void start() throws Exception {
-        vertx.eventBus().consumer(UPDATE_ARTIFACT_SUBSCRIPTIONS, {
-            //todo: get metrics subscriptions by artifact
-            metricSubscriptions.each {
-                def applicationArtifact = it.key
-                def artifactMetricTimeFrames = it.value
-
-                artifactMetricTimeFrames.each {
-                    def timeFrame = it.key
-                    def metricTypes = it.value as HashSet<MetricType>
-                    publishLatestMetrics(applicationArtifact, timeFrame, metricTypes.asList())
-                }
-            }
+        vertx.eventBus().consumer(PUBLISH_ARTIFACT_METRICS, {
+            def subscription = it.body() as ArtifactMetricSubscribeRequest
+            def appArtifact = ApplicationArtifact.builder()
+                    .appUuid(subscription.appUuid())
+                    .artifactQualifiedName(subscription.artifactQualifiedName()).build()
+            publishLatestMetrics(appArtifact, subscription.timeFrame(), subscription.metricTypes())
         })
 
         vertx.eventBus().consumer(SUBSCRIBE_TO_ARTIFACT_METRICS, { request ->

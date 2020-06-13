@@ -5,8 +5,6 @@ import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
 import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
 import com.sourceplusplus.core.SourceCore
-import com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker
-import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.CompositeFuture
@@ -20,6 +18,9 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
+import static com.sourceplusplus.core.api.metric.track.MetricSubscriptionTracker.*
+import static com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker.*
+
 /**
  * Keeps track of artifact subscriptions.
  *
@@ -32,7 +33,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
-    public static final String UPDATE_ARTIFACT_SUBSCRIPTIONS = "UpdateArtifactSubscriptions"
     public static final String GET_ARTIFACT_SUBSCRIPTIONS = "GetArtifactSubscriptions"
     public static final String GET_APPLICATION_SUBSCRIPTIONS = "GetApplicationSubscriptions"
     public static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "RefreshSubscriberApplicationSubscriptions"
@@ -52,7 +52,19 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
             })
         }
         vertx.setPeriodic(TimeUnit.SECONDS.toMillis(5), {
-            vertx.eventBus().publish(UPDATE_ARTIFACT_SUBSCRIPTIONS, true)
+            core.storage.getSubscriberArtifactSubscriptions({
+                if (it.succeeded()) {
+                    it.result().keySet().each {
+                        if (it.type == SourceArtifactSubscriptionType.METRICS) {
+                            vertx.eventBus().publish(PUBLISH_ARTIFACT_METRICS, it)
+                        } else {
+                            vertx.eventBus().publish(PUBLISH_ARTIFACT_TRACES, it)
+                        }
+                    }
+                } else {
+                    log.error("Failed to get subscriber artifact subscriptions", it.cause())
+                }
+            })
         })
         vertx.eventBus().consumer(SUBSCRIBE_TO_ARTIFACT, {
             subscribeToArtifact(it as Message<ArtifactSubscribeRequest>)
@@ -185,12 +197,12 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
         switch (subRequest.type) {
             case SourceArtifactSubscriptionType.METRICS:
-                vertx.eventBus().request(MetricSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT_METRICS, subRequest, {
+                vertx.eventBus().request(SUBSCRIBE_TO_ARTIFACT_METRICS, subRequest, {
                     request.reply(it.result().body())
                 })
                 break
             case SourceArtifactSubscriptionType.TRACES:
-                vertx.eventBus().request(TraceSubscriptionTracker.SUBSCRIBE_TO_ARTIFACT_TRACES, subRequest, {
+                vertx.eventBus().request(SUBSCRIBE_TO_ARTIFACT_TRACES, subRequest, {
                     request.reply(it.result().body())
                 })
                 break
@@ -205,7 +217,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
         log.info("Accepted artifact unsubscription: " + unsubRequest)
 
         if (unsubRequest instanceof ArtifactMetricUnsubscribeRequest) {
-            vertx.eventBus().request(MetricSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT_METRICS, unsubRequest, {
+            vertx.eventBus().request(UNSUBSCRIBE_FROM_ARTIFACT_METRICS, unsubRequest, {
                 if (it.succeeded()) {
                     request.reply(true)
                 } else {
@@ -214,7 +226,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                 }
             })
         } else if (unsubRequest instanceof ArtifactTraceUnsubscribeRequest) {
-            vertx.eventBus().request(TraceSubscriptionTracker.UNSUBSCRIBE_FROM_ARTIFACT_TRACES, unsubRequest, {
+            vertx.eventBus().request(UNSUBSCRIBE_FROM_ARTIFACT_TRACES, unsubRequest, {
                 if (it.succeeded()) {
                     request.reply(true)
                 } else {

@@ -24,6 +24,7 @@ import static com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionTy
 @Slf4j
 class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
 
+    public static final String PUBLISH_ARTIFACT_TRACES = "PublishArtifactTraces"
     public static final String SUBSCRIBE_TO_ARTIFACT_TRACES = "SubscribeToArtifactTraces"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT_TRACES = "UnsubscribeFromArtifactTraces"
 
@@ -33,24 +34,22 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
 
     @Override
     void start() throws Exception {
-        vertx.eventBus().consumer(UPDATE_ARTIFACT_SUBSCRIPTIONS, {
-            //todo: get trace subscriptions by artifact
-            traceSubscriptions.each {
-                def applicationArtifact = it.key
-                def artifactTraceTimeFrames = it.value
-
-                artifactTraceTimeFrames.each {
-                    switch (it) {
-                        case TraceOrderType.LATEST_TRACES:
-                            publishLatestTraces(applicationArtifact)
-                            break
-                        case TraceOrderType.SLOWEST_TRACES:
-                            publishSlowestTraces(applicationArtifact)
-                            break
-                        case TraceOrderType.FAILED_TRACES:
-                            publishFailedTraces(applicationArtifact)
-                            break
-                    }
+        vertx.eventBus().consumer(PUBLISH_ARTIFACT_TRACES, {
+            def subscription = it.body() as ArtifactTraceSubscribeRequest
+            def appArtifact = ApplicationArtifact.builder()
+                    .appUuid(subscription.appUuid())
+                    .artifactQualifiedName(subscription.artifactQualifiedName()).build()
+            subscription.orderTypes().each {
+                switch (it) { //todo: add time frame to publish params
+                    case TraceOrderType.LATEST_TRACES:
+                        publishLatestTraces(appArtifact)
+                        break
+                    case TraceOrderType.SLOWEST_TRACES:
+                        publishSlowestTraces(appArtifact)
+                        break
+                    case TraceOrderType.FAILED_TRACES:
+                        publishFailedTraces(appArtifact)
+                        break
                 }
             }
         })
@@ -204,22 +203,18 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
         core.traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
-                if (traceQueryResult.traces().isEmpty()) {
-                    log.debug("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
-                } else {
-                    def traceResult = ArtifactTraceResult.builder()
-                            .appUuid(appArtifact.appUuid())
-                            .artifactQualifiedName(appArtifact.artifactQualifiedName())
-                            .orderType(traceQuery.orderType())
-                            .start(traceQuery.durationStart())
-                            .stop(traceQuery.durationStop())
-                            .step(traceQuery.durationStep())
-                            .traces(traceQueryResult.traces())
-                            .total(traceQueryResult.total())
-                            .build()
-                    vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, traceResult)
-                    log.debug("Published latest traces for artifact: " + traceResult.artifactQualifiedName())
-                }
+                def traceResult = ArtifactTraceResult.builder()
+                        .appUuid(appArtifact.appUuid())
+                        .artifactQualifiedName(appArtifact.artifactQualifiedName())
+                        .orderType(traceQuery.orderType())
+                        .start(traceQuery.durationStart())
+                        .stop(traceQuery.durationStop())
+                        .step(traceQuery.durationStep())
+                        .traces(traceQueryResult.traces())
+                        .total(traceQueryResult.total())
+                        .build()
+                vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, traceResult)
+                log.debug("Published latest traces for artifact: " + traceResult.artifactQualifiedName())
             } else {
                 it.cause().printStackTrace()
             }

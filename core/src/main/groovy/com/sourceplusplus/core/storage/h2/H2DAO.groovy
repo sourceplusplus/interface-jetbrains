@@ -752,14 +752,8 @@ class H2DAO extends SourceStorage {
                 def subscriptions = new HashMap<ArtifactSubscribeRequest, Instant>()
                 def results = it.result().results
                 results.each {
-                    def type = SourceArtifactSubscriptionType.valueOf(it.getString(0))
-                    if (type == SourceArtifactSubscriptionType.TRACES) {
-                        def subRequest = Json.decodeValue(it.getString(1), ArtifactTraceSubscribeRequest.class)
-                        subscriptions.put(subRequest, it.getInstant(2))
-                    } else if (type == SourceArtifactSubscriptionType.METRICS) {
-                        def subRequest = Json.decodeValue(it.getString(1), ArtifactMetricSubscribeRequest.class)
-                        subscriptions.put(subRequest, it.getInstant(2))
-                    }
+                    def subRequest = Json.decodeValue(it.getString(0), ArtifactSubscribeRequest.class)
+                    subscriptions.put(subRequest, it.getInstant(1))
                 }
                 handler.handle(Future.succeededFuture(subscriptions))
             } else {

@@ -121,10 +121,14 @@ public class SourceCoreClient implements SourceClient {
     }
 
     public void attachBridge(Vertx vertx) {
-        SourceBridgeClient bridgeClient = new SourceBridgeClient(vertx,
+        attachBridge(vertx,
                 SourcePluginConfig.current.activeEnvironment.apiHost,
                 SourcePluginConfig.current.activeEnvironment.apiPort,
                 SourcePluginConfig.current.activeEnvironment.apiSslEnabled);
+    }
+
+    public void attachBridge(Vertx vertx, String apiHost, int apiPort, boolean apiSslEnabled) {
+        SourceBridgeClient bridgeClient = new SourceBridgeClient(vertx, apiHost, apiPort, apiSslEnabled);
         bridgeClient.setupSubscriptions();
     }
 
