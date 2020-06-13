@@ -32,12 +32,6 @@ public interface ArtifactSubscribeRequest extends SourceMessage {
     @Nullable
     String artifactQualifiedName();
 
-    @Deprecated
-    @Value.Default
-    default String getSubscriberClientId() {
-        return SourceClient.CLIENT_ID;
-    }
-
     @Value.Default
     default String subscriberUuid() {
         return SourceClient.CLIENT_ID;
