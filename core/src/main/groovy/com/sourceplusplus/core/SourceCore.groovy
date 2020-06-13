@@ -10,7 +10,7 @@ import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
 import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
-import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
+//import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
 import com.sourceplusplus.core.storage.h2.H2DAO
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
@@ -60,7 +60,7 @@ class SourceCore extends AbstractVerticle {
         switch (storageConfig.getString("type")) {
             case "elasticsearch":
                 log.info("Using storage: Elasticsearch")
-                storage = new ElasticsearchDAO(vertx.eventBus(), storageConfig.getJsonObject("elasticsearch"), storageCompleter)
+                //storage = new ElasticsearchDAO(vertx.eventBus(), storageConfig.getJsonObject("elasticsearch"), storageCompleter)
                 break
             case "h2":
                 log.info("Using storage: H2")

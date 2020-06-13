@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
-import com.sourceplusplus.api.client.SourceClient;
 import com.sourceplusplus.api.model.QueryTimeFrame;
-import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
+import com.sourceplusplus.api.model.artifact.ArtifactUnsubscribeRequest;
+import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType;
 import org.immutables.value.Value;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -25,18 +24,7 @@ import java.util.List;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonSerialize(as = ArtifactTraceUnsubscribeRequest.class)
 @JsonDeserialize(as = ArtifactTraceUnsubscribeRequest.class)
-public interface AbstractArtifactTraceUnsubscribeRequest extends SourceMessage {
-
-    @Nullable
-    String appUuid();
-
-    @Nullable
-    String artifactQualifiedName();
-
-    @Value.Default
-    default String getSubscriberClientId() {
-        return SourceClient.CLIENT_ID;
-    }
+public interface AbstractArtifactTraceUnsubscribeRequest extends ArtifactUnsubscribeRequest {
 
     List<QueryTimeFrame> removeTimeFrames();
 
@@ -45,6 +33,12 @@ public interface AbstractArtifactTraceUnsubscribeRequest extends SourceMessage {
     @Value.Default
     default boolean removeAllArtifactTraceSubscriptions() {
         return false;
+    }
+
+    @Override
+    @Value.Default
+    default SourceArtifactSubscriptionType getType() {
+        return SourceArtifactSubscriptionType.TRACES;
     }
 
     @Value.Check

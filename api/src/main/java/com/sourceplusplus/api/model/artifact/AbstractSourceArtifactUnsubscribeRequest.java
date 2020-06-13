@@ -3,12 +3,8 @@ package com.sourceplusplus.api.model.artifact;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.sourceplusplus.api.client.SourceClient;
-import com.sourceplusplus.api.model.SourceMessage;
 import com.sourceplusplus.api.model.SourceStyle;
 import org.immutables.value.Value;
-
-import javax.annotation.Nullable;
 
 /**
  * Used to unsubscribe from artifact metrics/traces.
@@ -22,18 +18,7 @@ import javax.annotation.Nullable;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonSerialize(as = SourceArtifactUnsubscribeRequest.class)
 @JsonDeserialize(as = SourceArtifactUnsubscribeRequest.class)
-public interface AbstractSourceArtifactUnsubscribeRequest extends SourceMessage {
-
-    @Nullable
-    String appUuid();
-
-    @Nullable
-    String artifactQualifiedName();
-
-    @Value.Default
-    default String getSubscriberClientId() {
-        return SourceClient.CLIENT_ID;
-    }
+public interface AbstractSourceArtifactUnsubscribeRequest extends ArtifactUnsubscribeRequest {
 
     boolean removeAllArtifactSubscriptions();
 }

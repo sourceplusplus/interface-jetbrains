@@ -10,7 +10,6 @@ import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTra
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.JacksonCodec
 import io.vertx.ext.web.RoutingContext
 import net.jodah.expiringmap.ExpirationPolicy
@@ -96,11 +95,11 @@ class ArtifactAPI extends AbstractVerticle {
     }
 
     void getSourceArtifactSubscriptions(ApplicationArtifact applicationArtifact,
-                                        Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+                                        Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
         vertx.eventBus().request(ArtifactSubscriptionTracker.GET_ARTIFACT_SUBSCRIPTIONS, applicationArtifact, {
             if (it.succeeded()) {
                 def subscribers = JacksonCodec.decodeValue(it.result().body() as String,
-                        new TypeReference<List<SourceArtifactSubscription>>() {})
+                        new TypeReference<List<ArtifactSubscribeRequest>>() {})
                 handler.handle(Future.succeededFuture(subscribers))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))

@@ -1,7 +1,7 @@
 package com.sourceplusplus.core.api.trace.track
 
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.application.SourceApplication
-import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceOrderType
@@ -52,6 +52,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
             })
 
             def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
                     .addOrderTypes(TraceOrderType.LATEST_TRACES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
@@ -64,7 +65,6 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
             })
         }).test("verify_subscribed_to_artifact_traces", { test ->
             def async = test.async()
-            coreClient.refreshStorage()
             coreClient.getSubscriberApplicationSubscriptions(application.appUuid(), {
                 if (it.failed()) {
                     test.fail(it.cause())
@@ -72,9 +72,13 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
 
                 def subscriptions = it.result()
                 test.assertEquals(1, subscriptions.size())
-                test.assertEquals("com.company.TestClass.testMethod()", subscriptions.get(0).artifactQualifiedName())
-                test.assertEquals(1, subscriptions.get(0).subscriptionLastAccessed().size())
-                test.assertEquals(SourceArtifactSubscriptionType.TRACES, subscriptions.get(0).subscriptionLastAccessed().keySet()[0])
+                test.assertEquals(ArtifactTraceSubscribeRequest.class, subscriptions.get(0).class)
+
+                def subscription = subscriptions.get(0) as ArtifactTraceSubscribeRequest
+                test.assertEquals("com.company.TestClass.testMethod()", subscription.artifactQualifiedName())
+                test.assertEquals(QueryTimeFrame.LAST_15_MINUTES, subscription.timeFrame())
+                test.assertEquals(1, subscription.orderTypes().size())
+                test.assertTrue(subscription.orderTypes().contains(TraceOrderType.LATEST_TRACES))
                 async.countDown()
             })
         }).run().awaitSuccess()
@@ -91,6 +95,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
             })
 
             def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
                     .addOrderTypes(TraceOrderType.LATEST_TRACES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
@@ -108,14 +113,12 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
                     .addRemoveOrderTypes(TraceOrderType.LATEST_TRACES)
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
 
-            coreClient.refreshStorage()
             coreClient.unsubscribeFromArtifactTraces(unsubTraceRequest, {
                 if (it.failed()) {
                     test.fail(it.cause())
                 }
                 test.assertTrue(it.result())
 
-                coreClient.refreshStorage()
                 coreClient.getApplicationSubscriptions(application.appUuid(), true, {
                     if (it.failed()) {
                         test.fail(it.cause())

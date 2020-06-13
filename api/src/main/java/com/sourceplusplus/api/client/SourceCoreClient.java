@@ -411,7 +411,7 @@ public class SourceCoreClient implements SourceClient {
     }
 
     public void getSubscriberApplicationSubscriptions(String appUuid,
-                                                      Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+                                                      Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
         String url = sppUrl + GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":subscriberUuid", CLIENT_ID);
@@ -421,7 +421,7 @@ public class SourceCoreClient implements SourceClient {
         try (Response response = client.newCall(request.build()).execute()) {
             if (response.isSuccessful()) {
                 handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(response.body().string(),
-                        new TypeReference<List<SourceArtifactSubscription>>() {
+                        new TypeReference<List<ArtifactSubscribeRequest>>() {
                         })));
             } else {
                 handler.handle(Future.failedFuture(response.message()));

@@ -35,8 +35,9 @@ CREATE TABLE IF NOT EXISTS source_artifact_subscription
     app_uuid                VARCHAR   NOT NULL,
     artifact_qualified_name VARCHAR   NOT NULL,
     subscription_type       VARCHAR   NOT NULL,
+    subscription_data       VARCHAR   NOT NULL UNIQUE,
     last_accessed           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (subscriber_uuid, app_uuid, artifact_qualified_name, subscription_type)
+    PRIMARY KEY (subscriber_uuid, app_uuid, artifact_qualified_name, subscription_type, subscription_data)
 );
 
 CREATE TABLE IF NOT EXISTS source_artifact_failure

@@ -6,6 +6,8 @@ import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
 import com.sourceplusplus.api.model.artifact.*
 import com.sourceplusplus.api.model.config.SourceAgentConfig
+import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
+import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.Trace
 import com.sourceplusplus.api.model.trace.TraceQuery
 import com.sourceplusplus.api.model.trace.TraceSpan
@@ -70,18 +72,22 @@ class H2DAO extends SourceStorage {
             "storage/h2/queries/get_application_artifacts.sql"), Charsets.UTF_8)
     private static final String GET_ARTIFACT_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_subscriptions.sql"), Charsets.UTF_8)
+    private static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
+            "storage/h2/queries/get_subscriber_application_subscriptions.sql"), Charsets.UTF_8)
     private static final String GET_SUBSCRIBER_ARTIFACT_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_subscriber_artifact_subscriptions.sql"), Charsets.UTF_8)
     private static final String GET_ALL_ARTIFACT_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_all_artifact_subscriptions.sql"), Charsets.UTF_8)
+    private static final String CREATE_ARTIFACT_SUBSCRIPTION = Resources.toString(RESOURCE_LOADER.getResource(
+            "storage/h2/queries/create_artifact_subscription.sql"), Charsets.UTF_8)
     private static final String UPDATE_ARTIFACT_SUBSCRIPTION = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/update_artifact_subscription.sql"), Charsets.UTF_8)
-    private static final String GET_SUBSCRIBER_ARTIFACT_SUBSCRIPTION = Resources.toString(RESOURCE_LOADER.getResource(
-            "storage/h2/queries/get_subscriber_artifact_subscription.sql"), Charsets.UTF_8)
     private static final String GET_APPLICATION_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_application_subscriptions.sql"), Charsets.UTF_8)
     private static final String DELETE_ARTIFACT_SUBSCRIPTION = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/delete_artifact_subscription.sql"), Charsets.UTF_8)
+    private static final String DELETE_SUBSCRIBER_ARTIFACT_SUBSCRIPTIONS = Resources.toString(RESOURCE_LOADER.getResource(
+            "storage/h2/queries/delete_subscriber_artifact_subscriptions.sql"), Charsets.UTF_8)
     private static final String ADD_ARTIFACT_FAILURE = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/add_artifact_failure.sql"), Charsets.UTF_8)
     private static final String GET_ARTIFACT_FAILURES = Resources.toString(RESOURCE_LOADER.getResource(
@@ -674,25 +680,17 @@ class H2DAO extends SourceStorage {
      */
     @Override
     void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,
-                                  Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+                                  Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
         def params = new JsonArray()
         params.add(appUuid)
         params.add(artifactQualifiedName)
         client.queryWithParams(GET_ARTIFACT_SUBSCRIPTIONS, params, {
             if (it.succeeded()) {
-                def subscriptions = new HashMap<String, SourceArtifactSubscription.Builder>()
-                def results = it.result().results
-                results.each {
-                    def key = it.getString(0) + "-" + it.getString(1) + "-" + it.getString(2)
-                    def subscription = SourceArtifactSubscription.builder()
-                            .subscriberUuid(it.getString(0))
-                            .appUuid(it.getString(1))
-                            .artifactQualifiedName(it.getString(2))
-                    subscriptions.putIfAbsent(key, subscription)
-                    subscriptions.get(key).putSubscriptionLastAccessed(SourceArtifactSubscriptionType.valueOf(
-                            it.getString(3)), it.getInstant(4))
+                def rtnList = new ArrayList<ArtifactSubscribeRequest>()
+                it.result().results.each {
+                    rtnList << Json.decodeValue(it.getString(0), ArtifactSubscribeRequest.class)
                 }
-                handler.handle(Future.succeededFuture(subscriptions.values().collect { it.build() }))
+                handler.handle(Future.succeededFuture(rtnList))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -703,26 +701,19 @@ class H2DAO extends SourceStorage {
      * {@inheritDoc}
      */
     @Override
-    void getSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid,
-                                            Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+    void getSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid, String artifactQualifiedName,
+                                            Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
         def params = new JsonArray()
         params.add(subscriberUuid)
         params.add(appUuid)
+        params.add(artifactQualifiedName)
         client.queryWithParams(GET_SUBSCRIBER_ARTIFACT_SUBSCRIPTIONS, params, {
             if (it.succeeded()) {
-                def subscriptions = new HashMap<String, SourceArtifactSubscription.Builder>()
-                def results = it.result().results
-                results.each {
-                    def key = it.getString(0) + "-" + it.getString(1) + "-" + it.getString(2)
-                    def subscription = SourceArtifactSubscription.builder()
-                            .subscriberUuid(it.getString(0))
-                            .appUuid(it.getString(1))
-                            .artifactQualifiedName(it.getString(2))
-                    subscriptions.putIfAbsent(key, subscription)
-                    subscriptions.get(key).putSubscriptionLastAccessed(SourceArtifactSubscriptionType.valueOf(
-                            it.getString(3)), it.getInstant(4))
+                def rtnList = new ArrayList<ArtifactSubscribeRequest>()
+                it.result().results.each {
+                    rtnList << Json.decodeValue(it.getString(0), ArtifactSubscribeRequest.class)
                 }
-                handler.handle(Future.succeededFuture(subscriptions.values().collect { it.build() }))
+                handler.handle(Future.succeededFuture(rtnList))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -733,22 +724,44 @@ class H2DAO extends SourceStorage {
      * {@inheritDoc}
      */
     @Override
-    void getArtifactSubscriptions(Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+    void getSubscriberApplicationSubscriptions(String subscriberUuid, String appUuid,
+                                            Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
+        def params = new JsonArray()
+        params.add(subscriberUuid)
+        params.add(appUuid)
+        client.queryWithParams(GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS, params, {
+            if (it.succeeded()) {
+                def rtnList = new ArrayList<ArtifactSubscribeRequest>()
+                it.result().results.each {
+                    rtnList << Json.decodeValue(it.getString(0), ArtifactSubscribeRequest.class)
+                }
+                handler.handle(Future.succeededFuture(rtnList))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getSubscriberArtifactSubscriptions(Handler<AsyncResult<Map<ArtifactSubscribeRequest, Instant>>> handler) {
         client.query(GET_ALL_ARTIFACT_SUBSCRIPTIONS, {
             if (it.succeeded()) {
-                def subscriptions = new HashMap<String, SourceArtifactSubscription.Builder>()
+                def subscriptions = new HashMap<ArtifactSubscribeRequest, Instant>()
                 def results = it.result().results
                 results.each {
-                    def key = it.getString(0) + "-" + it.getString(1) + "-" + it.getString(2)
-                    def subscription = SourceArtifactSubscription.builder()
-                            .subscriberUuid(it.getString(0))
-                            .appUuid(it.getString(1))
-                            .artifactQualifiedName(it.getString(2))
-                    subscriptions.putIfAbsent(key, subscription)
-                    subscriptions.get(key).putSubscriptionLastAccessed(SourceArtifactSubscriptionType.valueOf(
-                            it.getString(3)), it.getInstant(4))
+                    def type = SourceArtifactSubscriptionType.valueOf(it.getString(0))
+                    if (type == SourceArtifactSubscriptionType.TRACES) {
+                        def subRequest = Json.decodeValue(it.getString(1), ArtifactTraceSubscribeRequest.class)
+                        subscriptions.put(subRequest, it.getInstant(2))
+                    } else if (type == SourceArtifactSubscriptionType.METRICS) {
+                        def subRequest = Json.decodeValue(it.getString(1), ArtifactMetricSubscribeRequest.class)
+                        subscriptions.put(subRequest, it.getInstant(2))
+                    }
                 }
-                handler.handle(Future.succeededFuture(subscriptions.values().collect { it.build() }))
+                handler.handle(Future.succeededFuture(subscriptions))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -759,41 +772,48 @@ class H2DAO extends SourceStorage {
      * {@inheritDoc}
      */
     @Override
-    void updateArtifactSubscription(SourceArtifactSubscription subscription,
-                                    Handler<AsyncResult<SourceArtifactSubscription>> handler) {
-        def futures = []
-        subscription.subscriptionLastAccessed().each {
-            def future = Promise.promise()
-            futures.add(future)
-
-            def params = new JsonArray()
-            params.add(subscription.subscriberUuid())
-            params.add(subscription.appUuid())
-            params.add(subscription.artifactQualifiedName())
-            params.add(it.key.toString())
-            params.add(it.value)
-            client.updateWithParams(UPDATE_ARTIFACT_SUBSCRIPTION, params, future)
-        }
-        CompositeFuture.all(futures).onComplete({
-            if (it.succeeded()) {
-                getArtifactSubscription(subscription.subscriberUuid(), subscription.appUuid(),
-                        subscription.artifactQualifiedName(), handler)
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void deleteArtifactSubscription(SourceArtifactSubscription subscription,
-                                    Handler<AsyncResult<Void>> handler) {
+    void createArtifactSubscription(ArtifactSubscribeRequest subscription,
+                                    Handler<AsyncResult<ArtifactSubscribeRequest>> handler) {
         def params = new JsonArray()
         params.add(subscription.subscriberUuid())
         params.add(subscription.appUuid())
         params.add(subscription.artifactQualifiedName())
+        params.add(subscription.type)
+        params.add(Json.encode(subscription))
+        client.updateWithParams(CREATE_ARTIFACT_SUBSCRIPTION, params, {
+            if (it.succeeded()) {
+                handler.handle(Future.succeededFuture(subscription))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void updateArtifactSubscription(ArtifactSubscribeRequest oldSubscription, ArtifactSubscribeRequest newSubscription,
+                                    Handler<AsyncResult<ArtifactSubscribeRequest>> handler) {
+        def params = new JsonArray()
+        params.add(Json.encode(newSubscription))
+        params.add(Json.encode(oldSubscription))
+        client.updateWithParams(UPDATE_ARTIFACT_SUBSCRIPTION, params, {
+            if (it.succeeded()) {
+                handler.handle(Future.succeededFuture(newSubscription))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void deleteArtifactSubscription(ArtifactSubscribeRequest subscription, Handler<AsyncResult<Void>> handler) {
+        def params = new JsonArray()
+        params.add(Json.encode(subscription))
         client.updateWithParams(DELETE_ARTIFACT_SUBSCRIPTION, params, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture())
@@ -807,11 +827,17 @@ class H2DAO extends SourceStorage {
      * {@inheritDoc}
      */
     @Override
-    void setArtifactSubscription(SourceArtifactSubscription subscription,
-                                 Handler<AsyncResult<SourceArtifactSubscription>> handler) {
-        deleteArtifactSubscription(subscription, {
+    void deleteSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid, String artifactQualifiedName,
+                                               SourceArtifactSubscriptionType type,
+                                               Handler<AsyncResult<Void>> handler) {
+        def params = new JsonArray()
+        params.add(subscriberUuid)
+        params.add(appUuid)
+        params.add(artifactQualifiedName)
+        params.add(type)
+        client.updateWithParams(DELETE_SUBSCRIBER_ARTIFACT_SUBSCRIPTIONS, params, {
             if (it.succeeded()) {
-                updateArtifactSubscription(subscription, handler)
+                handler.handle(Future.succeededFuture())
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -822,34 +848,11 @@ class H2DAO extends SourceStorage {
      * {@inheritDoc}
      */
     @Override
-    void getArtifactSubscription(String subscriberUuid, String appUuid,
-                                 String artifactQualifiedName,
-                                 Handler<AsyncResult<Optional<SourceArtifactSubscription>>> handler) {
-        def params = new JsonArray()
-        params.add(subscriberUuid)
-        params.add(appUuid)
-        params.add(artifactQualifiedName)
-        client.queryWithParams(GET_SUBSCRIBER_ARTIFACT_SUBSCRIPTION, params, {
+    void setArtifactSubscription(ArtifactSubscribeRequest subscription,
+                                 Handler<AsyncResult<ArtifactSubscribeRequest>> handler) {
+        deleteArtifactSubscription(subscription, {
             if (it.succeeded()) {
-                def subscriptions = new HashMap<String, SourceArtifactSubscription.Builder>()
-                def results = it.result().results
-                results.each {
-                    def key = it.getString(0) + "-" + it.getString(1) + "-" + it.getString(2)
-                    def subscription = SourceArtifactSubscription.builder()
-                            .subscriberUuid(it.getString(0))
-                            .appUuid(it.getString(1))
-                            .artifactQualifiedName(it.getString(2))
-                    subscriptions.putIfAbsent(key, subscription)
-                    subscriptions.get(key).putSubscriptionLastAccessed(SourceArtifactSubscriptionType.valueOf(
-                            it.getString(3)), it.getInstant(4))
-                }
-
-                def value = subscriptions.values().collect { it.build() }
-                if (value) {
-                    handler.handle(Future.succeededFuture(Optional.of(value.get(0))))
-                } else {
-                    handler.handle(Future.succeededFuture(Optional.empty()))
-                }
+                updateArtifactSubscription(subscription, handler)
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }
@@ -870,12 +873,7 @@ class H2DAO extends SourceStorage {
                 def subscriptionCounts = new HashMap<String, Set<String>>()
                 def applicationSubscriptions = new HashMap<String, SourceApplicationSubscription.Builder>()
                 results.each {
-                    def subscription = SourceArtifactSubscription.builder()
-                            .subscriberUuid(it.getString(0))
-                            .appUuid(it.getString(1))
-                            .artifactQualifiedName(it.getString(2))
-                            .putSubscriptionLastAccessed(SourceArtifactSubscriptionType.valueOf(it.getString(3)), it.getInstant(4))
-                            .build()
+                    def subscription = Json.decodeValue(it.getString(0), ArtifactSubscribeRequest.class)
                     subscriptionCounts.putIfAbsent(subscription.artifactQualifiedName(), new HashSet<>())
                     applicationSubscriptions.putIfAbsent(subscription.artifactQualifiedName(),
                             SourceApplicationSubscription.builder().artifactQualifiedName(subscription.artifactQualifiedName()))
@@ -883,7 +881,7 @@ class H2DAO extends SourceStorage {
                     def subscribers = subscriptionCounts.get(subscription.artifactQualifiedName())
                     subscribers.add(subscription.subscriberUuid())
                     appSubscription.subscribers(subscribers.size())
-                    appSubscription.addAllTypes(subscription.subscriptionLastAccessed().keySet())
+                    appSubscription.addTypes(subscription.type)
                 }
                 handler.handle(Future.succeededFuture(applicationSubscriptions.values().collect { it.build() }))
             } else {
