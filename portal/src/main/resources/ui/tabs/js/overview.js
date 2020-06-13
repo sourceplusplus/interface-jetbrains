@@ -12,7 +12,7 @@ $('#sidebar_traces_link_failed').attr('href', "traces.html" + mainGetQuery + '&o
 $('#configuration_link').attr('href', "configuration.html" + mainGetQuery);
 $('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuery);
 
-var series0 = {
+let series0 = {
     name: '99th percentile',
     type: 'line',
     color: "#e1483b",
@@ -23,7 +23,7 @@ var series0 = {
     areaStyle: {},
     data: []
 };
-var series1 = {
+let series1 = {
     name: '95th percentile',
     type: 'line',
     color: "#e1483b",
@@ -32,7 +32,7 @@ var series1 = {
     areaStyle: {},
     data: []
 };
-var series2 = {
+let series2 = {
     name: '90th percentile',
     type: 'line',
     color: "#e1483b",
@@ -41,7 +41,7 @@ var series2 = {
     areaStyle: {},
     data: []
 };
-var series3 = {
+let series3 = {
     name: '75th percentile',
     type: 'line',
     color: "#e1483b",
@@ -50,7 +50,7 @@ var series3 = {
     areaStyle: {},
     data: []
 };
-var series4 = {
+let series4 = {
     name: '50th percentile',
     type: 'line',
     color: "#e1483b",
@@ -60,7 +60,7 @@ var series4 = {
     data: []
 };
 
-var overviewChart = echarts.init(document.getElementById('overview_chart'));
+let overviewChart = echarts.init(document.getElementById('overview_chart'));
 window.onresize = function () {
     console.log("Resizing overview chart");
     overviewChart.resize();
@@ -122,9 +122,9 @@ eb.onopen = function () {
     }
     clickedViewAverageResponseTimeChart(); //default = avg resp time
 
-    var clearOverviewHandler = portalUuid + '-ClearOverview';
-    var displayCardHandler = portalUuid + '-DisplayCard';
-    var updateChartHandler = portalUuid + '-UpdateChart';
+    let clearOverviewHandler = portalUuid + '-ClearOverview';
+    let displayCardHandler = portalUuid + '-DisplayCard';
+    let updateChartHandler = portalUuid + '-UpdateChart';
     eb.registerHandler(clearOverviewHandler, function (error, message) {
         console.log("Clearing overview");
         overviewChart.setOption({
@@ -132,10 +132,9 @@ eb.onopen = function () {
         })
     });
     eb.registerHandler(displayCardHandler, function (error, message) {
-        //eb.send('PortalLogger', 'Displaying card: ' + JSON.stringify(message));
         console.log('Displaying card');
-        var card = message.body;
-        if (card.time_frame != currentTimeFrame) {
+        let card = message.body;
+        if (card.time_frame !== currentTimeFrame) {
             console.log("Ignoring card for time frame: " + card.time_frame
                 + " - Current time frame: " + currentTimeFrame);
             return
@@ -144,33 +143,32 @@ eb.onopen = function () {
         document.getElementById('card_' + card.meta.toLowerCase() + '_header').textContent = card.header;
     });
     eb.registerHandler(updateChartHandler, function (error, message) {
-        //eb.send('PortalLogger', 'Updating chart: ' + JSON.stringify(message));
         console.log('Updating chart');
-        var chartData = message.body;
-        if (chartData.time_frame != currentTimeFrame) {
+        let chartData = message.body;
+        if (chartData.time_frame !== currentTimeFrame) {
             return
         }
-        var cards = ["throughput_average", "responsetime_average", "servicelevelagreement_average"];
-        for (var i = 0; i < cards.length; i++) {
+        let cards = ["throughput_average", "responsetime_average", "servicelevelagreement_average"];
+        for (let i = 0; i < cards.length; i++) {
             $('#card_' + cards[i] + '_header').removeClass('spp_red_color');
             $('#card_' + cards[i] + '_header_label').removeClass('spp_red_color');
         }
         $('#card_' + chartData.metric_type.toLowerCase() + '_header').addClass('spp_red_color');
         $('#card_' + chartData.metric_type.toLowerCase() + '_header_label').addClass('spp_red_color');
-        if (chartData.metric_type.toLowerCase() == cards[0]) {
+        if (chartData.metric_type.toLowerCase() === cards[0]) {
             tooltipMeasurement = "/min";
-        } else if (chartData.metric_type.toLowerCase() == cards[1]) {
+        } else if (chartData.metric_type.toLowerCase() === cards[1]) {
             tooltipMeasurement = "ms";
-        } else if (chartData.metric_type.toLowerCase() == cards[2]) {
+        } else if (chartData.metric_type.toLowerCase() === cards[2]) {
             tooltipMeasurement = "%";
         }
 
-        for (var i = 0; i < chartData.series_data.length; i++) {
-            var seriesData = chartData.series_data[i];
-            var list = [];
-            for (var z = 0; z < seriesData.values.length; z++) {
-                var value = seriesData.values[z];
-                var time = moment.unix(seriesData.times[z]).valueOf();
+        for (let i = 0; i < chartData.series_data.length; i++) {
+            let seriesData = chartData.series_data[i];
+            let list = [];
+            for (let z = 0; z < seriesData.values.length; z++) {
+                let value = seriesData.values[z];
+                let time = moment.unix(seriesData.times[z]).valueOf();
 
                 list.push({
                     value: [time, value],
@@ -181,17 +179,18 @@ eb.onopen = function () {
                     }
                 });
             }
-        }
-        if (seriesData.series_index == 0) {
-            series0.data = list;
-        } else if (seriesData.series_index == 1) {
-            series1.data = list;
-        } else if (seriesData.series_index == 2) {
-            series2.data = list;
-        } else if (seriesData.series_index == 3) {
-            series3.data = list;
-        } else if (seriesData.series_index == 4) {
-            series4.data = list;
+
+            if (seriesData.series_index === 0) {
+                series0.data = list;
+            } else if (seriesData.series_index === 1) {
+                series1.data = list;
+            } else if (seriesData.series_index === 2) {
+                series2.data = list;
+            } else if (seriesData.series_index === 3) {
+                series3.data = list;
+            } else if (seriesData.series_index === 4) {
+                series4.data = list;
+            }
         }
         overviewChart.setOption({
             series: [series0, series1, series2, series3, series4]

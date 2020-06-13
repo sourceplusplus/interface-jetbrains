@@ -14,6 +14,9 @@ public enum QueryTimeFrame {
     LAST_30_MINUTES(30),
     LAST_HOUR(60),
     LAST_3_HOURS(60 * 3);
+//    LAST_6_HOURS(60 * 6),
+//    LAST_12_HOURS(60 * 12),
+//    LAST_24_HOURS(60 * 24);
 
     private final int minutes;
 

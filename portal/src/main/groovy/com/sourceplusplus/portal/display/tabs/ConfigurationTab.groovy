@@ -10,6 +10,8 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 
+import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
+
 /**
  * Used to display and configure a given source code artifact.
  *
@@ -127,8 +129,8 @@ class ConfigurationTab extends AbstractTab {
     private void cacheAndDisplayArtifactConfiguration(SourcePortal portal, SourceArtifact artifact) {
         portal.portalUI.configurationView.artifact = artifact
         if (portal.portalUI.currentTab == thisTab) {
-            vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_ARTIFACT_CONFIGURATION",
-                    new JsonObject(Json.encode(artifact)))
+            vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_ARTIFACT_CONFIGURATION", new JsonObject(Json.encode(
+                    artifact.withArtifactQualifiedName(getShortQualifiedFunctionName(artifact.artifactQualifiedName())))))
         }
     }
 }

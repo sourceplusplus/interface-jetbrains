@@ -228,7 +228,7 @@ class OverviewTab extends AbstractTab {
         } else if (artifactMetrics.metricType() == ServiceLevelAgreement_Average) {
             def barTrendCard = BarTrendCard.builder()
                     .timeFrame(metricResult.timeFrame())
-                    .header(decimalFormat.format(avg / 100.0))
+                    .header(avg == 0 ? "0%" : decimalFormat.format(avg / 100.0) + "%")
                     .meta(artifactMetrics.metricType().toString().toLowerCase())
                     .barGraphData(percents as double[])
                     .build()

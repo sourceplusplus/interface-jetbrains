@@ -8,7 +8,7 @@
     <!--Dynamically set style based on dark_mode parameter-->
     <script>
         function loadCSS(filename) {
-            var linkRef = document.createElement("link");
+            let linkRef = document.createElement("link");
             linkRef.setAttribute("rel", "stylesheet");
             linkRef.setAttribute("type", "text/css");
             linkRef.setAttribute("href", filename);
@@ -130,9 +130,15 @@
             <thead>
             <tr>
                 <th style="padding-top: 5px; padding-bottom: 5px" class="secondary_background_color">Operation</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Occurred</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Exec</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Status</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center"
+                    class="secondary_background_color">Occurred
+                </th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center"
+                    class="secondary_background_color">Exec
+                </th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center"
+                    class="secondary_background_color">Status
+                </th>
             </tr>
             </thead>
             <tbody id="trace_table">
@@ -143,9 +149,15 @@
             <thead class="secondary_background_color">
             <tr>
                 <th style="padding-top: 5px; padding-bottom: 5px" class="secondary_background_color">Operation</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Exec</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Exec (%)</th>
-                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center" class="secondary_background_color">Status</th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center"
+                    class="secondary_background_color">Exec
+                </th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center"
+                    class="secondary_background_color">Exec (%)
+                </th>
+                <th style="padding-top: 5px; padding-bottom: 5px; text-align: center"
+                    class="secondary_background_color">Status
+                </th>
             </tr>
             </thead>
             <tbody id="stack_table" class="stack_table_background">
@@ -192,34 +204,11 @@
 </div>
 <script src='../jquery-3.1.1.min.js'></script>
 <script src='../semantic.min.js'></script>
-<script>
-    $(document).ready(function () {
-        $('.ui.dropdown').dropdown();
-        $('#latest_traces_header').dropdown({on: null});
-        $('#trace_stack_header').dropdown({on: 'hover'});
-
-        $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
-    });
-    $(".openbtn").on("click", function () {
-        $(".ui.sidebar").toggleClass("very thin icon");
-        $(".asd").toggleClass("marginlefting");
-        $(".sidebar z").toggleClass("displaynone");
-        $(".ui.accordion").toggleClass("displaynone");
-        $(".ui.dropdown.item").toggleClass("displaynone");
-        $(".hide_on_toggle").toggleClass("displaynone");
-        $(".pusher").toggleClass("dimmed");
-
-        $(".logo").find('img').toggle();
-
-    });
-    $('.ui.accordion').accordion({
-        selector: {}
-    });
-</script>
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>
 <script src='../source_eventbus_bridge.js'></script>
+<script src='../portal.js'></script>
 <script src='js/traces.js'></script>
 <script src='js/views/traces_view.js'></script>
 </body>

@@ -72,3 +72,8 @@ function keepPortalAlive() {
     eb.send('KeepAlivePortal', {'portal_uuid': portalUuid});
     console.log("Sent portal keep alive request");
 }
+
+function portalLog(message) {
+    console.log(message);
+    eb.send('PortalLogger', message);
+}

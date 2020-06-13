@@ -8,7 +8,7 @@
     <!--Dynamically set style based on dark_mode parameter-->
     <script>
         function loadCSS(filename) {
-            var linkRef = document.createElement("link");
+            let linkRef = document.createElement("link");
             linkRef.setAttribute("rel", "stylesheet");
             linkRef.setAttribute("type", "text/css");
             linkRef.setAttribute("href", filename);
@@ -16,8 +16,7 @@
         }
 
         function findGetParameter(parameterName) {
-            var result = null,
-                tmp = [];
+            let result = null, tmp = [];
             location.search
                 .substr(1)
                 .split("&")
@@ -29,7 +28,7 @@
         }
 
         var getDarkMode = findGetParameter("dark_mode");
-        var darkMode = (getDarkMode) ? (getDarkMode == 'true') : false;
+        var darkMode = (getDarkMode) ? (getDarkMode === 'true') : false;
         if (darkMode) {
             loadCSS("css/dark_style.css");
         } else {
@@ -143,7 +142,7 @@
                     <tr>
                         <td>
                             <h4 class="ui header secondary_background_color">
-                                <div class="content">Endpoint(s)</div>
+                                <div class="content">Endpoint</div>
                             </h4>
                         </td>
                         <td id="artifact_endpoint" class="secondary_background_color"></td>
@@ -164,32 +163,11 @@
 </div>
 <script src='../jquery-3.1.1.min.js'></script>
 <script src='../semantic.min.js'></script>
-<script>
-    $(document).ready(function () {
-        $('.ui.dropdown').dropdown();
-        $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
-    });
-
-    $(".openbtn").on("click", function () {
-        $(".ui.sidebar").toggleClass("very thin icon");
-        $(".asd").toggleClass("marginlefting");
-        $(".sidebar z").toggleClass("displaynone");
-        $(".ui.accordion").toggleClass("displaynone");
-        $(".ui.dropdown.item").toggleClass("displaynone");
-        $(".hide_on_toggle").toggleClass("displaynone");
-        $(".pusher").toggleClass("dimmed");
-
-        $(".logo").find('img').toggle();
-
-    });
-    $('.ui.accordion').accordion({
-        selector: {}
-    });
-</script>
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>
 <script src='../source_eventbus_bridge.js'></script>
+<script src='../portal.js'></script>
 <script src='js/configuration.js'></script>
 <script src='js/views/configuration_view.js'></script>
 </body>

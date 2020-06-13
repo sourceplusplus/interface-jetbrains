@@ -9,7 +9,7 @@
     <!--Dynamically set style based on dark_mode parameter-->
     <script>
         function loadCSS(filename) {
-            var linkRef = document.createElement("link");
+            let linkRef = document.createElement("link");
             linkRef.setAttribute("rel", "stylesheet");
             linkRef.setAttribute("type", "text/css");
             linkRef.setAttribute("href", filename);
@@ -103,6 +103,15 @@
                         <div onclick="updateTime('last_3_hours')" class="item">
                             <span class="menu_tooltip_text">LAST 3 HOURS</span>
                         </div>
+                        <!--                        <div onclick="updateTime('last_6_hours')" class="item">-->
+                        <!--                            <span class="menu_tooltip_text">LAST 6 HOURS</span>-->
+                        <!--                        </div>-->
+                        <!--                        <div onclick="updateTime('last_12_hours')" class="item">-->
+                        <!--                            <span class="menu_tooltip_text">LAST 12 HOURS</span>-->
+                        <!--                        </div>-->
+                        <!--                        <div onclick="updateTime('last_24_hours')" class="item">-->
+                        <!--                            <span class="menu_tooltip_text">LAST 24 HOURS</span>-->
+                        <!--                        </div>-->
                     </div>
                 </div>
             </div>
@@ -161,32 +170,11 @@
 </div>
 <script src='../jquery-3.1.1.min.js'></script>
 <script src='../semantic.min.js'></script>
-<script>
-    $(document).ready(function () {
-        $('.ui.dropdown').dropdown();
-        $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
-    });
-
-    $(".openbtn").on("click", function () {
-        $(".ui.sidebar").toggleClass("very thin icon");
-        $(".asd").toggleClass("marginlefting");
-        $(".sidebar z").toggleClass("displaynone");
-        $(".ui.accordion").toggleClass("displaynone");
-        $(".ui.dropdown.item").toggleClass("displaynone");
-        $(".hide_on_toggle").toggleClass("displaynone");
-        $(".pusher").toggleClass("dimmed");
-
-        $(".logo").find('img').toggle();
-
-    });
-    $('.ui.accordion').accordion({
-        selector: {}
-    });
-</script>
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>
 <script src='../source_eventbus_bridge.js'></script>
+<script src='../portal.js'></script>
 <script src='js/overview.js'></script>
 </body>
 </html>

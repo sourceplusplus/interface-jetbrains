@@ -22,16 +22,12 @@ eb.onopen = function () {
         displayTraces(message.body);
     });
     eb.registerHandler(portalUuid + '-DisplayInnerTraceStack', function (error, message) {
-        displayInnerTraces(message);
+        displayInnerTraces(message.body);
     });
     eb.registerHandler(portalUuid + '-DisplayTraceStack', function (error, message) {
-        eb.send('PortalLogger', 'Displaying trace stack: ' + JSON.stringify(message));
-        console.log('Displaying trace stack: ' + JSON.stringify(message));
         displayTraceStack(message.body);
     });
     eb.registerHandler(portalUuid + '-DisplaySpanInfo', function (error, message) {
-        eb.send('PortalLogger', 'Displaying trace span info: ' + JSON.stringify(message));
-        console.log('Displaying trace span info: ' + JSON.stringify(message));
         displaySpanInfo(message.body);
     });
 
