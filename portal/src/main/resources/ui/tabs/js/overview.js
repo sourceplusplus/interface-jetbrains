@@ -187,11 +187,10 @@ eb.onopen = function () {
 
     var timeFrame = localStorage.getItem('spp.metric_time_frame');
     if (timeFrame == null) {
-        localStorage.setItem('spp.metric_time_frame', timeFrame =  currentTimeFrame);
+        localStorage.setItem('spp.metric_time_frame', timeFrame = currentTimeFrame);
     }
     updateTime(timeFrame);
-    console.log('Set initial time frame to: ' + timeFrame);
-    eb.send('PortalLogger', 'Set initial time frame to: ' + timeFrame);
+    portalLog('Set initial time frame to: ' + timeFrame);
 
     eb.publish('OverviewTabOpened', {'portal_uuid': portalUuid});
 };
