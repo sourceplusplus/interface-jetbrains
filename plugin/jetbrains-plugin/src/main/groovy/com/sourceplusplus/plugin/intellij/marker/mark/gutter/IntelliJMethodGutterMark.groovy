@@ -232,7 +232,9 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                 markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(initialTab, portalUuid)
             }
 
-            if (existingPortal.empty) {
+            if (existingPortal.present) {
+                existingPortal.get().portalUI.lateInitBrowser(markComponent.browser)
+            } else  {
                 IntelliJSourcePortal.register(appUuid, portalUuid, artifactQualifiedName, newPortal)
             }
         }

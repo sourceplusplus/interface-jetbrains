@@ -36,6 +36,11 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
         }
     }
 
+    void lateInitBrowser(JBCefBrowser browser) {
+        this.browser = Objects.requireNonNull(browser)
+        browser.JBCefClient.addLifeSpanHandler(this, browser.cefBrowser)
+    }
+
     void cloneUI(IntelliJPortalUI portalUI) {
         parentBrowser = portalUI.parentBrowser
         super.cloneUI(portalUI)

@@ -6,6 +6,14 @@
     <link rel='stylesheet' href='../semantic.min.css'>
     <script src='../jquery-3.5.1.min.js'></script>
     <script src='../portal_theme.js'></script>
+    <style>
+        tbody tr, td {
+            max-height: 44px !important;
+            height: 44px !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+    </style>
 </head>
 <body>
 <div class="ui sidebar vertical left menu overlay visible very thin icon spp_blue"
@@ -157,7 +165,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="span_log_div" class="ui segment displaynone" style="padding: 0">
+                <div id="span_log_div" class="ui segment displaynone" style="padding: 0; overflow-x: auto">
                     <table id="log_tag_table" class="ui celled striped table unstackable">
                         <thead>
                         <tr>

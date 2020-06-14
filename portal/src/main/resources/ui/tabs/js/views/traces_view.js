@@ -71,7 +71,7 @@ function displayTraces(traceResult) {
 
             var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + appUuid + '","'
                 + traceResult.artifact_qualified_name + '","' + globalTraceId +
-                '");\' style="border-top: 0 !important; padding-left: 20px; height: 47px">';
+                '");\' style="border-top: 0 !important; padding-left: 20px;">';
             rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="fas fa-plus-square"></i>';
             rowHtml += '<span style="vertical-align:top">';
             rowHtml += operationName.replace('<', '&lt;').replace('>', '&gt;');
@@ -176,8 +176,8 @@ function displayInnerTraces(innerTraceStack) {
     for (let i = 0; i < traceStack.length; i++) {
         let spanInfo = traceStack[i];
         let span = spanInfo.span;
-        var rowHtml = '<tr style="border-top: 0 !important; height: 47px"><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
-            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px">';
+        var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
+            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
         if (span.has_child_stack) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
@@ -325,8 +325,8 @@ function displayTraceStack(traceStack) {
     for (let i = 0; i < traceStack.length; i++) {
         let spanInfo = traceStack[i];
         let span = spanInfo.span;
-        var rowHtml = '<tr style="border-top: 0 !important; height: 47px"><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
-            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px">';
+        var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
+            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
         if (span.has_child_stack) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
