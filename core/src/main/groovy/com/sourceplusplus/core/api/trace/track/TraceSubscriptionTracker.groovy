@@ -67,7 +67,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                     def futures = []
                     it.result().findAll { it.type == TRACES }.each {
                         def currentSubscription = it as ArtifactTraceSubscribeRequest
-                        if (subRequest.type == currentSubscription.type && subRequest.timeFrame() == currentSubscription.timeFrame()) {
+                        if (subRequest.timeFrame() == currentSubscription.timeFrame()) {
                             def promise = Promise.promise()
                             futures.add(promise)
 
