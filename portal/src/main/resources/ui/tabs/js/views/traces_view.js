@@ -71,9 +71,11 @@ function displayTraces(traceResult) {
 
             var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + appUuid + '","'
                 + traceResult.artifact_qualified_name + '","' + globalTraceId +
-                '");\' style="border-top: 0 !important; padding-left: 20px">';
-            rowHtml += '<i class="large plus square outline icon"></i>'
-                + operationName.replace('<', '&lt;').replace('>', '&gt;');
+                '");\' style="border-top: 0 !important; padding-left: 20px; height: 47px">';
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="fas fa-plus-square"></i>';
+            rowHtml += '<span style="vertical-align:top">';
+            rowHtml += operationName.replace('<', '&lt;').replace('>', '&gt;');
+            rowHtml += '</span>';
             rowHtml += '</td>';
 
             let occurred = moment(Number(trace.start));
@@ -174,10 +176,18 @@ function displayInnerTraces(innerTraceStack) {
     for (let i = 0; i < traceStack.length; i++) {
         let spanInfo = traceStack[i];
         let span = spanInfo.span;
-        var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
+        var rowHtml = '<tr style="border-top: 0 !important; height: 47px"><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px">';
-        rowHtml += '<i class="large minus square outline icon"></i>' +
-            spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+
+        if (span.has_child_stack) {
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
+                spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+        } else {
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>'
+            rowHtml += '<span style="vertical-align:top">';
+            rowHtml += spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+            rowHtml += '</span>';
+        }
         rowHtml += '</td>';
 
         rowHtml += '<td class="collapsing">' + spanInfo.time_took + '</td>';
@@ -315,10 +325,18 @@ function displayTraceStack(traceStack) {
     for (let i = 0; i < traceStack.length; i++) {
         let spanInfo = traceStack[i];
         let span = spanInfo.span;
-        var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
+        var rowHtml = '<tr style="border-top: 0 !important; height: 47px"><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px">';
-        rowHtml += '<i class="large minus square outline icon"></i>' +
-            spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+
+        if (span.has_child_stack) {
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
+                spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+        } else {
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>'
+            rowHtml += '<span style="vertical-align:top">';
+            rowHtml += spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+            rowHtml += '</span>';
+        }
         rowHtml += '</td>';
 
         rowHtml += '<td class="collapsing">' + spanInfo.time_took + '</td>';

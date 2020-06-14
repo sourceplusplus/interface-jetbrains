@@ -580,7 +580,7 @@ class SkywalkingIntegration extends APMIntegration {
 
     static ArrayList<TraceSpan> processTraceStack(JsonObject traceStackData, TraceSpanStackQuery spanQuery,
                                                   SourceArtifact artifact, Map<String, String> skywalkingEndpoints) {
-        def spanList = new ArrayList<TraceSpan>()
+        def processedSpans = new ArrayList<TraceSpan>()
         if (traceStackData != null) {
             def stack = traceStackData.getJsonArray("spans")
             def segments = new HashMap<String, List<TraceSpan>>()
@@ -590,6 +590,8 @@ class SkywalkingIntegration extends APMIntegration {
                 segments.get(traceSpan.segmentId()).add(traceSpan)
             }
 
+            def segmentSpanChildStacks = new HashMap<String, HashSet<Long>>()
+            def spanList = new ArrayList<TraceSpan>()
             for (def traceSpans : segments.values()) {
                 def parentSpanId = -2L
                 if (spanQuery.oneLevelDeep()) {
@@ -610,13 +612,17 @@ class SkywalkingIntegration extends APMIntegration {
                 def orderedTraceSpans = traceSpans.sort { it.spanId() }.reverse()
                 def childErrors = new HashSet<Long>()
                 for (def traceSpan : orderedTraceSpans) {
+                    if (parentSpanId != traceSpan.parentSpanId() && traceSpan.parentSpanId() >= 0) {
+                        segmentSpanChildStacks.putIfAbsent(traceSpan.segmentId(), new HashSet<Long>())
+                        segmentSpanChildStacks.get(traceSpan.segmentId()).add(traceSpan.parentSpanId())
+                    }
                     if (traceSpan.isError()) {
                         childErrors.add(traceSpan.parentSpanId())
                     }
 
                     def processedSpan = traceSpan
                     if (childErrors.contains(traceSpan.spanId())) {
-                        processedSpan = traceSpan.withIsChildError(true)
+                        processedSpan = processedSpan.withIsChildError(true)
                         childErrors.add(traceSpan.parentSpanId())
                     }
                     if (spanQuery.oneLevelDeep() && traceSpan.spanId() != parentSpanId &&
@@ -629,8 +635,16 @@ class SkywalkingIntegration extends APMIntegration {
                     }
                 }
             }
+
+            spanList.reverse().each {
+                if (segmentSpanChildStacks.get(it.segmentId())?.contains(it.spanId())) {
+                    processedSpans.add(it.withHasChildStack(true))
+                } else {
+                    processedSpans.add(it)
+                }
+            }
         }
-        return spanList.reverse()
+        return processedSpans
     }
 
     private static boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact,

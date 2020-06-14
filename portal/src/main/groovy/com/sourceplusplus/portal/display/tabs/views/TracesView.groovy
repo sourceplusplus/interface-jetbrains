@@ -25,7 +25,7 @@ class TracesView {
     boolean innerTrace
     String rootArtifactQualifiedName
     JsonArray traceStack
-    JsonArray innerTraceStack
+    Stack<JsonArray> innerTraceStack = new Stack<>()
     TraceOrderType orderType = TraceOrderType.LATEST_TRACES
     ViewType viewType = ViewType.TRACES
     String traceId
@@ -62,10 +62,9 @@ class TracesView {
         } else {
             traceStack = null
         }
-        if (view.innerTraceStack) {
-            innerTraceStack = new JsonArray().addAll(view.innerTraceStack)
-        } else {
-            innerTraceStack = null
+
+        view.innerTraceStack.reverse().each {
+            innerTraceStack.push(it)
         }
         orderType = view.orderType
         viewType = view.viewType

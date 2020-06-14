@@ -1,6 +1,7 @@
 package com.sourceplusplus.api.model.trace;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -28,6 +29,7 @@ import java.util.Map;
  */
 @SourceStyle
 @Value.Immutable
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonSerialize(as = TraceSpan.class)
 @JsonDeserialize(as = TraceSpan.class)
 public interface AbstractTraceSpan {
@@ -78,6 +80,13 @@ public interface AbstractTraceSpan {
     @JsonAlias({"isChildError", "child_error"})
     default boolean isChildError() {
         return false;
+    }
+
+    @Nullable
+    @Value.Default
+    @JsonAlias({"hasChildStack", "has_child_stack"})
+    default Boolean hasChildStack() {
+        return null;
     }
 
     String layer();
