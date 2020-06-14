@@ -64,7 +64,7 @@ function portalConnected() {
                 + mainGetQueryWithoutPortalUuid, '_self');
         });
     } else {
-        window.setInterval(keepPortalAlive, 60000 * 4);
+        window.setInterval(keepPortalAlive, 60000 * 2);
     }
 }
 
