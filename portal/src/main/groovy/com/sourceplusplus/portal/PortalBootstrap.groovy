@@ -24,6 +24,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.apache.commons.io.IOUtils
 
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
 
 /**
  * Used to bootstrap the Source++ Portal.
@@ -174,6 +175,19 @@ class PortalBootstrap extends AbstractVerticle {
                     SourcePortal.ensurePortalActive(portal)
                 })
             }
+
+            //keep subscriptions alive
+            vertx.setPeriodic(TimeUnit.MINUTES.toMillis(2), {
+                SourcePortalConfig.current.coreClients.each {
+                    it.value.refreshSubscriberApplicationSubscriptions(it.key, {
+                        if (it.succeeded()) {
+                            log.debug("Refreshed subscriptions")
+                        } else {
+                            log.error("Failed to refresh subscriptions", it.cause())
+                        }
+                    })
+                }
+            })
 
             vertx.eventBus().consumer("REGISTER_PORTAL", {
                 def request = it.body() as JsonObject

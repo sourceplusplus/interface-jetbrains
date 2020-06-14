@@ -70,7 +70,7 @@ function portalConnected() {
 
 function keepPortalAlive() {
     eb.send('KeepAlivePortal', {'portal_uuid': portalUuid});
-    console.log("Sent portal keep alive request");
+    portalLog("Sent portal keep alive request. Portal UUID: " + portalUuid);
 }
 
 function portalLog(message) {

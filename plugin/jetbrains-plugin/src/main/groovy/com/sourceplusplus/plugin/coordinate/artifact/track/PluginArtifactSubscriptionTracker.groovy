@@ -30,7 +30,7 @@ class PluginArtifactSubscriptionTracker extends AbstractVerticle {
     @Override
     void start() throws Exception {
         //keep subscriptions alive
-        vertx.setPeriodic(TimeUnit.MINUTES.toMillis(5), {
+        vertx.setPeriodic(TimeUnit.MINUTES.toMillis(2), {
             if (SourcePluginConfig.current.activeEnvironment?.appUuid) {
                 SourcePluginConfig.current.activeEnvironment.coreClient.refreshSubscriberApplicationSubscriptions(
                         SourcePluginConfig.current.activeEnvironment.appUuid, {

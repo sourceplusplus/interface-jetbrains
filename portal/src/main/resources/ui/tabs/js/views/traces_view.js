@@ -27,9 +27,11 @@ var displayedTraceIds = new Map();
 function displayTraces(traceResult) {
     if (traceResult.order_type !== traceOrderType) {
         portalLog("Ignoring display traces")
-        return
+        return //todo: still needed?
     }
-    portalLog('Displaying traces - Size: ' + traceResult.traces.length);
+    portalLog('Displaying traces - Artifact: ' + traceResult.artifact_simple_name +
+        ' - From: ' + moment.unix(Number(traceResult.start)).format() + ' - To: ' + moment.unix(Number(traceResult.stop)).format() +
+        ' - Order type: ' + traceResult.order_type + ' - Amount: ' + traceResult.traces.length);
 
     $('#span_info_panel').css('display', 'none');
     $('#latest_traces_header').addClass('active_sub_tab');
