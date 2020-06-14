@@ -1,11 +1,14 @@
 package com.sourceplusplus.plugin
 
+import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.marker.SourceFileMarker
 import com.sourceplusplus.marker.SourceFileMarkerProvider
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.source.mark.gutter.component.api.config.ComponentSizeEvaluator
+import com.sourceplusplus.marker.source.mark.gutter.component.api.config.GutterMarkComponentConfiguration
 import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponentProvider
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
@@ -14,7 +17,7 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import org.jetbrains.annotations.NotNull
 
-import java.awt.Dimension
+import java.awt.*
 
 /**
  * Used to bootstrap the Source++ Plugin.
@@ -40,9 +43,16 @@ class PluginBootstrap extends AbstractVerticle {
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider.with {
             defaultConfiguration.preloadJcefBrowser = false
             defaultConfiguration.autoDisposeBrowser = false //todo: should be able to dispose, see IntelliJPortalUI.close()
-            defaultConfiguration.setComponentSize(new Dimension(775, 250))
-            //todo: measure size of editor and make short if it will extend past IDE
-            //defaultConfiguration.setComponentSize(new Dimension(620, 250))
+            defaultConfiguration.setComponentSizeEvaluator(new ComponentSizeEvaluator() {
+                @Override
+                Dimension getDynamicSize(@NotNull Editor editor, @NotNull GutterMarkComponentConfiguration configuration) {
+                    def portalWidth = (editor.contentComponent.width * 0.8) as int
+                    if (portalWidth > 775) {
+                        portalWidth = 775
+                    }
+                    return new Dimension(portalWidth, 250)
+                }
+            })
         }
         SourceMarkerPlugin.configuration.sourceFileMarkerProvider = new SourceFileMarkerProvider() {
             @Override
