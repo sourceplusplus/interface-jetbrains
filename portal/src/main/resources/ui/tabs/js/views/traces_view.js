@@ -179,7 +179,7 @@ function displayInnerTraces(innerTraceStack) {
         var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
-        if (span.has_child_stack) {
+        if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
                 spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else {
@@ -328,7 +328,7 @@ function displayTraceStack(traceStack) {
         var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
-        if (span.has_child_stack) {
+        if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
                 spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else {
