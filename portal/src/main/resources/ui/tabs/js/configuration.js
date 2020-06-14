@@ -1,3 +1,5 @@
+console.log("Configuration tab started");
+
 eb.onopen = function () {
     portalConnected();
     if (requiresRegistration) {

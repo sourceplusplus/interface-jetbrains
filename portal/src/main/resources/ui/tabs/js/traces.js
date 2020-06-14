@@ -1,3 +1,5 @@
+console.log("Traces tab started");
+
 var viewingInnerTrace = false;
 eb.onopen = function () {
     portalConnected();

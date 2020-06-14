@@ -58,30 +58,21 @@
                 <div class="ui icon top left pointing dropdown">
                     <i class="clock outline icon spp_red_color" style="font-size: 20px; margin-top: -2px"></i>
                     <div class="menu secondary_background_color" style="margin-top: 0 !important;">
-                        <div onclick="updateTime('last_5_minutes')" class="item">
+                        <div id="last_5_minutes_time" onclick="updateTime('last_5_minutes')" class="item">
                             <span class="menu_tooltip_text">LAST 5 MINUTES</span>
                         </div>
-                        <div onclick="updateTime('last_15_minutes')" class="item active">
+                        <div id="last_15_minutes_time" onclick="updateTime('last_15_minutes')" class="item">
                             <span class="menu_tooltip_active_text">LAST 15 MINUTES</span>
                         </div>
-                        <div onclick="updateTime('last_30_minutes')" class="item">
+                        <div id="last_30_minutes_time" onclick="updateTime('last_30_minutes')" class="item">
                             <span class="menu_tooltip_text">LAST 30 MINUTES</span>
                         </div>
-                        <div onclick="updateTime('last_hour')" class="item">
+                        <div id="last_hour_time" onclick="updateTime('last_hour')" class="item">
                             <span class="menu_tooltip_text">LAST HOUR</span>
                         </div>
-                        <div onclick="updateTime('last_3_hours')" class="item">
+                        <div id="last_3_hours_time" onclick="updateTime('last_3_hours')" class="item">
                             <span class="menu_tooltip_text">LAST 3 HOURS</span>
                         </div>
-                        <!--                        <div onclick="updateTime('last_6_hours')" class="item">-->
-                        <!--                            <span class="menu_tooltip_text">LAST 6 HOURS</span>-->
-                        <!--                        </div>-->
-                        <!--                        <div onclick="updateTime('last_12_hours')" class="item">-->
-                        <!--                            <span class="menu_tooltip_text">LAST 12 HOURS</span>-->
-                        <!--                        </div>-->
-                        <!--                        <div onclick="updateTime('last_24_hours')" class="item">-->
-                        <!--                            <span class="menu_tooltip_text">LAST 24 HOURS</span>-->
-                        <!--                        </div>-->
                     </div>
                 </div>
             </div>
@@ -144,5 +135,6 @@
 <script src='../vertx-eventbus.min.js'></script>
 <script src='../source_eventbus_bridge.js'></script>
 <script src='js/overview.js'></script>
+<script src='js/views/overview_view.js'></script>
 </body>
 </html>
