@@ -4,37 +4,8 @@
     <meta charset="UTF-8">
     <title>Configuration - Source++</title>
     <link rel='stylesheet' href='../semantic.min.css'>
-
-    <!--Dynamically set style based on dark_mode parameter-->
-    <script>
-        function loadCSS(filename) {
-            let linkRef = document.createElement("link");
-            linkRef.setAttribute("rel", "stylesheet");
-            linkRef.setAttribute("type", "text/css");
-            linkRef.setAttribute("href", filename);
-            document.getElementsByTagName("head")[0].appendChild(linkRef);
-        }
-
-        function findGetParameter(parameterName) {
-            let result = null, tmp = [];
-            location.search
-                .substr(1)
-                .split("&")
-                .forEach(function (item) {
-                    tmp = item.split("=");
-                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-                });
-            return result;
-        }
-
-        var getDarkMode = findGetParameter("dark_mode");
-        var darkMode = (getDarkMode) ? (getDarkMode === 'true') : false;
-        if (darkMode) {
-            loadCSS("css/dark_style.css");
-        } else {
-            loadCSS("css/style.css");
-        }
-    </script>
+    <script src='../jquery-3.1.1.min.js'></script>
+    <script src='../portal_theme.js'></script>
 </head>
 <body style="overflow-y: hidden">
 <div class="ui sidebar vertical left menu overlay visible very thin icon spp_blue"
@@ -161,13 +132,11 @@
         </div>
     </div>
 </div>
-<script src='../jquery-3.1.1.min.js'></script>
 <script src='../semantic.min.js'></script>
 <script src="../moment.min.js"></script>
 <script src="../sockjs.min.js"></script>
 <script src='../vertx-eventbus.min.js'></script>
 <script src='../source_eventbus_bridge.js'></script>
-<script src='../portal.js'></script>
 <script src='js/configuration.js'></script>
 <script src='js/views/configuration_view.js'></script>
 </body>
