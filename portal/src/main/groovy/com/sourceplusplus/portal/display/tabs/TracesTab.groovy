@@ -382,7 +382,7 @@ class TracesTab extends AbstractTab {
                                     vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
                                 } else {
                                     //navigated away from portal; reset to trace stack
-//                                    portal.portalUI.tracesView.viewType = TracesView.ViewType.TRACE_STACK
+                                    portal.portalUI.tracesView.viewType = TracesView.ViewType.TRACE_STACK
 
                                     def queryResult = it.result()
                                     def innerLevel = representation.innerLevel + 1
