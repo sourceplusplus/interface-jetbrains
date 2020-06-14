@@ -1,14 +1,17 @@
-if (hideOverviewTab) {
-    $('#overview_link').css('display', 'none');
-    $('#sidebar_overview_link').css('display', 'none');
-}
+function setupUI() {
+    if (hideOverviewTab) {
+        $('#overview_link').css('display', 'none');
+        $('#sidebar_overview_link').css('display', 'none');
+    }
 
-$('#entry_method_toggle').change(function (e) {
-    toggledEntryMethod(e.target.checked === true);
-});
-$('#force_subscribe_toggle').change(function (e) {
-    toggledForceSubscription(e.target.checked === true);
-});
+    $('#entry_method_toggle').change(function (e) {
+        toggledEntryMethod(e.target.checked === true);
+    });
+    $('#force_subscribe_toggle').change(function (e) {
+        toggledForceSubscription(e.target.checked === true);
+    });
+}
+setupUI();
 
 function updateArtifactConfigurationTable(artifact) {
     $('#artifact_qualified_name').text(artifact.artifact_qualified_name);
