@@ -26,7 +26,7 @@
 
         <projectService
                 serviceImplementation="com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService"/>
-        <toolWindow id="Source++ Console" icon="/icons/s.png" anchor="bottom"
+        <toolWindow id="Source++ Console" icon="/icons/s.svg" anchor="bottom"
                     factoryClass="com.sourceplusplus.plugin.intellij.tool.SourcePluginToolWindowFactory"/>
         <java.programPatcher implementation="com.sourceplusplus.plugin.intellij.patcher.MavenAgentPatcher"/>
         <applicationConfigurable
