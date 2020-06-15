@@ -34,8 +34,13 @@ class PortalViewTracker extends AbstractVerticle {
     void start() throws Exception {
         //get portal from cache to ensure it remains active
         vertx.eventBus().consumer(KEEP_ALIVE_PORTAL, { messageHandler ->
-            SourcePortal.ensurePortalActive(SourcePortal.getPortal(JsonObject.mapFrom(
-                    messageHandler.body()).getString("portal_uuid")))
+            def portal = SourcePortal.getPortal(JsonObject.mapFrom(messageHandler.body()).getString("portal_uuid"))
+            if (portal != null) {
+                SourcePortal.ensurePortalActive(portal)
+                messageHandler.reply(200)
+            } else {
+                messageHandler.fail(404, "Portal not found")
+            }
         })
 
         //user wants to open portal
