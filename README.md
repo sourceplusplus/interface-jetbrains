@@ -67,14 +67,18 @@ Install a JetBrains IDE if you don’t already have one.
 
 After installation, you will need to configure the Source++ Plugin (see [Configure Plugin](https://sourceplusplus.com/knowledge/introduction/configure-plugin/)).
 
-## Code Structure
+## Project Structure
 
-| Module                        | Description                                              | Language    |
+| Internal Module               | Description                                              | Language    |
 | ----------------------------- | -------------------------------------------------------- | ----------- |
 | :api                          | Holds common data models and communication clients       | Java 8+     |
 | :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.5+ |
 | :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.5+ |
 | :portal                       | Used to visually display contextualized artifact data    | Groovy 2.5+ |
+
+| External Module               | Description                                              | Language    |
+| ----------------------------- | -------------------------------------------------------- | ----------- |
+| [SourceMarker](https://github.com/sourceplusplus/SourceMarker) | Used to tie UI popups to source code artifacts | Kotlin 1.3+ |
 
 ## Building/Testing
 
