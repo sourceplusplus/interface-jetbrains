@@ -57,7 +57,7 @@ public class SourceCoreClient implements SourceClient {
     private static final String CREATE_APPLICATION_ENDPOINT = String.format(
             "/%s/applications", SPP_API_VERSION);
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
-            "/%s/applications/:appUuid/subscriptions", SPP_API_VERSION);
+            "/%s/applications/:appUuid/subscriptions?includeAutomatic=:includeAutomatic", SPP_API_VERSION);
     private static final String GET_APPLICATION_ENDPOINTS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/endpoints", SPP_API_VERSION);
     private static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
@@ -453,9 +453,10 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public List<SourceApplicationSubscription> getApplicationSubscriptions(String appUuid) {
+    public List<SourceApplicationSubscription> getApplicationSubscriptions(String appUuid, boolean includeAutomatic) {
         String url = sppUrl + GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT
-                .replace(":appUuid", appUuid);
+                .replace(":appUuid", appUuid)
+                .replace(":includeAutomatic", Boolean.toString(includeAutomatic));
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
@@ -468,10 +469,11 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void getApplicationSubscriptions(String appUuid,
+    public void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
                                             Handler<AsyncResult<List<SourceApplicationSubscription>>> handler) {
         String url = sppUrl + GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT
-                .replace(":appUuid", appUuid);
+                .replace(":appUuid", appUuid)
+                .replace(":includeAutomatic", Boolean.toString(includeAutomatic));
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 

@@ -119,7 +119,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
                 }
                 test.assertTrue(it.result())
 
-                coreClient.getApplicationSubscriptions(application.appUuid(), {
+                coreClient.getApplicationSubscriptions(application.appUuid(), true,{
                     if (it.failed()) {
                         test.fail(it.cause())
                     }
