@@ -88,7 +88,7 @@ function displayTraces(traceResult) {
             if (trace.error) {
                 rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
             } else {
-                rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
+                rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
             }
 
             let insertIndex = displayedTraces.length;
@@ -199,7 +199,7 @@ function displayInnerTraces(innerTraceStack) {
         } else if (span.child_error && i > 0) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
         } else {
-            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
         }
         $('#stack_table').append(rowHtml);
 
@@ -348,7 +348,7 @@ function displayTraceStack(traceStack) {
         } else if (span.child_error && i > 0) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
         } else {
-            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
         }
         $('#stack_table').append(rowHtml);
 
