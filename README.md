@@ -104,11 +104,11 @@ After installation, you will need to configure the Source++ Plugin (see [Configu
 
 ## Documentation
 
-For full documentation, visit the [knowledge base](https://sourceplusplus.com/knowledge).
+For full documentation, visit the [knowledge base](https://github.com/sourceplusplus/Assistant/tree/master/docs/markdown).
 
 ## Roadmap
 
-To know what is going on, see the [roadmap](https://sourceplusplus.com/knowledge/general/roadmap).
+To know what is going on, see the [roadmap](https://github.com/sourceplusplus/Assistant/blob/master/docs/markdown/02-general/02-roadmap.md).
 
 ## Contributing
 
