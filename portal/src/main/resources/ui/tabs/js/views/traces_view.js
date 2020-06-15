@@ -29,7 +29,7 @@ function displayTraces(traceResult) {
         portalLog("Ignoring display traces")
         return //todo: still needed?
     }
-    portalLog('Displaying traces - Artifact: ' + traceResult.artifact_simple_name +
+    console.log('Displaying traces - Artifact: ' + traceResult.artifact_simple_name +
         ' - From: ' + moment.unix(Number(traceResult.start)).format() + ' - To: ' + moment.unix(Number(traceResult.stop)).format() +
         ' - Order type: ' + traceResult.order_type + ' - Amount: ' + traceResult.traces.length);
 

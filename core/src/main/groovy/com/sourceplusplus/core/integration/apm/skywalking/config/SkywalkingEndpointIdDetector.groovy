@@ -187,7 +187,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     private void searchServiceEndpoints(String appUuid, JsonArray serviceEndpoints,
                                         Handler<AsyncResult<Void>> handler) {
-        log.info("Searching service endpoints. App UUID: $appUuid - Endpoints: $serviceEndpoints")
+        log.debug("Searching service endpoints. App UUID: $appUuid - Endpoints: $serviceEndpoints")
         def futures = []
         for (int z = 0; z < serviceEndpoints.size(); z++) {
             def serviceEndpoint = serviceEndpoints.getJsonObject(z)
