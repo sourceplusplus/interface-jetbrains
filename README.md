@@ -72,9 +72,9 @@ After installation, you will need to configure the Source++ Plugin (see [Configu
 | Module                        | Description                                              | Language    |
 | ----------------------------- | -------------------------------------------------------- | ----------- |
 | :api                          | Holds common data models and communication clients       | Java 8+     |
-| :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.4+ |
-| :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.4+ |
-| :portal                       | Used to visually display contextualized artifact data    | Groovy 2.4+ |
+| :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.5+ |
+| :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.5+ |
+| :portal                       | Used to visually display contextualized artifact data    | Groovy 2.5+ |
 
 ## Building/Testing
 
