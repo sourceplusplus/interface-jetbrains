@@ -14,10 +14,12 @@ import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponent
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.plugin.SourcePlugin
+import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 import com.sourceplusplus.plugin.source.model.SourceMethodAnnotation
+import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
 import groovy.util.logging.Slf4j
 import io.vertx.core.AsyncResult
@@ -44,16 +46,15 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     IntelliJMethodGutterMark(SourceFileMarker sourceFileMarker, UMethod psiMethod) {
         super(sourceFileMarker, psiMethod)
 
-        //create artifact (if necessary)
         def appUuid = SourcePluginConfig.current.activeEnvironment.appUuid
         def sourceArtifact = SourceArtifact.builder()
                 .appUuid(appUuid).artifactQualifiedName(artifactQualifiedName).build()
         putUserData(IntelliJKeys.SourceArtifact, sourceArtifact)
-        SourcePluginConfig.current.activeEnvironment.coreClient.upsertArtifact(appUuid, sourceArtifact, {
+        PluginArtifactTracker.getOrCreateSourceArtifact(psiMethod, {
             if (it.succeeded()) {
                 updateSourceArtifact(it.result())
             } else {
-                log.erro("Failed to create artifact: " + artifactQualifiedName, it.cause())
+                log.error("Failed to create artifact: " + artifactQualifiedName, it.cause())
             }
         })
     }
@@ -77,8 +78,13 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
         if (event.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
             (event.sourceMark as IntelliJGutterMark).registerPortal()
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+            if (getUserData(IntelliJKeys.PortalRefresher) != null) {
+                SourcePlugin.vertx.cancelTimer(getUserData(IntelliJKeys.PortalRefresher))
+                putUserData(IntelliJKeys.PortalRefresher, null)
+            }
             if (portalRegistered) {
                 IntelliJSourcePortal.getPortal(portalUuid).close()
+                putUserData(IntelliJKeys.PortalUUID, null)
             }
 
             def unsubscribeRequest = SourceArtifactUnsubscribeRequest.builder()
@@ -166,8 +172,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      */
     @Override
     boolean isArtifactSubscribed() {
-        def config = getUserData(IntelliJKeys.SourceArtifact).config()
-        return config.subscribeAutomatically() || config.forceSubscribe()
+        return getUserData(IntelliJKeys.SourceArtifact).config().subscribeAutomatically()
     }
 
     /**
@@ -232,10 +237,19 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                 markComponent.configuration.initialUrl = IntelliJPortalUI.getPortalUrl(initialTab, portalUuid)
             }
 
+            IntelliJSourcePortal finalPortal
             if (existingPortal.present) {
                 existingPortal.get().portalUI.lateInitBrowser(markComponent.browser)
-            } else  {
+                finalPortal = existingPortal.get()
+            } else {
                 IntelliJSourcePortal.register(appUuid, portalUuid, artifactQualifiedName, newPortal)
+                finalPortal = IntelliJSourcePortal.getPortal(portalUuid)
+            }
+
+            if (getUserData(IntelliJKeys.PortalRefresher) == null) {
+                putUserData(IntelliJKeys.PortalRefresher, SourcePlugin.vertx.setPeriodic(60_000 * 2, {
+                    SourcePortal.ensurePortalActive(finalPortal)
+                }))
             }
         }
     }
@@ -248,8 +262,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                 return entryMethod
             } else if (artifactDataAvailable) {
                 return sppActive
-            } else if (artifactSubscribed) {
-                return sppInactive
             }
         }
         return null

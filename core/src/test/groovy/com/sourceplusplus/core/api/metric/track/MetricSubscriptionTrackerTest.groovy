@@ -169,7 +169,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
                 }
                 test.assertTrue(it.result())
 
-                coreClient.getApplicationSubscriptions(application.appUuid(), true, {
+                coreClient.getApplicationSubscriptions(application.appUuid(), {
                     if (it.failed()) {
                         test.fail(it.cause())
                     }

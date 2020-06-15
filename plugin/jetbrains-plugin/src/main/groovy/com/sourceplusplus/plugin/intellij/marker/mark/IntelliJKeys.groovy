@@ -16,4 +16,5 @@ class IntelliJKeys {
     public static final SourceKey<SourceArtifact> SourceArtifact = new SourceKey<>("SourceArtifact")
     public static final SourceKey<Boolean> ArtifactDataAvailable = new SourceKey<>("ArtifactDataAvailable")
     public static final SourceKey<String> PortalUUID = new SourceKey<>("PortalUUID")
+    public static final SourceKey<Long> PortalRefresher = new SourceKey<>("PortalRefresher")
 }

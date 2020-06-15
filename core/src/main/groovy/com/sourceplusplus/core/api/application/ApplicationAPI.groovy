@@ -144,9 +144,8 @@ class ApplicationAPI extends AbstractVerticle {
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
             return
         }
-        def includeAutomatic = Boolean.valueOf(routingContext.request().getParam("includeAutomatic"))
 
-        getApplicationSubscriptions(appUuid, includeAutomatic, {
+        getApplicationSubscriptions(appUuid, {
             if (it.succeeded()) {
                 routingContext.response().setStatusCode(200)
                         .end(Json.encode(it.result()))
@@ -175,45 +174,11 @@ class ApplicationAPI extends AbstractVerticle {
         })
     }
 
-    void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
-                                     Handler<AsyncResult<Set<SourceApplicationSubscription>>> handler) {
-        log.info("Getting appliction subscriptions. App UUID: $appUuid - Include automatic: $includeAutomatic")
-        vertx.eventBus().request(ArtifactSubscriptionTracker.GET_APPLICATION_SUBSCRIPTIONS, appUuid, {
+    void getApplicationSubscriptions(String appUuid, Handler<AsyncResult<Set<SourceApplicationSubscription>>> handler) {
+        log.info("Getting appliction subscriptions. App UUID: $appUuid")
+        core.storage.getApplicationSubscriptions(appUuid, {
             if (it.succeeded()) {
-                def subscribers = JacksonCodec.decodeValue(it.result().body() as String,
-                        new TypeReference<Set<SourceApplicationSubscription>>() {})
-                core.storage.findArtifactBySubscribeAutomatically(appUuid, {
-                    if (it.succeeded()) {
-                        def automaticSubscriptions = it.result()
-                        def mergeMap = new HashMap<String, SourceApplicationSubscription.Builder>()
-                        subscribers.each {
-                            mergeMap.putIfAbsent(it.artifactQualifiedName(),
-                                    SourceApplicationSubscription.builder().from(it))
-                        }
-                        automaticSubscriptions.each {
-                            if (mergeMap.containsKey(it.artifactQualifiedName())) {
-                                mergeMap.get(it.artifactQualifiedName())
-                                        .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically()))
-                                        .forceSubscription(Boolean.valueOf(it.config().forceSubscribe()))
-                            } else {
-                                mergeMap.putIfAbsent(it.artifactQualifiedName(),
-                                        SourceApplicationSubscription.builder()
-                                                .artifactQualifiedName(it.artifactQualifiedName())
-                                                .subscribers(0)
-                                                .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically()))
-                                                .forceSubscription(Boolean.valueOf(it.config().forceSubscribe())))
-                            }
-                        }
-
-                        def mergedSubscriptions = mergeMap.collect { it.value.build() } as Set
-                        if (!includeAutomatic) {
-                            mergedSubscriptions.removeIf { Boolean.valueOf(it.automaticSubscription()) }
-                        }
-                        handler.handle(Future.succeededFuture(mergedSubscriptions))
-                    } else {
-                        handler.handle(Future.failedFuture(it.cause()))
-                    }
-                })
+                handler.handle(Future.succeededFuture(it.result().toSet()))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

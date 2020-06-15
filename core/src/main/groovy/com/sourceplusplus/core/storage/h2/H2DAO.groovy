@@ -60,7 +60,7 @@ class H2DAO extends SourceStorage {
             "storage/h2/queries/get_artifact_by_endpoint_name.sql"), Charsets.UTF_8)
     private static final String GET_ARTIFACT_BY_ENDPOINT_ID = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_by_endpoint_id.sql"), Charsets.UTF_8)
-    private static final String GET_ARTIFACT_BY_SUBSCRIBE_AUTOMATICALLY = Resources.toString(RESOURCE_LOADER.getResource(
+    private static final String GET_ARTIFACT_BY_AUTO_SUBSCRIBE = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_by_subscribe_automatically.sql"), Charsets.UTF_8)
     private static final String GET_ARTIFACT_BY_ENDPOINT = Resources.toString(RESOURCE_LOADER.getResource(
             "storage/h2/queries/get_artifact_by_endpoint.sql"), Charsets.UTF_8)
@@ -317,7 +317,6 @@ class H2DAO extends SourceStorage {
         params.add(artifact.createDate())
         params.add(artifact.config().endpoint())
         params.add(artifact.config().subscribeAutomatically())
-        params.add(artifact.config().forceSubscribe())
         params.add(artifact.config().moduleName())
         params.add(artifact.config().component())
         params.add(artifact.config().endpointName())
@@ -348,7 +347,6 @@ class H2DAO extends SourceStorage {
         params.add(artifact.artifactQualifiedName())
         params.add(artifact.config().endpoint())
         params.add(artifact.config().subscribeAutomatically())
-        params.add(artifact.config().forceSubscribe())
         params.add(artifact.config().moduleName())
         params.add(artifact.config().component())
         params.add(artifact.config().endpointName())
@@ -397,16 +395,15 @@ class H2DAO extends SourceStorage {
                     def config = SourceArtifactConfig.builder()
                             .endpoint(artifactDetails.getBoolean(4))
                             .subscribeAutomatically(artifactDetails.getBoolean(5))
-                            .forceSubscribe(artifactDetails.getBoolean(6))
-                            .moduleName(artifactDetails.getString(7))
-                            .component(artifactDetails.getString(8))
-                            .endpointName(artifactDetails.getString(9))
-                    if (artifactDetails.getString(10)) {
-                        config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
+                            .moduleName(artifactDetails.getString(6))
+                            .component(artifactDetails.getString(7))
+                            .endpointName(artifactDetails.getString(8))
+                    if (artifactDetails.getString(9)) {
+                        config.addEndpointIds(artifactDetails.getString(9)[1..-2].split(","))
                     }
                     def status = SourceArtifactStatus.builder()
-                            .activelyFailing(artifactDetails.getBoolean(11))
-                            .latestFailedServiceInstance(artifactDetails.getString(12))
+                            .activelyFailing(artifactDetails.getBoolean(10))
+                            .latestFailedServiceInstance(artifactDetails.getString(11))
 
                     handler.handle(Future.succeededFuture(Optional.of(
                             artifact.withConfig(config.build()).withStatus(status.build()))))
@@ -441,16 +438,15 @@ class H2DAO extends SourceStorage {
                     def config = SourceArtifactConfig.builder()
                             .endpoint(artifactDetails.getBoolean(4))
                             .subscribeAutomatically(artifactDetails.getBoolean(5))
-                            .forceSubscribe(artifactDetails.getBoolean(6))
-                            .moduleName(artifactDetails.getString(7))
-                            .component(artifactDetails.getString(8))
-                            .endpointName(artifactDetails.getString(9))
-                    if (artifactDetails.getString(10)) {
-                        config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
+                            .moduleName(artifactDetails.getString(6))
+                            .component(artifactDetails.getString(7))
+                            .endpointName(artifactDetails.getString(8))
+                    if (artifactDetails.getString(9)) {
+                        config.addEndpointIds(artifactDetails.getString(9)[1..-2].split(","))
                     }
                     def status = SourceArtifactStatus.builder()
-                            .activelyFailing(artifactDetails.getBoolean(11))
-                            .latestFailedServiceInstance(artifactDetails.getString(12))
+                            .activelyFailing(artifactDetails.getBoolean(10))
+                            .latestFailedServiceInstance(artifactDetails.getString(11))
 
                     handler.handle(Future.succeededFuture(Optional.of(
                             artifact.withConfig(config.build()).withStatus(status.build()))))
@@ -491,16 +487,15 @@ class H2DAO extends SourceStorage {
                     def config = SourceArtifactConfig.builder()
                             .endpoint(artifactDetails.getBoolean(4))
                             .subscribeAutomatically(artifactDetails.getBoolean(5))
-                            .forceSubscribe(artifactDetails.getBoolean(6))
-                            .moduleName(artifactDetails.getString(7))
-                            .component(artifactDetails.getString(8))
-                            .endpointName(artifactDetails.getString(9))
-                    if (artifactDetails.getString(10)) {
-                        config.addEndpointIds(artifactDetails.getString(10)[1..-2].split(","))
+                            .moduleName(artifactDetails.getString(6))
+                            .component(artifactDetails.getString(7))
+                            .endpointName(artifactDetails.getString(8))
+                    if (artifactDetails.getString(9)) {
+                        config.addEndpointIds(artifactDetails.getString(9)[1..-2].split(","))
                     }
                     def status = SourceArtifactStatus.builder()
-                            .activelyFailing(artifactDetails.getBoolean(11))
-                            .latestFailedServiceInstance(artifactDetails.getString(12))
+                            .activelyFailing(artifactDetails.getBoolean(10))
+                            .latestFailedServiceInstance(artifactDetails.getString(11))
 
                     handler.handle(Future.succeededFuture(Optional.of(
                             artifact.withConfig(config.build()).withStatus(status.build()))))
@@ -520,7 +515,7 @@ class H2DAO extends SourceStorage {
     void findArtifactBySubscribeAutomatically(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
         def params = new JsonArray()
         params.add(appUuid)
-        client.queryWithParams(GET_ARTIFACT_BY_SUBSCRIBE_AUTOMATICALLY, params, {
+        client.queryWithParams(GET_ARTIFACT_BY_AUTO_SUBSCRIBE, params, {
             if (it.succeeded()) {
                 def artifacts = new ArrayList<SourceArtifact>()
                 def results = it.result().results
@@ -533,16 +528,15 @@ class H2DAO extends SourceStorage {
                     def config = SourceArtifactConfig.builder()
                             .endpoint(it.getBoolean(4))
                             .subscribeAutomatically(it.getBoolean(5))
-                            .forceSubscribe(it.getBoolean(6))
-                            .moduleName(it.getString(7))
-                            .component(it.getString(8))
-                            .endpointName(it.getString(9))
-                    if (it.getString(10)) {
-                        config.addEndpointIds(it.getString(10)[1..-2].split(","))
+                            .moduleName(it.getString(6))
+                            .component(it.getString(7))
+                            .endpointName(it.getString(8))
+                    if (it.getString(9)) {
+                        config.addEndpointIds(it.getString(9)[1..-2].split(","))
                     }
                     def status = SourceArtifactStatus.builder()
-                            .activelyFailing(it.getBoolean(11))
-                            .latestFailedServiceInstance(it.getString(12))
+                            .activelyFailing(it.getBoolean(10))
+                            .latestFailedServiceInstance(it.getString(11))
 
                     artifacts.add(artifact.withConfig(config.build()).withStatus(status.build()))
                 }
@@ -573,16 +567,15 @@ class H2DAO extends SourceStorage {
                     def config = SourceArtifactConfig.builder()
                             .endpoint(it.getBoolean(4))
                             .subscribeAutomatically(it.getBoolean(5))
-                            .forceSubscribe(it.getBoolean(6))
-                            .moduleName(it.getString(7))
-                            .component(it.getString(8))
-                            .endpointName(it.getString(9))
-                    if (it.getString(10)) {
-                        config.addEndpointIds(it.getString(10)[1..-2].split(","))
+                            .moduleName(it.getString(6))
+                            .component(it.getString(7))
+                            .endpointName(it.getString(8))
+                    if (it.getString(9)) {
+                        config.addEndpointIds(it.getString(9)[1..-2].split(","))
                     }
                     def status = SourceArtifactStatus.builder()
-                            .activelyFailing(it.getBoolean(11))
-                            .latestFailedServiceInstance(it.getString(12))
+                            .activelyFailing(it.getBoolean(10))
+                            .latestFailedServiceInstance(it.getString(11))
 
                     artifacts.add(artifact.withConfig(config.build()).withStatus(status.build()))
                 }
@@ -613,16 +606,15 @@ class H2DAO extends SourceStorage {
                     def config = SourceArtifactConfig.builder()
                             .endpoint(it.getBoolean(4))
                             .subscribeAutomatically(it.getBoolean(5))
-                            .forceSubscribe(it.getBoolean(6))
-                            .moduleName(it.getString(7))
-                            .component(it.getString(8))
-                            .endpointName(it.getString(9))
-                    if (it.getString(10)) {
-                        config.addEndpointIds(it.getString(10)[1..-2].split(","))
+                            .moduleName(it.getString(6))
+                            .component(it.getString(7))
+                            .endpointName(it.getString(8))
+                    if (it.getString(9)) {
+                        config.addEndpointIds(it.getString(9)[1..-2].split(","))
                     }
                     def status = SourceArtifactStatus.builder()
-                            .activelyFailing(it.getBoolean(11))
-                            .latestFailedServiceInstance(it.getString(12))
+                            .activelyFailing(it.getBoolean(10))
+                            .latestFailedServiceInstance(it.getString(11))
 
                     artifacts.add(artifact.withConfig(config.build()).withStatus(status.build()))
                 }
@@ -653,16 +645,15 @@ class H2DAO extends SourceStorage {
                     def config = SourceArtifactConfig.builder()
                             .endpoint(it.getBoolean(4))
                             .subscribeAutomatically(it.getBoolean(5))
-                            .forceSubscribe(it.getBoolean(6))
-                            .moduleName(it.getString(7))
-                            .component(it.getString(8))
-                            .endpointName(it.getString(9))
-                    if (it.getString(10)) {
-                        config.addEndpointIds(it.getString(10)[1..-2].split(","))
+                            .moduleName(it.getString(6))
+                            .component(it.getString(7))
+                            .endpointName(it.getString(8))
+                    if (it.getString(9)) {
+                        config.addEndpointIds(it.getString(9)[1..-2].split(","))
                     }
                     def status = SourceArtifactStatus.builder()
-                            .activelyFailing(it.getBoolean(11))
-                            .latestFailedServiceInstance(it.getString(12))
+                            .activelyFailing(it.getBoolean(10))
+                            .latestFailedServiceInstance(it.getString(11))
 
                     artifacts.add(artifact.withConfig(config.build()).withStatus(status.build()))
                 }
@@ -830,21 +821,6 @@ class H2DAO extends SourceStorage {
         client.updateWithParams(DELETE_SUBSCRIBER_ARTIFACT_SUBSCRIPTIONS, params, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture())
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void setArtifactSubscription(ArtifactSubscribeRequest subscription,
-                                 Handler<AsyncResult<ArtifactSubscribeRequest>> handler) {
-        deleteArtifactSubscription(subscription, {
-            if (it.succeeded()) {
-                updateArtifactSubscription(subscription, handler)
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
             }

@@ -649,8 +649,7 @@
 //                '            {\n' +
 //                '               "bool":{\n' +
 //                '                  "should":[\n' +
-//                '                     { "match":{ "config.subscribe_automatically":true } },\n' +
-//                '                     { "match":{ "config.force_subscribe":true } }\n' +
+//                '                     { "match":{ "config.auto_subscribe":true } }\n' +
 //                '                  ]\n' +
 //                '               }\n' +
 //                '            }\n' +
@@ -1051,38 +1050,6 @@
 //                        subscription.subscriberUuid(), subscription.appUuid(), subscription.artifactQualifiedName())
 //                if (result.succeeded) {
 //                    handler.handle(Future.succeededFuture())
-//                } else {
-//                    log.error(result.errorMessage)
-//                    handler.handle(Future.failedFuture(result.errorMessage))
-//                }
-//            }
-//
-//            @Override
-//            void failed(Exception ex) {
-//                log.error("Failed to set artifact subscription", ex)
-//                handler.handle(Future.failedFuture(ex))
-//            }
-//        })
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    void setArtifactSubscription(SourceArtifactSubscription subscription,
-//                                 Handler<AsyncResult<SourceArtifactSubscription>> handler) {
-//        def index = new Index.Builder(Json.encode(subscription)).index(SPP_INDEX + "_artifact_subscription")
-//                .type("artifact_subscription")
-//                .id(URLEncoder.encode(subscription.subscriberUuid() + "-" + subscription.appUuid() + "-" + subscription.artifactQualifiedName(), "UTF-8"))
-//                .build()
-//        client.executeAsync(index, new JestResultHandler<DocumentResult>() {
-//
-//            @Override
-//            void completed(DocumentResult result) {
-//                log.debug("Set artifact subscription. Subscriber: {} - Application: {} - Artifact: {}",
-//                        subscription.subscriberUuid(), subscription.appUuid(), subscription.artifactQualifiedName())
-//                if (result.succeeded) {
-//                    handler.handle(Future.succeededFuture(subscription))
 //                } else {
 //                    log.error(result.errorMessage)
 //                    handler.handle(Future.failedFuture(result.errorMessage))

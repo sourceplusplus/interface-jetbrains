@@ -57,7 +57,7 @@ public class SourceCoreClient implements SourceClient {
     private static final String CREATE_APPLICATION_ENDPOINT = String.format(
             "/%s/applications", SPP_API_VERSION);
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
-            "/%s/applications/:appUuid/subscriptions?includeAutomatic=:includeAutomatic", SPP_API_VERSION);
+            "/%s/applications/:appUuid/subscriptions", SPP_API_VERSION);
     private static final String GET_APPLICATION_ENDPOINTS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/endpoints", SPP_API_VERSION);
     private static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
@@ -453,10 +453,9 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public List<SourceApplicationSubscription> getApplicationSubscriptions(String appUuid, boolean includeAutomatic) {
+    public List<SourceApplicationSubscription> getApplicationSubscriptions(String appUuid) {
         String url = sppUrl + GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT
-                .replace(":appUuid", appUuid)
-                .replace(":includeAutomatic", Boolean.toString(includeAutomatic));
+                .replace(":appUuid", appUuid);
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
@@ -469,11 +468,10 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
+    public void getApplicationSubscriptions(String appUuid,
                                             Handler<AsyncResult<List<SourceApplicationSubscription>>> handler) {
         String url = sppUrl + GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT
-                .replace(":appUuid", appUuid)
-                .replace(":includeAutomatic", Boolean.toString(includeAutomatic));
+                .replace(":appUuid", appUuid);
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
@@ -527,8 +525,13 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceArtifact.class)));
-        } catch (Exception e) {
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceArtifact.class)));
+            } else {
+                handler.handle(asyncAPIException(responseBody));
+            }
+        } catch (IOException e) {
             handler.handle(Future.failedFuture(e));
         }
     }

@@ -17,6 +17,6 @@ function toggledEntryMethod(entryMethod) {
     eb.send('UpdateArtifactEntryMethod', {'portal_uuid': portalUuid, "entry_method": entryMethod});
 }
 
-function toggledForceSubscription(forceSubscribe) {
-    eb.send('UpdateArtifactForceSubscribe', {'portal_uuid': portalUuid, "force_subscribe": forceSubscribe});
+function toggledAutoSubscribe(autoSubscribe) {
+    eb.send('UpdateArtifactAutoSubscribe', {'portal_uuid': portalUuid, "auto_subscribe": autoSubscribe});
 }

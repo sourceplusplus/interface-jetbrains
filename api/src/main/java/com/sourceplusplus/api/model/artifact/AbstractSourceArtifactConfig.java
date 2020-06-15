@@ -29,9 +29,6 @@ public interface AbstractSourceArtifactConfig extends SourceMessage {
     Boolean subscribeAutomatically();
 
     @Nullable
-    Boolean forceSubscribe();
-
-    @Nullable
     String moduleName();
 
     @Nullable

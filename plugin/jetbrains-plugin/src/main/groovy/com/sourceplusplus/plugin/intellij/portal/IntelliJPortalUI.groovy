@@ -1,6 +1,7 @@
 package com.sourceplusplus.plugin.intellij.portal
 
 import com.google.common.base.Joiner
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.jcef.JBCefBrowser
 import com.sourceplusplus.portal.display.PortalTab
 import com.sourceplusplus.portal.display.PortalUI
@@ -62,10 +63,7 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
 
     void close() {
         browser.getJBCefClient().removeLifeSpanHandler(this, browser.cefBrowser)
-        //todo: closing cefBrowser and disposing browser causes issues but it likely leading to a memory leak
-        //todo: issue when not being called. Can recreate by creating mark, opening portal, closing tab, opening tab
-        //todo: and displaying portal again
-        //Disposer.dispose(browser)
+        Disposer.dispose(browser)
     }
 
     void reload() {

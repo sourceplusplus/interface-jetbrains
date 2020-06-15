@@ -7,8 +7,8 @@ function setupUI() {
     $('#entry_method_toggle').change(function (e) {
         toggledEntryMethod(e.target.checked === true);
     });
-    $('#force_subscribe_toggle').change(function (e) {
-        toggledForceSubscription(e.target.checked === true);
+    $('#auto_subscribe_toggle').change(function (e) {
+        toggledAutoSubscribe(e.target.checked === true);
     });
 }
 setupUI();
@@ -23,14 +23,10 @@ function updateArtifactConfigurationTable(artifact) {
             $('#entry_method_toggle').checkbox("set checked");
         }
 
-        if (artifact.config.force_subscribe || artifact.config.subscribe_automatically) {
-            $('#artifact_auto_subscribe').text('true');
-
-            if (artifact.config.force_subscribe) {
-                $('#force_subscribe_toggle').checkbox("set checked");
-            }
+        if (artifact.config.subscribe_automatically) {
+            $('#auto_subscribe_toggle').checkbox("set checked");
         } else {
-            $('#artifact_auto_subscribe').text('false');
+            $('#auto_subscribe_toggle').checkbox("set unchecked");
         }
 
         if (artifact.config.endpoint_name) {
@@ -42,8 +38,7 @@ function updateArtifactConfigurationTable(artifact) {
         }
     } else {
         $('#artifact_endpoint').text('false');
-        $('#artifact_auto_subscribe').text('false');
         $('#entry_method_toggle').checkbox("set unchecked");
-        $('#force_subscribe_toggle').checkbox("set unchecked");
+        $('#auto_subscribe_toggle').checkbox("set unchecked");
     }
 }

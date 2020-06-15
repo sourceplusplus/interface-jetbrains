@@ -88,9 +88,6 @@ abstract class SourceStorage {
                                                         SourceArtifactSubscriptionType type,
                                                         Handler<AsyncResult<Void>> handler)
 
-    abstract void setArtifactSubscription(ArtifactSubscribeRequest subscription,
-                                          Handler<AsyncResult<ArtifactSubscribeRequest>> handler)
-
     abstract void getApplicationSubscriptions(String appUuid,
                                               Handler<AsyncResult<List<SourceApplicationSubscription>>> handler)
 

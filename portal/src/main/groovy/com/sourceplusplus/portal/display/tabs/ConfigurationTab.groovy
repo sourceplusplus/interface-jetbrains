@@ -25,7 +25,7 @@ class ConfigurationTab extends AbstractTab {
     public static final String CONFIGURATION_TAB_OPENED = "ConfigurationTabOpened"
     public static final String DISPLAY_ARTIFACT_CONFIGURATION = "DisplayArtifactConfiguration"
     public static final String UPDATE_ARTIFACT_ENTRY_METHOD = "UpdateArtifactEntryMethod"
-    public static final String UPDATE_ARTIFACT_FORCE_SUBSCRIBE = "UpdateArtifactForceSubscribe"
+    public static final String UPDATE_ARTIFACT_AUTO_SUBSCRIBE = "UpdateArtifactAutoSubscribe"
 
     private final boolean pluginAvailable
     private boolean updateConfigurationPermitted
@@ -46,8 +46,8 @@ class ConfigurationTab extends AbstractTab {
             def message = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(message.getString("portal_uuid"))
             portal.portalUI.currentTab = PortalTab.Configuration
-            updateUI(portal)
             SourcePortal.ensurePortalActive(portal)
+            updateUI(portal)
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
             log.debug("Artifact configuration updated")
@@ -79,23 +79,23 @@ class ConfigurationTab extends AbstractTab {
                 }
             })
         })
-        vertx.eventBus().consumer(UPDATE_ARTIFACT_FORCE_SUBSCRIBE, {
+        vertx.eventBus().consumer(UPDATE_ARTIFACT_AUTO_SUBSCRIBE, {
             def request = JsonObject.mapFrom(it.body())
             def portal = SourcePortal.getPortal(request.getString("portal_uuid"))
             if (!updateConfigurationPermitted) {
-                log.warn("Rejected artifact force subscribe update")
+                log.warn("Rejected artifact auto subscribe update")
                 updateUI(portal)
                 return
             }
 
-            log.info("Updating artifact force subscribe")
+            log.info("Updating artifact auto subscribe")
             def config = SourceArtifactConfig.builder()
-                    .forceSubscribe(request.getBoolean("force_subscribe"))
+                    .subscribeAutomatically(request.getBoolean("auto_subscribe"))
                     .build()
             SourcePortalConfig.current.getCoreClient(portal.appUuid).createOrUpdateArtifactConfig(
                     portal.appUuid, portal.portalUI.viewingPortalArtifact, config, {
                 if (it.succeeded()) {
-                    log.info("Successfully updated artifact force subscribe")
+                    log.info("Successfully updated artifact auto subscribe")
                 } else {
                     log.error("Failed to update artifact config: " + portal.portalUI.viewingPortalArtifact, it.cause())
                 }

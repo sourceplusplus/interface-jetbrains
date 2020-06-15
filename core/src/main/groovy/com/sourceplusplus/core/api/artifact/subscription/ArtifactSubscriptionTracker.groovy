@@ -34,7 +34,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
     public static final String GET_ARTIFACT_SUBSCRIPTIONS = "GetArtifactSubscriptions"
-    public static final String GET_APPLICATION_SUBSCRIPTIONS = "GetApplicationSubscriptions"
     public static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "RefreshSubscriberApplicationSubscriptions"
     public static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "GetSubscriberApplicationSubscriptions"
 
@@ -79,17 +78,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
                     msg.reply(Json.encode(it.result()))
                 } else {
                     log.error("Failed to get artifact subscriptions", it.cause())
-                    msg.fail(500, it.cause().message)
-                }
-            })
-        })
-        vertx.eventBus().consumer(GET_APPLICATION_SUBSCRIPTIONS, { msg ->
-            def appUuid = msg.body() as String
-            core.storage.getApplicationSubscriptions(appUuid, {
-                if (it.succeeded()) {
-                    msg.reply(Json.encode(it.result()))
-                } else {
-                    log.error("Failed to get application subscriptions", it.cause())
                     msg.fail(500, it.cause().message)
                 }
             })
