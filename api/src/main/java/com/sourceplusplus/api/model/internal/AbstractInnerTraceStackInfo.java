@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonArray;
 import org.immutables.value.Value;
 
 /**
- * Represents an artifact's trace statck data.
+ * Represents an artifact's trace stack data.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.2.6
