@@ -72,7 +72,7 @@ function displayTraces(traceResult) {
             var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + appUuid + '","'
                 + traceResult.artifact_qualified_name + '","' + globalTraceId +
                 '");\' style="border-top: 0 !important; padding-left: 20px;">';
-            rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="fas fa-plus-square"></i>';
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-plus-square"></i>';
             rowHtml += '<span style="vertical-align:top">';
             rowHtml += operationName.replace('<', '&lt;').replace('>', '&gt;');
             rowHtml += '</span>';
@@ -180,7 +180,7 @@ function displayInnerTraces(innerTraceStack) {
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
         if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
-            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
                 spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>'
@@ -329,7 +329,7 @@ function displayTraceStack(traceStack) {
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
         if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
-            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
                 spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>'
