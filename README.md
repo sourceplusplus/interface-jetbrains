@@ -78,7 +78,7 @@ After installation, you will need to configure the Source++ Plugin (see [Configu
 
 | External Module               | Description                                              | Language    |
 | ----------------------------- | -------------------------------------------------------- | ----------- |
-| [SourceMarker](https://github.com/sourceplusplus/SourceMarker) | Used to tie UI popups to source code artifacts | Kotlin 1.3+ |
+| [SourceMarker](https://github.com/sourceplusplus/SourceMarker) | Used to tie visual marks & popups to source code artifacts | Kotlin 1.3+ |
 
 ## Building/Testing
 
