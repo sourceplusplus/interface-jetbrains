@@ -63,14 +63,16 @@ function portalConnected() {
             window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
                 + mainGetQueryWithoutPortalUuid, '_self');
         });
-    } else {
-        window.setInterval(keepPortalAlive, 60000 * 2);
+    } else if (externalPortal) {
+        let keepAliveInterval = window.setInterval(function () {
+            portalLog("Sent portal keep alive request. Portal UUID: " + portalUuid);
+            eb.send('KeepAlivePortal', {'portal_uuid': portalUuid}, function (error, message) {
+                if (error) {
+                    clearInterval(keepAliveInterval);
+                }
+            });
+        }, 30000);
     }
-}
-
-function keepPortalAlive() {
-    eb.send('KeepAlivePortal', {'portal_uuid': portalUuid});
-    portalLog("Sent portal keep alive request. Portal UUID: " + portalUuid);
 }
 
 function portalLog(message) {
