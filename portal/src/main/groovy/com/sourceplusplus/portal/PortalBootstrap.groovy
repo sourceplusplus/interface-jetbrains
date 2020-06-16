@@ -135,12 +135,12 @@ class PortalBootstrap extends AbstractVerticle {
                 def artifactQualifiedName = sub.getString("artifact_qualified_name")
                 SourcePortalConfig.current.addCoreClient(appUuid, coreClient)
 
-                if (sub.getBoolean("force_subscribe", false)) {
+                if (sub.getBoolean("auto_subscribe", false)) {
                     //make sure application exists first (create if necessary), then subscribe
                     SourcePortalConfig.current.getCoreClient(appUuid).getApplication(appUuid, {
                         if (it.succeeded()) {
                             if (it.result().isPresent()) {
-                                def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
+                                def artifactConfig = SourceArtifactConfig.builder().subscribeAutomatically(true).build()
                                 SourcePortalConfig.current.getCoreClient(appUuid).createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                     if (it.failed()) {
                                         log.error("Failed to create artifact config", it.cause())
@@ -151,7 +151,7 @@ class PortalBootstrap extends AbstractVerticle {
                                         .appUuid(appUuid).build()
                                 SourcePortalConfig.current.getCoreClient(appUuid).createApplication(createApplication, {
                                     if (it.succeeded()) {
-                                        def artifactConfig = SourceArtifactConfig.builder().forceSubscribe(true).build()
+                                        def artifactConfig = SourceArtifactConfig.builder().subscribeAutomatically(true).build()
                                         SourcePortalConfig.current.getCoreClient(appUuid).createOrUpdateArtifactConfig(appUuid, artifactQualifiedName, artifactConfig, {
                                             if (it.failed()) {
                                                 log.error("Failed to create artifact config", it.cause())
@@ -169,11 +169,7 @@ class PortalBootstrap extends AbstractVerticle {
                 }
 
                 //register portal
-                def portal = SourcePortal.getPortal(SourcePortal.register(appUuid, artifactQualifiedName, true))
-                //keep portal active
-                vertx.setPeriodic(60_000, {
-                    SourcePortal.ensurePortalActive(portal)
-                })
+                SourcePortal.register(appUuid, artifactQualifiedName, true)
             }
 
             //keep subscriptions alive

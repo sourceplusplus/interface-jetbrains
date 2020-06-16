@@ -58,8 +58,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
         super(psiFile)
         keepSourceMarkArtifactsUpToDate()
 
-        SourcePlugin.vertx.eventBus().send(
-                PluginArtifactSubscriptionTracker.SYNC_AUTOMATIC_SUBSCRIPTIONS, true)
+        SourcePlugin.vertx.eventBus().send(PluginArtifactSubscriptionTracker.SYNC_AUTOMATIC_SUBSCRIPTIONS, true)
     }
 
     /**

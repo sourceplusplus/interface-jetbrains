@@ -158,7 +158,7 @@ class SkywalkingIntegration extends APMIntegration {
     @Override
     void getServiceInstances(Instant start, Instant end, String step, String serviceId,
                              Handler<AsyncResult<JsonArray>> handler) {
-        log.info("Getting all SkyWalking service instances. Start: $start - End: $end - Service id: $serviceId")
+        log.debug("Getting all SkyWalking service instances. Start: $start - End: $end - Service id: $serviceId")
         def graphqlQuery = new JsonObject()
         if ("second".equalsIgnoreCase(step)) {
             graphqlQuery.put("query", GET_SERVICE_INSTANCES
@@ -183,7 +183,7 @@ class SkywalkingIntegration extends APMIntegration {
             } else {
                 def result = it.result().bodyAsJsonObject()
                         .getJsonObject("data").getJsonArray("getServiceInstances")
-                log.info("Got all SkyWalking service instances: " + result)
+                log.debug("Got all SkyWalking service instances: " + result)
                 handler.handle(Future.succeededFuture(result))
             }
         })
@@ -228,7 +228,7 @@ class SkywalkingIntegration extends APMIntegration {
     }
 
     void getServiceEndpoints(String serviceId, Handler<AsyncResult<JsonArray>> handler) {
-        log.info("Getting SkyWalking service endpoints for service id: " + serviceId)
+        log.debug("Getting SkyWalking service endpoints for service id: " + serviceId)
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_SERVICE_ENDPOINTS
                 .replace('$serviceId', serviceId)
@@ -241,7 +241,7 @@ class SkywalkingIntegration extends APMIntegration {
             } else {
                 def result = it.result().bodyAsJsonObject()
                         .getJsonObject("data").getJsonArray("searchEndpoint")
-                log.info("Got SkyWalking service endpoints: " + result)
+                log.debug("Got SkyWalking service endpoints: " + result)
                 handler.handle(Future.succeededFuture(result))
             }
         })

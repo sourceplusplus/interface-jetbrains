@@ -91,7 +91,8 @@ class TraceAPI extends AbstractVerticle {
 
         ArtifactTraceSubscribeRequest request
         try {
-            request = Json.decodeValue(routingContext.getBodyAsString(), ArtifactTraceSubscribeRequest.class)
+            request = Json.decodeValue(routingContext.getBodyAsJson().put("type", "TRACES").toString(),
+                    ArtifactTraceSubscribeRequest.class)
         } catch (all) {
             all.printStackTrace()
             routingContext.response().setStatusCode(500)

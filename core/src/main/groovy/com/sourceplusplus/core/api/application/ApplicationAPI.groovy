@@ -178,10 +178,9 @@ class ApplicationAPI extends AbstractVerticle {
     void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
                                      Handler<AsyncResult<Set<SourceApplicationSubscription>>> handler) {
         log.info("Getting appliction subscriptions. App UUID: $appUuid - Include automatic: $includeAutomatic")
-        vertx.eventBus().request(ArtifactSubscriptionTracker.GET_APPLICATION_SUBSCRIPTIONS, appUuid, {
+        core.storage.getApplicationSubscriptions(appUuid, {
             if (it.succeeded()) {
-                def subscribers = JacksonCodec.decodeValue(it.result().body() as String,
-                        new TypeReference<Set<SourceApplicationSubscription>>() {})
+                def subscribers = it.result()
                 core.storage.findArtifactBySubscribeAutomatically(appUuid, {
                     if (it.succeeded()) {
                         def automaticSubscriptions = it.result()
@@ -194,20 +193,20 @@ class ApplicationAPI extends AbstractVerticle {
                             if (mergeMap.containsKey(it.artifactQualifiedName())) {
                                 mergeMap.get(it.artifactQualifiedName())
                                         .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically()))
-                                        .forceSubscription(Boolean.valueOf(it.config().forceSubscribe()))
                             } else {
                                 mergeMap.putIfAbsent(it.artifactQualifiedName(),
                                         SourceApplicationSubscription.builder()
                                                 .artifactQualifiedName(it.artifactQualifiedName())
                                                 .subscribers(0)
-                                                .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically()))
-                                                .forceSubscription(Boolean.valueOf(it.config().forceSubscribe())))
+                                                .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically())))
                             }
                         }
 
                         def mergedSubscriptions = mergeMap.collect { it.value.build() } as Set
                         if (!includeAutomatic) {
-                            mergedSubscriptions.removeIf { Boolean.valueOf(it.automaticSubscription()) }
+                            mergedSubscriptions.removeIf {
+                                Boolean.valueOf(it.automaticSubscription()) && it.subscribers() == 0
+                            }
                         }
                         handler.handle(Future.succeededFuture(mergedSubscriptions))
                     } else {

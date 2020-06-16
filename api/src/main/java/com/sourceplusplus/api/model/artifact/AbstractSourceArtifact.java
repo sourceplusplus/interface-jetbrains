@@ -31,17 +31,21 @@ public interface AbstractSourceArtifact extends SourceMessage {
     String artifactQualifiedName();
 
     @Nullable
+    @Value.Auxiliary
     Instant createDate();
 
     @Nullable
+    @Value.Auxiliary
     Instant lastUpdated();
 
     @Value.Default
+    @Value.Auxiliary
     default SourceArtifactConfig config() {
         return SourceArtifactConfig.builder().build();
     }
 
     @Value.Default
+    @Value.Auxiliary
     default SourceArtifactStatus status() {
         return SourceArtifactStatus.builder().build();
     }

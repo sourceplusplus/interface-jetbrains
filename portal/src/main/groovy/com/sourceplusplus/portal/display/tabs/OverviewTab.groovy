@@ -62,8 +62,8 @@ class OverviewTab extends AbstractTab {
             def portalUuid = (it.body() as JsonObject).getString("portal_uuid")
             def portal = SourcePortal.getPortal(portalUuid)
             portal.portalUI.currentTab = PortalTab.Overview
-            updateUI(portal)
             SourcePortal.ensurePortalActive(portal)
+            updateUI(portal)
         })
         vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
             def artifactMetricResult = it.body() as ArtifactMetricResult

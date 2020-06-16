@@ -29,7 +29,7 @@ function displayTraces(traceResult) {
         portalLog("Ignoring display traces")
         return //todo: still needed?
     }
-    portalLog('Displaying traces - Artifact: ' + traceResult.artifact_simple_name +
+    console.log('Displaying traces - Artifact: ' + traceResult.artifact_simple_name +
         ' - From: ' + moment.unix(Number(traceResult.start)).format() + ' - To: ' + moment.unix(Number(traceResult.stop)).format() +
         ' - Order type: ' + traceResult.order_type + ' - Amount: ' + traceResult.traces.length);
 
@@ -72,7 +72,7 @@ function displayTraces(traceResult) {
             var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + appUuid + '","'
                 + traceResult.artifact_qualified_name + '","' + globalTraceId +
                 '");\' style="border-top: 0 !important; padding-left: 20px;">';
-            rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="fas fa-plus-square"></i>';
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-plus-square"></i>';
             rowHtml += '<span style="vertical-align:top">';
             rowHtml += operationName.replace('<', '&lt;').replace('>', '&gt;');
             rowHtml += '</span>';
@@ -88,7 +88,7 @@ function displayTraces(traceResult) {
             if (trace.error) {
                 rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
             } else {
-                rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
+                rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
             }
 
             let insertIndex = displayedTraces.length;
@@ -180,7 +180,7 @@ function displayInnerTraces(innerTraceStack) {
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
         if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
-            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
                 spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>'
@@ -199,7 +199,7 @@ function displayInnerTraces(innerTraceStack) {
         } else if (span.child_error && i > 0) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
         } else {
-            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
         }
         $('#stack_table').append(rowHtml);
 
@@ -329,7 +329,7 @@ function displayTraceStack(traceStack) {
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
         if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
-            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="fas fa-plus-square"></i>' +
+            rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
                 spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>'
@@ -348,7 +348,7 @@ function displayTraceStack(traceStack) {
         } else if (span.child_error && i > 0) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
         } else {
-            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check circle outline icon"></i></td></tr>';
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
         }
         $('#stack_table').append(rowHtml);
 

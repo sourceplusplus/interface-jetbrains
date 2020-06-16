@@ -12,6 +12,7 @@ import com.intellij.util.indexing.FileBasedIndex
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactTracker
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.patcher.tail.LogTailer
 import groovy.transform.PackageScope
@@ -142,10 +143,12 @@ trait SourceAgentPatcher {
                     it.methods.each {
                         try {
                             def artifactQualifiedName = MarkerUtils.getFullyQualifiedName(UastContextKt.toUElement(it) as UMethod)
-                            def methodName = removePackageAndClassName(artifactQualifiedName)
-                            def entryMethod = artifactEndpoints.contains(artifactQualifiedName)
-                            def isStatic = it.hasModifier(JvmModifier.STATIC)
-                            writer.append("\t\t<method method=\"$methodName\" static=\"$isStatic\" entry_method=\"$entryMethod\"></method>\n")
+                            if (PluginArtifactTracker.getSourceArtifact(artifactQualifiedName).config().subscribeAutomatically()) {
+                                def methodName = removePackageAndClassName(artifactQualifiedName)
+                                def entryMethod = artifactEndpoints.contains(artifactQualifiedName)
+                                def isStatic = it.hasModifier(JvmModifier.STATIC)
+                                writer.append("\t\t<method method=\"$methodName\" static=\"$isStatic\" entry_method=\"$entryMethod\"></method>\n")
+                            }
                         } catch (Throwable ignored) {
                             log.warn("Failed to determine artifact qualified name of: " + it)
                         }

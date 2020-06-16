@@ -527,8 +527,13 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceArtifact.class)));
-        } catch (Exception e) {
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceArtifact.class)));
+            } else {
+                handler.handle(asyncAPIException(responseBody));
+            }
+        } catch (IOException e) {
             handler.handle(Future.failedFuture(e));
         }
     }
