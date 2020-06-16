@@ -1,6 +1,6 @@
 The Source++ Roadmap is a place for high-to-mid-level ideas around the future of Source++.
 The purpose of the roadmap is to present a vision for Source++.
-As a community of contributors, we can't work together toward something unless their is a shared vision. There are no dates nor deadlines in this roadmap, only a list of milestones.
+As a community of contributors, we can't work together toward something unless there is a shared vision. There are no dates nor deadlines in this roadmap, only a list of milestones.
 
 # Source++ Vision
 
