@@ -94,17 +94,11 @@ class ArtifactAPI extends AbstractVerticle {
         })
     }
 
-    void getSourceArtifactSubscriptions(ApplicationArtifact applicationArtifact,
+    void getSourceArtifactSubscriptions(ApplicationArtifact appArtifact,
                                         Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
-        vertx.eventBus().request(ArtifactSubscriptionTracker.GET_ARTIFACT_SUBSCRIPTIONS, applicationArtifact, {
-            if (it.succeeded()) {
-                def subscribers = JacksonCodec.decodeValue(it.result().body() as String,
-                        new TypeReference<List<ArtifactSubscribeRequest>>() {})
-                handler.handle(Future.succeededFuture(subscribers))
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
+        log.info("Getting source artifact subscriptions. App UUID: {} - Artifact: {}",
+                appArtifact.appUuid(), appArtifact.artifactQualifiedName())
+        core.storage.getArtifactSubscriptions(appArtifact.appUuid(), appArtifact.artifactQualifiedName(),handler)
     }
 
     private void unsubscribeSourceArtifactRoute(RoutingContext routingContext) {

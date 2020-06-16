@@ -63,23 +63,27 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
             core.storage.getSubscriberArtifactSubscriptions(subRequest.subscriberUuid(),
                     subRequest.appUuid(), subRequest.artifactQualifiedName(), {
                 if (it.succeeded()) {
-                    boolean updatedSubscription = false
+                    boolean createSubscription = true
                     def futures = []
                     it.result().findAll { it.type == TRACES }.each {
                         def currentSubscription = it as ArtifactTraceSubscribeRequest
                         if (subRequest.timeFrame() == currentSubscription.timeFrame()) {
-                            def promise = Promise.promise()
-                            futures.add(promise)
+                            if (subRequest != currentSubscription) {
+                                def promise = Promise.promise()
+                                futures.add(promise)
 
-                            subRequest = subRequest.withOrderTypes(
-                                    currentSubscription.orderTypes() + subRequest.orderTypes())
-                            core.storage.updateArtifactSubscription(currentSubscription, subRequest, promise)
-                            updatedSubscription = true
+                                subRequest = currentSubscription.withSubscribeDate(Instant.now())
+                                        .withOrderTypes(currentSubscription.orderTypes() + subRequest.orderTypes())
+                                core.storage.updateArtifactSubscription(currentSubscription, subRequest, promise)
+                            }
+                            createSubscription = false
                         }
                     }
-                    if (!updatedSubscription) {
+                    if (createSubscription) {
                         def promise = Promise.promise()
                         futures.add(promise)
+
+                        subRequest = subRequest.withSubscribeDate(Instant.now())
                         core.storage.createArtifactSubscription(subRequest, promise)
                     }
 

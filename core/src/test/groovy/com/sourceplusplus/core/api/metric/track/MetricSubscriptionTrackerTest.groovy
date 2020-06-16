@@ -2,6 +2,7 @@ package com.sourceplusplus.core.api.metric.track
 
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.application.SourceApplication
+import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
@@ -20,6 +21,79 @@ import static com.sourceplusplus.api.model.metric.MetricType.*
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
+
+    @Test
+    void "validate_subscription_create_date"() {
+        SourceApplication application
+        ArtifactMetricSubscribeRequest metricSubscribeRequest
+        ArtifactSubscribeRequest originalSubscription
+        TestSuite.create("validate_subscription_create_date-setup").before({ test ->
+            def async = test.async()
+            createApplication(test, {
+                application = it
+                async.complete()
+            })
+        }).test("subscribeToArtifact", { test ->
+            def async = test.async()
+            metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
+                    .appUuid(application.appUuid())
+                    .artifactQualifiedName("manual-subscribe")
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
+                    .addMetricTypes(Throughput_Average)
+                    .build()
+            coreClient.subscribeToArtifact(metricSubscribeRequest, {
+                coreClient.getArtifactSubscriptions(application.appUuid(), "manual-subscribe", {
+                    if (it.succeeded()) {
+                        test.assertEquals(1, it.result().size())
+                        test.assertNotNull(it.result()[0].subscribeDate())
+
+                        originalSubscription = it.result()[0]
+                        async.complete()
+                    } else {
+                        test.fail(it.cause())
+                    }
+                })
+            })
+        }).test("validate_subscription_create_date_stays_same", { test ->
+            def async = test.async()
+            coreClient.subscribeToArtifact(metricSubscribeRequest, {
+                if (it.succeeded()) {
+                    coreClient.getArtifactSubscriptions(application.appUuid(), "manual-subscribe", {
+                        if (it.succeeded()) {
+                            test.assertEquals(1, it.result().size())
+                            test.assertNotNull(it.result()[0].subscribeDate())
+                            test.assertEquals(originalSubscription, it.result()[0])
+                            test.assertEquals(originalSubscription.subscribeDate(), it.result()[0].subscribeDate())
+                            async.complete()
+                        } else {
+                            test.fail(it.cause())
+                        }
+                    })
+                } else {
+                    test.fail(it.cause())
+                }
+            })
+        }).test("validate_subscription_create_date_updates", { test ->
+            def async = test.async()
+            coreClient.subscribeToArtifact(metricSubscribeRequest.withMetricTypes(Throughput_Average, ResponseTime_Average), {
+                if (it.succeeded()) {
+                    coreClient.getArtifactSubscriptions(application.appUuid(), "manual-subscribe", {
+                        if (it.succeeded()) {
+                            test.assertEquals(1, it.result().size())
+                            test.assertNotNull(it.result()[0].subscribeDate())
+                            test.assertNotEquals(originalSubscription, it.result()[0])
+                            test.assertTrue(originalSubscription.subscribeDate().toEpochMilli() < it.result()[0].subscribeDate().toEpochMilli())
+                            async.complete()
+                        } else {
+                            test.fail(it.cause())
+                        }
+                    })
+                } else {
+                    test.fail(it.cause())
+                }
+            })
+        }).run().awaitSuccess()
+    }
 
     @Test
     void "update_subscribed_artifact_metrics"() {
