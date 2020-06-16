@@ -47,8 +47,8 @@ class TracesView {
     }
 
     void cloneView(TracesView view) {
-        traceResultCache = view.traceResultCache
-        traceStacks = view.traceStacks
+        traceResultCache = new ConcurrentHashMap<>(view.traceResultCache)
+        traceStacks = new HashMap<>(view.traceStacks)
         if (view.traceStack) {
             traceStack = new JsonArray().addAll(view.traceStack)
         } else {
