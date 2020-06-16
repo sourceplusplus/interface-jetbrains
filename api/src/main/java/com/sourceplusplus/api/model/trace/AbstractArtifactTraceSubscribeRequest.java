@@ -10,7 +10,6 @@ import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest;
 import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType;
 import org.immutables.value.Value;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -27,7 +26,6 @@ import java.util.Set;
 @JsonDeserialize(as = ArtifactTraceSubscribeRequest.class)
 public interface AbstractArtifactTraceSubscribeRequest extends ArtifactSubscribeRequest {
 
-    @Nullable //todo: remove
     QueryTimeFrame timeFrame();
 
     Set<TraceOrderType> orderTypes();

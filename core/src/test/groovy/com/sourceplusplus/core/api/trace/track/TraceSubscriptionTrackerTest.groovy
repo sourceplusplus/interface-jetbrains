@@ -103,6 +103,7 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
         }).test("subscribe_to_artifact_traces", { test ->
             def async = test.async()
             def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .addOrderTypes(LATEST_TRACES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()

@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.display.tabs
 
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.InnerTraceStackInfo
 import com.sourceplusplus.api.model.internal.TraceSpanInfo
@@ -77,6 +78,7 @@ class TracesTab extends AbstractTab {
                     .appUuid(portal.appUuid)
                     .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
                     .addOrderTypes(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .build()
             SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
                 if (it.succeeded()) {
