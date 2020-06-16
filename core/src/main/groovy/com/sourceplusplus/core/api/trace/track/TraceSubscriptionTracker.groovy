@@ -186,7 +186,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                 .systemRequest(true)
                 .appUuid(request.appUuid())
                 .artifactQualifiedName(request.artifactQualifiedName())
-                .durationStart(Instant.now().minus(request.timeFrame().minutes - 1, ChronoUnit.MINUTES))
+                .durationStart(Instant.now().minus(request.timeFrame().minutes, ChronoUnit.MINUTES))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
         core.traceAPI.getTraces(request.appUuid(), traceQuery, {
@@ -216,7 +216,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                 .systemRequest(true)
                 .appUuid(request.appUuid())
                 .artifactQualifiedName(request.artifactQualifiedName())
-                .durationStart(Instant.now().minus(request.timeFrame().minutes - 1, ChronoUnit.MINUTES))
+                .durationStart(Instant.now().minus(request.timeFrame().minutes, ChronoUnit.MINUTES))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
         core.traceAPI.getTraces(request.appUuid(), traceQuery, {
@@ -250,7 +250,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                 .systemRequest(true)
                 .appUuid(request.appUuid())
                 .artifactQualifiedName(request.artifactQualifiedName())
-                .durationStart(Instant.now().minus(request.timeFrame().minutes - 1, ChronoUnit.MINUTES))
+                .durationStart(Instant.now().minus(request.timeFrame().minutes, ChronoUnit.MINUTES))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
         core.traceAPI.getTraces(request.appUuid(), traceQuery, {

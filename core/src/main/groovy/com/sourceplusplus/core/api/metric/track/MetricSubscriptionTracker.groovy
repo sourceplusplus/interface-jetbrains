@@ -188,7 +188,7 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
                 .artifactQualifiedName(appArtifact.artifactQualifiedName())
                 .metricTypes(metricTypes)
                 .timeFrame(timeFrame)
-                .start(Instant.now().minus(timeFrame.minutes - 1, ChronoUnit.MINUTES))
+                .start(Instant.now().minus(timeFrame.minutes, ChronoUnit.MINUTES))
                 .stop(Instant.now())
                 .step("MINUTE")
                 .build()
