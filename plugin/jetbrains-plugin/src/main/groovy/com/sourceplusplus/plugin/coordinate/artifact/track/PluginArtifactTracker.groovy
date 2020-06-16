@@ -4,7 +4,6 @@ import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.project.DumbService
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PropertyUtilBase
@@ -23,9 +22,6 @@ import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.plugins.groovy.GroovyFileType
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastContextKt
-
-import java.util.function.Function
-import java.util.stream.Collectors
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
 
@@ -55,10 +51,6 @@ class PluginArtifactTracker extends AbstractVerticle {
         return APPLICATION_ARTIFACTS.get(artifactQualifiedName)
     }
 
-    static void getOrCreateSourceArtifact(PsiMethod method, Handler<AsyncResult<SourceArtifact>> handler) {
-        getOrCreateSourceArtifact(UastContextKt.toUElement(method) as UMethod, handler)
-    }
-
     static void getOrCreateSourceArtifact(UMethod method, Handler<AsyncResult<SourceArtifact>> handler) {
         def appUuid = SourcePluginConfig.current.activeEnvironment.appUuid
         def artifactQualifiedName = MarkerUtils.getFullyQualifiedName(method)
@@ -86,19 +78,17 @@ class PluginArtifactTracker extends AbstractVerticle {
         SourcePluginConfig.current.activeEnvironment.coreClient.getArtifacts(
                 SourcePluginConfig.current.activeEnvironment.appUuid, {
             if (it.succeeded()) {
-                addNewApplicationArtifacts(it.result().stream().map(new Function<SourceArtifact, String>() {
-                    String apply(SourceArtifact artifact) {
-                        APPLICATION_ARTIFACTS.put(artifact.artifactQualifiedName(), artifact)
-                        return artifact.artifactQualifiedName()
-                    }
-                }).collect(Collectors.toSet()))
+                it.result().each {
+                    APPLICATION_ARTIFACTS.put(it.artifactQualifiedName(), it)
+                }
+                addNewApplicationArtifacts()
             } else {
                 log.error("Failed to get application artifacts", it.cause())
             }
         })
     }
 
-    private static void addNewApplicationArtifacts(Set<String> currentApplicationArtifacts) {
+    private static void addNewApplicationArtifacts() {
         DumbService.getInstance(IntelliJStartupActivity.currentProject).smartInvokeLater {
             log.info("Syncing application artifacts")
 
@@ -125,7 +115,7 @@ class PluginArtifactTracker extends AbstractVerticle {
                             try {
                                 def uMethod = UastContextKt.toUElement(method) as UMethod
                                 def artifactQualifiedName = MarkerUtils.getFullyQualifiedName(uMethod)
-                                if (!currentApplicationArtifacts.contains(artifactQualifiedName)) {
+                                if (!APPLICATION_ARTIFACTS.containsKey(artifactQualifiedName)) {
                                     getOrCreateSourceArtifact(uMethod, {
                                         if (it.failed()) {
                                             log.error("Failed to create artifact", it.cause())
