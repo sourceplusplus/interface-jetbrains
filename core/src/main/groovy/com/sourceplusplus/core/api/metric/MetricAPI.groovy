@@ -89,7 +89,8 @@ class MetricAPI extends AbstractVerticle {
 
         ArtifactMetricSubscribeRequest request
         try {
-            request = Json.decodeValue(routingContext.getBodyAsString(), ArtifactMetricSubscribeRequest.class)
+            request = Json.decodeValue(routingContext.getBodyAsJson().put("type", "METRICS").toString(),
+                    ArtifactMetricSubscribeRequest.class)
         } catch (all) {
             all.printStackTrace()
             routingContext.response().setStatusCode(500)

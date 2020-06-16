@@ -204,7 +204,9 @@ class ApplicationAPI extends AbstractVerticle {
 
                         def mergedSubscriptions = mergeMap.collect { it.value.build() } as Set
                         if (!includeAutomatic) {
-                            mergedSubscriptions.removeIf { Boolean.valueOf(it.automaticSubscription()) }
+                            mergedSubscriptions.removeIf {
+                                Boolean.valueOf(it.automaticSubscription()) && it.subscribers() == 0
+                            }
                         }
                         handler.handle(Future.succeededFuture(mergedSubscriptions))
                     } else {
