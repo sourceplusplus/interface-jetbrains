@@ -41,7 +41,10 @@ n/a (200 OK)
 
 ```json
 {
-   "metric_types":[
+   "remove_time_frames": [
+      "LAST_5_MINUTES"
+   ],
+   "remove_metric_types":[
       "Throughput_Average", "ResponseTime_Average", "ServiceLevelAgreement_Average",
       "ResponseTime_99Percentile", "ResponseTime_95Percentile", "ResponseTime_90Percentile",
       "ResponseTime_75Percentile", "ResponseTime_50Percentile"
