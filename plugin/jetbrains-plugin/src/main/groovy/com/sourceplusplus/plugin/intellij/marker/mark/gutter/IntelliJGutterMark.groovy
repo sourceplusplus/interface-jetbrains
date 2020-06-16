@@ -3,6 +3,7 @@ package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 import com.intellij.openapi.util.IconLoader
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
+import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 
 import javax.swing.*
 
@@ -26,4 +27,8 @@ interface IntelliJGutterMark extends GutterMark, IntelliJSourceMark {
     String getPortalUuid()
 
     void registerPortal()
+
+    IntelliJSourcePortal getPortal()
+
+    Icon determineMostSuitableIcon()
 }

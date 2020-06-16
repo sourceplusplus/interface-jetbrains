@@ -50,6 +50,14 @@ function displayTraces(traceResult) {
     $('#span_info_header').removeClass('active_sub_tab');
     $('#span_info_header').css('visibility', 'hidden');
 
+    if (traceOrderType === 'LATEST_TRACES') {
+        $('#latest_traces_header_text').text('Latest Traces');
+    } else if (traceOrderType === 'SLOWEST_TRACES') {
+        $('#latest_traces_header_text').text('Slowest Traces');
+    } else if (traceOrderType === 'FAILED_TRACES') {
+        $('#latest_traces_header_text').text('Failed Traces');
+    }
+
     $('#traces_start_field').val(moment.unix(Number(traceResult.start)).format());
     $('#traces_stop_field').val(moment.unix(Number(traceResult.stop)).format());
     $('#traces_total_label').text("Total: " + traceResult.total);
@@ -165,6 +173,8 @@ function displayInnerTraces(innerTraceStack) {
             $('#latest_traces_header_text').text('Latest Traces');
         } else if (traceOrderType === 'SLOWEST_TRACES') {
             $('#latest_traces_header_text').text('Slowest Traces');
+        } else if (traceOrderType === 'FAILED_TRACES') {
+            $('#latest_traces_header_text').text('Failed Traces');
         }
     }
 

@@ -21,8 +21,6 @@ class TracesView {
     private final PortalUI portalUI
     private Map<TraceOrderType, ArtifactTraceResult> traceResultCache = new ConcurrentHashMap<>()
     private Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
-    int innerLevel = 0
-    boolean innerTrace
     String rootArtifactQualifiedName
     JsonArray traceStack
     Stack<JsonArray> innerTraceStack = new Stack<>()
@@ -51,11 +49,13 @@ class TracesView {
         return traceStacks.get(traceId)
     }
 
+    boolean getInnerTrace() {
+        return !innerTraceStack.isEmpty()
+    }
+
     void cloneView(TracesView view) {
         traceResultCache = view.traceResultCache
         traceStacks = view.traceStacks
-        innerLevel = view.innerLevel
-        innerTrace = view.innerTrace
         rootArtifactQualifiedName = view.rootArtifactQualifiedName
         if (view.traceStack) {
             traceStack = new JsonArray().addAll(view.traceStack)

@@ -254,7 +254,19 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
         }
     }
 
-    private Icon determineMostSuitableIcon() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    IntelliJSourcePortal getPortal() {
+        return IntelliJSourcePortal.getPortal(portalUuid)
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Icon determineMostSuitableIcon() {
         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
             if (sourceArtifact.status().activelyFailing()) {
                 return failingMethod
