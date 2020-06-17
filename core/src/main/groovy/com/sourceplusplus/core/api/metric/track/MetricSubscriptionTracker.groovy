@@ -1,12 +1,9 @@
 package com.sourceplusplus.core.api.metric.track
 
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
-import com.sourceplusplus.api.model.QueryTimeFrame
-import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.ArtifactMetricQuery
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
-import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
 import groovy.util.logging.Slf4j
@@ -40,18 +37,11 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
     @Override
     void start() throws Exception {
         vertx.eventBus().consumer(PUBLISH_ARTIFACT_METRICS, {
-            def subscription = it.body() as ArtifactMetricSubscribeRequest
-            def appArtifact = ApplicationArtifact.builder()
-                    .appUuid(subscription.appUuid())
-                    .artifactQualifiedName(subscription.artifactQualifiedName()).build()
-            publishLatestMetrics(appArtifact, subscription.timeFrame(), subscription.metricTypes())
+            publishLatestMetrics(it.body() as ArtifactMetricSubscribeRequest)
         })
 
         vertx.eventBus().consumer(SUBSCRIBE_TO_ARTIFACT_METRICS, { request ->
             def subRequest = request.body() as ArtifactMetricSubscribeRequest
-            def appArtifact = ApplicationArtifact.builder()
-                    .appUuid(subRequest.appUuid())
-                    .artifactQualifiedName(subRequest.artifactQualifiedName()).build()
 
             core.storage.getSubscriberArtifactSubscriptions(subRequest.subscriberUuid(),
                     subRequest.appUuid(), subRequest.artifactQualifiedName(), {
@@ -83,7 +73,7 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
                     CompositeFuture.all(futures).onComplete({
                         if (it.succeeded()) {
                             request.reply(true)
-                            publishLatestMetrics(appArtifact, subRequest.timeFrame(), subRequest.metricTypes())
+                            publishLatestMetrics(subRequest)
                         } else {
                             log.error("Failed to add artifact subscription", it.cause())
                             request.fail(500, it.cause().message)
@@ -181,14 +171,13 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
         log.info("{} started", getClass().getSimpleName())
     }
 
-    private void publishLatestMetrics(ApplicationArtifact appArtifact, QueryTimeFrame timeFrame,
-                                      Set<MetricType> metricTypes) {
+    private void publishLatestMetrics(ArtifactMetricSubscribeRequest subscription) {
         def metricQuery = ArtifactMetricQuery.builder()
-                .appUuid(appArtifact.appUuid())
-                .artifactQualifiedName(appArtifact.artifactQualifiedName())
-                .metricTypes(metricTypes)
-                .timeFrame(timeFrame)
-                .start(Instant.now().minus(timeFrame.minutes, ChronoUnit.MINUTES))
+                .appUuid(subscription.appUuid())
+                .artifactQualifiedName(subscription.artifactQualifiedName())
+                .metricTypes(subscription.metricTypes())
+                .timeFrame(subscription.timeFrame()) //todo: why is time frame and start/stop needed?
+                .start(Instant.now().minus(subscription.timeFrame().minutes, ChronoUnit.MINUTES))
                 .stop(Instant.now())
                 .step("MINUTE")
                 .build()

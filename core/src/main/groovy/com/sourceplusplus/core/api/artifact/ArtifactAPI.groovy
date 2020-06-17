@@ -1,16 +1,13 @@
 package com.sourceplusplus.core.api.artifact
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.sourceplusplus.api.model.artifact.*
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
-import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
-import io.vertx.core.json.jackson.JacksonCodec
 import io.vertx.ext.web.RoutingContext
 import net.jodah.expiringmap.ExpirationPolicy
 import net.jodah.expiringmap.ExpiringMap
@@ -35,7 +32,7 @@ class ArtifactAPI extends AbstractVerticle {
 
     private static final SourceArtifactConfig EMPTY_CONFIG = SourceArtifactConfig.builder().build()
     private static final SourceArtifactStatus EMPTY_STATUS = SourceArtifactStatus.builder().build()
-    private static final Map<ApplicationArtifact, SourceArtifact> APPLICATION_ARTIFACT_CACHE = ExpiringMap.builder()
+    private static final Map<String, SourceArtifact> APPLICATION_ARTIFACT_CACHE = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.ACCESSED)
             .expiration(5, TimeUnit.MINUTES).build()
     private static final Map<String, SourceArtifact> ENDPOINT_NAME_ARTIFACT_CACHE = ExpiringMap.builder()
@@ -81,9 +78,7 @@ class ArtifactAPI extends AbstractVerticle {
             return
         }
 
-        def appArtifact = ApplicationArtifact.builder().appUuid(appUuid)
-                .artifactQualifiedName(artifactQualifiedName).build()
-        getSourceArtifactSubscriptions(appArtifact, {
+        getSourceArtifactSubscriptions(appUuid, artifactQualifiedName, {
             if (it.succeeded()) {
                 routingContext.response().setStatusCode(200)
                         .end(Json.encode(it.result()))
@@ -94,11 +89,10 @@ class ArtifactAPI extends AbstractVerticle {
         })
     }
 
-    void getSourceArtifactSubscriptions(ApplicationArtifact appArtifact,
+    void getSourceArtifactSubscriptions(String appUuid, String artifactQualifiedName,
                                         Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
-        log.info("Getting source artifact subscriptions. App UUID: {} - Artifact: {}",
-                appArtifact.appUuid(), appArtifact.artifactQualifiedName())
-        core.storage.getArtifactSubscriptions(appArtifact.appUuid(), appArtifact.artifactQualifiedName(),handler)
+        log.info("Getting source artifact subscriptions. App UUID: {} - Artifact: {}", appUuid, artifactQualifiedName)
+        core.storage.getArtifactSubscriptions(appUuid, artifactQualifiedName,handler)
     }
 
     private void unsubscribeSourceArtifactRoute(RoutingContext routingContext) {
@@ -211,9 +205,7 @@ class ArtifactAPI extends AbstractVerticle {
 
                     core.storage.updateArtifact(artifact, {
                         if (it.succeeded()) {
-                            def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
-                                    .artifactQualifiedName(artifact.artifactQualifiedName()).build()
-                            APPLICATION_ARTIFACT_CACHE.put(appArtifact, it.result())
+                            APPLICATION_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + artifact.artifactQualifiedName(), it.result())
 
                             if (it.result().config() && it.result().config().endpointName()) {
                                 ENDPOINT_NAME_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + it.result().config().endpointName(), it.result())
@@ -241,9 +233,7 @@ class ArtifactAPI extends AbstractVerticle {
                     artifact = artifact.withCreateDate(now).withLastUpdated(now)
                     core.storage.createArtifact(artifact, {
                         if (it.succeeded()) {
-                            def appArtifact = ApplicationArtifact.builder().appUuid(artifact.appUuid())
-                                    .artifactQualifiedName(artifact.artifactQualifiedName()).build()
-                            APPLICATION_ARTIFACT_CACHE.put(appArtifact, it.result())
+                            APPLICATION_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + artifact.artifactQualifiedName(), it.result())
 
                             if (it.result().config() && it.result().config().endpointName()) {
                                 ENDPOINT_NAME_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + it.result().config().endpointName(), it.result())
@@ -503,11 +493,9 @@ class ArtifactAPI extends AbstractVerticle {
 
     private void getAndCacheSourceArtifact(String appUuid, String artifactQualifiedName,
                                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        def appArtifact = ApplicationArtifact.builder().appUuid(appUuid)
-                .artifactQualifiedName(artifactQualifiedName).build()
-        if (APPLICATION_ARTIFACT_CACHE.containsKey(appArtifact)) {
+        if (APPLICATION_ARTIFACT_CACHE.containsKey(appUuid + ":" + artifactQualifiedName)) {
             handler.handle(Future.succeededFuture(Optional.ofNullable(
-                    APPLICATION_ARTIFACT_CACHE.get(appArtifact))))
+                    APPLICATION_ARTIFACT_CACHE.get(appUuid + ":" + artifactQualifiedName))))
         } else {
             log.info("Getting source artifact from storage. App UUID: {} - Artifact qualified name: {}",
                     appUuid, artifactQualifiedName)
@@ -516,9 +504,9 @@ class ArtifactAPI extends AbstractVerticle {
                     handler.handle(Future.failedFuture(it.cause()))
                 } else {
                     if (it.result().isPresent()) {
-                        APPLICATION_ARTIFACT_CACHE.put(appArtifact, it.result().get())
+                        APPLICATION_ARTIFACT_CACHE.put(appUuid + ":" + artifactQualifiedName, it.result().get())
                     } else {
-                        APPLICATION_ARTIFACT_CACHE.put(appArtifact, null)
+                        APPLICATION_ARTIFACT_CACHE.put(appUuid + ":" + artifactQualifiedName, null)
                     }
                     handler.handle(Future.succeededFuture(it.result()))
                 }
