@@ -21,7 +21,6 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.*
-import static com.sourceplusplus.api.model.trace.TraceOrderType.*
 import static com.sourceplusplus.api.util.ArtifactNameUtils.*
 
 /**
@@ -92,17 +91,20 @@ class TracesTab extends AbstractTab {
             handleArtifactTraceResult(it.body() as ArtifactTraceResult)
         })
 
-        //external portals hold more traces;
-        //this will prepopulate those portals and ensure slowest traces remain current
+        //get historical traces
         vertx.eventBus().consumer(TRACES_TAB_OPENED, {
             def portalUuid = JsonObject.mapFrom(it.body()).getString("portal_uuid")
             def portal = SourcePortal.getPortal(portalUuid)
             if (portal == null) {
                 log.warn("Ignoring traces tab opened event. Unable to find portal: {}", portalUuid)
-            } else if (portal.external) {
+            } else {
+                if (portal.external) {
+                    portal.portalUI.tracesView.viewTraceAmount = 25
+                }
+
                 def traceQuery = TraceQuery.builder()
                         .orderType(portal.portalUI.tracesView.orderType)
-                        .pageSize(25)
+                        .pageSize(portal.portalUI.tracesView.viewTraceAmount)
                         .appUuid(portal.appUuid)
                         .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
                         .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
@@ -125,38 +127,6 @@ class TracesTab extends AbstractTab {
                         log.error("Failed to get traces", it.cause())
                     }
                 })
-            }
-        })
-        vertx.setPeriodic(60_000, {
-            SourcePortal.getExternalPortals().each {
-                if (it.portalUI.currentTab == PortalTab.Traces
-                        && it.portalUI.tracesView.orderType == SLOWEST_TRACES) {
-                    def traceQuery = TraceQuery.builder()
-                            .orderType(it.portalUI.tracesView.orderType)
-                            .pageSize(25)
-                            .appUuid(it.appUuid)
-                            .artifactQualifiedName(it.portalUI.viewingPortalArtifact)
-                            .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
-                            .durationStop(Instant.now())
-                            .durationStep("SECOND").build()
-                    SourcePortalConfig.current.getCoreClient(it.appUuid).getTraces(traceQuery, {
-                        if (it.succeeded()) {
-                            def traceResult = ArtifactTraceResult.builder()
-                                    .appUuid(traceQuery.appUuid())
-                                    .artifactQualifiedName(traceQuery.artifactQualifiedName())
-                                    .orderType(traceQuery.orderType())
-                                    .start(traceQuery.durationStart())
-                                    .stop(traceQuery.durationStop())
-                                    .step(traceQuery.durationStep())
-                                    .traces(it.result().traces())
-                                    .total(it.result().total())
-                                    .build()
-                            handleArtifactTraceResult(traceResult)
-                        } else {
-                            log.error("Failed to get traces", it.cause())
-                        }
-                    })
-                }
             }
         })
 

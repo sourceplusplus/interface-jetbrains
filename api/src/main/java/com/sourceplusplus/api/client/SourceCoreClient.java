@@ -775,25 +775,6 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public TraceQueryResult getTraces(String appUuid, String artifactQualifiedName, TraceOrderType orderType) {
-        String url = sppUrl + GET_TRACES_ENDPOINT
-                .replace(":appUuid", appUuid)
-                .replace(":artifactQualifiedName", artifactQualifiedName)
-                .replace(":orderType", orderType.toString())
-                .replace(":pageSize", "10")
-                .replace(":durationStart", Instant.now().minus(14, ChronoUnit.MINUTES).toString())
-                .replace(":durationStop", Instant.now().toString())
-                .replace(":durationStep", "SECOND");
-        Request.Builder request = new Request.Builder().url(url).get();
-        addHeaders(request);
-
-        try (Response response = client.newCall(request.build()).execute()) {
-            return Json.decodeValue(response.body().string(), TraceQueryResult.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
         String url = sppUrl + GET_TRACES_ENDPOINT
                 .replace(":appUuid", traceQuery.appUuid())

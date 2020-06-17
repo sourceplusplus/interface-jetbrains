@@ -25,9 +25,14 @@ class TracesView {
     ViewType viewType = ViewType.TRACES
     String traceId
     int spanId
+    int viewTraceAmount = 10
 
     void cacheArtifactTraceResult(ArtifactTraceResult artifactTraceResult) {
-        traceResultCache.put(artifactTraceResult.orderType(), artifactTraceResult)
+        def currentTraceResult = traceResultCache.get(artifactTraceResult.orderType())
+        if (currentTraceResult) {
+            artifactTraceResult = artifactTraceResult.mergeWith(currentTraceResult)
+        }
+        traceResultCache.put(artifactTraceResult.orderType(), artifactTraceResult.truncate(viewTraceAmount))
     }
 
     ArtifactTraceResult getArtifactTraceResult() {
