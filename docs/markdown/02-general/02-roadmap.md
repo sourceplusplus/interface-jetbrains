@@ -35,7 +35,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 > Focus: Automatic artifact monitoring
 
  - Embeddable Source++ Core ([#177](https://github.com/CodeBrig/Source/issues/177)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
- - Integrated error notification ([#114](https://github.com/sourceplusplus/Assistant/issues/114)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
+ - Integrated artifact error notifications ([#114](https://github.com/sourceplusplus/Assistant/issues/114)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
  
 ## 0.4.0 (alpha)
