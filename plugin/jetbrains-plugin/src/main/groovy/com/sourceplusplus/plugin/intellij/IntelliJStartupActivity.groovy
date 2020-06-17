@@ -9,7 +9,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.sourceplusplus.api.client.SourceCoreClient
@@ -25,7 +24,6 @@ import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutte
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import com.sourceplusplus.plugin.intellij.settings.application.ApplicationSettingsDialogWrapper
 import com.sourceplusplus.plugin.intellij.settings.connect.EnvironmentDialogWrapper
-import com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
