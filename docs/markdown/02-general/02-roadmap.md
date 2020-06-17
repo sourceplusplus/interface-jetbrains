@@ -34,6 +34,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 > Focus: Automatic artifact monitoring
 
+ - Integrated error notification ([#114](https://github.com/sourceplusplus/Assistant/issues/114)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Artifact, endpoint, log, trace searching functionality
  - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
  - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
