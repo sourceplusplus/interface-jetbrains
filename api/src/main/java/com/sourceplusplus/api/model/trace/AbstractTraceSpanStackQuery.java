@@ -36,10 +36,7 @@ public interface AbstractTraceSpanStackQuery {
     }
 
     @Nullable
-    @Value.Default
-    default Boolean systemRequest() {
-        return null;
-    }
+    Boolean systemRequest();
 
     //todo: spanId and segmentId can't be null at same time
 }

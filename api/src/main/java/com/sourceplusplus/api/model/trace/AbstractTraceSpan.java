@@ -83,11 +83,8 @@ public interface AbstractTraceSpan {
     }
 
     @Nullable
-    @Value.Default
     @JsonAlias({"hasChildStack", "has_child_stack"})
-    default Boolean hasChildStack() {
-        return null;
-    }
+    Boolean hasChildStack();
 
     String layer();
 

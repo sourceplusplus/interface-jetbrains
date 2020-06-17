@@ -40,18 +40,12 @@ public interface AbstractSourceApplication extends SourceMessage {
     SourceAgentConfig agentConfig();
 
     @Nullable
-    @Value.Default
     @JsonAlias({"isCreateRequest", "create_request"})
-    default Boolean isCreateRequest() {
-        return null;
-    }
+    Boolean isCreateRequest();
 
     @Nullable
-    @Value.Default
     @JsonAlias({"isUpdateRequest", "update_request"})
-    default Boolean isUpdateRequest() {
-        return null;
-    }
+    Boolean isUpdateRequest();
 
     @Value.Check
     default void validate() {

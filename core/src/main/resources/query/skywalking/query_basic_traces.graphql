@@ -7,7 +7,8 @@
         },
         serviceId: $serviceId,
         serviceInstanceId: $serviceInstanceId,
-        endpointId: "$endpointId",
+        endpointId: $endpointId,
+        endpointName: $endpointName,
         traceState: $traceState,
         queryOrder: $queryOrder,
         paging: {

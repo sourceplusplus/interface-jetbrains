@@ -53,8 +53,6 @@ class SkywalkingIntegration extends APMIntegration {
             "query/skywalking/get_endpoint_metrics.graphql"), Charsets.UTF_8)
     private static final String QUERY_BASIC_TRACES = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/query_basic_traces.graphql"), Charsets.UTF_8)
-    private static final String QUERY_FAILING_TRACES = Resources.toString(RESOURCE_LOADER.getResource(
-            "query/skywalking/query_failing_traces.graphql"), Charsets.UTF_8)
     private static final String GET_TRACE_STACK = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
     private final ApplicationAPI applicationAPI
@@ -370,16 +368,6 @@ class SkywalkingIntegration extends APMIntegration {
     @Override
     void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
         log.debug("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
-        def actualQuery
-        if (traceQuery.orderType() == FAILED_TRACES
-                || (traceQuery.endpointId() == null && traceQuery.traceState() == "ERROR")) {
-            actualQuery = QUERY_FAILING_TRACES
-        } else {
-            actualQuery = QUERY_BASIC_TRACES
-                    .replace('$endpointId', traceQuery.endpointId())
-        }
-        def queryOrder = traceQuery.orderType() == SLOWEST_TRACES ? "BY_DURATION" : "BY_START_TIME"
-        def graphqlQuery = new JsonObject()
 
         def serviceIdStr = "null"
         if (traceQuery.serviceId() != null) {
@@ -389,23 +377,29 @@ class SkywalkingIntegration extends APMIntegration {
         if (traceQuery.serviceInstanceId() != null) {
             serviceInstanceIdStr = '"' + traceQuery.serviceInstanceId() + '"'
         }
+        def endpointIdStr = "null"
+        if (traceQuery.endpointId() != null) {
+            endpointIdStr = '"' + traceQuery.endpointId() + '"'
+        }
         def endpointNameStr = "null"
         if (traceQuery.artifactQualifiedName() != null) {
             endpointNameStr = '"' + traceQuery.artifactQualifiedName() + '"'
         } else if (traceQuery.endpointName() != null) {
             endpointNameStr = '"' + traceQuery.endpointName() + '"'
         }
-        graphqlQuery.put("query", actualQuery
+        def queryOrder = traceQuery.orderType() == SLOWEST_TRACES ? "BY_DURATION" : "BY_START_TIME"
+        def graphqlQuery = new JsonObject()
+        graphqlQuery.put("query", QUERY_BASIC_TRACES
                 .replace('$serviceId', serviceIdStr)
                 .replace('$serviceInstanceId', serviceInstanceIdStr)
+                .replace('$endpointId', endpointIdStr)
                 .replace('$endpointName', endpointNameStr)
                 .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
                 .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
                 .replace('$queryDurationStep', traceQuery.durationStep())
                 .replace('$traceState', traceQuery.traceState())
                 .replace('$queryOrder', queryOrder)
-                .replace('$pageSize', Integer.toString(traceQuery.pageSize()))
-        )
+                .replace('$pageSize', Integer.toString(traceQuery.pageSize())))
 
         webClient.post(skywalkingOAPPort, skywalkingOAPHost,
                 "/graphql").sendJsonObject(graphqlQuery, {

@@ -24,7 +24,7 @@ import java.util.List;
 @JsonDeserialize(as = Trace.class)
 public interface AbstractTrace {
 
-    @Nullable //todo: where is this null?
+    @Nullable //when partial
     String key();
 
     @JsonAlias({"operationNames"})

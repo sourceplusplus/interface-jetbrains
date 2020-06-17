@@ -205,7 +205,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                 vertx.eventBus().publish(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, traceResult)
                 log.debug("Published latest traces for artifact: " + traceResult.artifactQualifiedName())
             } else {
-                it.cause().printStackTrace()
+                log.error("Failed to get traces", it.cause())
             }
         })
     }
@@ -239,7 +239,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                     log.debug("Published slowest traces for artifact: " + traceResult.artifactQualifiedName())
                 }
             } else {
-                it.cause().printStackTrace()
+                log.error("Failed to get traces", it.cause())
             }
         })
     }
@@ -273,7 +273,7 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
                     log.debug("Published failed traces for artifact: " + traceResult.artifactQualifiedName())
                 }
             } else {
-                it.cause().printStackTrace()
+                log.error("Failed to get traces", it.cause())
             }
         })
     }

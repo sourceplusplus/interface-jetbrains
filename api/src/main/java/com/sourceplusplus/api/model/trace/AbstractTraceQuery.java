@@ -83,8 +83,5 @@ public interface AbstractTraceQuery {
     }
 
     @Nullable
-    @Value.Default
-    default Boolean systemRequest() {
-        return null;
-    }
+    Boolean systemRequest();
 }
