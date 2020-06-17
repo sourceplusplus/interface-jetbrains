@@ -2,14 +2,14 @@ package com.sourceplusplus.portal.display.tabs
 
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
-import com.sourceplusplus.api.model.internal.InnerTraceStackInfo
-import com.sourceplusplus.api.model.internal.TraceSpanInfo
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.portal.PortalBootstrap
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.coordinate.track.PortalViewTracker
 import com.sourceplusplus.portal.display.PortalTab
 import com.sourceplusplus.portal.display.tabs.views.TracesView
+import com.sourceplusplus.portal.model.traces.InnerTraceStackInfo
+import com.sourceplusplus.portal.model.traces.TraceSpanInfo
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray

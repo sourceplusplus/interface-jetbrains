@@ -5,14 +5,14 @@ import com.codahale.metrics.UniformReservoir
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
-import com.sourceplusplus.api.model.internal.BarTrendCard
-import com.sourceplusplus.api.model.internal.SplineChart
-import com.sourceplusplus.api.model.internal.SplineSeriesData
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
+import com.sourceplusplus.portal.model.overview.BarTrendCard
+import com.sourceplusplus.portal.model.overview.SplineChart
+import com.sourceplusplus.portal.model.overview.SplineSeriesData
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -170,7 +170,7 @@ class OverviewTab extends AbstractTab {
         def splintChart = SplineChart.builder()
                 .metricType(artifactMetrics.metricType())
                 .timeFrame(metricResult.timeFrame())
-                .addSeriesData(seriesDataBuilder.build())
+                .seriesData(Collections.singletonList(seriesDataBuilder.build()))
                 .build()
 
         def portalUuid = portal.portalUuid
