@@ -1,7 +1,6 @@
 package com.sourceplusplus.plugin.intellij
 
 import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerImpl
-import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
@@ -15,6 +14,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.sourceplusplus.api.client.SourceCoreClient
 import com.sourceplusplus.api.model.SourceMessage
+import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.config.SourceEnvironmentConfig
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.core.SourceCoreServer
@@ -30,10 +30,6 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.apache.commons.io.IOUtils
-import org.apache.log4j.AppenderSkeleton
-import org.apache.log4j.Level
-import org.apache.log4j.Logger
-import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
 
 import javax.swing.*
@@ -62,42 +58,6 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         }
         System.setProperty("vertx.disableFileCPResolving", "true")
         Disposer.register(project, this)
-
-        //redirect loggers to console
-        def consoleView = ServiceManager.getService(project, SourcePluginConsoleService.class).getConsoleView()
-        Logger.getLogger("com.sourceplusplus").addAppender(new AppenderSkeleton() {
-            @Override
-            protected void append(LoggingEvent loggingEvent) {
-                Object message = loggingEvent.message
-                if (loggingEvent.level.isGreaterOrEqual(Level.WARN)) {
-                    if (message.toString().startsWith("[PORTAL]")) {
-                        consoleView.print(message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
-                    } else {
-                        def module = loggingEvent.logger.getName().replace("com.sourceplusplus.", "")
-                        module = module.substring(0, module.indexOf(".")).toUpperCase()
-                        consoleView.print("[$module] - " + message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
-                    }
-                } else if (loggingEvent.level.isGreaterOrEqual(Level.INFO)) {
-                    if (message.toString().startsWith("[PORTAL]")) {
-                        consoleView.print(message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
-                    } else {
-                        def module = loggingEvent.logger.getName().replace("com.sourceplusplus.", "")
-                        module = module.substring(0, module.indexOf(".")).toUpperCase()
-                        consoleView.print("[$module] - " + message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
-                    }
-                }
-            }
-
-            @Override
-            void close() {
-            }
-
-            @Override
-            boolean requiresLayout() {
-                return false
-            }
-        })
-        Disposer.register(project, consoleView)
 
         log.info("Loading Source++ for project: {} ({})", project.name, project.getPresentableUrl())
         currentProject = project
@@ -169,12 +129,12 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                 } else {
                     SourcePluginConfig.current.activeEnvironment.coreClient = coreClient
                     if (SourcePluginConfig.current.activeEnvironment.appUuid == null) {
-                        doApplicationSettingsDialog()
+                        determineSourceApplication()
                     } else {
                         coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
                             if (it.failed() || !it.result().isPresent()) {
                                 SourcePluginConfig.current.activeEnvironment.appUuid = null
-                                doApplicationSettingsDialog()
+                                determineSourceApplication()
                             } else {
                                 startSourcePlugin(coreClient)
                             }
@@ -223,7 +183,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         SourcePluginConfig.current.setEnvironments([env])
         SourcePluginConfig.current.activeEnvironment = env
         PropertiesComponent.getInstance().setValue("spp_plugin_config", Json.encode(SourcePluginConfig.current))
-        doApplicationSettingsDialog()
+        determineSourceApplication()
     }
 
     private static notifyNoConnection() {
@@ -245,12 +205,12 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                             coreClient.ping({
                                 if (it.succeeded()) {
                                     if (SourcePluginConfig.current.activeEnvironment?.appUuid == null) {
-                                        doApplicationSettingsDialog()
+                                        determineSourceApplication()
                                     } else {
                                         coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
                                             if (it.failed() || !it.result().isPresent()) {
                                                 SourcePluginConfig.current.activeEnvironment.appUuid = null
-                                                doApplicationSettingsDialog()
+                                                determineSourceApplication()
                                             } else {
                                                 startSourcePlugin(coreClient)
                                             }
@@ -291,22 +251,63 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
         DaemonCodeAnalyzerImpl.getInstance(currentProject).restart()
     }
 
-    private static void doApplicationSettingsDialog() {
-        Notifications.Bus.notify(
-                new Notification("Source++", "Application Required",
-                        "Last step, Source++ also requires this project to be linked with a new or existing application. Please <a href=\"#\">choose</a> here.",
-                        NotificationType.INFORMATION, new NotificationListener() {
-                    @Override
-                    void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
-                        def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
-                        if (SourcePluginConfig.current.activeEnvironment.apiKey) {
-                            coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
+    private static void determineSourceApplication() {
+        def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
+        if (SourcePluginConfig.current.activeEnvironment.apiKey) {
+            coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
+        }
+
+        ApplicationManager.getApplication().invokeLater {
+            def applicationSettings = new ApplicationSettingsDialogWrapper(currentProject, coreClient)
+            def appDomain = applicationSettings.applicationSettingsDialog.applicationDomain
+            if (!appDomain.isEmpty()) {
+                //create/get auto-detected application
+                coreClient.getApplications({
+                    if (it.succeeded()) {
+                       def existingProject = it.result().find { it.appName() == currentProject.name}
+                        if (!existingProject) {
+                            coreClient.createApplication(SourceApplication.builder().isCreateRequest(true)
+                                    .appName(currentProject.name).build(), {
+                                if (it.succeeded()) {
+                                    SourcePluginConfig.current.activeEnvironment.appUuid = it.result().appUuid()
+                                    SourcePluginConfig.current.getEnvironment(SourcePluginConfig.current.activeEnvironment.environmentName).appUuid = it.result().appUuid()
+                                    PropertiesComponent.getInstance().setValue("spp_plugin_config", Json.encode(SourcePluginConfig.current))
+                                    startSourcePlugin(coreClient)
+                                } else {
+                                    log.error("Failed to create application", it.cause())
+                                }
+                            })
+                        } else {
+                            SourcePluginConfig.current.activeEnvironment.appUuid = existingProject.appUuid()
+                            SourcePluginConfig.current.getEnvironment(SourcePluginConfig.current.activeEnvironment.environmentName).appUuid = existingProject.appUuid()
+                            PropertiesComponent.getInstance().setValue("spp_plugin_config", Json.encode(SourcePluginConfig.current))
+                            startSourcePlugin(coreClient)
                         }
-                        def applicationSettings = new ApplicationSettingsDialogWrapper(currentProject, coreClient)
-                        applicationSettings.createCenterPanel()
-                        applicationSettings.show()
+                    } else {
+                        log.error("Failed to get applications", it.cause())
                     }
-                }))
+                })
+            } else {
+                doApplicationSettingsDialog()
+            }
+        }
+    }
+
+    private static void doApplicationSettingsDialog() {
+        Notifications.Bus.notify(new Notification("Source++", "Application Required",
+                "Last step, Source++ also requires this project to be linked with a new or existing application. Please <a href=\"#\">choose</a> here.",
+                NotificationType.INFORMATION, new NotificationListener() {
+            @Override
+            void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
+                def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
+                if (SourcePluginConfig.current.activeEnvironment.apiKey) {
+                    coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
+                }
+                def applicationSettings = new ApplicationSettingsDialogWrapper(currentProject, coreClient)
+                applicationSettings.createCenterPanel()
+                applicationSettings.show()
+            }
+        }))
     }
 
     private static void registerPluginCodecs() {

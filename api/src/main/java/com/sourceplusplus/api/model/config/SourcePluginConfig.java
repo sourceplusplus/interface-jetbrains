@@ -18,7 +18,7 @@ public final class SourcePluginConfig {
 
     public static final transient SourcePluginConfig current = defaultConfiguration();
     private volatile Set<SourceEnvironmentConfig> environments = new HashSet<>();
-    public volatile SourceEnvironmentConfig activeEnvironment = null;
+    public volatile SourceEnvironmentConfig activeEnvironment = null; //todo: environments.contains(activeEnvironment) should be true by reference
     public volatile boolean classVirtualTextMarksEnabled = false;
     public volatile boolean methodVirtualTextMarksEnabled = false;
     public volatile boolean classGutterMarksEnabled = false;

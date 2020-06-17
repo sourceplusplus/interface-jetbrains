@@ -51,6 +51,10 @@ class ApplicationSettingsDialogWrapper extends DialogWrapper {
         })
     }
 
+    ApplicationSettingsDialog getApplicationSettingsDialog() {
+        return applicationSettings
+    }
+
     boolean getOkayAction() {
         return okayAction
     }
