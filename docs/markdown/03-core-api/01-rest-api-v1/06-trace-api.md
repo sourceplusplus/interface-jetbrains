@@ -24,7 +24,7 @@ The Trace API allows you to store and retrieve distributed traces. You can use t
 **Request [ArtifactTraceSubscribeRequest]**:
 ```json
 {
-   "time_frame": "LAST_15_MINUTES",
+   "time_frame": "LAST_5_MINUTES",
    "order_type": "LATEST_TRACES"
 }
 ```

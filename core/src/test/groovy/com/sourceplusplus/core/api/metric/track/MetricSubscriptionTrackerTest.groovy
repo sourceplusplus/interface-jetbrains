@@ -108,7 +108,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
             def async = test.async()
             def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
                     .addMetricTypes(Throughput_Average)
-                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(metricSubscribeRequest, {
@@ -156,7 +156,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
             def async = test.async()
             def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
                     .addMetricTypes(Throughput_Average)
-                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(metricSubscribeRequest, {
@@ -181,7 +181,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
 
             def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
                     .addMetricTypes(Throughput_Average)
-                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(metricSubscribeRequest, {
@@ -219,7 +219,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
 
             def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
                     .addMetricTypes(Throughput_Average)
-                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(metricSubscribeRequest, {
@@ -234,7 +234,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
             def unsubMetricRequest = ArtifactMetricUnsubscribeRequest.builder()
                     .addRemoveMetricTypes(Throughput_Average)
                     .appUuid(application.appUuid())
-                    .addRemoveTimeFrames(QueryTimeFrame.LAST_15_MINUTES)
+                    .addRemoveTimeFrames(QueryTimeFrame.LAST_5_MINUTES)
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
 
             coreClient.unsubscribeFromArtifactMetrics(unsubMetricRequest, {
@@ -267,7 +267,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
             def async = test.async()
             def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
                     .addMetricTypes(Throughput_Average, ResponseTime_Average)
-                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(metricSubscribeRequest, {
@@ -320,7 +320,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
             def subRequest1 = Promise.promise().future()
             def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
                     .addMetricTypes(Throughput_Average)
-                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(metricSubscribeRequest, subRequest1)
@@ -348,7 +348,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
                                 def subscription = subscriptions.get(0) as ArtifactMetricSubscribeRequest
                                 test.assertEquals("com.company.TestClass.testMethod()", subscription.artifactQualifiedName())
                                 test.assertEquals(SourceArtifactSubscriptionType.METRICS, subscription.type)
-                                test.assertEquals(QueryTimeFrame.LAST_15_MINUTES, subscription.timeFrame())
+                                test.assertEquals(QueryTimeFrame.LAST_5_MINUTES, subscription.timeFrame())
                                 async.complete()
                             })
                         } else {
@@ -375,14 +375,14 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
             def async = test.async()
             def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
                     .addMetricTypes(Throughput_Average, ResponseTime_Average)
-                    .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("com.company.TestClass.testMethod()").build()
             coreClient.subscribeToArtifact(metricSubscribeRequest, {
                 if (it.succeeded()) {
                     def metricUnsubscribeRequest = ArtifactMetricUnsubscribeRequest.builder()
                             .addRemoveTimeFramedMetricTypes(TimeFramedMetricType.builder()
-                                    .metricType(ResponseTime_Average).timeFrame(QueryTimeFrame.LAST_15_MINUTES).build())
+                                    .metricType(ResponseTime_Average).timeFrame(QueryTimeFrame.LAST_5_MINUTES).build())
                             .appUuid(application.appUuid())
                             .artifactQualifiedName("com.company.TestClass.testMethod()").build()
 
@@ -400,7 +400,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
                                 def subscription = subscriptions.get(0) as ArtifactMetricSubscribeRequest
                                 test.assertEquals("com.company.TestClass.testMethod()", subscription.artifactQualifiedName())
                                 test.assertEquals(SourceArtifactSubscriptionType.METRICS, subscription.type)
-                                test.assertEquals(QueryTimeFrame.LAST_15_MINUTES, subscription.timeFrame())
+                                test.assertEquals(QueryTimeFrame.LAST_5_MINUTES, subscription.timeFrame())
                                 test.assertEquals(1, subscription.metricTypes().size())
                                 test.assertTrue(subscription.metricTypes().contains(Throughput_Average))
                                 async.complete()

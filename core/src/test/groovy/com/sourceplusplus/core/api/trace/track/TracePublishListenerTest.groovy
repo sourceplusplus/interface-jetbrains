@@ -33,7 +33,7 @@ class TracePublishListenerTest extends SourceCoreAPITest {
                     if (it.succeeded()) {
                         def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
                                 .addOrderTypes(TraceOrderType.LATEST_TRACES)
-                                .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                                .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                                 .appUuid(application.appUuid())
                                 .artifactQualifiedName("com.company.TestClass.testMethod()").build()
                         coreClient.subscribeToArtifact(traceSubscribeRequest, {

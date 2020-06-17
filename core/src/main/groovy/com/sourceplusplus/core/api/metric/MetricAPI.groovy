@@ -123,7 +123,7 @@ class MetricAPI extends AbstractVerticle {
 //        def durationStep = routingContext.request().getParam("durationStep")
 //
 //        def metricType = MetricType.Throughput_Average //todo: dynamic
-//        def orderType = QueryTimeFrame.LAST_15_MINUTES //todo: dynamic
+//        def orderType = QueryTimeFrame.LAST_5_MINUTES //todo: dynamic
 //        def timeFramedMetricType = TimeFramedMetricType.builder().metricType(metricType).orderType(orderType).build()
 //        def metricQuery = ArtifactMetricQuery.builder()
 //                .timeFramedMetricType(timeFramedMetricType)
