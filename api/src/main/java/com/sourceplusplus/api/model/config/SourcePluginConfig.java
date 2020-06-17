@@ -17,8 +17,8 @@ import java.util.*;
 public final class SourcePluginConfig {
 
     public static final transient SourcePluginConfig current = defaultConfiguration();
-    private volatile Set<SourceEnvironmentConfig> environments = new HashSet<>();
-    public volatile SourceEnvironmentConfig activeEnvironment = null; //todo: environments.contains(activeEnvironment) should be true by reference
+    private volatile Set<SourceEnvironmentConfig> environments = new HashSet<>(); //todo: environments.contains(activeEnvironment) should be true by reference
+    public volatile SourceEnvironmentConfig activeEnvironment = null; //todo: could add active flag to SourceEnvironmentConfig and remove this
     public volatile boolean classVirtualTextMarksEnabled = false;
     public volatile boolean methodVirtualTextMarksEnabled = false;
     public volatile boolean classGutterMarksEnabled = false;
