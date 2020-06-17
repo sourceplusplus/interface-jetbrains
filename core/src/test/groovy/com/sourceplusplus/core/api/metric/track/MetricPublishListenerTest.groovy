@@ -34,7 +34,7 @@ class MetricPublishListenerTest extends SourceCoreAPITest {
                     if (it.succeeded()) {
                         def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
                                 .addMetricTypes(Throughput_Average)
-                                .timeFrame(QueryTimeFrame.LAST_15_MINUTES)
+                                .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                                 .appUuid(application.appUuid())
                                 .artifactQualifiedName("com.company.TestClass.testMethod()").build()
                         coreClient.subscribeToArtifact(metricSubscribeRequest, {
@@ -58,7 +58,7 @@ class MetricPublishListenerTest extends SourceCoreAPITest {
                 def metricResult = it.body() as ArtifactMetricResult
                 test.assertEquals(application.appUuid(), metricResult.appUuid())
                 test.assertEquals("com.company.TestClass.testMethod()", metricResult.artifactQualifiedName())
-                test.assertEquals(QueryTimeFrame.LAST_15_MINUTES, metricResult.timeFrame())
+                test.assertEquals(QueryTimeFrame.LAST_5_MINUTES, metricResult.timeFrame())
                 test.assertEquals(1, metricResult.artifactMetrics().size())
                 test.assertEquals(Throughput_Average, metricResult.artifactMetrics()[0].metricType())
                 async.countDown()

@@ -1,7 +1,7 @@
 console.log("Overview tab started");
 
 var currentMetricType = "Throughput_Average";
-var currentTimeFrame = "LAST_15_MINUTES";
+var currentTimeFrame = "LAST_5_MINUTES";
 
 console.log("Connecting portal");
 eb.onopen = function () {

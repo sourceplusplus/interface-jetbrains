@@ -1,5 +1,6 @@
 package test.integration.trace
 
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.config.SourceAgentConfig
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
@@ -146,6 +147,7 @@ class TraceAPITest extends SourceCoreAPITest {
         }).test("testCallDepth2-check_trace_data", { test ->
             def async = test.async()
             def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .addOrderTypes(TraceOrderType.LATEST_TRACES)
                     .appUuid(application.appUuid())
                     .artifactQualifiedName("test.integration.trace.TraceTest.threeStaticMethodCallDepth()").build()
@@ -155,6 +157,7 @@ class TraceAPITest extends SourceCoreAPITest {
                 }
 
                 traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                        .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                         .addOrderTypes(TraceOrderType.LATEST_TRACES)
                         .appUuid(application.appUuid())
                         .artifactQualifiedName("test.integration.trace.TraceTest.firstMethod()").build()

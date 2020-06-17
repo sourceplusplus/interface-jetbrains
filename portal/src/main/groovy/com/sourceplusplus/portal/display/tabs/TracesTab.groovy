@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.display.tabs
 
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.internal.InnerTraceStackInfo
 import com.sourceplusplus.api.model.internal.TraceSpanInfo
@@ -20,7 +21,6 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.*
-import static com.sourceplusplus.api.model.trace.TraceOrderType.*
 import static com.sourceplusplus.api.util.ArtifactNameUtils.*
 
 /**
@@ -72,11 +72,12 @@ class TracesTab extends AbstractTab {
             SourcePortal.ensurePortalActive(portal)
             updateUI(portal)
 
-            //subscribe (re-subscribe) to get latest stats
+            //subscribe (re-subscribe) to get traces as they are created
             def subscribeRequest = ArtifactTraceSubscribeRequest.builder()
                     .appUuid(portal.appUuid)
                     .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
-                    .addOrderTypes(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
+                    .addOrderTypes(portal.portalUI.tracesView.orderType)
+                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
                     .build()
             SourcePortalConfig.current.getCoreClient(portal.appUuid).subscribeToArtifact(subscribeRequest, {
                 if (it.succeeded()) {
@@ -90,17 +91,20 @@ class TracesTab extends AbstractTab {
             handleArtifactTraceResult(it.body() as ArtifactTraceResult)
         })
 
-        //external portals hold more traces;
-        //this will prepopulate those portals and ensure slowest traces remain current
+        //get historical traces
         vertx.eventBus().consumer(TRACES_TAB_OPENED, {
             def portalUuid = JsonObject.mapFrom(it.body()).getString("portal_uuid")
             def portal = SourcePortal.getPortal(portalUuid)
             if (portal == null) {
                 log.warn("Ignoring traces tab opened event. Unable to find portal: {}", portalUuid)
-            } else if (portal.external) {
+            } else {
+                if (portal.external) {
+                    portal.portalUI.tracesView.viewTraceAmount = 25
+                }
+
                 def traceQuery = TraceQuery.builder()
                         .orderType(portal.portalUI.tracesView.orderType)
-                        .pageSize(25)
+                        .pageSize(portal.portalUI.tracesView.viewTraceAmount)
                         .appUuid(portal.appUuid)
                         .artifactQualifiedName(portal.portalUI.viewingPortalArtifact)
                         .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
@@ -123,38 +127,6 @@ class TracesTab extends AbstractTab {
                         log.error("Failed to get traces", it.cause())
                     }
                 })
-            }
-        })
-        vertx.setPeriodic(60_000, {
-            SourcePortal.getExternalPortals().each {
-                if (it.portalUI.currentTab == PortalTab.Traces
-                        && it.portalUI.tracesView.orderType == SLOWEST_TRACES) {
-                    def traceQuery = TraceQuery.builder()
-                            .orderType(it.portalUI.tracesView.orderType)
-                            .pageSize(25)
-                            .appUuid(it.appUuid)
-                            .artifactQualifiedName(it.portalUI.viewingPortalArtifact)
-                            .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
-                            .durationStop(Instant.now())
-                            .durationStep("SECOND").build()
-                    SourcePortalConfig.current.getCoreClient(it.appUuid).getTraces(traceQuery, {
-                        if (it.succeeded()) {
-                            def traceResult = ArtifactTraceResult.builder()
-                                    .appUuid(traceQuery.appUuid())
-                                    .artifactQualifiedName(traceQuery.artifactQualifiedName())
-                                    .orderType(traceQuery.orderType())
-                                    .start(traceQuery.durationStart())
-                                    .stop(traceQuery.durationStop())
-                                    .step(traceQuery.durationStep())
-                                    .traces(it.result().traces())
-                                    .total(it.result().total())
-                                    .build()
-                            handleArtifactTraceResult(traceResult)
-                        } else {
-                            log.error("Failed to get traces", it.cause())
-                        }
-                    })
-                }
             }
         })
 
@@ -194,21 +166,24 @@ class TracesTab extends AbstractTab {
             def representation = portal.portalUI.tracesView
             representation.viewType = TracesView.ViewType.TRACES
 
-            if (representation.rootArtifactQualifiedName == null) {
-                if (representation.innerLevel > 0) {
-                    representation.viewType = TracesView.ViewType.TRACE_STACK
-                    representation.innerLevel-- //todo: can use innerTraceStack size
-                    representation.innerTrace = representation.innerLevel > 0
-                    representation.innerTraceStack.pop()
+            if (representation.innerTraceStack.size() > 0) {
+                representation.viewType = TracesView.ViewType.TRACE_STACK
+                def stack = representation.innerTraceStack.pop()
+
+                if (representation.innerTrace) {
+                    updateUI(portal)
+                } else if (!portal.external) {
+                    //navigating back to parent stack
+                    def rootArtifactQualifiedName = stack.getJsonObject(0).getString("root_artifact_qualified_name")
+                    vertx.eventBus().send(NAVIGATE_TO_ARTIFACT.address,
+                            new JsonObject().put("portal_uuid", portal.portalUuid)
+                                    .put("artifact_qualified_name", rootArtifactQualifiedName)
+                                    .put("parent_stack_navigation", true))
+                } else {
+                    updateUI(portal)
                 }
-                updateUI(portal)
             } else {
-                //navigating back to parent stack
-                vertx.eventBus().send(NAVIGATE_TO_ARTIFACT.address,
-                        new JsonObject().put("portal_uuid", portal.portalUuid)
-                                .put("artifact_qualified_name", representation.rootArtifactQualifiedName)
-                                .put("parent_stack_navigation", true)
-                )
+                updateUI(portal)
             }
         })
 
@@ -301,7 +276,7 @@ class TracesTab extends AbstractTab {
 
        if (representation.innerTrace && representation.viewType != TracesView.ViewType.SPAN_INFO) {
             def innerTraceStackInfo = InnerTraceStackInfo.builder()
-                    .innerLevel(representation.innerLevel)
+                    .innerLevel(representation.innerTraceStack.size())
                     .traceStack(representation.innerTraceStack.peek()).build()
             vertx.eventBus().publish(portal.portalUuid + "-DisplayInnerTraceStack",
                     new JsonObject(Json.encode(innerTraceStackInfo)))
@@ -340,11 +315,8 @@ class TracesTab extends AbstractTab {
                             vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
                         } else {
                             def queryResult = it.result()
-                            def innerLevel = representation.innerLevel + 1
                             def spanTracesView = portal.portalUI.tracesView
                             spanTracesView.viewType = TracesView.ViewType.TRACE_STACK
-                            spanTracesView.innerTrace = true
-                            spanTracesView.innerLevel = innerLevel
                             spanTracesView.innerTraceStack.push(handleTraceStack(
                                     portal.appUuid, portal.portalUI.viewingPortalArtifact, queryResult))
 
@@ -385,17 +357,8 @@ class TracesTab extends AbstractTab {
                                     portal.portalUI.tracesView.viewType = TracesView.ViewType.TRACE_STACK
 
                                     def queryResult = it.result()
-                                    def innerLevel = representation.innerLevel + 1
                                     def spanTracesView = spanPortal.get().portalUI.tracesView
-                                    if (span.getString("type") == "Exit"
-                                            && queryResult.traceSpans().get(0).type() == "Entry") {
-                                        innerLevel = 0
-                                    } else {
-                                        spanTracesView.rootArtifactQualifiedName = portal.portalUI.viewingPortalArtifact
-                                    }
                                     spanTracesView.viewType = TracesView.ViewType.TRACE_STACK
-                                    spanTracesView.innerTrace = true
-                                    spanTracesView.innerLevel = innerLevel
                                     spanTracesView.innerTraceStack.push(handleTraceStack(
                                             portal.appUuid, portal.portalUI.viewingPortalArtifact, queryResult))
                                     vertx.eventBus().send(NAVIGATE_TO_ARTIFACT.address,

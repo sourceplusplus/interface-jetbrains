@@ -79,6 +79,8 @@ public class SourceCoreClient implements SourceClient {
     private static final String SOURCE_ARTIFACT_ENDPOINT_BASE = String.format(
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName", SPP_API_VERSION);
     private static final String GET_SOURCE_ARTIFACT_ENDPOINT = SOURCE_ARTIFACT_ENDPOINT_BASE;
+    private static final String GET_SOURCE_ARTIFACT_SUBSCRIPTIONS_ENDPOINT = String.format(
+            SOURCE_ARTIFACT_ENDPOINT_BASE + "/subscriptions", SPP_API_VERSION);
     private static final String CONFIGURE_SOURCE_ARTIFACT_ENDPOINT = String.format(
             SOURCE_ARTIFACT_ENDPOINT_BASE + "/config", SPP_API_VERSION);
     private static final String UNSUBSCRIBE_SOURCE_ARTIFACT_ENDPOINT = String.format(
@@ -740,6 +742,24 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
+    public void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,
+                                         Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
+        String url = sppUrl + GET_SOURCE_ARTIFACT_SUBSCRIPTIONS_ENDPOINT
+                .replace(":appUuid", appUuid)
+                .replace(":artifactQualifiedName", URLEncoder.encode(artifactQualifiedName));
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            List<ArtifactSubscribeRequest> artifacts = JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<ArtifactSubscribeRequest>>() {
+                    });
+            handler.handle(Future.succeededFuture(artifacts));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
     public void getArtifactConfig(String appUuid, String artifactQualifiedName,
                                   Handler<AsyncResult<SourceArtifactConfig>> handler) {
         String url = sppUrl + GET_SOURCE_ARTIFACT_CONFIGURATION_ENDPOINT
@@ -752,25 +772,6 @@ public class SourceCoreClient implements SourceClient {
             handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceArtifactConfig.class)));
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
-        }
-    }
-
-    public TraceQueryResult getTraces(String appUuid, String artifactQualifiedName, TraceOrderType orderType) {
-        String url = sppUrl + GET_TRACES_ENDPOINT
-                .replace(":appUuid", appUuid)
-                .replace(":artifactQualifiedName", artifactQualifiedName)
-                .replace(":orderType", orderType.toString())
-                .replace(":pageSize", "10")
-                .replace(":durationStart", Instant.now().minus(14, ChronoUnit.MINUTES).toString())
-                .replace(":durationStop", Instant.now().toString())
-                .replace(":durationStep", "SECOND");
-        Request.Builder request = new Request.Builder().url(url).get();
-        addHeaders(request);
-
-        try (Response response = client.newCall(request.build()).execute()) {
-            return Json.decodeValue(response.body().string(), TraceQueryResult.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 

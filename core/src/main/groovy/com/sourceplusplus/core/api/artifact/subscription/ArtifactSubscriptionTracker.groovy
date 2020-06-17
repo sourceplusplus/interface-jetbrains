@@ -1,7 +1,6 @@
 package com.sourceplusplus.core.api.artifact.subscription
 
 import com.sourceplusplus.api.model.artifact.*
-import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.metric.ArtifactMetricUnsubscribeRequest
 import com.sourceplusplus.api.model.trace.ArtifactTraceUnsubscribeRequest
 import com.sourceplusplus.core.SourceCore
@@ -33,7 +32,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
 
     public static final String SUBSCRIBE_TO_ARTIFACT = "SubscribeToArtifact"
     public static final String UNSUBSCRIBE_FROM_ARTIFACT = "UnsubscribeFromArtifact"
-    public static final String GET_ARTIFACT_SUBSCRIPTIONS = "GetArtifactSubscriptions"
     public static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "RefreshSubscriberApplicationSubscriptions"
     public static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS = "GetSubscriberApplicationSubscriptions"
 
@@ -70,17 +68,6 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
         })
         vertx.eventBus().consumer(UNSUBSCRIBE_FROM_ARTIFACT, {
             unsubscribeFromArtifact(it as Message<ArtifactUnsubscribeRequest>)
-        })
-        vertx.eventBus().consumer(GET_ARTIFACT_SUBSCRIPTIONS, { msg ->
-            def appArtifact = msg.body() as ApplicationArtifact
-            core.storage.getArtifactSubscriptions(appArtifact.appUuid(), appArtifact.artifactQualifiedName(), {
-                if (it.succeeded()) {
-                    msg.reply(Json.encode(it.result()))
-                } else {
-                    log.error("Failed to get artifact subscriptions", it.cause())
-                    msg.fail(500, it.cause().message)
-                }
-            })
         })
         vertx.eventBus().consumer(REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS, { msg ->
             def request = msg.body() as JsonObject

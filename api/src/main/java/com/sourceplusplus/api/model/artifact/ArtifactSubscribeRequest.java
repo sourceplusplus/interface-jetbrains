@@ -10,6 +10,7 @@ import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 
 /**
  * Used to subscribe to artifact metrics/traces.
@@ -31,6 +32,10 @@ public interface ArtifactSubscribeRequest extends SourceMessage {
 
     @Nullable
     String artifactQualifiedName();
+
+    @Nullable
+    @Value.Auxiliary
+    Instant subscribeDate();
 
     @Value.Default
     default String subscriberUuid() {

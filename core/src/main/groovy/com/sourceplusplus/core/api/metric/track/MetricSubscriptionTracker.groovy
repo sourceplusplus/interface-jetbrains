@@ -56,23 +56,27 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
             core.storage.getSubscriberArtifactSubscriptions(subRequest.subscriberUuid(),
                     subRequest.appUuid(), subRequest.artifactQualifiedName(), {
                 if (it.succeeded()) {
-                    boolean updatedSubscription = false
+                    boolean createSubscription = true
                     def futures = []
                     it.result().findAll { it.type == METRICS }.each {
                         def currentSubscription = it as ArtifactMetricSubscribeRequest
                         if (subRequest.timeFrame() == currentSubscription.timeFrame()) {
-                            def promise = Promise.promise()
-                            futures.add(promise)
+                            if (subRequest != currentSubscription) {
+                                def promise = Promise.promise()
+                                futures.add(promise)
 
-                            subRequest = subRequest.withMetricTypes(
-                                    currentSubscription.metricTypes() + subRequest.metricTypes())
-                            core.storage.updateArtifactSubscription(currentSubscription, subRequest, promise)
-                            updatedSubscription = true
+                                subRequest = currentSubscription.withSubscribeDate(Instant.now())
+                                        .withMetricTypes(currentSubscription.metricTypes() + subRequest.metricTypes())
+                                core.storage.updateArtifactSubscription(currentSubscription, subRequest, promise)
+                            }
+                            createSubscription = false
                         }
                     }
-                    if (!updatedSubscription) {
+                    if (createSubscription) {
                         def promise = Promise.promise()
                         futures.add(promise)
+
+                        subRequest = subRequest.withSubscribeDate(Instant.now())
                         core.storage.createArtifactSubscription(subRequest, promise)
                     }
 
@@ -184,7 +188,7 @@ class MetricSubscriptionTracker extends ArtifactSubscriptionTracker {
                 .artifactQualifiedName(appArtifact.artifactQualifiedName())
                 .metricTypes(metricTypes)
                 .timeFrame(timeFrame)
-                .start(Instant.now().minus(timeFrame.minutes - 1, ChronoUnit.MINUTES))
+                .start(Instant.now().minus(timeFrame.minutes, ChronoUnit.MINUTES))
                 .stop(Instant.now())
                 .step("MINUTE")
                 .build()

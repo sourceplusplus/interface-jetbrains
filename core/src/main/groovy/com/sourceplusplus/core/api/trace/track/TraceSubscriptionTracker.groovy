@@ -1,7 +1,6 @@
 package com.sourceplusplus.core.api.trace.track
 
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
-import com.sourceplusplus.api.model.internal.ApplicationArtifact
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
@@ -36,67 +35,64 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
     void start() throws Exception {
         vertx.eventBus().consumer(PUBLISH_ARTIFACT_TRACES, {
             def subscription = it.body() as ArtifactTraceSubscribeRequest
-            def appArtifact = ApplicationArtifact.builder()
-                    .appUuid(subscription.appUuid())
-                    .artifactQualifiedName(subscription.artifactQualifiedName()).build()
             subscription.orderTypes().each {
                 switch (it) { //todo: add time frame to publish params
                     case TraceOrderType.LATEST_TRACES:
-                        publishLatestTraces(appArtifact)
+                        publishLatestTraces(subscription)
                         break
                     case TraceOrderType.SLOWEST_TRACES:
-                        publishSlowestTraces(appArtifact)
+                        publishSlowestTraces(subscription)
                         break
                     case TraceOrderType.FAILED_TRACES:
-                        publishFailedTraces(appArtifact)
+                        publishFailedTraces(subscription)
                         break
                 }
             }
         })
 
         vertx.eventBus().consumer(SUBSCRIBE_TO_ARTIFACT_TRACES, { request ->
-            def subRequest = request.body() as ArtifactTraceSubscribeRequest
-            def appArtifact = ApplicationArtifact.builder()
-                    .appUuid(subRequest.appUuid())
-                    .artifactQualifiedName(subRequest.artifactQualifiedName()).build()
-
-            core.storage.getSubscriberArtifactSubscriptions(subRequest.subscriberUuid(),
-                    subRequest.appUuid(), subRequest.artifactQualifiedName(), {
+            def newSubscription = request.body() as ArtifactTraceSubscribeRequest
+            core.storage.getSubscriberArtifactSubscriptions(newSubscription.subscriberUuid(),
+                    newSubscription.appUuid(), newSubscription.artifactQualifiedName(), {
                 if (it.succeeded()) {
-                    boolean updatedSubscription = false
+                    boolean createSubscription = true
                     def futures = []
                     it.result().findAll { it.type == TRACES }.each {
                         def currentSubscription = it as ArtifactTraceSubscribeRequest
-                        if (subRequest.timeFrame() == currentSubscription.timeFrame()) {
-                            def promise = Promise.promise()
-                            futures.add(promise)
+                        if (newSubscription.timeFrame() == currentSubscription.timeFrame()) {
+                            if (newSubscription != currentSubscription) {
+                                def promise = Promise.promise()
+                                futures.add(promise)
 
-                            subRequest = subRequest.withOrderTypes(
-                                    currentSubscription.orderTypes() + subRequest.orderTypes())
-                            core.storage.updateArtifactSubscription(currentSubscription, subRequest, promise)
-                            updatedSubscription = true
+                                newSubscription = currentSubscription.withSubscribeDate(Instant.now())
+                                        .withOrderTypes(currentSubscription.orderTypes() + newSubscription.orderTypes())
+                                core.storage.updateArtifactSubscription(currentSubscription, newSubscription, promise)
+                            }
+                            createSubscription = false
                         }
                     }
-                    if (!updatedSubscription) {
+                    if (createSubscription) {
                         def promise = Promise.promise()
                         futures.add(promise)
-                        core.storage.createArtifactSubscription(subRequest, promise)
+
+                        newSubscription = newSubscription.withSubscribeDate(Instant.now())
+                        core.storage.createArtifactSubscription(newSubscription, promise)
                     }
 
                     CompositeFuture.all(futures).onComplete({
                         if (it.succeeded()) {
                             request.reply(true)
 
-                            subRequest.orderTypes().each {
+                            newSubscription.orderTypes().each {
                                 switch (it) {
                                     case TraceOrderType.LATEST_TRACES:
-                                        publishLatestTraces(appArtifact)
+                                        publishLatestTraces(newSubscription)
                                         break
                                     case TraceOrderType.SLOWEST_TRACES:
-                                        publishSlowestTraces(appArtifact)
+                                        publishSlowestTraces(newSubscription)
                                         break
                                     case TraceOrderType.FAILED_TRACES:
-                                        publishFailedTraces(appArtifact)
+                                        publishFailedTraces(newSubscription)
                                         break
                                 }
                             }
@@ -184,28 +180,21 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
         log.info("{} started", getClass().getSimpleName())
     }
 
-    /**
-     * Finds the latest 10 traces for the given ApplicationArtifact and publishes to subscribers.
-     * Will look back as far as 30 days.
-     *
-     * @param appArtifact
-     * @param timeFrame
-     */
-    private void publishLatestTraces(ApplicationArtifact appArtifact) {
+    private void publishLatestTraces(ArtifactTraceSubscribeRequest request) {
         def traceQuery = TraceQuery.builder()
                 .orderType(TraceOrderType.LATEST_TRACES)
                 .systemRequest(true)
-                .appUuid(appArtifact.appUuid())
-                .artifactQualifiedName(appArtifact.artifactQualifiedName())
-                .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
+                .appUuid(request.appUuid())
+                .artifactQualifiedName(request.artifactQualifiedName())
+                .durationStart(Instant.now().minus(request.timeFrame().minutes, ChronoUnit.MINUTES))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
-        core.traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
+        core.traceAPI.getTraces(request.appUuid(), traceQuery, {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 def traceResult = ArtifactTraceResult.builder()
-                        .appUuid(appArtifact.appUuid())
-                        .artifactQualifiedName(appArtifact.artifactQualifiedName())
+                        .appUuid(request.appUuid())
+                        .artifactQualifiedName(request.artifactQualifiedName())
                         .orderType(traceQuery.orderType())
                         .start(traceQuery.durationStart())
                         .stop(traceQuery.durationStop())
@@ -221,31 +210,24 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
         })
     }
 
-    /**
-     * Finds the slowest 10 traces for the given ApplicationArtifact and publishes to subscribers.
-     * Will look back as far as 30 days.
-     *
-     * @param appArtifact
-     * @param timeFrame
-     */
-    private void publishSlowestTraces(ApplicationArtifact appArtifact) {
+    private void publishSlowestTraces(ArtifactTraceSubscribeRequest request) {
         def traceQuery = TraceQuery.builder()
                 .orderType(TraceOrderType.SLOWEST_TRACES)
                 .systemRequest(true)
-                .appUuid(appArtifact.appUuid())
-                .artifactQualifiedName(appArtifact.artifactQualifiedName())
-                .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
+                .appUuid(request.appUuid())
+                .artifactQualifiedName(request.artifactQualifiedName())
+                .durationStart(Instant.now().minus(request.timeFrame().minutes, ChronoUnit.MINUTES))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
-        core.traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
+        core.traceAPI.getTraces(request.appUuid(), traceQuery, {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {
-                    log.debug("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
+                    log.debug("No traces to publish for artifact: " + request.artifactQualifiedName())
                 } else {
                     def traceResult = ArtifactTraceResult.builder()
-                            .appUuid(appArtifact.appUuid())
-                            .artifactQualifiedName(appArtifact.artifactQualifiedName())
+                            .appUuid(request.appUuid())
+                            .artifactQualifiedName(request.artifactQualifiedName())
                             .orderType(traceQuery.orderType())
                             .start(traceQuery.durationStart())
                             .stop(traceQuery.durationStop())
@@ -262,31 +244,24 @@ class TraceSubscriptionTracker extends ArtifactSubscriptionTracker {
         })
     }
 
-    /**
-     * Finds the last failed 10 traces for the given ApplicationArtifact and publishes to subscribers.
-     * Will look back as far as 30 days.
-     *
-     * @param appArtifact
-     * @param timeFrame
-     */
-    private void publishFailedTraces(ApplicationArtifact appArtifact) {
+    private void publishFailedTraces(ArtifactTraceSubscribeRequest request) {
         def traceQuery = TraceQuery.builder()
                 .orderType(TraceOrderType.FAILED_TRACES)
                 .systemRequest(true)
-                .appUuid(appArtifact.appUuid())
-                .artifactQualifiedName(appArtifact.artifactQualifiedName())
-                .durationStart(Instant.now().minus(30, ChronoUnit.DAYS))
+                .appUuid(request.appUuid())
+                .artifactQualifiedName(request.artifactQualifiedName())
+                .durationStart(Instant.now().minus(request.timeFrame().minutes, ChronoUnit.MINUTES))
                 .durationStop(Instant.now())
                 .durationStep("SECOND").build()
-        core.traceAPI.getTraces(appArtifact.appUuid(), traceQuery, {
+        core.traceAPI.getTraces(request.appUuid(), traceQuery, {
             if (it.succeeded()) {
                 def traceQueryResult = it.result()
                 if (traceQueryResult.traces().isEmpty()) {
-                    log.debug("No traces to publish for artifact: " + appArtifact.artifactQualifiedName())
+                    log.debug("No traces to publish for artifact: " + request.artifactQualifiedName())
                 } else {
                     def traceResult = ArtifactTraceResult.builder()
-                            .appUuid(appArtifact.appUuid())
-                            .artifactQualifiedName(appArtifact.artifactQualifiedName())
+                            .appUuid(request.appUuid())
+                            .artifactQualifiedName(request.artifactQualifiedName())
                             .orderType(traceQuery.orderType())
                             .start(traceQuery.durationStart())
                             .stop(traceQuery.durationStop())

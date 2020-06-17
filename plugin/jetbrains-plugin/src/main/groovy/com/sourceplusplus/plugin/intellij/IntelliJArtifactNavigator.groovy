@@ -9,8 +9,8 @@ import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
-import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.display.PortalTab
+import com.sourceplusplus.portal.display.tabs.views.TracesView
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
@@ -57,15 +57,23 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
         })
         vertx.eventBus().consumer(NAVIGATE_TO_ARTIFACT.address, { message ->
             def request = message.body() as JsonObject
-            def portal = IntelliJSourcePortal.getPortal(request.getString("portal_uuid"))
-            def parentStackNavigation = request.getBoolean("parent_stack_navigation", false)
-            if (portal.portalUI.tracesView.innerTrace && parentStackNavigation) {
+            if (request.getBoolean("parent_stack_navigation", false)) {
+                def portal = IntelliJSourcePortal.getPortal(request.getString("portal_uuid"))
                 def mark = SourceMarkerPlugin.INSTANCE.getSourceMark(
                         portal.portalUI.viewingPortalArtifact) as IntelliJGutterMark
                 if (mark.configuration.icon == IntelliJGutterMark.arrowToLeft) {
-                    ApplicationManager.getApplication().invokeLater({
-                        mark.dispose()
-                    })
+                    mark.configuration.icon = mark.determineMostSuitableIcon()
+                    if (mark.configuration.icon == null) {
+                        //remove mark completely
+                        ApplicationManager.getApplication().invokeLater({
+                            mark.dispose()
+                        })
+                    } else {
+                        //revert mark back to previous icon
+                        mark.sourceFileMarker.refresh()
+                        mark.portal.portalUI.tracesView.innerTraceStack.empty()
+                        mark.portal.portalUI.tracesView.viewType = TracesView.ViewType.TRACES
+                    }
                 }
             }
 

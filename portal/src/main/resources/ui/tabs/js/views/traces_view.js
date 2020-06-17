@@ -20,141 +20,117 @@ function setupUI() {
 }
 setupUI();
 
-let keepTraceCount = (externalPortal) ? 25 : 10;
-var displayedTraces = [];
-var displayedTraceIds = new Map();
-
 function displayTraces(traceResult) {
-    if (traceResult.order_type !== traceOrderType) {
-        portalLog("Ignoring display traces")
-        return //todo: still needed?
-    }
     console.log('Displaying traces - Artifact: ' + traceResult.artifact_simple_name +
         ' - From: ' + moment.unix(Number(traceResult.start)).format() + ' - To: ' + moment.unix(Number(traceResult.stop)).format() +
         ' - Order type: ' + traceResult.order_type + ' - Amount: ' + traceResult.traces.length);
 
+    //todo: move all this stuff to setupUI()
     $('#span_info_panel').css('display', 'none');
-    $('#latest_traces_header').addClass('active_sub_tab');
-    $('#latest_traces_header').removeClass('inactive_tab');
+    $('#latest_traces_header').addClass('active_sub_tab')
+        .removeClass('inactive_tab');
     $('#top_trace_table').css('display', '');
     $('#trace_stack_table').css('visibility', 'hidden');
     $('#traces_span').css('display', 'unset');
     $('#trace_stack_span').css('display', 'none');
     $('#segment_id_span').css('display', 'none');
 
-    $('#trace_stack_header').addClass('inactive_tab');
-    $('#trace_stack_header').removeClass('active_sub_tab');
-    $('#trace_stack_header').css('visibility', 'hidden');
+    $('#trace_stack_header').addClass('inactive_tab')
+        .removeClass('active_sub_tab')
+        .css('visibility', 'hidden');
 
-    $('#span_info_header').addClass('inactive_tab');
-    $('#span_info_header').removeClass('active_sub_tab');
-    $('#span_info_header').css('visibility', 'hidden');
+    $('#span_info_header').addClass('inactive_tab')
+        .removeClass('active_sub_tab')
+        .css('visibility', 'hidden');
+
+    if (traceOrderType === 'LATEST_TRACES') {
+        $('#latest_traces_header_text').text('Latest Traces');
+    } else if (traceOrderType === 'SLOWEST_TRACES') {
+        $('#latest_traces_header_text').text('Slowest Traces');
+    } else if (traceOrderType === 'FAILED_TRACES') {
+        $('#latest_traces_header_text').text('Failed Traces');
+    }
 
     $('#traces_start_field').val(moment.unix(Number(traceResult.start)).format());
     $('#traces_stop_field').val(moment.unix(Number(traceResult.stop)).format());
     $('#traces_total_label').text("Total: " + traceResult.total);
 
-    let appUuid = traceResult.app_uuid;
-    if (traceResult.traces.length > 0) {
-        for (let i = 0; i < traceResult.traces.length; i++) {
-            let trace = traceResult.traces[i];
-            let globalTraceId = trace.trace_ids[0];
-            if (displayedTraceIds.has(globalTraceId)) {
-                continue;
+    for (let i = 0; i < traceResult.traces.length; i++) {
+        let trace = traceResult.traces[i];
+        let globalTraceId = trace.trace_ids[0];
+        let htmlTraceId = globalTraceId.split('.').join('');
+        let operationName = trace.operation_names[0];
+        if (operationName === traceResult.artifact_qualified_name) {
+            operationName = traceResult.artifact_simple_name;
+        }
+
+        var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + traceResult.app_uuid + '","'
+            + traceResult.artifact_qualified_name + '","' + globalTraceId +
+            '");\' style="border-top: 0 !important; padding-left: 20px;">';
+        rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-plus-square"></i>';
+        rowHtml += '<span style="vertical-align:top">';
+        rowHtml += operationName.replace('<', '&lt;').replace('>', '&gt;');
+        rowHtml += '</span>';
+        rowHtml += '</td>';
+
+        let occurred = moment(Number(trace.start));
+        let now = moment();
+        let timeOccurredDuration = moment.duration(now.diff(occurred));
+        rowHtml += '<td class="trace_time collapsing" id="trace_time_' + htmlTraceId + '" data-value="' + trace.start + '" style="text-align: center">'
+            + getPrettyDuration(timeOccurredDuration, 1) + '</td>';
+        rowHtml += '<td class="collapsing">' + trace.pretty_duration + '</td>';
+
+        if (trace.error) {
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
+        } else {
+            rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
+        }
+
+        let tableRow = document.getElementById("trace_table").rows[i];
+        if (tableRow != null) {
+            if (tableRow.id !== ("trace-" + htmlTraceId)) {
+                document.getElementById("trace_table").rows[i].outerHTML = rowHtml;
             }
-
-            let htmlTraceId = globalTraceId.split('.').join('');
-            let operationName = trace.operation_names[0];
-            if (operationName === traceResult.artifact_qualified_name) {
-                operationName = traceResult.artifact_simple_name;
-            }
-
-            var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + appUuid + '","'
-                + traceResult.artifact_qualified_name + '","' + globalTraceId +
-                '");\' style="border-top: 0 !important; padding-left: 20px;">';
-            rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-plus-square"></i>';
-            rowHtml += '<span style="vertical-align:top">';
-            rowHtml += operationName.replace('<', '&lt;').replace('>', '&gt;');
-            rowHtml += '</span>';
-            rowHtml += '</td>';
-
-            let occurred = moment(Number(trace.start));
-            let now = moment();
-            let timeOccurredDuration = moment.duration(now.diff(occurred));
-            rowHtml += '<td class="trace_time collapsing" id="trace_time_' + htmlTraceId + '" data-value="' + trace.start + '" style="text-align: center">'
-                + getPrettyDuration(timeOccurredDuration, 1) + '</td>';
-            rowHtml += '<td class="collapsing">' + trace.pretty_duration + '</td>';
-
-            if (trace.error) {
-                rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
-            } else {
-                rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
-            }
-
-            let insertIndex = displayedTraces.length;
-            if (traceResult.order_type === "SLOWEST_TRACES") {
-                //sort by duration
-                for (let z = 0; z < displayedTraces.length; z++) {
-                    if (trace.duration >= displayedTraces[z].duration) {
-                        insertIndex = z;
-                        break;
-                    }
-                }
-            } else {
-                //sort by time
-                for (let z = 0; z < displayedTraces.length; z++) {
-                    if (trace.start >= displayedTraces[z].start) {
-                        insertIndex = z;
-                        break;
-                    }
-                }
-            }
-            document.getElementById("trace_table").insertRow(insertIndex).outerHTML = rowHtml;
-            displayedTraceIds.set(globalTraceId, true);
-            displayedTraces.splice(insertIndex, 0, trace);
-
-            if (displayedTraces.length > keepTraceCount) {
-                let deleteGlobalTraceId = displayedTraces.pop().trace_ids[0];
-                displayedTraceIds.delete(deleteGlobalTraceId);
-                $('#trace-' + deleteGlobalTraceId.split('.').join('')).remove();
-            }
+        } else {
+            $('#trace_table').append(rowHtml);
         }
     }
 
-    $('#traces_captured').text(traceResult.traces.length);
+    updateOccurredLabels();
 }
 
 function displayInnerTraces(innerTraceStack) {
     portalLog('Displaying inner trace stack: ' + JSON.stringify(innerTraceStack));
 
+    //todo: move all this stuff to setupUI()
     $('#latest_traces_header').removeClass('active');
     $('#span_info_panel').css('display', 'none');
     $('#top_trace_table').css('display', 'none');
-    $('#trace_stack_table').css('display', '');
-    $('#trace_stack_table').css('visibility', 'visible');
+    $('#trace_stack_table').css('display', '')
+        .css('visibility', 'visible');
     $('#segment_id_span').css('display', 'none');
     $('#trace_stack_span').css('display', 'unset');
 
-    $('#trace_stack_header').removeClass('inactive_tab');
-    $('#trace_stack_header').addClass('active_sub_tab');
-    $('#trace_stack_header').css('visibility', 'visible');
+    $('#trace_stack_header').removeClass('inactive_tab')
+        .addClass('active_sub_tab')
+        .css('visibility', 'visible');
 
-    $('#span_info_header').removeClass('active');
-    $('#span_info_header').css('visibility', 'hidden');
+    $('#span_info_header').removeClass('active')
+        .css('visibility', 'hidden');
 
     $('#top_trace_table').css('display', 'none');
     $('#trace_stack_table').css('visibility', 'visible');
     $('#traces_span').css('display', 'none');
 
-    $('#latest_traces_header').removeClass('active_sub_tab');
-    $('#latest_traces_header').addClass('inactive_tab');
+    $('#latest_traces_header').removeClass('active_sub_tab')
+        .addClass('inactive_tab');
 
-    $('#trace_stack_header').addClass('active_sub_tab');
-    $('#trace_stack_header').removeClass('inactive_tab');
-    $('#trace_stack_header').css('visibility', 'visible');
+    $('#trace_stack_header').addClass('active_sub_tab')
+        .removeClass('inactive_tab')
+        .css('visibility', 'visible');
 
-    $('#span_info_header').removeClass('active_sub_tab');
-    $('#span_info_header').css('visibility', 'hidden');
+    $('#span_info_header').removeClass('active_sub_tab')
+        .css('visibility', 'hidden');
 
     $('#stack_table tr').remove();
 
@@ -165,6 +141,8 @@ function displayInnerTraces(innerTraceStack) {
             $('#latest_traces_header_text').text('Latest Traces');
         } else if (traceOrderType === 'SLOWEST_TRACES') {
             $('#latest_traces_header_text').text('Slowest Traces');
+        } else if (traceOrderType === 'FAILED_TRACES') {
+            $('#latest_traces_header_text').text('Failed Traces');
         }
     }
 
@@ -212,24 +190,25 @@ function displayInnerTraces(innerTraceStack) {
 function displaySpanInfo(spanInfo) {
     portalLog('Displaying trace span info: ' + JSON.stringify(spanInfo));
 
+    //todo: move all this stuff to setupUI()
     $('#top_trace_table').css('display', 'none');
     $('#trace_stack_table').css('visibility', 'visible');
     $('#segment_id_span').css('display', 'unset');
     $('#trace_stack_span').css('display', 'none');
 
-    $('#trace_stack_header').css('visibility', 'visible');
-    $('#trace_stack_header').removeClass('active_sub_tab');
-    $('#latest_traces_header').removeClass('active_sub_tab');
-    $('#trace_stack_header').addClass('inactive_tab');
-    $('#latest_traces_header').addClass('inactive_tab');
+    $('#trace_stack_header').css('visibility', 'visible')
+        .removeClass('active_sub_tab')
+        .addClass('inactive_tab');
+    $('#latest_traces_header').removeClass('active_sub_tab')
+        .addClass('inactive_tab');
 
-    $('#span_info_header').addClass('active_sub_tab');
-    $('#span_info_header').removeClass('inactive_tab');
-    $('#span_info_header').css('visibility', 'visible');
-    $('#trace_stack_table').css('display', 'none');
-    $('#trace_stack_table').css('visibility', 'hidden');
-    $('#span_info_panel').css('display', '');
-    $('#span_info_panel').css('visibility', 'visible');
+    $('#span_info_header').addClass('active_sub_tab')
+        .removeClass('inactive_tab')
+        .css('visibility', 'visible');
+    $('#trace_stack_table').css('display', 'none')
+        .css('visibility', 'hidden');
+    $('#span_info_panel').css('display', '')
+        .css('visibility', 'visible');
 
     $('#tag_table tr').remove();
     $('#span_info_start_trace_time').attr("data-value", spanInfo.start_time);
@@ -282,34 +261,35 @@ function displaySpanInfo(spanInfo) {
 function displayTraceStack(traceStack) {
     portalLog('Displaying trace stack: ' + JSON.stringify(traceStack));
 
+    //todo: move all this stuff to setupUI()
     $('#latest_traces_header').removeClass('active');
     $('#span_info_panel').css('display', 'none');
     $('#top_trace_table').css('display', 'none');
-    $('#trace_stack_table').css('display', '');
-    $('#trace_stack_table').css('visibility', 'visible');
+    $('#trace_stack_table').css('display', '')
+        .css('visibility', 'visible');
     $('#segment_id_span').css('display', 'none');
     $('#trace_stack_span').css('display', 'unset');
 
-    $('#trace_stack_header').removeClass('inactive_tab');
-    $('#trace_stack_header').addClass('active_sub_tab');
-    $('#trace_stack_header').css('visibility', 'visible');
+    $('#trace_stack_header').removeClass('inactive_tab')
+        .addClass('active_sub_tab')
+        .css('visibility', 'visible');
 
-    $('#span_info_header').removeClass('active');
-    $('#span_info_header').css('visibility', 'hidden');
+    $('#span_info_header').removeClass('active')
+        .css('visibility', 'hidden');
 
     $('#top_trace_table').css('display', 'none');
     $('#trace_stack_table').css('visibility', 'visible');
     $('#traces_span').css('display', 'none');
 
-    $('#latest_traces_header').removeClass('active_sub_tab');
-    $('#latest_traces_header').addClass('inactive_tab');
+    $('#latest_traces_header').removeClass('active_sub_tab')
+        .addClass('inactive_tab');
 
-    $('#trace_stack_header').addClass('active_sub_tab');
-    $('#trace_stack_header').removeClass('inactive_tab');
-    $('#trace_stack_header').css('visibility', 'visible');
+    $('#trace_stack_header').addClass('active_sub_tab')
+        .removeClass('inactive_tab')
+        .css('visibility', 'visible');
 
-    $('#span_info_header').removeClass('active_sub_tab');
-    $('#span_info_header').css('visibility', 'hidden');
+    $('#span_info_header').removeClass('active_sub_tab')
+        .css('visibility', 'hidden');
 
     $('#stack_table tr').remove();
 
@@ -395,7 +375,16 @@ function getPrettyDuration(duration, decimalPlaces) {
     } else if (duration.minutes() > 0) {
         let minutes = duration.minutes();
         duration = duration.subtract(minutes, 'minutes');
-        prettyDuration = minutes + "m " + (Math.round(duration.asSeconds() * 10) / 10).toFixed(decimalPlaces);
+        let seconds = duration.seconds();
+        if (seconds === 0) {
+            prettyDuration = minutes + "";
+            postText = "m ago";
+        } else {
+            prettyDuration = minutes + "m " + duration.seconds() + "";
+            postText = "s ago";
+        }
+    } else if (duration.seconds() > 0) {
+        prettyDuration = duration.seconds() + "";
         postText = "s ago";
     } else {
         prettyDuration = (Math.round(duration.asSeconds() * 10) / 10).toFixed(decimalPlaces);
