@@ -32,20 +32,23 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.3.0 (alpha)
 
+> Focus: Automatic artifact monitoring
+
+ - Embeddable Source++ Core ([#177](https://github.com/CodeBrig/Source/issues/177)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
+ - Integrated artifact error notifications ([#114](https://github.com/sourceplusplus/Assistant/issues/114)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
+ - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ 
+## 0.4.0 (alpha)
+
 > Focus: Language-agnostic source code parsing
 
+ - Artifact, endpoint, log, trace searching functionality
+ - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Trace service detection and custom tooltip displays ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Browser-based control panel ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Updated portal interface
-
-## 0.4.0 (alpha)
-
-> Focus: Automatic artifact monitoring
-
- - Artifact, endpoint, log, trace searching functionality
- - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
- - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
+ - Arthur integration
 
 ## 0.5.0 (alpha)
 
