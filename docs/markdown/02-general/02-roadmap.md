@@ -48,6 +48,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Trace service detection and custom tooltip displays ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Browser-based control panel ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Updated portal interface
+ - Arthur integration
 
 ## 0.5.0 (alpha)
 
