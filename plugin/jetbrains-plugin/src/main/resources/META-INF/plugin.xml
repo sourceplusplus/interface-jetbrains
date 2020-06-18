@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin require-restart="true">
     <id>com.sourceplusplus.plugin.intellij</id>
     <name>Source++</name>
     <version>0.2.6-alpha</version>
