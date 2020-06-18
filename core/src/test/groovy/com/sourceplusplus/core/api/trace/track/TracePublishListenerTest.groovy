@@ -9,6 +9,7 @@ import com.sourceplusplus.api.model.trace.ArtifactTraceResult
 import com.sourceplusplus.api.model.trace.ArtifactTraceSubscribeRequest
 import com.sourceplusplus.api.model.trace.TraceOrderType
 import com.sourceplusplus.core.api.SourceCoreAPITest
+import groovy.util.logging.Slf4j
 import io.vertx.core.Vertx
 import io.vertx.ext.unit.TestSuite
 import org.junit.Test
@@ -18,6 +19,7 @@ import org.junit.Test
  * @since 0.3.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class TracePublishListenerTest extends SourceCoreAPITest {
 
     @Test
@@ -54,11 +56,16 @@ class TracePublishListenerTest extends SourceCoreAPITest {
 
             def async = test.async(2)
             vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
+                //todo: should only receive subscriber's traces
                 def traceResult = it.body() as ArtifactTraceResult
-                test.assertEquals(application.appUuid(), traceResult.appUuid())
-                test.assertEquals("com.company.TestClass.testMethod()", traceResult.artifactQualifiedName())
-                test.assertEquals(TraceOrderType.LATEST_TRACES, traceResult.orderType())
-                async.countDown()
+                if (application.appUuid() == traceResult.appUuid()) {
+                    test.assertEquals(application.appUuid(), traceResult.appUuid())
+                    test.assertEquals("com.company.TestClass.testMethod()", traceResult.artifactQualifiedName())
+                    test.assertEquals(TraceOrderType.LATEST_TRACES, traceResult.orderType())
+                    async.countDown()
+                } else {
+                    log.warn("Shouldn't receive trace for app uuid: " + traceResult.appUuid())
+                }
             })
 
             coreClient.attachBridge(vertx, apiHost, apiPort, apiSslEnabled)

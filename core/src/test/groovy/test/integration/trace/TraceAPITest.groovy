@@ -12,7 +12,6 @@ import groovy.util.logging.Slf4j
 import io.vertx.ext.unit.TestSuite
 import org.junit.Before
 import org.junit.Test
-import test.integration.trace.TraceTest
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -28,24 +27,8 @@ class TraceAPITest extends SourceCoreAPITest {
     @Before
     void resetAgentAndApacheSkywalking() {
         log.info("Resetting Source++ and Apache SkyWalking integration")
-        def skywalkingPackage = "org.apache.skywalking.apm.agent.core"
-        def serviceManagerInstance = skywalkingPackage + ".boot.ServiceManager.INSTANCE"
-        def downstreamAgentConfig = skywalkingPackage + ".conf.RemoteDownstreamConfig.Agent"
-        def serviceRegisterClientClass = skywalkingPackage + ".remote.ServiceAndEndpointRegisterClient.class"
-        def commandExecutorServiceClass = skywalkingPackage + ".commands.CommandExecutorService.class"
-        Eval.me(serviceManagerInstance + ".findService($commandExecutorServiceClass)")
-                ."commandExecutorMap"["ServiceMetadataReset"]."execute"()
         SourceAgentConfig.current.appUuid = UUID.randomUUID().toString()
-        Eval.me(skywalkingPackage + ".conf.Config.Agent.SERVICE_NAME = '" + SourceAgentConfig.current.appUuid + "'")
-        Eval.me(serviceManagerInstance + ".findService($serviceRegisterClientClass)")."coolDownStartTime" = -1
-        Eval.me(serviceManagerInstance + ".findService($serviceRegisterClientClass)")."run"()
-        while (Eval.me(downstreamAgentConfig + ".SERVICE_ID") == 0
-                || Eval.me(downstreamAgentConfig + ".SERVICE_INSTANCE_ID") == 0) {
-            try {
-                Thread.sleep(100)
-            } catch (InterruptedException ignore) {
-            }
-        }
+        Eval.me("org.apache.skywalking.apm.agent.core.conf.Config.Agent.SERVICE_NAME = '$SourceAgentConfig.current.appUuid'")
         log.info("Reset Source++ and Apache SkyWalking integration")
     }
 

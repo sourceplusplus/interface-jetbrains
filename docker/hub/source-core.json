@@ -20,7 +20,7 @@
       "id": "apache_skywalking",
       "category": "APM",
       "enabled": false,
-      "version": "7.0.0",
+      "version": "8.0.0",
       "connections": {
         "REST": {
           "host": "localhost",
