@@ -1,0 +1,27 @@
+name: Plugin Verifier
+
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  compatibility:
+    name: Ensure compatibility against the lowest and latest EAP version.
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11.x.x
+      - name: Build the plugin using Gradle
+        run: ./gradlew buildPlugin
+      - uses: thepieterdc/intellij-plugin-verifier-action@master
+        with:
+          plugin: 'plugin/jetbrains-plugin/build/distributions/jetbrains-source-plugin-*'
+          versions: |
+            2020.1
+            LATEST-EAP-SNAPSHOT
