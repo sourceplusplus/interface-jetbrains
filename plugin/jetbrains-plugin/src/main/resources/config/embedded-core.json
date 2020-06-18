@@ -13,10 +13,6 @@
     "type": "h2",
     "h2": {
       "connection": "disk"
-    },
-    "elasticsearch": {
-      "host": "localhost",
-      "port": 9200
     }
   },
   "integrations": [
