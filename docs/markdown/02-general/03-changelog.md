@@ -15,6 +15,8 @@
 - Dynamic Source++ Portal sizing based on editor width ([#203](https://github.com/sourceplusplus/Assistant/issues/203))
 - Added failed traces order type to traces tab
 - Changed overview tab default timeframe from 15 minutes to 5 minutes
+- Added distinct gutter mark for entry artifacts
+- Updated `subscription_inactive_limit_minutes` from 15 to 5
 
 ## Dependency upgrade
 - Upgraded Apache SkyWalking (7.0.0 -> 8.0.0)
