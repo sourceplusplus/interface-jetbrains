@@ -1,3 +1,35 @@
+# 0.3.0-alpha (2020-06-20)
+
+## Improvement
+- Embeddable Source++ Core ([#177](https://github.com/sourceplusplus/Assistant/issues/177))
+- Ability to load/save H2 database to disk ([#197](https://github.com/sourceplusplus/Assistant/issues/197))
+- Remove agent and implement apm-customize-enhance-plugin ([#179](https://github.com/sourceplusplus/Assistant/issues/179))
+- Auto-create project application ([#206](https://github.com/sourceplusplus/Assistant/issues/206))
+- Ability to open portal via mouse click ([#48](https://github.com/sourceplusplus/Assistant/issues/48))
+- Ability to open portal via keyboard shortcut ([#47](https://github.com/sourceplusplus/Assistant/issues/47))
+- Added caching to ApplicationAPI ([#196](https://github.com/sourceplusplus/Assistant/issues/196))
+- Increased caching in ArtifactAPI ([#185](https://github.com/sourceplusplus/Assistant/issues/185))
+- Ability to go further than one span deep in external mode ([#202](https://github.com/sourceplusplus/Assistant/issues/202))
+- Variable portal size based on editor size ([#203](https://github.com/sourceplusplus/Assistant/issues/203))
+- Avoid checking for new traces when no agent is active ([#187](https://github.com/sourceplusplus/Assistant/issues/187))
+- Dynamic Source++ Portal sizing based on editor width ([#203](https://github.com/sourceplusplus/Assistant/issues/203))
+- Added failed traces order type to traces tab
+- Changed overview tab default timeframe from 15 minutes to 5 minutes
+
+## Dependency upgrade
+- Upgraded Apache SkyWalking (7.0.0 -> 8.0.0)
+- Upgraded Groovy (2.4.17 -> 2.5.11)
+- Upgraded SourceMarker (0.1.3 -> 0.1.5)
+- Upgraded JetBrains intellij plugin (0.4.18 -> 0.4.21)
+- Upgraded IntelliJ plugin IntelliJ version (201.6073-EAP-CANDIDATE-SNAPSHOT -> 202.5103-EAP-CANDIDATE-SNAPSHOT)
+- Upgraded Gradle Wrapper (4.10.3 -> 6.5)
+- Upgraded Vert.x (3.9.0 -> 3.9.1)
+- Upgraded commons-io (2.6 -> 2.7)
+- Upgraded metrics-core (4.1.5 -> 4.1.9)
+- Upgraded Apache ECharts (4.7.0 -> 4.8.0)
+- Upgraded Fomantic UI (2.8.4 -> 2.8.5)
+- Upgraded okhttp (4.6.0 -> 4.7.2)
+
 # 0.2.6-alpha (2020-05-16)
 
 ## Bug
