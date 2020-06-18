@@ -119,8 +119,7 @@ class SkywalkingIntegration extends APMIntegration {
      * {@inheritDoc}
      */
     @Override
-    void getAllServices(Instant start, Instant end, String step,
-                        Handler<AsyncResult<JsonArray>> handler) {
+    void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler) {
         log.debug("Getting all SkyWalking services. Start: " + start + " - End: " + end)
         def graphqlQuery = new JsonObject()
         if ("second".equalsIgnoreCase(step)) {
