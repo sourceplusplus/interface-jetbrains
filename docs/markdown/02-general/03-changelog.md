@@ -27,7 +27,7 @@
 - Upgraded commons-io (2.6 -> 2.7)
 - Upgraded metrics-core (4.1.5 -> 4.1.9)
 - Upgraded Apache ECharts (4.7.0 -> 4.8.0)
-- Upgraded Fomantic UI (2.8.4 -> 2.8.5)
+- Upgraded Fomantic UI (2.8.4 -> 2.8.6)
 - Upgraded okhttp (4.6.0 -> 4.7.2)
 
 # 0.2.6-alpha (2020-05-16)
