@@ -196,7 +196,7 @@ function displayInnerTraces(innerTraceStack) {
             if (component == null) {
                 component = span.component;
             }
-            rowHtml += '<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../components/assets/' + component.toUpperCase() + '.png"></img>' +
+            rowHtml += '<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../themes/default/assets/components/' + component.toUpperCase() + '.png"></img>' +
               spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
@@ -354,7 +354,7 @@ function displayTraceStack(traceStack) {
           if (component == null) {
               component = span.component;
           }
-          rowHtml += '<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../components/assets/' + component.toUpperCase() + '.png"></img>' +
+          rowHtml += '<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../themes/default/assets/components/' + component.toUpperCase() + '.png"></img>' +
             spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
