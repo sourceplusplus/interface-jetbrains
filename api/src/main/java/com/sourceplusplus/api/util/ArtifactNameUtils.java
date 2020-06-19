@@ -25,6 +25,14 @@ public class ArtifactNameUtils {
         return withoutArgs.substring(withoutArgs.lastIndexOf("?") + 1, withoutArgs.lastIndexOf("."));
     }
 
+    public static String getClassName(String qualifiedMethodName) {
+        if (qualifiedMethodName == null || qualifiedMethodName.isEmpty() || qualifiedMethodName.indexOf('.') == -1) {
+            return qualifiedMethodName;
+        }
+        return qualifiedMethodName.substring(0, qualifiedMethodName.substring(
+                0, qualifiedMethodName.indexOf("(")).lastIndexOf("."));
+    }
+
     public static String getShortFunctionSignature(String qualifiedName) {
         return getFunctionSignature(qualifiedName).replaceAll("\\B\\w+(\\.)", "$1");
     }

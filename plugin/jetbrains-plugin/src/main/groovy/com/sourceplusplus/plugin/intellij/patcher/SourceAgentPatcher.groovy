@@ -10,6 +10,7 @@ import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.indexing.FileBasedIndex
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.api.util.ArtifactNameUtils
 import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactTracker
@@ -144,7 +145,7 @@ trait SourceAgentPatcher {
                         try {
                             def artifactQualifiedName = MarkerUtils.getFullyQualifiedName(UastContextKt.toUElement(it) as UMethod)
                             if (PluginArtifactTracker.getSourceArtifact(artifactQualifiedName).config().subscribeAutomatically()) {
-                                def methodName = removePackageAndClassName(artifactQualifiedName)
+                                def methodName = ArtifactNameUtils.removePackageAndClassName(artifactQualifiedName)
                                 def entryMethod = artifactEndpoints.contains(artifactQualifiedName)
                                 def isStatic = it.hasModifier(JvmModifier.STATIC)
                                 writer.append("\t\t<method method=\"$methodName\" static=\"$isStatic\" entry_method=\"$entryMethod\"></method>\n")
@@ -175,19 +176,5 @@ trait SourceAgentPatcher {
             }
         }
         archiveInputStream.close()
-    }
-
-    static String getClassName(String qualifiedMethodName) {
-        if (!qualifiedMethodName || qualifiedMethodName.indexOf('.') == -1) return qualifiedMethodName
-        return qualifiedMethodName.substring(0, qualifiedMethodName.substring(
-                0, qualifiedMethodName.indexOf("(")).lastIndexOf("."))
-    }
-
-    static removePackageAndClassName(String qualifiedMethodName) {
-        if (!qualifiedMethodName || qualifiedMethodName.indexOf('.') == -1 || qualifiedMethodName.indexOf('(') == -1) {
-            return qualifiedMethodName
-        }
-        return qualifiedMethodName.substring(qualifiedMethodName.substring(
-                0, qualifiedMethodName.indexOf("(")).lastIndexOf(".") + 1)
     }
 }
