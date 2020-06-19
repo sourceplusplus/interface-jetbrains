@@ -159,34 +159,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
-    void markArtifactDataAvailable() {
-        if (!artifactDataAvailable) {
-            putUserData(IntelliJKeys.ArtifactDataAvailable, true)
-            configuration.icon = determineMostSuitableIcon()
-            sourceFileMarker.refresh()
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    boolean isArtifactSubscribed() {
-        return getUserData(IntelliJKeys.SourceArtifact).config().subscribeAutomatically()
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    boolean isArtifactDataAvailable() {
-        return getUserData(IntelliJKeys.ArtifactDataAvailable)
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     boolean isPortalRegistered() {
         return getUserData(IntelliJKeys.PortalUUID) != null
     }
@@ -272,8 +244,6 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                 return failingMethod
             } else if (sourceArtifact.config().endpoint()) {
                 return entryMethod
-            } else if (artifactDataAvailable) {
-                return sppActive
             }
         }
         return null
