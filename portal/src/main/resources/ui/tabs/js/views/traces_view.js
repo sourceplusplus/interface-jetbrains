@@ -1,3 +1,36 @@
+const COMPONENT_MAPPINGS = {
+    'mongodb-driver': 'MongoDB',
+    'rocketMQ-producer': 'RocketMQ',
+    'rocketMQ-consumer': 'RocketMQ',
+    'kafka-producer': 'Kafka',
+    'kafka-consumer': 'Kafka',
+    'activemq-producer': 'ActiveMQ',
+    'activemq-consumer': 'ActiveMQ',
+    'postgresql-jdbc-driver': 'PostgreSQL',
+    'Xmemcached': 'Memcached',
+    'Spymemcached': 'Memcached',
+    'h2-jdbc-driver': 'H2',
+    'mysql-connector-java': 'Mysql',
+    'Jedis': 'Redis',
+    'Redisson': 'Redis',
+    'Lettuce': 'Redis',
+    'Zookeeper': 'Zookeeper',
+    'StackExchange.Redis': 'Redis',
+    'SqlClient': 'SqlServer',
+    'Npgsql': 'PostgreSQL',
+    'MySqlConnector': 'Mysql',
+    'EntityFrameworkCore.InMemory': 'InMemoryDatabase',
+    'EntityFrameworkCore.SqlServer': 'SqlServer',
+    'EntityFrameworkCore.Sqlite': 'SQLite',
+    'Pomelo.EntityFrameworkCore.MySql': 'Mysql',
+    'Npgsql.EntityFrameworkCore.PostgreSQL': 'PostgreSQL',
+    'transport-client': 'Elasticsearch',
+    'rest-high-level-client': 'Elasticsearch',
+    'SolrJ': 'Solr',
+    'cassandra-java-driver': 'Cassandra',
+    'mariadb-jdbc': 'Mariadb'
+}
+
 function setupUI() {
     if (hideOverviewTab) {
         $('#overview_link').css('display', 'none');
@@ -99,6 +132,7 @@ function displayTraces(traceResult) {
     updateOccurredLabels();
 }
 
+//todo: merge this method with displayTraceStack
 function displayInnerTraces(innerTraceStack) {
     portalLog('Displaying inner trace stack: ' + JSON.stringify(innerTraceStack));
 
@@ -157,7 +191,14 @@ function displayInnerTraces(innerTraceStack) {
         var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
-        if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
+        if (COMPONENT_MAPPINGS[span.component] || span.component !== "Unknown") {
+            let component = COMPONENT_MAPPINGS[span.component];
+            if (component == null) {
+                component = span.component;
+            }
+            rowHtml += '<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../components/assets/' + component.toUpperCase() + '.png"></img>' +
+              spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+        } else if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
                 spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else {
@@ -308,7 +349,14 @@ function displayTraceStack(traceStack) {
         var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
             + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
-        if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
+        if (COMPONENT_MAPPINGS[span.component] || span.component !== "Unknown") {
+          let component = COMPONENT_MAPPINGS[span.component];
+          if (component == null) {
+              component = span.component;
+          }
+          rowHtml += '<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../components/assets/' + component.toUpperCase() + '.png"></img>' +
+            spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+        } else if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
                 spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
         } else {
