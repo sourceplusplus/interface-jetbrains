@@ -91,8 +91,8 @@ class SourceCore extends AbstractVerticle {
         adminAPI = new AdminAPI(this)
         applicationAPI = new ApplicationAPI(this)
         artifactAPI = new ArtifactAPI(this)
-        metricAPI = new MetricAPI(vertx.sharedData(), this)
-        traceAPI = new TraceAPI(vertx.sharedData(), this)
+        metricAPI = new MetricAPI(this)
+        traceAPI = new TraceAPI(this)
 
         def deploymentConfig = new DeploymentOptions().setConfig(config())
         def adminAPIFuture = Promise.promise().future()

@@ -10,7 +10,6 @@ import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
-import io.vertx.core.shareddata.SharedData
 import io.vertx.ext.web.RoutingContext
 
 import java.time.Instant
@@ -28,11 +27,9 @@ import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFun
 @Slf4j
 class TraceAPI extends AbstractVerticle {
 
-    private final SharedData sharedData
     private final SourceCore core
 
-    TraceAPI(SharedData sharedData, SourceCore core) {
-        this.sharedData = Objects.requireNonNull(sharedData)
+    TraceAPI(SourceCore core) {
         this.core = Objects.requireNonNull(core)
     }
 

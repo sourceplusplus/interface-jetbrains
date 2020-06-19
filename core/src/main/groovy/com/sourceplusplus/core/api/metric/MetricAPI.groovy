@@ -14,7 +14,6 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.json.Json
-import io.vertx.core.shareddata.SharedData
 import io.vertx.ext.web.RoutingContext
 
 /**
@@ -27,11 +26,9 @@ import io.vertx.ext.web.RoutingContext
 @Slf4j
 class MetricAPI extends AbstractVerticle {
 
-    private final SharedData sharedData
     private final SourceCore core
 
-    MetricAPI(SharedData sharedData, SourceCore core) {
-        this.sharedData = Objects.requireNonNull(sharedData)
+    MetricAPI(SourceCore core) {
         this.core = Objects.requireNonNull(core)
     }
 
