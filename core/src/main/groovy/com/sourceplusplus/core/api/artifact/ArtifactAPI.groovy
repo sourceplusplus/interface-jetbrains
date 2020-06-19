@@ -3,6 +3,7 @@ package com.sourceplusplus.core.api.artifact
 import com.sourceplusplus.api.model.artifact.*
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
+import com.sourceplusplus.api.util.ArtifactNameUtils
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.api.artifact.subscription.ArtifactSubscriptionTracker
 import groovy.util.logging.Slf4j
@@ -92,7 +93,7 @@ class ArtifactAPI extends AbstractVerticle {
     void getSourceArtifactSubscriptions(String appUuid, String artifactQualifiedName,
                                         Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
         log.info("Getting source artifact subscriptions. App UUID: {} - Artifact: {}", appUuid, artifactQualifiedName)
-        core.storage.getArtifactSubscriptions(appUuid, artifactQualifiedName,handler)
+        core.storage.getArtifactSubscriptions(appUuid, artifactQualifiedName, handler)
     }
 
     private void unsubscribeSourceArtifactRoute(RoutingContext routingContext) {
@@ -318,23 +319,33 @@ class ArtifactAPI extends AbstractVerticle {
 
     void findSourceArtifact(String appUuid, String search,
                             Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        getSourceArtifact(appUuid, search, {
-            if (it.succeeded()) {
-                if (it.result().isPresent()) {
+        if (ArtifactNameUtils.isArtifactQualifiedName(search)) {
+            getSourceArtifact(appUuid, search, {
+                if (it.succeeded()) {
+                    if (it.result().isPresent()) {
+                        handler.handle(Future.succeededFuture(it.result()))
+                    } else {
+                        getSourceArtifactByEndpointName(appUuid, search, {
+                            if (it.succeeded()) {
+                                handler.handle(Future.succeededFuture(it.result()))
+                            } else {
+                                handler.handle(Future.failedFuture(it.cause()))
+                            }
+                        })
+                    }
+                } else {
+                    handler.handle(Future.failedFuture(it.cause()))
+                }
+            })
+        } else {
+            getSourceArtifactByEndpointName(appUuid, search, {
+                if (it.succeeded()) {
                     handler.handle(Future.succeededFuture(it.result()))
                 } else {
-                    getSourceArtifactByEndpointName(appUuid, search, {
-                        if (it.succeeded()) {
-                            handler.handle(Future.succeededFuture(it.result()))
-                        } else {
-                            handler.handle(Future.failedFuture(it.cause()))
-                        }
-                    })
+                    handler.handle(Future.failedFuture(it.cause()))
                 }
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
+            })
+        }
     }
 
     void getSourceArtifact(String appUuid, String artifactQualifiedName,

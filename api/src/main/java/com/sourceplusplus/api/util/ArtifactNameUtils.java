@@ -9,6 +9,11 @@ package com.sourceplusplus.api.util;
  */
 public class ArtifactNameUtils {
 
+    public static boolean isArtifactQualifiedName(String artifactQualifiedName) {
+        return artifactQualifiedName.contains(".") && artifactQualifiedName.contains("(") &&
+                artifactQualifiedName.contains(")");
+    }
+
     public static String getShortQualifiedClassName(String qualifiedName) {
         return getQualifiedClassName(qualifiedName).replaceAll("\\B\\w+(\\.)", "$1");
     }
@@ -26,7 +31,7 @@ public class ArtifactNameUtils {
     }
 
     public static String getClassName(String qualifiedMethodName) {
-        if (qualifiedMethodName == null || qualifiedMethodName.isEmpty() || qualifiedMethodName.indexOf('.') == -1) {
+        if (qualifiedMethodName == null || qualifiedMethodName.isEmpty() || !qualifiedMethodName.contains(".")) {
             return qualifiedMethodName;
         }
         return qualifiedMethodName.substring(0, qualifiedMethodName.substring(

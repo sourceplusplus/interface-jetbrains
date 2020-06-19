@@ -197,7 +197,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
             def fut = Promise.promise()
             futures.add(fut)
-            artifactAPI.getSourceArtifact(appUuid, endpointName, {
+            artifactAPI.findSourceArtifact(appUuid, endpointName, {
                 if (it.succeeded()) {
                     if (it.result().isPresent()) {
                         def artifact = it.result().get()
@@ -208,17 +208,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                             fut.complete()
                         }
                     } else {
-                        searchServiceName(appUuid, endpointName, endpointId, {
-                            if (it.succeeded()) {
-                                if (it.result().isPresent()) {
-                                    fut.complete()
-                                } else {
-                                    searchServiceId(appUuid, endpointId, endpointName, fut)
-                                }
-                            } else {
-                                fut.fail(it.cause())
-                            }
-                        })
+                        searchServiceId(appUuid, endpointId, endpointName, fut)
                     }
                 } else {
                     fut.fail(it.cause())
@@ -235,7 +225,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
                     def sourceArtifact = it.result().get()
-                    if (sourceArtifact.config() && sourceArtifact.config().endpointName()
+                    if (sourceArtifact.config().endpointName()
                             && sourceArtifact.config().endpointName().contains("{")) {
                         //dynamically named endpoint; save aliases to memory
                         vertx.sharedData().getLocalMap("skywalking_endpoint_alias")
@@ -246,34 +236,6 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
                     vertx.sharedData().getLocalMap("skywalking_pending_endpoints")
                             .put(endpointName, endpointId)
                     analyzeEndpointTraces(appUuid, endpointId, handler)
-                }
-            } else {
-                handler.handle(Future.failedFuture(it.cause()))
-            }
-        })
-    }
-
-    private void searchServiceName(String appUuid, String endpointName, String endpointId,
-                                   Handler<AsyncResult<Optional<SourceArtifactConfig>>> handler) {
-        log.info("Searching service name. App UUID: $appUuid - Endpoint id: $endpointId - Endpoint name: $endpointName")
-        artifactAPI.getSourceArtifactByEndpointName(appUuid, endpointName, {
-            if (it.succeeded()) {
-                if (it.result().isPresent()) {
-                    def sourceArtifact = it.result().get()
-                    if (!sourceArtifact.config().endpointIds()
-                            || !sourceArtifact.config().endpointIds().contains(endpointId)) {
-                        addEndpointIdsToArtifactConfig(sourceArtifact, Sets.newHashSet(endpointId), {
-                            if (it.succeeded()) {
-                                handler.handle(Future.succeededFuture(Optional.of(it.result())))
-                            } else {
-                                handler.handle(Future.failedFuture(it.cause()))
-                            }
-                        })
-                    } else {
-                        handler.handle(Future.succeededFuture(Optional.empty()))
-                    }
-                } else {
-                    handler.handle(Future.succeededFuture(Optional.empty()))
                 }
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
