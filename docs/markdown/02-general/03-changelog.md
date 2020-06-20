@@ -1,6 +1,10 @@
 # 0.3.0-alpha (2020-06-20)
 
+## Bug
+- Artifact config persist multiple endpoint ids to storage correctly ([#184](https://github.com/sourceplusplus/Assistant/issues/184))
+
 ## Improvement
+- Integrated error notifications ([#114](https://github.com/sourceplusplus/Assistant/issues/114))
 - Embeddable Source++ Core ([#177](https://github.com/sourceplusplus/Assistant/issues/177))
 - Ability to load/save H2 database to disk ([#197](https://github.com/sourceplusplus/Assistant/issues/197))
 - Remove agent and implement apm-customize-enhance-plugin ([#179](https://github.com/sourceplusplus/Assistant/issues/179))
@@ -12,11 +16,23 @@
 - Ability to go further than one span deep in external mode ([#202](https://github.com/sourceplusplus/Assistant/issues/202))
 - Variable portal size based on editor size ([#203](https://github.com/sourceplusplus/Assistant/issues/203))
 - Avoid checking for new traces when no agent is active ([#187](https://github.com/sourceplusplus/Assistant/issues/187))
-- Dynamic Source++ Portal sizing based on editor width ([#203](https://github.com/sourceplusplus/Assistant/issues/203))
+- Close portal when external portal shown ([#212](https://github.com/sourceplusplus/Assistant/issues/212))
+- Keep track of SkyWalkingIntegration timeframes ([#186](https://github.com/sourceplusplus/Assistant/issues/186))
+- Subscription trackers subscriber based ([#194](https://github.com/sourceplusplus/Assistant/issues/194))
+- Detected service icons in portal trace stacks ([#102](https://github.com/sourceplusplus/Assistant/issues/102))
+- Moved internal model classes to portal project ([#209](https://github.com/sourceplusplus/Assistant/issues/209))
+- Auto-subscribe to all user methods ([#176](https://github.com/sourceplusplus/Assistant/issues/176))
+- Auto-subscribe to metrics when overview shown ([#192](https://github.com/sourceplusplus/Assistant/issues/192))
+- Auto-add local/docker core environment(s) if detected ([#172](https://github.com/sourceplusplus/Assistant/issues/172))
+- Plugin now shows error message on duplicate application name ([#173](https://github.com/sourceplusplus/Assistant/issues/173))
+- Added entry point gutter mark ([#180](https://github.com/sourceplusplus/Assistant/issues/180))
+- Persisting whole SourceArtifact to SourceMark instead of individual attributes ([#181](https://github.com/sourceplusplus/Assistant/issues/181))
+- Trace stack propagates error icon to parent when child span fails ([#183](https://github.com/sourceplusplus/Assistant/issues/183)) 
 - Added failed traces order type to traces tab
 - Changed overview tab default timeframe from 15 minutes to 5 minutes
 - Added distinct gutter mark for entry artifacts
 - Updated `subscription_inactive_limit_minutes` from 15 to 5
+- Updated `endpoint_detection_interval_seconds` from 15 to 10
 
 ## Dependency upgrade
 - Upgraded Apache SkyWalking (7.0.0 -> 8.0.0)
