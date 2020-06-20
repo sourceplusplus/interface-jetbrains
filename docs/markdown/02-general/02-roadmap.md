@@ -37,6 +37,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Embeddable Source++ Core ([#177](https://github.com/CodeBrig/Source/issues/177)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
  - Integrated artifact error notifications ([#114](https://github.com/sourceplusplus/Assistant/issues/114)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Trace service detection ![](../../images/roadmap/Source++-Portal-blue.svg)
  
 ## 0.4.0 (alpha)
 
@@ -45,7 +46,6 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
  - Artifact, endpoint, log, trace searching functionality
  - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
- - Trace service detection and custom tooltip displays ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Browser-based control panel ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Updated portal interface
  - Arthur integration
