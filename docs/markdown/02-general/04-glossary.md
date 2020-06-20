@@ -5,6 +5,7 @@ Some terms also contain a link to our documentation to provide you with more inf
 | Term     | Description                                                  |
 | -------- | ------------------------------------------------------------ |
 | API      | Application Programming Interface: A set of standard protocols to get access to the data of an application. |
+| Artifact | A source code entity representation (class, function/method, method call, for-loop, etc) |                   
 | HTTP     | Hypertext Transfer Protocol: Standard internet protocol for sending information. Does not encrypt. |
 | HTTPS    | Hypertext Transfer Protocol Secure: Safer and newer version of HTTP. Uses SSL for encryption. |
 | REST API | Representational State Transfer: An API to upload, update, get or delete Source++ data. |
