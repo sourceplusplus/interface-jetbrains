@@ -45,7 +45,7 @@ class PluginBootstrap extends AbstractVerticle {
             defaultConfiguration.autoDisposeBrowser = false //todo: should be able to dispose, see IntelliJPortalUI.close()
             defaultConfiguration.setComponentSizeEvaluator(new ComponentSizeEvaluator() {
                 @Override
-                Dimension getDynamicSize(@NotNull Editor editor, @NotNull GutterMarkComponentConfiguration configuration) {
+                Dimension getDynamicSize(Editor editor, GutterMarkComponentConfiguration configuration) {
                     def portalWidth = (editor.contentComponent.width * 0.8) as int
                     if (portalWidth > 775) {
                         portalWidth = 775
