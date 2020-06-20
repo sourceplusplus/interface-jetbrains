@@ -11,6 +11,8 @@ import org.apache.log4j.Logger
 import org.apache.log4j.spi.LoggingEvent
 import org.jetbrains.annotations.NotNull
 
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace
+
 /**
  * Displays logs from the agent and plugin in a console window.
  *
@@ -32,19 +34,24 @@ class SourcePluginConsoleService {
                 Object message = loggingEvent.message
                 if (loggingEvent.level.isGreaterOrEqual(Level.WARN)) {
                     if (message.toString().startsWith("[PORTAL]")) {
-                        consoleView.print(message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
+                        consoleView.print("$message\n", ConsoleViewContentType.ERROR_OUTPUT)
                     } else {
                         def module = loggingEvent.logger.getName().replace("com.sourceplusplus.", "")
                         module = module.substring(0, module.indexOf(".")).toUpperCase()
-                        consoleView.print("[$module] - " + message.toString() + "\n", ConsoleViewContentType.ERROR_OUTPUT)
+                        if (loggingEvent.throwableInformation) {
+                            consoleView.print("[$module] - $message\n${getStackTrace(loggingEvent.throwableInformation.throwable)}\n",
+                                    ConsoleViewContentType.ERROR_OUTPUT)
+                        } else {
+                            consoleView.print("[$module] - $message\n", ConsoleViewContentType.ERROR_OUTPUT)
+                        }
                     }
                 } else if (loggingEvent.level.isGreaterOrEqual(Level.INFO)) {
                     if (message.toString().startsWith("[PORTAL]")) {
-                        consoleView.print(message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
+                        consoleView.print("$message\n", ConsoleViewContentType.NORMAL_OUTPUT)
                     } else {
                         def module = loggingEvent.logger.getName().replace("com.sourceplusplus.", "")
                         module = module.substring(0, module.indexOf(".")).toUpperCase()
-                        consoleView.print("[$module] - " + message.toString() + "\n", ConsoleViewContentType.NORMAL_OUTPUT)
+                        consoleView.print("[$module] - $message\n", ConsoleViewContentType.NORMAL_OUTPUT)
                     }
                 }
             }
