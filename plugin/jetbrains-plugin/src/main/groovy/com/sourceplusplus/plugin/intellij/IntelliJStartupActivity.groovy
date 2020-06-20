@@ -185,41 +185,39 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
     }
 
     private static notifyNoConnection() {
-        Notifications.Bus.notify(
-                new Notification("Source++", "Connection Required",
-                        "Source++ must be connected to a valid host to activate. Please <a href=\"#\">connect</a> here.",
-                        NotificationType.INFORMATION, new NotificationListener() {
-                    @Override
-                    void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
-                        def connectDialog = new EnvironmentDialogWrapper(currentProject)
-                        connectDialog.createCenterPanel()
-                        connectDialog.show()
+        Notifications.Bus.notify(new Notification("Source++", "Connection Required",
+                "Source++ must be connected to a valid host to activate. Please <a href=\"#\">connect</a> here.",
+                NotificationType.INFORMATION, new NotificationListener() {
+            @Override
+            void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
+                def connectDialog = new EnvironmentDialogWrapper(currentProject)
+                connectDialog.createCenterPanel()
+                connectDialog.show()
 
-                        if (SourcePluginConfig.current.activeEnvironment) {
-                            def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
-                            if (SourcePluginConfig.current.activeEnvironment.apiKey) {
-                                coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
-                            }
-                            coreClient.ping({
-                                if (it.succeeded()) {
-                                    if (SourcePluginConfig.current.activeEnvironment?.appUuid == null) {
+                if (SourcePluginConfig.current.activeEnvironment) {
+                    def coreClient = new SourceCoreClient(SourcePluginConfig.current.activeEnvironment.sppUrl)
+                    if (SourcePluginConfig.current.activeEnvironment.apiKey) {
+                        coreClient.apiKey = SourcePluginConfig.current.activeEnvironment.apiKey
+                    }
+                    coreClient.ping({
+                        if (it.succeeded()) {
+                            if (SourcePluginConfig.current.activeEnvironment?.appUuid == null) {
+                                determineSourceApplication()
+                            } else {
+                                coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
+                                    if (it.failed() || !it.result().isPresent()) {
+                                        SourcePluginConfig.current.activeEnvironment.appUuid = null
                                         determineSourceApplication()
                                     } else {
-                                        coreClient.getApplication(SourcePluginConfig.current.activeEnvironment.appUuid, {
-                                            if (it.failed() || !it.result().isPresent()) {
-                                                SourcePluginConfig.current.activeEnvironment.appUuid = null
-                                                determineSourceApplication()
-                                            } else {
-                                                startSourcePlugin(coreClient)
-                                            }
-                                        })
+                                        startSourcePlugin(coreClient)
                                     }
-                                }
-                            })
+                                })
+                            }
                         }
-                    }
-                })
-        )
+                    })
+                }
+            }
+        }))
     }
 
     static void startSourcePlugin(SourceCoreClient coreClient) {
@@ -262,7 +260,7 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                 //create/get auto-detected application
                 coreClient.getApplications({
                     if (it.succeeded()) {
-                       def existingProject = it.result().find { it.appName() == currentProject.name}
+                        def existingProject = it.result().find { it.appName() == currentProject.name }
                         if (!existingProject) {
                             coreClient.createApplication(SourceApplication.builder().isCreateRequest(true)
                                     .appName(currentProject.name).build(), {
