@@ -1,15 +1,5 @@
-$('#overview_link').attr('href', "overview.html" + mainGetQuery);
-$('#sidebar_overview_link').attr('href', "overview.html" + mainGetQuery);
+console.log("Traces tab started");
 
-$('#traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
-$('#traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
-$('#sidebar_traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
-$('#sidebar_traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
-
-$('#configuration_link').attr('href', "configuration.html" + mainGetQuery);
-$('#sidebar_configuration_link').attr('href', "configuration.html" + mainGetQuery);
-
-var viewingInnerTrace = false;
 eb.onopen = function () {
     portalConnected();
     if (requiresRegistration) {
@@ -20,16 +10,12 @@ eb.onopen = function () {
         displayTraces(message.body);
     });
     eb.registerHandler(portalUuid + '-DisplayInnerTraceStack', function (error, message) {
-        displayInnerTraces(message);
+        displayInnerTraces(message.body);
     });
     eb.registerHandler(portalUuid + '-DisplayTraceStack', function (error, message) {
-        eb.send('PortalLogger', 'Displaying trace stack: ' + JSON.stringify(message));
-        console.log('Displaying trace stack: ' + JSON.stringify(message));
         displayTraceStack(message.body);
     });
     eb.registerHandler(portalUuid + '-DisplaySpanInfo', function (error, message) {
-        eb.send('PortalLogger', 'Displaying trace span info: ' + JSON.stringify(message));
-        console.log('Displaying trace span info: ' + JSON.stringify(message));
         displaySpanInfo(message.body);
     });
 

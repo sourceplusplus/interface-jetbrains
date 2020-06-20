@@ -22,7 +22,7 @@ class OverviewView {
 
     private final PortalUI portalUI
     private Map<String, Map<QueryTimeFrame, ArtifactMetricResult>> metricResultCache = new ConcurrentHashMap<>()
-    QueryTimeFrame timeFrame = QueryTimeFrame.LAST_15_MINUTES
+    QueryTimeFrame timeFrame = QueryTimeFrame.LAST_5_MINUTES
     MetricType activeChartMetric = ResponseTime_Average
 
     OverviewView(PortalUI portalUI) {

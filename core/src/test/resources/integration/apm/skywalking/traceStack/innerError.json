@@ -1,0 +1,113 @@
+{
+  "spans": [
+    {
+      "traceId": "8.1.15908316452720103",
+      "segmentId": "8.1.15908316452720102",
+      "spanId": 0,
+      "parentSpanId": -1,
+      "refs": [
+      ],
+      "serviceCode": "b4c8f3f5-c8d2-4de6-a223-80dd3e7c3cd9",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1590831645272,
+      "endTime": 1590831645772,
+      "endpointName": "com.company.JavaErrorExample.invokesMethod()",
+      "type": "Entry",
+      "peer": "",
+      "component": "",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [
+      ],
+      "logs": [
+      ]
+    },
+    {
+      "traceId": "8.1.15908316452720103",
+      "segmentId": "8.1.15908316452720102",
+      "spanId": 1,
+      "parentSpanId": 0,
+      "refs": [
+      ],
+      "serviceCode": "b4c8f3f5-c8d2-4de6-a223-80dd3e7c3cd9",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1590831645772,
+      "endTime": 1590831645772,
+      "endpointName": "com.company.JavaErrorExample.innerInvokesMethod()",
+      "type": "Local",
+      "peer": "",
+      "component": "",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [
+      ],
+      "logs": [
+      ]
+    },
+    {
+      "traceId": "8.1.15908316452720103",
+      "segmentId": "8.1.15908316452720102",
+      "spanId": 2,
+      "parentSpanId": 1,
+      "refs": [
+      ],
+      "serviceCode": "b4c8f3f5-c8d2-4de6-a223-80dd3e7c3cd9",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1590831645772,
+      "endTime": 1590831645772,
+      "endpointName": "com.company.JavaErrorExample.innerInnerThrowsException()",
+      "type": "Local",
+      "peer": "",
+      "component": "",
+      "isError": true,
+      "layer": "Unknown",
+      "tags": [
+      ],
+      "logs": [
+        {
+          "time": 1590831645772,
+          "data": [
+            {
+              "key": "event",
+              "value": "error"
+            },
+            {
+              "key": "error.kind",
+              "value": "java.lang.InterruptedException"
+            },
+            {
+              "key": "message",
+              "value": "Alert"
+            },
+            {
+              "key": "stack",
+              "value": "java.lang.InterruptedException: Alert\nat com.company.JavaErrorExample.innerInnerThrowsException$original$6Sy6zHx2(JavaErrorExample.java:29)\nat com.company.JavaErrorExample.innerInnerThrowsException$original$6Sy6zHx2$accessor$sAFlBgva(JavaErrorExample.java)\nat com.company.JavaErrorExample$auxiliary$8hAbFqC9.call(Unknown Source)\nat org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.StaticMethodsInter.intercept(StaticMethodsInter.java:83)\nat com.company.JavaErrorExample.innerInnerThrowsException(JavaErrorExample.java)\nat com.company.JavaErrorExample.innerInvokesMethod$original$6Sy6zHx2(JavaErrorExample.java:23)\nat com.company.JavaErrorExample.innerInvokesMethod$original$6Sy6zHx2$accessor$sAFlBgva(JavaErrorExample.java)\nat com.company.JavaErrorExample$auxiliary$g8lXYOmM.call(Unknown Source)\nat org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.StaticMethodsInter.intercept(StaticMethodsInter.java:83)\nat com.company.JavaErrorExample.innerInvokesMethod(JavaErrorExample.java)\nat com.company.JavaErrorExample.invokesMethod$original$6Sy6zHx2(JavaErrorExample.java:17)\nat com.company.JavaErrorExample.invokesMethod$original$6Sy6zHx2$accessor$sAFlBgva(JavaErrorExample.java)\nat com.company.JavaErrorExample$auxiliary$2Eio6nnf.call(Unknown Source)\nat org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.StaticMethodsInter.intercept(StaticMethodsInter.java:83)\nat com.company.JavaErrorExample.invokesMethod(JavaErrorExample.java)\nat com.company.JavaErrorExample.main(JavaErrorExample.java:7)\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "traceId": "8.1.15908316452720103",
+      "segmentId": "8.1.15908316452720102",
+      "spanId": 3,
+      "parentSpanId": 0,
+      "refs": [
+      ],
+      "serviceCode": "b4c8f3f5-c8d2-4de6-a223-80dd3e7c3cd9",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1590831645772,
+      "endTime": 1590831645772,
+      "endpointName": "com.company.OtherFile.main()",
+      "type": "Local",
+      "peer": "",
+      "component": "",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [
+      ],
+      "logs": [
+      ]
+    }
+  ]
+}

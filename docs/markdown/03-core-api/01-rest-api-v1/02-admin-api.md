@@ -43,7 +43,7 @@ The Admin API allows you to modify Source++ system settings and integrations. Yo
 {
   "category": "APM",
   "enabled": true,
-  "version": "7.0.0",
+  "version": "8.0.0",
   "connections": {
     "gRPC": {
       "host": "localhost",
@@ -56,7 +56,9 @@ The Admin API allows you to modify Source++ system settings and integrations. Yo
   },
   "config": {
     "timezone": null,
-    "endpoint_detection_interval_seconds": 15
+    "service_detection_delay_seconds": 10,
+    "endpoint_detection_interval_seconds": 10,
+    "failing_artifact_detection_interval_seconds": 10
   },
   "id": "apache_skywalking"
 }
@@ -79,7 +81,7 @@ n/a
     "name": "Apache SkyWalking",
     "category": "APM",
     "enabled": true,
-    "version": "7.0.0",
+    "version": "8.0.0",
     "connections": {
       "gRPC": {
         "host": "localhost",
@@ -92,7 +94,9 @@ n/a
     },
     "config": {
       "timezone": null,
-      "endpoint_detection_interval_seconds": 15
+      "service_detection_delay_seconds": 10,
+      "endpoint_detection_interval_seconds": 10,
+      "failing_artifact_detection_interval_seconds": 10
     },
     "id": "apache_skywalking"
   }

@@ -7,17 +7,20 @@
     "jks_password": null,
     "secure_mode": false,
     "api_key": null,
-    "subscription_inactive_limit_minutes": 15
+    "subscription_inactive_limit_minutes": 5
   },
   "storage": {
-    "type": "h2"
+    "type": "h2",
+    "h2": {
+      "connection": "memory"
+    }
   },
   "integrations": [
     {
       "id": "apache_skywalking",
       "category": "APM",
       "enabled": false,
-      "version": "7.0.0",
+      "version": "8.0.0",
       "connections": {
         "REST": {
           "host": "localhost",
@@ -30,7 +33,9 @@
       },
       "config": {
         "timezone": null,
-        "endpoint_detection_interval_seconds": 15
+        "service_detection_delay_seconds": 10,
+        "endpoint_detection_interval_seconds": 10,
+        "failing_artifact_detection_interval_seconds": 10
       }
     }
   ]

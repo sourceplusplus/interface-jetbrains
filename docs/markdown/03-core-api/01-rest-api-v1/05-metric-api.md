@@ -18,7 +18,7 @@ The Metric API allows you to store and retrieve application metrics. You can use
 **Request**:
 ```json
 {
-   "time_frame": "LAST_15_MINUTES",
+   "time_frame": "LAST_5_MINUTES",
    "metric_types":[
       "Throughput_Average", "ResponseTime_Average", "ServiceLevelAgreement_Average",
       "ResponseTime_99Percentile", "ResponseTime_95Percentile", "ResponseTime_90Percentile",
@@ -41,7 +41,10 @@ n/a (200 OK)
 
 ```json
 {
-   "metric_types":[
+   "remove_time_frames": [
+      "LAST_5_MINUTES"
+   ],
+   "remove_metric_types":[
       "Throughput_Average", "ResponseTime_Average", "ServiceLevelAgreement_Average",
       "ResponseTime_99Percentile", "ResponseTime_95Percentile", "ResponseTime_90Percentile",
       "ResponseTime_75Percentile", "ResponseTime_50Percentile"

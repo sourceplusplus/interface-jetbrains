@@ -1,0 +1,140 @@
+{
+  "spans": [
+    {
+      "traceId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400351",
+      "segmentId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400350",
+      "spanId": 0,
+      "parentSpanId": -1,
+      "refs": [],
+      "serviceCode": "b2189224-e734-4590-9173-67e5d4ac379b",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1592125684540,
+      "endTime": 1592125685041,
+      "endpointName": "com.company.JavaErrorExample.invokesMethod2()",
+      "type": "Entry",
+      "peer": "",
+      "component": "Unknown",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400351",
+      "segmentId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400350",
+      "spanId": 1,
+      "parentSpanId": 0,
+      "refs": [],
+      "serviceCode": "b2189224-e734-4590-9173-67e5d4ac379b",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1592125685040,
+      "endTime": 1592125685041,
+      "endpointName": "com.company.JavaErrorExample.innerInvokesMethod()",
+      "type": "Local",
+      "peer": "",
+      "component": "Unknown",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400351",
+      "segmentId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400350",
+      "spanId": 2,
+      "parentSpanId": 1,
+      "refs": [],
+      "serviceCode": "b2189224-e734-4590-9173-67e5d4ac379b",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1592125685040,
+      "endTime": 1592125685041,
+      "endpointName": "com.company.JavaErrorExample.innerInnerThrowsException()",
+      "type": "Local",
+      "peer": "",
+      "component": "Unknown",
+      "isError": true,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": [
+        {
+          "time": 1592125685041,
+          "data": [
+            {
+              "key": "event",
+              "value": "error"
+            },
+            {
+              "key": "error.kind",
+              "value": "java.lang.InterruptedException"
+            },
+            {
+              "key": "message",
+              "value": "Alert"
+            },
+            {
+              "key": "stack",
+              "value": "java.lang.InterruptedException: Alert\nat com.company.JavaErrorExample.innerInnerThrowsException$original$RHUbpWkc(JavaErrorExample.java:31)\nat com.company.JavaErrorExample.innerInnerThrowsException$original$RHUbpWkc$accessor$46JN4GZj(JavaErrorExample.java)\nat com.company.JavaErrorExample$auxiliary$4MbkjGjN.call(Unknown Source)\nat org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.StaticMethodsInter.intercept(StaticMethodsInter.java:83)\nat com.company.JavaErrorExample.innerInnerThrowsException(JavaErrorExample.java)\nat com.company.JavaErrorExample.innerInvokesMethod$original$RHUbpWkc(JavaErrorExample.java:24)\nat com.company.JavaErrorExample.innerInvokesMethod$original$RHUbpWkc$accessor$46JN4GZj(JavaErrorExample.java)\nat com.company.JavaErrorExample$auxiliary$lpqBoZDQ.call(Unknown Source)\nat org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.StaticMethodsInter.intercept(StaticMethodsInter.java:83)\nat com.company.JavaErrorExample.innerInvokesMethod(JavaErrorExample.java)\nat com.company.JavaErrorExample.invokesMethod2$original$RHUbpWkc(JavaErrorExample.java:17)\nat com.company.JavaErrorExample.invokesMethod2$original$RHUbpWkc$accessor$46JN4GZj(JavaErrorExample.java)\nat com.company.JavaErrorExample$auxiliary$btGV7fbA.call(Unknown Source)\nat org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.StaticMethodsInter.intercept(StaticMethodsInter.java:83)\nat com.company.JavaErrorExample.invokesMethod2(JavaErrorExample.java)\nat com.company.JavaErrorExample.main(JavaErrorExample.java:7)\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "traceId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400351",
+      "segmentId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400350",
+      "spanId": 3,
+      "parentSpanId": 2,
+      "refs": [],
+      "serviceCode": "b2189224-e734-4590-9173-67e5d4ac379b",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1592125685040,
+      "endTime": 1592125685040,
+      "endpointName": "com.company.JavaErrorExample.calledBeforeException()",
+      "type": "Local",
+      "peer": "",
+      "component": "Unknown",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400351",
+      "segmentId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400350",
+      "spanId": 4,
+      "parentSpanId": 0,
+      "refs": [],
+      "serviceCode": "b2189224-e734-4590-9173-67e5d4ac379b",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1592125685041,
+      "endTime": 1592125685041,
+      "endpointName": "com.company.OtherFile.main()",
+      "type": "Local",
+      "peer": "",
+      "component": "Unknown",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    },
+    {
+      "traceId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400351",
+      "segmentId": "599d2618abd543ac8005e686b0db21e1.1.15921256845400350",
+      "spanId": 5,
+      "parentSpanId": 0,
+      "refs": [],
+      "serviceCode": "b2189224-e734-4590-9173-67e5d4ac379b",
+      "serviceInstanceName": "af2835d23d924169b770c1a224fd58be@172.25.0.1",
+      "startTime": 1592125685041,
+      "endTime": 1592125685041,
+      "endpointName": "com.company.T3.test()",
+      "type": "Local",
+      "peer": "",
+      "component": "Unknown",
+      "isError": false,
+      "layer": "Unknown",
+      "tags": [],
+      "logs": []
+    }
+  ]
+}

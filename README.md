@@ -67,26 +67,24 @@ Install a JetBrains IDE if you don’t already have one.
 
 After installation, you will need to configure the Source++ Plugin (see [Configure Plugin](docs/markdown/01-introduction/06-configure-source-plugin.md)).
 
-## Code Structure
+## Project Structure
 
-| Module                        | Description                                              | Language    |
+| Internal Module               | Description                                              | Language    |
 | ----------------------------- | -------------------------------------------------------- | ----------- |
-| :agent:jvm-agent              | Used to activate and configure APMs' JVM agents          | Java 8+     |
 | :api                          | Holds common data models and communication clients       | Java 8+     |
-| :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.4+ |
-| :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.4+ |
-| :portal                       | Used to visually display contextualized artifact data    | Groovy 2.4+ |
+| :core                         | Handles integrations, contextualization, & subscriptions | Groovy 2.5+ |
+| :plugin:jetbrains-plugin      | JetBrains implementation of the Source++ Plugin          | Groovy 2.5+ |
+| :portal                       | Used to visually display contextualized artifact data    | Groovy 2.5+ |
+
+| External Module               | Description                                              | Language    |
+| ----------------------------- | -------------------------------------------------------- | ----------- |
+| [SourceMarker](https://github.com/sourceplusplus/SourceMarker) | Used to tie visual marks & popups to source code artifacts | Kotlin 1.3+ |
 
 ## Building/Testing
 
 #### Run all Source++ tests:
 ```
 ./gradlew test
-```
-
-#### Build Source++ Agent:
-```
-./gradlew buildAgent
 ```
 
 #### Build Source++ Plugin:

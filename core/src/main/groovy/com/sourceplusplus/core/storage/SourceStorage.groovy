@@ -2,10 +2,16 @@ package com.sourceplusplus.core.storage
 
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
+import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest
 import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
+import com.sourceplusplus.api.model.artifact.SourceArtifactSubscriptionType
+import com.sourceplusplus.api.model.trace.Trace
+import com.sourceplusplus.api.model.trace.TraceQuery
+import com.sourceplusplus.api.model.trace.TraceSpan
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
+
+import java.time.Instant
 
 /**
  * Represents a storage for saving/fetching core data.
@@ -15,6 +21,10 @@ import io.vertx.core.Handler
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 abstract class SourceStorage {
+
+    abstract void getCoreConfig(Handler<AsyncResult<Optional<CoreConfig>>> handler)
+
+    abstract void updateCoreConfig(CoreConfig coreConfig, Handler<AsyncResult<CoreConfig>> handler)
 
     abstract void createApplication(SourceApplication application, Handler<AsyncResult<SourceApplication>> handler)
 
@@ -48,29 +58,43 @@ abstract class SourceStorage {
     abstract void findArtifactBySubscribeAutomatically(String appUuid,
                                                        Handler<AsyncResult<List<SourceArtifact>>> handler)
 
+    abstract void findArtifactByEndpoint(String appUuid,
+                                         Handler<AsyncResult<List<SourceArtifact>>> handler)
+
+    abstract void findArtifactByFailing(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler)
+
     abstract void getApplicationArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler)
 
     abstract void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,
-                                           Handler<AsyncResult<List<SourceArtifactSubscription>>> handler)
+                                           Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler)
 
-    abstract void getSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid,
-                                                     Handler<AsyncResult<List<SourceArtifactSubscription>>> handler)
+    abstract void getSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid, String artifactQualifiedName,
+                                                     Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler)
 
-    abstract void getArtifactSubscriptions(Handler<AsyncResult<List<SourceArtifactSubscription>>> handler)
+    abstract void getSubscriberApplicationSubscriptions(String subscriberUuid, String appUuid,
+                                                        Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler)
 
-    abstract void updateArtifactSubscription(SourceArtifactSubscription subscription,
-                                             Handler<AsyncResult<SourceArtifactSubscription>> handler)
+    abstract void getSubscriberArtifactSubscriptions(Handler<AsyncResult<Map<ArtifactSubscribeRequest, Instant>>> handler)
 
-    abstract void deleteArtifactSubscription(SourceArtifactSubscription subscription, Handler<AsyncResult<Void>> handler)
+    abstract void createArtifactSubscription(ArtifactSubscribeRequest Subscription,
+                                             Handler<AsyncResult<ArtifactSubscribeRequest>> handler)
 
-    abstract void setArtifactSubscription(SourceArtifactSubscription subscription,
-                                          Handler<AsyncResult<SourceArtifactSubscription>> handler)
+    abstract void updateArtifactSubscription(ArtifactSubscribeRequest oldSubscription, ArtifactSubscribeRequest newSubscription,
+                                             Handler<AsyncResult<ArtifactSubscribeRequest>> handler)
 
-    abstract void getArtifactSubscription(String subscriberUuid, String appUuid, String artifactQualifiedName,
-                                          Handler<AsyncResult<Optional<SourceArtifactSubscription>>> handler)
+    abstract void deleteArtifactSubscription(ArtifactSubscribeRequest subscription, Handler<AsyncResult<Void>> handler)
+
+    abstract void deleteSubscriberArtifactSubscriptions(String subscriberUuid, String appUuid, String artifactQualifiedName,
+                                                        SourceArtifactSubscriptionType type,
+                                                        Handler<AsyncResult<Void>> handler)
 
     abstract void getApplicationSubscriptions(String appUuid,
                                               Handler<AsyncResult<List<SourceApplicationSubscription>>> handler)
+
+    abstract void addArtifactFailure(SourceArtifact artifact, TraceSpan failingSpan, Handler<AsyncResult<Void>> handler)
+
+    abstract void getArtifactFailures(SourceArtifact artifact, TraceQuery traceQuery,
+                                      Handler<AsyncResult<List<Trace>>> handler)
 
     abstract void refreshDatabase(Handler<AsyncResult<Void>> handler)
 

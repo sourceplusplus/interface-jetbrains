@@ -8,9 +8,12 @@ import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetrics
 import com.sourceplusplus.api.model.metric.MetricType
 import com.sourceplusplus.api.model.trace.*
+import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
+import com.sourceplusplus.core.integration.apm.skywalking.status.SkywalkingFailingArtifacts
+import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
@@ -23,6 +26,11 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+import static com.sourceplusplus.api.util.ArtifactNameUtils.*
+import static com.sourceplusplus.api.model.trace.TraceOrderType.*
+import static com.sourceplusplus.core.SourceCoreServer.RESOURCE_LOADER
+import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.SourceService
+
 /**
  * Represents integration with the Apache SkyWalking APM.
  *
@@ -33,18 +41,21 @@ import java.time.format.DateTimeFormatter
 @Slf4j
 class SkywalkingIntegration extends APMIntegration {
 
-    private static final String GET_ALL_SERVICES = Resources.toString(Resources.getResource(
+    public static final String UNKNOWN_COMPONENT = "Unknown"
+
+    private static final String GET_ALL_SERVICES = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_all_services.graphql"), Charsets.UTF_8)
-    private static final String GET_SERVICE_ENDPOINTS = Resources.toString(Resources.getResource(
+    private static final String GET_SERVICE_INSTANCES = Resources.toString(RESOURCE_LOADER.getResource(
+            "query/skywalking/get_service_instances.graphql"), Charsets.UTF_8)
+    private static final String GET_SERVICE_ENDPOINTS = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_service_endpoints.graphql"), Charsets.UTF_8)
-    private static final String GET_ENDPOINT_METRICS = Resources.toString(Resources.getResource(
+    private static final String GET_ENDPOINT_METRICS = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_endpoint_metrics.graphql"), Charsets.UTF_8)
-    private static final String GET_LATEST_TRACES = Resources.toString(Resources.getResource(
-            "query/skywalking/get_latest_traces.graphql"), Charsets.UTF_8)
-    private static final String GET_SLOWEST_TRACES = Resources.toString(Resources.getResource(
-            "query/skywalking/get_slowest_traces.graphql"), Charsets.UTF_8)
-    private static final String GET_TRACE_STACK = Resources.toString(Resources.getResource(
+    private static final String QUERY_BASIC_TRACES = Resources.toString(RESOURCE_LOADER.getResource(
+            "query/skywalking/query_basic_traces.graphql"), Charsets.UTF_8)
+    private static final String GET_TRACE_STACK = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_trace_stack.graphql"), Charsets.UTF_8)
+    private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final SourceStorage storage
     private DateTimeFormatter DATE_TIME_FORMATTER_MINUTES
@@ -52,8 +63,10 @@ class SkywalkingIntegration extends APMIntegration {
     private String skywalkingOAPHost
     private int skywalkingOAPPort
     private WebClient webClient
+    private int serviceDetectionDelay
 
-    SkywalkingIntegration(ArtifactAPI artifactAPI, SourceStorage storage) {
+    SkywalkingIntegration(ApplicationAPI applicationAPI, ArtifactAPI artifactAPI, SourceStorage storage) {
+        this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
     }
@@ -76,10 +89,18 @@ class SkywalkingIntegration extends APMIntegration {
         def restHost = Objects.requireNonNull(config().getJsonObject("connections").getJsonObject("REST"))
         skywalkingOAPHost = Objects.requireNonNull(restHost.getString("host"))
         skywalkingOAPPort = Objects.requireNonNull(restHost.getInteger("port"))
-
         webClient = WebClient.create(vertx)
-        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, artifactAPI),
-                new DeploymentOptions().setConfig(config()), {
+
+        serviceDetectionDelay = config().getJsonObject("config").getInteger("service_detection_delay_seconds")
+
+        def deploymentConfig = new DeploymentOptions().setConfig(config())
+        def failingArtifactsPromise = Promise.promise().future()
+        def endpointIdDetectorPromise = Promise.promise().future()
+        vertx.deployVerticle(new SkywalkingFailingArtifacts(this, applicationAPI, artifactAPI, storage),
+                deploymentConfig, failingArtifactsPromise)
+        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, applicationAPI, artifactAPI, storage),
+                deploymentConfig, endpointIdDetectorPromise)
+        CompositeFuture.all(failingArtifactsPromise, endpointIdDetectorPromise).onComplete({
             if (it.succeeded()) {
                 log.info("SkywalkingIntegration started")
                 startFuture.complete()
@@ -94,8 +115,12 @@ class SkywalkingIntegration extends APMIntegration {
         log.info("{} stopped", getClass().getSimpleName())
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     void getAllServices(Instant start, Instant end, String step, Handler<AsyncResult<JsonArray>> handler) {
-        log.info("Getting all SkyWalking services. Start: " + start + " - End: " + end)
+        log.debug("Getting all SkyWalking services. Start: " + start + " - End: " + end)
         def graphqlQuery = new JsonObject()
         if ("second".equalsIgnoreCase(step)) {
             graphqlQuery.put("query", GET_ALL_SERVICES
@@ -116,16 +141,97 @@ class SkywalkingIntegration extends APMIntegration {
             if (it.failed()) {
                 handler.handle(Future.failedFuture(it.cause()))
             } else {
-                def result = new JsonObject(it.result().bodyAsString())
-                        .getJsonObject("data").getJsonArray("getAllServices")
-                log.info("Got all SkyWalking services: " + result)
+                def result = it.result().bodyAsJsonObject()
+                if (result.containsKey("data")) {
+                    def services = result.getJsonObject("data").getJsonArray("getAllServices")
+                    log.debug("Got all SkyWalking services: {}", services)
+                    handler.handle(Future.succeededFuture(services))
+                } else {
+                    def errorMessage = it.result().bodyAsJsonObject().getJsonArray("errors")
+                            .getJsonObject(0).getString("message")
+                    handler.handle(Future.failedFuture(new IllegalStateException(errorMessage)))
+                }
+            }
+        })
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getServiceInstances(Instant start, Instant end, String step, String serviceId,
+                             Handler<AsyncResult<JsonArray>> handler) {
+        log.debug("Getting all SkyWalking service instances. Start: $start - End: $end - Service id: $serviceId")
+        def graphqlQuery = new JsonObject()
+        if ("second".equalsIgnoreCase(step)) {
+            graphqlQuery.put("query", GET_SERVICE_INSTANCES
+                    .replace('$serviceId', serviceId)
+                    .replace('$durationStart', DATE_TIME_FORMATTER_SECONDS.format(start))
+                    .replace('$durationEnd', DATE_TIME_FORMATTER_SECONDS.format(end))
+                    .replace('$durationStep', step)
+            )
+        } else {
+            graphqlQuery.put("query", GET_SERVICE_INSTANCES
+                    .replace('$serviceId', serviceId)
+                    .replace('$durationStart', DATE_TIME_FORMATTER_MINUTES.format(start))
+                    .replace('$durationEnd', DATE_TIME_FORMATTER_MINUTES.format(end))
+                    .replace('$durationStep', step)
+            )
+        }
+
+        webClient.post(skywalkingOAPPort, skywalkingOAPHost,
+                "/graphql").sendJsonObject(graphqlQuery, {
+            if (it.failed()) {
+                handler.handle(Future.failedFuture(it.cause()))
+            } else {
+                def result = it.result().bodyAsJsonObject()
+                        .getJsonObject("data").getJsonArray("getServiceInstances")
+                log.debug("Got all SkyWalking service instances: " + result)
                 handler.handle(Future.succeededFuture(result))
             }
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void getActiveServiceInstances(Handler<AsyncResult<JsonArray>> handler) {
+        log.info("Getting all active SkyWalking service instances")
+        def start = Instant.now(), end = Instant.now(), step = "MINUTE"
+        getAllServices(start, end, "MINUTE", {
+            if (it.succeeded()) {
+                def futures = []
+                for (int i = 0; i < it.result().size(); i++) {
+                    def promise = Promise.promise()
+                    futures.add(promise)
+
+                    def service = it.result().getJsonObject(i)
+                    getServiceInstances(start, end, step, service.getString("label"), promise)
+                }
+
+                CompositeFuture.all(futures).onComplete({
+                    if (it.succeeded()) {
+                        def resultArray = new JsonArray()
+                        for (int i = 0; i < it.result().size(); i++) {
+                            def serviceInstance = it.result().resultAt(i) as JsonArray
+                            if (!serviceInstance.isEmpty()) {
+                                resultArray.add(serviceInstance)
+                            }
+                        }
+                        handler.handle(Future.succeededFuture(resultArray))
+                    } else {
+                        handler.handle(Future.failedFuture(it.cause()))
+                    }
+                })
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
+    }
+
     void getServiceEndpoints(String serviceId, Handler<AsyncResult<JsonArray>> handler) {
-        log.info("Getting SkyWalking service endpoints for service id: " + serviceId)
+        log.debug("Getting SkyWalking service endpoints for service id: " + serviceId)
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_SERVICE_ENDPOINTS
                 .replace('$serviceId', serviceId)
@@ -136,14 +242,18 @@ class SkywalkingIntegration extends APMIntegration {
             if (it.failed()) {
                 handler.handle(Future.failedFuture(it.cause()))
             } else {
-                def result = new JsonObject(it.result().bodyAsString())
+                def result = it.result().bodyAsJsonObject()
                         .getJsonObject("data").getJsonArray("searchEndpoint")
-                log.info("Got SkyWalking service endpoints: " + result)
+                log.debug("Got SkyWalking service endpoints: " + result)
                 handler.handle(Future.succeededFuture(result))
             }
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     void getEndpointMetrics(String endpointId, ArtifactMetricQuery metricQuery,
                             Handler<AsyncResult<ArtifactMetricResult>> handler) {
         log.debug("Getting SkyWalking endpoint metrics: " + Objects.requireNonNull(metricQuery))
@@ -257,39 +367,60 @@ class SkywalkingIntegration extends APMIntegration {
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
         log.debug("Getting SkyWalking traces: " + Objects.requireNonNull(traceQuery))
-        def graphqlQuery = new JsonObject()
-        def fullQuery
-        if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
-            fullQuery = GET_LATEST_TRACES
-        } else {
-            fullQuery = GET_SLOWEST_TRACES
+
+        def serviceIdStr = "null"
+        if (traceQuery.serviceId() != null) {
+            serviceIdStr = '"' + traceQuery.serviceId() + '"'
         }
-        graphqlQuery.put("query", fullQuery
-                .replace('$endpointId', traceQuery.endpointId())
+        def serviceInstanceIdStr = "null"
+        if (traceQuery.serviceInstanceId() != null) {
+            serviceInstanceIdStr = '"' + traceQuery.serviceInstanceId() + '"'
+        }
+        def endpointIdStr = "null"
+        if (traceQuery.endpointId() != null) {
+            endpointIdStr = '"' + traceQuery.endpointId() + '"'
+        }
+        def endpointNameStr = "null"
+        if (traceQuery.artifactQualifiedName() != null) {
+            endpointNameStr = '"' + traceQuery.artifactQualifiedName() + '"'
+        } else if (traceQuery.endpointName() != null) {
+            endpointNameStr = '"' + traceQuery.endpointName() + '"'
+        }
+        def queryOrder = traceQuery.orderType() == SLOWEST_TRACES ? "BY_DURATION" : "BY_START_TIME"
+        def graphqlQuery = new JsonObject()
+        graphqlQuery.put("query", QUERY_BASIC_TRACES
+                .replace('$serviceId', serviceIdStr)
+                .replace('$serviceInstanceId', serviceInstanceIdStr)
+                .replace('$endpointId', endpointIdStr)
+                .replace('$endpointName', endpointNameStr)
                 .replace('$queryDurationStart', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStart()))
                 .replace('$queryDurationEnd', DATE_TIME_FORMATTER_SECONDS.format(traceQuery.durationStop()))
                 .replace('$queryDurationStep', traceQuery.durationStep())
-                .replace('$pageSize', Integer.toString(traceQuery.pageSize()))
-        )
+                .replace('$traceState', traceQuery.traceState())
+                .replace('$queryOrder', queryOrder)
+                .replace('$pageSize', Integer.toString(traceQuery.pageSize())))
 
         webClient.post(skywalkingOAPPort, skywalkingOAPHost,
                 "/graphql").sendJsonObject(graphqlQuery, {
             if (it.failed()) {
                 handler.handle(Future.failedFuture(it.cause()))
             } else {
-                JsonObject result = new JsonObject(it.result().bodyAsString())
+                def result = it.result().bodyAsJsonObject()
                         .getJsonObject("data").getJsonObject("queryBasicTraces")
                 def traceList = new ArrayList<Trace>()
                 def traces = result.getJsonArray("traces")
                 for (int i = 0; i < traces.size(); i++) {
                     traceList.add(Json.decodeValue(traces.getJsonObject(i).toString(), Trace.class))
                 }
-                if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
+                if (traceQuery.orderType() == LATEST_TRACES || traceQuery.orderType() == FAILED_TRACES) {
                     traceList.sort({ it.start() })
-                } else if (traceQuery.orderType() == TraceOrderType.SLOWEST_TRACES) {
+                } else if (traceQuery.orderType() == SLOWEST_TRACES) {
                     traceList.sort({ it.duration() })
                 }
 
@@ -298,25 +429,42 @@ class SkywalkingIntegration extends APMIntegration {
                         .total(result.getInteger("total"))
                         .build()
 
-                if (traceQuery.artifactQualifiedName() == null) {
-                    log.info("Got SkyWalking traces. Endpoint: {} - Traces: {} - Total: {}",
-                            traceQuery.endpointId(), traceQueryResult.traces().size(), traceQueryResult.total())
-                } else {
-                    log.info("Got SkyWalking traces. Artifact: {} - Traces: {} - Total: {}",
-                            traceQuery.artifactQualifiedName(), traceQueryResult.traces().size(), traceQueryResult.total())
+                def primarySelector = ""
+                if (traceQuery.artifactQualifiedName() != null) {
+                    primarySelector = "Artifact: ${getShortQualifiedFunctionName(traceQuery.artifactQualifiedName())} - "
+                } else if (traceQuery.endpointId() != null) {
+                    primarySelector = "Endpoint: ${traceQuery.endpointId()} - "
+                } else if (traceQuery.endpointName() != null) {
+                    primarySelector = "Endpoint: ${traceQuery.endpointName()} - "
+                } else if (traceQuery.serviceInstanceId() != null) {
+                    primarySelector = "Service instance id: ${traceQuery.serviceInstanceId()} - "
+                } else if (traceQuery.serviceId() != null) {
+                    primarySelector = "Service id: ${traceQuery.serviceId()} - "
                 }
+                log.info("Got SkyWalking traces. {}State: {} - Order: {} - Traces: {} - Total: {}",
+                        primarySelector, traceQuery.traceState(), queryOrder,
+                        traceQueryResult.traces().size(), traceQueryResult.total())
+
                 handler.handle(Future.succeededFuture(traceQueryResult))
             }
         })
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    void getTraceStack(String appUuid, String traceId,
-                       Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
-        def query = TraceSpanStackQuery.builder().oneLevelDeep(false).traceId(traceId).build()
+    void getTraceStack(String appUuid, String traceId, Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
+        def query = TraceSpanStackQuery.builder()
+                .systemRequest(true)
+                .oneLevelDeep(false)
+                .traceId(traceId).build()
         getTraceStack(appUuid, null, query, handler)
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void getTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
@@ -331,65 +479,9 @@ class SkywalkingIntegration extends APMIntegration {
             if (it.failed()) {
                 handler.handle(Future.failedFuture(it.cause()))
             } else {
-                def spanList = new ArrayList<TraceSpan>()
-                def data = it.result().bodyAsJsonObject().getJsonObject("data").getJsonObject("queryTrace")
-                if (data != null) {
-                    def parentSpanId = -1
-                    def prevSpanId = -1
-                    def exitSegmentId = null
-                    long exitSpanId = -1
-
-                    def stack = data.getJsonArray("spans")
-                    for (int i = 0; i < stack.size(); i++) {
-                        def traceSpan = Json.decodeValue(stack.getJsonObject(i).toString(), TraceSpan.class)
-
-                        if (artifact && spanQuery.oneLevelDeep()) {
-                            if (parentSpanId != -1 && prevSpanId != -1 && traceSpan.spanId() < prevSpanId) {
-                                break
-                            } else {
-                                prevSpanId = traceSpan.spanId()
-                            }
-
-                            if (parentSpanId == -1 && spanQuery.segmentId() != null) {
-                                if ((spanQuery.segmentId() == traceSpan.segmentId()
-                                        && spanQuery.spanId() == traceSpan.spanId()) || exitSegmentId != null) {
-                                    if (traceSpan.type() == "Exit" && exitSegmentId == null && spanQuery.followExit()) {
-                                        exitSegmentId = traceSpan.segmentId()
-                                        exitSpanId = traceSpan.spanId()
-                                    } else if (exitSegmentId != null && spanQuery.followExit()) {
-                                        boolean foundEntry = false
-                                        def refs = traceSpan.refs()
-                                        refs.each {
-                                            if (exitSegmentId == it.parentSegmentId()
-                                                    && exitSpanId == it.parentSpanId()
-                                                    && it.type() == "CROSS_PROCESS") {
-                                                foundEntry = true
-                                            }
-                                        }
-                                        if (foundEntry) {
-                                            spanList.add(traceSpan)
-                                            parentSpanId = traceSpan.spanId()
-                                        }
-                                    } else {
-                                        spanList.add(traceSpan)
-                                        parentSpanId = traceSpan.spanId()
-                                    }
-                                }
-                            } else if (parentSpanId == -1 && (traceSpan.endpointName() == artifact.artifactQualifiedName()
-                                    || (artifact.config() && traceSpan.endpointName() == artifact.config().endpointName()))) {
-                                if (!spanList.isEmpty() || traceSpan.type() != "Exit") {
-                                    spanList.add(traceSpan)
-                                    parentSpanId = traceSpan.spanId()
-                                }
-                            } else if (parentSpanId != -1 && traceSpan.parentSpanId() == parentSpanId) {
-                                spanList.add(traceSpan)
-                            }
-                        } else {
-                            spanList.add(traceSpan)
-                        }
-                    }
-                }
-
+                ArrayList<TraceSpan> spanList = processTraceStack(
+                        it.result().bodyAsJsonObject().getJsonObject("data").getJsonObject("queryTrace"),
+                        spanQuery, artifact, vertx.sharedData().getLocalMap("skywalking_endpoints"))
                 def futures = new ArrayList<Future>()
                 spanList.each {
                     def fut = Promise.promise()
@@ -429,5 +521,143 @@ class SkywalkingIntegration extends APMIntegration {
                 })
             }
         })
+    }
+
+    void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
+        def searchServiceStartTime
+        def returnCached = false
+        if (CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService == null) {
+            searchServiceStartTime = Instant.now()
+        } else {
+            searchServiceStartTime = CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService
+            returnCached = Instant.now().epochSecond - searchServiceStartTime.epochSecond <= serviceDetectionDelay
+        }
+
+        if (returnCached) {
+            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
+        } else {
+            def searchServiceEndTime = Instant.now()
+            getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
+                if (it.succeeded()) {
+                    CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService = searchServiceEndTime
+
+                    def futures = []
+                    for (int i = 0; i < it.result().size(); i++) {
+                        def service = it.result().getJsonObject(i)
+                        def serviceId = service.getString("key")
+                        def appUuid = service.getString("label")
+
+                        //verify appUuid is valid
+                        def promise = Promise.promise()
+                        futures.add(promise)
+                        applicationAPI.getApplication(appUuid, {
+                            if (it.succeeded()) {
+                                if (it.result().isPresent()) {
+                                    CoreConfig.INSTANCE.apmIntegrationConfig.addSourceService(
+                                            new SourceService(serviceId, appUuid))
+                                }
+                                promise.complete()
+                            } else {
+                                promise.fail(it.cause())
+                            }
+                        })
+                    }
+
+                    CompositeFuture.all(futures).onComplete({
+                        if (it.succeeded()) {
+                            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
+                        } else {
+                            handler.handle(Future.failedFuture(it.cause()))
+                        }
+                    })
+                } else {
+                    handler.handle(Future.failedFuture(it.cause()))
+                }
+            })
+        }
+    }
+
+    static ArrayList<TraceSpan> processTraceStack(JsonObject traceStackData, TraceSpanStackQuery spanQuery,
+                                                  SourceArtifact artifact, Map<String, String> skywalkingEndpoints) {
+        def processedSpans = new ArrayList<TraceSpan>()
+        if (traceStackData != null) {
+            def stack = traceStackData.getJsonArray("spans")
+            def segments = new HashMap<String, List<TraceSpan>>()
+            for (int i = 0; i < stack.size(); i++) {
+                def traceSpan = Json.decodeValue(stack.getJsonObject(i).toString(), TraceSpan.class)
+                segments.putIfAbsent(traceSpan.segmentId(), new ArrayList<TraceSpan>())
+                segments.get(traceSpan.segmentId()).add(traceSpan)
+            }
+
+            def segmentSpanChildStacks = new HashMap<String, HashSet<Long>>()
+            def spanList = new ArrayList<TraceSpan>()
+            for (def traceSpans : segments.values()) {
+                def parentSpanId = -2L
+                if (spanQuery.oneLevelDeep()) {
+                    if (spanQuery.spanId() != null) {
+                        parentSpanId = spanQuery.spanId()
+                    } else {
+                        def parentSpan = traceSpans.find {
+                            isMatchingArtifact(it, artifact, skywalkingEndpoints)
+                        }
+                        if (parentSpan) {
+                            parentSpanId = parentSpan.spanId()
+                        } else {
+                            continue
+                        }
+                    }
+                }
+
+                def orderedTraceSpans = traceSpans.sort { it.spanId() }.reverse()
+                def childErrors = new HashSet<Long>()
+                for (def traceSpan : orderedTraceSpans) {
+                    if (parentSpanId != traceSpan.parentSpanId() && traceSpan.parentSpanId() >= 0) {
+                        segmentSpanChildStacks.putIfAbsent(traceSpan.segmentId(), new HashSet<Long>())
+                        segmentSpanChildStacks.get(traceSpan.segmentId()).add(traceSpan.parentSpanId())
+                    }
+                    if (traceSpan.isError()) {
+                        childErrors.add(traceSpan.parentSpanId())
+                    }
+
+                    def processedSpan = traceSpan
+                    if (childErrors.contains(traceSpan.spanId())) {
+                        processedSpan = processedSpan.withIsChildError(true)
+                        childErrors.add(traceSpan.parentSpanId())
+                    }
+                    if (spanQuery.oneLevelDeep() && traceSpan.spanId() != parentSpanId &&
+                            traceSpan.parentSpanId() != parentSpanId) {
+                        processedSpan = null
+                    }
+
+                    if (processedSpan != null) {
+                        spanList.add(processedSpan)
+                    }
+                }
+            }
+
+            spanList.reverse().each {
+                if (segmentSpanChildStacks.get(it.segmentId())?.contains(it.spanId())) {
+                    processedSpans.add(it.withHasChildStack(true))
+                } else {
+                    processedSpans.add(it)
+                }
+            }
+        }
+        return processedSpans
+    }
+
+    private static boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact,
+                                              Map<String, String> skywalkingEndpoints) {
+        if (traceSpan.component() && traceSpan.component() != UNKNOWN_COMPONENT) {
+            return false //skip entry component spans
+        }
+
+        def endpointId = skywalkingEndpoints.get(traceSpan.endpointName())
+        if (endpointId && artifact.config().endpointIds() && artifact.config().endpointIds().contains(endpointId)) {
+            return true
+        } else {
+            return traceSpan.endpointName() == artifact.artifactQualifiedName() ||
+                    (artifact.config() && traceSpan.endpointName() == artifact.config().endpointName())
+        }
     }
 }

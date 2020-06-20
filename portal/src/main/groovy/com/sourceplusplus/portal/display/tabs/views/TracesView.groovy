@@ -2,7 +2,6 @@ package com.sourceplusplus.portal.display.tabs.views
 
 import com.sourceplusplus.api.model.trace.ArtifactTraceResult
 import com.sourceplusplus.api.model.trace.TraceOrderType
-import com.sourceplusplus.portal.display.PortalUI
 import groovy.transform.Canonical
 import io.vertx.core.json.JsonArray
 
@@ -18,25 +17,22 @@ import java.util.concurrent.ConcurrentHashMap
 @Canonical
 class TracesView {
 
-    private final PortalUI portalUI
     private Map<TraceOrderType, ArtifactTraceResult> traceResultCache = new ConcurrentHashMap<>()
     private Map<String, JsonArray> traceStacks = new HashMap<>() //todo: evicting cache
-    int innerLevel = 0
-    boolean innerTrace
-    String rootArtifactQualifiedName
     JsonArray traceStack
-    JsonArray innerTraceStack
+    Stack<JsonArray> innerTraceStack = new Stack<>()
     TraceOrderType orderType = TraceOrderType.LATEST_TRACES
     ViewType viewType = ViewType.TRACES
     String traceId
     int spanId
-
-    TracesView(PortalUI portalUI) {
-        this.portalUI = portalUI
-    }
+    int viewTraceAmount = 10
 
     void cacheArtifactTraceResult(ArtifactTraceResult artifactTraceResult) {
-        traceResultCache.put(artifactTraceResult.orderType(), artifactTraceResult)
+        def currentTraceResult = traceResultCache.get(artifactTraceResult.orderType())
+        if (currentTraceResult) {
+            artifactTraceResult = artifactTraceResult.mergeWith(currentTraceResult)
+        }
+        traceResultCache.put(artifactTraceResult.orderType(), artifactTraceResult.truncate(viewTraceAmount))
     }
 
     ArtifactTraceResult getArtifactTraceResult() {
@@ -51,21 +47,21 @@ class TracesView {
         return traceStacks.get(traceId)
     }
 
+    boolean getInnerTrace() {
+        return !innerTraceStack.isEmpty()
+    }
+
     void cloneView(TracesView view) {
-        traceResultCache = view.traceResultCache
-        traceStacks = view.traceStacks
-        innerLevel = view.innerLevel
-        innerTrace = view.innerTrace
-        rootArtifactQualifiedName = view.rootArtifactQualifiedName
+        traceResultCache = new ConcurrentHashMap<>(view.traceResultCache)
+        traceStacks = new HashMap<>(view.traceStacks)
         if (view.traceStack) {
             traceStack = new JsonArray().addAll(view.traceStack)
         } else {
             traceStack = null
         }
-        if (view.innerTraceStack) {
-            innerTraceStack = new JsonArray().addAll(view.innerTraceStack)
-        } else {
-            innerTraceStack = null
+
+        view.innerTraceStack.reverse().each {
+            innerTraceStack.push(it)
         }
         orderType = view.orderType
         viewType = view.viewType

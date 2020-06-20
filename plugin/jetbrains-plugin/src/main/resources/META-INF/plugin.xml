@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin require-restart="true">
     <id>com.sourceplusplus.plugin.intellij</id>
     <name>Source++</name>
     <version>0.2.6-alpha</version>
@@ -26,7 +26,7 @@
 
         <projectService
                 serviceImplementation="com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService"/>
-        <toolWindow id="Source++ Console" icon="/icons/s.png" anchor="bottom"
+        <toolWindow id="Source++ Console" icon="/icons/s.svg" anchor="bottom"
                     factoryClass="com.sourceplusplus.plugin.intellij.tool.SourcePluginToolWindowFactory"/>
         <java.programPatcher implementation="com.sourceplusplus.plugin.intellij.patcher.MavenAgentPatcher"/>
         <applicationConfigurable
@@ -42,31 +42,18 @@
                                  displayName="About"
                                  id="About"
                                  instance="com.sourceplusplus.plugin.intellij.settings.about.AboutConfigurable"/>
-
-        <intentionAction>
-            <className>com.sourceplusplus.plugin.intellij.intention.SubscribeSourceArtifactIntention</className>
-            <category>Source++ Artifact</category>
-            <descriptionDirectoryName>SubscribeSourceArtifact</descriptionDirectoryName>
-        </intentionAction>
-        <intentionAction>
-            <className>com.sourceplusplus.plugin.intellij.intention.SubscribeFileSourceArtifactsIntention</className>
-            <category>Source++ Artifact</category>
-            <descriptionDirectoryName>SubscribeFileSourceArtifacts</descriptionDirectoryName>
-        </intentionAction>
-        <intentionAction>
-            <className>com.sourceplusplus.plugin.intellij.intention.UnsubscribeSourceArtifactIntention</className>
-            <category>Source++ Artifact</category>
-            <descriptionDirectoryName>UnsubscribeSourceArtifact</descriptionDirectoryName>
-        </intentionAction>
-        <intentionAction>
-            <className>com.sourceplusplus.plugin.intellij.intention.UnsubscribeFileSourceArtifactsIntention</className>
-            <category>Source++ Artifact</category>
-            <descriptionDirectoryName>UnsubscribeFileSourceArtifacts</descriptionDirectoryName>
-        </intentionAction>
     </extensions>
 
     <projectListeners>
         <listener class="com.sourceplusplus.marker.plugin.FileActivityListener"
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </projectListeners>
+
+    <actions>
+        <action id="com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMarkPopupAction"
+                class="com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMarkPopupAction"
+                text="IntelliJSourceMark Popup Action" description="IntelliJSourceMark popup action">
+            <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
+        </action>
+    </actions>
 </idea-plugin>

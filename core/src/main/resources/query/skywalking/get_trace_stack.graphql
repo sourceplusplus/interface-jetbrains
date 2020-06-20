@@ -12,6 +12,7 @@
         type
       }
       serviceCode
+      serviceInstanceName
       startTime
       endTime
       endpointName

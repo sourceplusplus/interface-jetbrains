@@ -155,9 +155,7 @@ class EnvironmentDialog extends JDialog {
 
         environmentList.addListSelectionListener({
             if (environmentList.selectedValue != null) {
-                deleteButton.setEnabled(true)
                 clearConnectionForm(true)
-                nameTextField.requestFocus()
 
                 def env = environmentList.selectedValue as SourceEnvironmentConfig
                 nameTextField.text = env.environmentName
@@ -166,11 +164,28 @@ class EnvironmentDialog extends JDialog {
                 apiTokenTextField.text = env.apiKey
                 sslEnabledCheckbox.setSelected(env.apiSslEnabled)
 
+                def existingEnvironment = SourcePluginConfig.current.getEnvironment(env.environmentName)
+                if (existingEnvironment != null && existingEnvironment.embedded) {
+                    nameTextField.setEnabled(false)
+                    hostTextField.setEnabled(false)
+                    portSpinner.setEnabled(false)
+                    apiTokenTextField.setEnabled(false)
+                    sslEnabledCheckbox.setEnabled(false)
+                    deleteButton.setEnabled(false)
+                } else {
+                    deleteButton.setEnabled(true)
+                    nameTextField.requestFocus()
+                }
+
                 if (activeEnvironment == null && environmentList.model.size == 1) {
                     //only environment automatically becomes active environment
                     activateButton.setEnabled(false)
                 } else {
-                    activateButton.setEnabled(activeEnvironment != env)
+                    if (env.embedded && !SourcePluginConfig.current.embeddedCoreServer) {
+                        activateButton.setEnabled(false)
+                    } else {
+                        activateButton.setEnabled(activeEnvironment != env)
+                    }
                 }
             } else {
                 deleteButton.setEnabled(false)
@@ -307,7 +322,10 @@ class EnvironmentDialog extends JDialog {
                         || env.apiPort != (portSpinner.value as int)
                         || env.apiSslEnabled != sslEnabledCheckbox.isSelected()
                         || env.apiKey != apiTokenTextField.text) {
-                    saveButton.setEnabled(true)
+                    def existingEnvironment = SourcePluginConfig.current.getEnvironment(nameTextField.text)
+                    if (existingEnvironment != null && !existingEnvironment.embedded) {
+                        saveButton.setEnabled(true)
+                    }
                 }
             } else {
                 saveButton.setEnabled(true)

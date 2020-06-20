@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<enhanced>
+    <class class_name="test.integration.trace.*">
+        <method method="*" static="true"></method>
+        <method method="threeStaticMethodCallDepth()" static="true" entry_method="true"></method>
+    </class>
+</enhanced>

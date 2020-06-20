@@ -1,6 +1,7 @@
 package com.sourceplusplus.plugin.intellij.portal
 
 import com.google.common.base.Joiner
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.jcef.JBCefBrowser
 import com.sourceplusplus.portal.display.PortalTab
 import com.sourceplusplus.portal.display.PortalUI
@@ -57,11 +58,12 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
         if (userQuery) {
             userQuery = "&$userQuery"
         }
-        browser.cefBrowser.loadURL(getPortalUrl(tab, portalUuid, userQuery))
+        browser.loadURL(getPortalUrl(tab, portalUuid, userQuery))
     }
 
     void close() {
-        browser.cefBrowser.close(true)
+        browser.getJBCefClient().removeLifeSpanHandler(this, browser.cefBrowser)
+        Disposer.dispose(browser)
     }
 
     void reload() {
@@ -88,7 +90,7 @@ class IntelliJPortalUI extends PortalUI implements CefLifeSpanHandler {
         if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
             popupBrowser.createImmediately()
         }
-        portal.portalUI.browser = new JBCefBrowser(popupBrowser)
+        portal.portalUI.browser = new JBCefBrowser(popupBrowser, this.browser.JBCefClient, false, targetUrl)
         portal.portalUI.parentBrowser.JBCefClient.addLifeSpanHandler(this, portal.portalUI.browser.cefBrowser)
 
         def popupFrame = new JFrame(portal.portalUI.viewingPortalArtifact)

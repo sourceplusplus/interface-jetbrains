@@ -24,5 +24,11 @@ public interface AbstractApacheSkyWalkingIntegrationConfig extends IntegrationCo
     String timezone();
 
     @Nullable
+    Integer serviceDetectionDelaySeconds();
+
+    @Nullable
     Integer endpointDetectionIntervalSeconds();
+
+    @Nullable
+    Integer failingArtifactDetectionIntervalSeconds();
 }

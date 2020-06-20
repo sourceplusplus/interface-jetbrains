@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<enhanced>
+    <class class_name="com.sourceplusplus.core.*">
+        <method method="*" static="true"></method>
+        <method method="*" static="false"></method>
+    </class>
+</enhanced>

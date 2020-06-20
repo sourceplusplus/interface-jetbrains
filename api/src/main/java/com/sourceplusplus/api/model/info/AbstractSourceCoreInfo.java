@@ -50,7 +50,7 @@ public interface AbstractSourceCoreInfo extends SourceMessage {
 
     @Value.Check
     default void validate() {
-        if (!"dev".equals(version())) {
+        if (!"dev".equals(version()) && !"embedded".equals(version())) {
             Preconditions.checkNotNull(buildDate());
         }
     }

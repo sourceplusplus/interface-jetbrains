@@ -1,6 +1,6 @@
 The Source++ Roadmap is a place for high-to-mid-level ideas around the future of Source++.
 The purpose of the roadmap is to present a vision for Source++.
-As a community of contributors, we can't work together toward something unless their is a shared vision. There are no dates nor deadlines in this roadmap, only a list of milestones.
+As a community of contributors, we can't work together toward something unless there is a shared vision. There are no dates nor deadlines in this roadmap, only a list of milestones.
 
 # Source++ Vision
 
@@ -32,20 +32,23 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
 ## 0.3.0 (alpha)
 
-> Focus: Language-agnostic source code parsing
-
- - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
- - Trace service detection and custom tooltip displays ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
- - Browser-based control panel ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
- - Updated portal interface
-
-## 0.4.0 (alpha)
-
 > Focus: Automatic artifact monitoring
 
- - Artifact, endpoint, log, trace searching functionality
+ - Embeddable Source++ Core ([#177](https://github.com/CodeBrig/Source/issues/177)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg)
+ - Integrated artifact error notifications ([#114](https://github.com/sourceplusplus/Assistant/issues/114)) ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
  - Automated artifact tracing based on overhead limit ![](../../images/roadmap/Source++-Agent-blue.svg) ![](../../images/roadmap/Source++-Core-blue.svg)
+ - Trace service detection ![](../../images/roadmap/Source++-Portal-blue.svg)
+ 
+## 0.4.0 (alpha)
+
+> Focus: Language-agnostic source code parsing
+
+ - Artifact, endpoint, log, trace searching functionality
  - Artifact trace comparing ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
+ - Artifact view sharing ![](../../images/roadmap/Source++-Plugin-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
+ - Browser-based control panel ![](../../images/roadmap/Source++-Core-blue.svg) ![](../../images/roadmap/Source++-Portal-blue.svg)
+ - Updated portal interface
+ - Arthur integration
 
 ## 0.5.0 (alpha)
 
@@ -53,6 +56,7 @@ The ultimate vision for Source++ is to become a language-agnostic AI-based pair 
 
  - Performance predictions ![](../../images/roadmap/Source++-Core-blue.svg)
  - GitSocratic 0.3+ integration
+ - Branch execution probabilities
 
 ## 0.6.0 (beta)
 

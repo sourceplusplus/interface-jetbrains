@@ -1,22 +1,37 @@
 package com.sourceplusplus.plugin.intellij.patcher
 
+import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.lang.jvm.JvmModifier
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiClassOwner
+import com.intellij.psi.PsiManager
+import com.intellij.psi.search.FileTypeIndex
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.util.indexing.FileBasedIndex
 import com.sourceplusplus.api.model.config.SourcePluginConfig
+import com.sourceplusplus.api.util.ArtifactNameUtils
+import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.plugin.PluginBootstrap
+import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactTracker
+import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.patcher.tail.LogTailer
-import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
-import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
+import org.apache.commons.compress.archivers.ArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.io.FileUtils
+import org.jetbrains.kotlin.idea.KotlinFileType
+import org.jetbrains.plugins.groovy.GroovyFileType
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UastContextKt
 
-import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicBoolean
 
-import static com.sourceplusplus.plugin.SourcePlugin.*
+import static com.sourceplusplus.plugin.SourcePlugin.BUILD
 
 /**
  * Used to add the Source++ Agent to project executions.
@@ -30,6 +45,7 @@ trait SourceAgentPatcher {
 
     @PackageScope static File agentFile
     private static AtomicBoolean patched = new AtomicBoolean()
+    private static String SKYWALKING_VERSION = BUILD.getString("apache_skywalking_version")
 
     static void patchAgent() {
         if (!SourcePluginConfig.current.agentPatcherEnabled) {
@@ -38,34 +54,28 @@ trait SourceAgentPatcher {
         }
         if (PluginBootstrap.sourcePlugin != null && !patched.getAndSet(true)) {
             log.info("Patching Source++ Agent for executing program...")
-            URL inputUrl = SourceAgentPatcher.class.getResource("/source-agent-" + BUILD.getString("version") + ".jar")
+            URL apmArchiveResource = SourceAgentPatcher.class.getResource("/skywalking/apache-skywalking-apm-${SKYWALKING_VERSION}.tar.gz")
             File destDir = File.createTempDir()
-            agentFile = new File(destDir, "source-agent-" + BUILD.getString("version") + ".jar")
-            FileUtils.copyURLToFile(inputUrl, agentFile)
-            agentFile.deleteOnExit()
+            File skywalkingArchive = new File(destDir, "apache-skywalking-apm-${SKYWALKING_VERSION}.tar.gz")
+            FileUtils.copyURLToFile(apmArchiveResource, skywalkingArchive)
+            skywalkingArchive.deleteOnExit()
             destDir.deleteOnExit()
 
-            //extract plugins
-            def pluginsUrl = SourceAgentPatcher.class.getResource("/plugins")
-            def pluginsDir = new File(destDir, "plugins")
-            pluginsDir.mkdir()
-            IntelliJPortalUI.extract(pluginsUrl, "/plugins", pluginsDir.absolutePath)
+            //extract Apache SkyWalking agent
+            unTarGz(skywalkingArchive.toPath(), destDir.toPath())
+            agentFile = new File(destDir, "apache-skywalking-apm-bin/agent/skywalking-agent.jar")
+            agentFile.deleteOnExit()
 
-            //extract activations
-            def activationsUrl = SourceAgentPatcher.class.getResource("/activations")
-            def activationsDir = new File(destDir, "activations")
-            activationsDir.mkdir()
-            IntelliJPortalUI.extract(activationsUrl, "/activations", activationsDir.absolutePath)
-
-            //redirect agent logs to console
-            def logFile = new File(destDir.absolutePath + File.separator + "source-agent.log")
-            log.info("Tailing log file: " + logFile)
-            logFile.createNewFile()
-            logFile.deleteOnExit()
-            new Thread(new LogTailer(logFile, "AGENT")).start()
+            //move apm-customize-enhance-plugin-*.jar to plugins
+            URL customEnhancePlugin = SourceAgentPatcher.class.getResource("/skywalking/apm-customize-enhance-plugin-${SKYWALKING_VERSION}.jar")
+            FileUtils.copyURLToFile(customEnhancePlugin, new File(agentFile.parentFile,
+                    "plugins" + File.separator + "apm-customize-enhance-plugin-${SKYWALKING_VERSION}.jar"))
+//            Files.move(new File(agentFile.parentFile, "optional-plugins" + File.separator + "apm-customize-enhance-plugin-8.0.0.jar").toPath(),
+//                    new File(agentFile.parentFile, "plugins" + File.separator + "apm-customize-enhance-plugin-8.0.0.jar").toPath(),
+//                    StandardCopyOption.REPLACE_EXISTING)
 
             //redirect skywalking logs to console
-            def skywalkingLogFile = new File(destDir.absolutePath + File.separator + "logs" + File.separator + "skywalking-api.log")
+            def skywalkingLogFile = new File(agentFile.parentFile, "logs" + File.separator + "skywalking-api.log")
             skywalkingLogFile.parentFile.mkdirs()
             log.info("Tailing log file: " + skywalkingLogFile)
             skywalkingLogFile.createNewFile()
@@ -75,36 +85,99 @@ trait SourceAgentPatcher {
 
         if (agentFile != null) {
             //inject agent config
-            modifyAgentJar(agentFile.absolutePath)
+            modifyAgentInstallation(agentFile.parentFile)
         }
     }
 
-    private static void modifyAgentJar(String agentPath) throws IOException {
-        Path agentFilePath = Paths.get(agentPath)
-        FileSystems.newFileSystem(agentFilePath, null).withCloseable { fs ->
-            Path source = fs.getPath("/source-agent.json")
-            Path temp = fs.getPath("/temp_source-agent.json")
-            Files.move(source, temp)
-            modifyAgentSettings(temp, source)
-            Files.delete(temp)
+    private static void modifyAgentInstallation(File agentDirectory) throws IOException {
+        def customizeEnhanceFile = new File(agentDirectory, "config" + File.separator + "customize_enhance.xml")
+        customizeEnhanceFile.withWriter { writer ->
+            writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+            writer.append("<enhanced>\n")
+
+            def endpointArtifacts = SourcePluginConfig.current.activeEnvironment.coreClient
+                    .getApplicationEndpoints(SourcePluginConfig.current.activeEnvironment.appUuid)
+            Set<String> artifactEndpoints = new HashSet<>()
+            endpointArtifacts.each { artifactEndpoints.add(it.artifactQualifiedName()) }
+
+            ApplicationManager.getApplication().runReadAction {
+                //include groovy source files
+                def groovySourceFiles = FileBasedIndex.getInstance().getContainingFiles(
+                        FileTypeIndex.NAME, GroovyFileType.GROOVY_FILE_TYPE,
+                        GlobalSearchScope.projectScope(IntelliJStartupActivity.currentProject))
+                processSourceFiles(groovySourceFiles, writer, artifactEndpoints)
+
+                //include java source files
+                def javaSourceFiles = FileBasedIndex.getInstance().getContainingFiles(
+                        FileTypeIndex.NAME, JavaFileType.INSTANCE,
+                        GlobalSearchScope.projectScope(IntelliJStartupActivity.currentProject))
+                processSourceFiles(javaSourceFiles, writer, artifactEndpoints)
+
+                //include kotlin source files
+                def kotlinSourceFiles = FileBasedIndex.getInstance().getContainingFiles(
+                        FileTypeIndex.NAME, KotlinFileType.INSTANCE,
+                        GlobalSearchScope.projectScope(IntelliJStartupActivity.currentProject))
+                processSourceFiles(kotlinSourceFiles, writer, artifactEndpoints)
+            }
+            writer.append("</enhanced>")
+        }
+
+        def agentConfig = new File(agentDirectory, "config" + File.separator + "agent.config")
+        Properties prop = new Properties()
+        new FileInputStream(agentConfig).withCloseable { input ->
+            prop.load(input)
+        }
+        new FileOutputStream(agentConfig).withCloseable { output ->
+            //prop.setProperty("agent.instance_properties[keyz]", "valuez")
+            //prop.setProperty("agent.is_open_debugging_class", "true")
+            prop.setProperty("agent.service_name", SourcePluginConfig.current.activeEnvironment.appUuid)
+            prop.setProperty("plugin.customize.enhance_file", customizeEnhanceFile.absolutePath)
+            prop.store(output, null)
         }
     }
 
-    private static void modifyAgentSettings(Path src, Path dst) throws IOException {
-        def agentConfig = new JsonObject(Files.newInputStream(src).getText())
-
-        agentConfig.put("log_location", agentFile.parentFile.absolutePath)
-        agentConfig.getJsonObject("application").put("app_uuid", SourcePluginConfig.current.activeEnvironment.appUuid)
-        agentConfig.getJsonObject("api").put("host", SourcePluginConfig.current.activeEnvironment.apiHost)
-        agentConfig.getJsonObject("api").put("port", SourcePluginConfig.current.activeEnvironment.apiPort)
-        agentConfig.getJsonObject("api").put("ssl", SourcePluginConfig.current.activeEnvironment.apiSslEnabled)
-        agentConfig.getJsonObject("api").put("key", SourcePluginConfig.current.activeEnvironment.apiKey)
-
-        agentConfig.getJsonObject("plugin-bridge").put("host", SourcePluginConfig.current.remoteAgentHost)
-        agentConfig.getJsonObject("plugin-bridge").put("port", SourcePluginConfig.current.remoteAgentPort)
-
-        Files.newOutputStream(dst).withWriter {
-            it.write(Json.encodePrettily(agentConfig))
+    private static void processSourceFiles(Collection<VirtualFile> sourceFiles, BufferedWriter writer,
+                                           Set<String> artifactEndpoints) {
+        sourceFiles.each {
+            def sourceFile = PsiManager.getInstance(IntelliJStartupActivity.currentProject).findFile(it)
+            if (sourceFile instanceof PsiClassOwner) {
+                sourceFile.classes.each {
+                    //todo: don't write class if no methods are found
+                    writer.append("\t<class class_name=\"" + it.qualifiedName + "\">\n")
+                    it.methods.each {
+                        try {
+                            def artifactQualifiedName = MarkerUtils.getFullyQualifiedName(UastContextKt.toUElement(it) as UMethod)
+                            if (PluginArtifactTracker.getSourceArtifact(artifactQualifiedName).config().subscribeAutomatically()) {
+                                def methodName = ArtifactNameUtils.removePackageAndClassName(artifactQualifiedName)
+                                def entryMethod = artifactEndpoints.contains(artifactQualifiedName)
+                                def isStatic = it.hasModifier(JvmModifier.STATIC)
+                                writer.append("\t\t<method method=\"$methodName\" static=\"$isStatic\" entry_method=\"$entryMethod\"></method>\n")
+                            }
+                        } catch (Throwable ignored) {
+                            log.warn("Failed to determine artifact qualified name of: " + it)
+                        }
+                    }
+                    writer.append("\t</class>\n")
+                }
+            }
         }
+    }
+
+    private static void unTarGz(Path pathInput, Path pathOutput) throws IOException {
+        TarArchiveInputStream archiveInputStream = new TarArchiveInputStream(
+                new GzipCompressorInputStream(new BufferedInputStream(Files.newInputStream(pathInput))))
+
+        ArchiveEntry entry
+        while ((entry = archiveInputStream.getNextEntry()) != null) {
+            Path pathEntryOutput = pathOutput.resolve(entry.getName())
+            if (entry.isDirectory()) {
+                if (!Files.exists(pathEntryOutput)) {
+                    pathEntryOutput.toFile().mkdirs()
+                }
+            } else {
+                Files.copy(archiveInputStream, pathEntryOutput)
+            }
+        }
+        archiveInputStream.close()
     }
 }

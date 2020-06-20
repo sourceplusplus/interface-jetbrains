@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.jackson.JacksonCodec;
 import okhttp3.*;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +39,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class SourceCoreClient implements SourceClient {
 
+    static {
+        SourceClient.initMappers();
+    }
+
     private static final String SPP_API_VERSION = System.getenv().getOrDefault(
             "SPP_API_VERSION", System.getProperty("SPP_API_VERSION", "v1"));
     private static final String PING_ENDPOINT = "/ping";
@@ -53,6 +58,8 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications", SPP_API_VERSION);
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/subscriptions?includeAutomatic=:includeAutomatic", SPP_API_VERSION);
+    private static final String GET_APPLICATION_ENDPOINTS_ENDPOINT = String.format(
+            "/%s/applications/:appUuid/endpoints", SPP_API_VERSION);
     private static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/subscribers/:subscriberUuid/subscriptions", SPP_API_VERSION);
     private static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
@@ -65,21 +72,27 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications/:appUuid", SPP_API_VERSION);
     private static final String GET_APPLICATIONS_ENDPOINT = String.format(
             "/%s/applications", SPP_API_VERSION);
-    private static final String SOURCE_ARTIFACT_ENDPOINT = String.format(
+    private static final String UPSERT_SOURCE_ARTIFACT_ENDPOINT = String.format(
+            "/%s/applications/:appUuid/artifacts", SPP_API_VERSION);
+    private static final String GET_SOURCE_ARTIFACTS_ENDPOINT = String.format(
+            "/%s/applications/:appUuid/artifacts", SPP_API_VERSION);
+    private static final String SOURCE_ARTIFACT_ENDPOINT_BASE = String.format(
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName", SPP_API_VERSION);
-    private static final String GET_SOURCE_ARTIFACT_ENDPOINT = SOURCE_ARTIFACT_ENDPOINT;
+    private static final String GET_SOURCE_ARTIFACT_ENDPOINT = SOURCE_ARTIFACT_ENDPOINT_BASE;
+    private static final String GET_SOURCE_ARTIFACT_SUBSCRIPTIONS_ENDPOINT = String.format(
+            SOURCE_ARTIFACT_ENDPOINT_BASE + "/subscriptions", SPP_API_VERSION);
     private static final String CONFIGURE_SOURCE_ARTIFACT_ENDPOINT = String.format(
-            SOURCE_ARTIFACT_ENDPOINT + "/config", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT_BASE + "/config", SPP_API_VERSION);
     private static final String UNSUBSCRIBE_SOURCE_ARTIFACT_ENDPOINT = String.format(
-            SOURCE_ARTIFACT_ENDPOINT + "/unsubscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT_BASE + "/unsubscribe", SPP_API_VERSION);
     private static final String SUBSCRIBE_SOURCE_ARTIFACT_METRICS_ENDPOINT = String.format(
-            SOURCE_ARTIFACT_ENDPOINT + "/metrics/subscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT_BASE + "/metrics/subscribe", SPP_API_VERSION);
     private static final String UNSUBSCRIBE_SOURCE_ARTIFACT_METRICS_ENDPOINT = String.format(
-            SOURCE_ARTIFACT_ENDPOINT + "/metrics/unsubscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT_BASE + "/metrics/unsubscribe", SPP_API_VERSION);
     private static final String SUBSCRIBE_SOURCE_ARTIFACT_TRACES_ENDPOINT = String.format(
-            SOURCE_ARTIFACT_ENDPOINT + "/traces/subscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT_BASE + "/traces/subscribe", SPP_API_VERSION);
     private static final String UNSUBSCRIBE_SOURCE_ARTIFACT_TRACES_ENDPOINT = String.format(
-            SOURCE_ARTIFACT_ENDPOINT + "/traces/unsubscribe", SPP_API_VERSION);
+            SOURCE_ARTIFACT_ENDPOINT_BASE + "/traces/unsubscribe", SPP_API_VERSION);
     private static final String GET_SOURCE_ARTIFACT_CONFIGURATION_ENDPOINT = CONFIGURE_SOURCE_ARTIFACT_ENDPOINT;
     private static final String GET_TRACES_ENDPOINT = String.format(
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces?orderType=:orderType&pageSize=:pageSize" +
@@ -88,8 +101,8 @@ public class SourceCoreClient implements SourceClient {
             "/%s/applications/:appUuid/artifacts/:artifactQualifiedName/traces/:traceId/spans" +
                     "?followExit=:followExit&oneLevelDeep=:oneLevelDeep&segmentId=:segmentId&spanId=:spanId", SPP_API_VERSION);
 
-    private final OkHttpClient client = new OkHttpClient();
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private final static OkHttpClient client = new OkHttpClient();
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private final String sppUrl;
     private String apiKey;
 
@@ -103,19 +116,21 @@ public class SourceCoreClient implements SourceClient {
         } else {
             this.sppUrl = "http://" + Objects.requireNonNull(host) + ":" + port;
         }
-        SourceClient.initMappers();
     }
 
     public SourceCoreClient(String sppUrl) {
         this.sppUrl = Objects.requireNonNull(sppUrl);
-        SourceClient.initMappers();
     }
 
     public void attachBridge(Vertx vertx) {
-        SourceBridgeClient bridgeClient = new SourceBridgeClient(vertx,
+        attachBridge(vertx,
                 SourcePluginConfig.current.activeEnvironment.apiHost,
                 SourcePluginConfig.current.activeEnvironment.apiPort,
                 SourcePluginConfig.current.activeEnvironment.apiSslEnabled);
+    }
+
+    public void attachBridge(Vertx vertx, String apiHost, int apiPort, boolean apiSslEnabled) {
+        SourceBridgeClient bridgeClient = new SourceBridgeClient(vertx, apiHost, apiPort, apiSslEnabled);
         bridgeClient.setupSubscriptions();
     }
 
@@ -155,7 +170,7 @@ public class SourceCoreClient implements SourceClient {
             if (response.isSuccessful()) {
                 handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, IntegrationInfo.class)));
             } else {
-                handler.handle(extractAPIException(responseBody));
+                handler.handle(asyncAPIException(responseBody));
             }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
@@ -185,7 +200,7 @@ public class SourceCoreClient implements SourceClient {
             if (response.isSuccessful()) {
                 handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceCoreInfo.class)));
             } else {
-                handler.handle(extractAPIException(responseBody));
+                handler.handle(asyncAPIException(responseBody));
             }
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
@@ -294,8 +309,12 @@ public class SourceCoreClient implements SourceClient {
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            return Json.decodeValue(response.body().string(), SourceApplication.class);
-        } catch (Exception e) {
+            if (response.isSuccessful()) {
+                return Json.decodeValue(response.body().string(), SourceApplication.class);
+            } else {
+                throw getAPIException(response.body().string());
+            }
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -398,7 +417,7 @@ public class SourceCoreClient implements SourceClient {
     }
 
     public void getSubscriberApplicationSubscriptions(String appUuid,
-                                                      Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+                                                      Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
         String url = sppUrl + GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT
                 .replace(":appUuid", appUuid)
                 .replace(":subscriberUuid", CLIENT_ID);
@@ -408,7 +427,7 @@ public class SourceCoreClient implements SourceClient {
         try (Response response = client.newCall(request.build()).execute()) {
             if (response.isSuccessful()) {
                 handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(response.body().string(),
-                        new TypeReference<List<SourceArtifactSubscription>>() {
+                        new TypeReference<List<ArtifactSubscribeRequest>>() {
                         })));
             } else {
                 handler.handle(Future.failedFuture(response.message()));
@@ -470,20 +489,53 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void createArtifact(String appUuid, SourceArtifact createRequest,
+    public List<SourceArtifact> getApplicationEndpoints(String appUuid) {
+        String url = sppUrl + GET_APPLICATION_ENDPOINTS_ENDPOINT
+                .replace(":appUuid", appUuid);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            return JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<SourceArtifact>>() {
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void getApplicationEndpoints(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        String url = sppUrl + GET_APPLICATION_ENDPOINTS_ENDPOINT
+                .replace(":appUuid", appUuid);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<SourceArtifact>>() {
+                    });
+            handler.handle(Future.succeededFuture(artifacts));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public void upsertArtifact(String appUuid, SourceArtifact createRequest,
                                Handler<AsyncResult<SourceArtifact>> handler) {
-        String url = sppUrl + SOURCE_ARTIFACT_ENDPOINT
-                .replace(":appUuid", appUuid)
-                .replace(":artifactQualifiedName", URLEncoder.encode(createRequest.artifactQualifiedName()));
+        String url = sppUrl + UPSERT_SOURCE_ARTIFACT_ENDPOINT
+                .replace(":appUuid", appUuid);
         Request.Builder request = new Request.Builder().url(url)
                 .post(RequestBody.create(JSON, Json.encode(createRequest)));
         addHeaders(request);
 
         try (Response response = client.newCall(request.build()).execute()) {
-            SourceArtifact artifact = Json.decodeValue(response.body().string(), SourceArtifact.class);
-            artifact = artifact.withAppUuid(appUuid).withArtifactQualifiedName(createRequest.artifactQualifiedName());
-            handler.handle(Future.succeededFuture(artifact));
-        } catch (Exception e) {
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceArtifact.class)));
+            } else {
+                handler.handle(asyncAPIException(responseBody));
+            }
+        } catch (IOException e) {
             handler.handle(Future.failedFuture(e));
         }
     }
@@ -505,7 +557,40 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName, SourceArtifactConfig createRequest,
+    public void getArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        String url = sppUrl + GET_SOURCE_ARTIFACTS_ENDPOINT
+                .replace(":appUuid", appUuid);
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<SourceArtifact>>() {
+                    });
+            handler.handle(Future.succeededFuture(artifacts));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public void getFailingArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        String url = sppUrl + GET_SOURCE_ARTIFACTS_ENDPOINT
+                .replace(":appUuid", appUuid) + "?includeOnlyFailing=true";
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<SourceArtifact>>() {
+                    });
+            handler.handle(Future.succeededFuture(artifacts));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
+    public void createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName,
+                                             SourceArtifactConfig createRequest,
                                              Handler<AsyncResult<SourceArtifactConfig>> handler) {
         String url = sppUrl + CONFIGURE_SOURCE_ARTIFACT_ENDPOINT
                 .replace(":appUuid", appUuid)
@@ -657,6 +742,24 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
+    public void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,
+                                         Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
+        String url = sppUrl + GET_SOURCE_ARTIFACT_SUBSCRIPTIONS_ENDPOINT
+                .replace(":appUuid", appUuid)
+                .replace(":artifactQualifiedName", URLEncoder.encode(artifactQualifiedName));
+        Request.Builder request = new Request.Builder().url(url).get();
+        addHeaders(request);
+
+        try (Response response = client.newCall(request.build()).execute()) {
+            List<ArtifactSubscribeRequest> artifacts = JacksonCodec.decodeValue(response.body().string(),
+                    new TypeReference<List<ArtifactSubscribeRequest>>() {
+                    });
+            handler.handle(Future.succeededFuture(artifacts));
+        } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+        }
+    }
+
     public void getArtifactConfig(String appUuid, String artifactQualifiedName,
                                   Handler<AsyncResult<SourceArtifactConfig>> handler) {
         String url = sppUrl + GET_SOURCE_ARTIFACT_CONFIGURATION_ENDPOINT
@@ -669,25 +772,6 @@ public class SourceCoreClient implements SourceClient {
             handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceArtifactConfig.class)));
         } catch (Exception e) {
             handler.handle(Future.failedFuture(e));
-        }
-    }
-
-    public TraceQueryResult getTraces(String appUuid, String artifactQualifiedName, TraceOrderType orderType) {
-        String url = sppUrl + GET_TRACES_ENDPOINT
-                .replace(":appUuid", appUuid)
-                .replace(":artifactQualifiedName", artifactQualifiedName)
-                .replace(":orderType", orderType.toString())
-                .replace(":pageSize", "10")
-                .replace(":durationStart", Instant.now().minus(14, ChronoUnit.MINUTES).toString())
-                .replace(":durationStop", Instant.now().toString())
-                .replace(":durationStep", "SECOND");
-        Request.Builder request = new Request.Builder().url(url).get();
-        addHeaders(request);
-
-        try (Response response = client.newCall(request.build()).execute()) {
-            return Json.decodeValue(response.body().string(), TraceQueryResult.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -744,12 +828,21 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    private <T> Future<T> extractAPIException(String responseBody) {
+    private <T> Future<T> asyncAPIException(String responseBody) {
         JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
         String[] strErrors = new String[errors.size()];
         for (int i = 0; i < errors.size(); i++) {
             strErrors[i] = errors.getString(i);
         }
         return Future.failedFuture(new APIException(strErrors));
+    }
+
+    private APIException getAPIException(String responseBody) {
+        JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
+        String[] strErrors = new String[errors.size()];
+        for (int i = 0; i < errors.size(); i++) {
+            strErrors[i] = errors.getString(i);
+        }
+        return new APIException(strErrors);
     }
 }

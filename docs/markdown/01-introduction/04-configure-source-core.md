@@ -10,10 +10,13 @@
     "jks_password": null,
     "secure_mode": false,
     "api_key": null,
-    "subscription_inactive_limit_minutes": 15
+    "subscription_inactive_limit_minutes": 5
   },
   "storage": {
     "type": "h2",
+    "h2": {
+      "connection": "memory"
+    },
     "elasticsearch": {
       "host": "localhost",
       "port": 9200
@@ -24,7 +27,7 @@
       "id": "apache_skywalking",
       "category": "APM",
       "enabled": true,
-      "version": "7.0.0",
+      "version": "8.0.0",
       "connections": {
         "REST": {
           "host": "localhost",
@@ -39,7 +42,9 @@
       },
       "config": {
         "timezone": null,
-        "endpoint_detection_interval_seconds": 15
+        "service_detection_delay_seconds": 10,
+        "endpoint_detection_interval_seconds": 10,
+        "failing_artifact_detection_interval_seconds": 10
       }
     }
   ]
@@ -57,7 +62,7 @@
 | jks_password                        | null      | Password for the JKS file (optional)                         |
 | secure_mode                         | false     | Secure API with Bearer token authentication (requires `api_key`) |
 | api_key                             | null      | The API key to use (`secure_mode` must be true to enable)    |
-| subscription_inactive_limit_minutes | 15        | Minutes necessary of inactive to prune artifact subscriptions (-1 to disable) |
+| subscription_inactive_limit_minutes | 5        | Minutes necessary of inactive to prune artifact subscriptions (-1 to disable) |
 
 ## Storage Settings
 
@@ -65,10 +70,17 @@
 | -------- | ----- | -------------------------------------------------------- |
 | type     | h2    | The storage system type to use (`h2` or `elasticsearch`) |
 
+### H2 Settings
+
+| Property   | Value  | Description                                                                       |
+|------------|--------|-----------------------------------------------------------------------------------|
+| connection | memory | The H2 connection type (memory or disk)                                           |
+| location   | null   | The storage location of the H2 database (when disk connection is used) (optional) |
+
 ### Elasticsearch Settings
 
 | Property | Value     | Description                                             |
-| -------- | --------- | ------------------------------------------------------- |
+|----------|-----------|---------------------------------------------------------|
 | host     | localhost | The address of the Elasticsearch instance to connect to |
 | port     | 9200      | The port of the Elasticsearch instance to connect to    |
 
@@ -81,7 +93,7 @@
 | id                                  | apache_skywalking | ID for the given Source++ integration                        |
 | category                            | APM               | Category for the given Source++ integration                  |
 | enabled                             | false             | Used to enable/disable the given Source++ integration        |
-| version                             | 7.0.0             | Current version of the Source++ integration                  |
+| version                             | 8.0.0             | Current version of the Source++ integration                  |
 
 #### Connections
 
@@ -106,7 +118,9 @@
 | Property                            | Value     | Description                                                  |
 | ----------------------------------- | --------- | ------------------------------------------------------------ |
 | timezone                            | null      | Timezone to use when querying SkyWalking OAP (defaults to system) |
-| endpoint_detection_interval_seconds | 15        | Seconds to wait before scanning for new endpoints            |
+| service_detection_delay_seconds     | 10        | Minimum seconds to wait before scanning for new services     |
+| endpoint_detection_interval_seconds | 10        | Seconds to wait before scanning for new endpoints            |
+| failing_artifact_detection_interval_seconds | 10 | Seconds to wait before scanning for failing artifacts       |
 
 # Next Step
 

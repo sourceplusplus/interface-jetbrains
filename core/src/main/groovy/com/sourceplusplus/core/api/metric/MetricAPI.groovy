@@ -14,7 +14,6 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.json.Json
-import io.vertx.core.shareddata.SharedData
 import io.vertx.ext.web.RoutingContext
 
 /**
@@ -27,11 +26,9 @@ import io.vertx.ext.web.RoutingContext
 @Slf4j
 class MetricAPI extends AbstractVerticle {
 
-    private final SharedData sharedData
     private final SourceCore core
 
-    MetricAPI(SharedData sharedData, SourceCore core) {
-        this.sharedData = Objects.requireNonNull(sharedData)
+    MetricAPI(SourceCore core) {
         this.core = Objects.requireNonNull(core)
     }
 
@@ -89,7 +86,8 @@ class MetricAPI extends AbstractVerticle {
 
         ArtifactMetricSubscribeRequest request
         try {
-            request = Json.decodeValue(routingContext.getBodyAsString(), ArtifactMetricSubscribeRequest.class)
+            request = Json.decodeValue(routingContext.getBodyAsJson().put("type", "METRICS").toString(),
+                    ArtifactMetricSubscribeRequest.class)
         } catch (all) {
             all.printStackTrace()
             routingContext.response().setStatusCode(500)
@@ -122,7 +120,7 @@ class MetricAPI extends AbstractVerticle {
 //        def durationStep = routingContext.request().getParam("durationStep")
 //
 //        def metricType = MetricType.Throughput_Average //todo: dynamic
-//        def orderType = QueryTimeFrame.LAST_15_MINUTES //todo: dynamic
+//        def orderType = QueryTimeFrame.LAST_5_MINUTES //todo: dynamic
 //        def timeFramedMetricType = TimeFramedMetricType.builder().metricType(metricType).orderType(orderType).build()
 //        def metricQuery = ArtifactMetricQuery.builder()
 //                .timeFramedMetricType(timeFramedMetricType)
@@ -152,10 +150,14 @@ class MetricAPI extends AbstractVerticle {
                         def endpointId = endpointIds[0] //todo: not only use first endpoint id
                         core.APMIntegration.getEndpointMetrics(endpointId, metricQuery, handler)
                     } else {
-                        log.warn("Could not find endpoint id for artifact: " + metricQuery.artifactQualifiedName())
+                        log.debug("Could not find endpoint id for artifact: " + metricQuery.artifactQualifiedName())
                         //todo: doesn't complete handler
                     }
+                } else {
+                    //todo: doesn't complete handler
                 }
+            } else {
+                //todo: doesn't complete handler
             }
         })
     }

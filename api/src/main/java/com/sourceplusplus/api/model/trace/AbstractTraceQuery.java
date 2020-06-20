@@ -31,6 +31,9 @@ public interface AbstractTraceQuery {
     String serviceId();
 
     @Nullable
+    String serviceInstanceId();
+
+    @Nullable
     String traceId();
 
     @Nullable
@@ -45,8 +48,14 @@ public interface AbstractTraceQuery {
     @Nullable
     Integer maxTraceDuration();
 
-    @Nullable
-    String traceState();
+    @Value.Default
+    default String traceState() {
+        if (orderType() == TraceOrderType.FAILED_TRACES) {
+            return "ERROR";
+        } else {
+            return "ALL";
+        }
+    }
 
     @Nullable
     String queryOrder();
@@ -72,4 +81,7 @@ public interface AbstractTraceQuery {
     default TraceOrderType orderType() {
         return TraceOrderType.LATEST_TRACES;
     }
+
+    @Nullable
+    Boolean systemRequest();
 }

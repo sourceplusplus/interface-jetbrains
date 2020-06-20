@@ -35,5 +35,8 @@ public interface AbstractTraceSpanStackQuery {
         return false;
     }
 
+    @Nullable
+    Boolean systemRequest();
+
     //todo: spanId and segmentId can't be null at same time
 }

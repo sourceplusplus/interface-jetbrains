@@ -13,7 +13,7 @@ To attach the Source++ Agent for use with the Apache SkyWalking APM outside of t
 
 ### Supply activations & plugins
 
-By default Apache SkyWalking will not monitor any technologies which are not included in the activations and plugins folders. Both of these folders should be placed in the same directory as the `source-agent-x.x.x.jar` file to activate them.
+By default, Apache SkyWalking will not monitor any technologies which are not included in the activations and plugins folders. Both of these folders should be placed in the same directory as the `source-agent-x.x.x.jar` file to activate them.
 
 For more information about the activations and plugins available see: [here](https://github.com/apache/incubator-skywalking/blob/master/docs/en/setup/service-agent/java-agent/README.md)
 

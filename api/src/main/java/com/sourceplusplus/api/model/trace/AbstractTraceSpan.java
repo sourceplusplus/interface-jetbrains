@@ -1,6 +1,7 @@
 package com.sourceplusplus.api.model.trace;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -28,6 +29,7 @@ import java.util.Map;
  */
 @SourceStyle
 @Value.Immutable
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonSerialize(as = TraceSpan.class)
 @JsonDeserialize(as = TraceSpan.class)
 public interface AbstractTraceSpan {
@@ -49,6 +51,9 @@ public interface AbstractTraceSpan {
     @JsonAlias({"serviceCode", "service_code"})
     String serviceCode();
 
+    @JsonAlias({"serviceInstanceName", "service_instance_name"})
+    String serviceInstanceName();
+
     @JsonAlias({"startTime", "start_time"})
     long startTime();
 
@@ -59,6 +64,7 @@ public interface AbstractTraceSpan {
     String endpointName();
 
     @Nullable
+    @JsonAlias({"artifactQualifiedName", "artifact_qualified_name"})
     String artifactQualifiedName();
 
     String type();
@@ -69,6 +75,16 @@ public interface AbstractTraceSpan {
 
     @JsonAlias({"isError", "error"})
     boolean isError();
+
+    @Value.Default
+    @JsonAlias({"isChildError", "child_error"})
+    default boolean isChildError() {
+        return false;
+    }
+
+    @Nullable
+    @JsonAlias({"hasChildStack", "has_child_stack"})
+    Boolean hasChildStack();
 
     String layer();
 

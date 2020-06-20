@@ -10,9 +10,8 @@ import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.sockjs.BridgeOptions
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import org.jetbrains.annotations.NotNull
 
 /**
  * Used to bootstrap the Source++ Plugin.
@@ -27,11 +26,10 @@ class SourcePlugin {
     public static final ResourceBundle BUILD = ResourceBundle.getBundle(
             "source-plugin_build", Locale.default, SourcePlugin.classLoader)
 
-    private final Vertx vertx
+    private static final Vertx vertx = Vertx.vertx()
     private PluginBootstrap pluginBootstrap
 
     SourcePlugin(SourceCoreClient coreClient) {
-        vertx = Vertx.vertx()
         System.addShutdownHook {
             vertx.close()
         }
@@ -51,17 +49,19 @@ class SourcePlugin {
         })
     }
 
-    void updateEnvironment(SourceCoreClient coreClient) {
+    static void updateEnvironment(SourceCoreClient coreClient) {
         SourcePluginConfig.current.activeEnvironment.coreClient = coreClient
-        coreClient.attachBridge(vertx)
+        if (!SourcePluginConfig.current.embeddedCoreServer) {
+            coreClient.attachBridge(vertx)
+        }
         if (SourcePluginConfig.current.activeEnvironment.appUuid) {
             SourcePortalConfig.current.addCoreClient(SourcePluginConfig.current.activeEnvironment.appUuid, coreClient)
         }
     }
 
-    private void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
+    private static void startPortalUIBridge(Handler<AsyncResult<HttpServer>> listenHandler) {
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx)
-        BridgeOptions portalBridgeOptions = new BridgeOptions()
+        SockJSBridgeOptions portalBridgeOptions = new SockJSBridgeOptions()
                 .addInboundPermitted(new PermittedOptions().setAddressRegex(".+"))
                 .addOutboundPermitted(new PermittedOptions().setAddressRegex(".+"))
         sockJSHandler.bridge(portalBridgeOptions)
@@ -71,8 +71,7 @@ class SourcePlugin {
         vertx.createHttpServer().requestHandler(router).listen(0, listenHandler)
     }
 
-    @NotNull
-    Vertx getVertx() {
+    static Vertx getVertx() {
         return vertx
     }
 }

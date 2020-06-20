@@ -1,5 +1,6 @@
 package com.sourceplusplus.core.api.trace
 
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.trace.*
@@ -9,10 +10,12 @@ import com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.json.Json
-import io.vertx.core.shareddata.SharedData
 import io.vertx.ext.web.RoutingContext
 
 import java.time.Instant
+import java.time.temporal.ChronoUnit
+
+import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFunctionName
 
 /**
  * Used to add/modify/fetch artifact trace subscriptions.
@@ -24,11 +27,9 @@ import java.time.Instant
 @Slf4j
 class TraceAPI extends AbstractVerticle {
 
-    private final SharedData sharedData
     private final SourceCore core
 
-    TraceAPI(SharedData sharedData, SourceCore core) {
-        this.sharedData = Objects.requireNonNull(sharedData)
+    TraceAPI(SourceCore core) {
         this.core = Objects.requireNonNull(core)
     }
 
@@ -87,7 +88,8 @@ class TraceAPI extends AbstractVerticle {
 
         ArtifactTraceSubscribeRequest request
         try {
-            request = Json.decodeValue(routingContext.getBodyAsString(), ArtifactTraceSubscribeRequest.class)
+            request = Json.decodeValue(routingContext.getBodyAsJson().put("type", "TRACES").toString(),
+                    ArtifactTraceSubscribeRequest.class)
         } catch (all) {
             all.printStackTrace()
             routingContext.response().setStatusCode(500)
@@ -119,10 +121,18 @@ class TraceAPI extends AbstractVerticle {
                 .artifactQualifiedName(artifactQualifiedName)
         def orderType = routingContext.request().getParam("orderType")
         if (orderType) traceQueryBuilder.orderType(TraceOrderType.valueOf(orderType.toUpperCase()))
-        def queryDurationStart = routingContext.request().getParam("durationStart")
-        if (queryDurationStart) traceQueryBuilder.durationStart(Instant.parse(queryDurationStart))
-        def queryDurationStop = routingContext.request().getParam("durationStop")
-        if (queryDurationStop) traceQueryBuilder.durationStop(Instant.parse(queryDurationStop))
+
+        def timeFrame = routingContext.request().getParam("timeFrame")
+        if (timeFrame) {
+            def queryTimeFrame = QueryTimeFrame.valueOf(timeFrame.toUpperCase())
+            traceQueryBuilder.durationStart(Instant.now().minus(queryTimeFrame.minutes, ChronoUnit.MINUTES))
+                    .durationStop(Instant.now())
+        } else {
+            def queryDurationStart = routingContext.request().getParam("durationStart")
+            if (queryDurationStart) traceQueryBuilder.durationStart(Instant.parse(queryDurationStart))
+            def queryDurationStop = routingContext.request().getParam("durationStop")
+            if (queryDurationStop) traceQueryBuilder.durationStop(Instant.parse(queryDurationStop))
+        }
         def queryDurationStep = routingContext.request().getParam("durationStep")
         if (queryDurationStep) traceQueryBuilder.durationStep(queryDurationStep)
         def pageSize = routingContext.request().getParam("pageSize")
@@ -148,8 +158,8 @@ class TraceAPI extends AbstractVerticle {
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
             return
         }
-        def oneLevelDeep = routingContext.request().getParam("oneLevelDeep") as boolean
-        def followExit = routingContext.request().getParam("followExit") as boolean
+        def oneLevelDeep = Boolean.valueOf(routingContext.request().getParam("oneLevelDeep"))
+        def followExit = Boolean.valueOf(routingContext.request().getParam("followExit"))
         def segmentId = routingContext.request().getParam("segmentId")
         def spanId = routingContext.request().getParam("spanId")
 
@@ -176,16 +186,12 @@ class TraceAPI extends AbstractVerticle {
     }
 
     void getTraces(String appUuid, TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
-        if (traceQuery.endpointId() != null || traceQuery.endpointName()) {
-            //todo: query without getting artifact config
-            throw new UnsupportedOperationException("todo: this")
-        }
-
         log.debug("Getting traces. App UUID: {} - Query: {}", appUuid, traceQuery)
-        core.artifactAPI.getSourceArtifactConfig(appUuid, traceQuery.artifactQualifiedName(), {
+        core.artifactAPI.getSourceArtifact(appUuid, traceQuery.artifactQualifiedName(), {
             if (it.succeeded()) {
                 if (it.result().isPresent()) {
-                    def artifactConfig = it.result().get()
+                    def artifact = it.result().get()
+                    def artifactConfig = artifact.config()
                     if (artifactConfig.endpoint() || artifactConfig.endpointIds()) {
                         if (artifactConfig.endpointIds()) {
                             def futures = new ArrayList<Future>()
@@ -201,7 +207,8 @@ class TraceAPI extends AbstractVerticle {
                                     (it.result().list() as List<TraceQueryResult>).each {
                                         totalTraces.addAll(it.traces())
                                     }
-                                    if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES) {
+                                    if (traceQuery.orderType() == TraceOrderType.LATEST_TRACES
+                                            || traceQuery.orderType() == TraceOrderType.FAILED_TRACES) {
                                         totalTraces.sort({ it.start() })
                                     } else if (traceQuery.orderType() == TraceOrderType.SLOWEST_TRACES) {
                                         totalTraces.sort({ it.duration() })
@@ -216,15 +223,29 @@ class TraceAPI extends AbstractVerticle {
                                 }
                             })
                         } else {
-                            log.debug("Could not find endpoint id for endpoint. Artifact qualified name: " + traceQuery.artifactQualifiedName())
+                            log.debug("Could not find endpoint id for endpoint. Artifact qualified name: {}",
+                                    getShortQualifiedFunctionName(traceQuery.artifactQualifiedName()))
                             handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                         }
+                    } else if (traceQuery.orderType() == TraceOrderType.FAILED_TRACES) {
+                        core.storage.getArtifactFailures(artifact, traceQuery, {
+                            if (it.succeeded()) {
+                                def finalResult = TraceQueryResult.builder()
+                                        .addAllTraces(it.result())
+                                        .total(it.result().size()).build()
+                                handler.handle(Future.succeededFuture(finalResult))
+                            } else {
+                                handler.handle(Future.failedFuture(it.cause()))
+                            }
+                        })
                     } else {
-                        log.debug("No traces exists for artifact. Artifact qualified name: " + traceQuery.artifactQualifiedName())
+                        log.debug("No traces exists for artifact. Artifact qualified name: {}",
+                                getShortQualifiedFunctionName(traceQuery.artifactQualifiedName()))
                         handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                     }
                 } else {
-                    log.debug("Could not find artifact config. Artifact qualified name: " + traceQuery.artifactQualifiedName())
+                    log.debug("Could not find artifact config. Artifact qualified name: {}",
+                            getShortQualifiedFunctionName(traceQuery.artifactQualifiedName()))
                     handler.handle(Future.succeededFuture(TraceQueryResult.builder().total(0).build()))
                 }
             } else {
@@ -236,7 +257,7 @@ class TraceAPI extends AbstractVerticle {
     void getTraceSpans(String appUuid, String artifactQualifiedName, TraceSpanStackQuery traceSpanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
         log.info("Getting trace spans. App UUID: {} - Artifact qualified name: {} - Query: {}",
-                appUuid, artifactQualifiedName, traceSpanQuery)
+                appUuid, getShortQualifiedFunctionName(artifactQualifiedName), traceSpanQuery)
         if (traceSpanQuery.oneLevelDeep()) {
             core.artifactAPI.getSourceArtifact(appUuid, artifactQualifiedName, {
                 if (it.succeeded()) {

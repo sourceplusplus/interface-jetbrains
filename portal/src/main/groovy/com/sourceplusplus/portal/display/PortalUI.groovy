@@ -37,7 +37,7 @@ class PortalUI {
     PortalUI(String portalUuid) {
         this.portalUuid = portalUuid
         this.overviewView = new OverviewView(this)
-        this.tracesView = new TracesView(this)
+        this.tracesView = new TracesView()
         this.configurationView = new ConfigurationView()
     }
 

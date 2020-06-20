@@ -10,5 +10,6 @@ package com.sourceplusplus.api.model.artifact;
 public enum SourceArtifactSubscriptionType {
 
     METRICS,
-    TRACES
+    TRACES,
+    ALL
 }

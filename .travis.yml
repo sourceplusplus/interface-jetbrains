@@ -21,7 +21,6 @@ deploy:
   provider: releases
   api_key: $GH_TOKEN
   file:
-  - /home/travis/build/sourceplusplus/Assistant/agent/jvm-agent/build/libs/source-agent-0.2.6.jar
   - /home/travis/build/sourceplusplus/Assistant/api/build/libs/source-api-0.2.6.jar
   - /home/travis/build/sourceplusplus/Assistant/core/build/distributions/source-core-0.2.6.zip
   - /home/travis/build/sourceplusplus/Assistant/plugin/jetbrains-plugin/build/distributions/jetbrains-source-plugin-0.2.6.zip

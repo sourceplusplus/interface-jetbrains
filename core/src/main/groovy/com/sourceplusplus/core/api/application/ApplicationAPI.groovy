@@ -3,7 +3,8 @@ package com.sourceplusplus.core.api.application
 import com.fasterxml.jackson.core.type.TypeReference
 import com.sourceplusplus.api.model.application.SourceApplication
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription
-import com.sourceplusplus.api.model.artifact.SourceArtifactSubscription
+import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.error.SourceAPIError
 import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.core.SourceCore
@@ -17,10 +18,13 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.JacksonCodec
 import io.vertx.ext.web.RoutingContext
+import net.jodah.expiringmap.ExpirationPolicy
+import net.jodah.expiringmap.ExpiringMap
 import org.apache.commons.io.IOUtils
 
 import java.time.Instant
 import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 /**
@@ -39,6 +43,9 @@ class ApplicationAPI extends AbstractVerticle {
             IOUtils.readLines(ApplicationAPI.getResourceAsStream("/appname_gen/color-list.txt"), "UTF-8")
     private final static List<String> ANIMAL_NAMES =
             IOUtils.readLines(ApplicationAPI.getResourceAsStream("/appname_gen/animal-list.txt"), "UTF-8")
+    private static final Map<String, SourceApplication> SOURCE_APPLICATION_CACHE = ExpiringMap.builder()
+            .expirationPolicy(ExpirationPolicy.ACCESSED)
+            .expiration(5, TimeUnit.MINUTES).build()
     private final SourceCore core
 
     ApplicationAPI(SourceCore core) {
@@ -53,6 +60,7 @@ class ApplicationAPI extends AbstractVerticle {
         core.baseRouter.get("/applications/search").handler(this.&searchApplicationsRoute)
         core.baseRouter.get("/applications/:appUuid").handler(this.&getApplicationRoute)
         core.baseRouter.get("/applications/:appUuid/subscriptions").handler(this.&getApplicationSubscriptionsRoute)
+        core.baseRouter.get("/applications/:appUuid/endpoints").handler(this.&getApplicationEndpointsRoute)
         core.baseRouter.get("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions")
                 .handler(this.&getSubscriberApplicationSubscriptionsRoute)
         core.baseRouter.put("/applications/:appUuid/subscribers/:subscriberUuid/subscriptions/refresh")
@@ -81,14 +89,14 @@ class ApplicationAPI extends AbstractVerticle {
     }
 
     void getSubscriberApplicationSubscriptions(String appUuid, String subscriberUuid,
-                                               Handler<AsyncResult<List<SourceArtifactSubscription>>> handler) {
+                                               Handler<AsyncResult<List<ArtifactSubscribeRequest>>> handler) {
         def message = new JsonObject()
         message.put("app_uuid", appUuid)
         message.put('subscriber_uuid', subscriberUuid)
         vertx.eventBus().request(ArtifactSubscriptionTracker.GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS, message, {
             if (it.succeeded()) {
                 handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(it.result().body().toString(),
-                        new TypeReference<List<SourceArtifactSubscription>>() {
+                        new TypeReference<List<ArtifactSubscribeRequest>>() {
                         })))
             } else {
                 handler.handle(Future.failedFuture(it.cause()))
@@ -149,13 +157,30 @@ class ApplicationAPI extends AbstractVerticle {
         })
     }
 
+    private getApplicationEndpointsRoute(RoutingContext routingContext) {
+        def appUuid = routingContext.request().getParam("appUuid")
+        if (!appUuid) {
+            routingContext.response().setStatusCode(400)
+                    .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
+            return
+        }
+        getApplicationEndpoints(appUuid, {
+            if (it.succeeded()) {
+                routingContext.response().setStatusCode(200)
+                        .end(Json.encode(it.result()))
+            } else {
+                routingContext.response().setStatusCode(400)
+                        .end(Json.encode(new SourceAPIError().addError(it.cause().message)))
+            }
+        })
+    }
+
     void getApplicationSubscriptions(String appUuid, boolean includeAutomatic,
                                      Handler<AsyncResult<Set<SourceApplicationSubscription>>> handler) {
         log.info("Getting appliction subscriptions. App UUID: $appUuid - Include automatic: $includeAutomatic")
-        vertx.eventBus().request(ArtifactSubscriptionTracker.GET_APPLICATION_SUBSCRIPTIONS, appUuid, {
+        core.storage.getApplicationSubscriptions(appUuid, {
             if (it.succeeded()) {
-                def subscribers = JacksonCodec.decodeValue(it.result().body() as String,
-                        new TypeReference<Set<SourceApplicationSubscription>>() {})
+                def subscribers = it.result()
                 core.storage.findArtifactBySubscribeAutomatically(appUuid, {
                     if (it.succeeded()) {
                         def automaticSubscriptions = it.result()
@@ -168,20 +193,20 @@ class ApplicationAPI extends AbstractVerticle {
                             if (mergeMap.containsKey(it.artifactQualifiedName())) {
                                 mergeMap.get(it.artifactQualifiedName())
                                         .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically()))
-                                        .forceSubscription(Boolean.valueOf(it.config().forceSubscribe()))
                             } else {
                                 mergeMap.putIfAbsent(it.artifactQualifiedName(),
                                         SourceApplicationSubscription.builder()
                                                 .artifactQualifiedName(it.artifactQualifiedName())
                                                 .subscribers(0)
-                                                .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically()))
-                                                .forceSubscription(Boolean.valueOf(it.config().forceSubscribe())))
+                                                .automaticSubscription(Boolean.valueOf(it.config().subscribeAutomatically())))
                             }
                         }
 
                         def mergedSubscriptions = mergeMap.collect { it.value.build() } as Set
                         if (!includeAutomatic) {
-                            mergedSubscriptions.removeIf { Boolean.valueOf(it.automaticSubscription()) }
+                            mergedSubscriptions.removeIf {
+                                Boolean.valueOf(it.automaticSubscription()) && it.subscribers() == 0
+                            }
                         }
                         handler.handle(Future.succeededFuture(mergedSubscriptions))
                     } else {
@@ -192,6 +217,11 @@ class ApplicationAPI extends AbstractVerticle {
                 handler.handle(Future.failedFuture(it.cause()))
             }
         })
+    }
+
+    void getApplicationEndpoints(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        log.info("Getting appliction endpoints. App UUID: $appUuid")
+        core.storage.findArtifactByEndpoint(appUuid, handler)
     }
 
     private void updateApplicationRoute(RoutingContext routingContext) {
@@ -231,7 +261,15 @@ class ApplicationAPI extends AbstractVerticle {
     void updateApplication(SourceApplication updateRequest, Handler<AsyncResult<SourceApplication>> handler) {
         log.info(String.format("Updating application. App uuid: %s - App name: %s",
                 updateRequest.appUuid(), updateRequest.appName()))
-        core.storage.updateApplication(updateRequest, handler)
+        core.storage.updateApplication(updateRequest, {
+            if (it.succeeded()) {
+                def application = it.result()
+                SOURCE_APPLICATION_CACHE.put(application.appUuid(), application)
+                handler.handle(Future.succeededFuture(application))
+            } else {
+                handler.handle(Future.failedFuture(it.cause()))
+            }
+        })
     }
 
     private void createApplicationRoute(RoutingContext routingContext) {
@@ -280,7 +318,15 @@ class ApplicationAPI extends AbstractVerticle {
                                     .withIsUpdateRequest(null)
                             log.info(String.format("Creating application. App uuid: %s - App name: %s",
                                     createRequest.appUuid(), createRequest.appName()))
-                            core.storage.createApplication(createRequest, handler)
+                            core.storage.createApplication(createRequest, {
+                                if (it.succeeded()) {
+                                    def application = it.result()
+                                    SOURCE_APPLICATION_CACHE.put(application.appUuid(), application)
+                                    handler.handle(Future.succeededFuture(application))
+                                } else {
+                                    handler.handle(Future.failedFuture(it.cause()))
+                                }
+                            })
                         }
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))
@@ -295,7 +341,15 @@ class ApplicationAPI extends AbstractVerticle {
                     .withIsUpdateRequest(null)
             log.info(String.format("Creating application. App uuid: %s - App name: %s",
                     createRequest.appUuid(), createRequest.appName()))
-            core.storage.createApplication(createRequest, handler)
+            core.storage.createApplication(createRequest, {
+                if (it.succeeded()) {
+                    def application = it.result()
+                    SOURCE_APPLICATION_CACHE.put(application.appUuid(), application)
+                    handler.handle(Future.succeededFuture(application))
+                } else {
+                    handler.handle(Future.failedFuture(it.cause()))
+                }
+            })
         }
     }
 
@@ -349,8 +403,8 @@ class ApplicationAPI extends AbstractVerticle {
     }
 
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
-        log.info("Getting application. App uuid: {}", appUuid)
-        core.storage.getApplication(appUuid, handler)
+        log.debug("Getting application. App uuid: {}", appUuid)
+        getAndCacheSourceApplication(appUuid, handler)
     }
 
     private void getApplicationsRoute(RoutingContext routingContext) {
@@ -368,6 +422,27 @@ class ApplicationAPI extends AbstractVerticle {
     void getApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
         log.info("Getting all applications")
         core.storage.getAllApplications(handler)
+    }
+
+    private void getAndCacheSourceApplication(String appUuid,
+                                              Handler<AsyncResult<Optional<SourceApplication>>> handler) {
+        if (SOURCE_APPLICATION_CACHE.containsKey(appUuid)) {
+            handler.handle(Future.succeededFuture(Optional.ofNullable(SOURCE_APPLICATION_CACHE.get(appUuid))))
+        } else {
+            log.info("Getting source application from storage. App UUID: {}", appUuid)
+            core.storage.getApplication(appUuid, {
+                if (it.failed()) {
+                    handler.handle(Future.failedFuture(it.cause()))
+                } else {
+                    if (it.result().isPresent()) {
+                        SOURCE_APPLICATION_CACHE.put(appUuid, it.result().get())
+                    } else {
+                        SOURCE_APPLICATION_CACHE.put(appUuid, null)
+                    }
+                    handler.handle(Future.succeededFuture(it.result()))
+                }
+            })
+        }
     }
 
     /**

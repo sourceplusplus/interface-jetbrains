@@ -3,6 +3,7 @@ package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 import com.intellij.openapi.util.IconLoader
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
+import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
 
 import javax.swing.*
 
@@ -18,10 +19,16 @@ interface IntelliJGutterMark extends GutterMark, IntelliJSourceMark {
     public static final Icon sppActive = IconLoader.getIcon("/icons/s++_active.svg", IntelliJGutterMark.class)
     public static final Icon sppInactive = IconLoader.getIcon("/icons/s++_inactive.svg", IntelliJGutterMark.class)
     public static final Icon arrowToLeft = IconLoader.getIcon("/icons/s++_trace_navigation.svg", IntelliJGutterMark.class)
+    public static final Icon entryMethod = IconLoader.getIcon("/icons/s++_entry_method.svg", IntelliJGutterMark.class)
+    public static final Icon failingMethod = IconLoader.getIcon("/icons/s++_failing_method.svg", IntelliJGutterMark.class)
 
     boolean isPortalRegistered()
 
     String getPortalUuid()
 
     void registerPortal()
+
+    IntelliJSourcePortal getPortal()
+
+    Icon determineMostSuitableIcon()
 }
