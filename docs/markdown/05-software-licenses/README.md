@@ -1,4 +1,3 @@
-- [Source++ Agent](./01-agent-licenses.md)
-- [Source++ Core](./02-core-licenses.md)
-- [Source++ Plugin](./03-plugin-licenses.md)
-- [Source++ Portal](./04-portal-licenses.md)
+- [Source++ Core](./01-core-licenses.md)
+- [Source++ Plugin](./02-plugin-licenses.md)
+- [Source++ Portal](./03-portal-licenses.md)
