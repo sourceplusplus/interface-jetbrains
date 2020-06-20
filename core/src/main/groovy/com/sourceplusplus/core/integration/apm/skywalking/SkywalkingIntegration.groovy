@@ -142,9 +142,15 @@ class SkywalkingIntegration extends APMIntegration {
                 handler.handle(Future.failedFuture(it.cause()))
             } else {
                 def result = it.result().bodyAsJsonObject()
-                        .getJsonObject("data").getJsonArray("getAllServices")
-                log.debug("Got all SkyWalking services: " + result)
-                handler.handle(Future.succeededFuture(result))
+                if (result.containsKey("data")) {
+                    def services = result.getJsonObject("data").getJsonArray("getAllServices")
+                    log.debug("Got all SkyWalking services: {}", services)
+                    handler.handle(Future.succeededFuture(services))
+                } else {
+                    def errorMessage = it.result().bodyAsJsonObject().getJsonArray("errors")
+                            .getJsonObject(0).getString("message")
+                    handler.handle(Future.failedFuture(new IllegalStateException(errorMessage)))
+                }
             }
         })
     }

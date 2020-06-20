@@ -56,8 +56,8 @@ The Admin API allows you to modify Source++ system settings and integrations. Yo
   },
   "config": {
     "timezone": null,
-    "service_detection_delay_seconds": 15,
-    "endpoint_detection_interval_seconds": 15,
+    "service_detection_delay_seconds": 10,
+    "endpoint_detection_interval_seconds": 10,
     "failing_artifact_detection_interval_seconds": 10
   },
   "id": "apache_skywalking"
@@ -94,8 +94,8 @@ n/a
     },
     "config": {
       "timezone": null,
-      "service_detection_delay_seconds": 15,
-      "endpoint_detection_interval_seconds": 15,
+      "service_detection_delay_seconds": 10,
+      "endpoint_detection_interval_seconds": 10,
       "failing_artifact_detection_interval_seconds": 10
     },
     "id": "apache_skywalking"

@@ -8,12 +8,11 @@ import com.sourceplusplus.api.model.trace.TraceSpan
 import com.sourceplusplus.core.api.application.ApplicationAPI
 import com.sourceplusplus.core.api.artifact.ArtifactAPI
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
+import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
-import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -23,6 +22,7 @@ import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
+import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.EndpointIdDetection
 import static com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration.UNKNOWN_COMPONENT
 
 /**
@@ -42,6 +42,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
     private final ApplicationAPI applicationAPI
     private final ArtifactAPI artifactAPI
     private final SourceStorage storage
+    private final EndpointIdDetection endpointIdDetection
 
     SkywalkingEndpointIdDetector(SkywalkingIntegration skywalking, ApplicationAPI applicationAPI,
                                  ArtifactAPI artifactAPI, SourceStorage storage) {
@@ -49,6 +50,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
+        this.endpointIdDetection = CoreConfig.INSTANCE.apmIntegrationConfig.endpointIdDetection
     }
 
     @Override
@@ -245,18 +247,27 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
     private void analyzeEndpointTraces(String appUuid, String endpointId, Handler<AsyncResult<Void>> handler) {
         log.info("Analayzing endpoint traces. App UUID: $appUuid - Endpoint id: $endpointId")
-        //todo: should be a limit in this query and should look further back than 15 minutes
-        //todo: related to #186
+        def searchStartTime
+        if (endpointIdDetection.endpointLatestTracesAnalyzed.containsKey(endpointId)) {
+            searchStartTime = endpointIdDetection.endpointLatestTracesAnalyzed.get(endpointId)
+        } else {
+            searchStartTime = Instant.now()
+        }
+        def searchEndTime = Instant.now()
+
         def traceQuery = TraceQuery.builder()
                 .systemRequest(true)
                 .appUuid(appUuid)
                 .endpointId(endpointId)
-                .durationStart(Instant.now().minus(14, ChronoUnit.MINUTES))
-                .durationStop(Instant.now())
+                .durationStart(searchStartTime)
+                .durationStop(searchEndTime)
                 .durationStep("SECOND").build()
         skywalking.getTraces(traceQuery, {
             if (it.succeeded()) {
+                endpointIdDetection.addEndpointLatestTracesAnalyzed(endpointId, searchEndTime)
+
                 def futures = []
+                log.info("Analyzing {} traces from endpoint id: {}", it.result().traces().size(), endpointId)
                 //todo: likely don't need to check all traces
                 it.result().traces().each {
                     it.traceIds().each {
