@@ -32,9 +32,9 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 > 4. No websites or dashboards necessary to debug complex asynchronous runtime issues (just look at and follow through your actual source code)
 > 5. AI-based pair programming is going to be pretty cool when we get it right
 
-## Source++ Augments
+## Augments
 
-### Integrated Runtime Performance - Overview
+### Integrated Runtime Performance [Overview]
 
 ![](docs/images/integrated_runtime_performance-overview_v0.3-alpha.jpg)
 
