@@ -55,7 +55,9 @@ Source++ will not write source code for you. Source++ can be used to help debug 
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development3.jpg"/></td>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development4.jpg"/></td>
   </tr>
-    <tr>
+</table>
+<table>
+  <tr>
       <td width="100%" align="center"><b>Span Info</b></td>
   </tr>
   <tr>
