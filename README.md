@@ -32,13 +32,34 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 > 4. No websites or dashboards necessary to debug complex asynchronous runtime issues (just look at and follow through your actual source code)
 > 5. AI-based pair programming is going to be pretty cool when we get it right
 
-## Architectural Overview
+## Augments
 
-![](docs/images/Source%2B%2B%20Architectural%20Overview-v0.1.0-alpha.gif)
+### Integrated Runtime Performance
 
----
+![](docs/images/augments/Integrated_Runtime_Performance-Overview.jpg)
 
-![](docs/images/Source%2B%2B%20Artitecture%20(v0.3.0-alpha).gif)
+<table>
+  <tr>
+      <td width="50%" align="center"><b>Overview</b></td>
+      <td width="50%" align="center"><b>Activity</b></td>
+  </tr>
+  <tr>
+     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development1.jpg"/></td>
+     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development2.jpg"/></td>
+  </tr>
+</table>
+<table>
+  <tr>
+      <td width="33%" align="center"><b>Latest Traces</b></td>
+      <td width="33%" align="center"><b>Trace Stack</b></td>
+      <td width="33%" align="center"><b>Span Info</b></td>
+  </tr>
+  <tr>
+     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development3.jpg"/></td>
+     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development4.jpg"/></td>
+    <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development5.jpg"/></td>
+  </tr>
+</table>
 
 ## Getting Started
 
