@@ -47,21 +47,17 @@ Source++ will not write source code for you. Source++ can be used to help debug 
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development1.jpg"/></td>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development2.jpg"/></td>
   </tr>
+</table>
+<table>
   <tr>
-      <td width="50%" align="center"><b>Latest Traces</b></td>
-      <td width="50%" align="center"><b>Trace Stack</b></td>
+      <td width="33%" align="center"><b>Latest Traces</b></td>
+      <td width="33%" align="center"><b>Trace Stack</b></td>
+      <td width="33%" align="center"><b>Trace Stack</b></td>
   </tr>
   <tr>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development3.jpg"/></td>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development4.jpg"/></td>
-  </tr>
-</table>
-<table>
-  <tr>
-      <td width="100%" align="center"><b>Span Info</b></td>
-  </tr>
-  <tr>
-     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development3.jpg"/></td>
+    <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/update-diagrams/docs/images/augments/Integrated_Runtime_Performance-Development4.jpg"/></td>
   </tr>
 </table>
 
