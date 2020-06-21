@@ -27,7 +27,7 @@
       "id": "apache_skywalking",
       "category": "APM",
       "enabled": true,
-      "version": "8.0.0",
+      "version": "8.0.1",
       "connections": {
         "REST": {
           "host": "localhost",
@@ -93,7 +93,7 @@
 | id                                  | apache_skywalking | ID for the given Source++ integration                        |
 | category                            | APM               | Category for the given Source++ integration                  |
 | enabled                             | false             | Used to enable/disable the given Source++ integration        |
-| version                             | 8.0.0             | Current version of the Source++ integration                  |
+| version                             | 8.0.1             | Current version of the Source++ integration                  |
 
 #### Connections
 

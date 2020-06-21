@@ -43,7 +43,7 @@ The Admin API allows you to modify Source++ system settings and integrations. Yo
 {
   "category": "APM",
   "enabled": true,
-  "version": "8.0.0",
+  "version": "8.0.1",
   "connections": {
     "gRPC": {
       "host": "localhost",
@@ -81,7 +81,7 @@ n/a
     "name": "Apache SkyWalking",
     "category": "APM",
     "enabled": true,
-    "version": "8.0.0",
+    "version": "8.0.1",
     "connections": {
       "gRPC": {
         "host": "localhost",

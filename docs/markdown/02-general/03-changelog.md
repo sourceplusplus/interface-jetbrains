@@ -35,7 +35,7 @@
 - Updated `endpoint_detection_interval_seconds` from 15 to 10
 
 ## Dependency upgrade
-- Upgraded Apache SkyWalking (7.0.0 -> 8.0.0)
+- Upgraded Apache SkyWalking (7.0.0 -> 8.0.1)
 - Upgraded Groovy (2.4.17 -> 2.5.11)
 - Upgraded SourceMarker (0.1.3 -> 0.1.5)
 - Upgraded JetBrains intellij plugin (0.4.18 -> 0.4.21)

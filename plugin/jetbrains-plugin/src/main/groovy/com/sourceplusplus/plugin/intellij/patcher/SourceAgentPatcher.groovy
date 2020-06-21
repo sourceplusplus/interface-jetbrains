@@ -70,8 +70,8 @@ trait SourceAgentPatcher {
             URL customEnhancePlugin = SourceAgentPatcher.class.getResource("/skywalking/apm-customize-enhance-plugin-${SKYWALKING_VERSION}.jar")
             FileUtils.copyURLToFile(customEnhancePlugin, new File(agentFile.parentFile,
                     "plugins" + File.separator + "apm-customize-enhance-plugin-${SKYWALKING_VERSION}.jar"))
-//            Files.move(new File(agentFile.parentFile, "optional-plugins" + File.separator + "apm-customize-enhance-plugin-8.0.0.jar").toPath(),
-//                    new File(agentFile.parentFile, "plugins" + File.separator + "apm-customize-enhance-plugin-8.0.0.jar").toPath(),
+//            Files.move(new File(agentFile.parentFile, "optional-plugins" + File.separator + "apm-customize-enhance-plugin-8.0.1.jar").toPath(),
+//                    new File(agentFile.parentFile, "plugins" + File.separator + "apm-customize-enhance-plugin-8.0.1.jar").toPath(),
 //                    StandardCopyOption.REPLACE_EXISTING)
 
             //redirect skywalking logs to console

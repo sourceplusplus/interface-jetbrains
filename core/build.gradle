@@ -69,15 +69,15 @@ task buildAndMove {
                 java.nio.file.StandardCopyOption.COPY_ATTRIBUTES)
 
         //setup monitoring
-        def skywalkingArchive = new File(projectDir, '../3rd_party/skywalking/apache-skywalking-apm-8.0.0.tar.gz')
+        def skywalkingArchive = new File(projectDir, '../3rd_party/skywalking/apache-skywalking-apm-8.0.1.tar.gz')
         copy {
             from tarTree(resources.gzip(skywalkingArchive.getAbsolutePath()))
             into new File(projectDir, "../docker/local/")
         }
 
         //todo: temp; add as PR to skywalking
-        java.nio.file.Files.copy(new File(projectDir, "../3rd_party/skywalking/apm-customize-enhance-plugin-8.0.0.jar").toPath(),
-                new File(projectDir, "../docker/local/apache-skywalking-apm-bin/agent/plugins/apm-customize-enhance-plugin-8.0.0.jar").toPath(),
+        java.nio.file.Files.copy(new File(projectDir, "../3rd_party/skywalking/apm-customize-enhance-plugin-8.0.1.jar").toPath(),
+                new File(projectDir, "../docker/local/apache-skywalking-apm-bin/agent/plugins/apm-customize-enhance-plugin-8.0.1.jar").toPath(),
                 java.nio.file.StandardCopyOption.REPLACE_EXISTING)
 
     }
@@ -116,15 +116,15 @@ classes {
 
 test.doFirst {
     if (System.getenv("TRAVIS_BRANCH") != null || project.hasProperty("run_integration_tests")) {
-        def skywalkingArchive = new File(projectDir, '../3rd_party/skywalking/apache-skywalking-apm-8.0.0.tar.gz')
+        def skywalkingArchive = new File(projectDir, '../3rd_party/skywalking/apache-skywalking-apm-8.0.1.tar.gz')
         copy {
             from tarTree(resources.gzip(skywalkingArchive.getAbsolutePath()))
             into skywalkingArchive.parentFile
         }
 
         //todo: temp; add as PR to skywalking
-        java.nio.file.Files.copy(new File(skywalkingArchive.parentFile, "apm-customize-enhance-plugin-8.0.0.jar").toPath(),
-                new File(skywalkingArchive.parentFile, "apache-skywalking-apm-bin/agent/plugins/apm-customize-enhance-plugin-8.0.0.jar").toPath(),
+        java.nio.file.Files.copy(new File(skywalkingArchive.parentFile, "apm-customize-enhance-plugin-8.0.1.jar").toPath(),
+                new File(skywalkingArchive.parentFile, "apache-skywalking-apm-bin/agent/plugins/apm-customize-enhance-plugin-8.0.1.jar").toPath(),
                 java.nio.file.StandardCopyOption.REPLACE_EXISTING)
 
         PrintWriter output = new PrintWriter(new FileWriter(
