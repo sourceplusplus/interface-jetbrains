@@ -34,9 +34,14 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 
 ## Augments
 
-### Integrated Runtime Performance [Overview]
+### Integrated Runtime Performance
 
+#### Overview
 ![](docs/images/augments/Integrated_Runtime_Performance-Overview.jpg)
+
+#### Development
+
+![](docs/images/augments/Integrated_Runtime_Performance-Development.jpg)
 
 ## Getting Started
 
