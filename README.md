@@ -59,7 +59,6 @@ Source++ will not write source code for you. Source++ can be used to help debug 
      <td><img src="docs/images/augments/Integrated_Runtime_Performance-Development4.jpg"/></td>
   </tr>
 </table>
-![](docs/images/augments/Integrated_Runtime_Performance-Development.jpg)
 
 ## Getting Started
 
