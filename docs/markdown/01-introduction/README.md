@@ -6,6 +6,4 @@
 - [Configure Core](./04-configure-source-core.md)
 - [Install Plugin](./05-install-source-plugin.md)
 - [Configure Plugin](./06-configure-source-plugin.md)
-- [Attach Agent](./07-attach-source-agent.md)
-- [Configure Agent](./08-configure-source-agent.md)
 - [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)
