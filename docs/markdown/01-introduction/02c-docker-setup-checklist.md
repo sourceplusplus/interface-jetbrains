@@ -13,8 +13,6 @@ Note: Source++ will need to be integrated with Apache SkyWalking to enable usage
 
 - [Install Source++ Plugin](./05-install-source-plugin.md)
 - [Configure Source++ Plugin](./06-configure-source-plugin.md)
-- [Attach Source++ Agent](./07-attach-source-agent.md)
-- [Configure Source++ Agent](./08-configure-source-agent.md)
 - [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)
 
 # More Information

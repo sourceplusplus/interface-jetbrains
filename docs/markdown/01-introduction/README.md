@@ -1,7 +1,6 @@
 - [Getting Started](./01-getting-started.md)
 - [Docker Setup Checklist](./02c-docker-setup-checklist.md)
 - [Self-Hosted Setup Checklist](./02a-self-hosted-setup-checklist.md)
-- [Source++ Cloud Setup Checklist](./02b-source-cloud-setup-checklist.md)
 - [Setup Core](./03-setup-source-core.md)
 - [Configure Core](./04-configure-source-core.md)
 - [Install Plugin](./05-install-source-plugin.md)
