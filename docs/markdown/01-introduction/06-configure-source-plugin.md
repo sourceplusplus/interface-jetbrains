@@ -52,4 +52,4 @@ Once this step is finished you should see a status of "Connected" and you're rea
 
 # Next Step
 
-- [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)
+- [Create Source Mark](./07-create-source-mark.md)
