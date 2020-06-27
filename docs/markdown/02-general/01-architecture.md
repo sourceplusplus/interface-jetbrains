@@ -1,22 +1,15 @@
 # Architectural Overview
 
-![](../../images/Source%2B%2B%20Architectural%20Overview-v0.1.0-alpha.gif)
+![](../../images/augments/irp/Integrated-Runtime-Performance.jpg)
 
 1. Developer(s) write application code
-2. Application is deployed with the Source++ Agent using Apache SkyWalking
-3. Developer(s) determine which artifacts to subscribe to and send requests to Source++ Core
-4. Source++ Core updates Source++ Agent to begin tracing subscribed artifacts
-5. APM agent sends operation data to APM collector which is integrated with Source++ Core
-6. Relevant source artifact data is extracted from APM collector and sent to Source++ Plugin
-7. Developer(s) hover mouse over S++ mark to view Overview tab for artifact's live metrics
-8. Developer(s) hover mouse over S++ mark to view Traces tab for artifact's live traces
-9. Developer(s) continue developing application with the ability to easily view and improve performance in production
+1. Application is deployed with the Apache SkyWalking Agent attached
+1. APM agent sends operation data to APM collector which is integrated with Source++ Core
+1. Relevant source artifact data is extracted from APM collector and sent to Source++ Plugin
+1. Developer(s) activate S++ mark to view live artifact metrics and traces
+1. Developer(s) continue developing application with the ability to easily view and improve performance in production
 
 # Source++ Components
-
-## ~~Source++ Agent~~
-
-~~The Source++ Agent is used to monitor and gather application data. The agent relies heavily on [Apache SkyWalking](https://github.com/apache/incubator-skywalking) for the metrics and traces it gathers. The agent is primarily used to control the installation/un-installation of plugins and provide additional dynamic functionality to the Apache SkyWalking agent.~~
 
 ## Source++ Core
 
@@ -36,7 +29,7 @@ The portal currently contains three tabs:
 
 The overview tab displays general artifact statistics to gather an overall view of a source code artifact's runtime behavior. 
 
-![](../../images/portal/overview_last_15_minutes.png)
+![](../../images/portal/overview_last_5_minutes.png)
 
 ### Traces
 
@@ -49,6 +42,18 @@ The traces tab is used to navigate gathered distributed traces. The traces tab i
 #### Slowest Traces
 
 ![](../../images/portal/slowest_traces.png)
+
+#### Failed Traces
+
+![](../../images/portal/failed_traces.png)
+
+#### Trace Stack
+
+![](../../images/portal/trace_stack.png)
+
+#### Span Info
+
+![](../../images/portal/span_info.png)
 
 ### Configuration
 
