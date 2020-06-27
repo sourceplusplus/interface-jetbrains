@@ -16,11 +16,10 @@ import javax.swing.*
  */
 interface IntelliJGutterMark extends GutterMark, IntelliJSourceMark {
 
-    public static final Icon sppActive = IconLoader.getIcon("/icons/s++_active.svg", IntelliJGutterMark.class)
-    public static final Icon sppInactive = IconLoader.getIcon("/icons/s++_inactive.svg", IntelliJGutterMark.class)
-    public static final Icon arrowToLeft = IconLoader.getIcon("/icons/s++_trace_navigation.svg", IntelliJGutterMark.class)
-    public static final Icon entryMethod = IconLoader.getIcon("/icons/s++_entry_method.svg", IntelliJGutterMark.class)
-    public static final Icon failingMethod = IconLoader.getIcon("/icons/s++_failing_method.svg", IntelliJGutterMark.class)
+    static final Icon activeEntryMethod = IconLoader.getIcon("/icons/entry_method/active_entry_method.svg", IntelliJGutterMark.class)
+    static final Icon inactiveEntryMethod = IconLoader.getIcon("/icons/entry_method/inactive_entry_method.svg", IntelliJGutterMark.class)
+    static final Icon arrowToLeft = IconLoader.getIcon("/icons/trace_navigation/trace_navigation.svg", IntelliJGutterMark.class)
+    static final Icon failingMethod = IconLoader.getIcon("/icons/failing_method/failing_method.svg", IntelliJGutterMark.class)
 
     boolean isPortalRegistered()
 

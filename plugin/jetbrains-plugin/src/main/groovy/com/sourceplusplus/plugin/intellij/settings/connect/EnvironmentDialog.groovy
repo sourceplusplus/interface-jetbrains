@@ -6,16 +6,13 @@ import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.integration.ConnectionType
 import com.sourceplusplus.api.model.integration.IntegrationConnection
 import com.sourceplusplus.api.model.integration.IntegrationInfo
-import io.gitsocratic.api.SocraticAPI
-import io.gitsocratic.command.config.ConfigOption
-import io.gitsocratic.command.result.InitDockerCommandResult
+import com.sourceplusplus.api.model.integration.config.ApacheSkyWalkingIntegrationConfig
+import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
 
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
-
-import static com.sourceplusplus.plugin.SourcePlugin.*
 
 /**
  * Used to create, remove, and configure core environments.
@@ -24,13 +21,14 @@ import static com.sourceplusplus.plugin.SourcePlugin.*
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
+@Slf4j
 class EnvironmentDialog extends JDialog {
 
     private JPanel contentPane
     private JList<SourceEnvironmentConfig> environmentList
     private JButton createButton
     private JButton deleteButton
-    private JButton setupViaDockerButton
+    private JButton addIntegrationButton
     private JButton saveButton
     private JButton testConnectionButton
     private JSpinner portSpinner
@@ -53,109 +51,54 @@ class EnvironmentDialog extends JDialog {
             clearConnectionForm(true)
             nameTextField.requestFocus()
         })
-        setupViaDockerButton.addActionListener({
-            def connectDialog = new ConnectionInfoDialogWrapper("Docker Setup")
-            connectDialog.createCenterPanel()
+        addIntegrationButton.addActionListener({
+            def integrations = ["Apache SkyWalking"] as String[]
+            String integration = (String) JOptionPane.showInputDialog(this, "Integration to add to Source++ Core",
+                    "Add Integration", JOptionPane.QUESTION_MESSAGE, null, integrations, integrations[0])
+            if (integration == "Apache SkyWalking") {
+                def grpcAddress = JOptionPane.showInputDialog(this, "Server GRPC address (e.g. localhost:11800)",
+                        "Apache SkyWalking OAP Server", JOptionPane.QUESTION_MESSAGE)
+                if (grpcAddress) {
+                    def restAddress = JOptionPane.showInputDialog(this, "Server REST address (e.g. localhost:12800)",
+                            "Apache SkyWalking OAP Server", JOptionPane.QUESTION_MESSAGE)
+                    if (restAddress) {
+                        def restConnection = IntegrationConnection.builder()
+                                .host(restAddress.split(":")[0]).port(restAddress.split(":")[1] as int)
+                                .build()
+                        def grpcConnection = IntegrationConnection.builder()
+                                .host(grpcAddress.split(":")[0]).port(grpcAddress.split(":")[1] as int)
+                                .build()
+                        def integrationInfo = IntegrationInfo.builder()
+                                .id("apache_skywalking")
+                                .enabled(true)
+                                .putConnections(ConnectionType.REST, restConnection)
+                                .putConnections(ConnectionType.gRPC, grpcConnection)
+                                .config(ApacheSkyWalkingIntegrationConfig.builder().build()).build()
 
-            def input = new PipedInputStream()
-            def output = new PipedOutputStream()
-            input.connect(output)
-            Thread.startDaemon { //todo: ensure thread closes
-                input.eachLine {
-                    connectDialog.log(it + "\n")
-                }
-            }
-            Thread.startDaemon { //todo: ensure thread closes
-                ConfigOption.docker_apache_skywalking_hostname.setValue("skywalking-oap")
-                if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                    ConfigOption.docker_host.setValue("192.168.99.100")
-                }
-                connectDialog.setStatus("Initializing Apache SkyWalking...")
-                def initSkywalking = SocraticAPI.administration().initApacheSkyWalking()
-                        .skywalkingVersion(BUILD.getString("apache_skywalking_full_version"))
-                        .build().execute(output) as InitDockerCommandResult
-                if (initSkywalking.status != 0) {
-                    connectDialog.setStatus("<font color='red'>Failed to initialize Apache SkyWalking service</font>")
-                    output.close()
-                    input.close()
-                    return
-                }
-                Thread.sleep(10000) //todo: better (waits for skywalking to boot)
-
-                //todo: didn't always need this block twice
-                output.close()
-                input.close()
-                input = new PipedInputStream()
-                output = new PipedOutputStream()
-                input.connect(output)
-                Thread.startDaemon { //todo: ensure thread closes
-                    input.eachLine {
-                        connectDialog.log(it + "\n")
+                        def host = hostTextField.getText()
+                        def coreClient = new SourceCoreClient(host, portSpinner.value as int, sslEnabledCheckbox.isSelected())
+                        if (!apiTokenTextField.getText().isAllWhitespace()) {
+                            coreClient.apiKey = apiTokenTextField.getText().trim()
+                        }
+                        coreClient.updateIntegrationInfo(integrationInfo, {
+                            if (it.succeeded()) {
+                                JOptionPane.showMessageDialog(this, "Integration has been successfully added.",
+                                        "Successfully Updated", JOptionPane.INFORMATION_MESSAGE)
+                            } else {
+                                log.error("Failed to update integration", it.cause())
+                                JOptionPane.showMessageDialog(this, it.cause().message,
+                                        "Update Failed", JOptionPane.WARNING_MESSAGE)
+                            }
+                        })
                     }
                 }
-
-                connectDialog.setStatus("Initializing Source++...")
-                def initSpp = SocraticAPI.administration().initSourcePlusPlus()
-                        .sppVersion(BUILD.getString("full_version"))
-                        .link("Apache_SkyWalking")
-                        .build().execute(output) as InitDockerCommandResult
-                if (initSpp.status != 0) {
-                    connectDialog.setStatus("<font color='red'>Failed to initialize Source++ service</font>")
-                    output.close()
-                    input.close()
-                    return
-                }
-                output.close()
-                input.close()
-
-                connectDialog.setStatus("Integrating Apache SkyWalking with Source++...")
-                def skywalkingRestBinding = initSkywalking.portBindings.get("12800/tcp")[0]
-                def skywalkingRestPort = skywalkingRestBinding.substring(skywalkingRestBinding.indexOf(":") + 1) as int
-                def restConnection = IntegrationConnection.builder()
-                        .host("skywalking-oap").port(skywalkingRestPort)
-                        .build()
-                def skywalkingGrpcBinding = initSkywalking.portBindings.get("11800/tcp")[0]
-                def skywalkingGrpcPort = skywalkingGrpcBinding.substring(skywalkingGrpcBinding.indexOf(":") + 1) as int
-                def grpcConnection = IntegrationConnection.builder()
-                        .host("skywalking-oap").port(skywalkingGrpcPort)
-                        .build()
-
-                def sppBinding = initSpp.portBindings.get("8080/tcp")[0]
-                def sppHost = sppBinding.substring(0, sppBinding.indexOf(":"))
-                def sppPort = sppBinding.substring(sppBinding.indexOf(":") + 1) as int
-                if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                    sppHost = "192.168.99.100"
-                }
-
-                Thread.sleep(10000) //todo: better (waits for spp to boot)
-                def coreClient = new SourceCoreClient(sppHost, sppPort, sslEnabledCheckbox.isSelected())
-                def integrationInfo = IntegrationInfo.builder()
-                        .id("apache_skywalking")
-                        .enabled(true)
-                        .putConnections(ConnectionType.REST, restConnection)
-                        .putConnections(ConnectionType.gRPC, grpcConnection)
-                        .build()
-                coreClient.updateIntegrationInfo(integrationInfo, {
-                    if (it.succeeded()) {
-                        def env = new SourceEnvironmentConfig()
-                        env.environmentName = "Docker"
-                        env.apiHost = sppHost
-                        env.apiPort = sppPort
-                        env.apiSslEnabled = false
-                        clearConnectionForm(false)
-                        (environmentList.model as DefaultListModel<SourceEnvironmentConfig>).addElement(env)
-                        connectDialog.setStatus("<font color='green'>Successful</font>")
-                    } else {
-                        connectDialog.setError(it.cause())
-                    }
-                })
             }
-            connectDialog.show()
         })
 
         environmentList.addListSelectionListener({
             if (environmentList.selectedValue != null) {
                 clearConnectionForm(true)
+                addIntegrationButton.setEnabled(true)
 
                 def env = environmentList.selectedValue as SourceEnvironmentConfig
                 nameTextField.text = env.environmentName
@@ -190,6 +133,7 @@ class EnvironmentDialog extends JDialog {
             } else {
                 deleteButton.setEnabled(false)
                 activateButton.setEnabled(false)
+                addIntegrationButton.setEnabled(false)
             }
         })
         deleteButton.addActionListener({

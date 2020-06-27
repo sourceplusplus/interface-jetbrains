@@ -5,13 +5,13 @@ import com.sourceplusplus.api.model.error.SourceAPIErrors
 import com.sourceplusplus.api.model.integration.IntegrationInfo
 import com.sourceplusplus.core.SourceCore
 import com.sourceplusplus.core.integration.apm.skywalking.config.SkywalkingEndpointIdDetector
+import com.sourceplusplus.core.storage.CoreConfig
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 
 /**
@@ -33,7 +33,8 @@ class AdminAPI extends AbstractVerticle {
     @Override
     void start() throws Exception {
         core.baseRouter.get("/admin/integrations").handler(this.&getIntegrationsRoute)
-        core.baseRouter.put("/admin/integrations/:integrationId").handler(this.&updateIntegrationInfoRoute)
+        core.baseRouter.put("/admin/integrations/:integrationId")
+                .handler(this.&updateIntegrationInfoRoute)
         core.baseRouter.get("/admin/integrations/apache_skywalking/searchForNewEndpoints")
                 .handler(this.&searchForNewEndpointsRoute)
         core.baseRouter.get("/admin/storage/refresh")
@@ -61,8 +62,9 @@ class AdminAPI extends AbstractVerticle {
         })
     }
 
-    private getIntegrationsRoute(RoutingContext routingContext) {
-        routingContext.response().setStatusCode(200).end(Json.encode(core.getIntegrations()))
+    private static getIntegrationsRoute(RoutingContext routingContext) {
+        routingContext.response().setStatusCode(200)
+                .end(Json.encode(CoreConfig.INSTANCE.integrationCoreConfig.integrations))
     }
 
     private void updateIntegrationInfoRoute(RoutingContext routingContext) {
@@ -103,28 +105,13 @@ class AdminAPI extends AbstractVerticle {
     }
 
     void updateIntegrationInfo(IntegrationInfo integrationInfo, Handler<AsyncResult<IntegrationInfo>> handler) {
-        def currentInfo = core.integrations.find { it.id() == integrationInfo.id() }
-        if (currentInfo) {
+        def availableIntegration = core.availableIntegrations.find { it.id() == integrationInfo.id() }
+        if (availableIntegration) {
             integrationInfo = integrationInfo
-                    .withCategory(currentInfo.category())
-                    .withVersion(currentInfo.version())
-            if (!integrationInfo.connections()) {
-                integrationInfo = integrationInfo.withConnections(currentInfo.connections())
-            }
-            if (!integrationInfo.config()) {
-                integrationInfo = integrationInfo.withConfig(currentInfo.config())
-            }
+                    .withName(availableIntegration.name())
+                    .withCategory(availableIntegration.category())
 
-            def integrations = config().getJsonArray("integrations")
-            for (int i = 0; i < integrations.size(); i++) {
-                def integration = integrations.getJsonObject(i)
-                if (integration.getString("id") == integrationInfo.id()) {
-                    integrations.getJsonObject(i).mergeIn(JsonObject.mapFrom(integrationInfo))
-                    break
-                }
-            }
-
-            vertx.eventBus().request(SourceCore.UPDATE_INTEGRATIONS, integrations, {
+            vertx.eventBus().request(SourceCore.UPDATE_INTEGRATIONS, integrationInfo, {
                 if (it.succeeded()) {
                     handler.handle(Future.succeededFuture(integrationInfo))
                 } else {

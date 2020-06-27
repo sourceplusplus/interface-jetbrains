@@ -91,7 +91,8 @@ class SkywalkingIntegration extends APMIntegration {
         skywalkingOAPPort = Objects.requireNonNull(restHost.getInteger("port"))
         webClient = WebClient.create(vertx)
 
-        serviceDetectionDelay = config().getJsonObject("config").getInteger("service_detection_delay_seconds")
+        serviceDetectionDelay = config().getJsonObject("config")
+                .getInteger("service_detection_delay_seconds") ?: 10
 
         def deploymentConfig = new DeploymentOptions().setConfig(config())
         def failingArtifactsPromise = Promise.promise().future()
@@ -526,20 +527,20 @@ class SkywalkingIntegration extends APMIntegration {
     void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
         def searchServiceStartTime
         def returnCached = false
-        if (CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService == null) {
+        if (CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.latestSearchedService == null) {
             searchServiceStartTime = Instant.now()
         } else {
-            searchServiceStartTime = CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService
+            searchServiceStartTime = CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.latestSearchedService
             returnCached = Instant.now().epochSecond - searchServiceStartTime.epochSecond <= serviceDetectionDelay
         }
 
         if (returnCached) {
-            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
+            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.sourceServices))
         } else {
             def searchServiceEndTime = Instant.now()
             getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
                 if (it.succeeded()) {
-                    CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService = searchServiceEndTime
+                    CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.latestSearchedService = searchServiceEndTime
 
                     def futures = []
                     for (int i = 0; i < it.result().size(); i++) {
@@ -553,7 +554,7 @@ class SkywalkingIntegration extends APMIntegration {
                         applicationAPI.getApplication(appUuid, {
                             if (it.succeeded()) {
                                 if (it.result().isPresent()) {
-                                    CoreConfig.INSTANCE.apmIntegrationConfig.addSourceService(
+                                    CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.addSourceService(
                                             new SourceService(serviceId, appUuid))
                                 }
                                 promise.complete()
@@ -565,7 +566,7 @@ class SkywalkingIntegration extends APMIntegration {
 
                     CompositeFuture.all(futures).onComplete({
                         if (it.succeeded()) {
-                            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
+                            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.sourceServices))
                         } else {
                             handler.handle(Future.failedFuture(it.cause()))
                         }

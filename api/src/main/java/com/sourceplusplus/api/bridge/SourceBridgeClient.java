@@ -1,6 +1,7 @@
 package com.sourceplusplus.api.bridge;
 
 import com.sourceplusplus.api.model.artifact.SourceArtifact;
+import com.sourceplusplus.api.model.integration.IntegrationInfo;
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult;
 import com.sourceplusplus.api.model.trace.ArtifactTraceResult;
 import io.vertx.core.Vertx;
@@ -71,7 +72,9 @@ public class SourceBridgeClient {
                 ws.writeFrame(WebSocketFrame.textFrame(msg.encode(), true));
                 ws.handler(it -> {
                     JsonObject ob = new JsonObject(it.toString());
-                    if (PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress().equals(ob.getString("address"))) {
+                    if (PluginBridgeEndpoints.INTEGRATION_INFO_UPDATED.getAddress().equals(ob.getString("address"))) {
+                        handleIntegrationInfoUpdated(ob);
+                    } else if (PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.getAddress().equals(ob.getString("address"))) {
                         handleArtifactConfigUpdated(ob);
                     } else if (PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED.getAddress().equals(ob.getString("address"))) {
                         handleArtifactStatusUpdated(ob);
@@ -104,6 +107,11 @@ public class SourceBridgeClient {
             close();
             setupSubscriptions();
         });
+    }
+
+    private void handleIntegrationInfoUpdated(JsonObject msg) {
+        IntegrationInfo integration = Json.decodeValue(msg.getJsonObject("body").toString(), IntegrationInfo.class);
+        vertx.eventBus().publish(PluginBridgeEndpoints.INTEGRATION_INFO_UPDATED.getAddress(), integration);
     }
 
     private void handleArtifactConfigUpdated(JsonObject msg) {

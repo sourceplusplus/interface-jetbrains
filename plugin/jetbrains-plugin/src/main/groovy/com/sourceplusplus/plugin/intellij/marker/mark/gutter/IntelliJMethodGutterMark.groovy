@@ -15,6 +15,7 @@ import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJce
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactTracker
+import com.sourceplusplus.plugin.coordinate.integration.IntegrationInfoTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJKeys
 import com.sourceplusplus.plugin.intellij.portal.IntelliJPortalUI
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
@@ -243,7 +244,11 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             if (sourceArtifact.status().activelyFailing()) {
                 return failingMethod
             } else if (sourceArtifact.config().endpoint()) {
-                return entryMethod
+                if (IntegrationInfoTracker.getActiveIntegrationInfo("apache_skywalking")) {
+                    return activeEntryMethod
+                } else {
+                    return inactiveEntryMethod
+                }
             }
         }
         return null

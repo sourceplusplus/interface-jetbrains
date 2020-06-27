@@ -7,6 +7,7 @@ import com.sourceplusplus.plugin.coordinate.artifact.config.SpringMVCArtifactCon
 import com.sourceplusplus.plugin.coordinate.artifact.status.PluginFailingArtifactStatus
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactTracker
+import com.sourceplusplus.plugin.coordinate.integration.IntegrationInfoTracker
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
@@ -66,5 +67,7 @@ class PluginCoordinator extends AbstractVerticle {
         //track
         vertx.deployVerticle(new PluginArtifactTracker(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new PluginArtifactSubscriptionTracker(), new DeploymentOptions().setWorker(true))
+
+        vertx.deployVerticle(new IntegrationInfoTracker(), new DeploymentOptions().setWorker(true))
     }
 }

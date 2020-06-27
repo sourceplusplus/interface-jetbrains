@@ -18,25 +18,8 @@
   "integrations": [
     {
       "id": "apache_skywalking",
-      "category": "APM",
-      "enabled": true,
-      "version": "8.0.1",
-      "connections": {
-        "REST": {
-          "host": "localhost",
-          "port": 12800
-        },
-        "gRPC": {
-          "host": "localhost",
-          "port": 11800
-        }
-      },
-      "config": {
-        "timezone": null,
-        "service_detection_delay_seconds": 10,
-        "endpoint_detection_interval_seconds": 10,
-        "failing_artifact_detection_interval_seconds": 10
-      }
+      "name": "Apache SkyWalking",
+      "category": "APM"
     }
   ]
 }

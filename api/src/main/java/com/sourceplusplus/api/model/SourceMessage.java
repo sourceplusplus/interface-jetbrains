@@ -7,6 +7,7 @@ import com.sourceplusplus.api.model.artifact.SourceArtifact;
 import com.sourceplusplus.api.model.artifact.SourceArtifactConfig;
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest;
 import com.sourceplusplus.api.model.info.SourceCoreInfo;
+import com.sourceplusplus.api.model.integration.IntegrationInfo;
 import com.sourceplusplus.api.model.metric.*;
 import com.sourceplusplus.api.model.trace.*;
 import io.vertx.core.Vertx;
@@ -48,6 +49,7 @@ public interface SourceMessage extends Serializable {
         registerCodec(vertx, Trace.class);
         registerCodec(vertx, TraceSpanStackQuery.class);
         registerCodec(vertx, TraceSpanStackQueryResult.class);
+        registerCodec(vertx, IntegrationInfo.class);
     }
 
     static <T> void registerCodec(@NotNull Vertx vertx, @NotNull Class<T> type) {

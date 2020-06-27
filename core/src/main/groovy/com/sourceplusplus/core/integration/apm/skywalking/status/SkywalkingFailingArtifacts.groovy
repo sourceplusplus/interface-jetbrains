@@ -40,14 +40,14 @@ class SkywalkingFailingArtifacts extends AbstractVerticle {
         this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
-        this.failedArtifactTracker = CoreConfig.INSTANCE.apmIntegrationConfig.failedArtifactTracker
+        this.failedArtifactTracker = CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.failedArtifactTracker
     }
 
     @Override
     void start(Promise<Void> startFuture) throws Exception {
         searchForFailingArtifacts(startFuture)
         vertx.setPeriodic(TimeUnit.SECONDS.toMillis(config().getJsonObject("config")
-                .getInteger("failing_artifact_detection_interval_seconds")), {
+                .getInteger("failing_artifact_detection_interval_seconds") ?: 10), {
             searchForFailingArtifacts({
                 if (it.failed()) {
                     it.cause().printStackTrace()

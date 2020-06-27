@@ -219,9 +219,8 @@ class SourceCoreServer extends AbstractVerticle {
     }
 
     private SourceCoreInfo getSourceCoreInfo(SourceCore core) {
-        def activeIntegrations = core.getActiveIntegrations()
         def publicActiveIntegrations = []
-        activeIntegrations.each {
+        core.getActiveIntegrations().each {
             def updatedConnections = new HashMap<ConnectionType, IntegrationConnection>(it.connections())
             updatedConnections.each {
                 def port = it.value.port
