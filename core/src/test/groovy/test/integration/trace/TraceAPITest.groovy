@@ -149,7 +149,7 @@ class TraceAPITest extends SourceCoreAPITest {
                         test.fail(it.cause())
                     }
 
-                    for (int i = 0; i < 80; i++) { //todo: using h2 can put this down to 40
+                    for (int i = 0; i < 100; i++) { //todo: using h2 can put this down to 40
                         TraceTest.threeStaticMethodCallDepth()
                     }
 
