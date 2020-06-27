@@ -39,3 +39,7 @@ The portal will allow you to view several aspects related to the artifact which 
 ### Configuration
 
 ![](../../images/portal/configuration_tab.png)
+
+# More Information
+
+- [Source++ Architecture](../02-general/01-architecture.md)

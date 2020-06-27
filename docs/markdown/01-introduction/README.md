@@ -4,4 +4,5 @@
 - [Configure Core](./04-configure-source-core.md)
 - [Install Plugin](./05-install-source-plugin.md)
 - [Configure Plugin](./06-configure-source-plugin.md)
-- [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)
+- [Create Source Mark](./07-create-source-mark.md)
+- [View Source++ Portal](./08-view-source-portal.md)
