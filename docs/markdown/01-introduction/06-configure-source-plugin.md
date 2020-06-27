@@ -8,19 +8,9 @@ To connect the Source++ Plugin to a Source++ Core server go to:
 Depending on your setup, these settings may also be located at:
  - `File >> Settings >> Other Settings >> Source++ >> Manage Environments`
 
-Here you will find the ability to connect to an existing Source++ Core server as well as the ability to setup a new Source++ Core server (via Docker).
+Here you will find the ability to connect to an existing Source++ Core server.
 
 ![](../../images/plugin/Manage%20Environments.png)
-
-Clicking "Setup via Docker" will bring up the following window and begin downloading (if necessary) and booting (if necessary) a Source++ Core server:
-
-![](../../images/plugin/Setup%20via%20Docker.png)
-
-This will automatically create the required connection settings.
-
-![](../../images/plugin/Connect%20Source++.png)
-
-If your Source++ Core server is in secure mode you will also need to input the API token.
 
 You can test this connection by clicking the "Test Connection" button. If everything worked correctly you should see something similar to the following results:
 
