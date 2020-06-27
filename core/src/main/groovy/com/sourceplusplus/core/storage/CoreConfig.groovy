@@ -58,8 +58,13 @@ class CoreConfig {
             def integrations = deployConfig.getJsonArray("integrations")
             for (int i = 0; i < integrations.size(); i++) {
                 def integration = integrations.getJsonObject(i)
-                coreConfig.integrationCoreConfig.updateIntegration(Json.decodeValue(
-                        integration.toString(), IntegrationInfo.class))
+                if (integration.fieldNames() - ["id", "name", "category"]) {
+                    if (!integration.containsKey("config")) {
+                        integration = integration.put("config", new JsonObject())
+                    }
+                    coreConfig.integrationCoreConfig.updateIntegration(Json.decodeValue(
+                            integration.toString(), IntegrationInfo.class))
+                }
             }
         }
         INSTANCE = coreConfig
