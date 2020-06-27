@@ -23,11 +23,20 @@ Note: Before closing the environment settings make sure to click the "Apply" but
 Once you have an environment created you will need to add integration(s) before you're able to anything interesting with Source++.
 This is done by clicking the "Add Integration" button, which will display several dialogs that must be filled in to establish a connection with an available integration (e.g. Apache SkyWalking). 
 
+After successfully an integration and clicking the "Test Connection" button, you should see something similar to the following results:
+
+![](../../images/plugin/Successful%20Integration.png)
+
 # Create/Assign Application
+
+Once you've successfully connected the Source++ Plugin there may be a final step necessary before being able to use Source++.
+This is creating or assigning a Source++ application for the current project.
 
 ![](../../images/plugin/Status%20Connected.png)
 
-Once you've successfully connected the Source++ Plugin there is a final step required before being able to use Source++. This is creating or assigning a Source++ application for the current project. Pressing the "Create/Assign Application" button will bring up the following dialog:
+If the project name and structure can be determined automatically this step can be skipped.
+If this information cannot be determined automatically you must press the "Create/Assign Application" button.
+This will bring up the following dialog:
 
 ![](../../images/plugin/Create%20Application.png)
 
