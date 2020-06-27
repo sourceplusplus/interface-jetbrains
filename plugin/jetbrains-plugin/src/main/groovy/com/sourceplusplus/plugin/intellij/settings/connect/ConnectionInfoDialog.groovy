@@ -3,15 +3,16 @@ package com.sourceplusplus.plugin.intellij.settings.connect
 import com.sourceplusplus.api.APIException
 import com.sourceplusplus.api.model.info.SourceCoreInfo
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 
 import javax.swing.*
 
 /**
  * Displays core connection information.
  *
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  * @version 0.3.0
  * @since 0.1.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 class ConnectionInfoDialog extends JDialog {
 
@@ -37,7 +38,7 @@ class ConnectionInfoDialog extends JDialog {
 
     void setSuccessful(SourceCoreInfo sourceCoreInfo) {
         connectionStatusLabel.setText("<html><b>Connection Status: <font color='green'>Successful</font></b></html>")
-        connectionInfoTextArea.append(Json.encodePrettily(sourceCoreInfo))
+        connectionInfoTextArea.append(Json.encodePrettily(new JsonObject(Json.encode(sourceCoreInfo))))
         connectionInfoTextArea.setCaretPosition(0)
     }
 

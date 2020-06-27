@@ -18,6 +18,11 @@ You can test this connection by clicking the "Test Connection" button. If everyt
 
 Note: Before closing the environment settings make sure to click the "Apply" button to save all changes.
 
+# Add Integration
+
+Once you have an environment created you will need to add integration(s) before you're able to anything interesting with Source++.
+This is done by clicking the "Add Integration" button, which will display several dialogs that must be filled in to establish a connection with an available integration (e.g. Apache SkyWalking). 
+
 # Create/Assign Application
 
 ![](../../images/plugin/Status%20Connected.png)
@@ -38,4 +43,4 @@ Once this step is finished you should see a status of "Connected" and you're rea
 
 # Next Step
 
-- [Attach Source++ Agent](./07-attach-source-agent.md)
+- [Subscribe to Source Artifact](./09-subscribe-to-artifact.md)
