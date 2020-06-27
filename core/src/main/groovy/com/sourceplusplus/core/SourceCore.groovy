@@ -70,7 +70,7 @@ class SourceCore extends AbstractVerticle {
             if (it.succeeded()) {
                 storage.getCoreConfig({
                     if (it.succeeded()) {
-                        CoreConfig.setupCoreConfig(it.result(), storage)
+                        CoreConfig.setupCoreConfig(config(), it.result(), storage)
                         bootCoreAPIs(startFuture)
                     } else {
                         startFuture.fail(it.cause())

@@ -1,8 +1,10 @@
 package com.sourceplusplus.core.storage
 
+import com.sourceplusplus.api.model.integration.IntegrationInfo
 import com.sourceplusplus.core.integration.IntegrationCoreConfig
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 
 /**
  * Persistent configuration for the core system.
@@ -45,8 +47,21 @@ class CoreConfig {
         return Json.decodeValue(json, CoreConfig.class)
     }
 
-    static void setupCoreConfig(Optional<CoreConfig> currentConfig, SourceStorage storage) {
+    static void setupCoreConfig(JsonObject deployConfig, Optional<CoreConfig> currentConfig, SourceStorage storage) {
         _storage = storage
-        INSTANCE = currentConfig.isPresent() ? currentConfig.get() : new CoreConfig()
+
+        CoreConfig coreConfig
+        if (currentConfig.isPresent()) {
+            coreConfig = currentConfig.get()
+        } else {
+            coreConfig = new CoreConfig()
+            def integrations = deployConfig.getJsonArray("integrations")
+            for (int i = 0; i < integrations.size(); i++) {
+                def integration = integrations.getJsonObject(i)
+                coreConfig.integrationCoreConfig.updateIntegration(Json.decodeValue(
+                        integration.toString(), IntegrationInfo.class))
+            }
+        }
+        INSTANCE = coreConfig
     }
 }
