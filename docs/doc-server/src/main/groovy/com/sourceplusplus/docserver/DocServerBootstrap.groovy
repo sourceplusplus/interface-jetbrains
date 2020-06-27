@@ -23,7 +23,7 @@ import java.util.regex.Pattern
 /**
  * Used to handle the Source++ website documentation.
  *
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

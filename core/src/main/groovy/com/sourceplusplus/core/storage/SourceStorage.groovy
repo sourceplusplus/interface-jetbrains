@@ -16,7 +16,7 @@ import java.time.Instant
 /**
  * Represents a storage for saving/fetching core data.
  *
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

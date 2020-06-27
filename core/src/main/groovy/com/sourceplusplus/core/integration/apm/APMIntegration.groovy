@@ -17,7 +17,7 @@ import java.time.Instant
 /**
  * Represents integration with an APM.
  *
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -1,4 +1,4 @@
-# 0.3.0-alpha (2020-06-20)
+# 0.3.0-alpha (2020-06-27)
 
 ## Bug
 - Artifact config persist multiple endpoint ids to storage correctly ([#184](https://github.com/sourceplusplus/Assistant/issues/184))
@@ -27,7 +27,8 @@
 - Plugin now shows error message on duplicate application name ([#173](https://github.com/sourceplusplus/Assistant/issues/173))
 - Added entry point gutter mark ([#180](https://github.com/sourceplusplus/Assistant/issues/180))
 - Persisting whole SourceArtifact to SourceMark instead of individual attributes ([#181](https://github.com/sourceplusplus/Assistant/issues/181))
-- Trace stack propagates error icon to parent when child span fails ([#183](https://github.com/sourceplusplus/Assistant/issues/183)) 
+- Trace stack propagates error icon to parent when child span fails ([#183](https://github.com/sourceplusplus/Assistant/issues/183))
+- Determine SkyWalking timezone dynamically ([#195](https://github.com/sourceplusplus/Assistant/issues/195))
 - Added failed traces order type to traces tab
 - Changed overview tab default timeframe from 15 minutes to 5 minutes
 - Added distinct gutter mark for entry artifacts

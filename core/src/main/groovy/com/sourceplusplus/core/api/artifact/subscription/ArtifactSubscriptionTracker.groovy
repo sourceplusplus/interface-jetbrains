@@ -23,7 +23,7 @@ import static com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker.*
 /**
  * Keeps track of artifact subscriptions.
  *
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

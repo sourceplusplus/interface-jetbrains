@@ -17,7 +17,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 /**
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.2.6
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

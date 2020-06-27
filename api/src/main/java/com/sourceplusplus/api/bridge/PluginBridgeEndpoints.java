@@ -6,7 +6,7 @@ package com.sourceplusplus.api.bridge;
  * //todo: rename public-events to subscribe-events
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.1.0
  */
 public enum PluginBridgeEndpoints {

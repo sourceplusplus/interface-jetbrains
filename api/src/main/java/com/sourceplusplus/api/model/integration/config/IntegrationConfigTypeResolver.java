@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
  * Used to resolve the correct IntegrationConfig based on the id.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.2.0
  */
 public class IntegrationConfigTypeResolver extends TypeIdResolverBase {

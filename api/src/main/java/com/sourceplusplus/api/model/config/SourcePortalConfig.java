@@ -11,7 +11,7 @@ import java.util.Objects;
  * Holds the current configuration used by the portal.
  *
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.2.0
  */
 public class SourcePortalConfig {

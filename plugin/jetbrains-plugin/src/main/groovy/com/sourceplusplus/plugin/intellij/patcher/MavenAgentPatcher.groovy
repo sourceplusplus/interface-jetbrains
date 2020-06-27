@@ -9,7 +9,7 @@ import groovy.util.logging.Slf4j
 /**
  * Adds the Source++ Agent to any Maven-based project executions.
  *
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.2.4
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -17,7 +17,7 @@ import javax.swing.event.DocumentListener
 /**
  * Used to create, remove, and configure core environments.
  *
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

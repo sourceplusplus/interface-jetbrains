@@ -22,7 +22,7 @@ import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFun
 /**
  * Extension of the SourceMarker for handling IntelliJ.
  *
- * @version 0.2.6
+ * @version 0.3.0
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

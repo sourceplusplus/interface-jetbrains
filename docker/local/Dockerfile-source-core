@@ -1,5 +1,5 @@
 FROM openjdk:11-jre
-ADD ./source-core-0.2.6.zip /source-core-0.2.6.zip
+ADD ./source-core-0.3.0.zip /source-core-0.3.0.zip
 
 ADD ./apache-skywalking-apm-bin /apache-skywalking-apm-bin
 ADD ./agent.config /apache-skywalking-apm-bin/agent/config/agent.config
@@ -9,4 +9,4 @@ ENV SOURCE_CONFIG=docker-core.json
 #ENV JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -javaagent:/apache-skywalking-apm-bin/agent/skywalking-agent.jar"
 
 RUN unzip *.zip
-CMD ["./source-core-0.2.6/bin/source-core"]
+CMD ["./source-core-0.3.0/bin/source-core"]
