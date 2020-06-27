@@ -41,7 +41,6 @@
         }
       },
       "config": {
-        "timezone": null,
         "service_detection_delay_seconds": 10,
         "endpoint_detection_interval_seconds": 10,
         "failing_artifact_detection_interval_seconds": 10
@@ -117,7 +116,6 @@
 
 | Property                            | Value     | Description                                                  |
 | ----------------------------------- | --------- | ------------------------------------------------------------ |
-| timezone                            | null      | Timezone to use when querying SkyWalking OAP (defaults to system) |
 | service_detection_delay_seconds     | 10        | Minimum seconds to wait before scanning for new services     |
 | endpoint_detection_interval_seconds | 10        | Seconds to wait before scanning for new endpoints            |
 | failing_artifact_detection_interval_seconds | 10 | Seconds to wait before scanning for failing artifacts       |

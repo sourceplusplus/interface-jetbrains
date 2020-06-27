@@ -12,6 +12,4 @@ After you have completed these steps you will be able to view your application's
 To make things simple, we have provided two setup checklists. The first checklist is for those who wish to self-host Source++ (completely cost-free) and the second checklist is for those who have purchased Source++ Cloud (dedicated instances fully managed by the Source++ team).
 The self-hosted setup is more complex, but of course, allows for more customization.
 
-- [Docker Setup Checklist](02c-docker-setup-checklist.md)
 - [Self-Hosted Setup Checklist](02a-self-hosted-setup-checklist.md)
-- [Source++ Cloud Setup Checklist](02b-source-cloud-setup-checklist.md)
