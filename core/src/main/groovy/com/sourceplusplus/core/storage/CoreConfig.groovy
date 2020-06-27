@@ -1,6 +1,7 @@
 package com.sourceplusplus.core.storage
 
-import com.sourceplusplus.core.integration.apm.APMIntegrationConfig
+import com.sourceplusplus.api.model.integration.IntegrationInfo
+import com.sourceplusplus.core.integration.IntegrationCoreConfig
 import groovy.util.logging.Slf4j
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -17,14 +18,14 @@ class CoreConfig {
 
     public static CoreConfig INSTANCE
     private static SourceStorage _storage
-    private APMIntegrationConfig apmIntegrationConfig
+    private IntegrationCoreConfig integrationCoreConfig = new IntegrationCoreConfig()
 
-    APMIntegrationConfig getApmIntegrationConfig() {
-        return apmIntegrationConfig
+    IntegrationCoreConfig getIntegrationCoreConfig() {
+        return integrationCoreConfig
     }
 
-    void setApmIntegrationConfig(APMIntegrationConfig apmIntegrationConfig) {
-        this.apmIntegrationConfig = apmIntegrationConfig
+    void setApmIntegrationConfig(IntegrationCoreConfig integrationCoreConfig) {
+        this.integrationCoreConfig = integrationCoreConfig
         INSTANCE?.save()
     }
 
@@ -57,9 +58,12 @@ class CoreConfig {
             def integrations = deployConfig.getJsonArray("integrations")
             for (int i = 0; i < integrations.size(); i++) {
                 def integration = integrations.getJsonObject(i)
-                if (integration.getString("category") == "APM") {
-                    coreConfig.apmIntegrationConfig = new APMIntegrationConfig()
-                    break
+                if (integration.fieldNames() - ["id", "name", "category"]) {
+                    if (!integration.containsKey("config")) {
+                        integration = integration.put("config", new JsonObject())
+                    }
+                    coreConfig.integrationCoreConfig.updateIntegration(Json.decodeValue(
+                            integration.toString(), IntegrationInfo.class))
                 }
             }
         }

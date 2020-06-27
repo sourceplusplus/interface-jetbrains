@@ -50,7 +50,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
         this.applicationAPI = Objects.requireNonNull(applicationAPI)
         this.artifactAPI = Objects.requireNonNull(artifactAPI)
         this.storage = Objects.requireNonNull(storage)
-        this.endpointIdDetection = CoreConfig.INSTANCE.apmIntegrationConfig.endpointIdDetection
+        this.endpointIdDetection = CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.endpointIdDetection
     }
 
     @Override
@@ -90,7 +90,7 @@ class SkywalkingEndpointIdDetector extends AbstractVerticle {
 
         searchForNewEndpoints(startFuture)
         vertx.setPeriodic(TimeUnit.SECONDS.toMillis(config().getJsonObject("config")
-                .getInteger("endpoint_detection_interval_seconds")), {
+                .getInteger("endpoint_detection_interval_seconds") ?: 10), {
             searchForNewEndpoints({
                 if (it.failed()) {
                     it.cause().printStackTrace()

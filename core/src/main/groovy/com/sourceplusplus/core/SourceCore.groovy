@@ -10,18 +10,14 @@ import com.sourceplusplus.core.integration.apm.APMIntegration
 import com.sourceplusplus.core.integration.apm.skywalking.SkywalkingIntegration
 import com.sourceplusplus.core.storage.CoreConfig
 import com.sourceplusplus.core.storage.SourceStorage
-//import com.sourceplusplus.core.storage.elasticsearch.ElasticsearchDAO
 import com.sourceplusplus.core.storage.h2.H2DAO
 import groovy.util.logging.Slf4j
 import io.vertx.core.*
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
-import org.apache.commons.io.IOUtils
-
-import java.nio.charset.StandardCharsets
+import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.*
 
 /**
  * Used to setup storage, APIs, and integrations.
@@ -111,21 +107,10 @@ class SourceCore extends AbstractVerticle {
         })
     }
 
-    private void updateIntegrations(Message<Object> msg) {
-        def integrations = msg.body() as JsonArray
-        config().put("integrations", integrations)
-
-        def configFileLocation = System.getenv("SOURCE_CONFIG")
-        if (configFileLocation) {
-            def configFile = new File(configFileLocation)
-            if (configFile.exists() && configFile.canWrite()) {
-                def configData = IOUtils.toString(configFile.newInputStream(), StandardCharsets.UTF_8)
-                def updatedConfig = new JsonObject(configData)
-                updatedConfig.put("integrations", integrations)
-                configFile.newWriter().withWriter { it << updatedConfig.encodePrettily() }
-                log.info("Saved updated Source++ integration configuration to disk")
-            }
-        }
+    private void updateIntegrations(Message<IntegrationInfo> msg) {
+        def integrationInfo = msg.body()
+        CoreConfig.INSTANCE.integrationCoreConfig.updateIntegration(integrationInfo)
+        vertx.eventBus().publish(INTEGRATION_INFO_UPDATED.address, integrationInfo)
 
         //undeploy integrations
         def undeployFutures = []
@@ -163,18 +148,16 @@ class SourceCore extends AbstractVerticle {
 
     private void deployIntegrations(Handler<AsyncResult<Void>> handler) {
         def succeeded = true
-        def integrations = config().getJsonArray("integrations")
         def integrationFutures = []
 
         boolean deployMetricAPI = false
         boolean deployTraceAPI = false
-        for (int i = 0; i < integrations.size(); i++) {
-            def integration = integrations.getJsonObject(i)
-            if (integration.getBoolean("enabled")) {
+        for (def integration : CoreConfig.INSTANCE.integrationCoreConfig.integrations) {
+            if (integration.enabled()) {
                 def future = Promise.promise()
                 integrationFutures.add(future)
 
-                switch (integration.getString("id")) {
+                switch (integration.id()) {
                     case "apache_skywalking":
                         deployMetricAPI = deployTraceAPI = true
                         connectToApacheSkyWalking(integration, future)
@@ -182,7 +165,7 @@ class SourceCore extends AbstractVerticle {
                     default:
                         succeeded = false
                         handler.handle(Future.failedFuture(new IllegalArgumentException(
-                                "Invalid integration: " + integration.getString("id"))))
+                                "Invalid integration: " + integration.id())))
                 }
             }
         }
@@ -212,10 +195,11 @@ class SourceCore extends AbstractVerticle {
         }
     }
 
-    private void connectToApacheSkyWalking(JsonObject integration, Handler<AsyncResult<Void>> handler) {
+    private void connectToApacheSkyWalking(IntegrationInfo integration, Handler<AsyncResult<Void>> handler) {
         log.info("Connecting to Apache SkyWalking...")
         apmIntegration = new SkywalkingIntegration(applicationAPI, artifactAPI, storage)
-        vertx.deployVerticle(apmIntegration, new DeploymentOptions().setConfig(integration), {
+        vertx.deployVerticle(apmIntegration, new DeploymentOptions()
+                .setConfig(new JsonObject(Json.encode(integration))), {
             if (it.succeeded()) {
                 deployedIntegrations.add(it.result())
                 handler.handle(Future.succeededFuture())
@@ -257,11 +241,12 @@ class SourceCore extends AbstractVerticle {
         return apmIntegration
     }
 
-    List<IntegrationInfo> getIntegrations() {
+    List<IntegrationInfo> getAvailableIntegrations() {
         def integrationInfos = []
         def integrations = config().getJsonArray("integrations")
         for (int i = 0; i < integrations.size(); i++) {
-            def integrationInfo = Json.decodeValue(integrations.getJsonObject(i).toString(), IntegrationInfo.class)
+            def integration = integrations.getJsonObject(i).put("config", new JsonObject())
+            def integrationInfo = Json.decodeValue(integration.toString(), IntegrationInfo.class)
             switch (integrationInfo.id()) {
                 case "apache_skywalking":
                     integrationInfos.add(integrationInfo.withName("Apache SkyWalking"))
@@ -273,8 +258,9 @@ class SourceCore extends AbstractVerticle {
         return integrationInfos
     }
 
-    List<IntegrationInfo> getActiveIntegrations() {
-        return getIntegrations().stream().filter({ it -> it.enabled() })
+    static List<IntegrationInfo> getActiveIntegrations() {
+        return CoreConfig.INSTANCE.integrationCoreConfig.integrations.stream()
+                .filter({ it -> it.enabled() })
                 .map({ it -> IntegrationInfo.builder().id(it.id()).connections(it.connections()).build() })
                 .collect()
     }

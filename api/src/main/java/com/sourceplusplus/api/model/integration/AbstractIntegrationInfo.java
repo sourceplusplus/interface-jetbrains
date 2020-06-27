@@ -33,21 +33,27 @@ public interface AbstractIntegrationInfo extends SourceMessage {
     String id();
 
     @Nullable
+    @Value.Auxiliary
     String name();
 
     @Nullable
+    @Value.Auxiliary
     IntegrationCategory category();
 
     @Nullable
+    @Value.Auxiliary
     Boolean enabled();
 
     @Nullable
+    @Value.Auxiliary
     String version();
 
     @Nullable
+    @Value.Auxiliary
     Map<ConnectionType, IntegrationConnection> connections();
 
     @Nullable
+    @Value.Auxiliary
     @JsonTypeIdResolver(IntegrationConfigTypeResolver.class)
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "id")
     IntegrationConfig config();

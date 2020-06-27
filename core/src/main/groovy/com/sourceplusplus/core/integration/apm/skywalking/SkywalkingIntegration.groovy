@@ -43,6 +43,8 @@ class SkywalkingIntegration extends APMIntegration {
 
     public static final String UNKNOWN_COMPONENT = "Unknown"
 
+    private static final String GET_TIME_INFO = Resources.toString(RESOURCE_LOADER.getResource(
+            "query/skywalking/get_time_info.graphql"), Charsets.UTF_8)
     private static final String GET_ALL_SERVICES = Resources.toString(RESOURCE_LOADER.getResource(
             "query/skywalking/get_all_services.graphql"), Charsets.UTF_8)
     private static final String GET_SERVICE_INSTANCES = Resources.toString(RESOURCE_LOADER.getResource(
@@ -73,37 +75,31 @@ class SkywalkingIntegration extends APMIntegration {
 
     @Override
     void start(Promise<Void> startFuture) throws Exception {
-        def timezone = config().getJsonObject("config").getString("timezone")
-        if (timezone) {
-            DATE_TIME_FORMATTER_MINUTES = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
-                    .withZone(ZoneId.of(timezone))
-            DATE_TIME_FORMATTER_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss")
-                    .withZone(ZoneId.of(timezone))
-        } else {
-            DATE_TIME_FORMATTER_MINUTES = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
-                    .withZone(ZoneId.systemDefault())
-            DATE_TIME_FORMATTER_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss")
-                    .withZone(ZoneId.systemDefault())
-        }
+        serviceDetectionDelay = config().getJsonObject("config")
+                .getInteger("service_detection_delay_seconds") ?: 10
 
         def restHost = Objects.requireNonNull(config().getJsonObject("connections").getJsonObject("REST"))
         skywalkingOAPHost = Objects.requireNonNull(restHost.getString("host"))
         skywalkingOAPPort = Objects.requireNonNull(restHost.getInteger("port"))
         webClient = WebClient.create(vertx)
 
-        serviceDetectionDelay = config().getJsonObject("config").getInteger("service_detection_delay_seconds")
-
-        def deploymentConfig = new DeploymentOptions().setConfig(config())
-        def failingArtifactsPromise = Promise.promise().future()
-        def endpointIdDetectorPromise = Promise.promise().future()
-        vertx.deployVerticle(new SkywalkingFailingArtifacts(this, applicationAPI, artifactAPI, storage),
-                deploymentConfig, failingArtifactsPromise)
-        vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, applicationAPI, artifactAPI, storage),
-                deploymentConfig, endpointIdDetectorPromise)
-        CompositeFuture.all(failingArtifactsPromise, endpointIdDetectorPromise).onComplete({
+        determineTimeZone({
             if (it.succeeded()) {
-                log.info("SkywalkingIntegration started")
-                startFuture.complete()
+                def deploymentConfig = new DeploymentOptions().setConfig(config())
+                def failingArtifactsPromise = Promise.promise().future()
+                def endpointIdDetectorPromise = Promise.promise().future()
+                vertx.deployVerticle(new SkywalkingFailingArtifacts(this, applicationAPI, artifactAPI, storage),
+                        deploymentConfig, failingArtifactsPromise)
+                vertx.deployVerticle(new SkywalkingEndpointIdDetector(this, applicationAPI, artifactAPI, storage),
+                        deploymentConfig, endpointIdDetectorPromise)
+                CompositeFuture.all(failingArtifactsPromise, endpointIdDetectorPromise).onComplete({
+                    if (it.succeeded()) {
+                        log.info("SkywalkingIntegration started")
+                        startFuture.complete()
+                    } else {
+                        startFuture.fail(it.cause())
+                    }
+                })
             } else {
                 startFuture.fail(it.cause())
             }
@@ -113,6 +109,32 @@ class SkywalkingIntegration extends APMIntegration {
     @Override
     void stop() throws Exception {
         log.info("{} stopped", getClass().getSimpleName())
+    }
+
+    private void determineTimeZone(Handler<AsyncResult<Void>> handler) {
+        log.info("Getting SkyWalking time info")
+        webClient.post(skywalkingOAPPort, skywalkingOAPHost,
+                "/graphql").sendJsonObject(new JsonObject().put("query", GET_TIME_INFO), {
+            if (it.failed()) {
+                handler.handle(Future.failedFuture(it.cause()))
+            } else {
+                def result = it.result().bodyAsJsonObject()
+                if (result.containsKey("data")) {
+                    def timezone = result.getJsonObject("data")
+                            .getJsonObject("getTimeInfo").getString("timezone")
+                    DATE_TIME_FORMATTER_MINUTES = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
+                            .withZone(ZoneId.of(timezone))
+                    DATE_TIME_FORMATTER_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss")
+                            .withZone(ZoneId.of(timezone))
+
+                    handler.handle(Future.succeededFuture())
+                } else {
+                    def errorMessage = it.result().bodyAsJsonObject().getJsonArray("errors")
+                            .getJsonObject(0).getString("message")
+                    handler.handle(Future.failedFuture(new IllegalStateException(errorMessage)))
+                }
+            }
+        })
     }
 
     /**
@@ -526,20 +548,20 @@ class SkywalkingIntegration extends APMIntegration {
     void determineSourceServices(Handler<AsyncResult<Set<SourceService>>> handler) {
         def searchServiceStartTime
         def returnCached = false
-        if (CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService == null) {
+        if (CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.latestSearchedService == null) {
             searchServiceStartTime = Instant.now()
         } else {
-            searchServiceStartTime = CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService
+            searchServiceStartTime = CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.latestSearchedService
             returnCached = Instant.now().epochSecond - searchServiceStartTime.epochSecond <= serviceDetectionDelay
         }
 
         if (returnCached) {
-            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
+            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.sourceServices))
         } else {
             def searchServiceEndTime = Instant.now()
             getAllServices(searchServiceStartTime, searchServiceEndTime, "MINUTE", {
                 if (it.succeeded()) {
-                    CoreConfig.INSTANCE.apmIntegrationConfig.latestSearchedService = searchServiceEndTime
+                    CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.latestSearchedService = searchServiceEndTime
 
                     def futures = []
                     for (int i = 0; i < it.result().size(); i++) {
@@ -553,7 +575,7 @@ class SkywalkingIntegration extends APMIntegration {
                         applicationAPI.getApplication(appUuid, {
                             if (it.succeeded()) {
                                 if (it.result().isPresent()) {
-                                    CoreConfig.INSTANCE.apmIntegrationConfig.addSourceService(
+                                    CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.addSourceService(
                                             new SourceService(serviceId, appUuid))
                                 }
                                 promise.complete()
@@ -565,7 +587,7 @@ class SkywalkingIntegration extends APMIntegration {
 
                     CompositeFuture.all(futures).onComplete({
                         if (it.succeeded()) {
-                            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.apmIntegrationConfig.sourceServices))
+                            handler.handle(Future.succeededFuture(CoreConfig.INSTANCE.integrationCoreConfig.apmIntegrationConfig.sourceServices))
                         } else {
                             handler.handle(Future.failedFuture(it.cause()))
                         }

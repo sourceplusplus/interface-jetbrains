@@ -1,0 +1,6 @@
+{
+    getTimeInfo {
+        timezone
+        currentTimestamp
+    }
+}
