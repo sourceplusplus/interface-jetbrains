@@ -42,7 +42,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
                     def internalPortal = IntelliJSourcePortal.getInternalPortal(appUuid, artifactQualifiedName)
                     if (!internalPortal.isPresent()) {
                         def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                                artifactQualifiedName) as IntelliJGutterMark
+                                artifactQualifiedName, SourceMark.Type.GUTTER) as IntelliJGutterMark
                         if (sourceMark) {
                             sourceMark.registerPortal()
                         } else {
@@ -60,7 +60,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
             if (request.getBoolean("parent_stack_navigation", false)) {
                 def portal = IntelliJSourcePortal.getPortal(request.getString("portal_uuid"))
                 def mark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                        portal.portalUI.viewingPortalArtifact) as IntelliJGutterMark
+                        portal.portalUI.viewingPortalArtifact, SourceMark.Type.GUTTER) as IntelliJGutterMark
                 if (mark.configuration.icon == IntelliJGutterMark.arrowToLeft) {
                     mark.configuration.icon = mark.determineMostSuitableIcon()
                     if (mark.configuration.icon == null) {
@@ -86,7 +86,7 @@ class IntelliJArtifactNavigator extends AbstractVerticle {
                         IntelliJStartupActivity.currentProject, artifactQualifiedName)
 
                 def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                        artifactQualifiedName) as IntelliJMethodGutterMark
+                        artifactQualifiedName, SourceMark.Type.GUTTER) as IntelliJMethodGutterMark
                 if (sourceMark != null && sourceMark.portalRegistered) {
                     handleMark(sourceMark)
                 }

@@ -33,9 +33,9 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
                     SourcePluginConfig.current.activeEnvironment.appUuid, {
                 if (it.succeeded()) {
                     it.result().each {
-                        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                                it.artifactQualifiedName()) as IntelliJSourceMark
-                        sourceMark?.updateSourceArtifact(it)
+                        SourceMarkerPlugin.INSTANCE.getSourceMarks(it.artifactQualifiedName()).each { sourceMark ->
+                            (sourceMark as IntelliJSourceMark).updateSourceArtifact(it)
+                        }
                     }
                     log.debug("Refreshed actively failing artifacts")
                 } else {

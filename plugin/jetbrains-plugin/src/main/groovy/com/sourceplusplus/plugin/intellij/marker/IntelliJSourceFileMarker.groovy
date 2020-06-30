@@ -2,13 +2,14 @@ package com.sourceplusplus.plugin.intellij.marker
 
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.marker.SourceFileMarker
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
+import com.sourceplusplus.plugin.intellij.marker.mark.inlay.IntelliJMethodInlayMark
 import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.UMethod
@@ -38,18 +39,18 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
                 log.info("Artifact config updated. Artifact qualified name: {}",
                         getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
 
-                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                        artifact.artifactQualifiedName()) as IntelliJSourceMark
-                sourceMark?.updateSourceArtifact(artifact)
+                SourceMarkerPlugin.INSTANCE.getSourceMarks(artifact.artifactQualifiedName()).each {
+                    (it as IntelliJSourceMark).updateSourceArtifact(artifact)
+                }
             })
             SourcePlugin.vertx.eventBus().consumer(ARTIFACT_STATUS_UPDATED.address, {
                 def artifact = it.body() as SourceArtifact
                 log.info("Artifact status updated. Artifact qualified name: {}",
                         getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
 
-                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
-                        artifact.artifactQualifiedName()) as IntelliJSourceMark
-                sourceMark?.updateSourceArtifact(artifact)
+                SourceMarkerPlugin.INSTANCE.getSourceMarks(artifact.artifactQualifiedName()).each {
+                    (it as IntelliJSourceMark).updateSourceArtifact(artifact)
+                }
             })
         }
     }
@@ -81,8 +82,13 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
             log.info("Created gutter mark: " + sourceMark)
             SourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
             return sourceMark
+        } else if (type == SourceMark.Type.INLAY) {
+            def sourceMark = new IntelliJMethodInlayMark(this, psiMethod)
+            log.info("Created inlay mark: " + sourceMark)
+//            SourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
+            return sourceMark
         } else {
-            throw new IllegalStateException("Unsupported mark type: " + type)
+            return super.createSourceMark(psiMethod, type)
         }
     }
 }

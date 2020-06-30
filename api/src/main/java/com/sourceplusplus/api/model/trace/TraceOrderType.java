@@ -11,5 +11,6 @@ public enum TraceOrderType {
 
     LATEST_TRACES,
     SLOWEST_TRACES,
-    FAILED_TRACES
+    FAILED_TRACES,
+    TOTAL_TRACES
 }
