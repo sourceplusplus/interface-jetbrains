@@ -7,8 +7,8 @@ import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
 import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.trace.TraceOrderType
-import com.sourceplusplus.marker.plugin.SourceInlayProvider
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
@@ -66,8 +66,8 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
-    void apply() {
-        super.apply()
+    synchronized void apply(@NotNull SourceMarkComponent sourceMarkComponent, boolean addToMarker) {
+        super.apply(sourceMarkComponent, addToMarker)
 
         SourcePlugin.vertx.eventBus().publish(SOURCE_MARK_APPLIED, this)
         addEventListener(this)
@@ -82,9 +82,11 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             def gutterMark = event.sourceMark as IntelliJGutterMark
             gutterMark.registerPortal()
 
-            if (!gutterMark.getUserData(SourceInlayProvider.tiedInlayMarkKey)) {
-                gutterMark.tieInlayMark()
-            }
+//            def inlayMark = SourceMarkerPlugin.INSTANCE.getSourceMark(gutterMark.artifactQualifiedName, Type.INLAY) as InlayMark
+//            if (inlayMark) {
+//                //share source component
+//                inlayMark.sourceMarkComponent = gutterMark.sourceMarkComponent
+//            }
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
             if (getUserData(IntelliJKeys.PortalRefresher) != null) {
                 SourcePlugin.vertx.cancelTimer(getUserData(IntelliJKeys.PortalRefresher))

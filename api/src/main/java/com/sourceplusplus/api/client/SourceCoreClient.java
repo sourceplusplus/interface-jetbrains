@@ -5,7 +5,10 @@ import com.sourceplusplus.api.APIException;
 import com.sourceplusplus.api.bridge.SourceBridgeClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription;
-import com.sourceplusplus.api.model.artifact.*;
+import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest;
+import com.sourceplusplus.api.model.artifact.SourceArtifact;
+import com.sourceplusplus.api.model.artifact.SourceArtifactConfig;
+import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest;
 import com.sourceplusplus.api.model.config.SourcePluginConfig;
 import com.sourceplusplus.api.model.info.SourceCoreInfo;
 import com.sourceplusplus.api.model.integration.IntegrationInfo;
@@ -20,11 +23,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.jackson.JacksonCodec;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -787,11 +789,17 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), TraceQueryResult.class)));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), TraceQueryResult.class)));
+            }
+        });
     }
 
     public void getTraceSpans(String appUuid, String artifactQualifiedName, TraceSpanStackQuery traceSpanQuery,

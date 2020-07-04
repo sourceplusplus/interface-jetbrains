@@ -20,6 +20,7 @@ interface IntelliJGutterMark extends GutterMark, IntelliJSourceMark {
     static final Icon inactiveEntryMethod = IconLoader.getIcon("/icons/entry_method/inactive_entry_method.svg", IntelliJGutterMark.class)
     static final Icon arrowToLeft = IconLoader.getIcon("/icons/trace_navigation/trace_navigation.svg", IntelliJGutterMark.class)
     static final Icon failingMethod = IconLoader.getIcon("/icons/failing_method/failing_method.svg", IntelliJGutterMark.class)
+    static final Icon failingLine = IconLoader.getIcon("/icons/failing_method/failing_line.svg", IntelliJGutterMark.class)
 
     boolean isPortalRegistered()
 

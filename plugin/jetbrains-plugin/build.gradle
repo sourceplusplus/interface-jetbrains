@@ -32,7 +32,7 @@ dependencies {
         exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
         exclude group: 'org.codehaus.groovy'
     }
-    implementation('com.github.sourceplusplus.sourcemarker:marker-provider:462531cac7') {
+    implementation('com.github.sourceplusplus.sourcemarker:marker-provider:110ded7dbe') {
         transitive = false
     }
 }

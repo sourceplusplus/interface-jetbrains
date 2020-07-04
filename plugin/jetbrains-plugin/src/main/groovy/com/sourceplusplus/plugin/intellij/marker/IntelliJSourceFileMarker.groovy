@@ -4,6 +4,7 @@ import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
@@ -76,7 +77,7 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
      */
     @NotNull
     @Override
-    SourceMark createSourceMark(@NotNull UMethod psiMethod, @NotNull SourceMark.Type type) {
+    MethodSourceMark createSourceMark(@NotNull UMethod psiMethod, @NotNull SourceMark.Type type) {
         if (type == SourceMark.Type.GUTTER) {
             def sourceMark = new IntelliJMethodGutterMark(this, psiMethod)
             log.info("Created gutter mark: " + sourceMark)
