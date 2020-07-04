@@ -9,6 +9,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
 import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
@@ -39,18 +40,18 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
                 log.info("Artifact config updated. Artifact qualified name: {}",
                         getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
 
-                SourceMarkerPlugin.INSTANCE.getSourceMarks(artifact.artifactQualifiedName()).each {
-                    (it as IntelliJSourceMark).updateSourceArtifact(artifact)
-                }
+                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                        artifact.artifactQualifiedName(), SourceMark.Type.GUTTER) as IntelliJGutterMark
+                sourceMark?.updateSourceArtifact(artifact)
             })
             SourcePlugin.vertx.eventBus().consumer(ARTIFACT_STATUS_UPDATED.address, {
                 def artifact = it.body() as SourceArtifact
                 log.info("Artifact status updated. Artifact qualified name: {}",
                         getShortQualifiedFunctionName(artifact.artifactQualifiedName()))
 
-                SourceMarkerPlugin.INSTANCE.getSourceMarks(artifact.artifactQualifiedName()).each {
-                    (it as IntelliJSourceMark).updateSourceArtifact(artifact)
-                }
+                def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                        artifact.artifactQualifiedName(), SourceMark.Type.GUTTER) as IntelliJGutterMark
+                sourceMark?.updateSourceArtifact(artifact)
             })
         }
     }
