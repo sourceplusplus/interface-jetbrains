@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.search.GlobalSearchScope
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
+import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.trace.*
@@ -18,6 +19,7 @@ import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.uast.UThrowExpression
 
 import java.awt.*
 import java.time.Instant
@@ -25,7 +27,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED
@@ -45,7 +46,6 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
     private static final DateTimeFormatter dateTimeFormatter =
             DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withZone(ZoneId.systemDefault())
     private static final Color SPP_RED = Color.decode("#e1483b")
-    private static final Pattern errorLocation = Pattern.compile("\\((.+)\\..+:([0-9]+)\\)", Pattern.MULTILINE)
 
     @Override
     void start() throws Exception {
@@ -56,6 +56,7 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
                 if (sourceMarkEvent.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
                     def gutterMark = sourceMarkEvent.sourceMark as IntelliJGutterMark
                     if (gutterMark.sourceArtifact.status().activelyFailing()) {
+                        subscribeToFailingArtifactTraces(gutterMark.sourceArtifact)
                         addFailingVirtualText(gutterMark.sourceArtifact)
                     }
                 }
@@ -64,6 +65,7 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
         SourcePlugin.vertx.eventBus().consumer(ARTIFACT_STATUS_UPDATED.address, {
             def artifact = it.body() as SourceArtifact
             if (artifact.status().activelyFailing()) {
+                subscribeToFailingArtifactTraces(artifact)
                 addFailingVirtualText(artifact)
             }
         })
@@ -97,10 +99,12 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
         //check if error line can be determined
         def errorStack = errorLogs.data().get("stack")
         if (errorStack) {
-            final Matcher matcher = errorLocation.matcher(errorStack)
+            def qualifiedClassName = getQualifiedClassName(artifactQualifiedName)
+            def simpleClassName = qualifiedClassName.replaceAll("\\w+(\\.)", "")
+            def errorLocation = Pattern.compile("\\($simpleClassName\\.[^.]+:([0-9]+)\\)", Pattern.MULTILINE)
+            def matcher = errorLocation.matcher(errorStack)
             if (matcher.find()) {
-                //def className = matcher.group(1)
-                def errorLine = matcher.group(2) as int
+                def errorLine = matcher.group(1) as int
 
                 def psiClass = JavaPsiFacade.getInstance(currentProject)
                         .findClass(getQualifiedClassName(artifactQualifiedName), GlobalSearchScope.allScope(currentProject))
@@ -117,7 +121,12 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
 //            inlayMark.configuration.virtualText.icon = IntelliJGutterMark.failingLine
 //            inlayMark.configuration.virtualText.iconLocation.setLocation(0, -1)
                 }
-                inlayMark.configuration.virtualText.updateVirtualText(errorText)
+
+                if (inlayMark.psiExpression instanceof UThrowExpression) {
+                    inlayMark.configuration.virtualText.updateVirtualText(errorText)
+                } else {
+                    inlayMark.configuration.virtualText.updateVirtualText(" Threw " + errorKind + errorText)
+                }
             } else {
                 //method inlay
                 errorText = "    $errorKind" + errorText
@@ -159,6 +168,22 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
                 }
             } else {
                 log.error("Failed to get traces", it.cause())
+            }
+        })
+    }
+
+    private static void subscribeToFailingArtifactTraces(SourceArtifact sourceArtifact) {
+        def subscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                .appUuid(sourceArtifact.appUuid())
+                .artifactQualifiedName(sourceArtifact.artifactQualifiedName())
+                .addOrderTypes(TraceOrderType.FAILED_TRACES)
+                .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
+                .build()
+        SourcePortalConfig.current.getCoreClient(sourceArtifact.appUuid()).subscribeToArtifact(subscribeRequest, {
+            if (it.succeeded()) {
+                log.info("Successfully subscribed to traces with request: {}", subscribeRequest)
+            } else {
+                log.error("Failed to subscribe to artifact traces", it.cause())
             }
         })
     }
