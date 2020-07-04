@@ -127,7 +127,7 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
                 }
 
                 if (inlayMark.psiExpression instanceof UThrowExpression) {
-                    inlayMark.configuration.virtualText.updateVirtualText(errorText)
+                    inlayMark.configuration.virtualText.updateVirtualText(" //Thrown" + errorText)
                 } else {
                     inlayMark.configuration.virtualText.updateVirtualText(" //" + errorKind + errorText)
                 }
