@@ -112,6 +112,10 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
 
                 //expression inline inlay
                 def inlayMark = MarkerUtils.getOrCreateExpressionInlayMark(fileMarker, errorLine)
+                if (inlayMark == null) {
+                    return null //todo: could make a method inlay mark
+                }
+
                 if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
                 if (inlayMark.configuration.virtualText == null) {
                     inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, errorText)
@@ -125,7 +129,7 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
                 if (inlayMark.psiExpression instanceof UThrowExpression) {
                     inlayMark.configuration.virtualText.updateVirtualText(errorText)
                 } else {
-                    inlayMark.configuration.virtualText.updateVirtualText(" Threw " + errorKind + errorText)
+                    inlayMark.configuration.virtualText.updateVirtualText(" //" + errorKind + errorText)
                 }
             }
         }
