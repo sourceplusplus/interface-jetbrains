@@ -118,8 +118,8 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
                     inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
                     inlayMark.configuration.virtualText.setUseInlinePresentation(true)
                     inlayMark.configuration.activateOnMouseClick = false
-//            inlayMark.configuration.virtualText.icon = IntelliJGutterMark.failingLine
-//            inlayMark.configuration.virtualText.iconLocation.setLocation(0, -1)
+                    //inlayMark.configuration.virtualText.icon = IntelliJGutterMark.failingLine
+                    //inlayMark.configuration.virtualText.iconLocation.setLocation(0, -1)
                 }
 
                 if (inlayMark.psiExpression instanceof UThrowExpression) {
@@ -127,10 +127,6 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
                 } else {
                     inlayMark.configuration.virtualText.updateVirtualText(" Threw " + errorKind + errorText)
                 }
-            } else {
-                //method inlay
-                errorText = "    $errorKind" + errorText
-                println('here')
             }
         }
     }
