@@ -1,6 +1,7 @@
 package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 
 import com.intellij.openapi.util.IconLoader
+import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.plugin.intellij.portal.IntelliJSourcePortal
@@ -31,4 +32,6 @@ interface IntelliJGutterMark extends GutterMark, IntelliJSourceMark {
     IntelliJSourcePortal getPortal()
 
     Icon determineMostSuitableIcon()
+
+    SourceArtifact getSourceArtifact()
 }

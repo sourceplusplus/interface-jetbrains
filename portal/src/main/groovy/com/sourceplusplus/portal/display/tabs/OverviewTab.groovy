@@ -178,7 +178,48 @@ class OverviewTab extends AbstractTab {
     }
 
     private void updateCard(SourcePortal portal, ArtifactMetricResult metricResult, ArtifactMetrics artifactMetrics) {
+        double avg = calculateAverage(artifactMetrics)
+        double[] percents = calculatePercents(artifactMetrics)
+
+        if (artifactMetrics.metricType() == Throughput_Average) {
+            def barTrendCard = BarTrendCard.builder()
+                    .timeFrame(metricResult.timeFrame())
+                    .header(toPrettyFrequency(avg / 60.0))
+                    .meta(artifactMetrics.metricType().toString().toLowerCase())
+                    .barGraphData(percents)
+                    .build()
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
+        } else if (artifactMetrics.metricType() == ResponseTime_Average) {
+            def barTrendCard = BarTrendCard.builder()
+                    .timeFrame(metricResult.timeFrame())
+                    .header(toPrettyDuration(avg as int))
+                    .meta(artifactMetrics.metricType().toString().toLowerCase())
+                    .barGraphData(percents)
+                    .build()
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
+        } else if (artifactMetrics.metricType() == ServiceLevelAgreement_Average) {
+            def barTrendCard = BarTrendCard.builder()
+                    .timeFrame(metricResult.timeFrame())
+                    .header(avg == 0 ? "0%" : decimalFormat.format(avg / 100.0) + "%")
+                    .meta(artifactMetrics.metricType().toString().toLowerCase())
+                    .barGraphData(percents)
+                    .build()
+            def portalUuid = portal.portalUuid
+            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
+        }
+    }
+
+    static double calculateAverage(ArtifactMetrics artifactMetrics) {
         def histogram = new Histogram(new UniformReservoir(artifactMetrics.values().size()))
+        artifactMetrics.values().each {
+            histogram.update(it)
+        }
+        return histogram.snapshot.mean
+    }
+
+    static double[] calculatePercents(ArtifactMetrics artifactMetrics) {
         def metricArr = new ArrayList<Integer>()
         if (artifactMetrics.values().size() == 60) {
             for (int i = 0; i < artifactMetrics.values().size(); i += 4) {
@@ -195,9 +236,6 @@ class OverviewTab extends AbstractTab {
 
         def percentMax = metricArr.max()
         def percents = new ArrayList<Double>()
-        artifactMetrics.values().each {
-            histogram.update(it)
-        }
         for (int i = 0; i < metricArr.size(); i++) {
             if (percentMax == 0) {
                 percents.add(0)
@@ -205,39 +243,10 @@ class OverviewTab extends AbstractTab {
                 percents.add((metricArr.get(i) / percentMax) * 100.00)
             }
         }
-        def avg = histogram.snapshot.mean
-
-        if (artifactMetrics.metricType() == Throughput_Average) {
-            def barTrendCard = BarTrendCard.builder()
-                    .timeFrame(metricResult.timeFrame())
-                    .header(toPrettyFrequency(avg / 60.0))
-                    .meta(artifactMetrics.metricType().toString().toLowerCase())
-                    .barGraphData(percents as double[])
-                    .build()
-            def portalUuid = portal.portalUuid
-            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
-        } else if (artifactMetrics.metricType() == ResponseTime_Average) {
-            def barTrendCard = BarTrendCard.builder()
-                    .timeFrame(metricResult.timeFrame())
-                    .header(toPrettyDuration(avg as int))
-                    .meta(artifactMetrics.metricType().toString().toLowerCase())
-                    .barGraphData(percents as double[])
-                    .build()
-            def portalUuid = portal.portalUuid
-            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
-        } else if (artifactMetrics.metricType() == ServiceLevelAgreement_Average) {
-            def barTrendCard = BarTrendCard.builder()
-                    .timeFrame(metricResult.timeFrame())
-                    .header(avg == 0 ? "0%" : decimalFormat.format(avg / 100.0) + "%")
-                    .meta(artifactMetrics.metricType().toString().toLowerCase())
-                    .barGraphData(percents as double[])
-                    .build()
-            def portalUuid = portal.portalUuid
-            vertx.eventBus().publish("$portalUuid-DisplayCard", new JsonObject(Json.encode(barTrendCard)))
-        }
+        return metricArr
     }
 
-    private static String toPrettyDuration(int millis) {
+    static String toPrettyDuration(int millis) {
         def days = millis / 86400000d
         if (days > 1) {
             return (days as int) + "dys"
@@ -257,7 +266,7 @@ class OverviewTab extends AbstractTab {
         return (millis as int) + "ms"
     }
 
-    private static String toPrettyFrequency(double perSecond) {
+    static String toPrettyFrequency(double perSecond) {
         if (perSecond > 1000000) {
             return (perSecond / 1000000 as int) + "M/sec"
         } else if (perSecond > 1000) {

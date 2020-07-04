@@ -257,4 +257,12 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
         }
         return null
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    SourceArtifact getSourceArtifact() {
+        return getUserData(IntelliJKeys.SourceArtifact)
+    }
 }

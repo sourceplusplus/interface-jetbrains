@@ -10,7 +10,6 @@ import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactSubscriptionTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJMethodGutterMark
-import com.sourceplusplus.plugin.intellij.marker.mark.inlay.IntelliJMethodInlayMark
 import groovy.util.logging.Slf4j
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.UMethod
@@ -82,11 +81,6 @@ class IntelliJSourceFileMarker extends SourceFileMarker {
             def sourceMark = new IntelliJMethodGutterMark(this, psiMethod)
             log.info("Created gutter mark: " + sourceMark)
             SourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
-            return sourceMark
-        } else if (type == SourceMark.Type.INLAY) {
-            def sourceMark = new IntelliJMethodInlayMark(this, psiMethod)
-            log.info("Created inlay mark: " + sourceMark)
-//            SourcePlugin.vertx.eventBus().publish(IntelliJSourceMark.SOURCE_MARK_CREATED, sourceMark)
             return sourceMark
         } else {
             return super.createSourceMark(psiMethod, type)

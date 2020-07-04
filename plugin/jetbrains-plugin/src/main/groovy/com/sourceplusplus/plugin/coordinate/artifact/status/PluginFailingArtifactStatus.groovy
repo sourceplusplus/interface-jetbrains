@@ -43,7 +43,6 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
 
     private static final DateTimeFormatter dateTimeFormatter =
             DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withZone(ZoneId.systemDefault())
-    private static final DecimalFormat decimalFormat = new DecimalFormat(".#")
     private static final Color SPP_RED = Color.decode("#e1483b")
     private static final Pattern errorLocation = Pattern.compile("\\((.+)\\..+:([0-9]+)\\)", Pattern.MULTILINE)
 
