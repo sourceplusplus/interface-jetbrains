@@ -5,25 +5,26 @@ import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.search.GlobalSearchScope
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.trace.*
 import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.plugin.SourcePlugin
-import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
+import org.jetbrains.annotations.NotNull
 
 import java.awt.*
-import java.text.DecimalFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -32,7 +33,7 @@ import static com.sourceplusplus.api.util.ArtifactNameUtils.getQualifiedClassNam
 import static com.sourceplusplus.plugin.intellij.IntelliJStartupActivity.currentProject
 
 /**
- * Periodically fetches failing source artifacts from Source++ Core.
+ * todo: this
  *
  * @version 0.3.0
  * @since 0.3.0
@@ -48,13 +49,18 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
-        //sync status periodically
-        vertx.setPeriodic(TimeUnit.MINUTES.toMillis(5), {
-            refreshActivelyFailingArtifact()
-        })
-        refreshActivelyFailingArtifact()
-
         //listen for failing artifacts to add inlay marks to
+        SourceMarkerPlugin.INSTANCE.addGlobalSourceMarkEventListener(new SourceMarkEventListener() {
+            @Override
+            void handleEvent(@NotNull SourceMarkEvent sourceMarkEvent) {
+                if (sourceMarkEvent.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
+                    def gutterMark = sourceMarkEvent.sourceMark as IntelliJGutterMark
+                    if (gutterMark.sourceArtifact.status().activelyFailing()) {
+                        addFailingVirtualText(gutterMark.sourceArtifact)
+                    }
+                }
+            }
+        })
         SourcePlugin.vertx.eventBus().consumer(ARTIFACT_STATUS_UPDATED.address, {
             def artifact = it.body() as SourceArtifact
             if (artifact.status().activelyFailing()) {
@@ -63,21 +69,23 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
         })
         SourcePlugin.vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_TRACE_UPDATED.address, {
             def traceResult = it.body() as ArtifactTraceResult
-            def latestFailedTrace = traceResult.traces()[0]
-            def traceStackQuery = TraceSpanStackQuery.builder()
-                    .oneLevelDeep(true)
-                    .traceId(latestFailedTrace.traceIds()[0]).build()
-            SourcePortalConfig.current.getCoreClient(traceResult.appUuid()).getTraceSpans(
-                    traceResult.appUuid(), traceResult.artifactQualifiedName(), traceStackQuery, {
-                if (it.succeeded()) {
-                    def span = it.result().traceSpans()[0]
-                    ApplicationManager.getApplication().invokeLater {
-                        addOrUpdateVirtualText(traceResult.artifactQualifiedName(), span)
+            if (traceResult.orderType() == TraceOrderType.FAILED_TRACES) {
+                def latestFailedTrace = traceResult.traces()[0]
+                def traceStackQuery = TraceSpanStackQuery.builder()
+                        .oneLevelDeep(true)
+                        .traceId(latestFailedTrace.traceIds()[0]).build()
+                SourcePortalConfig.current.getCoreClient(traceResult.appUuid()).getTraceSpans(
+                        traceResult.appUuid(), traceResult.artifactQualifiedName(), traceStackQuery, {
+                    if (it.succeeded()) {
+                        def span = it.result().traceSpans()[0]
+                        ApplicationManager.getApplication().invokeLater {
+                            addOrUpdateVirtualText(traceResult.artifactQualifiedName(), span)
+                        }
+                    } else {
+                        log.error("Failed to get trace spans", it.cause())
                     }
-                } else {
-                    log.error("Failed to get trace spans", it.cause())
-                }
-            })
+                })
+            }
         })
     }
 
@@ -153,25 +161,5 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
                 log.error("Failed to get traces", it.cause())
             }
         })
-    }
-
-    private static void refreshActivelyFailingArtifact() {
-        if (SourcePluginConfig.current.activeEnvironment?.appUuid) {
-            SourcePluginConfig.current.activeEnvironment.coreClient.getFailingArtifacts(
-                    SourcePluginConfig.current.activeEnvironment.appUuid, {
-                if (it.succeeded()) {
-                    it.result().each {
-                        SourceMarkerPlugin.INSTANCE.getSourceMarks(it.artifactQualifiedName()).each { sourceMark ->
-                            (sourceMark as IntelliJSourceMark).updateSourceArtifact(it)
-                        }
-
-                        addFailingVirtualText(it)
-                    }
-                    log.debug("Refreshed actively failing artifacts")
-                } else {
-                    log.error("Failed to refresh actively failing artifacts", it.cause())
-                }
-            })
-        }
     }
 }

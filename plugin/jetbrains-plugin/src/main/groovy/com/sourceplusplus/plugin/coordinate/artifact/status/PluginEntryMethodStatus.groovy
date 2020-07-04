@@ -4,7 +4,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.artifact.SourceArtifact
-import com.sourceplusplus.api.model.config.SourcePluginConfig
 import com.sourceplusplus.api.model.config.SourcePortalConfig
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
@@ -17,7 +16,6 @@ import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.plugin.SourcePlugin
-import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.portal.display.tabs.OverviewTab
 import groovy.util.logging.Slf4j
@@ -45,16 +43,14 @@ class PluginEntryMethodStatus extends AbstractVerticle {
 
     @Override
     void start() throws Exception {
-        getEntryMethodArtifacts()
-
         //listen for entry methods to add inlay marks to
         SourceMarkerPlugin.INSTANCE.addGlobalSourceMarkEventListener(new SourceMarkEventListener() {
             @Override
             void handleEvent(@NotNull SourceMarkEvent sourceMarkEvent) {
                 if (sourceMarkEvent.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
                     def gutterMark = sourceMarkEvent.sourceMark as IntelliJGutterMark
-                    if (gutterMark.getSourceArtifact().config().endpoint()) {
-                        addEntryMethodVirtualText(gutterMark.getSourceArtifact())
+                    if (gutterMark.sourceArtifact.config().endpoint()) {
+                        subscribeToEntryMethodArtifact(gutterMark.sourceArtifact)
                     }
                 }
             }
@@ -62,7 +58,7 @@ class PluginEntryMethodStatus extends AbstractVerticle {
         SourcePlugin.vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, {
             def artifact = it.body() as SourceArtifact
             if (artifact.config().endpoint()) {
-                addEntryMethodVirtualText(artifact)
+                subscribeToEntryMethodArtifact(artifact)
             }
         })
         SourcePlugin.vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_METRIC_UPDATED.address, {
@@ -90,22 +86,27 @@ class PluginEntryMethodStatus extends AbstractVerticle {
                 def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(metricResult.artifactQualifiedName(),
                         SourceMark.Type.GUTTER) as MethodGutterMark
                 if (gutterMark) {
-                    ApplicationManager.getApplication().invokeLater {
-                        def inlayMark = MarkerUtils.getOrCreateMethodInlayMark(
-                                gutterMark.sourceFileMarker, gutterMark.psiElement.nameIdentifier)
-                        if (!inlayMark.sourceFileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
-                        if (inlayMark.configuration.virtualText == null) {
-                            inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, virtualTextResult)
-                            inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
-                        }
-                        inlayMark.configuration.virtualText.updateVirtualText(virtualTextResult)
-                    }
+                    updateEntryMethodVirtualText(gutterMark, virtualTextResult)
                 }
             }
         })
     }
 
-    private static void addEntryMethodVirtualText(SourceArtifact sourceArtifact) {
+    private static void updateEntryMethodVirtualText(MethodGutterMark gutterMark, String virtualTextResult) {
+        ApplicationManager.getApplication().invokeLater {
+            def inlayMark = MarkerUtils.getOrCreateMethodInlayMark(
+                    gutterMark.sourceFileMarker, gutterMark.psiElement.nameIdentifier)
+            if (!inlayMark.sourceFileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
+            if (inlayMark.configuration.virtualText == null) {
+                inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, virtualTextResult)
+                inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
+                inlayMark.configuration.activateOnMouseClick = false
+            }
+            inlayMark.configuration.virtualText.updateVirtualText(virtualTextResult)
+        }
+    }
+
+    private static void subscribeToEntryMethodArtifact(SourceArtifact sourceArtifact) {
         def subscribeRequest = ArtifactMetricSubscribeRequest.builder()
                 .appUuid(sourceArtifact.appUuid())
                 .artifactQualifiedName(sourceArtifact.artifactQualifiedName())
@@ -119,24 +120,5 @@ class PluginEntryMethodStatus extends AbstractVerticle {
                 log.error("Failed to subscribe to artifact metrics", it.cause())
             }
         })
-    }
-
-    private static void getEntryMethodArtifacts() {
-        if (SourcePluginConfig.current.activeEnvironment?.appUuid) {
-            SourcePluginConfig.current.activeEnvironment.coreClient.getApplicationEndpoints(
-                    SourcePluginConfig.current.activeEnvironment.appUuid, {
-                if (it.succeeded()) {
-                    it.result().each {
-                        SourceMarkerPlugin.INSTANCE.getSourceMarks(it.artifactQualifiedName()).each { sourceMark ->
-                            (sourceMark as IntelliJSourceMark).updateSourceArtifact(it)
-                        }
-
-                        addEntryMethodVirtualText(it)
-                    }
-                } else {
-                    log.error("Failed to get entry method artifacts", it.cause())
-                }
-            })
-        }
     }
 }
