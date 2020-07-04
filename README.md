@@ -38,6 +38,8 @@ Source++ will not write source code for you. Source++ can be used to help debug 
 
 ![](https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/Integrated-Runtime-Performance.jpg)
 
+#### Portal Interface
+
 <table>
   <tr>
       <td width="50%" align="center"><b>Overview</b></td>
@@ -60,6 +62,14 @@ Source++ will not write source code for you. Source++ can be used to help debug 
     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Span-Info.jpg"/></td>
   </tr>
 </table>
+
+#### Source Marks
+
+| Mark                          | Meaning                                                  |
+| ----------------------------- | -------------------------------------------------------- |
+| ![](docs/images/plugin/icons/entry_method/active_entry_method.svg) | Entry method (APM integration enabled) |
+| ![](docs/images/plugin/icons/entry_method/inactive_entry_method.svg) | Entry method (APM integration disabled) |
+| ![](docs/images/plugin/icons/failing_method/failing_method.svg) | Method has thrown exception in application's most recent run |
 
 ## Getting Started
 
