@@ -490,7 +490,7 @@ class SkywalkingIntegration extends APMIntegration {
     @Override
     void getTraceStack(String appUuid, SourceArtifact artifact, TraceSpanStackQuery spanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
-        log.info("Getting SkyWalking trace spans: " + Objects.requireNonNull(spanQuery))
+        log.trace("Getting SkyWalking trace spans: " + Objects.requireNonNull(spanQuery))
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", GET_TRACE_STACK
                 .replace('$globalTraceId', spanQuery.traceId())
@@ -535,7 +535,7 @@ class SkywalkingIntegration extends APMIntegration {
                                 .traceSpans(traceSpanList)
                                 .total(spanList.size())
                                 .build()
-                        log.info("Got SkyWalking trace spans: " + traceSpanQueryResult.total())
+                        log.debug("Got SkyWalking trace spans: " + traceSpanQueryResult.total())
                         handler.handle(Future.succeededFuture(traceSpanQueryResult))
                     } else {
                         handler.handle(Future.failedFuture(it.cause()))

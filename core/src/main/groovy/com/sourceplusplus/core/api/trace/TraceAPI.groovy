@@ -256,7 +256,7 @@ class TraceAPI extends AbstractVerticle {
 
     void getTraceSpans(String appUuid, String artifactQualifiedName, TraceSpanStackQuery traceSpanQuery,
                        Handler<AsyncResult<TraceSpanStackQueryResult>> handler) {
-        log.info("Getting trace spans. App UUID: {} - Artifact qualified name: {} - Query: {}",
+        log.debug("Getting trace spans. App UUID: {} - Artifact qualified name: {} - Query: {}",
                 appUuid, getShortQualifiedFunctionName(artifactQualifiedName), traceSpanQuery)
         if (traceSpanQuery.oneLevelDeep()) {
             core.artifactAPI.getSourceArtifact(appUuid, artifactQualifiedName, {
