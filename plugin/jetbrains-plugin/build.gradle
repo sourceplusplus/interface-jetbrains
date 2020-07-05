@@ -31,10 +31,6 @@ dependencies {
 //    implementation "io.vertx:vertx-web:$VERTX_VERSION"
     implementation files('../../3rd_party/vertx/vertx-web-3.9.1.jar')
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
-    implementation(group: 'com.github.codebrig', name: 'gitsocratic', version: '5097fbbef8') { //todo: real version
-        exclude group: 'com.github.sourceplusplus.assistant', module: 'source-api'
-        exclude group: 'org.codehaus.groovy'
-    }
     implementation('com.github.sourceplusplus.sourcemarker:marker-provider:d94a37fc1f') {
         transitive = false
     }
