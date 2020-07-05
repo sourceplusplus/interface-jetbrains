@@ -13,9 +13,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 interface IntelliJSourceMark extends SourceMark {
 
     static final String SOURCE_MARK_CREATED = "SourceMarkCreated" //todo: ensure used only when necessary
-    static final String SOURCE_MARK_APPLIED = "SourceMarkApplied"
+    static final String SOURCE_MARK_APPLIED = "SourceMarkApplied" //todo: gutter mark applied
 
     void updateSourceArtifact(SourceArtifact sourceArtifact)
-
-    SourceArtifact getSourceArtifact()
 }

@@ -5,7 +5,10 @@ import com.sourceplusplus.api.APIException;
 import com.sourceplusplus.api.bridge.SourceBridgeClient;
 import com.sourceplusplus.api.model.application.SourceApplication;
 import com.sourceplusplus.api.model.application.SourceApplicationSubscription;
-import com.sourceplusplus.api.model.artifact.*;
+import com.sourceplusplus.api.model.artifact.ArtifactSubscribeRequest;
+import com.sourceplusplus.api.model.artifact.SourceArtifact;
+import com.sourceplusplus.api.model.artifact.SourceArtifactConfig;
+import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest;
 import com.sourceplusplus.api.model.config.SourcePluginConfig;
 import com.sourceplusplus.api.model.info.SourceCoreInfo;
 import com.sourceplusplus.api.model.integration.IntegrationInfo;
@@ -20,11 +23,11 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.jackson.JacksonCodec;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -165,16 +168,22 @@ public class SourceCoreClient implements SourceClient {
                 .put(RequestBody.create(JSON, Json.encode(updatedIntegrationInfo)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            String responseBody = response.body().string();
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, IntegrationInfo.class)));
-            } else {
-                handler.handle(asyncAPIException(responseBody));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, IntegrationInfo.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public IntegrationInfo updateIntegrationInfo(IntegrationInfo updatedIntegrationInfo) {
@@ -195,16 +204,22 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            String responseBody = response.body().string();
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceCoreInfo.class)));
-            } else {
-                handler.handle(asyncAPIException(responseBody));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceCoreInfo.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public SourceCoreInfo info() {
@@ -254,15 +269,22 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(response.isSuccessful()));
-            } else {
-                handler.handle(Future.failedFuture(response.body().string()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(response.isSuccessful()));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public boolean searchForNewEndpoints() {
@@ -291,11 +313,22 @@ public class SourceCoreClient implements SourceClient {
                 .post(RequestBody.create(JSON, Json.encode(createRequest)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceApplication.class)));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceApplication.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public SourceApplication createApplication() {
@@ -325,11 +358,22 @@ public class SourceCoreClient implements SourceClient {
                 .put(RequestBody.create(JSON, Json.encode(updateRequest)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceApplication.class)));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceApplication.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public SourceApplication findApplicationByName(String appName) {
@@ -355,16 +399,25 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(Optional.of(Json.decodeValue(response.body().string(),
-                        SourceApplication.class))));
-            } else {
-                handler.handle(Future.succeededFuture(Optional.empty()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Optional.of(Json.decodeValue(responseBody,
+                            SourceApplication.class))));
+                } else if (response.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    handler.handle(Future.succeededFuture(Optional.empty()));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public SourceApplication getApplication(String appUuid) {
@@ -390,16 +443,25 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(Optional.of(Json.decodeValue(response.body().string(),
-                        SourceApplication.class))));
-            } else {
-                handler.handle(Future.succeededFuture(Optional.empty()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Optional.of(Json.decodeValue(responseBody,
+                            SourceApplication.class))));
+                } else if (response.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    handler.handle(Future.succeededFuture(Optional.empty()));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getApplications(Handler<AsyncResult<List<SourceApplication>>> handler) {
@@ -407,13 +469,24 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(response.body().string(),
-                    new TypeReference<List<SourceApplication>>() {
-                    })));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(responseBody,
+                            new TypeReference<List<SourceApplication>>() {
+                            })));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getSubscriberApplicationSubscriptions(String appUuid,
@@ -424,17 +497,24 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(response.body().string(),
-                        new TypeReference<List<ArtifactSubscribeRequest>>() {
-                        })));
-            } else {
-                handler.handle(Future.failedFuture(response.message()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(JacksonCodec.decodeValue(responseBody,
+                            new TypeReference<List<ArtifactSubscribeRequest>>() {
+                            })));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void refreshSubscriberApplicationSubscriptions(String appUuid, Handler<AsyncResult<Void>> handler) {
@@ -444,15 +524,22 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).put(RequestBody.create(null, new byte[0]));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture());
-            } else {
-                handler.handle(Future.failedFuture(response.message()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture());
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public List<SourceApplicationSubscription> getApplicationSubscriptions(String appUuid, boolean includeAutomatic) {
@@ -479,14 +566,25 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            List<SourceApplicationSubscription> subscribers = JacksonCodec.decodeValue(response.body().string(),
-                    new TypeReference<List<SourceApplicationSubscription>>() {
-                    });
-            handler.handle(Future.succeededFuture(subscribers));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    List<SourceApplicationSubscription> subscribers = JacksonCodec.decodeValue(responseBody,
+                            new TypeReference<List<SourceApplicationSubscription>>() {
+                            });
+                    handler.handle(Future.succeededFuture(subscribers));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public List<SourceArtifact> getApplicationEndpoints(String appUuid) {
@@ -510,14 +608,25 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
-                    new TypeReference<List<SourceArtifact>>() {
-                    });
-            handler.handle(Future.succeededFuture(artifacts));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    List<SourceArtifact> artifacts = JacksonCodec.decodeValue(responseBody,
+                            new TypeReference<List<SourceArtifact>>() {
+                            });
+                    handler.handle(Future.succeededFuture(artifacts));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void upsertArtifact(String appUuid, SourceArtifact createRequest,
@@ -528,16 +637,22 @@ public class SourceCoreClient implements SourceClient {
                 .post(RequestBody.create(JSON, Json.encode(createRequest)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            String responseBody = response.body().string();
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceArtifact.class)));
-            } else {
-                handler.handle(asyncAPIException(responseBody));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (IOException e) {
-            handler.handle(Future.failedFuture(e));
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceArtifact.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getArtifact(String appUuid, String artifactQualifiedName,
@@ -548,13 +663,24 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            SourceArtifact artifact = Json.decodeValue(response.body().string(), SourceArtifact.class);
-            artifact = artifact.withAppUuid(appUuid).withArtifactQualifiedName(artifactQualifiedName);
-            handler.handle(Future.succeededFuture(artifact));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    SourceArtifact artifact = Json.decodeValue(responseBody, SourceArtifact.class);
+                    artifact = artifact.withAppUuid(appUuid).withArtifactQualifiedName(artifactQualifiedName);
+                    handler.handle(Future.succeededFuture(artifact));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
@@ -563,14 +689,25 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
-                    new TypeReference<List<SourceArtifact>>() {
-                    });
-            handler.handle(Future.succeededFuture(artifacts));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    List<SourceArtifact> artifacts = JacksonCodec.decodeValue(responseBody,
+                            new TypeReference<List<SourceArtifact>>() {
+                            });
+                    handler.handle(Future.succeededFuture(artifacts));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getFailingArtifacts(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
@@ -579,14 +716,25 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            List<SourceArtifact> artifacts = JacksonCodec.decodeValue(response.body().string(),
-                    new TypeReference<List<SourceArtifact>>() {
-                    });
-            handler.handle(Future.succeededFuture(artifacts));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    List<SourceArtifact> artifacts = JacksonCodec.decodeValue(responseBody,
+                            new TypeReference<List<SourceArtifact>>() {
+                            });
+                    handler.handle(Future.succeededFuture(artifacts));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName,
@@ -599,11 +747,22 @@ public class SourceCoreClient implements SourceClient {
                 .put(RequestBody.create(JSON, Json.encode(createRequest)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceArtifactConfig.class)));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceArtifactConfig.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public SourceArtifactConfig createOrUpdateArtifactConfig(String appUuid, String artifactQualifiedName,
@@ -641,15 +800,22 @@ public class SourceCoreClient implements SourceClient {
                 .put(RequestBody.create(JSON, Json.encode(subscribeRequest)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(true));
-            } else {
-                handler.handle(Future.failedFuture(response.message()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(true));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public boolean subscribeToArtifact(ArtifactSubscribeRequest subscribeRequest) {
@@ -691,15 +857,22 @@ public class SourceCoreClient implements SourceClient {
                 .put(RequestBody.create(JSON, Json.encode(unsubscribeRequest)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(true));
-            } else {
-                handler.handle(Future.failedFuture(response.message()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(true));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void unsubscribeFromArtifactTraces(ArtifactTraceUnsubscribeRequest unsubscribeRequest,
@@ -711,15 +884,22 @@ public class SourceCoreClient implements SourceClient {
                 .put(RequestBody.create(JSON, Json.encode(unsubscribeRequest)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(true));
-            } else {
-                handler.handle(Future.failedFuture(response.message()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(true));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void unsubscribeFromArtifactMetrics(ArtifactMetricUnsubscribeRequest unsubscribeRequest,
@@ -731,15 +911,22 @@ public class SourceCoreClient implements SourceClient {
                 .put(RequestBody.create(JSON, Json.encode(unsubscribeRequest)));
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            if (response.isSuccessful()) {
-                handler.handle(Future.succeededFuture(true));
-            } else {
-                handler.handle(Future.failedFuture(response.message()));
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(true));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getArtifactSubscriptions(String appUuid, String artifactQualifiedName,
@@ -750,14 +937,25 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            List<ArtifactSubscribeRequest> artifacts = JacksonCodec.decodeValue(response.body().string(),
-                    new TypeReference<List<ArtifactSubscribeRequest>>() {
-                    });
-            handler.handle(Future.succeededFuture(artifacts));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    List<ArtifactSubscribeRequest> artifacts = JacksonCodec.decodeValue(responseBody,
+                            new TypeReference<List<ArtifactSubscribeRequest>>() {
+                            });
+                    handler.handle(Future.succeededFuture(artifacts));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getArtifactConfig(String appUuid, String artifactQualifiedName,
@@ -768,11 +966,22 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), SourceArtifactConfig.class)));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, SourceArtifactConfig.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getTraces(TraceQuery traceQuery, Handler<AsyncResult<TraceQueryResult>> handler) {
@@ -787,11 +996,22 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), TraceQueryResult.class)));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, TraceQueryResult.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public void getTraceSpans(String appUuid, String artifactQualifiedName, TraceSpanStackQuery traceSpanQuery,
@@ -807,11 +1027,22 @@ public class SourceCoreClient implements SourceClient {
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
-        try (Response response = client.newCall(request.build()).execute()) {
-            handler.handle(Future.succeededFuture(Json.decodeValue(response.body().string(), TraceSpanStackQueryResult.class)));
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        client.newCall(request.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    handler.handle(Future.succeededFuture(Json.decodeValue(responseBody, TraceSpanStackQueryResult.class)));
+                } else {
+                    handler.handle(asyncAPIException(responseBody));
+                }
+            }
+        });
     }
 
     public String getApiKey() {

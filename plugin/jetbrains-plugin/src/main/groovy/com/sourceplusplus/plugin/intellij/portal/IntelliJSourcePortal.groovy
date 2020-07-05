@@ -2,8 +2,8 @@ package com.sourceplusplus.plugin.intellij.portal
 
 import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
-import com.sourceplusplus.marker.source.mark.gutter.GutterMark
-import com.sourceplusplus.plugin.intellij.marker.mark.IntelliJSourceMark
+import com.sourceplusplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.portal.SourcePortal
 import groovy.util.logging.Slf4j
 
@@ -107,10 +107,11 @@ class IntelliJSourcePortal extends SourcePortal {
     @Override
     SourcePortal createExternalPortal() {
         //close portal being opened externally first
-        def sourceMark = SourceMarkerPlugin.INSTANCE.getSourceMark(portalUI.viewingPortalArtifact) as IntelliJSourceMark
-        if (sourceMark instanceof GutterMark) {
+        def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(
+                portalUI.viewingPortalArtifact, SourceMark.Type.GUTTER) as IntelliJGutterMark
+        if (gutterMark) {
             ApplicationManager.getApplication().invokeLater {
-                sourceMark.closePopup()
+                gutterMark.closePopup()
             }
         }
 

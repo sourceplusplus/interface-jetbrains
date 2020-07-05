@@ -23,6 +23,8 @@
 
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$JavaDescriptor"/>
+        <codeInsight.inlayProvider language="JAVA"
+                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayProvider"/>
 
         <projectService
                 serviceImplementation="com.sourceplusplus.plugin.intellij.tool.SourcePluginConsoleService"/>

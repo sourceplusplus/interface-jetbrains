@@ -23,6 +23,10 @@ public class ArtifactNameUtils {
     }
 
     public static String getQualifiedClassName(String qualifiedName) {
+        if (qualifiedName == null || qualifiedName.isEmpty()
+                || !qualifiedName.contains(".") || !qualifiedName.contains("(")) {
+            return qualifiedName;
+        }
         String withoutArgs = qualifiedName.substring(0, qualifiedName.indexOf("("));
         if (withoutArgs.contains("<")) {
             withoutArgs = withoutArgs.substring(0, withoutArgs.indexOf("<"));

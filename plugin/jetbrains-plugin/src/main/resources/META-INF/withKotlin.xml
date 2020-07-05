@@ -2,5 +2,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language="kotlin"
                                         implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$KotlinDescriptor"/>
+        <codeInsight.inlayProvider language="kotlin"
+                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayProvider"/>
     </extensions>
 </idea-plugin>

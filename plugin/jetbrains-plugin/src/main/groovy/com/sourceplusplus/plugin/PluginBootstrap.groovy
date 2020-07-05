@@ -4,12 +4,12 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.api.model.SourceMessage
 import com.sourceplusplus.api.model.config.SourcePluginConfig
-import com.sourceplusplus.marker.SourceFileMarker
-import com.sourceplusplus.marker.SourceFileMarkerProvider
+import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.SourceFileMarkerProvider
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
-import com.sourceplusplus.marker.source.mark.gutter.component.api.config.ComponentSizeEvaluator
-import com.sourceplusplus.marker.source.mark.gutter.component.api.config.GutterMarkComponentConfiguration
-import com.sourceplusplus.marker.source.mark.gutter.component.jcef.GutterMarkJcefComponentProvider
+import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
+import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
+import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import com.sourceplusplus.portal.PortalBootstrap
@@ -39,13 +39,14 @@ class PluginBootstrap extends AbstractVerticle {
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.activateOnMouseHover = false
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.activateOnMouseClick = true
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.activateOnKeyboardShortcut = true
-        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new GutterMarkJcefComponentProvider()
+        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new SourceMarkJcefComponentProvider()
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider.with {
+            defaultConfiguration.hideOnScroll = false
             defaultConfiguration.preloadJcefBrowser = false
             defaultConfiguration.autoDisposeBrowser = false //todo: should be able to dispose, see IntelliJPortalUI.close()
             defaultConfiguration.setComponentSizeEvaluator(new ComponentSizeEvaluator() {
                 @Override
-                Dimension getDynamicSize(Editor editor, GutterMarkComponentConfiguration configuration) {
+                Dimension getDynamicSize(Editor editor, SourceMarkComponentConfiguration configuration) {
                     def portalWidth = (editor.contentComponent.width * 0.8) as int
                     if (portalWidth > 775) {
                         portalWidth = 775
