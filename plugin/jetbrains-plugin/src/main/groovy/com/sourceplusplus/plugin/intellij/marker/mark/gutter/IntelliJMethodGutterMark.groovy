@@ -164,6 +164,14 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
+    SourceArtifact getSourceArtifact() {
+        return getUserData(IntelliJKeys.SourceArtifact)
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     boolean isPortalRegistered() {
         return getUserData(IntelliJKeys.PortalUUID) != null
     }
@@ -198,7 +206,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             def newPortal = null
             def markComponent = sourceMarkComponent as SourceMarkJcefComponent
             if (initialTab == null) {
-                if (getUserData(IntelliJKeys.SourceArtifact).status().activelyFailing()) {
+                if (sourceArtifact.status().activelyFailing()) {
                     markComponent.configuration.initialUrl =
                             IntelliJPortalUI.getPortalUrl(PortalTab.Traces, portalUuid) +
                                     "&order_type=" + TraceOrderType.FAILED_TRACES +
@@ -245,9 +253,9 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     Icon determineMostSuitableIcon() {
         if (SourcePluginConfig.current.methodGutterMarksEnabled) {
-            if (getUserData(IntelliJKeys.SourceArtifact).status().activelyFailing()) {
+            if (sourceArtifact.status().activelyFailing()) {
                 return failingMethod
-            } else if (getUserData(IntelliJKeys.SourceArtifact).config().endpoint()) {
+            } else if (sourceArtifact.config().endpoint()) {
                 if (IntegrationInfoTracker.getActiveIntegrationInfo("apache_skywalking")) {
                     return activeEntryMethod
                 } else {
@@ -256,13 +264,5 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
             }
         }
         return null
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    SourceArtifact getSourceArtifact() {
-        return getUserData(IntelliJKeys.SourceArtifact)
     }
 }
