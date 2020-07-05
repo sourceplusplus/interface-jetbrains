@@ -29,7 +29,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
 import static com.sourceplusplus.api.model.metric.MetricType.*
 
 /**
- * todo: this
+ * Keeps track of entry method inlay marks.
  *
  * @version 0.3.0
  * @since 0.3.0

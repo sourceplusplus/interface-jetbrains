@@ -36,7 +36,7 @@ import static com.sourceplusplus.api.util.ArtifactNameUtils.getQualifiedClassNam
 import static com.sourceplusplus.plugin.intellij.IntelliJStartupActivity.currentProject
 
 /**
- * todo: this
+ * Keeps track of failing artifact inlay marks.
  *
  * @version 0.3.0
  * @since 0.3.0
