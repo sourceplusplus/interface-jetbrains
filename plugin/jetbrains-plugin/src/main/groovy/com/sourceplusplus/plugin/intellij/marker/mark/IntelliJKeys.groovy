@@ -6,7 +6,7 @@ import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 /**
  * Keys used by Source++ to attribute data to IntelliJ elements.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.2.5
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject
 /**
  * Contains common portal tab functionality.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

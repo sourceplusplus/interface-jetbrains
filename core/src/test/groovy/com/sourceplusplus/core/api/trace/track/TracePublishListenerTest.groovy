@@ -15,7 +15,7 @@ import io.vertx.ext.unit.TestSuite
 import org.junit.Test
 
 /**
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.3.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

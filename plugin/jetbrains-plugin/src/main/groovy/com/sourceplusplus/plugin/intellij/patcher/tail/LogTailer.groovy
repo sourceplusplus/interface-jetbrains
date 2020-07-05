@@ -10,7 +10,7 @@ import org.apache.commons.io.input.TailerListenerAdapter
 /**
  * Used to tail agent/skywalking logs and send them to the plugin console.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.2.4
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

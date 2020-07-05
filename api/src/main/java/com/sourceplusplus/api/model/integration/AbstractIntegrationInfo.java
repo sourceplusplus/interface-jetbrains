@@ -18,9 +18,9 @@ import java.util.Map;
 /**
  * General information about a core integration.
  *
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.1.1
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @SourceStyle
 @Value.Immutable

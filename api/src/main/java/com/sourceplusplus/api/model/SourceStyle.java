@@ -11,9 +11,9 @@ import java.lang.annotation.Target;
 /**
  * Immutable settings for Source++ API messages.
  *
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.1.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @JsonSerialize
 @Retention(RetentionPolicy.CLASS)

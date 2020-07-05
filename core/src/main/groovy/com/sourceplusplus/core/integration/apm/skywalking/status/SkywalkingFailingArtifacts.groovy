@@ -21,7 +21,7 @@ import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.*
 /**
  * Queries Apache SkyWalking for failing traces and correlates them to stored sources code artifacts.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.3.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

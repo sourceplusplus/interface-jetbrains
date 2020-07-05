@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 /**
  * Used to hold temporary status indicators for source artifacts.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.3.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
