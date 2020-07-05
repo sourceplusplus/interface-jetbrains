@@ -10,9 +10,9 @@ import javax.annotation.Nullable;
 /**
  * Used to unsubscribe to artifact metrics/traces.
  *
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.3.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @JsonAutoDetect
 public interface ArtifactUnsubscribeRequest extends SourceMessage {

@@ -28,7 +28,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFI
 /**
  * Keeps track of all current artifacts and keeps them in sync with Source++ Core.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.3.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

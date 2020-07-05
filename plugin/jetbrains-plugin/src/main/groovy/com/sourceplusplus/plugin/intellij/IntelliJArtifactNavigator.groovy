@@ -21,7 +21,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.NAVIGATE_TO_AR
 /**
  * Used to navigate between artifacts via the Source++ Portal.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

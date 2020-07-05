@@ -7,7 +7,7 @@ import com.sourceplusplus.core.storage.CoreConfig
 /**
  * Persistent configuration for the core integrations.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.3.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

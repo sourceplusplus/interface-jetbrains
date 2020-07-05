@@ -15,7 +15,7 @@ import static com.sourceplusplus.plugin.SourcePlugin.BUILD
 /**
  * Displays general information about Source++.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -22,7 +22,7 @@ import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.*
 /**
  * Used to setup storage, APIs, and integrations.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -22,7 +22,7 @@ import javax.swing.*
 /**
  * Used to create a new application or pick an existing application to associate with the current project.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

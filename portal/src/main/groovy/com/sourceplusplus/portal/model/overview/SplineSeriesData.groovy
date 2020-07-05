@@ -7,9 +7,9 @@ import java.time.Instant
 /**
  * Represents an artifact's spline series data.
  *
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.1.0
+ * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
 @Builder
 class SplineSeriesData {

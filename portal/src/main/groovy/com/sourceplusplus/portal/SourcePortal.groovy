@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Represents a view into a specific source artifact.
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
