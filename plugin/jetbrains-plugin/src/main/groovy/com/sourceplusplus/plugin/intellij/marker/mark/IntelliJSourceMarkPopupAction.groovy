@@ -4,7 +4,6 @@ import com.intellij.openapi.editor.Editor
 import com.sourceplusplus.marker.source.mark.SourceMarkPopupAction
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
-import org.jetbrains.annotations.NotNull
 
 /**
  * Allows the Source++ Portal to be displayed via keyboard action.
@@ -17,7 +16,7 @@ import org.jetbrains.annotations.NotNull
 class IntelliJSourceMarkPopupAction extends SourceMarkPopupAction {
 
     @Override
-    void performPopupAction(@NotNull SourceMark sourceMark, @NotNull Editor editor) {
+    void performPopupAction(SourceMark sourceMark, Editor editor) {
         (sourceMark as IntelliJGutterMark).registerPortal()
         super.performPopupAction(sourceMark, editor)
     }
