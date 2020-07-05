@@ -31,7 +31,7 @@ dependencies {
 //    implementation "io.vertx:vertx-web:$VERTX_VERSION"
     implementation files('../../3rd_party/vertx/vertx-web-3.9.1.jar')
     implementation "io.vertx:vertx-tcp-eventbus-bridge:$VERTX_VERSION"
-    implementation('com.github.sourceplusplus.sourcemarker:marker-provider:d94a37fc1f') {
+    implementation('com.github.sourceplusplus.sourcemarker:marker-provider:0.2.1') {
         transitive = false
     }
 }

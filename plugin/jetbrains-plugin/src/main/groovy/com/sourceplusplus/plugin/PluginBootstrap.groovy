@@ -41,7 +41,6 @@ class PluginBootstrap extends AbstractVerticle {
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider = new SourceMarkJcefComponentProvider()
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration.componentProvider.with {
-            defaultConfiguration.hideOnScroll = false
             defaultConfiguration.preloadJcefBrowser = false
             defaultConfiguration.autoDisposeBrowser = false //todo: should be able to dispose, see IntelliJPortalUI.close()
             defaultConfiguration.setComponentSizeEvaluator(new ComponentSizeEvaluator() {
