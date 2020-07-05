@@ -20,9 +20,7 @@
 
 ## Introduction
 
-Source++ is an open-source automated programming assistant with runtime-aware and context-aware functionality. Source++ is an observant-only programming assistant and aims to bridge application performance management (APM) solutions with the software developer's integrated development environment (IDE), enabling tighter feedback loops.
-
-Source++ will not write source code for you. Source++ can be used to help debug and prevent runtime issues by providing contextualized behavior about your source code throughout development. Future versions of Source++ aspire to provide additional AI-based pair programming features.
+Source++ is an open-source automated programming assistant with runtime-aware and context-aware functionality. Source++ is an observant-only programming assistant and aims to bridge application performance management (APM) solutions with the software developer's integrated development environment (IDE), enabling tighter feedback loops. Source++ can be used to help debug and prevent runtime issues by providing contextualized behavior about your source code throughout development. Future versions of Source++ aspire to provide additional AI-based pair programming features.
 
 ### Why?
 
