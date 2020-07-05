@@ -78,14 +78,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
     @Override
     void handleEvent(SourceMarkEvent event) {
         if (event.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
-            def gutterMark = event.sourceMark as IntelliJGutterMark
-            gutterMark.registerPortal()
-
-//            def inlayMark = SourceMarkerPlugin.INSTANCE.getSourceMark(gutterMark.artifactQualifiedName, Type.INLAY) as InlayMark
-//            if (inlayMark) {
-//                //share source component
-//                inlayMark.sourceMarkComponent = gutterMark.sourceMarkComponent
-//            }
+            (event.sourceMark as IntelliJGutterMark).registerPortal()
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
             if (getUserData(IntelliJKeys.PortalRefresher) != null) {
                 SourcePlugin.vertx.cancelTimer(getUserData(IntelliJKeys.PortalRefresher))
