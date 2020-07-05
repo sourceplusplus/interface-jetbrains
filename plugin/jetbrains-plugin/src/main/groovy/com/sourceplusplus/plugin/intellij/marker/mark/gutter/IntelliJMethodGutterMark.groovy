@@ -28,7 +28,6 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
-import org.jetbrains.annotations.NotNull
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUAnnotation
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
@@ -66,7 +65,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
-    synchronized void apply(@NotNull SourceMarkComponent sourceMarkComponent, boolean addToMarker) {
+    synchronized void apply(SourceMarkComponent sourceMarkComponent, boolean addToMarker) {
         super.apply(sourceMarkComponent, addToMarker)
 
         SourcePlugin.vertx.eventBus().publish(SOURCE_MARK_APPLIED, this)
@@ -77,7 +76,7 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
      * {@inheritDoc}
      */
     @Override
-    void handleEvent(@NotNull SourceMarkEvent event) {
+    void handleEvent(SourceMarkEvent event) {
         if (event.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
             def gutterMark = event.sourceMark as IntelliJGutterMark
             gutterMark.registerPortal()
