@@ -12,6 +12,9 @@ intellij {
 patchPluginXml {
     sinceBuild = "201"
 }
+publishPlugin {
+    token = System.getenv("JETBRAINS_PUBLISH_PLUGIN_TOKEN")
+}
 
 group = 'com.sourceplusplus.plugin'
 archivesBaseName = 'jetbrains-source-plugin'
