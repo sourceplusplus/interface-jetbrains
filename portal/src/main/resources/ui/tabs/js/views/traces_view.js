@@ -401,7 +401,7 @@ function getPrettyDuration(duration, decimalPlaces) {
     var prettyDuration;
     var postText;
     if (duration.months() > 0) {
-        let months = duration.weeks();
+        let months = duration.months();
         duration = duration.subtract(months, 'months');
         prettyDuration = months + "mo " + (Math.round(duration.asWeeks() * 10) / 10).toFixed(decimalPlaces);
         postText = "w ago";
@@ -411,7 +411,7 @@ function getPrettyDuration(duration, decimalPlaces) {
         prettyDuration = weeks + "w " + (Math.round(duration.asDays() * 10) / 10).toFixed(decimalPlaces);
         postText = "d ago";
     } else if (duration.days() > 0) {
-        let days = duration.hours();
+        let days = duration.days();
         duration = duration.subtract(days, 'days');
         prettyDuration = days + "d " + (Math.round(duration.asHours() * 10) / 10).toFixed(decimalPlaces);
         postText = "h ago";
