@@ -13,6 +13,7 @@ import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
+import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
@@ -29,6 +30,7 @@ import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
+import static com.intellij.psi.search.GlobalSearchScope.*
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_STATUS_UPDATED
 import static com.sourceplusplus.api.util.ArtifactNameUtils.getQualifiedClassName
 import static com.sourceplusplus.plugin.intellij.IntelliJStartupActivity.currentProject
@@ -97,42 +99,63 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
         def errorText = " @ ${dateTimeFormatter.format(errorLogs.time())}"
 
         //check if error line can be determined
+        def useMethodVirtualText = true
         def errorStack = errorLogs.data().get("stack")
         if (errorStack) {
             def qualifiedClassName = getQualifiedClassName(artifactQualifiedName)
+            def psiClass = JavaPsiFacade.getInstance(currentProject).findClass(qualifiedClassName, allScope(currentProject))
+            def fileMarker = SourceMarkerPlugin.INSTANCE.getSourceFileMarker(psiClass.containingFile)
+
             def simpleClassName = qualifiedClassName.replaceAll("\\w+(\\.)", "")
             def errorLocation = Pattern.compile("\\($simpleClassName\\.[^.]+:([0-9]+)\\)", Pattern.MULTILINE)
             def matcher = errorLocation.matcher(errorStack)
             if (matcher.find()) {
                 def errorLine = matcher.group(1) as int
-
-                def psiClass = JavaPsiFacade.getInstance(currentProject)
-                        .findClass(getQualifiedClassName(artifactQualifiedName), GlobalSearchScope.allScope(currentProject))
-                def fileMarker = SourceMarkerPlugin.INSTANCE.getSourceFileMarker(psiClass.containingFile)
-
-                //expression inline inlay
                 def inlayMark = MarkerUtils.getOrCreateExpressionInlayMark(fileMarker, errorLine)
-                if (inlayMark == null) {
-                    return null //todo: could make a method inlay mark
+                if (inlayMark != null) {
+                    updateInlineVirtualText(inlayMark, errorKind, errorText)
+                    useMethodVirtualText = false
                 }
+            }
 
-                if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
-                if (inlayMark.configuration.virtualText == null) {
-                    inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, errorText)
-                    inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
-                    inlayMark.configuration.virtualText.setUseInlinePresentation(true)
-                    inlayMark.configuration.activateOnMouseClick = false
-                    //inlayMark.configuration.virtualText.icon = IntelliJGutterMark.failingLine
-                    //inlayMark.configuration.virtualText.iconLocation.setLocation(0, -1)
-                }
-
-                if (inlayMark.psiExpression instanceof UThrowExpression) {
-                    inlayMark.configuration.virtualText.updateVirtualText(" //Thrown" + errorText)
-                } else {
-                    inlayMark.configuration.virtualText.updateVirtualText(" //" + errorKind + errorText)
+            //default to method if error line can't be found
+            if (useMethodVirtualText) {
+                for (def method : psiClass.methods) {
+                    if (MarkerUtils.getFullyQualifiedName(method) == artifactQualifiedName) {
+                        def inlayMark = MarkerUtils.getOrCreateMethodInlayMark(fileMarker, method.nameIdentifier)
+                        updateMethodVirtualText(inlayMark, errorKind, errorText)
+                        break
+                    }
                 }
             }
         }
+    }
+
+    private static void updateInlineVirtualText(InlayMark inlayMark, String errorKind, String errorText) {
+        if (!inlayMark.sourceFileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
+        if (inlayMark.configuration.virtualText == null) {
+            inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, errorText)
+            inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
+            inlayMark.configuration.virtualText.setUseInlinePresentation(true)
+            inlayMark.configuration.activateOnMouseClick = false
+        }
+
+        if (inlayMark.psiExpression instanceof UThrowExpression) {
+            inlayMark.configuration.virtualText.updateVirtualText(" //Thrown" + errorText)
+        } else {
+            inlayMark.configuration.virtualText.updateVirtualText(" //" + errorKind + errorText)
+        }
+    }
+
+    private static void updateMethodVirtualText(InlayMark inlayMark, String errorKind, String errorText) {
+        if (!inlayMark.sourceFileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
+        if (inlayMark.configuration.virtualText == null) {
+            inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, errorText)
+            inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
+            inlayMark.configuration.activateOnMouseClick = false
+        }
+
+        inlayMark.configuration.virtualText.updateVirtualText("    //" + errorKind + errorText)
     }
 
     private static void addFailingVirtualText(SourceArtifact sourceArtifact) {
