@@ -14,6 +14,7 @@ import com.sourceplusplus.api.util.ArtifactNameUtils
 import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.plugin.PluginBootstrap
 import com.sourceplusplus.plugin.coordinate.artifact.track.PluginArtifactTracker
+import com.sourceplusplus.plugin.coordinate.integration.IntegrationInfoTracker
 import com.sourceplusplus.plugin.intellij.IntelliJStartupActivity
 import com.sourceplusplus.plugin.intellij.patcher.tail.LogTailer
 import groovy.transform.PackageScope
@@ -51,7 +52,11 @@ trait SourceAgentPatcher {
         if (!SourcePluginConfig.current.agentPatcherEnabled) {
             log.info("Skipped patching program. Agent patcher is disabled.")
             return
+        } else if (!IntegrationInfoTracker.getActiveIntegrationInfo("apache_skywalking")) {
+            log.info("Skipped patching program. Apache SkyWalking integration is missing.")
+            return
         }
+
         if (PluginBootstrap.sourcePlugin != null && !patched.getAndSet(true)) {
             log.info("Patching Source++ Agent for executing program...")
             URL apmArchiveResource = SourceAgentPatcher.class.getResource("/skywalking/apache-skywalking-apm-${SKYWALKING_VERSION}.tar.gz")
