@@ -1,3 +1,22 @@
+# 0.3.1-alpha (2020-07-06)
+
+## Bug
+- Endpoint id should have precedence over endpoint name ([#233](https://github.com/sourceplusplus/Assistant/issues/233))
+- Trace occurred displaying incorrectly ([#225](https://github.com/sourceplusplus/Assistant/issues/225))
+- Portal NPE when close file ([#229](https://github.com/sourceplusplus/Assistant/issues/229))
+- Use correct OkHttp async calls ([#228](https://github.com/sourceplusplus/Assistant/issues/228))
+
+## Improvement
+- Entry method virtual text marking ([#219](https://github.com/sourceplusplus/Assistant/issues/219))
+- Failed method/line inlay mark ([#226](https://github.com/sourceplusplus/Assistant/issues/226))
+- Disable agent integration if APM integration doesn't exist ([#231](https://github.com/sourceplusplus/Assistant/issues/231))
+- Ability to force portal uuid in SourcePortal config ([#217](https://github.com/sourceplusplus/Assistant/issues/217))
+- Auto-publish JetBrains plugin ([#169](https://github.com/sourceplusplus/Assistant/issues/169))
+
+## Dependency upgrade
+- Upgraded SourceMarker (0.1.5 -> 0.2.1)
+- Removed dependency GitSocratic
+
 # 0.3.0-alpha (2020-06-27)
 
 ## Bug
