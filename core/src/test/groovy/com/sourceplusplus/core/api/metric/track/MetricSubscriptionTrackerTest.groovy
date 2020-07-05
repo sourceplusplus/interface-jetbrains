@@ -173,23 +173,22 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
     void "verify_subscribed_to_artifact_metrics"() {
         SourceApplication application
         TestSuite.create("verify_subscribed_to_artifact_metrics-setup").before({ test ->
-            def async = test.async(2)
+            def async = test.async()
             createApplication(test, {
                 application = it
-                async.countDown()
-            })
 
-            def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
-                    .addMetricTypes(Throughput_Average)
-                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
-                    .appUuid(application.appUuid())
-                    .artifactQualifiedName("com.company.TestClass.testMethod()").build()
-            coreClient.subscribeToArtifact(metricSubscribeRequest, {
-                if (it.failed()) {
-                    test.fail(it.cause())
-                }
-                test.assertTrue(it.result())
-                async.countDown()
+                def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
+                        .addMetricTypes(Throughput_Average)
+                        .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
+                        .appUuid(application.appUuid())
+                        .artifactQualifiedName("com.company.TestClass.testMethod()").build()
+                coreClient.subscribeToArtifact(metricSubscribeRequest, {
+                    if (it.failed()) {
+                        test.fail(it.cause())
+                    }
+                    test.assertTrue(it.result())
+                    async.complete()
+                })
             })
         }).test("verify_subscribed_to_artifact_metrics", { test ->
             def async = test.async()
@@ -211,23 +210,22 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
     void "verify_unsubscribed_to_artifact_metrics"() {
         SourceApplication application
         TestSuite.create("verify_unsubscribed_to_artifact_metrics-setup").before({ test ->
-            def async = test.async(2)
+            def async = test.async()
             createApplication(test, {
                 application = it
-                async.countDown()
-            })
 
-            def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
-                    .addMetricTypes(Throughput_Average)
-                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
-                    .appUuid(application.appUuid())
-                    .artifactQualifiedName("com.company.TestClass.testMethod()").build()
-            coreClient.subscribeToArtifact(metricSubscribeRequest, {
-                if (it.failed()) {
-                    test.fail(it.cause())
-                }
-                test.assertTrue(it.result())
-                async.countDown()
+                def metricSubscribeRequest = ArtifactMetricSubscribeRequest.builder()
+                        .addMetricTypes(Throughput_Average)
+                        .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
+                        .appUuid(application.appUuid())
+                        .artifactQualifiedName("com.company.TestClass.testMethod()").build()
+                coreClient.subscribeToArtifact(metricSubscribeRequest, {
+                    if (it.failed()) {
+                        test.fail(it.cause())
+                    }
+                    test.assertTrue(it.result())
+                    async.complete()
+                })
             })
         }).test("verify_unsubscribed_to_artifact_metrics", { test ->
             def async = test.async()

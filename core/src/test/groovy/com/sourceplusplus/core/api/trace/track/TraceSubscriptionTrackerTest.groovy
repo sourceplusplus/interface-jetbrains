@@ -95,10 +95,10 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
     void "subscribe_to_artifact_traces"() {
         SourceApplication application
         TestSuite.create("subscribe_to_artifact_traces-setup").before({ test ->
-            def async = test.async(1)
+            def async = test.async()
             createApplication(test, {
                 application = it
-                async.countDown()
+                async.complete()
             })
         }).test("subscribe_to_artifact_traces", { test ->
             def async = test.async()
@@ -121,23 +121,22 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
     void "verify_subscribed_to_artifact_traces"() {
         SourceApplication application
         TestSuite.create("verify_subscribed_to_artifact_traces-setup").before({ test ->
-            def async = test.async(2)
+            def async = test.async()
             createApplication(test, {
                 application = it
-                async.countDown()
-            })
 
-            def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
-                    .addOrderTypes(LATEST_TRACES)
-                    .appUuid(application.appUuid())
-                    .artifactQualifiedName("com.company.TestClass.testMethod()").build()
-            coreClient.subscribeToArtifact(traceSubscribeRequest, {
-                if (it.failed()) {
-                    test.fail(it.cause())
-                }
-                test.assertTrue(it.result())
-                async.countDown()
+                def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                        .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
+                        .addOrderTypes(LATEST_TRACES)
+                        .appUuid(application.appUuid())
+                        .artifactQualifiedName("com.company.TestClass.testMethod()").build()
+                coreClient.subscribeToArtifact(traceSubscribeRequest, {
+                    if (it.failed()) {
+                        test.fail(it.cause())
+                    }
+                    test.assertTrue(it.result())
+                    async.complete()
+                })
             })
         }).test("verify_subscribed_to_artifact_traces", { test ->
             def async = test.async()
@@ -164,23 +163,22 @@ class TraceSubscriptionTrackerTest extends SourceCoreAPITest {
     void "verify_unsubscribed_to_artifact_traces"() {
         SourceApplication application
         TestSuite.create("verify_unsubscribed_to_artifact_traces-setup").before({ test ->
-            def async = test.async(2)
+            def async = test.async()
             createApplication(test, {
                 application = it
-                async.countDown()
-            })
 
-            def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
-                    .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
-                    .addOrderTypes(LATEST_TRACES)
-                    .appUuid(application.appUuid())
-                    .artifactQualifiedName("com.company.TestClass.testMethod()").build()
-            coreClient.subscribeToArtifact(traceSubscribeRequest, {
-                if (it.failed()) {
-                    test.fail(it.cause())
-                }
-                test.assertTrue(it.result())
-                async.countDown()
+                def traceSubscribeRequest = ArtifactTraceSubscribeRequest.builder()
+                        .timeFrame(QueryTimeFrame.LAST_5_MINUTES)
+                        .addOrderTypes(LATEST_TRACES)
+                        .appUuid(application.appUuid())
+                        .artifactQualifiedName("com.company.TestClass.testMethod()").build()
+                coreClient.subscribeToArtifact(traceSubscribeRequest, {
+                    if (it.failed()) {
+                        test.fail(it.cause())
+                    }
+                    test.assertTrue(it.result())
+                    async.complete()
+                })
             })
         }).test("verify_unsubscribed_to_artifact_traces", { test ->
             def async = test.async()

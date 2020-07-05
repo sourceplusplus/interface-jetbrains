@@ -26,6 +26,7 @@ import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Objects;
@@ -410,6 +411,8 @@ public class SourceCoreClient implements SourceClient {
                 if (response.isSuccessful()) {
                     handler.handle(Future.succeededFuture(Optional.of(Json.decodeValue(responseBody,
                             SourceApplication.class))));
+                } else if (response.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    handler.handle(Future.succeededFuture(Optional.empty()));
                 } else {
                     handler.handle(asyncAPIException(responseBody));
                 }
@@ -452,6 +455,8 @@ public class SourceCoreClient implements SourceClient {
                 if (response.isSuccessful()) {
                     handler.handle(Future.succeededFuture(Optional.of(Json.decodeValue(responseBody,
                             SourceApplication.class))));
+                } else if (response.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    handler.handle(Future.succeededFuture(Optional.empty()));
                 } else {
                     handler.handle(asyncAPIException(responseBody));
                 }
