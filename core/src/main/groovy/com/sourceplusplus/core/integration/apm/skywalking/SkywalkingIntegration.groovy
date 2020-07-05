@@ -405,15 +405,17 @@ class SkywalkingIntegration extends APMIntegration {
             serviceInstanceIdStr = '"' + traceQuery.serviceInstanceId() + '"'
         }
         def endpointIdStr = "null"
+        def endpointNameStr = "null"
         if (traceQuery.endpointId() != null) {
             endpointIdStr = '"' + traceQuery.endpointId() + '"'
+        } else {
+            if (traceQuery.artifactQualifiedName() != null) {
+                endpointNameStr = '"' + traceQuery.artifactQualifiedName() + '"'
+            } else if (traceQuery.endpointName() != null) {
+                endpointNameStr = '"' + traceQuery.endpointName() + '"'
+            }
         }
-        def endpointNameStr = "null"
-        if (traceQuery.artifactQualifiedName() != null) {
-            endpointNameStr = '"' + traceQuery.artifactQualifiedName() + '"'
-        } else if (traceQuery.endpointName() != null) {
-            endpointNameStr = '"' + traceQuery.endpointName() + '"'
-        }
+
         def queryOrder = traceQuery.orderType() == SLOWEST_TRACES ? "BY_DURATION" : "BY_START_TIME"
         def graphqlQuery = new JsonObject()
         graphqlQuery.put("query", QUERY_BASIC_TRACES
