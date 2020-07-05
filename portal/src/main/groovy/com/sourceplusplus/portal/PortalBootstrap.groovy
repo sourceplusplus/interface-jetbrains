@@ -131,6 +131,7 @@ class PortalBootstrap extends AbstractVerticle {
             def subscriptions = config().getJsonArray("artifact_subscriptions")
             for (int i = 0; i < subscriptions.size(); i++) {
                 def sub = subscriptions.getJsonObject(i)
+                def portalUuid = sub.getString("portal_uuid")
                 def appUuid = sub.getString("app_uuid")
                 def artifactQualifiedName = sub.getString("artifact_qualified_name")
                 SourcePortalConfig.current.addCoreClient(appUuid, coreClient)
@@ -169,7 +170,11 @@ class PortalBootstrap extends AbstractVerticle {
                 }
 
                 //register portal
-                SourcePortal.register(appUuid, artifactQualifiedName, true)
+                if (portalUuid) {
+                    SourcePortal.register(portalUuid, appUuid, artifactQualifiedName, true)
+                } else {
+                    SourcePortal.register(appUuid, artifactQualifiedName, true)
+                }
             }
 
             //keep subscriptions alive
