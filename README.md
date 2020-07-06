@@ -26,7 +26,7 @@ Source++ is an open-source automated programming assistant with runtime-aware an
 
 > 1. To enable developers easy access to feedback-driven development methodologies
 > 2. APMs often lack tight integration with actual development of the source code they monitor
-> 3. Source code comprehension can be improved by providing an extra dimension of behavior linked with said source code (ie. being able to visualize how a particular method acts in certain environments vs. locally)
+> 3. Source code comprehension can be improved by providing an extra dimension of behavior linked with said source code (ie. being able to visualize how a particular method acts in production vs. locally)
 > 4. No websites or dashboards necessary to debug complex asynchronous runtime issues
 > 5. AI-based pair programming is going to be pretty cool when we get it right
 
