@@ -36,7 +36,7 @@ Source++ is an open-source automated programming assistant with runtime-aware an
 
 ![](https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/Integrated-Runtime-Performance.jpg)
 
-#### Portal Interface
+#### User Interfaces
 
 <table>
   <tr>
