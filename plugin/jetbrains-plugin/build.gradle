@@ -69,8 +69,16 @@ task updatePluginResources {
         }
 
         copy {
-            from '../../3rd_party'
-            into 'build/resources/main'
+            from '../../3rd_party/skywalking/apache-skywalking-apm-8.0.1.tar.gz'
+            into 'build/resources/main/skywalking/'
+        }
+        copy {
+            from '../../3rd_party/skywalking/apm-customize-enhance-plugin-8.0.1.jar'
+            into 'build/resources/main/skywalking/'
+        }
+        copy {
+            from '../../3rd_party/skywalking/apm-vertx-core-3.x-plugin-8.0.1.jar'
+            into 'build/resources/main/skywalking/'
         }
     }
 }
