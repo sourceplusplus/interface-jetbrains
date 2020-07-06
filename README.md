@@ -40,21 +40,15 @@ Source++ is an open-source automated programming assistant with runtime-aware an
 
 <table>
   <tr>
-      <td width="50%" align="center"><b>Overview</b></td>
-      <td width="50%" align="center"><b>Activity</b></td>
+      <td width="20%" align="center"><b>Overview</b></td>
+      <td width="20%" align="center"><b>Activity</b></td>
+      <td width="20%" align="center"><b>Latest Traces</b></td>
+      <td width="20%" align="center"><b>Trace Stack</b></td>
+      <td width="20%" align="center"><b>Span Info</b></td>
   </tr>
   <tr>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Overview.jpg"/></td>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Activity.jpg"/></td>
-  </tr>
-</table>
-<table>
-  <tr>
-      <td width="33%" align="center"><b>Latest Traces</b></td>
-      <td width="33%" align="center"><b>Trace Stack</b></td>
-      <td width="33%" align="center"><b>Span Info</b></td>
-  </tr>
-  <tr>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Latest-Traces.jpg"/></td>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Trace-Stack.jpg"/></td>
     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Span-Info.jpg"/></td>
