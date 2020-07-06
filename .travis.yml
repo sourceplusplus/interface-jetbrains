@@ -2,7 +2,7 @@ language: java
 install: skip
 
 os: linux
-dist: trusty
+dist: xenial
 jdk: openjdk11
 
 services:
