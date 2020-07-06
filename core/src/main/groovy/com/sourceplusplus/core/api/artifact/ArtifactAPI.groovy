@@ -13,6 +13,7 @@ import io.vertx.ext.web.RoutingContext
 import net.jodah.expiringmap.ExpirationPolicy
 import net.jodah.expiringmap.ExpiringMap
 
+import java.sql.SQLIntegrityConstraintViolationException
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
@@ -231,6 +232,7 @@ class ArtifactAPI extends AbstractVerticle {
                     })
                 } else {
                     //create
+                    def originalArtifact = artifact
                     artifact = artifact.withCreateDate(now).withLastUpdated(now)
                     core.storage.createArtifact(artifact, {
                         if (it.succeeded()) {
@@ -246,7 +248,13 @@ class ArtifactAPI extends AbstractVerticle {
                             }
                             handler.handle(Future.succeededFuture(it.result()))
                         } else {
-                            handler.handle(Future.failedFuture(it.cause()))
+                            if (it.cause() instanceof SQLIntegrityConstraintViolationException) {
+                                log.warn("Constraint violation creating artifact: {}. Trying again...",
+                                        originalArtifact.artifactQualifiedName())
+                                createOrUpdateSourceArtifact(originalArtifact, overrideStatus, handler)
+                            } else {
+                                handler.handle(Future.failedFuture(it.cause()))
+                            }
                         }
                     })
                 }

@@ -147,10 +147,10 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
     void "subscribe_to_artifact_metrics"() {
         SourceApplication application
         TestSuite.create("subscribe_to_artifact_metrics-setup").before({ test ->
-            def async = test.async(1)
+            def async = test.async()
             createApplication(test, {
                 application = it
-                async.countDown()
+                async.complete()
             })
         }).test("subscribe_to_artifact_metrics", { test ->
             def async = test.async()
@@ -164,7 +164,7 @@ class MetricSubscriptionTrackerTest extends SourceCoreAPITest {
                     test.fail(it.cause())
                 }
                 test.assertTrue(it.result())
-                async.countDown()
+                async.complete()
             })
         }).run().awaitSuccess()
     }
