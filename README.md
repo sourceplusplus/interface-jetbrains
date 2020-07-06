@@ -72,8 +72,7 @@ Source++ is an open-source automated programming assistant with runtime-aware an
 
 | Mark                          | Meaning                                                  |
 | ----------------------------- | -------------------------------------------------------- |
-| ![](docs/images/plugin/icons/entry_method/active_entry_method.svg) | Method handles user requests (SOAP, REST, etc) [APM integration active] |
-| ![](docs/images/plugin/icons/entry_method/inactive_entry_method.svg) | Method handles user requests (SOAP, REST, etc) [APM integration inactive] |
+| ![](docs/images/plugin/icons/entry_method/active_entry_method.svg) | Method handles user requests (SOAP, REST, etc) |
 | ![](docs/images/plugin/icons/failing_method/failing_method.svg) | Method has thrown exception in application's most recent run |
 
 ## Getting Started
