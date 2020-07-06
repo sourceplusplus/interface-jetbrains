@@ -15,6 +15,10 @@
 
 ## Dependency upgrade
 - Upgraded SourceMarker (0.1.5 -> 0.2.1)
+- Upgraded Gradle Shadow Plugin (5.2.0 -> 6.0.0)
+- Upgraded Gradle Docker Compose Plugin (0.6.6 -> 0.12.1)
+- Upgraded jackson (2.11.0 -> 2.11.1)
+- Upgraded metrics-core (4.1.9 -> 4.1.10.1)
 - Removed dependency GitSocratic
 
 # 0.3.0-alpha (2020-06-27)
