@@ -56,7 +56,9 @@ classes {
 }
 
 task updatePluginResources {
-    doLast {
+    dependsOn ":core:build"
+
+    doFirst {
         def portalResources = file('../../portal/src/main/resources')
         if (!portalResources.exists()) throw new IllegalStateException("Could not find portal resources")
         copy {
