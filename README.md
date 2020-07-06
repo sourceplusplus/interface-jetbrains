@@ -61,7 +61,20 @@ Source++ is an open-source automated programming assistant with runtime-aware an
   </tr>
 </table>
 
-#### Source Marks
+#### Inlay Marks
+
+<table>
+  <tr>
+      <td width="50%" align="center"><b>Live Telemetry</b></td>
+      <td width="50%" align="center"><b>Error Tracking</b></td>
+  </tr>
+  <tr>
+     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/entry_method_inlay.jpg"/></td>
+     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/failing_artifact_inlay.jpg"/></td>
+  </tr>
+</table>
+
+#### Gutter Marks
 
 | Mark                          | Meaning                                                  |
 | ----------------------------- | -------------------------------------------------------- |
