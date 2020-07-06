@@ -58,11 +58,25 @@ classes {
 processResources {
     dependsOn ":core:build", ":portal:build"
 
-    from("../../portal/src/main/resources")
-    from("../../core/build/main/resources")
-    from("../../3rd_party/skywalking/apache-skywalking-apm-8.0.1.tar.gz") { into('skywalking') }
-    from("../../3rd_party/skywalking/apm-customize-enhance-plugin-8.0.1.jar") { into('skywalking') }
-    from("../../3rd_party/skywalking/apm-vertx-core-3.x-plugin-8.0.1.jar") { into('skywalking') }
+    def portalResources = file('../../portal/src/main/resources')
+    if (!portalResources.exists()) throw new IllegalStateException("Could not find portal resources")
+    from(portalResources)
+
+    def coreResources = file('../../core/build/resources/main')
+    if (!coreResources.exists()) throw new IllegalStateException("Could not find core resources")
+    from(coreResources)
+
+    def apmTar = file('../../3rd_party/skywalking/apache-skywalking-apm-8.0.1.tar.gz')
+    if (!apmTar.exists()) throw new IllegalStateException("Could not find APM tar")
+    from(apmTar) { into('skywalking') }
+
+    def customizeEnhance = file('../../3rd_party/skywalking/apm-customize-enhance-plugin-8.0.1.jar')
+    if (!customizeEnhance.exists()) throw new IllegalStateException("Could not find APM customize enhance jar")
+    from(customizeEnhance) { into('skywalking') }
+
+    def vertxPlugin = file('../../3rd_party/skywalking/apm-vertx-core-3.x-plugin-8.0.1.jar')
+    if (!vertxPlugin.exists()) throw new IllegalStateException("Could not find APM vert.x plugin jar")
+    from(vertxPlugin) { into('skywalking') }
 }
 
 build {
