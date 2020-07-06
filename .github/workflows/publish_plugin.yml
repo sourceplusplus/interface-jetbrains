@@ -17,4 +17,4 @@ jobs:
       - name: Publish the Source++ Assistant plugin to the JetBrains Marketplace
         env:
           JETBRAINS_PUBLISH_PLUGIN_TOKEN: ${{ secrets.JETBRAINS_PUBLISH_PLUGIN_TOKEN }}
-        run: ./gradlew publishPlugin
+        run: ./gradlew publishPlugin -x test
