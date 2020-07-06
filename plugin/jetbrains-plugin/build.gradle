@@ -55,68 +55,20 @@ classes {
     dependsOn createProperties
 }
 
-task updatePluginResources {
-    dependsOn ":core:build"
+processResources {
+    dependsOn ":core:build", ":portal:build"
 
-    try {
-        println "Plugin file size-1: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
-    } catch (all){ }
-    try {
-        println "Lib file size-1: " + file('build/libs/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
-    } catch (all){ }
-
-    doFirst {
-        try {
-            println "Plugin file size-2: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
-        } catch (all){ }
-        try {
-            println "Lib file size-2: " + file('build/libs/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
-        } catch (all){ }
-
-        println "project dir: " + projectDir
-        def portalResources = file('../../portal/src/main/resources')
-        if (!portalResources.exists()) throw new IllegalStateException("Could not find portal resources")
-        copy {
-            from portalResources
-            into 'build/resources/main'
-        }
-        file("build/resources/main/source-portal_build.properties").delete()
-
-        def coreResources = file('../../core/build/resources/main')
-        if (!coreResources.exists()) throw new IllegalStateException("Could not find core resources")
-        copy {
-            from coreResources
-            into 'build/resources/main'
-        }
-
-        def apmTar = file('../../3rd_party/skywalking/apache-skywalking-apm-8.0.1.tar.gz')
-        if (!apmTar.exists()) throw new IllegalStateException("Could not find APM tar")
-        copy {
-            from apmTar
-            into 'build/resources/main/skywalking/'
-        }
-        def customizeEnhance = file('../../3rd_party/skywalking/apm-customize-enhance-plugin-8.0.1.jar')
-        if (!customizeEnhance.exists()) throw new IllegalStateException("Could not find APM customize enhance jar")
-        copy {
-            from customizeEnhance
-            into 'build/resources/main/skywalking/'
-        }
-        def vertxPlugin = file('../../3rd_party/skywalking/apm-vertx-core-3.x-plugin-8.0.1.jar')
-        if (!vertxPlugin.exists()) throw new IllegalStateException("Could not find APM vert.x plugin jar")
-        copy {
-            from vertxPlugin
-            into 'build/resources/main/skywalking/'
-        }
-    }
+    from("../../portal/src/main/resources")
+    from("../../core/build/main/resources")
+    from("../../3rd_party/skywalking/apache-skywalking-apm-8.0.1.tar.gz") { into('skywalking') }
+    from("../../3rd_party/skywalking/apm-customize-enhance-plugin-8.0.1.jar") { into('skywalking') }
+    from("../../3rd_party/skywalking/apm-vertx-core-3.x-plugin-8.0.1.jar") { into('skywalking') }
 }
-compileJava.mustRunAfter updatePluginResources
-runIde.dependsOn updatePluginResources
-buildPlugin.dependsOn updatePluginResources
 
 build {
     doLast {
-        println "Plugin file size: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
-        println "Lib file size: " + file('build/libs/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
-        println "Skywalking folder size: " + file('build/resources/main/skywalking').directorySize() /  (1024 * 1024) + "mb"
+        println "Plugin file size: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() / (1024 * 1024) + "mb"
+        println "Lib file size: " + file('build/libs/jetbrains-source-plugin-0.3.1.zip').size() / (1024 * 1024) + "mb"
+        println "Skywalking folder size: " + file('build/resources/main/skywalking').directorySize() / (1024 * 1024) + "mb"
     }
 }
