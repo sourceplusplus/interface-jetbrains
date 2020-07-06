@@ -74,6 +74,7 @@ Source++ is an open-source automated programming assistant with runtime-aware an
 | ----------------------------- | -------------------------------------------------------- |
 | ![](docs/images/plugin/icons/entry_method/active_entry_method.svg) | Method handles user requests (SOAP, REST, etc) |
 | ![](docs/images/plugin/icons/failing_method/failing_method.svg) | Method has thrown exception in application's most recent run |
+| ![](docs/images/plugin/icons/trace_navigation/trace_navigation.svg) | Indicates the span stack is a child of the trace created by method caller |
 
 ## Getting Started
 
