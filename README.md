@@ -26,8 +26,8 @@ Source++ is an open-source automated programming assistant with runtime-aware an
 
 > 1. To enable developers easy access to feedback-driven development methodologies
 > 2. APMs often lack tight integration with actual development of the source code they monitor
-> 3. Source code comprehension can be improved by providing an extra dimension of behavior linked with said source code (ie. being able to visualize how a particular method acts in certain environments vs. locally)
-> 4. No websites or dashboards necessary to debug complex asynchronous runtime issues (just look at and follow through your actual source code)
+> 3. Source code comprehension can be improved by providing an extra dimension of behavior linked with said source code (ie. being able to visualize how a particular method acts in production vs. locally)
+> 4. No websites or dashboards necessary to debug complex asynchronous runtime issues
 > 5. AI-based pair programming is going to be pretty cool when we get it right
 
 ## Augments
@@ -36,37 +36,43 @@ Source++ is an open-source automated programming assistant with runtime-aware an
 
 ![](https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/Integrated-Runtime-Performance.jpg)
 
-#### Portal Interface
+#### User Interfaces
 
 <table>
   <tr>
-      <td width="50%" align="center"><b>Overview</b></td>
-      <td width="50%" align="center"><b>Activity</b></td>
+      <td width="20%" align="center"><b>Overview</b></td>
+      <td width="20%" align="center"><b>Activity</b></td>
+      <td width="20%" align="center"><b>Latest Traces</b></td>
+      <td width="20%" align="center"><b>Trace Stack</b></td>
+      <td width="20%" align="center"><b>Span Info</b></td>
   </tr>
   <tr>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Overview.jpg"/></td>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Activity.jpg"/></td>
-  </tr>
-</table>
-<table>
-  <tr>
-      <td width="33%" align="center"><b>Latest Traces</b></td>
-      <td width="33%" align="center"><b>Trace Stack</b></td>
-      <td width="33%" align="center"><b>Span Info</b></td>
-  </tr>
-  <tr>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Latest-Traces.jpg"/></td>
      <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Trace-Stack.jpg"/></td>
     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/IRP-Span-Info.jpg"/></td>
   </tr>
 </table>
 
-#### Source Marks
+#### Inlay Marks
+
+<table>
+  <tr>
+      <td width="50%" align="center"><b>Live Telemetry</b></td>
+      <td width="50%" align="center"><b>Error Tracking</b></td>
+  </tr>
+  <tr>
+     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/entry_method_inlay.jpg"/></td>
+     <td><img src="https://raw.githubusercontent.com/sourceplusplus/Assistant/master/docs/images/augments/irp/failing_artifact_inlay.jpg"/></td>
+  </tr>
+</table>
+
+#### Gutter Marks
 
 | Mark                          | Meaning                                                  |
 | ----------------------------- | -------------------------------------------------------- |
-| ![](docs/images/plugin/icons/entry_method/active_entry_method.svg) | Entry method (APM integration enabled) |
-| ![](docs/images/plugin/icons/entry_method/inactive_entry_method.svg) | Entry method (APM integration disabled) |
+| ![](docs/images/plugin/icons/entry_method/active_entry_method.svg) | Method handles user requests (SOAP, REST, etc) |
 | ![](docs/images/plugin/icons/failing_method/failing_method.svg) | Method has thrown exception in application's most recent run |
 
 ## Getting Started

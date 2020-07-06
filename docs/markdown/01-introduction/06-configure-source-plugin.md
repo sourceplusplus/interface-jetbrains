@@ -20,10 +20,10 @@ Note: Before closing the environment settings make sure to click the "Apply" but
 
 # Add Integration
 
-Once you have an environment created you will need to add integration(s) before you're able to anything interesting with Source++.
+Once you have an environment created you will need to add integration(s) before you're able to do anything interesting with Source++.
 This is done by clicking the "Add Integration" button, which will display several dialogs that must be filled in to establish a connection with an available integration (e.g. Apache SkyWalking). 
 
-After successfully an integration and clicking the "Test Connection" button, you should see something similar to the following results:
+After successfully adding an integration and clicking the "Test Connection" button, you should see something similar to the following results:
 
 ![](../../images/plugin/Successful%20Integration.png)
 
