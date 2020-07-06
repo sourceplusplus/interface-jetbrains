@@ -61,10 +61,16 @@ task updatePluginResources {
     try {
         println "Plugin file size-1: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
     } catch (all){ }
+    try {
+        println "Lib file size-1: " + file('build/libs/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
+    } catch (all){ }
 
     doFirst {
         try {
             println "Plugin file size-2: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
+        } catch (all){ }
+        try {
+            println "Lib file size-2: " + file('build/libs/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
         } catch (all){ }
 
         println "project dir: " + projectDir
@@ -110,5 +116,6 @@ buildPlugin.dependsOn updatePluginResources
 build {
     doLast {
         println "Plugin file size: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
+        println "Lib file size: " + file('build/libs/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
     }
 }
