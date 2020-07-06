@@ -58,7 +58,15 @@ classes {
 task updatePluginResources {
     dependsOn ":core:build"
 
+    try {
+        println "Plugin file size-1: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
+    } catch (all){ }
+
     doFirst {
+        try {
+            println "Plugin file size-2: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
+        } catch (all){ }
+
         println "project dir: " + projectDir
         def portalResources = file('../../portal/src/main/resources')
         if (!portalResources.exists()) throw new IllegalStateException("Could not find portal resources")
