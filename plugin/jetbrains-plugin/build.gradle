@@ -56,13 +56,11 @@ classes {
 }
 
 processResources {
-    dependsOn ":core:build", ":portal:build"
-
     def portalResources = file('../../portal/src/main/resources')
     if (!portalResources.exists()) throw new IllegalStateException("Could not find portal resources")
     from(portalResources)
 
-    def coreResources = file('../../core/build/resources/main')
+    def coreResources = file('../../core/src/main/resources')
     if (!coreResources.exists()) throw new IllegalStateException("Could not find core resources")
     from(coreResources)
 
