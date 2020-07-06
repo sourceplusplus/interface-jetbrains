@@ -15,6 +15,9 @@ env:
 before_install:
  - chmod +x gradlew
 
+script:
+  - ./gradlew clean build test -Prun_integration_tests
+
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
