@@ -1,4 +1,4 @@
-Once the Source++ Plugin has been installed, and the appropriate integrations have been added the final step which may be necessary to is configure any source code artifacts which Source++ should pay special attention to.
+Once the Source++ Plugin has been installed, and the appropriate integrations have been added the final step which may be necessary is to configure any source code artifacts which Source++ should pay special attention to.
 The appropriate necessary configuration will depend on which integrations are enabled.
 
 For now, with Apache SkyWalking being the only available integration the only configuration which may be necessary is to designate which methods in your code are to be considered "entry methods".
