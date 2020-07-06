@@ -59,6 +59,7 @@ task updatePluginResources {
     dependsOn ":core:build"
 
     doFirst {
+        println "project dir: " + projectDir
         def portalResources = file('../../portal/src/main/resources')
         if (!portalResources.exists()) throw new IllegalStateException("Could not find portal resources")
         copy {
@@ -97,3 +98,9 @@ task updatePluginResources {
 compileJava.mustRunAfter updatePluginResources
 runIde.dependsOn updatePluginResources
 buildPlugin.dependsOn updatePluginResources
+
+build {
+    doLast {
+        println "Plugin file size: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
+    }
+}
