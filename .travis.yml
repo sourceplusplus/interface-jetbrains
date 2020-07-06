@@ -1,4 +1,8 @@
 language: java
+install: skip
+
+os: linux
+dist: trusty
 jdk: openjdk11
 
 services:
@@ -11,10 +15,16 @@ env:
 before_install:
  - chmod +x gradlew
 
+script:
+  - ./gradlew build --scan -s
+
 before_cache:
-  - rm -rf $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
 cache:
-    - $HOME/.gradle/caches/modules-2
+  directories:
+    - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
 deploy:
