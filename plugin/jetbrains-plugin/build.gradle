@@ -117,5 +117,6 @@ build {
     doLast {
         println "Plugin file size: " + file('build/distributions/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
         println "Lib file size: " + file('build/libs/jetbrains-source-plugin-0.3.1.zip').size() /  (1024 * 1024) + "mb"
+        println "Skywalking folder size: " + file('build/resources/main/skywalking').directorySize() /  (1024 * 1024) + "mb"
     }
 }
