@@ -58,6 +58,8 @@ class PluginCoordinator extends AbstractVerticle {
             }
         })
 
+        vertx.deployVerticle(new IntegrationInfoTracker(), new DeploymentOptions().setWorker(true))
+
         //config
         vertx.deployVerticle(new SpringMVCArtifactConfigIntegrator(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new SkywalkingTraceConfigIntegrator(), new DeploymentOptions().setWorker(true))
@@ -69,7 +71,5 @@ class PluginCoordinator extends AbstractVerticle {
         //track
         vertx.deployVerticle(new PluginArtifactTracker(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new PluginArtifactSubscriptionTracker(), new DeploymentOptions().setWorker(true))
-
-        vertx.deployVerticle(new IntegrationInfoTracker(), new DeploymentOptions().setWorker(true))
     }
 }

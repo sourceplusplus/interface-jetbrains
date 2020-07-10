@@ -1060,20 +1060,19 @@ public class SourceCoreClient implements SourceClient {
     }
 
     private <T> Future<T> asyncAPIException(String responseBody) {
-        JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
-        String[] strErrors = new String[errors.size()];
-        for (int i = 0; i < errors.size(); i++) {
-            strErrors[i] = errors.getString(i);
-        }
-        return Future.failedFuture(new APIException(strErrors));
+        return Future.failedFuture(getAPIException(responseBody));
     }
 
     private APIException getAPIException(String responseBody) {
-        JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
-        String[] strErrors = new String[errors.size()];
-        for (int i = 0; i < errors.size(); i++) {
-            strErrors[i] = errors.getString(i);
+        try {
+            JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
+            String[] strErrors = new String[errors.size()];
+            for (int i = 0; i < errors.size(); i++) {
+                strErrors[i] = errors.getString(i);
+            }
+            return new APIException(strErrors);
+        } catch (Exception ex) {
+            return new APIException(responseBody);
         }
-        return new APIException(strErrors);
     }
 }

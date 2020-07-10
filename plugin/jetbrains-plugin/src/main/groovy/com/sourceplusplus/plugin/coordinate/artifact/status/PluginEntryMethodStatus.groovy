@@ -5,6 +5,7 @@ import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.config.SourcePortalConfig
+import com.sourceplusplus.api.model.integration.IntegrationInfo
 import com.sourceplusplus.api.model.metric.ArtifactMetricResult
 import com.sourceplusplus.api.model.metric.ArtifactMetricSubscribeRequest
 import com.sourceplusplus.marker.MarkerUtils
@@ -16,6 +17,7 @@ import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.plugin.SourcePlugin
+import com.sourceplusplus.plugin.coordinate.integration.IntegrationInfoTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
 import com.sourceplusplus.portal.display.tabs.OverviewTab
 import groovy.util.logging.Slf4j
@@ -26,6 +28,7 @@ import java.awt.*
 import java.text.DecimalFormat
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
+import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.INTEGRATION_INFO_UPDATED
 import static com.sourceplusplus.api.model.metric.MetricType.*
 
 /**
@@ -40,16 +43,29 @@ class PluginEntryMethodStatus extends AbstractVerticle {
 
     private static final DecimalFormat decimalFormat = new DecimalFormat(".#")
     private static final Color SPP_RED = Color.decode("#e1483b")
+    private static final Stack<SourceArtifact> PENDING_ARTIFACTS = new Stack<>()
 
     @Override
     void start() throws Exception {
+        SourcePlugin.vertx.eventBus().consumer(INTEGRATION_INFO_UPDATED.address, {
+            def integration = it.body() as IntegrationInfo
+            if ((integration.id() == "apache_skywalking" && integration.enabled())
+                    || IntegrationInfoTracker.getActiveIntegrationInfo("apache_skywalking")) {
+                while (!PENDING_ARTIFACTS.isEmpty()) {
+                    subscribeToEntryMethodArtifact(PENDING_ARTIFACTS.pop())
+                }
+            }
+        })
+
         //listen for entry methods to add inlay marks to
         SourceMarkerPlugin.INSTANCE.addGlobalSourceMarkEventListener(new SourceMarkEventListener() {
             @Override
             void handleEvent(@NotNull SourceMarkEvent sourceMarkEvent) {
                 if (sourceMarkEvent.eventCode == GutterMarkEventCode.GUTTER_MARK_VISIBLE) {
                     def gutterMark = sourceMarkEvent.sourceMark as IntelliJGutterMark
-                    if (gutterMark.sourceArtifact.config().endpoint()) {
+                    if (!IntegrationInfoTracker.getActiveIntegrationInfo("apache_skywalking")) {
+                        PENDING_ARTIFACTS.push(gutterMark.sourceArtifact)
+                    } else if (gutterMark.sourceArtifact.config().endpoint()) {
                         subscribeToEntryMethodArtifact(gutterMark.sourceArtifact)
                     }
                 }
@@ -57,7 +73,9 @@ class PluginEntryMethodStatus extends AbstractVerticle {
         })
         SourcePlugin.vertx.eventBus().consumer(ARTIFACT_CONFIG_UPDATED.address, {
             def artifact = it.body() as SourceArtifact
-            if (artifact.config().endpoint()) {
+            if (!IntegrationInfoTracker.getActiveIntegrationInfo("apache_skywalking")) {
+                PENDING_ARTIFACTS.push(artifact)
+            } else if (artifact.config().endpoint()) {
                 subscribeToEntryMethodArtifact(artifact)
             }
         })
