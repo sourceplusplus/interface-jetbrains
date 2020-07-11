@@ -1,7 +1,9 @@
 package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 
 import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
+import com.intellij.lang.jvm.annotation.JvmAnnotationEnumFieldValue
 import com.intellij.openapi.application.ReadAction
+import com.intellij.psi.PsiField
 import com.intellij.psi.PsiLiteral
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
@@ -125,6 +127,10 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                             if (it.attributeValue instanceof JvmAnnotationConstantValue) {
                                 def annotationConstantValue = it.attributeValue as JvmAnnotationConstantValue
                                 attributeMap.put(it.attributeName, annotationConstantValue.constantValue)
+                            } else if (it.attributeValue instanceof JvmAnnotationEnumFieldValue) {
+                                def enumValue = it.attributeValue as JvmAnnotationEnumFieldValue
+                                def sourceElement = enumValue.field.sourceElement as PsiField
+                                attributeMap.put(it.attributeName, sourceElement.name)
                             } else if (it.attributeValue.sourceElement instanceof PsiLiteral) {
                                 attributeMap.put(it.attributeName, (it.attributeValue.sourceElement as PsiLiteral).value)
                             } else {
