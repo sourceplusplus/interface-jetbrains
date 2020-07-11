@@ -33,6 +33,7 @@ import io.vertx.core.Handler
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUAnnotation
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UResolvable
 import org.jetbrains.uast.java.JavaUAnnotation
 
 import javax.swing.*
@@ -115,7 +116,12 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                         def attributeMap = new HashMap<String, Object>()
                         it.attributeValues.each {
                             if (it.name) {
-                                attributeMap.put(it.name, (it.expression as ULiteralExpression).value)
+                                if (it.expression instanceof UResolvable) {
+                                    def sourceElement = (it.expression as UResolvable).resolve() as PsiField
+                                    attributeMap.put(it.name, sourceElement.name)
+                                } else {
+                                    attributeMap.put(it.name, (it.expression as ULiteralExpression).value)
+                                }
                             } else {
                                 //log.warn("Unknown annotation expression: " + it)
                             }
