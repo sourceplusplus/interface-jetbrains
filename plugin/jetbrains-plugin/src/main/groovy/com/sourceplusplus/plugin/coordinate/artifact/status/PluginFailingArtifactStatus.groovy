@@ -2,7 +2,6 @@ package com.sourceplusplus.plugin.coordinate.artifact.status
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.JavaPsiFacade
-import com.intellij.psi.search.GlobalSearchScope
 import com.sourceplusplus.api.bridge.PluginBridgeEndpoints
 import com.sourceplusplus.api.model.QueryTimeFrame
 import com.sourceplusplus.api.model.artifact.SourceArtifact
@@ -14,15 +13,14 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
-import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
+import com.sourceplusplus.plugin.intellij.marker.mark.inlay.IntelliJVirtualText
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.uast.UThrowExpression
 
-import java.awt.*
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -47,7 +45,6 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
 
     private static final DateTimeFormatter dateTimeFormatter =
             DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withZone(ZoneId.systemDefault())
-    private static final Color SPP_RED = Color.decode("#e1483b")
 
     @Override
     void start() throws Exception {
@@ -94,6 +91,7 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
     }
 
     private static addOrUpdateVirtualText(String artifactQualifiedName, TraceSpan span) {
+        if (!span.logs()) return
         def errorLogs = span.logs()[0]
         def errorKind = errorLogs.data().get("error.kind").replaceAll("\\w+(\\.)", '')
         def errorText = " @ ${dateTimeFormatter.format(errorLogs.time())}"
@@ -131,31 +129,24 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
         }
     }
 
-    private static void updateInlineVirtualText(InlayMark inlayMark, String errorKind, String errorText) {
+    private static void updateInlineVirtualText(InlayMark inlayMark, String errorKind, String errorStatus) {
         if (!inlayMark.sourceFileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
         if (inlayMark.configuration.virtualText == null) {
-            inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, errorText)
-            inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
-            inlayMark.configuration.virtualText.setUseInlinePresentation(true)
-            inlayMark.configuration.activateOnMouseClick = false
+            inlayMark.configuration.virtualText = new IntelliJVirtualText(inlayMark, errorStatus, true)
         }
 
-        if (inlayMark.psiExpression instanceof UThrowExpression) {
-            inlayMark.configuration.virtualText.updateVirtualText(" //Thrown" + errorText)
-        } else {
-            inlayMark.configuration.virtualText.updateVirtualText(" //" + errorKind + errorText)
-        }
+        def virtualText = (IntelliJVirtualText) inlayMark.configuration.virtualText
+        virtualText.updateFailingArtifactStatus(errorKind, errorStatus, inlayMark.psiExpression instanceof UThrowExpression)
     }
 
     private static void updateMethodVirtualText(InlayMark inlayMark, String errorKind, String errorText) {
         if (!inlayMark.sourceFileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
         if (inlayMark.configuration.virtualText == null) {
-            inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, errorText)
-            inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
-            inlayMark.configuration.activateOnMouseClick = false
+            inlayMark.configuration.virtualText = new IntelliJVirtualText(inlayMark, errorText, false)
         }
 
-        inlayMark.configuration.virtualText.updateVirtualText("    //" + errorKind + errorText)
+        def virtualText = (IntelliJVirtualText) inlayMark.configuration.virtualText
+        virtualText.updateFailingArtifactStatus(errorKind, errorText, false)
     }
 
     private static void addFailingVirtualText(SourceArtifact sourceArtifact) {

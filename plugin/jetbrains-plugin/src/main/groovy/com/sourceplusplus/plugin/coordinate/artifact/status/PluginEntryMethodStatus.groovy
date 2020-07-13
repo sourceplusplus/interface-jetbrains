@@ -15,16 +15,15 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
-import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.plugin.SourcePlugin
 import com.sourceplusplus.plugin.coordinate.integration.IntegrationInfoTracker
 import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
+import com.sourceplusplus.plugin.intellij.marker.mark.inlay.IntelliJVirtualText
 import com.sourceplusplus.portal.display.tabs.OverviewTab
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import org.jetbrains.annotations.NotNull
 
-import java.awt.*
 import java.text.DecimalFormat
 
 import static com.sourceplusplus.api.bridge.PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED
@@ -42,7 +41,6 @@ import static com.sourceplusplus.api.model.metric.MetricType.*
 class PluginEntryMethodStatus extends AbstractVerticle {
 
     private static final DecimalFormat decimalFormat = new DecimalFormat(".#")
-    private static final Color SPP_RED = Color.decode("#e1483b")
     private static final Stack<SourceArtifact> PENDING_ARTIFACTS = new Stack<>()
 
     @Override
@@ -116,11 +114,11 @@ class PluginEntryMethodStatus extends AbstractVerticle {
                     gutterMark.sourceFileMarker, gutterMark.psiElement.nameIdentifier)
             if (!inlayMark.sourceFileMarker.containsSourceMark(inlayMark)) inlayMark.apply(true)
             if (inlayMark.configuration.virtualText == null) {
-                inlayMark.configuration.virtualText = new InlayMarkVirtualText(inlayMark, virtualTextResult)
-                inlayMark.configuration.virtualText.textAttributes.setForegroundColor(SPP_RED)
-                inlayMark.configuration.activateOnMouseClick = false
+                inlayMark.configuration.virtualText = new IntelliJVirtualText(inlayMark, virtualTextResult, false)
             }
-            inlayMark.configuration.virtualText.updateVirtualText(virtualTextResult)
+
+            def virtualText = (IntelliJVirtualText) inlayMark.configuration.virtualText
+            virtualText.updateEntryMethodStatus(virtualTextResult)
         }
     }
 
