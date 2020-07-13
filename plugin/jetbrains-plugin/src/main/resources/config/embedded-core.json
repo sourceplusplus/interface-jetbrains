@@ -1,7 +1,7 @@
 {
   "core": {
     "host": "localhost",
-    "port": 0,
+    "port": 8080,
     "ssl": false,
     "jks_path": null,
     "jks_password": null,

@@ -137,28 +137,50 @@ public class SourceCoreClient implements SourceClient {
         bridgeClient.setupSubscriptions();
     }
 
-    public void ping(Handler<AsyncResult<Boolean>> handler) {
-        try {
-            String url = sppUrl + PING_ENDPOINT;
-            Request request = new Request.Builder().url(url).get().build();
+    public boolean ping() {
+        String url = sppUrl + PING_ENDPOINT;
+        Request request = new Request.Builder().url(url).get().build();
 
-            OkHttpClient timeOutClient = client.newBuilder()
-                    .connectTimeout(5, TimeUnit.SECONDS)
-                    .writeTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(5, TimeUnit.SECONDS)
-                    .build();
-            try (Response response = timeOutClient.newCall(request).execute()) {
+        try (Response response = client.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .build().newCall(request).execute()) {
+            String responseBody = response.body().string();
+            if (response.code() == 200) {
+                return true;
+            } else {
+                throw getAPIException(responseBody);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void ping(Handler<AsyncResult<Boolean>> handler) {
+        String url = sppUrl + PING_ENDPOINT;
+        Request request = new Request.Builder().url(url).get().build();
+
+        client.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .build().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
                 if (response.code() == 200) {
                     handler.handle(Future.succeededFuture(true));
                 } else {
-                    handler.handle(Future.failedFuture(response.message()));
+                    handler.handle(asyncAPIException(responseBody));
                 }
-            } catch (Exception e) {
-                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        });
     }
 
     public void updateIntegrationInfo(IntegrationInfo updatedIntegrationInfo,

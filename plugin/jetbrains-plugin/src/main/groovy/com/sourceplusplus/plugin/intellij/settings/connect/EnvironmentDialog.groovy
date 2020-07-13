@@ -185,25 +185,17 @@ class EnvironmentDialog extends JDialog {
                 coreClient.apiKey = apiTokenTextField.getText().trim()
             }
 
-            coreClient.ping({
-                if (it.failed()) {
-                    def connectDialog = new ConnectionInfoDialogWrapper(it.cause())
-                    connectDialog.createCenterPanel()
-                    connectDialog.show()
-                } else {
-                    coreClient.info({
-                        if (it.failed()) {
-                            def connectDialog = new ConnectionInfoDialogWrapper(it.cause())
-                            connectDialog.createCenterPanel()
-                            connectDialog.show()
-                        } else {
-                            def connectDialog = new ConnectionInfoDialogWrapper(it.result())
-                            connectDialog.createCenterPanel()
-                            connectDialog.show()
-                        }
-                    })
-                }
-            })
+            try {
+                coreClient.ping()
+
+                def connectDialog = new ConnectionInfoDialogWrapper(coreClient.info())
+                connectDialog.createCenterPanel()
+                connectDialog.show()
+            } catch (Exception ex) {
+                def connectDialog = new ConnectionInfoDialogWrapper(ex)
+                connectDialog.createCenterPanel()
+                connectDialog.show()
+            }
         })
         nameTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
