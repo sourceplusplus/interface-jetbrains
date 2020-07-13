@@ -213,8 +213,10 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                 if (sourceArtifact.status().activelyFailing()) {
                     markComponent.configuration.initialUrl =
                             IntelliJPortalUI.getPortalUrl(PortalTab.Traces, portalUuid) +
-                                    "&order_type=" + TraceOrderType.FAILED_TRACES +
-                                    "&hide_overview_tab=true"
+                                    "&order_type=" + TraceOrderType.FAILED_TRACES
+                    if (!sourceArtifact.config().endpoint()) {
+                        markComponent.configuration.initialUrl += "&hide_overview_tab=true"
+                    }
 
                     newPortal = new IntelliJPortalUI(portalUuid, markComponent.browser)
                     newPortal.tracesView.orderType = TraceOrderType.FAILED_TRACES
