@@ -271,6 +271,8 @@ class OverviewTab extends AbstractTab {
             return (perSecond / 1000000 as int) + "M/sec"
         } else if (perSecond > 1000) {
             return (perSecond / 1000 as int) + "K/sec"
+        } else if (perSecond > 1) {
+            return (perSecond as int) + "/sec"
         } else {
             return (perSecond * 60 as int) + "/min"
         }
