@@ -30,7 +30,7 @@ class CoreConfig {
     }
 
     void save() {
-        log.debug("Saving updated core config")
+        log.trace("Saving updated core config")
         _storage.updateCoreConfig(this, {
             if (it.failed()) {
                 log.error("Failed to update core config", it.cause())

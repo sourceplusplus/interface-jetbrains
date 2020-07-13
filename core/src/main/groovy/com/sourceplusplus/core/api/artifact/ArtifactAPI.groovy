@@ -358,20 +358,20 @@ class ArtifactAPI extends AbstractVerticle {
 
     void getSourceArtifact(String appUuid, String artifactQualifiedName,
                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.debug("Getting source artifact. App UUID: {} - Artifact qualified name: {}",
+        log.trace("Getting source artifact. App UUID: {} - Artifact qualified name: {}",
                 appUuid, getShortQualifiedFunctionName(artifactQualifiedName))
         getAndCacheSourceArtifact(appUuid, artifactQualifiedName, handler)
     }
 
     void getSourceArtifactByEndpointName(String appUuid, String endpointName,
                                          Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.debug("Getting source artifact. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
+        log.trace("Getting source artifact. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
         getAndCacheSourceArtifactByEndpointName(appUuid, endpointName, handler)
     }
 
     void getSourceArtifactByEndpointId(String appUuid, String endpointId,
                                        Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.debug("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
+        log.trace("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
         getAndCacheSourceArtifactByEndpointId(appUuid, endpointId, handler)
     }
 

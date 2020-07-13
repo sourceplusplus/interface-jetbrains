@@ -403,7 +403,7 @@ class ApplicationAPI extends AbstractVerticle {
     }
 
     void getApplication(String appUuid, Handler<AsyncResult<Optional<SourceApplication>>> handler) {
-        log.debug("Getting application. App uuid: {}", appUuid)
+        log.trace("Getting application. App uuid: {}", appUuid)
         getAndCacheSourceApplication(appUuid, handler)
     }
 

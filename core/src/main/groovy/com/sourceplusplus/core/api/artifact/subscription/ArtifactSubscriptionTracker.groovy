@@ -115,7 +115,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     }
 
     private void removeInactiveArtifactSubscriptions() {
-        log.debug("Removing inactivate artifact subscriptions")
+        log.trace("Removing inactivate artifact subscriptions")
         def inactiveLimit = config().getJsonObject("core").getInteger("subscription_inactive_limit_minutes")
         core.storage.getSubscriberArtifactSubscriptions({
             if (it.succeeded()) {
