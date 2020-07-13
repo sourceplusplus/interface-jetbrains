@@ -25,6 +25,7 @@ public class SourceEnvironmentConfig {
     public volatile boolean apiSslEnabled;
     public volatile String apiKey;
     public volatile boolean embedded;
+    public volatile String applicationDomain;
 
     @Transient
     public String getSppUrl() {

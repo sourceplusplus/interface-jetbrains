@@ -10,6 +10,7 @@ import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
+import com.sourceplusplus.marker.source.mark.api.filter.CreateSourceMarkFilter
 import com.sourceplusplus.plugin.coordinate.PluginCoordinator
 import com.sourceplusplus.plugin.intellij.marker.IntelliJSourceFileMarker
 import com.sourceplusplus.portal.PortalBootstrap
@@ -59,6 +60,13 @@ class PluginBootstrap extends AbstractVerticle {
             SourceFileMarker createSourceFileMarker(@NotNull PsiFile psiFile) {
                 log.debug("Creating source file marker for file: " + psiFile)
                 return new IntelliJSourceFileMarker(psiFile)
+            }
+        }
+        SourceMarkerPlugin.configuration.createSourceMarkFilter = new CreateSourceMarkFilter() {
+            @Override
+            boolean test(String artifactQualifiedName) {
+                //todo: not much point in keeping / in the application domain
+                return artifactQualifiedName =~ SourcePluginConfig.current.activeEnvironment.applicationDomain.replace("/", "\\.")
             }
         }
     }
