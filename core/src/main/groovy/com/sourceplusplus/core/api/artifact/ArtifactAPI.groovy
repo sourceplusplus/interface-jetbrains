@@ -209,10 +209,10 @@ class ArtifactAPI extends AbstractVerticle {
                         if (it.succeeded()) {
                             APPLICATION_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + artifact.artifactQualifiedName(), it.result())
 
-                            if (it.result().config() && it.result().config().endpointName()) {
+                            if (it.result().config().endpointName()) {
                                 ENDPOINT_NAME_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + it.result().config().endpointName(), it.result())
                             }
-                            if (it.result().config() && it.result().config().endpointIds()) {
+                            if (it.result().config().endpointIds()) {
                                 it.result().config().endpointIds().each { endpointId ->
                                     ENDPOINT_ID_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + endpointId, it.result())
                                 }
@@ -238,10 +238,10 @@ class ArtifactAPI extends AbstractVerticle {
                         if (it.succeeded()) {
                             APPLICATION_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + artifact.artifactQualifiedName(), it.result())
 
-                            if (it.result().config() && it.result().config().endpointName()) {
+                            if (it.result().config().endpointName()) {
                                 ENDPOINT_NAME_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + it.result().config().endpointName(), it.result())
                             }
-                            if (it.result().config() && it.result().config().endpointIds()) {
+                            if (it.result().config().endpointIds()) {
                                 it.result().config().endpointIds().each { endpointId ->
                                     ENDPOINT_ID_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + endpointId, it.result())
                                 }
