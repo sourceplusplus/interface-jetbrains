@@ -43,14 +43,16 @@ class IntelliJVirtualText extends InlayMarkVirtualText {
 
     private String makeVirtualText() {
         if (entryMethodStatus && failingArtifactStatus) {
-            entryMethodStatus + " | " + failingArtifactKind + failingArtifactStatus
+            entryMethodStatus + " | " + failingArtifactKind + " " + failingArtifactStatus
         } else if (entryMethodStatus) {
             return entryMethodStatus
         } else {
             if (failingOnThrownLine) {
                 return " //Thrown " + failingArtifactStatus
+            } else if (useInlinePresentation) {
+                return " //" + failingArtifactKind + " " + failingArtifactStatus
             } else {
-                return " //" + failingArtifactKind + failingArtifactStatus
+                return failingArtifactKind + " " + failingArtifactStatus
             }
         }
     }

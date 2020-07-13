@@ -94,7 +94,7 @@ class PluginFailingArtifactStatus extends AbstractVerticle {
         if (!span.logs()) return
         def errorLogs = span.logs()[0]
         def errorKind = errorLogs.data().get("error.kind").replaceAll("\\w+(\\.)", '')
-        def errorText = " @ ${dateTimeFormatter.format(errorLogs.time())}"
+        def errorText = "@ ${dateTimeFormatter.format(errorLogs.time())}"
 
         //check if error line can be determined
         def useMethodVirtualText = true

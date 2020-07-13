@@ -81,7 +81,6 @@ class PluginEntryMethodStatus extends AbstractVerticle {
             def metricResult = it.body() as ArtifactMetricResult
             if (metricResult.timeFrame() == QueryTimeFrame.LAST_5_MINUTES) {
                 //todo: no import of OverviewTab
-                def virtualTextResult = "    "
                 def throughput = "n/a"
                 def response = "n/a RESP"
                 def sla = "n/a SLA"
@@ -97,12 +96,11 @@ class PluginEntryMethodStatus extends AbstractVerticle {
                         sla = (avg == 0 ? "0%" : decimalFormat.format(avg / 100.0) + "%") + " SLA"
                     }
                 }
-                virtualTextResult += "$throughput | $response | $sla"
 
                 def gutterMark = SourceMarkerPlugin.INSTANCE.getSourceMark(metricResult.artifactQualifiedName(),
                         SourceMark.Type.GUTTER) as MethodGutterMark
                 if (gutterMark) {
-                    updateEntryMethodVirtualText(gutterMark, virtualTextResult)
+                    updateEntryMethodVirtualText(gutterMark, "$throughput | $response | $sla")
                 }
             }
         })
