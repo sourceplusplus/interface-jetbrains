@@ -38,7 +38,6 @@ class SkywalkingTraceConfigIntegrator extends AbstractVerticle {
                 def artifactConfig = SourceArtifactConfig.builder()
                         .component("Local")
                         .moduleName(mark.getModuleName())
-                        .endpoint(false)
                 def operationName = it.attributeMap.get("operationName") as String
                 if (operationName) {
                     artifactConfig.endpointName(operationName)

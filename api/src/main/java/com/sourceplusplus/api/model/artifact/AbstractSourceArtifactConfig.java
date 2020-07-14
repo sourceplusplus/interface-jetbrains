@@ -26,6 +26,9 @@ public interface AbstractSourceArtifactConfig extends SourceMessage {
     Boolean endpoint();
 
     @Nullable
+    Boolean automaticEndpoint();
+
+    @Nullable
     Boolean subscribeAutomatically();
 
     @Nullable

@@ -46,7 +46,8 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
                         SourceArtifactConfig.builder()
                                 .component("SpringMVC")
                                 .moduleName(mark.getModuleName())
-                                .endpoint(true).subscribeAutomatically(true)
+                                .endpoint(true).automaticEndpoint(true)
+                                .subscribeAutomatically(true)
                                 .endpointName(requestUrl).build(), {
                     if (it.succeeded()) {
                         log.debug("Created/Updated artifact config for artifact: " + mark.artifactQualifiedName)

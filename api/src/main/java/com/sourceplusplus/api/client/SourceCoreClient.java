@@ -62,7 +62,7 @@ public class SourceCoreClient implements SourceClient {
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/subscriptions?includeAutomatic=:includeAutomatic", SPP_API_VERSION);
     private static final String GET_APPLICATION_ENDPOINTS_ENDPOINT = String.format(
-            "/%s/applications/:appUuid/endpoints", SPP_API_VERSION);
+            "/%s/applications/:appUuid/endpoints?includeAutomatic=:includeAutomatic", SPP_API_VERSION);
     private static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/subscribers/:subscriberUuid/subscriptions", SPP_API_VERSION);
     private static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
@@ -609,9 +609,10 @@ public class SourceCoreClient implements SourceClient {
         });
     }
 
-    public List<SourceArtifact> getApplicationEndpoints(String appUuid) {
+    public List<SourceArtifact> getApplicationEndpoints(String appUuid, boolean includeAutomatic) {
         String url = sppUrl + GET_APPLICATION_ENDPOINTS_ENDPOINT
-                .replace(":appUuid", appUuid);
+                .replace(":appUuid", appUuid)
+                .replace(":includeAutomatic", Boolean.toString(includeAutomatic));
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
@@ -624,9 +625,11 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void getApplicationEndpoints(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+    public void getApplicationEndpoints(String appUuid, boolean includeAutomatic,
+                                        Handler<AsyncResult<List<SourceArtifact>>> handler) {
         String url = sppUrl + GET_APPLICATION_ENDPOINTS_ENDPOINT
-                .replace(":appUuid", appUuid);
+                .replace(":appUuid", appUuid)
+                .replace(":includeAutomatic", Boolean.toString(includeAutomatic));
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 

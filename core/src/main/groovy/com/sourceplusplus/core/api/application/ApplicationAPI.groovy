@@ -164,7 +164,9 @@ class ApplicationAPI extends AbstractVerticle {
                     .end(Json.encode(new SourceAPIError().addError(SourceAPIErrors.INVALID_INPUT)))
             return
         }
-        getApplicationEndpoints(appUuid, {
+        def includeAutomatic = Boolean.valueOf(routingContext.request().getParam("includeAutomatic"))
+
+        getApplicationEndpoints(appUuid, includeAutomatic, {
             if (it.succeeded()) {
                 routingContext.response().setStatusCode(200)
                         .end(Json.encode(it.result()))
@@ -219,9 +221,10 @@ class ApplicationAPI extends AbstractVerticle {
         })
     }
 
-    void getApplicationEndpoints(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
-        log.info("Getting appliction endpoints. App UUID: $appUuid")
-        core.storage.findArtifactByEndpoint(appUuid, handler)
+    void getApplicationEndpoints(String appUuid, boolean includeAutomatic,
+                                 Handler<AsyncResult<List<SourceArtifact>>> handler) {
+        log.info("Getting appliction endpoints. App UUID: $appUuid - Include automatic: $includeAutomatic")
+        core.storage.findArtifactByEndpoint(appUuid, includeAutomatic, handler)
     }
 
     private void updateApplicationRoute(RoutingContext routingContext) {
