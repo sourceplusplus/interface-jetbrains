@@ -34,7 +34,7 @@ import static com.sourceplusplus.core.integration.apm.APMIntegrationConfig.Sourc
 /**
  * Represents integration with the Apache SkyWalking APM.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -605,12 +605,19 @@ class SkywalkingIntegration extends APMIntegration {
                                                   SourceArtifact artifact, Map<String, String> skywalkingEndpoints) {
         def processedSpans = new ArrayList<TraceSpan>()
         if (traceStackData != null) {
+            def allSpans = new ArrayList<TraceSpan>()
             def stack = traceStackData.getJsonArray("spans")
             def segments = new HashMap<String, List<TraceSpan>>()
             for (int i = 0; i < stack.size(); i++) {
                 def traceSpan = Json.decodeValue(stack.getJsonObject(i).toString(), TraceSpan.class)
                 segments.putIfAbsent(traceSpan.segmentId(), new ArrayList<TraceSpan>())
                 segments.get(traceSpan.segmentId()).add(traceSpan)
+                allSpans.add(traceSpan)
+            }
+
+            def parentSpan = null
+            if (spanQuery.oneLevelDeep()) {
+                parentSpan = getClosestMatchingSpan(allSpans, artifact, skywalkingEndpoints)
             }
 
             def segmentSpanChildStacks = new HashMap<String, HashSet<Long>>()
@@ -620,15 +627,10 @@ class SkywalkingIntegration extends APMIntegration {
                 if (spanQuery.oneLevelDeep()) {
                     if (spanQuery.spanId() != null) {
                         parentSpanId = spanQuery.spanId()
+                    } else if (parentSpan) {
+                        parentSpanId = parentSpan.spanId()
                     } else {
-                        def parentSpan = traceSpans.find {
-                            isMatchingArtifact(it, artifact, skywalkingEndpoints)
-                        }
-                        if (parentSpan) {
-                            parentSpanId = parentSpan.spanId()
-                        } else {
-                            continue
-                        }
+                        continue
                     }
                 }
 
@@ -670,18 +672,52 @@ class SkywalkingIntegration extends APMIntegration {
         return processedSpans
     }
 
-    private static boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact,
-                                              Map<String, String> skywalkingEndpoints) {
-        if (traceSpan.component() && traceSpan.component() != UNKNOWN_COMPONENT) {
-            return false //skip entry component spans
+    private static TraceSpan getClosestMatchingSpan(List<TraceSpan> traceSpans, SourceArtifact artifact,
+                                                    Map<String, String> skywalkingEndpoints) {
+        def matchingSpans = traceSpans.findAll { isMatchingArtifact(it, artifact, skywalkingEndpoints) }
+        if (matchingSpans.isEmpty()) {
+            return null
+        } else if (matchingSpans.size() == 1) {
+            return matchingSpans[0]
         }
 
+        //artifact qualified name most accurate
+        def artifactMatch = matchingSpans.find {
+            it.endpointName() == artifact.artifactQualifiedName() ||
+                    it.artifactQualifiedName() == artifact.artifactQualifiedName()
+        }
+        if (artifactMatch) {
+            return artifactMatch
+        }
+
+        //endpoint id next most accurate
+        def endpointIdMatch = matchingSpans.find {
+            def endpointId = skywalkingEndpoints.get(it.endpointName())
+            return endpointId && artifact.config().endpointIds() && artifact.config().endpointIds().contains(endpointId)
+        }
+        if (endpointIdMatch) {
+            return endpointIdMatch
+        }
+
+        //endpoint name next most accurate
+        def endpointNameMatch = matchingSpans.find {
+            it.endpointName() == artifact.config().endpointName()
+        }
+        if (endpointNameMatch) {
+            return endpointNameMatch
+        }
+
+        throw new IllegalStateException("No artifact or endpoint name match")
+    }
+
+    private static boolean isMatchingArtifact(TraceSpan traceSpan, SourceArtifact artifact,
+                                              Map<String, String> skywalkingEndpoints) {
         def endpointId = skywalkingEndpoints.get(traceSpan.endpointName())
         if (endpointId && artifact.config().endpointIds() && artifact.config().endpointIds().contains(endpointId)) {
             return true
         } else {
             return traceSpan.endpointName() == artifact.artifactQualifiedName() ||
-                    (artifact.config() && traceSpan.endpointName() == artifact.config().endpointName())
+                    traceSpan.endpointName() == artifact.config().endpointName()
         }
     }
 }

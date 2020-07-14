@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * A common client interface for the various Source++ components.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -25,7 +25,7 @@ import static com.sourceplusplus.api.util.ArtifactNameUtils.getShortQualifiedFun
  * Used to add/modify/fetch artifact subscriptions and configurations.
  * todo: artifact caching
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -209,10 +209,10 @@ class ArtifactAPI extends AbstractVerticle {
                         if (it.succeeded()) {
                             APPLICATION_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + artifact.artifactQualifiedName(), it.result())
 
-                            if (it.result().config() && it.result().config().endpointName()) {
+                            if (it.result().config().endpointName()) {
                                 ENDPOINT_NAME_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + it.result().config().endpointName(), it.result())
                             }
-                            if (it.result().config() && it.result().config().endpointIds()) {
+                            if (it.result().config().endpointIds()) {
                                 it.result().config().endpointIds().each { endpointId ->
                                     ENDPOINT_ID_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + endpointId, it.result())
                                 }
@@ -238,10 +238,10 @@ class ArtifactAPI extends AbstractVerticle {
                         if (it.succeeded()) {
                             APPLICATION_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + artifact.artifactQualifiedName(), it.result())
 
-                            if (it.result().config() && it.result().config().endpointName()) {
+                            if (it.result().config().endpointName()) {
                                 ENDPOINT_NAME_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + it.result().config().endpointName(), it.result())
                             }
-                            if (it.result().config() && it.result().config().endpointIds()) {
+                            if (it.result().config().endpointIds()) {
                                 it.result().config().endpointIds().each { endpointId ->
                                     ENDPOINT_ID_ARTIFACT_CACHE.put(artifact.appUuid() + ":" + endpointId, it.result())
                                 }
@@ -358,20 +358,20 @@ class ArtifactAPI extends AbstractVerticle {
 
     void getSourceArtifact(String appUuid, String artifactQualifiedName,
                            Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.debug("Getting source artifact. App UUID: {} - Artifact qualified name: {}",
+        log.trace("Getting source artifact. App UUID: {} - Artifact qualified name: {}",
                 appUuid, getShortQualifiedFunctionName(artifactQualifiedName))
         getAndCacheSourceArtifact(appUuid, artifactQualifiedName, handler)
     }
 
     void getSourceArtifactByEndpointName(String appUuid, String endpointName,
                                          Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.debug("Getting source artifact. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
+        log.trace("Getting source artifact. App UUID: {} - Endpoint name: {}", appUuid, endpointName)
         getAndCacheSourceArtifactByEndpointName(appUuid, endpointName, handler)
     }
 
     void getSourceArtifactByEndpointId(String appUuid, String endpointId,
                                        Handler<AsyncResult<Optional<SourceArtifact>>> handler) {
-        log.debug("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
+        log.trace("Getting source artifact. App UUID: {} - Endpoint id: {}", appUuid, endpointId)
         getAndCacheSourceArtifactByEndpointId(appUuid, endpointId, handler)
     }
 

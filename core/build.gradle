@@ -136,8 +136,13 @@ test.doFirst {
 
 shadowJar {
     dependencies {
+        //todo: only exclude these on embedded build
+
         exclude(dependency {
             it.moduleGroup == 'org.apache.logging.log4j'
+        })
+        exclude(dependency {
+            it.moduleGroup == 'com.sourceplusplus.api'
         })
     }
 }

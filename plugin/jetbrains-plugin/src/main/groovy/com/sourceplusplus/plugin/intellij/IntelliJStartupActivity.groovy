@@ -38,7 +38,7 @@ import java.util.concurrent.CountDownLatch
 /**
  * Starts up the plugin source marker.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -265,8 +265,11 @@ class IntelliJStartupActivity extends SourceMarkerStartupActivity implements Dis
                             coreClient.createApplication(SourceApplication.builder().isCreateRequest(true)
                                     .appName(currentProject.name).build(), {
                                 if (it.succeeded()) {
+                                    //todo: shouldn't need to double appUuid/applicationDomain up
                                     SourcePluginConfig.current.activeEnvironment.appUuid = it.result().appUuid()
+                                    SourcePluginConfig.current.activeEnvironment.applicationDomain = appDomain
                                     SourcePluginConfig.current.getEnvironment(SourcePluginConfig.current.activeEnvironment.environmentName).appUuid = it.result().appUuid()
+                                    SourcePluginConfig.current.getEnvironment(SourcePluginConfig.current.activeEnvironment.environmentName).applicationDomain = appDomain
                                     PropertiesComponent.getInstance().setValue("spp_plugin_config", Json.encode(SourcePluginConfig.current))
                                     startSourcePlugin(coreClient)
                                 } else {

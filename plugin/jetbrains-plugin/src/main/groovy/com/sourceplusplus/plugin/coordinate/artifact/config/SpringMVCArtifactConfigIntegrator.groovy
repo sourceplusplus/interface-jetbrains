@@ -12,7 +12,7 @@ import io.vertx.core.AbstractVerticle
  * Automatically appends the appropriate artifact configuration
  * on artifacts annotated with Spring Framework's web binding annotations.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -46,7 +46,8 @@ class SpringMVCArtifactConfigIntegrator extends AbstractVerticle {
                         SourceArtifactConfig.builder()
                                 .component("SpringMVC")
                                 .moduleName(mark.getModuleName())
-                                .endpoint(true).subscribeAutomatically(true)
+                                .endpoint(true).automaticEndpoint(true)
+                                .subscribeAutomatically(true)
                                 .endpointName(requestUrl).build(), {
                     if (it.succeeded()) {
                         log.debug("Created/Updated artifact config for artifact: " + mark.artifactQualifiedName)

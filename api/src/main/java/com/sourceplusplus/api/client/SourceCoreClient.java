@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Used to communicate with Source++ Core.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -62,7 +62,7 @@ public class SourceCoreClient implements SourceClient {
     private static final String GET_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/subscriptions?includeAutomatic=:includeAutomatic", SPP_API_VERSION);
     private static final String GET_APPLICATION_ENDPOINTS_ENDPOINT = String.format(
-            "/%s/applications/:appUuid/endpoints", SPP_API_VERSION);
+            "/%s/applications/:appUuid/endpoints?includeAutomatic=:includeAutomatic", SPP_API_VERSION);
     private static final String GET_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
             "/%s/applications/:appUuid/subscribers/:subscriberUuid/subscriptions", SPP_API_VERSION);
     private static final String REFRESH_SUBSCRIBER_APPLICATION_SUBSCRIPTIONS_ENDPOINT = String.format(
@@ -137,28 +137,50 @@ public class SourceCoreClient implements SourceClient {
         bridgeClient.setupSubscriptions();
     }
 
-    public void ping(Handler<AsyncResult<Boolean>> handler) {
-        try {
-            String url = sppUrl + PING_ENDPOINT;
-            Request request = new Request.Builder().url(url).get().build();
+    public boolean ping() {
+        String url = sppUrl + PING_ENDPOINT;
+        Request request = new Request.Builder().url(url).get().build();
 
-            OkHttpClient timeOutClient = client.newBuilder()
-                    .connectTimeout(5, TimeUnit.SECONDS)
-                    .writeTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(5, TimeUnit.SECONDS)
-                    .build();
-            try (Response response = timeOutClient.newCall(request).execute()) {
+        try (Response response = client.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .build().newCall(request).execute()) {
+            String responseBody = response.body().string();
+            if (response.code() == 200) {
+                return true;
+            } else {
+                throw getAPIException(responseBody);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void ping(Handler<AsyncResult<Boolean>> handler) {
+        String url = sppUrl + PING_ENDPOINT;
+        Request request = new Request.Builder().url(url).get().build();
+
+        client.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .build().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                handler.handle(Future.failedFuture(e));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseBody = response.body().string();
                 if (response.code() == 200) {
                     handler.handle(Future.succeededFuture(true));
                 } else {
-                    handler.handle(Future.failedFuture(response.message()));
+                    handler.handle(asyncAPIException(responseBody));
                 }
-            } catch (Exception e) {
-                handler.handle(Future.failedFuture(e));
             }
-        } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-        }
+        });
     }
 
     public void updateIntegrationInfo(IntegrationInfo updatedIntegrationInfo,
@@ -587,9 +609,10 @@ public class SourceCoreClient implements SourceClient {
         });
     }
 
-    public List<SourceArtifact> getApplicationEndpoints(String appUuid) {
+    public List<SourceArtifact> getApplicationEndpoints(String appUuid, boolean includeAutomatic) {
         String url = sppUrl + GET_APPLICATION_ENDPOINTS_ENDPOINT
-                .replace(":appUuid", appUuid);
+                .replace(":appUuid", appUuid)
+                .replace(":includeAutomatic", Boolean.toString(includeAutomatic));
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
@@ -602,9 +625,11 @@ public class SourceCoreClient implements SourceClient {
         }
     }
 
-    public void getApplicationEndpoints(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler) {
+    public void getApplicationEndpoints(String appUuid, boolean includeAutomatic,
+                                        Handler<AsyncResult<List<SourceArtifact>>> handler) {
         String url = sppUrl + GET_APPLICATION_ENDPOINTS_ENDPOINT
-                .replace(":appUuid", appUuid);
+                .replace(":appUuid", appUuid)
+                .replace(":includeAutomatic", Boolean.toString(includeAutomatic));
         Request.Builder request = new Request.Builder().url(url).get();
         addHeaders(request);
 
@@ -1060,20 +1085,19 @@ public class SourceCoreClient implements SourceClient {
     }
 
     private <T> Future<T> asyncAPIException(String responseBody) {
-        JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
-        String[] strErrors = new String[errors.size()];
-        for (int i = 0; i < errors.size(); i++) {
-            strErrors[i] = errors.getString(i);
-        }
-        return Future.failedFuture(new APIException(strErrors));
+        return Future.failedFuture(getAPIException(responseBody));
     }
 
     private APIException getAPIException(String responseBody) {
-        JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
-        String[] strErrors = new String[errors.size()];
-        for (int i = 0; i < errors.size(); i++) {
-            strErrors[i] = errors.getString(i);
+        try {
+            JsonArray errors = new JsonObject(responseBody).getJsonArray("errors");
+            String[] strErrors = new String[errors.size()];
+            for (int i = 0; i < errors.size(); i++) {
+                strErrors[i] = errors.getString(i);
+            }
+            return new APIException(strErrors);
+        } catch (Exception ex) {
+            return new APIException(responseBody);
         }
-        return new APIException(strErrors);
     }
 }

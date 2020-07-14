@@ -9,7 +9,7 @@ import com.sourceplusplus.plugin.intellij.marker.mark.gutter.IntelliJGutterMark
  * Allows the Source++ Portal to be displayed via keyboard action.
  * Ensures the portal is registered before popup.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.3.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

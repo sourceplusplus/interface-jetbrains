@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 /**
  * Configuration for the Apache SkyWalking APM integration.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

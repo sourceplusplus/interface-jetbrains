@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * Holds configuration necessary to connect to core.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -25,6 +25,7 @@ public class SourceEnvironmentConfig {
     public volatile boolean apiSslEnabled;
     public volatile String apiKey;
     public volatile boolean embedded;
+    public volatile String applicationDomain;
 
     @Transient
     public String getSppUrl() {

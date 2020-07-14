@@ -23,7 +23,7 @@ import static com.sourceplusplus.core.api.trace.track.TraceSubscriptionTracker.*
 /**
  * Keeps track of artifact subscriptions.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -115,7 +115,7 @@ class ArtifactSubscriptionTracker extends AbstractVerticle {
     }
 
     private void removeInactiveArtifactSubscriptions() {
-        log.debug("Removing inactivate artifact subscriptions")
+        log.trace("Removing inactivate artifact subscriptions")
         def inactiveLimit = config().getJsonObject("core").getInteger("subscription_inactive_limit_minutes")
         core.storage.getSubscriberArtifactSubscriptions({
             if (it.succeeded()) {

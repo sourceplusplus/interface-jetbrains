@@ -37,7 +37,7 @@ import static com.sourceplusplus.plugin.SourcePlugin.BUILD
 /**
  * Used to add the Source++ Agent to project executions.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -101,7 +101,7 @@ trait SourceAgentPatcher {
             writer.append("<enhanced>\n")
 
             def endpointArtifacts = SourcePluginConfig.current.activeEnvironment.coreClient
-                    .getApplicationEndpoints(SourcePluginConfig.current.activeEnvironment.appUuid)
+                    .getApplicationEndpoints(SourcePluginConfig.current.activeEnvironment.appUuid, false)
             Set<String> artifactEndpoints = new HashSet<>()
             endpointArtifacts.each { artifactEndpoints.add(it.artifactQualifiedName()) }
 
@@ -133,10 +133,9 @@ trait SourceAgentPatcher {
             prop.load(input)
         }
         new FileOutputStream(agentConfig).withCloseable { output ->
-            //prop.setProperty("agent.instance_properties[keyz]", "valuez")
-            //prop.setProperty("agent.is_open_debugging_class", "true")
             prop.setProperty("agent.service_name", SourcePluginConfig.current.activeEnvironment.appUuid)
             prop.setProperty("plugin.customize.enhance_file", customizeEnhanceFile.absolutePath)
+            prop.setProperty("plugin.springmvc.use_qualified_name_as_endpoint_name", "true")
             prop.store(output, null)
         }
     }

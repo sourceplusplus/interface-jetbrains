@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject
 /**
  * Persistent configuration for the core system.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.3.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -30,7 +30,7 @@ class CoreConfig {
     }
 
     void save() {
-        log.debug("Saving updated core config")
+        log.trace("Saving updated core config")
         _storage.updateCoreConfig(this, {
             if (it.failed()) {
                 log.error("Failed to update core config", it.cause())

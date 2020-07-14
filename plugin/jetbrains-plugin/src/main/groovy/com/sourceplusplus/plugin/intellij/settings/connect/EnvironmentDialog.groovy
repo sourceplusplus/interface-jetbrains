@@ -17,7 +17,7 @@ import javax.swing.event.DocumentListener
 /**
  * Used to create, remove, and configure core environments.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -185,25 +185,17 @@ class EnvironmentDialog extends JDialog {
                 coreClient.apiKey = apiTokenTextField.getText().trim()
             }
 
-            coreClient.ping({
-                if (it.failed()) {
-                    def connectDialog = new ConnectionInfoDialogWrapper(it.cause())
-                    connectDialog.createCenterPanel()
-                    connectDialog.show()
-                } else {
-                    coreClient.info({
-                        if (it.failed()) {
-                            def connectDialog = new ConnectionInfoDialogWrapper(it.cause())
-                            connectDialog.createCenterPanel()
-                            connectDialog.show()
-                        } else {
-                            def connectDialog = new ConnectionInfoDialogWrapper(it.result())
-                            connectDialog.createCenterPanel()
-                            connectDialog.show()
-                        }
-                    })
-                }
-            })
+            try {
+                coreClient.ping()
+
+                def connectDialog = new ConnectionInfoDialogWrapper(coreClient.info())
+                connectDialog.createCenterPanel()
+                connectDialog.show()
+            } catch (Exception ex) {
+                def connectDialog = new ConnectionInfoDialogWrapper(ex)
+                connectDialog.createCenterPanel()
+                connectDialog.show()
+            }
         })
         nameTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override

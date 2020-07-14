@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS source_artifact
     create_date                    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated                   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     endpoint                       BOOLEAN,
+    auto_endpoint                  BOOLEAN,
     auto_subscribe                 BOOLEAN,
     module_name                    VARCHAR,
     component                      VARCHAR,

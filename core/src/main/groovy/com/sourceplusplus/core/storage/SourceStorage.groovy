@@ -16,7 +16,7 @@ import java.time.Instant
 /**
  * Represents a storage for saving/fetching core data.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.2.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -58,7 +58,7 @@ abstract class SourceStorage {
     abstract void findArtifactBySubscribeAutomatically(String appUuid,
                                                        Handler<AsyncResult<List<SourceArtifact>>> handler)
 
-    abstract void findArtifactByEndpoint(String appUuid,
+    abstract void findArtifactByEndpoint(String appUuid, boolean includeAutomatic,
                                          Handler<AsyncResult<List<SourceArtifact>>> handler)
 
     abstract void findArtifactByFailing(String appUuid, Handler<AsyncResult<List<SourceArtifact>>> handler)

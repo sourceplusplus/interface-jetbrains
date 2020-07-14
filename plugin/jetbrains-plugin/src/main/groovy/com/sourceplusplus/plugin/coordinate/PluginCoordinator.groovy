@@ -28,7 +28,7 @@ import io.vertx.ext.eventbus.bridge.tcp.TcpEventBusBridge
  *  - source code artifact configuration changes
  *  - source code artifact subscription changes
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -58,6 +58,8 @@ class PluginCoordinator extends AbstractVerticle {
             }
         })
 
+        vertx.deployVerticle(new IntegrationInfoTracker(), new DeploymentOptions().setWorker(true))
+
         //config
         vertx.deployVerticle(new SpringMVCArtifactConfigIntegrator(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new SkywalkingTraceConfigIntegrator(), new DeploymentOptions().setWorker(true))
@@ -69,7 +71,5 @@ class PluginCoordinator extends AbstractVerticle {
         //track
         vertx.deployVerticle(new PluginArtifactTracker(), new DeploymentOptions().setWorker(true))
         vertx.deployVerticle(new PluginArtifactSubscriptionTracker(), new DeploymentOptions().setWorker(true))
-
-        vertx.deployVerticle(new IntegrationInfoTracker(), new DeploymentOptions().setWorker(true))
     }
 }

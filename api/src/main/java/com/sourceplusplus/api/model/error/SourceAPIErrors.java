@@ -3,7 +3,7 @@ package com.sourceplusplus.api.model.error;
 /**
  * Possible errors core API is able to throw.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

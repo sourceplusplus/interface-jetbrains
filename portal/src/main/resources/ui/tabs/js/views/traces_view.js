@@ -28,7 +28,9 @@ const COMPONENT_MAPPINGS = {
     'rest-high-level-client': 'Elasticsearch',
     'SolrJ': 'Solr',
     'cassandra-java-driver': 'Cassandra',
-    'mariadb-jdbc': 'Mariadb'
+    'mariadb-jdbc': 'Mariadb',
+    //
+    'SpringRestTemplate': 'SpringMVC'
 }
 
 function setupUI() {

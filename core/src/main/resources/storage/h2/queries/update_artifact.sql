@@ -1,9 +1,9 @@
 WITH existing_artifact(
-  app_uuid, artifact_qualified_name, endpoint, auto_subscribe,
+  app_uuid, artifact_qualified_name, endpoint, auto_endpoint, auto_subscribe,
   module_name, component, endpoint_name, endpoint_ids, active_failing, latest_failed_service_instance
 ) AS (
     SELECT
-      app_uuid, artifact_qualified_name, endpoint, auto_subscribe,
+      app_uuid, artifact_qualified_name, endpoint, auto_endpoint, auto_subscribe,
       module_name, component, endpoint_name, endpoint_ids, active_failing, latest_failed_service_instance
     FROM source_artifact
     WHERE 1=1
@@ -13,6 +13,7 @@ WITH existing_artifact(
 UPDATE source_artifact
 SET
   endpoint = COALESCE (?, (SELECT endpoint FROM existing_artifact)),
+  auto_endpoint = COALESCE (?, (SELECT auto_endpoint FROM existing_artifact)),
   auto_subscribe = COALESCE (?, (SELECT auto_subscribe FROM existing_artifact)),
   module_name = COALESCE (?, (SELECT module_name FROM existing_artifact)),
   component = COALESCE (?, (SELECT component FROM existing_artifact)),

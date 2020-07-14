@@ -1,7 +1,9 @@
 package com.sourceplusplus.plugin.intellij.marker.mark.gutter
 
 import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
+import com.intellij.lang.jvm.annotation.JvmAnnotationEnumFieldValue
 import com.intellij.openapi.application.ReadAction
+import com.intellij.psi.PsiField
 import com.intellij.psi.PsiLiteral
 import com.sourceplusplus.api.model.artifact.SourceArtifact
 import com.sourceplusplus.api.model.artifact.SourceArtifactUnsubscribeRequest
@@ -31,6 +33,7 @@ import io.vertx.core.Handler
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUAnnotation
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UResolvable
 import org.jetbrains.uast.java.JavaUAnnotation
 
 import javax.swing.*
@@ -38,7 +41,7 @@ import javax.swing.*
 /**
  * Extension of the MethodGutterMark for handling IntelliJ.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
@@ -113,7 +116,12 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                         def attributeMap = new HashMap<String, Object>()
                         it.attributeValues.each {
                             if (it.name) {
-                                attributeMap.put(it.name, (it.expression as ULiteralExpression).value)
+                                if (it.expression instanceof UResolvable) {
+                                    def sourceElement = (it.expression as UResolvable).resolve() as PsiField
+                                    attributeMap.put(it.name, sourceElement.name)
+                                } else {
+                                    attributeMap.put(it.name, (it.expression as ULiteralExpression).value)
+                                }
                             } else {
                                 //log.warn("Unknown annotation expression: " + it)
                             }
@@ -125,6 +133,10 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                             if (it.attributeValue instanceof JvmAnnotationConstantValue) {
                                 def annotationConstantValue = it.attributeValue as JvmAnnotationConstantValue
                                 attributeMap.put(it.attributeName, annotationConstantValue.constantValue)
+                            } else if (it.attributeValue instanceof JvmAnnotationEnumFieldValue) {
+                                def enumValue = it.attributeValue as JvmAnnotationEnumFieldValue
+                                def sourceElement = enumValue.field.sourceElement as PsiField
+                                attributeMap.put(it.attributeName, sourceElement.name)
                             } else if (it.attributeValue.sourceElement instanceof PsiLiteral) {
                                 attributeMap.put(it.attributeName, (it.attributeValue.sourceElement as PsiLiteral).value)
                             } else {
@@ -201,8 +213,10 @@ class IntelliJMethodGutterMark extends MethodGutterMark implements IntelliJGutte
                 if (sourceArtifact.status().activelyFailing()) {
                     markComponent.configuration.initialUrl =
                             IntelliJPortalUI.getPortalUrl(PortalTab.Traces, portalUuid) +
-                                    "&order_type=" + TraceOrderType.FAILED_TRACES +
-                                    "&hide_overview_tab=true"
+                                    "&order_type=" + TraceOrderType.FAILED_TRACES
+                    if (!sourceArtifact.config().endpoint()) {
+                        markComponent.configuration.initialUrl += "&hide_overview_tab=true"
+                    }
 
                     newPortal = new IntelliJPortalUI(portalUuid, markComponent.browser)
                     newPortal.tracesView.orderType = TraceOrderType.FAILED_TRACES
