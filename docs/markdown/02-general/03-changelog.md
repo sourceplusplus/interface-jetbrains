@@ -1,3 +1,23 @@
+# 0.3.2-alpha (2020-07-14)
+
+## Bug
+- SkyWalking entry methods shouldn't be marked as entry methods via customize-enhance-plugin ([#248](https://github.com/sourceplusplus/Assistant/issues/248))
+- Test connection button not working ([#246](https://github.com/sourceplusplus/Assistant/issues/246))
+- Ignore creating marks outside application package ([#240](https://github.com/sourceplusplus/Assistant/issues/240))
+- Failing entry method shouldn't hide overview tab ([#243](https://github.com/sourceplusplus/Assistant/issues/243))
+- Failing entry method flashes virtual text ([#245](https://github.com/sourceplusplus/Assistant/issues/245))
+- Fix issue parsing source code annotation ([#241](https://github.com/sourceplusplus/Assistant/issues/241))
+- Wait till APM integration enabled before sending subscription requests ([#239](https://github.com/sourceplusplus/Assistant/issues/239))
+
+## Improvement
+- Show entry method status above annotations ([#244](https://github.com/sourceplusplus/Assistant/issues/244))
+- 60/MIN+ throughput should show x/SEC ([#242](https://github.com/sourceplusplus/Assistant/issues/242))
+- Measure white space on inlay marks ([#232](https://github.com/sourceplusplus/Assistant/issues/232))
+
+## Dependency upgrade
+- Upgraded SourceMarker (0.2.1 -> 0.2.2)
+- Upgraded okhttp (4.7.2 -> 4.8.0)
+
 # 0.3.1-alpha (2020-07-06)
 
 ## Bug
