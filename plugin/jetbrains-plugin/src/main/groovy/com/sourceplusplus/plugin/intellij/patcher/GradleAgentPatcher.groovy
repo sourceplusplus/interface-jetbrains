@@ -13,7 +13,7 @@ import org.jetbrains.plugins.gradle.settings.GradleExecutionSettings
 /**
  * Adds the Source++ Agent to any Gradle-based project executions.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.2.4
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

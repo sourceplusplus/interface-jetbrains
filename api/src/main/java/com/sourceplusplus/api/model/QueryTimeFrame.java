@@ -4,7 +4,7 @@ package com.sourceplusplus.api.model;
  * Time frames the core supports for artifact metrics/traces.
  * todo: remove class for a more dynamic solution
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -5,7 +5,7 @@ package com.sourceplusplus.api.bridge;
  * Public event endpoints represent endpoints which should only be subscribed to.
  * //todo: rename public-events to subscribe-events
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -16,7 +16,7 @@ import java.util.zip.ZipFile
 /**
  * Used to render the Source++ Portal's Semantic UI.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

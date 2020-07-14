@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 /**
  * Used to query core for an artifact's trace spans stacks.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

@@ -33,7 +33,7 @@ import static com.sourceplusplus.api.model.metric.MetricType.*
 /**
  * Keeps track of entry method inlay marks.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.3.1
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

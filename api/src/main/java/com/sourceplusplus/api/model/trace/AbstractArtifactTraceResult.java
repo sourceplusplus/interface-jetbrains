@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Traces result for a given artifact.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */

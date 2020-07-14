@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Used to convey information about the current setup of core.
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @since 0.1.0
  * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
  */
