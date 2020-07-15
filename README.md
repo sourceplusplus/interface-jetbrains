@@ -30,6 +30,10 @@ Source++ is an open-source automated programming assistant with runtime-aware an
 > 4. No websites or dashboards necessary to debug complex asynchronous runtime issues
 > 5. AI-based pair programming is going to be pretty cool when we get it right
 
+## Demonstration
+
+[![](https://img.youtube.com/vi/_pML3VleIlo/0.jpg)](https://www.youtube.com/watch?v=_pML3VleIlo)
+
 ## Augments
 
 ### Integrated Runtime Performance
