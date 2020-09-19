@@ -19,9 +19,10 @@ jobs:
           java-version: 11.x.x
       - name: Build the plugin using Gradle
         run: ./gradlew buildPlugin
-      - uses: thepieterdc/intellij-plugin-verifier-action@master
+      - uses: ChrisCarini/intellij-platform-plugin-verifier-action@v1.0.3
         with:
-          plugin: 'plugin/jetbrains-plugin/build/distributions/jetbrains-source-plugin-*'
           versions: |
-            2020.1
-            LATEST-EAP-SNAPSHOT
+            ideaIC:2020.1
+            ideaIU:2020.1
+            ideaIC:LATEST-EAP-SNAPSHOT
+            ideaIU:LATEST-EAP-SNAPSHOT
