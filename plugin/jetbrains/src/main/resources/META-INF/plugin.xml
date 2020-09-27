@@ -1,0 +1,38 @@
+<idea-plugin>
+    <id>com.sourceplusplus.sourcemarker</id>
+    <name>SourceMarker</name>
+    <vendor>Source++</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <!--    todo: make separate plugin files-->
+    <depends>org.intellij.groovy</depends>
+    <depends>org.jetbrains.kotlin</depends>
+    <!--    todo: make separate plugin files-->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity
+                implementation="com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity"/>
+
+        <codeInsight.lineMarkerProvider language="Groovy"
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$GroovyDescriptor"/>
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$JavaDescriptor"/>
+        <codeInsight.lineMarkerProvider language="kotlin"
+                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$KotlinDescriptor"/>
+    </extensions>
+
+    <projectListeners>
+        <listener class="com.sourceplusplus.marker.plugin.FileActivityListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </projectListeners>
+
+    <actions>
+        <action id="com.sourceplusplus.sourcemarker.actions.PluginSourceMarkPopupAction"
+                class="com.sourceplusplus.sourcemarker.actions.PluginSourceMarkPopupAction"
+                text="SourcePortal Popup Action" description="SourcePortal popup action">
+            <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
+        </action>
+    </actions>
+</idea-plugin>

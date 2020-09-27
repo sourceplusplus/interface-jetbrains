@@ -1,0 +1,33 @@
+version: '3.3'
+services:
+  skywalking-oap:
+    container_name: skywalking-oap
+    hostname: skywalking-oap
+    ports:
+      - "11800:11800"
+      - "12800:12800"
+    build:
+      context: .
+      dockerfile: Dockerfile-skywalking-oap
+  spp-example-webapp:
+    container_name: spp-example-webapp
+    hostname: spp-example-webapp
+    depends_on:
+      - skywalking-oap
+    links:
+      - skywalking-oap
+    build:
+      context: .
+      dockerfile: Dockerfile-spp-example-webapp
+#  skywalking-ui:
+#    image: apache/skywalking-ui:8.1.0
+#    container_name: skywalking-ui
+#    hostname: skywalking-ui
+#    ports:
+#      - "8888:8080"
+#    depends_on:
+#      - skywalking-oap
+#    links:
+#      - skywalking-oap
+#    environment:
+#      - SW_OAP_ADDRESS=skywalking-oap:12800
