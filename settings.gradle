@@ -1,0 +1,17 @@
+rootProject.buildFileName = "build.gradle.kts"
+rootProject.name = 'SourceMarker'
+
+//framework
+include 'mapper'
+include 'marker'
+include 'mentor'
+include 'monitor'
+include 'plugin'
+include 'portal'
+include 'portal:backend'
+include 'portal:frontend'
+include 'protocol'
+
+//implementations
+include 'plugin:jetbrains'
+include 'monitor:skywalking'
