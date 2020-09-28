@@ -24,6 +24,8 @@ abstract class MentorJob {
 
     fun nextTask(): MentorTask = tasks[++currentTask]
     fun hasMoreTasks(): Boolean = currentTask < (tasks.size - 1)
+    fun isCurrentTask(task: MentorTask): Boolean = currentTask > -1 && tasks[currentTask] == task
+    fun isNextTask(task: MentorTask): Boolean = hasMoreTasks() && tasks[currentTask + 1] == task
 
     fun resetJob() {
         currentTask = -1
@@ -33,10 +35,6 @@ abstract class MentorJob {
     fun withConfig(config: MentorJobConfig): MentorJob {
         this.config = config
         return this
-    }
-
-    fun isNextTask(task: MentorTask): Boolean {
-        return hasMoreTasks() && tasks[currentTask + 1] == task
     }
 
     class TaskContext {
