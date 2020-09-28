@@ -67,6 +67,10 @@ class ProtocolAddress {
                 return "$portalUuid-DisplayTraceStack"
             }
 
+            fun DisplayInnerTraceStack(portalUuid: String): String {
+                return "$portalUuid-DisplayInnerTraceStack"
+            }
+
             fun DisplaySpanInfo(portalUuid: String): String {
                 return "$portalUuid-DisplaySpanInfo"
             }
