@@ -34,18 +34,23 @@ class SourceMentor : CoroutineVerticle() {
     private suspend fun runJobProcessing() {
         running = true
         while (running) {
-            val task = taskQueue.poll()
-            //todo: search un-expired tasks before executing new task
+            val currentTask = taskQueue.poll()
+            //todo: search un-expired tasks before executing current task
 
-            val jobsRequireTask = jobList.filter { it.isNextTask(task) }
-            task.executeTask(jobsRequireTask[0])
-            for (i in 1 until jobsRequireTask.size) {
-                jobsRequireTask[i].context.copyContext(jobsRequireTask[0], task)
+            //find jobs requiring task (execute once then share results)
+            val jobsWhichRequireTask = jobList.filter { it.isCurrentTask(currentTask) }
+            currentTask.executeTask(jobsWhichRequireTask[0])
+            for (i in 1 until jobsWhichRequireTask.size) {
+                jobsWhichRequireTask[i].context.copyContext(jobsWhichRequireTask[0], currentTask)
             }
 
-            jobsRequireTask.forEach {
+            //add new tasks to queue
+            jobsWhichRequireTask.forEach {
                 if (it.hasMoreTasks()) {
-                    taskQueue.add(it.nextTask())
+                    val nextTask = it.nextTask()
+                    if (!taskQueue.contains(nextTask)) {
+                        taskQueue.add(nextTask)
+                    }
                 }
             }
 
@@ -59,7 +64,10 @@ class SourceMentor : CoroutineVerticle() {
         }
 
         jobList.add(job)
-        taskQueue.add(job.nextTask())
+        val task = job.nextTask()
+        if (!taskQueue.contains(task)) {
+            taskQueue.add(task)
+        }
     }
 
     fun executeJobs(vararg jobs: MentorJob) {

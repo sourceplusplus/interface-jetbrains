@@ -40,6 +40,10 @@ import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.kotlin.core.deployVerticleAwait
+import io.vertx.kotlin.core.http.listenAwait
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.awt.Dimension
 import java.util.*
@@ -81,19 +85,21 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             return //todo: change when integration tests are added
         }
 
-        initPortal()
-        initMarker(initMentor())
-        initMapper()
-        initMonitor()
+        GlobalScope.launch {
+            initMonitor()
+            initPortal()
+            initMarker(initMentor())
+            initMapper()
+        }
         super.runActivity(project)
     }
 
-    private fun initMonitor() {
+    private suspend fun initMonitor() {
         //todo: configurable
         val config = JsonObject().apply {
             put("graphql_endpoint", "http://localhost:12800/graphql")
         }
-        vertx.deployVerticle(SkywalkingMonitor(), DeploymentOptions().setConfig(config))
+        vertx.deployVerticleAwait(SkywalkingMonitor(), DeploymentOptions().setConfig(config))
     }
 
     private fun initMapper() {
@@ -104,7 +110,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
      * Schedules long running, generic, and low-priority mentor jobs.
      * High-priority, specific, and short running mentor jobs are executed during source code navigation.
      */
-    private fun initMentor(): SourceMentor {
+    private suspend fun initMentor(): SourceMentor {
         val mentor = SourceMentor()
         mentor.executeJobs(
             ActiveExceptionMentor(vertx).withConfig(
@@ -120,14 +126,14 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 )
             )
         )
-        vertx.deployVerticle(mentor)
+        vertx.deployVerticleAwait(mentor)
         return mentor
     }
 
-    private fun initPortal() {
+    private suspend fun initPortal() {
         //todo: load portal config (custom themes, etc)
-        vertx.deployVerticle(PortalServer())
-        vertx.deployVerticle(PortalEventListener())
+        vertx.deployVerticleAwait(PortalServer())
+        vertx.deployVerticleAwait(PortalEventListener())
 
         //todo: portal should be connected to event bus without bridge
         val sockJSHandler = SockJSHandler.create(vertx)
@@ -138,7 +144,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
 
         val router = Router.router(vertx)
         router.route("/eventbus/*").handler(sockJSHandler)
-        vertx.createHttpServer().requestHandler(router).listen(8888, "localhost")
+        vertx.createHttpServer().requestHandler(router).listenAwait(8888, "localhost")
     }
 
     private fun initMarker(sourceMentor: SourceMentor) {
