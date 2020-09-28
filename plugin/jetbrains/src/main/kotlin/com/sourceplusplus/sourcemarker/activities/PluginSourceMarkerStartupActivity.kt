@@ -120,6 +120,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 )
             )
         )
+        vertx.deployVerticle(mentor)
         return mentor
     }
 
