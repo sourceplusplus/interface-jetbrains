@@ -35,6 +35,8 @@ class SourceMentor : CoroutineVerticle() {
         running = true
         while (running) {
             val task = taskQueue.poll()
+            //todo: search un-expired tasks before executing new task
+
             val jobsRequireTask = jobList.filter { it.isNextTask(task) }
             task.executeTask(jobsRequireTask[0])
             for (i in 1 until jobsRequireTask.size) {
@@ -46,6 +48,8 @@ class SourceMentor : CoroutineVerticle() {
                     taskQueue.add(it.nextTask())
                 }
             }
+
+            //todo: task context expiration list
         }
     }
 
