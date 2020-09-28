@@ -1,6 +1,7 @@
 package com.sourceplusplus.mentor.task
 
 import com.sourceplusplus.mentor.MentorJob
+import com.sourceplusplus.mentor.MentorJob.ContextKey
 import com.sourceplusplus.mentor.MentorTask
 import com.sourceplusplus.monitor.skywalking.track.ServiceInstanceTracker.Companion.getServiceInstances
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
@@ -23,16 +24,18 @@ class GetServiceInstance(
         val SERVICE_INSTANCE: ContextKey<GetServiceInstancesQuery.Result> = ContextKey()
     }
 
-    override suspend fun executeTask(job: MentorJob, context: TaskContext) {
+    override val contextKeys = listOf(SERVICE_INSTANCE)
+
+    override suspend fun executeTask(job: MentorJob) {
         val serviceId = if (byContext != null) {
-            context.get(byContext).id
+            job.context.get(byContext).id
         } else {
             byId
         }!!
 
         for (serviceInstance in getServiceInstances(serviceId, job.vertx)) {
             if (isMatch(serviceInstance)) {
-                context.put(SERVICE_INSTANCE, serviceInstance)
+                job.context.put(SERVICE_INSTANCE, serviceInstance)
                 break
             }
         }

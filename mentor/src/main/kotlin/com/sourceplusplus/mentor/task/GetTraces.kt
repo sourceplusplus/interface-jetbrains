@@ -1,6 +1,7 @@
 package com.sourceplusplus.mentor.task
 
 import com.sourceplusplus.mentor.MentorJob
+import com.sourceplusplus.mentor.MentorJob.ContextKey
 import com.sourceplusplus.mentor.MentorTask
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
@@ -27,8 +28,9 @@ class GetTraces(
         val TRACES: ContextKey<Nothing> = ContextKey()
     }
 
-    override suspend fun executeTask(job: MentorJob, context: TaskContext) {
+    override val contextKeys = listOf(TRACES)
 
+    override suspend fun executeTask(job: MentorJob) {
         val traces = EndpointTracesTracker.getTraces(
             GetEndpointTraces(
                 appUuid = "null", //todo: likely not necessary

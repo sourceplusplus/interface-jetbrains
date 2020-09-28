@@ -3,9 +3,9 @@ package com.sourceplusplus.mentor
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * todo: description.
@@ -19,15 +19,33 @@ class SourceMentor : CoroutineVerticle() {
         private val log = LoggerFactory.getLogger(SourceMentor::class.java)
     }
 
-    private val setupLock = AtomicBoolean()
     private val jobList = mutableListOf<MentorJob>()
     private val taskQueue = PriorityBlockingQueue<MentorTask>()
+    private var running = false
 
-    fun setup() {
-        if (!setupLock.compareAndSet(false, true)) {
-            log.info("Setting up SourceMentor")
-        } else {
-            throw IllegalStateException("Already setup")
+    override suspend fun start() {
+        log.info("Setting up SourceMentor")
+
+        launch {
+            runJobProcessing()
+        }
+    }
+
+    private suspend fun runJobProcessing() {
+        running = true
+        while (running) {
+            val task = taskQueue.poll()
+            val jobsRequireTask = jobList.filter { it.isNextTask(task) }
+            task.executeTask(jobsRequireTask[0])
+            for (i in 1 until jobsRequireTask.size) {
+                jobsRequireTask[i].context.copyContext(jobsRequireTask[0], task)
+            }
+
+            jobsRequireTask.forEach {
+                if (it.hasMoreTasks()) {
+                    taskQueue.add(it.nextTask())
+                }
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.sourceplusplus.mentor
 
 import io.vertx.core.Vertx
+import java.util.*
 
 /**
  * todo: description.
@@ -14,7 +15,7 @@ abstract class MentorJob {
     var config: MentorJobConfig = MentorJobConfig()
         private set
     abstract val tasks: List<MentorTask>
-    val context = HashMap<String, Any>()
+    val context = TaskContext()
     private var currentTask = -1
 
     fun log(msg: String) {
@@ -34,6 +35,36 @@ abstract class MentorJob {
         return this
     }
 
-    //todo: if jobs share functionality then they should share tasks
-    //todo: would need to search for duplicate tasks when setting up all jobs
+    fun isNextTask(task: MentorTask): Boolean {
+        return hasMoreTasks() && tasks[currentTask + 1] == task
+    }
+
+    class TaskContext {
+        private val cache: IdentityHashMap<ContextKey<*>, Any> = IdentityHashMap()
+
+        fun <T> put(key: ContextKey<T>, value: T) {
+            cache[key] = value!!
+        }
+
+        fun <T> get(key: ContextKey<T>): T {
+            return cache[key] as T
+        }
+
+        fun containsKey(key: ContextKey<*>): Boolean {
+            return cache.containsKey(key)
+        }
+
+        internal fun clear() {
+            cache.clear()
+        }
+
+        fun copyContext(copyJob: MentorJob, copyTask: MentorTask) {
+            copyTask.contextKeys.forEach {
+                cache[it] = copyJob.context.get(it)
+            }
+        }
+    }
+
+    @Suppress("unused")
+    class ContextKey<T>
 }

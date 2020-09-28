@@ -1,6 +1,6 @@
 package com.sourceplusplus.mentor
 
-import java.util.*
+import com.sourceplusplus.mentor.MentorJob.ContextKey
 
 /**
  * todo: description.
@@ -15,27 +15,8 @@ abstract class MentorTask : Comparable<MentorTask> {
             field = value
             //todo: remove/add to queue
         }
+    abstract val contextKeys: List<ContextKey<*>>
 
-    abstract suspend fun executeTask(job: MentorJob, context: TaskContext)
-
+    abstract suspend fun executeTask(job: MentorJob)
     override operator fun compareTo(other: MentorTask): Int = priority.compareTo(other.priority)
-
-    class TaskContext {
-        private val cache: IdentityHashMap<ContextKey<*>, Any> = IdentityHashMap()
-
-        fun <T> put(key: ContextKey<T>, value: T) {
-            cache[key] = value!!
-        }
-
-        fun <T> get(key: ContextKey<T>): T {
-            return cache[key] as T
-        }
-
-        fun containsKey(key: ContextKey<*>): Boolean {
-            return cache.containsKey(key)
-        }
-    }
-
-    @Suppress("unused")
-    class ContextKey<T>
 }
