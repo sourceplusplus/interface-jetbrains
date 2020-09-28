@@ -1,6 +1,7 @@
 package com.sourceplusplus.mentor.task
 
 import com.sourceplusplus.mentor.MentorJob
+import com.sourceplusplus.mentor.MentorJob.ContextKey
 import com.sourceplusplus.mentor.MentorTask
 import com.sourceplusplus.protocol.artifact.ArtifactLocation
 
@@ -18,7 +19,9 @@ class DetermineThrowableLocation(
         val ARTIFACT_LOCATION: ContextKey<ArtifactLocation> = ContextKey()
     }
 
-    override suspend fun executeTask(job: MentorJob, context: TaskContext) {
+    override val contextKeys = listOf(ARTIFACT_LOCATION)
+
+    override suspend fun executeTask(job: MentorJob) {
         TODO("Not yet implemented")
     }
 }
