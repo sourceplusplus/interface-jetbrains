@@ -17,17 +17,26 @@ abstract class MentorJob {
     abstract val tasks: List<MentorTask>
     val context = TaskContext()
     private var currentTask = -1
+    private var complete: Boolean = false
+
+    fun nextTask(): MentorTask = tasks[++currentTask]
+    fun hasMoreTasks(): Boolean = !complete && currentTask < (tasks.size - 1)
+    fun isCurrentTask(task: MentorTask): Boolean = !complete && currentTask > -1 && tasks[currentTask] == task
+    fun isComplete(): Boolean = complete || !hasMoreTasks()
+    fun complete() {
+        if (complete) {
+            throw IllegalStateException("Job already complete")
+        }
+        complete = true
+        log("Job completed")
+    }
 
     fun log(msg: String) {
         println(msg)
     }
 
-    fun nextTask(): MentorTask = tasks[++currentTask]
-    fun hasMoreTasks(): Boolean = currentTask < (tasks.size - 1)
-    fun isCurrentTask(task: MentorTask): Boolean = currentTask > -1 && tasks[currentTask] == task
-    fun isNextTask(task: MentorTask): Boolean = hasMoreTasks() && tasks[currentTask + 1] == task
-
     fun resetJob() {
+        log("Job reset")
         currentTask = -1
         context.clear()
     }
