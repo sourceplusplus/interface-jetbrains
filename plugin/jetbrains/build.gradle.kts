@@ -32,6 +32,7 @@ intellij {
 
     setPlugins("java", "Groovy", "Kotlin", "org.intellij.scala:2020.2.27")
 }
+tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
 
 repositories {
     maven(url = "https://jitpack.io") { name = "jitpack" }
