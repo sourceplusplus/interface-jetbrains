@@ -17,6 +17,12 @@ abstract class MentorTask : Comparable<MentorTask> {
         }
     abstract val contextKeys: List<ContextKey<*>>
 
+    fun withPriority(priority: Int): MentorTask {
+        this.priority = priority
+        return this
+    }
+
     abstract suspend fun executeTask(job: MentorJob)
     override operator fun compareTo(other: MentorTask): Int = priority.compareTo(other.priority)
+    override fun toString(): String = javaClass.simpleName
 }

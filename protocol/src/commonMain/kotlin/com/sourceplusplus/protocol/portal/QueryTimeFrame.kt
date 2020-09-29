@@ -7,6 +7,8 @@ package com.sourceplusplus.protocol.portal
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 enum class QueryTimeFrame(val minutes: Int, val id: String) {
+    //todo: support custom time frames
+
     LAST_5_MINUTES(5, "5_minutes"),
     LAST_15_MINUTES(15, "15_minutes"),
     LAST_30_MINUTES(30, "30_minutes"),

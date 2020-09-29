@@ -43,19 +43,14 @@ class ServiceInstanceTracker(private val skywalkingClient: SkywalkingClient) : C
         }
         vertx.eventBus().localConsumer<String>(getServiceInstances) {
             launch(vertx.dispatcher()) {
-                activeServicesInstances = skywalkingClient.run {
+                val servicesInstances = skywalkingClient.run {
                     getServiceInstances(
                         it.body(),
                         //todo: dynamic duration
                         getDuration(ZonedDateTime.now().minusMinutes(15), DurationStep.MINUTE)
                     )
                 }
-                vertx.eventBus().publish(activeServiceInstancesUpdatedAddress, activeServicesInstances)
-
-                if (activeServicesInstances.isNotEmpty()) {
-                    currentServiceInstance = activeServicesInstances[0]
-                    vertx.eventBus().publish(currentServiceInstanceUpdatedAddress, currentServiceInstance)
-                }
+                it.reply(servicesInstances)
             }
         }
 

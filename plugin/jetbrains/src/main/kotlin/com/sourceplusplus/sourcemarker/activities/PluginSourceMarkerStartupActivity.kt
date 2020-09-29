@@ -7,6 +7,9 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
@@ -29,9 +32,9 @@ import com.sourceplusplus.portal.backend.PortalServer
 import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
-import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
@@ -87,10 +90,28 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
         }
 
         GlobalScope.launch {
-            initMonitor()
-            initPortal()
-            initMarker(initMentor())
-            initMapper()
+            var connectedMonitor = false
+            try {
+                initMonitor()
+                connectedMonitor = true
+            } catch (throwable: Throwable) {
+                //todo: if first time bring up config panel automatically instead of notification
+                Notifications.Bus.notify(
+                    Notification(
+                        "SourceMarker", "Connection Failed",
+                        "SourceMarker failed to connect to Apache SkyWalking. " +
+                                "Please ensure Apache SkyWalking is running and the correct configuration " +
+                                "is set at: Settings -> Tools -> SourceMarker",
+                        NotificationType.ERROR
+                    )
+                )
+            }
+
+            if (connectedMonitor) {
+                initPortal()
+                initMarker(initMentor())
+                initMapper()
+            }
         }
         super.runActivity(project)
     }
