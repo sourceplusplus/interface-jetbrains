@@ -32,7 +32,7 @@ import java.util.regex.Pattern
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class GitRepositoryMapper(private val project: Project) : RepositoryRewriter() {
-    //todo: ability to add to existing mapped repo
+    //todo: remove intellij deps
 
     companion object {
         private val log = LoggerFactory.getLogger(GitRepositoryMapper::class.java)
@@ -121,4 +121,4 @@ class GitRepositoryMapper(private val project: Project) : RepositoryRewriter() {
 
         return result
     }
-} //git log --all --full-history -- <path-to-file>
+}

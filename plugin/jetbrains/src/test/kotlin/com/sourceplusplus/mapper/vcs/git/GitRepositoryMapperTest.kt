@@ -91,7 +91,6 @@ class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
 
 //    @Test
 //    fun `tokenized kotlin getter method`() {
-//        if (File("/tmp/git-repo").exists()) File("/tmp/git-repo").deleteRecursively()
 //        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
 //            @Language("Kt") val code = """
 //                class GetterMethod(private val str: String) {
@@ -99,22 +98,17 @@ class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
 //                        return str
 //                    }
 //                }
-//            """.trimIndent()
+//                """.trimIndent()
 //            File(git.repository.directory.parent, "GetterMethod.kt").writeText(code)
 //            git.add().addFilepattern(".").call()
 //            git.commit().setMessage("Initial commit").call()
 //        }
 //
 //        val fileRepo = FileRepository("/tmp/git-repo/.git")
-//        val mapper = GitRepositoryMapper(project)
-//        mapper.initialize(fileRepo, fileRepo)
-//        mapper.rewrite(Context.init())
-//        PorcelainAPI(fileRepo).use {
-//            it.resetHard()
-//            it.clean()
-//        }
+//        val gitMapper = GitRepositoryMapper(project)
+//        gitMapper.initialize(fileRepo)
 //
-//        val finerMethodFile = File("/tmp/git-repo/GetterMethod.getStr().mkt")
+//        val finerMethodFile = File(gitMapper.targetSourceDirectory, "GetterMethod.getStr().mkt")
 //        assertExists(finerMethodFile)
 //        assertEquals(
 //            """
@@ -125,10 +119,12 @@ class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
 //            {
 //            return
 //            str
-//            ;
 //            }
-//        """.trimIndent(), finerMethodFile.readText().trimIndent()
+//            """.trimIndent(), finerMethodFile.readText().trimIndent()
 //        )
+//        gitMapper.sourceRepo.directory.parentFile.deleteRecursively()
+//        gitMapper.targetGit.close()
+//        gitMapper.targetSourceDirectory.deleteRecursively()
 //    }
 
     @Test
