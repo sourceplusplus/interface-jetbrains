@@ -17,10 +17,6 @@ name: Build
 on: [push, pull_request]
 jobs:
 
-  setupEnvironment:
-    - name: Install Docker Compose
-      run: sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
-
   # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
   gradleValidation:
     name: Gradle Wrapper
@@ -42,6 +38,9 @@ jobs:
     runs-on: ubuntu-latest
     container: gradle:jdk11
     steps:
+
+      - name: Install Docker Compose
+        run: sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
 
       # Check out current repository
       - name: Fetch Sources
