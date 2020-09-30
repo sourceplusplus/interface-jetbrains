@@ -8,6 +8,7 @@ import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import java.time.ZonedDateTime
 
@@ -25,12 +26,14 @@ class GetTraces(
 ) : MentorTask() {
 
     companion object {
-        val TRACES: ContextKey<Nothing> = ContextKey()
+        val TRACE_RESULT: ContextKey<TraceResult> = ContextKey()
     }
 
-    override val contextKeys = listOf(TRACES)
+    override val contextKeys = listOf(TRACE_RESULT)
 
     override suspend fun executeTask(job: MentorJob) {
+        job.log("Executing task: $this")
+
         val traces = EndpointTracesTracker.getTraces(
             GetEndpointTraces(
                 appUuid = "null", //todo: likely not necessary
@@ -44,6 +47,10 @@ class GetTraces(
             ), job.vertx
         )
 
-        TODO("Not yet implemented")
+        if (haltOnEmptyTraces && traces.traces.isEmpty()) {
+            job.complete()
+        } else {
+            job.context.put(TRACE_RESULT, traces)
+        }
     }
 }

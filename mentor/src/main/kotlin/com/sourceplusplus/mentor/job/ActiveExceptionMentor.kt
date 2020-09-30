@@ -35,7 +35,7 @@ class ActiveExceptionMentor(
 
         //search failing traces to determine failing source code location
         DetermineThrowableLocation(
-            GetTraces.TRACES
+            GetTraces.TRACE_RESULT
         )
 
         //todo: create advice

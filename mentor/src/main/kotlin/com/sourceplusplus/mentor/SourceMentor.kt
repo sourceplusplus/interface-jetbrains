@@ -42,14 +42,29 @@ class SourceMentor : CoroutineVerticle() {
             currentTask.executeTask(jobsWhichRequireTask[0])
             for (i in 1 until jobsWhichRequireTask.size) {
                 jobsWhichRequireTask[i].context.copyContext(jobsWhichRequireTask[0], currentTask)
+                jobsWhichRequireTask[i].log("Copied context for task: $currentTask")
             }
 
             //add new tasks to queue
             jobsWhichRequireTask.forEach {
                 if (it.hasMoreTasks()) {
-                    val nextTask = it.nextTask()
+                    //increment priority so completing jobs is considered more important than starting them
+                    val nextTask = it.nextTask().withPriority(currentTask.priority + 1)
                     if (!taskQueue.contains(nextTask)) {
                         taskQueue.add(nextTask)
+                    }
+                }
+            }
+
+            //reschedule complete jobs (if necessary)
+            jobsWhichRequireTask.forEach {
+                if (it.isComplete()) {
+                    if (it.config.repeatForever) {
+                        it.resetJob()
+                        //todo: reschedule job logic
+                        it.log("Rescheduled job for: {}")
+                    } else {
+                        jobList.remove(it)
                     }
                 }
             }

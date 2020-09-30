@@ -27,6 +27,8 @@ class GetService(
     override val contextKeys = listOf(SERVICE)
 
     override suspend fun executeTask(job: MentorJob) {
+        job.log("Executing task: $this")
+
         if (current) {
             val service = getCurrentService(job.vertx)
             if (service != null && isMatch(service)) {
