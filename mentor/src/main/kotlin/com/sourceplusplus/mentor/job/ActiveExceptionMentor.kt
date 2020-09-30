@@ -17,7 +17,8 @@ import io.vertx.core.Vertx
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ActiveExceptionMentor(
-    override val vertx: Vertx
+    override val vertx: Vertx,
+    rootPackage: String
 ) : MentorJob() {
 
     override val tasks: List<MentorTask> = listOf(
@@ -35,7 +36,8 @@ class ActiveExceptionMentor(
 
         //search failing traces to determine failing source code location
         DetermineThrowableLocation(
-            GetTraces.TRACE_RESULT
+            GetTraces.TRACE_RESULT,
+            rootPackage
         )
 
         //todo: create advice

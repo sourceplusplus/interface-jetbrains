@@ -46,6 +46,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.kotlin.core.deployVerticleAwait
 import io.vertx.kotlin.core.http.listenAwait
+import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
@@ -89,7 +90,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             return //todo: change when integration tests are added
         }
 
-        GlobalScope.launch {
+        GlobalScope.launch(vertx.dispatcher()) {
             var connectedMonitor = false
             try {
                 initMonitor()
@@ -141,12 +142,12 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
     private suspend fun initMentor(): SourceMentor {
         val mentor = SourceMentor()
         mentor.executeJobs(
-            ActiveExceptionMentor(vertx).withConfig(
-                MentorJobConfig(
-                    repeatForever = true
-                    //todo: configurable schedule
-                )
-            ),
+//            ActiveExceptionMentor(vertx).withConfig(
+//                MentorJobConfig(
+//                    repeatForever = true
+//                    //todo: configurable schedule
+//                )
+//            ),
             RampDetectionMentor(vertx).withConfig(
                 MentorJobConfig(
                     repeatForever = true

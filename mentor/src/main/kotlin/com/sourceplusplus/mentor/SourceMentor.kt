@@ -3,7 +3,10 @@ package com.sourceplusplus.mentor
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runInterruptible
 import org.slf4j.LoggerFactory
 import java.util.concurrent.PriorityBlockingQueue
 
@@ -26,7 +29,7 @@ class SourceMentor : CoroutineVerticle() {
     override suspend fun start() {
         log.info("Setting up SourceMentor")
 
-        launch {
+        launch(vertx.dispatcher()) {
             runJobProcessing()
         }
     }
@@ -34,38 +37,42 @@ class SourceMentor : CoroutineVerticle() {
     private suspend fun runJobProcessing() {
         running = true
         while (running) {
-            val currentTask = taskQueue.poll()
+            val currentTask: MentorTask = runInterruptible(Dispatchers.IO) { taskQueue.take() }
             //todo: search un-expired tasks before executing current task
 
             //find jobs requiring task (execute once then share results)
             val jobsWhichRequireTask = jobList.filter { it.isCurrentTask(currentTask) }
             currentTask.executeTask(jobsWhichRequireTask[0])
+            jobsWhichRequireTask[0].log("Executed task: $currentTask")
+
             for (i in 1 until jobsWhichRequireTask.size) {
                 jobsWhichRequireTask[i].context.copyContext(jobsWhichRequireTask[0], currentTask)
                 jobsWhichRequireTask[i].log("Copied context for task: $currentTask")
             }
 
-            //add new tasks to queue
             jobsWhichRequireTask.forEach {
-                if (it.hasMoreTasks()) {
+                it.emitEvent(MentorJobEvent.TASK_COMPLETE, currentTask)
+
+                if (it.isComplete()) {
+                    //reschedule complete jobs (if necessary)
+                    if (it.config.repeatForever) {
+                        it.resetJob()
+                        //todo: reschedule job logic
+                        it.log("Rescheduled job for: {}")
+                        it.emitEvent(MentorJobEvent.JOB_RESCHEDULED)
+                    } else {
+                        jobList.remove(it)
+                        //it.emitEvent(MentorJobEvent.JOB_COMPLETE)
+                    }
+                } else if (it.hasMoreTasks()) {
+                    //add new tasks to queue
                     //increment priority so completing jobs is considered more important than starting them
                     val nextTask = it.nextTask().withPriority(currentTask.priority + 1)
                     if (!taskQueue.contains(nextTask)) {
                         taskQueue.add(nextTask)
                     }
-                }
-            }
-
-            //reschedule complete jobs (if necessary)
-            jobsWhichRequireTask.forEach {
-                if (it.isComplete()) {
-                    if (it.config.repeatForever) {
-                        it.resetJob()
-                        //todo: reschedule job logic
-                        it.log("Rescheduled job for: {}")
-                    } else {
-                        jobList.remove(it)
-                    }
+                } else {
+                    it.complete()
                 }
             }
 
