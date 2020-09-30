@@ -21,6 +21,10 @@ SourceMarker is a JetBrains-based plugin which implements Feedback-Driven Develo
 - Performance anti-pattern detection
   - Performance Ramp
 
+## Demonstration
+
+[![](https://img.youtube.com/vi/_pML3VleIlo/0.jpg)](https://www.youtube.com/watch?v=_pML3VleIlo)
+
 ## Installation
 
 - Using IDE built-in plugin system:
