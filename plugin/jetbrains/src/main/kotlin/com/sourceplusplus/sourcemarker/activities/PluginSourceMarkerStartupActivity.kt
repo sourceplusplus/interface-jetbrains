@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
@@ -28,13 +29,13 @@ import com.sourceplusplus.portal.backend.PortalServer
 import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
-import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.Json
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
@@ -95,11 +96,17 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
     }
 
     private suspend fun initMonitor() {
-        //todo: configurable
-        val config = JsonObject().apply {
-            put("graphql_endpoint", "http://localhost:12800/graphql")
+        val config = if (
+            PropertiesComponent.getInstance().isValueSet("sourcemarker_plugin_config")
+        ) {
+            Json.decodeValue(
+                PropertiesComponent.getInstance().getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
+        } else {
+            SourceMarkerConfig()
         }
-        vertx.deployVerticleAwait(SkywalkingMonitor(), DeploymentOptions().setConfig(config))
+        vertx.deployVerticleAwait(SkywalkingMonitor(config.skywalkingOapUrl))
     }
 
     private fun initMapper() {
