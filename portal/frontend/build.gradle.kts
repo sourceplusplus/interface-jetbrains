@@ -17,6 +17,7 @@ kotlin {
 //                implementation(npm("sockjs-client", "1.4.0", generateExternals = true))
 //                implementation(npm("vertx3-eventbus-client", "3.9.1", generateExternals = true))
                 implementation(npm("jquery", "3.5.1", generateExternals = true))
+                implementation(npm("moment", "2.29.0"))
 
                 implementation(project(":protocol"))
                 implementation(kotlin("stdlib-common"))
