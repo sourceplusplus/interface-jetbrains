@@ -59,7 +59,7 @@ jobs:
 
       # Run detekt, ktlint and tests
       - name: Run Linters and Test
-        run: ./gradlew check
+        run: ./gradlew check --info --stacktrace
 
       # Run verifyPlugin Gradle task
       - name: Verify Plugin
