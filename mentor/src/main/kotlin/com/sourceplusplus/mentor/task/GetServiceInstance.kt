@@ -45,6 +45,7 @@ class GetServiceInstance(
 
     private fun isMatch(result: GetServiceInstancesQuery.Result): Boolean {
         return when {
+            byId == null && byName == null -> true
             byId != null && byName != null && byId == result.id && byName == result.name -> true
             byId != null && byId == result.id -> true
             byName != null && byName == result.name -> true

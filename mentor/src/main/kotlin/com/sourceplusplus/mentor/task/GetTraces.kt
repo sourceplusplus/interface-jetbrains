@@ -21,8 +21,7 @@ import java.time.ZonedDateTime
 class GetTraces(
     private val orderType: TraceOrderType,
     private val timeFrame: QueryTimeFrame, //todo: impl start/end in QueryTimeFrame
-    private val limit: Int = 100,
-    private val haltOnEmptyTraces: Boolean = true
+    private val limit: Int = 100
 ) : MentorTask() {
 
     companion object {
@@ -43,14 +42,10 @@ class GetTraces(
                     ZonedDateTime.now().minusMinutes(15),
                     ZonedDateTime.now(),
                     SkywalkingClient.DurationStep.MINUTE
-                )
+                ),
+                pageSize = limit
             ), job.vertx
         )
-
-        if (haltOnEmptyTraces && traces.traces.isEmpty()) {
-            job.complete()
-        } else {
-            job.context.put(TRACE_RESULT, traces)
-        }
+        job.context.put(TRACE_RESULT, traces)
     }
 }

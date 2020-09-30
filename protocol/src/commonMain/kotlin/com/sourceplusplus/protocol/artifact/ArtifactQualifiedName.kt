@@ -10,5 +10,6 @@ data class ArtifactQualifiedName(
     val identifier: String,
     val commitId: String,
     val type: ArtifactType,
+    val lineNumber: Int? = null,
     val operationName: String? = null //todo: only method artifacts need
 )
