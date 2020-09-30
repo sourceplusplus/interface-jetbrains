@@ -12,6 +12,11 @@
     <!--    todo: make separate plugin files-->
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable
+                instance="com.sourceplusplus.sourcemarker.settings.SourceMarkerConfigurable"
+                groupId="tools"
+                id="SourceMarker"
+                displayName="SourceMarker"/>
         <postStartupActivity
                 implementation="com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity"/>
 

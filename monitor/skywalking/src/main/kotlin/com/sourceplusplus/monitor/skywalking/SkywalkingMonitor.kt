@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SkywalkingMonitor : CoroutineVerticle() {
+class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
 
     companion object {
         private val log = LoggerFactory.getLogger(SkywalkingMonitor::class.java)
@@ -27,8 +27,9 @@ class SkywalkingMonitor : CoroutineVerticle() {
     }
 
     private suspend fun setup() {
+        log.debug("Apache SkyWalking server: $serverUrl")
         val client = ApolloClient.builder()
-            .serverUrl(config.getString("graphql_endpoint"))
+            .serverUrl(serverUrl)
             .build()
 
         val response = client.query(GetTimeInfoQuery()).toDeferred().await()
