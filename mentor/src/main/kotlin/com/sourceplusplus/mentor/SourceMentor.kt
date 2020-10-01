@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
 import org.slf4j.LoggerFactory
+import java.util.*
 import java.util.concurrent.PriorityBlockingQueue
 
 /**
@@ -45,12 +46,24 @@ class SourceMentor : CoroutineVerticle() {
             currentTask.executeTask(jobsWhichRequireTask[0])
             jobsWhichRequireTask[0].log("Executed task: $currentTask")
 
+            val tasksStillRequired = Collections.newSetFromMap(
+                IdentityHashMap<MentorTask, Boolean>()
+            )
             for (i in 1 until jobsWhichRequireTask.size) {
-                jobsWhichRequireTask[i].context.copyContext(jobsWhichRequireTask[0], currentTask)
-                jobsWhichRequireTask[i].log("Copied context for task: $currentTask")
+                val sameContext = jobsWhichRequireTask[i].currentTask()
+                    .usingSameContext(jobsWhichRequireTask[i], jobsWhichRequireTask[0], currentTask)
+                if (sameContext) {
+                    jobsWhichRequireTask[i].context.copyContext(jobsWhichRequireTask[0], currentTask)
+                    jobsWhichRequireTask[i].log("Copied context for task: $currentTask")
+                    jobsWhichRequireTask[i].emitEvent(MentorJobEvent.CONTEXT_SHARED, currentTask)
+                } else {
+                    val task = jobsWhichRequireTask[i].currentTask()
+                    tasksStillRequired.add(task)
+                    addTask(task)
+                }
             }
 
-            jobsWhichRequireTask.forEach {
+            jobsWhichRequireTask.filter { !tasksStillRequired.contains(it.currentTask()) }.forEach {
                 it.emitEvent(MentorJobEvent.TASK_COMPLETE, currentTask)
 
                 if (it.isComplete()) {
@@ -62,15 +75,10 @@ class SourceMentor : CoroutineVerticle() {
                         it.emitEvent(MentorJobEvent.JOB_RESCHEDULED)
                     } else {
                         jobList.remove(it)
-                        //it.emitEvent(MentorJobEvent.JOB_COMPLETE)
                     }
                 } else if (it.hasMoreTasks()) {
                     //add new tasks to queue
-                    //increment priority so completing jobs is considered more important than starting them
-                    val nextTask = it.nextTask().withPriority(currentTask.priority + 1)
-                    if (!taskQueue.contains(nextTask)) {
-                        taskQueue.add(nextTask)
-                    }
+                    addTask(it.nextTask())
                 } else {
                     it.complete()
                 }
@@ -80,16 +88,19 @@ class SourceMentor : CoroutineVerticle() {
         }
     }
 
+    private fun addTask(task: MentorTask) {
+        if (!taskQueue.contains(task)) {
+            taskQueue.add(task)
+        }
+    }
+
     fun executeJob(job: MentorJob) {
         if (job.tasks.isEmpty()) {
             throw IllegalArgumentException("Job contains no tasks")
         }
 
         jobList.add(job)
-        val task = job.nextTask()
-        if (!taskQueue.contains(task)) {
-            taskQueue.add(task)
-        }
+        addTask(job.nextTask())
     }
 
     fun executeJobs(vararg jobs: MentorJob) {

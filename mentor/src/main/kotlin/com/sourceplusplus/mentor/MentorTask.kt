@@ -11,10 +11,6 @@ import com.sourceplusplus.mentor.MentorJob.ContextKey
 abstract class MentorTask : Comparable<MentorTask> {
 
     var priority: Int = 0
-        set(value) {
-            field = value
-            //todo: remove/add to queue
-        }
     abstract val contextKeys: List<ContextKey<*>>
 
     fun withPriority(priority: Int): MentorTask {
@@ -23,6 +19,7 @@ abstract class MentorTask : Comparable<MentorTask> {
     }
 
     abstract suspend fun executeTask(job: MentorJob)
-    override operator fun compareTo(other: MentorTask): Int = priority.compareTo(other.priority)
+    override operator fun compareTo(other: MentorTask): Int = other.priority.compareTo(priority)
     override fun toString(): String = javaClass.simpleName
+    open fun usingSameContext(selfJob: MentorJob, job: MentorJob, task: MentorTask): Boolean = true
 }

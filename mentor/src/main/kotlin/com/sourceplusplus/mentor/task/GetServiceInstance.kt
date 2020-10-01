@@ -56,6 +56,13 @@ class GetServiceInstance(
         }
     }
 
+    override fun usingSameContext(selfJob: MentorJob, job: MentorJob, task: MentorTask): Boolean {
+        if (task is GetServiceInstance && byContext != null && task.byContext != null) {
+            return selfJob.context.get(byContext) == job.context.get(byContext)
+        }
+        return true
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GetServiceInstance) return false

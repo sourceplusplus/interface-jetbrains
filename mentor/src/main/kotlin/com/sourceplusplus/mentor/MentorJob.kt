@@ -26,6 +26,7 @@ abstract class MentorJob {
     private val listeners: MutableList<MentorJobListener> = mutableListOf()
 
     fun addJobListener(jobListener: MentorJobListener) = listeners.add(jobListener)
+    fun currentTask(): MentorTask = tasks[currentTask]
     fun nextTask(): MentorTask = tasks[++currentTask]
     fun hasMoreTasks(): Boolean = !complete && currentTask < (tasks.size - 1)
     fun isCurrentTask(task: MentorTask): Boolean = !complete && currentTask > -1 && tasks[currentTask] == task
