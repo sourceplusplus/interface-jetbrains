@@ -3,11 +3,10 @@ package com.sourceplusplus.mentor.task
 import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorJob.ContextKey
 import com.sourceplusplus.mentor.MentorTask
-import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
 import com.sourceplusplus.protocol.artifact.ArtifactLocation
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.protocol.artifact.trace.TraceResult
+import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 
 /**
  * todo: description.
@@ -16,7 +15,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceResult
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class DetermineThrowableLocation(
-    private val byTracesContext: ContextKey<TraceResult>,
+    private val byTraceStacksContext: ContextKey<List<TraceSpanStackQueryResult>>,
     private val rootPackage: String
 ) : MentorTask() {
 
@@ -29,13 +28,12 @@ class DetermineThrowableLocation(
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Executing task: $this")
-        job.log("Task configuration\n\tbyTracesContext: $byTracesContext\n\trootPackage: $rootPackage")
+        job.log("Task configuration\n\tbyTraceStacksContext: $byTraceStacksContext\n\trootPackage: $rootPackage")
 
         //todo: ArtifactLocation more appropriate naming than ArtifactQualifiedName
         val domainExceptions = mutableMapOf<ArtifactQualifiedName, List<String>>()
-        val traceResult = job.context.get(byTracesContext)
-        traceResult.traces.distinctBy { it.operationNames }.forEach { trace ->
-            val traceStack = EndpointTracesTracker.getTraceStack(trace.traceIds[0], job.vertx)
+        val traceStacks = job.context.get(byTraceStacksContext)
+        traceStacks.forEach { traceStack ->
             traceStack.traceSpans.forEach { span ->
                 span.logs.forEach { logEntry ->
                     val logLines = logEntry.data.split("\n")

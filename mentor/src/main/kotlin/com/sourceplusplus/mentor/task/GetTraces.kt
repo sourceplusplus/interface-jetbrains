@@ -22,7 +22,8 @@ class GetTraces(
     //todo: serviceId/serviceInstanceId
     private val orderType: TraceOrderType,
     private val timeFrame: QueryTimeFrame, //todo: impl start/end in QueryTimeFrame
-    private val limit: Int = 100
+    private val endpointName: String? = null,
+    private val limit: Int = 10
 ) : MentorTask() {
 
     companion object {
@@ -33,10 +34,17 @@ class GetTraces(
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Executing task: $this")
-        job.log("Task configuration\n\torderType: $orderType\n\ttimeFrame: $timeFrame\n\tlimit: $limit")
+        job.log(
+            "Task configuration\n\t" +
+                    "orderType: $orderType\n\t" +
+                    "timeFrame: $timeFrame\n\t" +
+                    "endpointName: $endpointName\nt\t" +
+                    "limit: $limit"
+        )
 
         val traces = EndpointTracesTracker.getTraces(
             GetEndpointTraces(
+                endpointName = endpointName,
                 appUuid = "null", //todo: likely not necessary
                 artifactQualifiedName = "null", //todo: likely not necessary
                 orderType = orderType,
@@ -49,6 +57,6 @@ class GetTraces(
             ), job.vertx
         )
         job.context.put(TRACE_RESULT, traces)
-        job.log("Added context\n\tKey: $TRACE_RESULT\n\tValue: $traces")
+        job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${traces.traces.size}")
     }
 }

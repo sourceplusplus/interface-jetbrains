@@ -71,6 +71,7 @@ class SkywalkingClient(
             QueryBasicTracesQuery(
                 TraceQueryCondition(
                     endpointId = Input.optional(request.endpointId),
+                    endpointName = Input.optional(request.endpointName),
                     queryDuration = Input.optional(request.zonedDuration.toDuration(this)),
                     queryOrder = request.orderType.toQueryOrder(),
                     traceState = request.orderType.toTraceState(),

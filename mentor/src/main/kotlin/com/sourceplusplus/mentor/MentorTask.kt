@@ -21,5 +21,5 @@ abstract class MentorTask : Comparable<MentorTask> {
     abstract suspend fun executeTask(job: MentorJob)
     override operator fun compareTo(other: MentorTask): Int = other.priority.compareTo(priority)
     override fun toString(): String = javaClass.simpleName
-    open fun usingSameContext(selfJob: MentorJob, job: MentorJob, task: MentorTask): Boolean = true
+    open fun usingSameContext(selfJob: MentorJob, job: MentorJob, task: MentorTask): Boolean = false
 }

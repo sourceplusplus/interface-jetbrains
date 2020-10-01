@@ -2,10 +2,7 @@ package com.sourceplusplus.mentor.job
 
 import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorTask
-import com.sourceplusplus.mentor.task.DetermineThrowableLocation
-import com.sourceplusplus.mentor.task.GetService
-import com.sourceplusplus.mentor.task.GetServiceInstance
-import com.sourceplusplus.mentor.task.GetTraces
+import com.sourceplusplus.mentor.task.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import io.vertx.core.Vertx
@@ -33,10 +30,11 @@ class ActiveExceptionMentor(
             TraceOrderType.FAILED_TRACES,
             QueryTimeFrame.LAST_15_MINUTES
         ),
+        GetTraceStacks(GetTraces.TRACE_RESULT),
 
         //search failing traces to determine failing source code location
         DetermineThrowableLocation(
-            GetTraces.TRACE_RESULT,
+            GetTraceStacks.TRACE_STACKS,
             rootPackage
         )
 
