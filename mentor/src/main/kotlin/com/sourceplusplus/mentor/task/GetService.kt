@@ -28,18 +28,28 @@ class GetService(
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Executing task: $this")
+        job.log("Configuration: byId - $byId, byName - $byName, current - $current")
 
         if (current) {
             val service = getCurrentService(job.vertx)
             if (service != null && isMatch(service)) {
                 job.context.put(SERVICE, service)
+                job.log("Set context $SERVICE to value $service")
+            } else {
+                job.log("Failed to set context $SERVICE")
             }
         } else {
+            var setContext = false
             for (service in getActiveServices(job.vertx)) {
                 if (isMatch(service)) {
                     job.context.put(SERVICE, service)
+                    job.log("Set context $SERVICE to value $service")
+                    setContext = true
                     break
                 }
+            }
+            if (!setContext) {
+                job.log("Failed to set context $SERVICE")
             }
         }
     }
