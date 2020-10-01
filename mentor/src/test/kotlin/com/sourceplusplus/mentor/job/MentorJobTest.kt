@@ -12,7 +12,7 @@ import org.junit.Test
 
 class MentorJobTest : MentorTest() {
 
-    @Test(timeout = 2500)
+    @Test(timeout = 5000)
     fun singleTaskJob() {
         val testPromise = Promise.promise<Nothing>()
         val simpleJob = object : MentorJob() {
@@ -32,7 +32,9 @@ class MentorJobTest : MentorTest() {
         }
         runBlocking(vertx.dispatcher()) {
             testPromise.future().onCompleteAwait()
-            vertx.close()
+            val stopPromise = Promise.promise<Void>()
+            mentor.stop(stopPromise)
+            stopPromise.future().onCompleteAwait()
         }
     }
 }

@@ -13,7 +13,7 @@ import org.junit.Test
 
 class GetTracesTest : MentorTest() {
 
-    @Test(timeout = 2500)
+    @Test(timeout = 5000)
     fun latestTraces() {
         val emptyJob = object : MentorJob() {
             override val vertx: Vertx = this@GetTracesTest.vertx
@@ -27,7 +27,6 @@ class GetTracesTest : MentorTest() {
             ).executeTask(emptyJob)
 
             assertNotNull(emptyJob.context.get(GetTraces.TRACE_RESULT))
-            vertx.close()
         }
     }
 }
