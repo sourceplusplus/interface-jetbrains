@@ -85,5 +85,7 @@ abstract class MentorJob {
     }
 
     @Suppress("unused")
-    class ContextKey<T>
+    class ContextKey<T>(private val name: String) {
+        override fun toString(): String = name
+    }
 }

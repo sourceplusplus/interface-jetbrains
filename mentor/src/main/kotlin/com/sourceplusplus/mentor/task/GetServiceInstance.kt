@@ -21,13 +21,15 @@ class GetServiceInstance(
 ) : MentorTask() {
 
     companion object {
-        val SERVICE_INSTANCE: ContextKey<GetServiceInstancesQuery.Result> = ContextKey()
+        val SERVICE_INSTANCE: ContextKey<GetServiceInstancesQuery.Result> =
+            ContextKey("GetServiceInstance.SERVICE_INSTANCE")
     }
 
     override val contextKeys = listOf(SERVICE_INSTANCE)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Executing task: $this")
+        job.log("Task configuration\n\tbyContext: $byContext\n\tbyId: $byId\n\tbyName: $byName")
 
         val serviceId = if (byContext != null) {
             job.context.get(byContext).id
@@ -38,6 +40,7 @@ class GetServiceInstance(
         for (serviceInstance in getServiceInstances(serviceId, job.vertx)) {
             if (isMatch(serviceInstance)) {
                 job.context.put(SERVICE_INSTANCE, serviceInstance)
+                job.log("Added context\n\tKey: $SERVICE_INSTANCE\n\tValue: $serviceInstance")
                 break
             }
         }

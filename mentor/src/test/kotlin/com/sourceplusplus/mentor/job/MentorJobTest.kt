@@ -12,7 +12,7 @@ import org.junit.Test
 
 class MentorJobTest : MentorTest() {
 
-    @Test(timeout = 5000)
+    @Test(timeout = 15000)
     fun singleTaskJob() {
         val testPromise = Promise.promise<Nothing>()
         val simpleJob = object : MentorJob() {

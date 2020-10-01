@@ -21,35 +21,35 @@ class GetService(
 ) : MentorTask() {
 
     companion object {
-        val SERVICE: ContextKey<GetAllServicesQuery.Result> = ContextKey()
+        val SERVICE: ContextKey<GetAllServicesQuery.Result> = ContextKey("GetService.SERVICE")
     }
 
     override val contextKeys = listOf(SERVICE)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Executing task: $this")
-        job.log("Configuration: byId - $byId, byName - $byName, current - $current")
+        job.log("Task configuration\n\tbyId: $byId\n\tbyName: $byName\n\tcurrent: $current")
 
         if (current) {
             val service = getCurrentService(job.vertx)
             if (service != null && isMatch(service)) {
                 job.context.put(SERVICE, service)
-                job.log("Set context $SERVICE to value $service")
+                job.log("Added context\n\tKey: $SERVICE\n\tValue: $service")
             } else {
-                job.log("Failed to set context $SERVICE")
+                job.log("Failed to add context: $SERVICE")
             }
         } else {
-            var setContext = false
+            var addedContext = false
             for (service in getActiveServices(job.vertx)) {
                 if (isMatch(service)) {
                     job.context.put(SERVICE, service)
-                    job.log("Set context $SERVICE to value $service")
-                    setContext = true
+                    job.log("Added context\n\tKey: $SERVICE\n\tValue: $service")
+                    addedContext = true
                     break
                 }
             }
-            if (!setContext) {
-                job.log("Failed to set context $SERVICE")
+            if (!addedContext) {
+                job.log("Failed to add context: $SERVICE")
             }
         }
     }
