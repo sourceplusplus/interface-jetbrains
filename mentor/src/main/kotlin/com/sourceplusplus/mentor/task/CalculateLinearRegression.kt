@@ -15,7 +15,6 @@ import org.apache.commons.math3.stat.regression.SimpleRegression
 class CalculateLinearRegression(
     private val byTracesContext: ContextKey<TraceResult>,
     val regressionMap: MutableMap<String, SimpleRegression> = mutableMapOf()
-//    private val rootPackage: String
 ) : MentorTask() {
 
     companion object {
