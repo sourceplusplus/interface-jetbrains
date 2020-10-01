@@ -1,6 +1,6 @@
 package com.sourceplusplus.sourcemarker.listeners
 
-import com.sourceplusplus.marker.MarkerUtils
+import com.intellij.openapi.util.IconLoader
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
@@ -16,6 +16,11 @@ import com.sourceplusplus.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PluginSourceMarkEventListener(private val sourceMentor: SourceMentor) : SourceMarkEventListener {
+
+    private val exclamationTriangle = IconLoader.getIcon(
+        "/icons/exclamation-triangle.svg",
+        PluginSourceMarkEventListener::class.java
+    )
 
     override fun handleEvent(event: SourceMarkEvent) {
         if (event.eventCode == SourceMarkEventCode.MARK_ADDED) {
