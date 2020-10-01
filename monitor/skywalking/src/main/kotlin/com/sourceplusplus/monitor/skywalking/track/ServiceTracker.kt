@@ -23,21 +23,56 @@ class ServiceTracker(private val skywalkingClient: SkywalkingClient) : Coroutine
     var activeServices: List<GetAllServicesQuery.Result> = emptyList()
 
     override suspend fun start() {
-        launch(vertx.dispatcher()) {
-            activeServices = skywalkingClient.run {
-                getServices(getDuration(ZonedDateTime.now().minusMinutes(15), DurationStep.MINUTE))
-            }
-            vertx.eventBus().publish(activeServicesUpdatedAddress, activeServices)
+        vertx.setPeriodic(5000) { timerId ->
+            launch(vertx.dispatcher()) {
+                activeServices = skywalkingClient.run {
+                    getServices(getDuration(ZonedDateTime.now().minusMinutes(15), DurationStep.MINUTE))
+                }
 
-            if (activeServices.isNotEmpty()) {
-                currentService = activeServices[0]
-                vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
+                if (activeServices.isNotEmpty()) {
+                    vertx.cancelTimer(timerId)
+                    vertx.eventBus().publish(activeServicesUpdatedAddress, activeServices)
+
+                    currentService = activeServices[0]
+                    vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
+                }
             }
         }
 
+
         //async accessors
-        vertx.eventBus().localConsumer<Nothing>(getCurrentServiceAddress) { it.reply(currentService) }
-        vertx.eventBus().localConsumer<Nothing>(getActiveServicesAddress) { it.reply(activeServices) }
+        vertx.eventBus().localConsumer<Boolean>(getCurrentServiceAddress) { msg ->
+            if (msg.body() && currentService == null) {
+                val consumer = currentServiceConsumer(vertx)
+                if (currentService != null) {
+                    consumer.unregister()
+                    msg.reply(currentService)
+                } else {
+                    consumer.handler {
+                        msg.reply(it.body())
+                        consumer.unregister()
+                    }
+                }
+            } else {
+                msg.reply(currentService)
+            }
+        }
+        vertx.eventBus().localConsumer<Boolean>(getActiveServicesAddress) { msg ->
+            if (msg.body() && activeServices.isEmpty()) {
+                val consumer = activeServicesConsumer(vertx)
+                if (activeServices.isNotEmpty()) {
+                    consumer.unregister()
+                    msg.reply(activeServices)
+                } else {
+                    consumer.handler {
+                        msg.reply(it.body())
+                        consumer.unregister()
+                    }
+                }
+            } else {
+                msg.reply(activeServices)
+            }
+        }
     }
 
     companion object {
@@ -57,13 +92,25 @@ class ServiceTracker(private val skywalkingClient: SkywalkingClient) : Coroutine
 
         suspend fun getCurrentService(vertx: Vertx): GetAllServicesQuery.Result? {
             return vertx.eventBus()
-                .requestAwait<GetAllServicesQuery.Result?>(getCurrentServiceAddress, null)
+                .requestAwait<GetAllServicesQuery.Result?>(getCurrentServiceAddress, false)
                 .body()
         }
 
         suspend fun getActiveServices(vertx: Vertx): List<GetAllServicesQuery.Result> {
             return vertx.eventBus()
-                .requestAwait<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, null)
+                .requestAwait<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, false)
+                .body()
+        }
+
+        suspend fun getCurrentServiceAwait(vertx: Vertx): GetAllServicesQuery.Result {
+            return vertx.eventBus()
+                .requestAwait<GetAllServicesQuery.Result>(getCurrentServiceAddress, true)
+                .body()
+        }
+
+        suspend fun getActiveServicesAwait(vertx: Vertx): List<GetAllServicesQuery.Result> {
+            return vertx.eventBus()
+                .requestAwait<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, true)
                 .body()
         }
     }
