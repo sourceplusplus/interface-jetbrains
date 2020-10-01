@@ -14,6 +14,7 @@ data class GetEndpointTraces(
     val serviceId: String? = null,
     val serviceInstanceId: String? = null,
     val endpointId: String? = null,
+    val endpointName: String? = null,
     val zonedDuration: ZonedDuration,
     val orderType: TraceOrderType = TraceOrderType.LATEST_TRACES,
     val pageNumber: Int = 1,
