@@ -53,7 +53,6 @@ tasks {
         doLast {
             println("Downloading Apache SkyWalking")
             val f = File(projectDir, "test/e2e/apache-skywalking-apm-es7-8.1.0.tar.gz")
-            println("Location: " + f.absolutePath)
             if (!f.exists()) {
                 java.net.URL("https://downloads.apache.org/skywalking/8.1.0/apache-skywalking-apm-es7-8.1.0.tar.gz")
                     .openStream().use { input ->
