@@ -13,7 +13,7 @@ import org.junit.Test
 
 class ActiveExceptionMentorTest : MentorTest() {
 
-    @Test(timeout = 5000)
+    @Test(timeout = 15000)
     fun testJob() {
         val testPromise = Promise.promise<Nothing>()
         val job = ActiveExceptionMentor(vertx, "spp.example")

@@ -21,13 +21,15 @@ class DetermineThrowableLocation(
 ) : MentorTask() {
 
     companion object {
-        val ARTIFACT_LOCATION: ContextKey<ArtifactLocation> = ContextKey()
+        val ARTIFACT_LOCATION: ContextKey<ArtifactLocation> =
+            ContextKey("DetermineThrowableLocation.ARTIFACT_LOCATION")
     }
 
     override val contextKeys = listOf(ARTIFACT_LOCATION)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Executing task: $this")
+        job.log("Task configuration\n\tbyTracesContext: $byTracesContext\n\trootPackage: $rootPackage")
 
         //todo: ArtifactLocation more appropriate naming than ArtifactQualifiedName
         val domainExceptions = mutableMapOf<ArtifactQualifiedName, List<String>>()

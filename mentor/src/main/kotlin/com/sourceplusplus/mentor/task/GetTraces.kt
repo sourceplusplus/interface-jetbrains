@@ -19,19 +19,21 @@ import java.time.ZonedDateTime
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class GetTraces(
+    //todo: serviceId/serviceInstanceId
     private val orderType: TraceOrderType,
     private val timeFrame: QueryTimeFrame, //todo: impl start/end in QueryTimeFrame
     private val limit: Int = 100
 ) : MentorTask() {
 
     companion object {
-        val TRACE_RESULT: ContextKey<TraceResult> = ContextKey()
+        val TRACE_RESULT: ContextKey<TraceResult> = ContextKey("GetTraces.TRACE_RESULT")
     }
 
     override val contextKeys = listOf(TRACE_RESULT)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Executing task: $this")
+        job.log("Task configuration\n\torderType: $orderType\n\ttimeFrame: $timeFrame\n\tlimit: $limit")
 
         val traces = EndpointTracesTracker.getTraces(
             GetEndpointTraces(
@@ -47,5 +49,6 @@ class GetTraces(
             ), job.vertx
         )
         job.context.put(TRACE_RESULT, traces)
+        job.log("Added context\n\tKey: $TRACE_RESULT\n\tValue: $traces")
     }
 }
