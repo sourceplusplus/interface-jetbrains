@@ -27,8 +27,8 @@ class ActiveExceptionMentor(
 
         //fetch failing traces
         GetTraces(
-            TraceOrderType.FAILED_TRACES,
-            QueryTimeFrame.LAST_15_MINUTES
+            orderType = TraceOrderType.FAILED_TRACES,
+            timeFrame = QueryTimeFrame.LAST_15_MINUTES
         ),
         GetTraceStacks(GetTraces.TRACE_RESULT),
 

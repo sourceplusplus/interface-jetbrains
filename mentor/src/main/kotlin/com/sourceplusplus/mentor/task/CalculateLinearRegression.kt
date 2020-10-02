@@ -36,5 +36,23 @@ class CalculateLinearRegression(
         //todo: should be saving regression objects permanently to job
         //todo: each time run should add new traces to regression object
         //todo: there should likely be a way to give endpoints priority based on the likelihood for it to be a performance ramp
+
+        regressionMap.forEach {
+            if (it.value.slope >= 0 && it.value.rSquare >= 0.50 && it.value.n >= 100) {
+                println("apparent linear slope detected")
+            }
+//            println(
+//                "${it.key}\n\t" +
+//                        "slope: ${it.value.slope}\n\t" +
+//                        "slopeConfidenceInterval: ${it.value.slopeConfidenceInterval}\n\t" +
+//                        "r: ${it.value.r}\n\t" +
+//                        "rSquare: ${it.value.rSquare}\n\t" +
+//                        "slopeStdErr: ${it.value.slopeStdErr}\n\t" +
+//                        "intercept: ${it.value.intercept}\n\t" +
+//                        "interceptStdErr: ${it.value.interceptStdErr}\n\t" +
+//                        "significance: ${it.value.significance}\n\t" +
+//                        "n: ${it.value.n}"
+//            )
+        }
     }
 }

@@ -66,21 +66,22 @@ class SourceMentor : CoroutineVerticle() {
             jobsWhichRequireTask.filter { !tasksStillRequired.contains(it.currentTask()) }.forEach {
                 it.emitEvent(MentorJobEvent.TASK_COMPLETE, currentTask)
 
-                if (it.isComplete()) {
-                    //reschedule complete jobs (if necessary)
-                    if (it.config.repeatForever) {
-                        it.resetJob()
-                        //todo: reschedule job logic
-                        it.log("Rescheduled job for: {}")
-                        it.emitEvent(MentorJobEvent.JOB_RESCHEDULED)
-                    } else {
-                        jobList.remove(it)
-                    }
-                } else if (it.hasMoreTasks()) {
+                if (it.hasMoreTasks()) {
                     //add new tasks to queue
                     addTask(it.nextTask())
                 } else {
-                    it.complete()
+                    //reschedule complete jobs (if necessary)
+                    if (it.config.repeatForever) {
+                        it.resetJob()
+                        it.log("Rescheduled job for: {}")
+                        it.emitEvent(MentorJobEvent.JOB_RESCHEDULED)
+
+                        //todo: reschedule job logic
+                        addTask(it.nextTask())
+                    } else {
+                        it.complete()
+                        jobList.remove(it)
+                    }
                 }
             }
 
