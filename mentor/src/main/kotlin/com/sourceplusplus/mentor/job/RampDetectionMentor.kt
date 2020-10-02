@@ -14,7 +14,8 @@ import io.vertx.core.Vertx
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class RampDetectionMentor(
-    override val vertx: Vertx
+    override val vertx: Vertx,
+    confidence: Double = 0.5
 ) : MentorJob() {
 
     override val tasks: List<MentorTask> = listOf(
@@ -32,8 +33,9 @@ class RampDetectionMentor(
         ),
 
         //todo: ARIMA model?
-        CalculateLinearRegression(GetTraces.TRACE_RESULT),
-        //DelayTask(10_000)
+        CalculateLinearRegression(GetTraces.TRACE_RESULT, confidence),
+
+        //DelayTask(30_000)
 
         //todo: find endpoints with consistently increasing response time of a certain threshold
         //todo: search source code of endpoint for culprits

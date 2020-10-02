@@ -1,5 +1,7 @@
 package com.sourceplusplus.mentor
 
+import com.sourceplusplus.protocol.advice.AdviceListener
+import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import io.vertx.core.Vertx
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -24,6 +26,8 @@ abstract class MentorJob {
     private var currentTask = -1
     private var complete: Boolean = false
     private val listeners: MutableList<MentorJobListener> = mutableListOf()
+    open val advice: Set<ArtifactAdvice> = mutableSetOf()
+    private val adviceListeners: MutableList<AdviceListener> = mutableListOf()
 
     fun addJobListener(jobListener: MentorJobListener) = listeners.add(jobListener)
     fun currentTask(): MentorTask = tasks[currentTask]
@@ -57,6 +61,16 @@ abstract class MentorJob {
 
     fun emitEvent(event: MentorJobEvent, data: Any? = null) {
         listeners.forEach { it.onEvent(event, data) }
+    }
+
+    fun addAdvice(artifactAdvice: ArtifactAdvice) {
+        if ((advice as MutableSet).add(artifactAdvice)) {
+            adviceListeners.forEach { it.advised(artifactAdvice) }
+        }
+    }
+
+    fun addAdviceListener(adviceListener: AdviceListener) {
+        adviceListeners.add(adviceListener)
     }
 
     class TaskContext {

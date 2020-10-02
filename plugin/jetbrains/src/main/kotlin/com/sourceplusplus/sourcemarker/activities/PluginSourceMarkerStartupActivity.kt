@@ -32,6 +32,7 @@ import com.sourceplusplus.portal.backend.PortalServer
 import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
+import com.sourceplusplus.sourcemarker.listeners.ArtifactAdviceListener
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
@@ -141,13 +142,17 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
      */
     private suspend fun initMentor(): SourceMentor {
         val mentor = SourceMentor()
+        mentor.addAdviceListener(ArtifactAdviceListener())
         mentor.executeJobs(
-//            ActiveExceptionMentor(vertx).withConfig(
-//                MentorJobConfig(
-//                    repeatForever = true
-//                    //todo: configurable schedule
-//                )
-//            ),
+            ActiveExceptionMentor(
+                vertx,
+                "spp.example" //todo: dynamic
+            ).withConfig(
+                MentorJobConfig(
+                    repeatForever = true
+                    //todo: configurable schedule
+                )
+            ),
             RampDetectionMentor(vertx).withConfig(
                 MentorJobConfig(
                     repeatForever = true

@@ -10,5 +10,6 @@ enum class ArtifactType {
     CLASS,
     METHOD,
     STATEMENT,
-    EXPRESSION
+    EXPRESSION,
+    ENDPOINT
 }
