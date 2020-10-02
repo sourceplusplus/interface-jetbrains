@@ -30,9 +30,17 @@ tasks {
         }
     }
 
-    getByName("test") {
+    test {
         dependsOn(":downloadSkywalking", ":composeUp")
         rootProject.tasks.findByName("composeUp")!!.mustRunAfter("downloadSkywalking")
         finalizedBy(":composeDown")
+
+        testLogging {
+            events("passed", "skipped", "failed")
+            setExceptionFormat("full")
+
+            outputs.upToDateWhen { false }
+            showStandardStreams = true
+        }
     }
 }
