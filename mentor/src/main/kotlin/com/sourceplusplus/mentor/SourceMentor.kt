@@ -45,6 +45,7 @@ class SourceMentor : CoroutineVerticle() {
 
             //find jobs requiring task (execute once then share results)
             val jobsWhichRequireTask = jobList.filter { it.isCurrentTask(currentTask) }
+            jobsWhichRequireTask[0].log("Executing task: $currentTask")
             currentTask.executeTask(jobsWhichRequireTask[0])
             jobsWhichRequireTask[0].log("Executed task: $currentTask")
 

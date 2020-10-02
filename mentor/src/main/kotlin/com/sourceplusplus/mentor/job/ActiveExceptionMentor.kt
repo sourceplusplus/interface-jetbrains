@@ -18,29 +18,35 @@ class ActiveExceptionMentor(
     rootPackage: String
 ) : MentorJob() {
 
-    override val tasks: List<MentorTask> = listOf(
-        //get active service instance
-        GetService(),
-        GetServiceInstance(
-            GetService.SERVICE
-        ),
+    override val tasks: List<MentorTask> by lazy {
+        listOf(
+            //get active service instance
+            GetService(),
+            GetServiceInstance(
+                GetService.SERVICE
+            ),
 
-        //fetch failing traces
-        GetTraces(
-            orderType = TraceOrderType.FAILED_TRACES,
-            timeFrame = QueryTimeFrame.LAST_15_MINUTES
-        ),
-        GetTraceStacks(GetTraces.TRACE_RESULT),
+            //fetch failing traces
+            GetTraces(
+                orderType = TraceOrderType.FAILED_TRACES,
+                timeFrame = QueryTimeFrame.LAST_15_MINUTES
+            ),
+            GetTraceStacks(GetTraces.TRACE_RESULT),
 
-        //search failing traces to determine failing source code location
-        DetermineThrowableLocation(
-            GetTraceStacks.TRACE_STACKS,
-            rootPackage
-        ),
+            //search failing traces to determine failing source code location
+            DetermineThrowableLocation(
+                GetTraceStacks.TRACE_STACKS,
+                rootPackage
+            ),
 
-        //DelayTask(30_000)
+            if (config.repeatForever) {
+                DelayTask(config.repeatDelay)
+            } else {
+                NoopTask()
+            }
 
-        //todo: create advice
-        //todo: maintain created advice status (remove on new instances, etc)
-    )
+            //todo: create advice
+            //todo: maintain created advice status (remove on new instances, etc)
+        )
+    }
 }

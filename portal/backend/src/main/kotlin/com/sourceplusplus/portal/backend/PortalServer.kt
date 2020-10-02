@@ -46,7 +46,7 @@ class PortalServer : CoroutineVerticle() {
 
         // Build Vert.x Web router
         val router = Router.router(vertx)
-        router.route().handler(LoggerHandler.create())
+        //router.route().handler(LoggerHandler.create())
         router.route().handler(ResponseTimeHandler.create())
 
 //        // Static handler

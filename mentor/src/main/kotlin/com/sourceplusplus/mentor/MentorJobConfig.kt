@@ -7,5 +7,6 @@ package com.sourceplusplus.mentor
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class MentorJobConfig(
-    val repeatForever: Boolean = false
+    val repeatForever: Boolean = false,
+    val repeatDelay: Long = 0
 )

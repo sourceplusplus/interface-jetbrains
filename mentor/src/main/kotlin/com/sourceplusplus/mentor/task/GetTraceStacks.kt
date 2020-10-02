@@ -25,7 +25,6 @@ class GetTraceStacks(
     override val contextKeys = listOf(TRACE_STACKS)
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log("Executing task: $this")
         job.log(
             "Task configuration\n\t" +
                     "byTracesContext: $byTracesContext\n\t" +

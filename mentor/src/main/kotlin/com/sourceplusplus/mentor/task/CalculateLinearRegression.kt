@@ -27,7 +27,6 @@ class CalculateLinearRegression(
     override val contextKeys = listOf<ContextKey<*>>()
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log("Executing task: $this")
         job.log("Task configuration\n\tbyTracesContext: $byTracesContext")
 
         val traceResult = job.context.get(byTracesContext)

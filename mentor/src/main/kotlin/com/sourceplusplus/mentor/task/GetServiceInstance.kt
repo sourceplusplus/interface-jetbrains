@@ -28,7 +28,6 @@ class GetServiceInstance(
     override val contextKeys = listOf(SERVICE_INSTANCE)
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log("Executing task: $this")
         job.log("Task configuration\n\tbyContext: $byContext\n\tbyId: $byId\n\tbyName: $byName")
 
         val serviceId = if (byContext != null) {
