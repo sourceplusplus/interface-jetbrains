@@ -15,7 +15,7 @@ import org.junit.Test
 
 class CalculateLinearRegressionTest : MentorTest() {
 
-    @Test(timeout = 30_000)
+    @Test(timeout = 60_000)
     fun calculateSlope() {
         val emptyJob = object : MentorJob() {
             override val vertx: Vertx = this@CalculateLinearRegressionTest.vertx
@@ -38,12 +38,12 @@ class CalculateLinearRegressionTest : MentorTest() {
                 )
             calcRegression.executeTask(emptyJob)
 
-            delay(5000)
+            delay(15000)
 
             getTraces.executeTask(emptyJob)
             calcRegression.executeTask(emptyJob)
 
-            delay(5000)
+            delay(15000)
 
             getTraces.executeTask(emptyJob)
             calcRegression.executeTask(emptyJob)

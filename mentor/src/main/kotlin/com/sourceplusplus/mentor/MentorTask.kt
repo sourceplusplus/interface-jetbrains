@@ -11,7 +11,7 @@ import com.sourceplusplus.mentor.MentorJob.ContextKey
 abstract class MentorTask : Comparable<MentorTask> {
 
     var priority: Int = 0
-    abstract val contextKeys: List<ContextKey<*>>
+    open val contextKeys: List<ContextKey<*>> = listOf()
 
     fun withPriority(priority: Int): MentorTask {
         this.priority = priority

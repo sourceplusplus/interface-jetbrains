@@ -20,6 +20,7 @@ import java.time.ZonedDateTime
  */
 class GetTraces(
     //todo: serviceId/serviceInstanceId
+    private val byEndpointIds: ContextKey<List<String>>? = null,
     private val orderType: TraceOrderType,
     private val timeFrame: QueryTimeFrame, //todo: impl start/end in QueryTimeFrame
     private val endpointName: String? = null,
@@ -38,25 +39,54 @@ class GetTraces(
             "Task configuration\n\t" +
                     "orderType: $orderType\n\t" +
                     "timeFrame: $timeFrame\n\t" +
-                    "endpointName: $endpointName\nt\t" +
+                    "endpointName: $endpointName\n\t" +
                     "limit: $limit"
         )
 
-        val traces = EndpointTracesTracker.getTraces(
-            GetEndpointTraces(
-                endpointName = endpointName,
-                appUuid = "null", //todo: likely not necessary
-                artifactQualifiedName = "null", //todo: likely not necessary
-                orderType = orderType,
-                zonedDuration = ZonedDuration( //todo: use timeFrame
-                    ZonedDateTime.now().minusMinutes(15),
-                    ZonedDateTime.now(),
-                    SkywalkingClient.DurationStep.MINUTE
-                ),
-                pageSize = limit
-            ), job.vertx
-        )
-        job.context.put(TRACE_RESULT, traces)
-        job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${traces.traces.size}")
+        if (byEndpointIds != null) {
+            var finalTraceResult: TraceResult? = null
+            job.context.get(byEndpointIds).forEach { endpointId ->
+                val traces = EndpointTracesTracker.getTraces(
+                    GetEndpointTraces(
+                        endpointId = endpointId,
+                        appUuid = "null", //todo: likely not necessary
+                        artifactQualifiedName = "null", //todo: likely not necessary
+                        orderType = orderType,
+                        zonedDuration = ZonedDuration( //todo: use timeFrame
+                            ZonedDateTime.now().minusMinutes(15),
+                            ZonedDateTime.now(),
+                            SkywalkingClient.DurationStep.MINUTE
+                        ),
+                        pageSize = limit
+                    ), job.vertx
+                )
+                finalTraceResult = if (finalTraceResult == null) {
+                    traces
+                } else {
+                    finalTraceResult!!.mergeWith(traces)
+                }
+            }
+
+            job.context.put(TRACE_RESULT, finalTraceResult!!)
+            job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${finalTraceResult!!.traces.size}")
+        } else {
+            val traces = EndpointTracesTracker.getTraces(
+                GetEndpointTraces(
+                    endpointName = endpointName,
+                    appUuid = "null", //todo: likely not necessary
+                    artifactQualifiedName = "null", //todo: likely not necessary
+                    orderType = orderType,
+                    zonedDuration = ZonedDuration( //todo: use timeFrame
+                        ZonedDateTime.now().minusMinutes(15),
+                        ZonedDateTime.now(),
+                        SkywalkingClient.DurationStep.MINUTE
+                    ),
+                    pageSize = limit
+                ), job.vertx
+            )
+
+            job.context.put(TRACE_RESULT, traces)
+            job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${traces.traces.size}")
+        }
     }
 }
