@@ -38,4 +38,14 @@ tasks {
             kotlinOptions.jvmTarget = "1.8"
         }
     }
+
+    test {
+        testLogging {
+            events("passed", "skipped", "failed")
+            setExceptionFormat("full")
+
+            outputs.upToDateWhen { false }
+            showStandardStreams = true
+        }
+    }
 }
