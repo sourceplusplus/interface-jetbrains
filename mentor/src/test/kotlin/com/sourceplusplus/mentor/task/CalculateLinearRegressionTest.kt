@@ -9,8 +9,8 @@ import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CalculateLinearRegressionTest : MentorTest() {
@@ -50,10 +50,8 @@ class CalculateLinearRegressionTest : MentorTest() {
 
             assertNotNull(calcRegression.regressionMap["{GET}/users"])
             assertNotNull(calcRegression.regressionMap["{GET}/users/{id}"])
-            assertTrue(
-                calcRegression.regressionMap["{GET}/users"]!!.slope >
-                        calcRegression.regressionMap["{GET}/users/{id}"]!!.slope
-            )
+            assertNotEquals(Double.NaN, calcRegression.regressionMap["{GET}/users"]!!.slope)
+            assertNotEquals(Double.NaN, calcRegression.regressionMap["{GET}/users/{id}"]!!.slope)
         }
     }
 }
