@@ -1,5 +1,6 @@
 package com.sourceplusplus.mentor
 
+import com.sourceplusplus.protocol.advice.AdviceListener
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -26,6 +27,7 @@ class SourceMentor : CoroutineVerticle() {
     private val jobList = mutableListOf<MentorJob>()
     private val taskQueue = PriorityBlockingQueue<MentorTask>()
     private var running = false
+    private val adviceListeners: MutableList<AdviceListener> = mutableListOf()
 
     override suspend fun start() {
         log.info("Setting up SourceMentor")
@@ -100,12 +102,17 @@ class SourceMentor : CoroutineVerticle() {
             throw IllegalArgumentException("Job contains no tasks")
         }
 
+        adviceListeners.forEach(job::addAdviceListener)
         jobList.add(job)
         addTask(job.nextTask())
     }
 
     fun executeJobs(vararg jobs: MentorJob) {
         jobs.forEach(this@SourceMentor::executeJob)
+    }
+
+    fun addAdviceListener(adviceListener: AdviceListener) {
+        adviceListeners.add(adviceListener)
     }
 
     fun getAllMethodAdvice(methodQualifiedName: ArtifactQualifiedName): List<ArtifactAdvice> {

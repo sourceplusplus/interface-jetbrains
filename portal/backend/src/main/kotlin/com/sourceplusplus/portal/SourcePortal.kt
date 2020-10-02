@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache
 import com.sourceplusplus.portal.display.views.ConfigurationView
 import com.sourceplusplus.portal.display.views.OverviewView
 import com.sourceplusplus.portal.display.views.TracesView
+import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.portal.PageType
 import org.slf4j.LoggerFactory
 import java.io.Closeable
@@ -105,6 +106,7 @@ class SourcePortal(
     val configurationView: ConfigurationView = ConfigurationView()
     lateinit var viewingPortalArtifact: String
     var currentTab = PageType.OVERVIEW
+    var advice : MutableList<ArtifactAdvice> = mutableListOf()
 
     fun cloneViews(portal: SourcePortal) {
         this.overviewView.cloneView(portal.overviewView)

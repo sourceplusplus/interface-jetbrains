@@ -1,8 +1,8 @@
-package com.sourceplusplus.mentor.advice.informative
+package com.sourceplusplus.protocol.advice.informative
 
 import com.sourceplusplus.protocol.advice.AdviceCategory
-import com.sourceplusplus.protocol.advice.AdviceMarkType
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
+import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 
 /**
  * todo: description.
@@ -10,7 +10,9 @@ import com.sourceplusplus.protocol.advice.ArtifactAdvice
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ActiveExceptionAdvice : ArtifactAdvice {
+class ActiveExceptionAdvice(
+    override val artifact: ArtifactQualifiedName
+) : ArtifactAdvice {
 
     //todo: get active service instance
     //todo: find failing traces
@@ -19,5 +21,4 @@ class ActiveExceptionAdvice : ArtifactAdvice {
     //todo: maintain created advice status (remove on new instances, etc)
 
     override val category: AdviceCategory = AdviceCategory.INFORMATIVE
-    override val markType: AdviceMarkType = AdviceMarkType.GUTTER //todo: multiple marks per advice
 }

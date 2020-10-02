@@ -30,6 +30,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         private val log = LoggerFactory.getLogger(PluginSourceMarkPopupAction::class.java)
         val SOURCE_PORTAL = SourceKey<SourcePortal>("SOURCE_PORTAL")
         val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
+        val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
     }
 
     private val endpointDetector = EndpointNameDetector()
@@ -112,6 +113,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
                 log.debug("Determining endpoint id")
                 val endpoint = EndpointTracker.searchExactEndpoint(endpointName, vertx)
                 if (endpoint != null) {
+                    sourceMark.putUserData(ENDPOINT_NAME, endpoint.name)
                     sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
                     log.debug("Detected endpoint id: ${endpoint.id}")
                     return endpoint.id

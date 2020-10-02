@@ -131,4 +131,9 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
         }
         return emptyList()
     }
+
+    fun getSourceMarks(): List<SourceMark> {
+        check(enabled) { "SourceMarkerPlugin disabled" }
+        return availableSourceFileMarkers.values.flatMap { it.getSourceMarks() }
+    }
 }

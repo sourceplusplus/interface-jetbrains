@@ -4,7 +4,9 @@ import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorJob.ContextKey
 import com.sourceplusplus.mentor.MentorTask
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServices
+import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServicesAwait
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getCurrentService
+import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getCurrentServiceAwait
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import java.util.*
 
@@ -17,7 +19,8 @@ import java.util.*
 class GetService(
     private val byId: String? = null,
     private val byName: String? = null,
-    private val current: Boolean = true
+    private val current: Boolean = true,
+    private val await: Boolean = true
 ) : MentorTask() {
 
     companion object {
@@ -31,7 +34,11 @@ class GetService(
         job.log("Task configuration\n\tbyId: $byId\n\tbyName: $byName\n\tcurrent: $current")
 
         if (current) {
-            val service = getCurrentService(job.vertx)
+            val service = if (await) {
+                getCurrentServiceAwait(job.vertx)
+            } else {
+                getCurrentService(job.vertx)
+            }
             if (service != null && isMatch(service)) {
                 job.context.put(SERVICE, service)
                 job.log("Added context\n\tKey: $SERVICE\n\tValue: $service")
@@ -40,7 +47,12 @@ class GetService(
             }
         } else {
             var addedContext = false
-            for (service in getActiveServices(job.vertx)) {
+            val services = if (await) {
+                getActiveServicesAwait(job.vertx)
+            } else {
+                getActiveServices(job.vertx)
+            }
+            for (service in services) {
                 if (isMatch(service)) {
                     job.context.put(SERVICE, service)
                     job.log("Added context\n\tKey: $SERVICE\n\tValue: $service")
@@ -63,6 +75,8 @@ class GetService(
             else -> false
         }
     }
+
+    override fun usingSameContext(selfJob: MentorJob, job: MentorJob, task: MentorTask): Boolean = true
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

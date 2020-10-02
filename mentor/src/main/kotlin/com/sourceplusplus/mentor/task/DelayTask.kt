@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
  */
 class DelayTask(private val delay: Long) : MentorTask() {
 
+    //todo: shouldn't work by delay but by rescheduling; otherwise delays concurrent jobs
     override suspend fun executeTask(job: MentorJob) {
         delay(delay)
     }

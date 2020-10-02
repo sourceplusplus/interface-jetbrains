@@ -34,7 +34,7 @@ class CalculateLinearRegressionTest : MentorTest() {
             getTraces.executeTask(emptyJob)
             val calcRegression =
                 CalculateLinearRegression(
-                    GetTraces.TRACE_RESULT
+                    GetTraces.TRACE_RESULT, 0.5
                 )
             calcRegression.executeTask(emptyJob)
 

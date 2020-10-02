@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.advice
 
+import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+
 /**
  * todo: description.
  *
@@ -8,6 +10,7 @@ package com.sourceplusplus.protocol.advice
  */
 interface ArtifactAdvice {
 
+    val artifact: ArtifactQualifiedName
     val category: AdviceCategory
-    val markType: AdviceMarkType
+//    val markType: AdviceMarkType
 }
