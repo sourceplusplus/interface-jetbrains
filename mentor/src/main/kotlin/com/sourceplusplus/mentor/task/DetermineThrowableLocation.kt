@@ -27,7 +27,6 @@ class DetermineThrowableLocation(
     override val contextKeys = listOf(ARTIFACT_LOCATION)
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log("Executing task: $this")
         job.log("Task configuration\n\tbyTraceStacksContext: $byTraceStacksContext\n\trootPackage: $rootPackage")
 
         //todo: ArtifactLocation more appropriate naming than ArtifactQualifiedName

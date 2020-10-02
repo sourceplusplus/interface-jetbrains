@@ -50,6 +50,9 @@ import io.vertx.kotlin.core.http.listenAwait
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.apache.log4j.FileAppender
+import org.apache.log4j.Logger
+import org.apache.log4j.PatternLayout
 import org.slf4j.LoggerFactory
 import java.awt.Dimension
 import java.util.*
@@ -115,6 +118,14 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 initMapper()
             }
         }
+
+        //debug logs
+        val fa = FileAppender()
+        fa.file = "/tmp/sourcemarker.log"
+        fa.layout = PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n")
+        fa.activateOptions()
+        Logger.getLogger("com.sourceplusplus").addAppender(fa)
+
         super.runActivity(project)
     }
 
@@ -149,13 +160,15 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 "spp.example" //todo: dynamic
             ).withConfig(
                 MentorJobConfig(
-                    repeatForever = true
+                    repeatForever = true,
+                    repeatDelay = 30_000
                     //todo: configurable schedule
                 )
             ),
             RampDetectionMentor(vertx).withConfig(
                 MentorJobConfig(
-                    repeatForever = true
+                    repeatForever = true,
+                    repeatDelay = 30_000
                     //todo: configurable schedule
                 )
             )

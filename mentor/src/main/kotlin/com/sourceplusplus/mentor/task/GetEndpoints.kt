@@ -16,7 +16,6 @@ class GetEndpoints(
     override val contextKeys = listOf(ENDPOINT_IDS)
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log("Executing task: $this")
 
         //todo: need way to iterate endpoints
         val endpoints = EndpointTracker.getEndpoints(100, job.vertx)

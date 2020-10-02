@@ -18,26 +18,32 @@ class RampDetectionMentor(
     confidence: Double = 0.5
 ) : MentorJob() {
 
-    override val tasks: List<MentorTask> = listOf(
-        //get active service instance
-        GetService(),
-        GetServiceInstance(
-            GetService.SERVICE
-        ),
+    override val tasks: List<MentorTask> by lazy {
+        listOf(
+            //get active service instance
+            GetService(),
+            GetServiceInstance(
+                GetService.SERVICE
+            ),
 
-        GetEndpoints(),
-        GetTraces(
-            GetEndpoints.ENDPOINT_IDS,
-            orderType = TraceOrderType.LATEST_TRACES,
-            timeFrame = QueryTimeFrame.LAST_15_MINUTES
-        ),
+            GetEndpoints(),
+            GetTraces(
+                GetEndpoints.ENDPOINT_IDS,
+                orderType = TraceOrderType.LATEST_TRACES,
+                timeFrame = QueryTimeFrame.LAST_15_MINUTES
+            ),
 
-        //todo: ARIMA model?
-        CalculateLinearRegression(GetTraces.TRACE_RESULT, confidence),
+            //todo: ARIMA model?
+            CalculateLinearRegression(GetTraces.TRACE_RESULT, confidence),
 
-        //DelayTask(30_000)
+            if (config.repeatForever) {
+                DelayTask(config.repeatDelay)
+            } else {
+                NoopTask()
+            }
 
-        //todo: find endpoints with consistently increasing response time of a certain threshold
-        //todo: search source code of endpoint for culprits
-    )
+            //todo: find endpoints with consistently increasing response time of a certain threshold
+            //todo: search source code of endpoint for culprits
+        )
+    }
 }
