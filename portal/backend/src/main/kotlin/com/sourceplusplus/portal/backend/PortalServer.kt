@@ -53,7 +53,7 @@ class PortalServer : CoroutineVerticle() {
 //        router.route("/*").handler(StaticHandler.create())
 
         // Routes
-        router.get("/").coroutineHandler { ctx -> getOverview(ctx) } //todo: could make whole application overview
+        router.get("/").coroutineHandler { ctx -> getRealOverview(ctx) } //todo: could make whole application overview
         router.get("/overview").coroutineHandler { ctx -> getOverview(ctx) }
         router.get("/traces").coroutineHandler { ctx -> getTraces(ctx) }
         router.get("/configuration").coroutineHandler { ctx -> getConfiguration(ctx) }
@@ -73,6 +73,20 @@ class PortalServer : CoroutineVerticle() {
         vertx.createHttpServer()
             .requestHandler(router)
             .listenAwait(config.getInteger("http.port", 8080))
+    }
+
+    private suspend fun getRealOverview(ctx: RoutingContext) {
+        withContext(Dispatchers.Default) {
+            ctx.respond(buildString {
+                appendHTML().html {
+                    head {
+                        commonHead("Overview - SourceMarker")
+                        script { src = "themes/default/assets/all.min.js" }
+                    }
+                    body("overflow_y_hidden") { id = "root" }
+                }
+            })
+        }
     }
 
     private suspend fun getOverview(ctx: RoutingContext) {

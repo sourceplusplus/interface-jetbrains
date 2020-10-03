@@ -76,7 +76,7 @@ class OverviewPage {
             overviewContent {
                 navBar {
                     timeDropdown(*QueryTimeFrame.values()) { updateTime(it) }
-                    calendar()
+                    //calendar()
 
                     rightAlign {
                         externalPortalButton()
