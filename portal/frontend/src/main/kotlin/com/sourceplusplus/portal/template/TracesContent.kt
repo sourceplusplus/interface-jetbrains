@@ -1,54 +1,42 @@
 package com.sourceplusplus.portal.template
 
+import com.sourceplusplus.protocol.TableType
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType
-import com.sourceplusplus.protocol.artifact.trace.TraceTableType
 import kotlinx.html.*
 import org.w3c.dom.HTMLElement
 
-fun TagConsumer<HTMLElement>.tracesContent(block: FlowContent.() -> Unit) {
+fun TagConsumer<HTMLElement>.pusherContent(block: FlowContent.() -> Unit) {
     div("pusher background_color") {
         block()
     }
 }
 
-fun TagConsumer<HTMLElement>.tracesTable(block: FlowContent.() -> Unit) {
+fun TagConsumer<HTMLElement>.wideColumn(block: FlowContent.() -> Unit) {
     div("wide column marginlefting") {
         block()
     }
 }
 
-fun TagConsumer<HTMLElement>.topTraceTable(vararg traceTableTypes: TraceTableType = arrayOf()) {
-    table("ui celled striped table unstackable secondary_background_color no_top_margin") {
-        id = "top_trace_table"
-        thead {
+fun TagConsumer<HTMLElement>.table(
+    tableClasses: String = "", //todo: generify and remove
+    tableId: String, tableBodyId: String,
+    tableBackground: String = "",
+    tableBodyBackground: String = "",
+    vararg tableTypes: TableType = arrayOf()
+) {
+    this@table.table("ui celled striped table unstackable $tableClasses") {
+        id = tableId
+        thead(tableBackground) {
             tr {
-                for (traceTableType in traceTableTypes) {
-                    th(classes = "secondary_background_color ${if (traceTableType.isCentered) "trace_th_center" else "trace_th"}") {
-                        +traceTableType.description
+                for (tableType in tableTypes) {
+                    th(classes = "secondary_background_color ${if (tableType.isCentered) "trace_th_center" else "trace_th"}") {
+                        +tableType.description
                     }
                 }
             }
         }
-        tbody {
-            id = "trace_table"
-        }
-    }
-}
-
-fun TagConsumer<HTMLElement>.traceStackTable(vararg traceTableTypes: TraceTableType = arrayOf()) {
-    table("ui celled striped table unstackable trace_stack_table hidden_full_height") {
-        id = "trace_stack_table"
-        thead("secondary_background_color") {
-            tr {
-                for (traceTableType in traceTableTypes) {
-                    th(classes = "secondary_background_color ${if (traceTableType.isCentered) "trace_th_center" else "trace_th"}") {
-                        +traceTableType.description
-                    }
-                }
-            }
-        }
-        tbody("stack_table_background") {
-            id = "stack_table"
+        tbody(tableBodyBackground) {
+            id = tableBodyId
         }
     }
 }

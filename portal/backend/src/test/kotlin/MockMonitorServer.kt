@@ -11,10 +11,12 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDispl
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RealOverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.TracesTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayArtifactConfiguration
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.portal.*
 import io.vertx.core.Vertx
@@ -56,6 +58,10 @@ fun main() {
 
     vertx.eventBus().consumer<String>(ClickedViewAsExternalPortal) {
         it.reply(JsonObject().put("portal_uuid", "null"))
+    }
+
+    vertx.eventBus().consumer<Void>(RealOverviewTabOpened) {
+        displayEndpoints(vertx)
     }
 
     vertx.eventBus().consumer<Void>(OverviewTabOpened) {
@@ -141,6 +147,10 @@ fun main() {
                 )
         )
     }
+}
+
+fun displayEndpoints(vertx: Vertx) {
+    vertx.eventBus().send(UpdateEndpoints("null"), JsonObject())
 }
 
 fun displayChart(vertx: Vertx) {

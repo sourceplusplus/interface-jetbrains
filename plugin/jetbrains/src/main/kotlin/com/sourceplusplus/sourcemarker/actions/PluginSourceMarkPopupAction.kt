@@ -62,22 +62,14 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         //todo: use SourcePortalAPI to ensure correct view is showing (don't refresh if correct already viewing)
         //todo: likely need to unregister old portal handlers
         val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
-//        if (ThreadLocalRandom.current().nextBoolean()) {
         if (sourcePortal != lastDisplayedInternalPortal) {
             jcefComponent.getBrowser().cefBrowser.executeJavaScript(
                 """
-                    window.location.href = 'http://localhost:8080/overview?portal_uuid=${sourcePortal.portalUuid}';
+                    window.location.href = 'http://localhost:8080/?portal_uuid=${sourcePortal.portalUuid}';
                 """.trimIndent(),
                 "", 0
             )
         }
-//        } else {
-//        jcefComponent.getBrowser().cefBrowser.executeJavaScript(
-//            """
-//                  window.location.href = 'http://localhost:8080/traces';
-//            """.trimIndent(), "", 0
-//        )
-//        }
 
         lastDisplayedInternalPortal = sourcePortal
         super.performPopupAction(sourceMark, editor)

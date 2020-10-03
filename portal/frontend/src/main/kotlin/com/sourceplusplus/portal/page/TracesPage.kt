@@ -32,16 +32,25 @@ class TracesPage {
                 }
                 navItem(CONFIGURATION)
             }
-            tracesContent {
+            pusherContent {
                 navBar {
                     tracesHeader(TRACE_ID, TIME_OCCURRED)
                     rightAlign {
                         externalPortalButton()
                     }
                 }
-                tracesTable {
-                    topTraceTable(OPERATION, OCCURRED, EXEC, STATUS)
-                    traceStackTable(OPERATION, EXEC, EXEC_PCT, STATUS)
+                wideColumn {
+                    table(
+                        "secondary_background_color no_top_margin",
+                        "top_trace_table", "trace_table",
+                        tableTypes = arrayOf(OPERATION, OCCURRED, EXEC, STATUS)
+                    )
+                    table(
+                        "trace_stack_table hidden_full_height",
+                        "trace_stack_table", "stack_table",
+                        "secondary_background_color", "stack_table_background",
+                        tableTypes = arrayOf(OPERATION, EXEC, EXEC_PCT, STATUS)
+                    )
                     spanInfoPanel(START_TIME, END_TIME)
                 }
             }
