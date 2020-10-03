@@ -3,9 +3,12 @@ package com.sourceplusplus.mentor.task
 import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorJob.ContextKey
 import com.sourceplusplus.mentor.MentorTask
+import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactLocation
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 
 /**
@@ -20,6 +23,10 @@ class DetermineThrowableLocation(
 ) : MentorTask() {
 
     companion object {
+        private val frameRegex = Regex(
+            "(?:\\s*at\\s+)((?:[\\w\\s](?:\\\$+|\\.|\\/)?)+)" +
+                    "\\.([\\w|_|\\\$|\\s|<|>]+)\\s*\\(([^\\(\\)]+(?:\\([^\\)]*\\))?)\\)"
+        )
         val ARTIFACT_LOCATION: ContextKey<ArtifactLocation> =
             ContextKey("DetermineThrowableLocation.ARTIFACT_LOCATION")
     }
@@ -30,32 +37,48 @@ class DetermineThrowableLocation(
         job.log("Task configuration\n\tbyTraceStacksContext: $byTraceStacksContext\n\trootPackage: $rootPackage")
 
         //todo: ArtifactLocation more appropriate naming than ArtifactQualifiedName
-        val domainExceptions = mutableMapOf<ArtifactQualifiedName, List<String>>()
         val traceStacks = job.context.get(byTraceStacksContext)
         traceStacks.forEach { traceStack ->
             traceStack.traceSpans.forEach { span ->
                 span.logs.forEach { logEntry ->
-                    val logLines = logEntry.data.split("\n")
-                    val domainExceptionLine = logLines.find { it.startsWith("at $rootPackage") }
-                    if (domainExceptionLine != null) {
-                        val location = domainExceptionLine.substring(3, domainExceptionLine.indexOf("("))
-                        val lineNumber = domainExceptionLine.substring(
-                            domainExceptionLine.indexOf(":") + 1,
-                            domainExceptionLine.indexOf(")")
-                        ).toInt()
+                    if (frameRegex.containsMatchIn(logEntry.data)) {
+                        val logLines = logEntry.data.split("\n")
+                        var message: String? = null
+                        val exceptionClass = if (logLines[0].contains(":")) {
+                            message = logLines[0].substring(logLines[0].indexOf(":") + 2)
+                            logLines[0].substring(0, logLines[0].indexOf(":"))
+                        } else {
+                            logLines[0]
+                        }
+                        val elements = mutableListOf<JvmStackTraceElement>()
+                        for (el in frameRegex.findAll(logEntry.data)) {
+                            val clazz = el.groupValues[1]
+                            val method = el.groupValues[2]
+                            val source = el.groupValues[3]
+                            elements.add(JvmStackTraceElement("$clazz.$method", source))
+                        }
+                        val stackTrace = JvmStackTrace(exceptionClass, message, elements)
 
-                        //todo: get commit id from service instance
-                        domainExceptions[ArtifactQualifiedName(
-                            identifier = location,
-                            commitId = "todo",
-                            type = ArtifactType.STATEMENT,
-                            lineNumber = lineNumber
-                        )] = logLines
+                        val domainExceptionLine = stackTrace.elements
+                            .find { it.method.startsWith(rootPackage) }
+                        if (domainExceptionLine != null) {
+                            val location = domainExceptionLine.method
+                            val lineNumber = domainExceptionLine.sourceAsLineNumber!!
+
+                            job.addAdvice(
+                                ActiveExceptionAdvice(
+                                    ArtifactQualifiedName(
+                                        identifier = location,
+                                        commitId = "todo", //todo: get commit id from service instance
+                                        type = ArtifactType.STATEMENT,
+                                        lineNumber = lineNumber
+                                    ), stackTrace = stackTrace
+                                )
+                            )
+                        }
                     }
                 }
             }
         }
-
-        //TODO()
     }
 }
