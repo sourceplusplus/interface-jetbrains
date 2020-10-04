@@ -38,7 +38,7 @@ fun main() {
     DatabindCodec.mapper().registerModule(GuavaModule())
     DatabindCodec.mapper().registerModule(Jdk8Module())
     DatabindCodec.mapper().registerModule(JavaTimeModule())
-    DatabindCodec.mapper().propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+    // DatabindCodec.mapper().propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
     DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
     DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
@@ -55,7 +55,7 @@ fun main() {
     vertx.createHttpServer().requestHandler(router).listen(8888, "localhost")
 
     vertx.eventBus().consumer<String>(ClickedViewAsExternalPortal) {
-        it.reply(JsonObject().put("portal_uuid", "null"))
+        it.reply(JsonObject().put("portalUuid", "null"))
     }
 
     vertx.eventBus().consumer<Void>(OverviewTabOpened) {

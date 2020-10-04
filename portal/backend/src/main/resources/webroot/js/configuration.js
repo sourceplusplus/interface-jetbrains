@@ -10,13 +10,13 @@ eb.onopen = function () {
         updateArtifactConfigurationTable(message.body);
     });
 
-    eb.publish('ConfigurationTabOpened', {'portal_uuid': portalUuid});
+    eb.publish('ConfigurationTabOpened', {'portalUuid': portalUuid});
 };
 
 function toggledEntryMethod(entryMethod) {
-    eb.send('UpdateArtifactEntryMethod', {'portal_uuid': portalUuid, "entry_method": entryMethod});
+    eb.send('UpdateArtifactEntryMethod', {'portalUuid': portalUuid, "entry_method": entryMethod});
 }
 
 function toggledAutoSubscribe(autoSubscribe) {
-    eb.send('UpdateArtifactAutoSubscribe', {'portal_uuid': portalUuid, "auto_subscribe": autoSubscribe});
+    eb.send('UpdateArtifactAutoSubscribe', {'portalUuid': portalUuid, "auto_subscribe": autoSubscribe});
 }

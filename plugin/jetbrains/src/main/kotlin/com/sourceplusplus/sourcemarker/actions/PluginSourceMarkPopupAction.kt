@@ -65,7 +65,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         if (sourcePortal != lastDisplayedInternalPortal) {
             jcefComponent.getBrowser().cefBrowser.executeJavaScript(
                 """
-                    window.location.href = 'http://localhost:8080/overview?portal_uuid=${sourcePortal.portalUuid}';
+                    window.location.href = 'http://localhost:8080/overview?portalUuid=${sourcePortal.portalUuid}';
                 """.trimIndent(),
                 "", 0
             )
