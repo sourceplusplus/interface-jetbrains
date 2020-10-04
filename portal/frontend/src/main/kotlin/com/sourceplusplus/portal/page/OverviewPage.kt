@@ -99,15 +99,15 @@ class OverviewPage {
                 js("updateChart(message.body);")
             }
 
-            var timeFrame = localStorage.getItem("spp.metric_time_frame")
+            var timeFrame = localStorage.getItem("spp.metricTimeFrame")
             if (timeFrame == null) {
                 timeFrame = currentTimeFrame.name
-                localStorage.setItem("spp.metric_time_frame", timeFrame)
+                localStorage.setItem("spp.metricTimeFrame", timeFrame)
             }
             updateTime(QueryTimeFrame.valueOf(timeFrame.toUpperCase()))
             js("portalLog('Set initial time frame to: ' + timeFrame);")
 
-            eb.publish(OverviewTabOpened, "{'portal_uuid': '$portalUuid'}")
+            eb.publish(OverviewTabOpened, "{'portalUuid': '$portalUuid'}")
         }
     }
 
@@ -205,12 +205,12 @@ class OverviewPage {
     private fun updateTime(interval: QueryTimeFrame) {
         console.log("Update time: $interval")
         currentTimeFrame = interval
-        localStorage.setItem("spp.metric_time_frame", interval.name)
+        localStorage.setItem("spp.metricTimeFrame", interval.name)
         eb.send(
             "SetMetricTimeFrame",
             json(
-                "portal_uuid" to portalUuid,
-                "metric_time_frame" to interval.name
+                "portalUuid" to portalUuid,
+                "metricTimeFrame" to interval.name
             )
         )
 
@@ -229,8 +229,8 @@ class OverviewPage {
         eb.send(
             SetActiveChartMetric,
             json(
-                "portal_uuid" to portalUuid,
-                "metric_type" to currentMetricType.name
+                "portalUuid" to portalUuid,
+                "metricType" to currentMetricType.name
             )
         )
     }
@@ -241,8 +241,8 @@ class OverviewPage {
         eb.send(
             SetActiveChartMetric,
             json(
-                "portal_uuid" to portalUuid,
-                "metric_type" to currentMetricType.name
+                "portalUuid" to portalUuid,
+                "metricType" to currentMetricType.name
             )
         )
     }
@@ -253,8 +253,8 @@ class OverviewPage {
         eb.send(
             SetActiveChartMetric,
             json(
-                "portal_uuid" to portalUuid,
-                "metric_type" to currentMetricType.name
+                "portalUuid" to portalUuid,
+                "metricType" to currentMetricType.name
             )
         )
     }

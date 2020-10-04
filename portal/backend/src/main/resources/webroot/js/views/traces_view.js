@@ -56,9 +56,10 @@ function setupUI() {
 setupUI();
 
 function displayTraces(traceResult) { //todo-chess-equality: [traceResult: TraceResult]
-    console.log('Displaying traces - Artifact: ' + traceResult.artifact_simple_name +
+    console.log('Displaying traces - Artifact: ' + traceResult.artifactSimpleName +
         ' - From: ' + moment.unix(Number(traceResult.start)).format() + ' - To: ' + moment.unix(Number(traceResult.stop)).format() +
-        ' - Order type: ' + traceResult.order_type + ' - Amount: ' + traceResult.traces.length);
+        ' - Order type: ' + traceResult.orderType + ' - Amount: ' + traceResult.traces.length);
+    console.log('>>>>>>>>>> TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
 
     //todo: move all this stuff to setupUI()
     $('#span_info_panel').css('display', 'none');
@@ -88,15 +89,15 @@ function displayTraces(traceResult) { //todo-chess-equality: [traceResult: Trace
 
     for (let i = 0; i < traceResult.traces.length; i++) {
         let trace = traceResult.traces[i];
-        let globalTraceId = trace.trace_ids[0];
+        let globalTraceId = trace.traceIds[0];
         let htmlTraceId = globalTraceId.split('.').join('');
-        let operationName = trace.operation_names[0];
-        if (operationName === traceResult.artifact_qualified_name) {
-            operationName = traceResult.artifact_simple_name;
+        let operationName = trace.operationNames[0];
+        if (operationName === traceResult.artifactQualifiedName) {
+            operationName = traceResult.artifactSimpleName;
         }
 
-        var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + traceResult.app_uuid + '","'
-            + traceResult.artifact_qualified_name + '","' + globalTraceId +
+        var rowHtml = '<tr id="trace-' + htmlTraceId + '"><td onclick=\'clickedDisplayTraceStack("' + traceResult.appUuid + '","'
+            + traceResult.artifactQualifiedName + '","' + globalTraceId +
             '");\' style="border-top: 0 !important; padding-left: 20px;">';
         rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-plus-square"></i>';
         rowHtml += '<span style="vertical-align:top">';
@@ -109,7 +110,7 @@ function displayTraces(traceResult) { //todo-chess-equality: [traceResult: Trace
         let timeOccurredDuration = moment.duration(now.diff(occurred));
         rowHtml += '<td class="trace_time collapsing" id="trace_time_' + htmlTraceId + '" data-value="' + trace.start + '" style="text-align: center">'
             + getPrettyDuration(timeOccurredDuration, 1) + '</td>';
-        rowHtml += '<td class="collapsing">' + trace.pretty_duration + '</td>';
+        rowHtml += '<td class="collapsing">' + trace.prettyDuration + '</td>';
 
         if (trace.error) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
@@ -166,7 +167,7 @@ function displayInnerTraces(innerTraceStack) { //todo-chess-equality: [innerTrac
 
     $('#stack_table tr').remove();
 
-    if (innerTraceStack.inner_level > 0) {
+    if (innerTraceStack.innerLevel > 0) {
         $('#latest_traces_header_text').text('Parent Stack');
     } else {
         if (traceOrderType === 'LATEST_TRACES') {
@@ -178,16 +179,16 @@ function displayInnerTraces(innerTraceStack) { //todo-chess-equality: [innerTrac
         }
     }
 
-    let traceStack = innerTraceStack.trace_stack;
-    $('#trace_id_field').val(traceStack[0].span.trace_id);
-    $('#time_occurred_field').val(moment(Number(traceStack[0].span.start_time)).format());
+    let traceStack = innerTraceStack.traceStack;
+    $('#trace_id_field').val(traceStack[0].span.traceId);
+    $('#time_occurred_field').val(moment(Number(traceStack[0].span.startTime)).format());
     $('#traces_span').css('display', 'none');
 
     for (let i = 0; i < traceStack.length; i++) {
         let spanInfo = traceStack[i];
         let span = spanInfo.span;
-        var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
-            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
+        var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.appUuid + '\',\'' + spanInfo.rootArtifactQualifiedName
+            + '\',\'' + span.traceId + '\',\'' + span.segmentId + '\',' + span.spanId + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
         if (COMPONENT_MAPPINGS[span.component] || span.component !== "Unknown") {
             let component = COMPONENT_MAPPINGS[span.component];
@@ -195,25 +196,25 @@ function displayInnerTraces(innerTraceStack) { //todo-chess-equality: [innerTrac
                 component = span.component;
             }
             rowHtml += '<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../themes/default/assets/components/' + component.toUpperCase() + '.png"></img>' +
-              spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
-        } else if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
+              spanInfo.operationName.replace('<', '&lt;').replace('>', '&gt;');
+        } else if (span.hasChildStack || (!externalPortal && span.artifactQualifiedName && i > 0)) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
-                spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+                spanInfo.operationName.replace('<', '&lt;').replace('>', '&gt;');
         } else {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>'
             rowHtml += '<span style="vertical-align:top">';
-            rowHtml += spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+            rowHtml += spanInfo.operationName.replace('<', '&lt;').replace('>', '&gt;');
             rowHtml += '</span>';
         }
         rowHtml += '</td>';
 
-        rowHtml += '<td class="collapsing">' + spanInfo.time_took + '</td>';
+        rowHtml += '<td class="collapsing">' + spanInfo.timeTook + '</td>';
         rowHtml += '<td><div class="ui red progress" id="trace_bar_' + i + '" style="margin: 0">';
         rowHtml += '<div class="bar"></div></div></td>';
 
         if (span.error) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="skull crossbones red icon"></i></td></tr>';
-        } else if (span.child_error && i > 0) {
+        } else if (span.childError && i > 0) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
         } else {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
@@ -221,7 +222,7 @@ function displayInnerTraces(innerTraceStack) { //todo-chess-equality: [innerTrac
         $('#stack_table').append(rowHtml);
 
         $('#trace_bar_' + i).progress({
-            percent: spanInfo.total_trace_percent
+            percent: spanInfo.totalTracePercent
         })
     }
 }
@@ -250,13 +251,13 @@ function displaySpanInfo(spanInfo) { //todo-chess-equality: [spanInfo: TraceSpan
         .css('visibility', 'visible');
 
     $('#tag_table tr').remove();
-    $('#span_info_start_trace_time').attr("data-value", spanInfo.start_time);
-    $('#span_info_start_time').text(moment(spanInfo.start_time).format('h:mm:ss a'));
-    $('#span_info_end_trace_time').attr("data-value", spanInfo.end_time);
-    $('#span_info_end_time').text(moment(spanInfo.end_time).format('h:mm:ss a'));
+    $('#span_info_start_trace_time').attr("data-value", spanInfo.startTime);
+    $('#span_info_start_time').text(moment(spanInfo.startTime).format('h:mm:ss a'));
+    $('#span_info_end_trace_time').attr("data-value", spanInfo.endTime);
+    $('#span_info_end_time').text(moment(spanInfo.endTime).format('h:mm:ss a'));
     updateOccurredLabels();
 
-    $('#segment_id_field').val(spanInfo.segment_id);
+    $('#segment_id_field').val(spanInfo.segmentId);
 
     var gotTags = false;
     for (let key of Object.keys(spanInfo.tags)) {
@@ -338,14 +339,14 @@ function displayTraceStack(traceStack) { //todo-chess-equality: [traceStack: Lis
         $('#latest_traces_header_text').text('Slowest Traces');
     }
 
-    $('#trace_id_field').val(traceStack[0].span.trace_id);
-    $('#time_occurred_field').val(moment(Number(traceStack[0].span.start_time)).format());
+    $('#trace_id_field').val(traceStack[0].span.traceId);
+    $('#time_occurred_field').val(moment(Number(traceStack[0].span.startTime)).format());
 
     for (let i = 0; i < traceStack.length; i++) {
         let spanInfo = traceStack[i];
         let span = spanInfo.span;
-        var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.app_uuid + '\',\'' + spanInfo.root_artifact_qualified_name
-            + '\',\'' + span.trace_id + '\',\'' + span.segment_id + '\',' + span.span_id + ');" style="border-top: 0 !important; padding-left: 20px;">';
+        var rowHtml = '<tr><td onclick="clickedDisplaySpanInfo(\'' + spanInfo.appUuid + '\',\'' + spanInfo.rootArtifactQualifiedName
+            + '\',\'' + span.traceId + '\',\'' + span.segmentId + '\',' + span.spanId + ');" style="border-top: 0 !important; padding-left: 20px;">';
 
         if (COMPONENT_MAPPINGS[span.component] || span.component !== "Unknown") {
           let component = COMPONENT_MAPPINGS[span.component];
@@ -353,25 +354,25 @@ function displayTraceStack(traceStack) { //todo-chess-equality: [traceStack: Lis
               component = span.component;
           }
           rowHtml += '<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../themes/default/assets/components/' + component.toUpperCase() + '.png"></img>' +
-            spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
-        } else if (span.has_child_stack || (!externalPortal && span.artifact_qualified_name && i > 0)) {
+            spanInfo.operationName.replace('<', '&lt;').replace('>', '&gt;');
+        } else if (span.hasChildStack || (!externalPortal && span.artifactQualifiedName && i > 0)) {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>' +
-                spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+                spanInfo.operationName.replace('<', '&lt;').replace('>', '&gt;');
         } else {
             rowHtml += '<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>'
             rowHtml += '<span style="vertical-align:top">';
-            rowHtml += spanInfo.operation_name.replace('<', '&lt;').replace('>', '&gt;');
+            rowHtml += spanInfo.operationName.replace('<', '&lt;').replace('>', '&gt;');
             rowHtml += '</span>';
         }
         rowHtml += '</td>';
 
-        rowHtml += '<td class="collapsing">' + spanInfo.time_took + '</td>';
+        rowHtml += '<td class="collapsing">' + spanInfo.timeTook + '</td>';
         rowHtml += '<td><div class="ui red progress" id="trace_bar_' + i + '" style="margin: 0">';
         rowHtml += '<div class="bar"></div></div></td>';
 
         if (span.error) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="skull crossbones red icon"></i></td></tr>';
-        } else if (span.child_error && i > 0) {
+        } else if (span.childError && i > 0) {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>';
         } else {
             rowHtml += '<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>';
@@ -379,7 +380,7 @@ function displayTraceStack(traceStack) { //todo-chess-equality: [traceStack: Lis
         $('#stack_table').append(rowHtml);
 
         $('#trace_bar_' + i).progress({
-            percent: spanInfo.total_trace_percent
+            percent: spanInfo.totalTracePercent
         })
     }
 }

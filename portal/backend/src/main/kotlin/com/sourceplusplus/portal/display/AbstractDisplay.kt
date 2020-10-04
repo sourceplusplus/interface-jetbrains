@@ -16,7 +16,7 @@ abstract class AbstractDisplay(val thisTab: PageType) : CoroutineVerticle() {
 
     override suspend fun start() {
         vertx.eventBus().consumer<JsonObject>(OpenedPortal) {
-            val portalUuid = JsonObject.mapFrom(it.body()).getString("portal_uuid")
+            val portalUuid = JsonObject.mapFrom(it.body()).getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
             if (portal.currentTab == thisTab) {
                 updateUI(portal)

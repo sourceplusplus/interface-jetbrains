@@ -1,5 +1,6 @@
 plugins {
     kotlin("js")
+    kotlin("plugin.serialization") version "1.4.10"
 }
 
 kotlin {
@@ -25,7 +26,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.7.2")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
                 implementation("com.github.hadilq:log4k-js:2.3.1")
-                //implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0-RC2")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0-RC2")
             }
         }
     }

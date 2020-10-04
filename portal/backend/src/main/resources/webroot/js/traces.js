@@ -19,34 +19,34 @@ eb.onopen = function () {
         displaySpanInfo(message.body);
     });
 
-    eb.publish('TracesTabOpened', {'portal_uuid': portalUuid, 'trace_order_type': traceOrderType});
+    eb.publish('TracesTabOpened', {'portalUuid': portalUuid, 'traceOrderType': traceOrderType});
 };
 
 function clickedDisplaySpanInfo(appUuid, rootArtifactQualifiedName, traceId, segmentId, spanId) {
     eb.send('ClickedDisplaySpanInfo', {
-        'portal_uuid': portalUuid,
-        'app_uuid': appUuid, 'artifact_qualified_name': rootArtifactQualifiedName,
-        'trace_id': traceId, 'segment_id': segmentId, 'span_id': spanId
+        'portalUuid': portalUuid,
+        'appUuid': appUuid, 'artifactQualifiedName': rootArtifactQualifiedName,
+        'traceId': traceId, 'segmentId': segmentId, 'spanId': spanId
     });
 }
 
 function clickedDisplayTraceStack(appUuid, artifactQualifiedName, globalTraceId) {
     eb.send('ClickedDisplayTraceStack', {
-        'portal_uuid': portalUuid,
-        'app_uuid': appUuid,
-        'artifact_qualified_name': artifactQualifiedName,
-        'trace_id': globalTraceId
+        'portalUuid': portalUuid,
+        'appUuid': appUuid,
+        'artifactQualifiedName': artifactQualifiedName,
+        'traceId': globalTraceId
     });
 }
 
 function clickedBackToTraces() {
     eb.send('ClickedDisplayTraces', {
-        'portal_uuid': portalUuid
+        'portalUuid': portalUuid
     });
 }
 
 function clickedBackToTraceStack() {
     eb.send('ClickedDisplayTraceStack', {
-        'portal_uuid': portalUuid
+        'portalUuid': portalUuid
     });
 }
