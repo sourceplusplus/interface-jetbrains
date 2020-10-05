@@ -33,6 +33,7 @@ const COMPONENT_MAPPINGS = {
     'SpringRestTemplate': 'SpringMVC'
 }
 
+/*
 function setupUI() {
     if (hideOverviewTab) {
         $('#overview_link').css('display', 'none');
@@ -130,6 +131,7 @@ function displayTraces(traceResult) { //todo-chess-equality: [traceResult: Trace
 
     updateOccurredLabels();
 }
+*/
 
 //todo: merge this method with displayTraceStack
 function displayInnerTraces(innerTraceStack) { //todo-chess-equality: [innerTraceStack: List<TraceSpanInfo>]
