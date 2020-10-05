@@ -24,16 +24,16 @@ kotlin {
             }
         }
 
-        val jsMain by getting {
-            dependencies {
-                implementation(kotlin("stdlib-js"))
-            }
-        }
-
-        val jsTest by getting {
-            dependencies {
-                implementation(kotlin("test-js"))
-            }
-        }
+//        val jsMain by getting {
+//            dependencies {
+//                implementation(kotlin("stdlib-js"))
+//            }
+//        }
+//
+//        val jsTest by getting {
+//            dependencies {
+//                implementation(kotlin("test-js"))
+//            }
+//        }
     }
 }

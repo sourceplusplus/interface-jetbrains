@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.template.*
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType.START_TIME
@@ -18,7 +19,11 @@ import org.w3c.dom.Element
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class TracesPage {
+class TracesPage(
+    private val portalUuid: String,
+    private val traceOrderType: TraceOrderType
+) {
+
     fun renderPage() {
         println("Rending Traces page")
         val root: Element = document.getElementById("root")!!
