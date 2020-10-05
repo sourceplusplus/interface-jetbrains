@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin.configuration as pluginConfiguration
 
 /**
- * todo: description.
+ * Represents a [GutterMark] associated to a method artifact.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

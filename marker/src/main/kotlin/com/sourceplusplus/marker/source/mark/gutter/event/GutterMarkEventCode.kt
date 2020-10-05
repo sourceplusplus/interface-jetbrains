@@ -1,9 +1,10 @@
 package com.sourceplusplus.marker.source.mark.gutter.event
 
 import com.sourceplusplus.marker.source.mark.api.event.IEventCode
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 
 /**
- * todo: description.
+ * Represents [GutterMark]-specific events.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
