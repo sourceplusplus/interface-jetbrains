@@ -7,6 +7,12 @@ import org.jetbrains.annotations.PropertyKey
 @NonNls
 private const val BUNDLE = "messages.PluginBundle"
 
+/**
+ * todo: description.
+ *
+ * @since 0.0.1
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 object PluginBundle : AbstractBundle(BUNDLE) {
 
     @Suppress("SpreadOperator")
