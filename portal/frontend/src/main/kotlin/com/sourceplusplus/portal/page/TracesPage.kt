@@ -12,7 +12,6 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayInner
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraces
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
@@ -26,7 +25,6 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.html.dom.append
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import org.w3c.dom.Element
@@ -46,6 +44,7 @@ class TracesPage {
     private val portalUuid = "null"
     init {
         console.log("Traces tab started")
+        setupUI()
         eb.onopen = {
             js("portalConnected()")
             eb.registerHandler(DisplayTraces(portalUuid)) { error: String, message: dynamic ->
@@ -62,20 +61,18 @@ class TracesPage {
                 console.log(">>>>>>>>>> total = ${traceResult.total}")
                 displayTraces(traceResult)
             }
-            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { error: String, message: Any ->
+            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { error: String, message: dynamic ->
                 js("displayInnerTraces(message.body)")
             }
-            eb.registerHandler(DisplayTraceStack(portalUuid)) { error: String, message: Any ->
+            eb.registerHandler(DisplayTraceStack(portalUuid)) { error: String, message: dynamic ->
                 js("displayTraceStack(message.body)")
             }
-            eb.registerHandler(DisplaySpanInfo(portalUuid)) { error: String, message: Any ->
+            eb.registerHandler(DisplaySpanInfo(portalUuid)) { error: String, message: dynamic ->
                 js("displaySpanInfo(message.body)")
             }
 
-            eb.publish(TracesTabOpened, "{'portalUuid': '$portalUuid', 'traceOrderType': traceOrderType}")
+            eb.publish(TracesTabOpened, "{'portalUuid': '$portalUuid', 'traceOrderType': '${js("traceOrderType")}'}")
         }
-
-        setupUI()
     }
 
     fun renderPage() {
@@ -130,15 +127,9 @@ class TracesPage {
             .removeClass("active_sub_tab")
             .css("visibility", "hidden")
 
-        when (js("traceOrderType") as String) {
-            "LATEST_TRACES" -> jq("#latest_traces_header_text").text("Latest Traces")
-            "SLOWEST_TRACES" -> jq("#latest_traces_header_text").text("Slowest Traces")
-            "FAILED_TRACES" -> jq("#latest_traces_header_text").text("Failed Traces")
-        }
-
-        jq("input[type='text']").on("click", fun() {
+        jq("input[type='text']").on("click") {
             jq(this).select()
-        })
+        }
 
         window.setInterval(updateOccurredLabels(), 2000)
     }
@@ -203,6 +194,12 @@ class TracesPage {
         """
         )
 
+        when (js("traceOrderType") as String) {
+            "LATEST_TRACES" -> jq("#latest_traces_header_text").text("Latest Traces")
+            "SLOWEST_TRACES" -> jq("#latest_traces_header_text").text("Slowest Traces")
+            "FAILED_TRACES" -> jq("#latest_traces_header_text").text("Failed Traces")
+        }
+
         for (i in traceResult.traces.indices) {
             val trace = traceResult.traces[i]
             val globalTraceId = trace.traceIds[0]
@@ -246,7 +243,7 @@ class TracesPage {
             }
         }
 
-        // updateOccurredLabels()
+        updateOccurredLabels()
     }
 
     fun displayTraceStack(vararg traceStack: TraceSpanInfo) { //todo-chess-equality: [traceStack: List<TraceSpanInfo>]
