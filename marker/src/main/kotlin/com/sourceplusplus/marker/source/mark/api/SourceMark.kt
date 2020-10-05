@@ -39,7 +39,7 @@ import kotlin.collections.ArrayList
 import kotlin.concurrent.schedule
 
 /**
- * todo: description.
+ * Used to associate visualizations near and/or inside of source code.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

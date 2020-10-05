@@ -5,7 +5,7 @@ import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
 import org.slf4j.LoggerFactory
 
 /**
- * todo: description.
+ * A [SourceMark] which adds visualizations inside source code text.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
