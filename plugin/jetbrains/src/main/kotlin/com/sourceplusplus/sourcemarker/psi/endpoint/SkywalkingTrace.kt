@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
-import com.sourceplusplus.sourcemarker.psi.EndpointNameDetector
+import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
@@ -14,7 +14,7 @@ import java.util.*
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SkywalkingTrace : EndpointNameDetector.EndpointNameDeterminer {
+class SkywalkingTrace : EndpointDetector.EndpointNameDeterminer {
 
     private val skywalkingTraceAnnotation = "org.apache.skywalking.apm.toolkit.trace.Trace"
 
