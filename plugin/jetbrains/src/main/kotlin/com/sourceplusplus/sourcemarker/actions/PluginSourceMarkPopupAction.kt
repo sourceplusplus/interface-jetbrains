@@ -36,7 +36,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         if (sourceMark.getUserData(SOURCE_PORTAL) == null) {
             val sourcePortal = SourcePortal.getPortal(
                 //todo: appUuid/portalUuid
-                SourcePortal.register("null", "null", sourceMark.artifactQualifiedName, false)
+                SourcePortal.register("null", sourceMark.artifactQualifiedName, false)
             )
             sourceMark.putUserData(SOURCE_PORTAL, sourcePortal)
 
@@ -79,6 +79,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         println("Endpoint ids: $endpointIds")
 
         //todo: disable traces page, disable overview page
+        //todo: ability to show class popup directly above focus instead of above class
     }
 
     private suspend fun performMethodPopup(sourceMark: MethodSourceMark) {
