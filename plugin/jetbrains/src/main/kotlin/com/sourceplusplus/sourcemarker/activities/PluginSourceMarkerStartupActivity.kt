@@ -197,9 +197,9 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
     private fun initMarker(sourceMentor: SourceMentor) {
         SourceMarkerPlugin.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(sourceMentor))
 
-        val configuration = GutterMarkConfiguration()
-        configuration.activateOnMouseHover = false
-        configuration.activateOnKeyboardShortcut = true
+        val gutterMarkConfig = GutterMarkConfiguration()
+        gutterMarkConfig.activateOnMouseHover = false
+        gutterMarkConfig.activateOnKeyboardShortcut = true
         val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
             defaultConfiguration.preloadJcefBrowser = false
             defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
@@ -221,9 +221,10 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 }
             }
         }
-        configuration.componentProvider = componentProvider
+        gutterMarkConfig.componentProvider = componentProvider
 
-        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration = configuration
+        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration = gutterMarkConfig
+        SourceMarkerPlugin.configuration.defaultInlayMarkConfiguration.componentProvider = componentProvider
     }
 
     override fun dispose() {
