@@ -8,6 +8,9 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.mentor.SourceMentor
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
+import com.sourceplusplus.sourcemarker.psi.EndpointDetector
+import org.slf4j.LoggerFactory
 
 /**
  * todo: description.
@@ -22,10 +25,17 @@ class PluginSourceMarkEventListener(private val sourceMentor: SourceMentor) : So
         PluginSourceMarkEventListener::class.java
     )
 
+    companion object {
+        private val log = LoggerFactory.getLogger(PluginSourceMarkEventListener::class.java)
+        private val endpointDetector = EndpointDetector()
+    }
+
     override fun handleEvent(event: SourceMarkEvent) {
         if (event.eventCode == SourceMarkEventCode.MARK_ADDED) {
             if (event.sourceMark is MethodSourceMark) {
                 val methodMark = event.sourceMark as MethodSourceMark
+                methodMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
+
                 sourceMentor.getAllMethodAdvice(
                     ArtifactQualifiedName(
                         methodMark.artifactQualifiedName,

@@ -63,7 +63,7 @@ abstract class MentorJob {
         listeners.forEach { it.onEvent(event, data) }
     }
 
-    fun addAdvice(artifactAdvice: ArtifactAdvice) {
+    suspend fun addAdvice(artifactAdvice: ArtifactAdvice) {
         if ((advice as MutableSet).add(artifactAdvice)) {
             adviceListeners.forEach { it.advised(artifactAdvice) }
         }

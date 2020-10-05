@@ -6,7 +6,6 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointMetrics
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
-import com.sourceplusplus.monitor.skywalking.model.GetMultipleEndpointMetrics
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.monitor.skywalking.toProtocol
 import com.sourceplusplus.monitor.skywalking.track.EndpointMetricsTracker
@@ -18,9 +17,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClosePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshTraces
-import com.sourceplusplus.protocol.artifact.ArtifactMetrics
-import com.sourceplusplus.protocol.portal.MetricType
-import com.sourceplusplus.sourcemarker.actions.PluginSourceMarkPopupAction.Companion.ENDPOINT_ID
+import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_ID
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
