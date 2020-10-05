@@ -15,8 +15,8 @@ data class ArtifactQualifiedName(
     val lineNumber: Int? = null,
     val operationName: String? = null //todo: only method artifacts need
 ) {
-    val qualifiedClassName: String?
-        get() = ArtifactNameUtils.getQualifiedClassName(identifier)
-    val qualifiedFunctionName: String?
-        get() = ArtifactNameUtils.getFunctionSignature(identifier)
+//    val qualifiedClassName: String?
+//        get() = ArtifactNameUtils.getQualifiedClassName(identifier)
+//    val qualifiedFunctionName: String?
+//        get() = ArtifactNameUtils.getFunctionSignature(identifier)
 }

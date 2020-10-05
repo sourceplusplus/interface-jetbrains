@@ -33,6 +33,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
         val parent = element.parent
         if (parent is PsiClass && element === parent.nameIdentifier) {
+            //class gutter marks
             val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile) ?: return null
             val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
             if (!SourceMarkerPlugin.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
@@ -61,6 +62,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             || (parent is GrMethod && element === parent.nameIdentifierGroovy)
             || (parent is KtNamedFunction && element === parent.nameIdentifier)
         ) {
+            //method gutter marks
             val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile) ?: return null
             val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
             if (!SourceMarkerPlugin.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
@@ -88,8 +90,27 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                 navigationHandler,
                 CENTER
             )
+        } else {
+            //expression gutter marks
+            //todo: only works for manually created expression gutter marks atm
+            if (element.getUserData(SourceKey.GutterMark) != null) {
+                val gutterMark = element.getUserData(SourceKey.GutterMark)!!
+                var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
+                if (gutterMark.configuration.activateOnMouseClick) {
+                    navigationHandler = GutterIconNavigationHandler { _, elt ->
+                        elt!!.getUserData(SourceKey.GutterMark)!!.displayPopup()
+                    }
+                }
+                return LineMarkerInfo(
+                    element,
+                    element.textRange,
+                    gutterMark.configuration.icon,
+                    null,
+                    navigationHandler,
+                    CENTER
+                )
+            }
         }
-        //todo: class mark
 
         return null
     }
