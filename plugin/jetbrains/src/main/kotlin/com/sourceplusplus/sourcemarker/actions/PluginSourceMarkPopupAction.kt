@@ -48,29 +48,19 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         }
         val sourcePortal = sourceMark.getUserData(SOURCE_PORTAL)!!
 
-        //todo: determine sourceportal context
         when (sourceMark) {
-            is ClassSourceMark -> GlobalScope.launch(vertx.dispatcher()) { performClassPopup(sourceMark) }
-            is MethodSourceMark -> GlobalScope.launch(vertx.dispatcher()) { performMethodPopup(sourceMark) }
+            is ClassSourceMark -> GlobalScope.launch(vertx.dispatcher()) {
+                performClassPopup(sourcePortal, sourceMark)
+            }
+            is MethodSourceMark -> GlobalScope.launch(vertx.dispatcher()) {
+                performMethodPopup(sourcePortal, sourceMark)
+            }
         }
 
-        //todo: use SourcePortalAPI to ensure correct view is showing (don't refresh if correct already viewing)
-        //todo: likely need to unregister old portal handlers
-        val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
-        if (sourcePortal != lastDisplayedInternalPortal) {
-            jcefComponent.getBrowser().cefBrowser.executeJavaScript(
-                """
-                    window.location.href = 'http://localhost:8080/overview?portal_uuid=${sourcePortal.portalUuid}';
-                """.trimIndent(),
-                "", 0
-            )
-        }
-
-        lastDisplayedInternalPortal = sourcePortal
         super.performPopupAction(sourceMark, editor)
     }
 
-    private suspend fun performClassPopup(sourceMark: ClassSourceMark) {
+    private suspend fun performClassPopup(sourcePortal: SourcePortal, sourceMark: ClassSourceMark) {
         //todo: get all endpoint keys for current file
         val endpointIds = sourceMark.sourceFileMarker.getSourceMarks()
             .filterIsInstance<MethodSourceMark>()
@@ -80,10 +70,19 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
 
         //todo: disable traces page, disable overview page
         //todo: ability to show class popup directly above focus instead of above class
+        lastDisplayedInternalPortal = sourcePortal
     }
 
-    private suspend fun performMethodPopup(sourceMark: MethodSourceMark) {
-        val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
-        println("Endpoint id: $endpointId")
+    private fun performMethodPopup(sourcePortal: SourcePortal, sourceMark: MethodSourceMark) {
+        val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
+        if (sourcePortal != lastDisplayedInternalPortal) {
+            val currentUrl = "/${sourcePortal.currentTab.name.toLowerCase()}" +
+                    "?portal_uuid=${sourcePortal.portalUuid}"
+            jcefComponent.getBrowser().cefBrowser.executeJavaScript(
+                "window.location.href = '$currentUrl';", currentUrl, 0
+            )
+
+            lastDisplayedInternalPortal = sourcePortal
+        }
     }
 }
