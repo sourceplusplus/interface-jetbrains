@@ -1,12 +1,13 @@
 package com.sourceplusplus.sourcemarker
 
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 
 /**
- * todo: description.
+ * Used to associate custom data to [SourceMark]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
