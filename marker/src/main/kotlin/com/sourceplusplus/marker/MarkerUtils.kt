@@ -23,7 +23,7 @@ import java.awt.Point
 import java.util.*
 
 /**
- * todo: description.
+ * Utility functions for working with [SourceMark]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

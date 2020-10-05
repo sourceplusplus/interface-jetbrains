@@ -11,6 +11,7 @@ import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
@@ -19,7 +20,7 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 
 /**
- * todo: description.
+ * Used to associate [GutterMark]s with IntelliJ PSI elements.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -129,7 +130,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     }
 
     /**
-     * todo: description.
+     * Associates Groovy [GutterMark]s to PSI elements.
      *
      * @since 0.0.1
      */
@@ -140,7 +141,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     }
 
     /**
-     * todo: description.
+     * Associates Java [GutterMark]s to PSI elements.
      *
      * @since 0.0.1
      */
@@ -151,7 +152,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     }
 
     /**
-     * todo: description.
+     * Associates Kotlin [GutterMark]s to PSI elements.
      *
      * @since 0.0.1
      */
