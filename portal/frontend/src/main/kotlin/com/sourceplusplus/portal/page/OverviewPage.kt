@@ -27,9 +27,8 @@ import kotlin.js.json
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class OverviewPage {
+class OverviewPage(private val portalUuid: String) {
 
-    val portalUuid = "null"
     var currentMetricType: MetricType = MetricType.Throughput_Average
     var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
     var tooltipMeasurement = "ms"
