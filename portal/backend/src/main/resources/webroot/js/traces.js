@@ -1,3 +1,4 @@
+/*
 console.log("Traces tab started");
 
 eb.onopen = function () {
@@ -50,3 +51,4 @@ function clickedBackToTraceStack() {
         'portalUuid': portalUuid
     });
 }
+*/
