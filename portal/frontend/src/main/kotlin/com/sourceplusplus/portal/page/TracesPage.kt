@@ -24,12 +24,16 @@ import com.sourceplusplus.protocol.artifact.trace.TraceTableType.*
 import com.sourceplusplus.protocol.portal.PageType.*
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.html.*
 import kotlinx.html.dom.append
+import kotlinx.html.dom.create
+import kotlinx.html.js.onClickFunction
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLTableRowElement
 import org.w3c.dom.get
 import kotlin.js.json
 import kotlin.math.round
@@ -51,6 +55,7 @@ class TracesPage(
         eb.onopen = {
             js("portalConnected()")
             eb.registerHandler(DisplayTraces(portalUuid)) { error: String, message: dynamic ->
+                console.log("########## Calling displayTraces...")
                 val body: dynamic = message.body
                 val traceResult: TraceResult = Json.decodeFromDynamic(body)
                 console.log(">>>>>>>>>> artifactQualifiedName = ${traceResult.artifactQualifiedName}")
@@ -68,7 +73,11 @@ class TracesPage(
                 js("displayInnerTraces(message.body)")
             }
             eb.registerHandler(DisplayTraceStack(portalUuid)) { error: String, message: dynamic ->
-                js("displayTraceStack(message.body)")
+                console.log("########## Calling displayTraceStack...")
+                val body: dynamic = message.body
+                val traceStack: Array<TraceSpanInfo> = Json.decodeFromDynamic(body)
+                displayTraceStack(*traceStack)
+
             }
             eb.registerHandler(DisplaySpanInfo(portalUuid)) { error: String, message: dynamic ->
                 js("displaySpanInfo(message.body)")
@@ -137,7 +146,7 @@ class TracesPage(
         window.setInterval(updateOccurredLabels(), 2000)
     }
 
-    fun clickedDisplayTraceStack(appUuid: String, artifactQualifiedName: String, globalTraceId: String) {
+    private fun clickedDisplayTraceStack(appUuid: String, artifactQualifiedName: String, globalTraceId: String) {
         eb.send(
             ClickedDisplayTraceStack,
             json(
@@ -212,28 +221,56 @@ class TracesPage(
                 operationName = traceResult.artifactSimpleName.toString()
             }
 
-            var rowHtml = """<tr id="trace-${htmlTraceId}"><td onclick='clickedDisplayTraceStack("${traceResult.appUuid}","
-                             ${traceResult.artifactQualifiedName}","$globalTraceId");' style="border-top: 0 !important; padding-left: 20px;">
-                          """
-            rowHtml += """<i style="font-size:1.5em;margin-right:5px" class="far fa-plus-square"></i>"""
-            rowHtml += """<span style="vertical-align:top">"""
-            rowHtml += operationName.replace("<", "&lt;").replace(">", "&gt;")
-            rowHtml += "</span>"
-            rowHtml += "</td>"
-
-            val occurred = moment(trace.start)
-            val now = moment()
-            val timeOccurredDuration = moment.duration(now.diff(occurred))
-            rowHtml += """<td class="trace_time collapsing" id="trace_time_$htmlTraceId" data-value="${trace.start}" style="text-align: center">
-                          ${getPrettyDuration(timeOccurredDuration, 1)}</td>
-                       """
-            rowHtml += """<td class="collapsing">${trace.prettyDuration}</td>"""
-
-            rowHtml += if (trace.error!!) {
-                """<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>"""
-            } else {
-                """<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>"""
-            }
+            val rowHtml: HTMLTableRowElement = document.create.tr {
+                id = "trace-${htmlTraceId}"
+                td {
+                    onClickFunction = {
+                        clickedDisplayTraceStack(
+                            traceResult.appUuid,
+                            traceResult.artifactQualifiedName,
+                            globalTraceId
+                        )
+                    }
+                    style = "border-top: 0 !important; padding-left: 20px"
+                    i {
+                        style = "font-size:1.5em;margin-right:5px"
+                        classes = setOf("far", "fa-plus-square")
+                    }
+                    span {
+                        style = "vertical-align:top"
+                        +operationName.replace("<", "&lt;").replace(">", "&gt;")
+                    }
+                }
+                val occurred = moment(trace.start)
+                val now = moment()
+                val timeOccurredDuration = moment.duration(now.diff(occurred))
+                td {
+                    classes = setOf("trace_time", "collapsing")
+                    id = "trace_time_$htmlTraceId"
+                    attributes["data-value"] = trace.start.toString()
+                    style = "text-align: center"
+                    +getPrettyDuration(timeOccurredDuration, 1)
+                }
+                td {
+                    classes = setOf("collapsing")
+                    +trace.prettyDuration!!
+                }
+                td {
+                    classes = setOf("collapsing")
+                    style = "padding: 0; text-align: center; font-size: 20px"
+                    if (trace.error!!) {
+                        i {
+                            classes = setOf("exclamation", "triangle", "red", "icon")
+                        }
+                    } else {
+                        style.plus("color:#808083")
+                        i {
+                            classes = setOf("check", "icon")
+                        }
+                    }
+                }
+            } as HTMLTableRowElement
+            console.log(">>>>>>>>>> rowHtml = $rowHtml")
 
             val traceTable: dynamic = document.getElementById("trace_table")
             val tableRow = traceTable.rows[i]
@@ -249,8 +286,10 @@ class TracesPage(
         updateOccurredLabels()
     }
 
-    fun displayTraceStack(vararg traceStack: TraceSpanInfo) { //todo-chess-equality: [traceStack: List<TraceSpanInfo>]
-        portalLog("Displaying trace stack: ${JSON.stringify(traceStack)}")
+    private fun displayTraceStack(vararg traceStack: TraceSpanInfo) { //todo-chess-equality: [traceStack: List<TraceSpanInfo>]
+        js("portalLog('Displaying trace stack:');")
+        // portalLog("Displaying trace stack:")
+        // console.log("${JSON.stringify(traceStack)}")
 
         //todo: move all this stuff to setupUI()
         jq("#latest_traces_header").removeClass("active")
@@ -290,8 +329,8 @@ class TracesPage(
             "FAILED_TRACES" -> jq("#latest_traces_header_text").text("Failed Traces")
         }
 
-        jq("#trace_id_field").value(traceStack[0].span.traceId)
-        jq("#time_occurred_field").value(moment(traceStack[0].span.startTime).format())
+        jq("#trace_id_field").valueOf(traceStack[0].span.traceId)
+        jq("#time_occurred_field").valueOf(moment(traceStack[0].span.startTime).format())
         jq("#traces_span").css("display", "none")
 
         for (i in traceStack.indices) {
@@ -332,10 +371,15 @@ class TracesPage(
             }
             jq("#stack_table").append(rowHtml)
 
+            /*
             jq("#trace_bar_${i}").progress(
                 jsObject {
                     percent = spanInfo.totalTracePercent
                 }
+            )
+            */
+            jq("#trace_bar_${i}").progress = json(
+                Pair("percent", spanInfo.totalTracePercent)
             )
         }
     }
