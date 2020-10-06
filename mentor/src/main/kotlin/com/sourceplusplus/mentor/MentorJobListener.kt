@@ -1,7 +1,7 @@
 package com.sourceplusplus.mentor
 
 /**
- * todo: description.
+ * Listen for [MentorJobEvent]s produced by processing [MentorJob]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

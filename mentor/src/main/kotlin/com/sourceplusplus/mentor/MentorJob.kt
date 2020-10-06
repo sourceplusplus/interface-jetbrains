@@ -1,5 +1,6 @@
 package com.sourceplusplus.mentor
 
+import com.sourceplusplus.mentor.MentorJob.TaskContext
 import com.sourceplusplus.protocol.advice.AdviceListener
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import io.vertx.core.Vertx
@@ -7,7 +8,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
- * todo: description.
+ * Primarily used to propagate a persistent context ([TaskContext]) between [MentorTask]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -81,10 +82,6 @@ abstract class MentorJob {
 
         fun <T> get(key: ContextKey<T>): T {
             return cache[key] as T
-        }
-
-        fun containsKey(key: ContextKey<*>): Boolean {
-            return cache.containsKey(key)
         }
 
         internal fun clear() {
