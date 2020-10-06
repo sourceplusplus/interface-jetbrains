@@ -3,7 +3,7 @@ package com.sourceplusplus.mentor.job
 import com.sourceplusplus.mentor.MentorJobEvent
 import com.sourceplusplus.mentor.MentorTest
 import com.sourceplusplus.mentor.SourceMentor
-import com.sourceplusplus.mentor.task.GetService
+import com.sourceplusplus.mentor.task.monitor.GetService
 import io.vertx.core.Promise
 import io.vertx.kotlin.core.onCompleteAwait
 import io.vertx.kotlin.coroutines.dispatcher
