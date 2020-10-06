@@ -1,4 +1,4 @@
-package com.sourceplusplus.mentor
+package com.sourceplusplus.mentor.base
 
 /**
  * Represents events [MentorJob]s may emit.

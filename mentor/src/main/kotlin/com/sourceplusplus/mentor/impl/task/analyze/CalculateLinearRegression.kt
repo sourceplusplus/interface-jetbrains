@@ -1,9 +1,9 @@
-package com.sourceplusplus.mentor.task.analyze
+package com.sourceplusplus.mentor.impl.task.analyze
 
-import com.sourceplusplus.mentor.MentorJob
-import com.sourceplusplus.mentor.MentorJob.ContextKey
-import com.sourceplusplus.mentor.MentorJob.TaskContext
-import com.sourceplusplus.mentor.MentorTask
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorJob.ContextKey
+import com.sourceplusplus.mentor.base.MentorJob.TaskContext
+import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType

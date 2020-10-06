@@ -1,7 +1,7 @@
-package com.sourceplusplus.mentor
+package com.sourceplusplus.mentor.base
 
-import com.sourceplusplus.mentor.MentorJob.ContextKey
-import com.sourceplusplus.mentor.MentorJob.TaskContext
+import com.sourceplusplus.mentor.base.MentorJob.ContextKey
+import com.sourceplusplus.mentor.base.MentorJob.TaskContext
 import io.vertx.core.Future
 
 /**

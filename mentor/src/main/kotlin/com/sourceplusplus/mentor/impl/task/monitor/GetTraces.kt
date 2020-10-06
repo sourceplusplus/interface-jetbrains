@@ -1,8 +1,8 @@
-package com.sourceplusplus.mentor.task.monitor
+package com.sourceplusplus.mentor.impl.task.monitor
 
-import com.sourceplusplus.mentor.MentorJob
-import com.sourceplusplus.mentor.MentorJob.ContextKey
-import com.sourceplusplus.mentor.MentorTask
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorJob.ContextKey
+import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration

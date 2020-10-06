@@ -1,7 +1,10 @@
-package com.sourceplusplus.mentor.job
+package com.sourceplusplus.mentor.impl.job
 
 import com.sourceplusplus.mentor.*
-import com.sourceplusplus.mentor.task.monitor.GetService
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorJobEvent
+import com.sourceplusplus.mentor.base.MentorTask
+import com.sourceplusplus.mentor.impl.task.monitor.GetService
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.onCompleteAwait

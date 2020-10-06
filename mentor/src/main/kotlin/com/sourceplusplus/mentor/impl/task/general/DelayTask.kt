@@ -1,7 +1,7 @@
-package com.sourceplusplus.mentor.task.general
+package com.sourceplusplus.mentor.impl.task.general
 
-import com.sourceplusplus.mentor.MentorJob
-import com.sourceplusplus.mentor.MentorTask
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorTask
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.dispatcher

@@ -1,13 +1,13 @@
-package com.sourceplusplus.mentor.job
+package com.sourceplusplus.mentor.impl.job
 
-import com.sourceplusplus.mentor.MentorJob
-import com.sourceplusplus.mentor.MentorTask
-import com.sourceplusplus.mentor.task.analyze.DetermineThrowableLocation
-import com.sourceplusplus.mentor.task.general.DelayTask
-import com.sourceplusplus.mentor.task.monitor.GetService
-import com.sourceplusplus.mentor.task.monitor.GetServiceInstance
-import com.sourceplusplus.mentor.task.monitor.GetTraceStacks
-import com.sourceplusplus.mentor.task.monitor.GetTraces
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorTask
+import com.sourceplusplus.mentor.impl.task.analyze.DetermineThrowableLocation
+import com.sourceplusplus.mentor.impl.task.general.DelayTask
+import com.sourceplusplus.mentor.impl.task.monitor.GetService
+import com.sourceplusplus.mentor.impl.task.monitor.GetServiceInstance
+import com.sourceplusplus.mentor.impl.task.monitor.GetTraceStacks
+import com.sourceplusplus.mentor.impl.task.monitor.GetTraces
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import io.vertx.core.Vertx
