@@ -75,6 +75,11 @@ class TracesPage {
         }
     }
 
+class TracesPage(
+    private val portalUuid: String,
+    private val traceOrderType: TraceOrderType
+) {
+
     fun renderPage() {
         println("Rending Traces page")
         val root: Element = document.getElementById("root")!!
