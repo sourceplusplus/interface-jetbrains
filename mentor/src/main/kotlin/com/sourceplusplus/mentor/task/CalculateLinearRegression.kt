@@ -21,11 +21,6 @@ class CalculateLinearRegression(
     val regressionMap: MutableMap<String, SimpleRegression> = mutableMapOf()
 ) : MentorTask() {
 
-    companion object {
-    }
-
-    override val contextKeys = listOf<ContextKey<*>>()
-
     override suspend fun executeTask(job: MentorJob) {
         job.log("Task configuration\n\tbyTracesContext: $byTracesContext")
 
@@ -36,8 +31,6 @@ class CalculateLinearRegression(
             regression.addData(trace.start.toDouble(), trace.duration.toDouble())
         }
 
-        //todo: should be saving regression objects permanently to job
-        //todo: each time run should add new traces to regression object
         //todo: there should likely be a way to give endpoints priority based on the likelihood for it to be a performance ramp
 
         regressionMap.forEach {

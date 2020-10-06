@@ -10,6 +10,5 @@ import com.sourceplusplus.mentor.MentorTask
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class NoopTask : MentorTask() {
-    override suspend fun executeTask(job: MentorJob) {
-    }
+    override suspend fun executeTask(job: MentorJob) = Unit
 }
