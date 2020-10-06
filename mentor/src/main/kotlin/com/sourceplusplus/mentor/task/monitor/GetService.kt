@@ -23,6 +23,8 @@ class GetService(
     private val await: Boolean = true
 ) : MentorTask() {
 
+    override val remainValidDuration: Long = 5 * 60 * 1000
+
     companion object {
         val SERVICE: ContextKey<GetAllServicesQuery.Result> = ContextKey("GetService.SERVICE")
     }

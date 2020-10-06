@@ -26,7 +26,6 @@ abstract class MentorJob {
     private var currentTask = -1
     private var complete: Boolean = false
     private val listeners: MutableList<MentorJobListener> = mutableListOf()
-    open val advice: Set<ArtifactAdvice> = mutableSetOf()
     private val adviceListeners: MutableList<AdviceListener> = mutableListOf()
 
     fun addJobListener(jobListener: MentorJobListener) = listeners.add(jobListener)
@@ -34,7 +33,7 @@ abstract class MentorJob {
     fun nextTask(): MentorTask = tasks[++currentTask]
     fun hasMoreTasks(): Boolean = !complete && currentTask < (tasks.size - 1)
     fun isCurrentTask(task: MentorTask): Boolean = !complete && currentTask > -1 && tasks[currentTask] == task
-    fun isComplete(): Boolean = complete
+
     fun complete() {
         if (complete) {
             throw IllegalStateException("Job already complete")
@@ -64,9 +63,7 @@ abstract class MentorJob {
     }
 
     suspend fun addAdvice(artifactAdvice: ArtifactAdvice) {
-        if ((advice as MutableSet).add(artifactAdvice)) {
-            adviceListeners.forEach { it.advised(artifactAdvice) }
-        }
+        adviceListeners.forEach { it.advised(artifactAdvice) }
     }
 
     fun addAdviceListener(adviceListener: AdviceListener) {

@@ -20,6 +20,8 @@ class GetServiceInstance(
     private val byName: String? = null
 ) : MentorTask() {
 
+    override val remainValidDuration: Long = 60 * 1000
+
     companion object {
         val SERVICE_INSTANCE: ContextKey<GetServiceInstancesQuery.Result> =
             ContextKey("GetServiceInstance.SERVICE_INSTANCE")

@@ -30,16 +30,6 @@ class PluginSourceMarkEventListener(private val sourceMentor: SourceMentor) : So
                 val methodMark = event.sourceMark as MethodSourceMark
                 methodMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
 
-                sourceMentor.getAllMethodAdvice(
-                    ArtifactQualifiedName(
-                        methodMark.artifactQualifiedName,
-                        "", //todo: commitId
-                        ArtifactType.METHOD
-                    )
-                ).forEach {
-//                    MarkerUtils.getOrCreateMethodGutterMark()
-//                    methodMark.sourceFileMarker.applySourceMark()
-                }
                 //todo: gather and display markings
                 //todo: gather and display advice
             }
