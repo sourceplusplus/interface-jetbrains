@@ -1,6 +1,7 @@
 package com.sourceplusplus.mentor.impl.job
 
-import com.sourceplusplus.mentor.*
+import com.sourceplusplus.mentor.MentorTest
+import com.sourceplusplus.mentor.SourceMentor
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorJobEvent
 import com.sourceplusplus.mentor.base.MentorTask
@@ -15,7 +16,7 @@ import org.junit.Test
 
 class MentorJobTest : MentorTest() {
 
-    @Test(timeout = 30_000)
+    @Test(timeout = 15_000)
     fun singleTaskJob() {
         val testPromise = Promise.promise<Nothing>()
         val simpleJob = object : MentorJob() {
@@ -25,8 +26,6 @@ class MentorJobTest : MentorTest() {
 
         val mentor = SourceMentor()
         mentor.executeJob(simpleJob)
-        vertx.deployVerticle(mentor)
-
         simpleJob.addJobListener { event, _ ->
             if (event == MentorJobEvent.JOB_COMPLETE) {
                 assertNotNull(simpleJob.context.get(GetService.SERVICE))
@@ -34,6 +33,7 @@ class MentorJobTest : MentorTest() {
             }
         }
         runBlocking(vertx.dispatcher()) {
+            vertx.deployVerticle(mentor)
             testPromise.future().onCompleteAwait()
             val stopPromise = Promise.promise<Void>()
             mentor.stop(stopPromise)
