@@ -27,7 +27,8 @@ class GetServiceInstance(
             ContextKey("GetServiceInstance.SERVICE_INSTANCE")
     }
 
-    override val contextKeys = listOf(SERVICE_INSTANCE)
+    override val inputContextKeys = listOfNotNull(byContext)
+    override val outputContextKeys = listOf(SERVICE_INSTANCE)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Task configuration\n\tbyContext: $byContext\n\tbyId: $byId\n\tbyName: $byName")
@@ -55,13 +56,6 @@ class GetServiceInstance(
             byName != null && byName == result.name -> true
             else -> false
         }
-    }
-
-    override fun usingSameContext(selfJob: MentorJob, job: MentorJob, task: MentorTask): Boolean {
-        if (task is GetServiceInstance && byContext != null && task.byContext != null) {
-            return selfJob.context.get(byContext) == job.context.get(byContext)
-        }
-        return super.usingSameContext(selfJob, job, task)
     }
 
     override fun equals(other: Any?): Boolean {

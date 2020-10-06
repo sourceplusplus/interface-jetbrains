@@ -2,6 +2,7 @@ package com.sourceplusplus.mentor.task.analyze
 
 import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorJob.ContextKey
+import com.sourceplusplus.mentor.MentorJob.TaskContext
 import com.sourceplusplus.mentor.MentorTask
 import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
@@ -44,6 +45,15 @@ class CalculateLinearRegression(
             }
         }
     }
+
+    /**
+     * This task uses a persistent regression map so two tasks should never assume their using the same context.
+     */
+    override fun usingSameContext(
+        selfContext: TaskContext,
+        otherContext: TaskContext,
+        task: MentorTask
+    ): Boolean = false
 
     class ApacheSimpleRegression(private val sr: SimpleRegression) : RampDetectionAdvice.SimpleRegression {
         override val n get() = sr.n

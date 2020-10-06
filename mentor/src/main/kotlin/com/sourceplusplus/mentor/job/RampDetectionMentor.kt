@@ -4,7 +4,6 @@ import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorTask
 import com.sourceplusplus.mentor.task.analyze.CalculateLinearRegression
 import com.sourceplusplus.mentor.task.general.DelayTask
-import com.sourceplusplus.mentor.task.general.NoopTask
 import com.sourceplusplus.mentor.task.monitor.GetEndpoints
 import com.sourceplusplus.mentor.task.monitor.GetService
 import com.sourceplusplus.mentor.task.monitor.GetServiceInstance
@@ -30,7 +29,7 @@ class RampDetectionMentor(
 ) : MentorJob() {
 
     override val tasks: List<MentorTask> by lazy {
-        listOf(
+        listOfNotNull(
             //get active service instance
             GetService(),
             GetServiceInstance(
@@ -52,9 +51,7 @@ class RampDetectionMentor(
 
             if (config.repeatForever) {
                 DelayTask(config.repeatDelay)
-            } else {
-                NoopTask()
-            }
+            } else null
         )
     }
 }

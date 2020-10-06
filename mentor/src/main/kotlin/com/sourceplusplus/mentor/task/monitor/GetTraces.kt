@@ -31,7 +31,7 @@ class GetTraces(
         val TRACE_RESULT: ContextKey<TraceResult> = ContextKey("GetTraces.TRACE_RESULT")
     }
 
-    override val contextKeys = listOf(TRACE_RESULT)
+    override val outputContextKeys = listOf(TRACE_RESULT)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log(

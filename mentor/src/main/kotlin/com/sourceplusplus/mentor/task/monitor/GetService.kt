@@ -2,6 +2,7 @@ package com.sourceplusplus.mentor.task.monitor
 
 import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorJob.ContextKey
+import com.sourceplusplus.mentor.MentorJob.TaskContext
 import com.sourceplusplus.mentor.MentorTask
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServices
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServicesAwait
@@ -29,7 +30,7 @@ class GetService(
         val SERVICE: ContextKey<GetAllServicesQuery.Result> = ContextKey("GetService.SERVICE")
     }
 
-    override val contextKeys = listOf(SERVICE)
+    override val outputContextKeys = listOf(SERVICE)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Task configuration\n\tbyId: $byId\n\tbyName: $byName\n\tcurrent: $current")
@@ -77,7 +78,14 @@ class GetService(
         }
     }
 
-    override fun usingSameContext(selfJob: MentorJob, job: MentorJob, task: MentorTask): Boolean = true
+    /**
+     * This task doesn't use any context but should be consider using the same context if any tasks are equal to it.
+     */
+    override fun usingSameContext(
+        selfContext: TaskContext,
+        otherContext: TaskContext,
+        task: MentorTask
+    ): Boolean = true
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
