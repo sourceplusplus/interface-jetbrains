@@ -12,6 +12,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayInner
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraces
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
@@ -40,8 +41,10 @@ import kotlin.math.round
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @ExperimentalSerializationApi
-class TracesPage {
-    private val portalUuid = "null"
+class TracesPage(
+    private val portalUuid: String,
+    private val traceOrderType: TraceOrderType
+) {
     init {
         console.log("Traces tab started")
         setupUI()
@@ -71,14 +74,9 @@ class TracesPage {
                 js("displaySpanInfo(message.body)")
             }
 
-            eb.publish(TracesTabOpened, "{'portalUuid': '$portalUuid', 'traceOrderType': '${js("traceOrderType")}'}")
+            eb.publish(TracesTabOpened, "{'portalUuid': '$portalUuid', 'traceOrderType': '$traceOrderType'}")
         }
     }
-
-class TracesPage(
-    private val portalUuid: String,
-    private val traceOrderType: TraceOrderType
-) {
 
     fun renderPage() {
         println("Rending Traces page")
