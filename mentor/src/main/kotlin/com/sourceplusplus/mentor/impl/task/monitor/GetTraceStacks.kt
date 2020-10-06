@@ -1,5 +1,6 @@
 package com.sourceplusplus.mentor.impl.task.monitor
 
+import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
@@ -13,13 +14,12 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class GetTraceStacks(
-    private val byTracesContext: MentorJob.ContextKey<TraceResult>,
+    private val byTracesContext: ContextKey<TraceResult>,
     private val distinctByOperationName: Boolean = true //todo: impl
 ) : MentorTask() {
 
     companion object {
-        val TRACE_STACKS: MentorJob.ContextKey<List<TraceSpanStackQueryResult>> =
-            MentorJob.ContextKey("GetTraceStacks.TRACE_STACKS")
+        val TRACE_STACKS: ContextKey<List<TraceSpanStackQueryResult>> = ContextKey("GetTraceStacks.TRACE_STACKS")
     }
 
     override val outputContextKeys = listOf(TRACE_STACKS)

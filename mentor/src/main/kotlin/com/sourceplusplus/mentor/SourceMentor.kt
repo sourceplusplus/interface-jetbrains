@@ -1,9 +1,9 @@
 package com.sourceplusplus.mentor
 
 import com.sourceplusplus.mentor.base.MentorJob
-import com.sourceplusplus.mentor.base.MentorJob.TaskContext
 import com.sourceplusplus.mentor.base.MentorJobEvent
 import com.sourceplusplus.mentor.base.MentorTask
+import com.sourceplusplus.mentor.base.MentorTaskContext
 import com.sourceplusplus.protocol.advice.AdviceListener
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
@@ -93,7 +93,7 @@ class SourceMentor : CoroutineVerticle() {
 
         if (task.remainValidDuration > 0) {
             job.log("Caching task: $task")
-            val cacheContext = TaskContext()
+            val cacheContext = MentorTaskContext()
             cacheContext.copyFullContext(job, task)
 
             stillValidTasks.add(CachedMentorTask(task, cacheContext))
@@ -175,6 +175,6 @@ class SourceMentor : CoroutineVerticle() {
 
     private data class CachedMentorTask(
         val task: MentorTask,
-        val context: TaskContext
+        val context: MentorTaskContext
     )
 }

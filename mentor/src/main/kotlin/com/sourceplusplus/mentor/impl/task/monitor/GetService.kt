@@ -1,9 +1,9 @@
 package com.sourceplusplus.mentor.impl.task.monitor
 
+import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
-import com.sourceplusplus.mentor.base.MentorJob.ContextKey
-import com.sourceplusplus.mentor.base.MentorJob.TaskContext
 import com.sourceplusplus.mentor.base.MentorTask
+import com.sourceplusplus.mentor.base.MentorTaskContext
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServices
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServicesAwait
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getCurrentService
@@ -82,8 +82,8 @@ class GetService(
      * This task doesn't use any context but should be consider using the same context if any tasks are equal to it.
      */
     override fun usingSameContext(
-        selfContext: TaskContext,
-        otherContext: TaskContext,
+        selfContext: MentorTaskContext,
+        otherContext: MentorTaskContext,
         task: MentorTask
     ): Boolean = true
 
