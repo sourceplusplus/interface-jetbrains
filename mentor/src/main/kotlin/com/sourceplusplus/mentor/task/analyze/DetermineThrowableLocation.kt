@@ -1,4 +1,4 @@
-package com.sourceplusplus.mentor.task
+package com.sourceplusplus.mentor.task.analyze
 
 import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorJob.ContextKey

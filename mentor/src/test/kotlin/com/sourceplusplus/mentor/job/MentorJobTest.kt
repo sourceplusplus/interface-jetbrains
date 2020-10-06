@@ -1,15 +1,13 @@
 package com.sourceplusplus.mentor.job
 
 import com.sourceplusplus.mentor.*
-import com.sourceplusplus.mentor.task.GetService
-import com.sourceplusplus.mentor.task.GetServiceInstance
+import com.sourceplusplus.mentor.task.monitor.GetService
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.onCompleteAwait
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.fail
 import org.junit.Test
 
 class MentorJobTest : MentorTest() {

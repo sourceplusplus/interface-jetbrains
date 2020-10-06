@@ -2,13 +2,19 @@ package com.sourceplusplus.mentor.job
 
 import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorTask
-import com.sourceplusplus.mentor.task.*
+import com.sourceplusplus.mentor.task.analyze.DetermineThrowableLocation
+import com.sourceplusplus.mentor.task.general.DelayTask
+import com.sourceplusplus.mentor.task.general.NoopTask
+import com.sourceplusplus.mentor.task.monitor.GetService
+import com.sourceplusplus.mentor.task.monitor.GetServiceInstance
+import com.sourceplusplus.mentor.task.monitor.GetTraceStacks
+import com.sourceplusplus.mentor.task.monitor.GetTraces
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import io.vertx.core.Vertx
 
 /**
- * todo: description.
+ * Searches failed traces to determine root cause source code location.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -26,27 +32,26 @@ class ActiveExceptionMentor(
                 GetService.SERVICE
             ),
 
-            //fetch failing traces
+            //fetch failed traces
             GetTraces(
                 orderType = TraceOrderType.FAILED_TRACES,
                 timeFrame = QueryTimeFrame.LAST_15_MINUTES
             ),
             GetTraceStacks(GetTraces.TRACE_RESULT),
 
-            //search failing traces to determine failing source code location
+            //search failed traces to determine throwable source code location
             DetermineThrowableLocation(
                 GetTraceStacks.TRACE_STACKS,
                 rootPackage
             ),
+
+            //todo: maintain created advice status (remove on new instances, etc)
 
             if (config.repeatForever) {
                 DelayTask(config.repeatDelay)
             } else {
                 NoopTask()
             }
-
-            //todo: create advice
-            //todo: maintain created advice status (remove on new instances, etc)
         )
     }
 }
