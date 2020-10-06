@@ -105,6 +105,28 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             SourceMarkerConfig()
         }
 
+        //attempt to determine root source package automatically (if necessary)
+        if (config.rootSourcePackage == null) {
+            var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
+                ?.getSubPackages(ProjectScope.getProjectScope(project))
+
+            //remove non-code packages
+            basePackages = basePackages!!.filter { it.qualifiedName != "asciidoc" }.toTypedArray()
+
+            //determine deepest common source package
+            if (basePackages.isNotEmpty()) {
+                var rootPackage: String? = null
+                while (basePackages!!.size == 1) {
+                    rootPackage = basePackages[0]!!.qualifiedName
+                    basePackages = basePackages[0]!!.getSubPackages(ProjectScope.getProjectScope(project))
+                }
+                if (rootPackage != null) {
+                    config.rootSourcePackage = rootPackage
+                    PropertiesComponent.getInstance().setValue("sourcemarker_plugin_config", Json.encode(config))
+                }
+            }
+        }
+
         GlobalScope.launch(vertx.dispatcher()) {
             var connectedMonitor = false
             try {
@@ -166,28 +188,6 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 )
             )
         )
-
-        //attempt to determine root source package automatically (if necessary)
-        if (config.rootSourcePackage == null) {
-            var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
-                ?.getSubPackages(ProjectScope.getProjectScope(project))
-
-            //remove non-code packages
-            basePackages = basePackages!!.filter { it.qualifiedName != "asciidoc" }.toTypedArray()
-
-            //determine deepest common source package
-            if (basePackages.isNotEmpty()) {
-                var rootPackage: String? = null
-                while (basePackages!!.size == 1) {
-                    rootPackage = basePackages[0]!!.qualifiedName
-                    basePackages = basePackages[0]!!.getSubPackages(ProjectScope.getProjectScope(project))
-                }
-                if (rootPackage != null) {
-                    config.rootSourcePackage = rootPackage
-                    PropertiesComponent.getInstance().setValue("sourcemarker_plugin_config", Json.encode(config))
-                }
-            }
-        }
 
         if (config.rootSourcePackage != null) {
             mentor.addJob(
