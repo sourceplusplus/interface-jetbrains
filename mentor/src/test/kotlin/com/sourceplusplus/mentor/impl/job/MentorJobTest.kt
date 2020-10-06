@@ -32,6 +32,7 @@ class MentorJobTest : MentorTest() {
                 testPromise.complete()
             }
         }
+
         runBlocking(vertx.dispatcher()) {
             vertx.deployVerticle(mentor)
             testPromise.future().onCompleteAwait()

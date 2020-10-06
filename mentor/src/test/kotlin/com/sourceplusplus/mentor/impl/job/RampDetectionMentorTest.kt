@@ -1,8 +1,8 @@
 package com.sourceplusplus.mentor.impl.job
 
-import com.sourceplusplus.mentor.base.MentorJobEvent
 import com.sourceplusplus.mentor.MentorTest
 import com.sourceplusplus.mentor.SourceMentor
+import com.sourceplusplus.mentor.base.MentorJobEvent
 import com.sourceplusplus.mentor.impl.task.monitor.GetService
 import io.vertx.core.Promise
 import io.vertx.kotlin.core.onCompleteAwait
@@ -20,15 +20,15 @@ class RampDetectionMentorTest : MentorTest() {
 
         val mentor = SourceMentor()
         mentor.executeJob(job)//.withConfig(MentorJobConfig(repeatForever = true)))
-        vertx.deployVerticle(mentor)
-
         job.addJobListener { event, _ ->
             if (event == MentorJobEvent.JOB_COMPLETE) {
                 assertNotNull(job.context.get(GetService.SERVICE))
                 testPromise.complete()
             }
         }
+
         runBlocking(vertx.dispatcher()) {
+            vertx.deployVerticle(mentor)
             testPromise.future().onCompleteAwait()
             val stopPromise = Promise.promise<Void>()
             mentor.stop(stopPromise)
