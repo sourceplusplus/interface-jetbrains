@@ -155,7 +155,7 @@ class SourceMentor : CoroutineVerticle() {
         }
     }
 
-    fun executeJob(job: MentorJob) {
+    fun addJob(job: MentorJob) {
         if (job.tasks.isEmpty()) {
             throw IllegalArgumentException("Job contains no tasks")
         }
@@ -165,8 +165,8 @@ class SourceMentor : CoroutineVerticle() {
         addTask(job.nextTask())
     }
 
-    fun executeJobs(vararg jobs: MentorJob) {
-        jobs.forEach(this@SourceMentor::executeJob)
+    fun addJobs(vararg jobs: MentorJob) {
+        jobs.forEach(this@SourceMentor::addJob)
     }
 
     fun addAdviceListener(adviceListener: AdviceListener) {

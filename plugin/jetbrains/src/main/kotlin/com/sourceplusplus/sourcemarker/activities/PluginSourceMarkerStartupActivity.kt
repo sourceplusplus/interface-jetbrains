@@ -14,6 +14,8 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
+import com.intellij.psi.JavaPsiFacade
+import com.intellij.psi.search.ProjectScope
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
@@ -22,8 +24,8 @@ import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingle
 import com.sourceplusplus.marker.source.mark.api.component.jcef.config.BrowserLoadingListener
 import com.sourceplusplus.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
 import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfiguration
-import com.sourceplusplus.mentor.base.MentorJobConfig
 import com.sourceplusplus.mentor.SourceMentor
+import com.sourceplusplus.mentor.base.MentorJobConfig
 import com.sourceplusplus.mentor.impl.job.ActiveExceptionMentor
 import com.sourceplusplus.mentor.impl.job.RampDetectionMentor
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
@@ -94,10 +96,19 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             return //todo: change when integration tests are added
         }
 
+        val config = if (PropertiesComponent.getInstance().isValueSet("sourcemarker_plugin_config")) {
+            Json.decodeValue(
+                PropertiesComponent.getInstance().getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
+        } else {
+            SourceMarkerConfig()
+        }
+
         GlobalScope.launch(vertx.dispatcher()) {
             var connectedMonitor = false
             try {
-                initMonitor()
+                initMonitor(config)
                 connectedMonitor = true
             } catch (throwable: Throwable) {
                 //todo: if first time bring up config panel automatically instead of notification
@@ -114,8 +125,9 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
 
             if (connectedMonitor) {
                 initPortal()
-                initMarker(initMentor())
+                initMarker()
                 initMapper()
+                initMentor(project, config)
             }
         }
 
@@ -129,17 +141,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
         super.runActivity(project)
     }
 
-    private suspend fun initMonitor() {
-        val config = if (
-            PropertiesComponent.getInstance().isValueSet("sourcemarker_plugin_config")
-        ) {
-            Json.decodeValue(
-                PropertiesComponent.getInstance().getValue("sourcemarker_plugin_config"),
-                SourceMarkerConfig::class.java
-            )
-        } else {
-            SourceMarkerConfig()
-        }
+    private suspend fun initMonitor(config: SourceMarkerConfig) {
         vertx.deployVerticleAwait(SkywalkingMonitor(config.skywalkingOapUrl))
     }
 
@@ -151,20 +153,11 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
      * Schedules long running, generic, and low-priority mentor jobs.
      * High-priority, specific, and short running mentor jobs are executed during source code navigation.
      */
-    private suspend fun initMentor(): SourceMentor {
+    private suspend fun initMentor(project: Project, config: SourceMarkerConfig): SourceMentor {
         val mentor = SourceMentor()
         mentor.addAdviceListener(ArtifactAdviceListener())
-        mentor.executeJobs(
-            ActiveExceptionMentor(
-                vertx,
-                "spp.example" //todo: dynamic
-            ).withConfig(
-                MentorJobConfig(
-                    repeatForever = true,
-                    repeatDelay = 30_000
-                    //todo: configurable schedule
-                )
-            ),
+        mentor.addJobs(
+
             RampDetectionMentor(vertx).withConfig(
                 MentorJobConfig(
                     repeatForever = true,
@@ -173,6 +166,46 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 )
             )
         )
+
+        //attempt to determine root source package automatically (if necessary)
+        if (config.rootSourcePackage == null) {
+            var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
+                ?.getSubPackages(ProjectScope.getProjectScope(project))
+
+            //remove non-code packages
+            basePackages = basePackages!!.filter { it.qualifiedName != "asciidoc" }.toTypedArray()
+
+            //determine deepest common source package
+            if (basePackages.isNotEmpty()) {
+                var rootPackage: String? = null
+                while (basePackages!!.size == 1) {
+                    rootPackage = basePackages[0]!!.qualifiedName
+                    basePackages = basePackages[0]!!.getSubPackages(ProjectScope.getProjectScope(project))
+                }
+                if (rootPackage != null) {
+                    config.rootSourcePackage = rootPackage
+                    PropertiesComponent.getInstance().setValue("sourcemarker_plugin_config", Json.encode(config))
+                }
+            }
+        }
+
+        if (config.rootSourcePackage != null) {
+            mentor.addJob(
+                ActiveExceptionMentor(
+                    vertx,
+                    config.rootSourcePackage!!
+                ).withConfig(
+                    MentorJobConfig(
+                        repeatForever = true,
+                        repeatDelay = 30_000
+                        //todo: configurable schedule
+                    )
+                )
+            )
+        } else {
+            log.warn("Could not determine root source package. Skipped adding ActiveExceptionMentor...")
+        }
+
         vertx.deployVerticleAwait(mentor)
         return mentor
     }
@@ -194,8 +227,8 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
         vertx.createHttpServer().requestHandler(router).listenAwait(8888, "localhost")
     }
 
-    private fun initMarker(sourceMentor: SourceMentor) {
-        SourceMarkerPlugin.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(sourceMentor))
+    private fun initMarker() {
+        SourceMarkerPlugin.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
 
         val gutterMarkConfig = GutterMarkConfiguration()
         gutterMarkConfig.activateOnMouseHover = false
