@@ -1,3 +1,4 @@
+/*
 const COMPONENT_MAPPINGS = {
     'mongodb-driver': 'MongoDB',
     'rocketMQ-producer': 'RocketMQ',
@@ -33,7 +34,6 @@ const COMPONENT_MAPPINGS = {
     'SpringRestTemplate': 'SpringMVC'
 }
 
-/*
 function setupUI() {
     if (hideOverviewTab) {
         $('#overview_link').css('display', 'none');
@@ -300,6 +300,7 @@ function displaySpanInfo(spanInfo) { //todo-chess-equality: [spanInfo: TraceSpan
     }
 }
 
+/*
 function displayTraceStack(traceStack) { //todo-chess-equality: [traceStack: List<TraceSpanInfo>]
     portalLog('Displaying trace stack: ' + JSON.stringify(traceStack));
 
@@ -445,3 +446,4 @@ function getPrettyDuration(duration, decimalPlaces) {
     }
     return prettyDuration + postText;
 }
+*/
