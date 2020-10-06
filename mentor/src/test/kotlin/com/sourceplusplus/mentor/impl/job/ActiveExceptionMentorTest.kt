@@ -20,15 +20,15 @@ class ActiveExceptionMentorTest : MentorTest() {
 
         val mentor = SourceMentor()
         mentor.executeJob(job)
-        vertx.deployVerticle(mentor)
-
         job.addJobListener { event, _ ->
             if (event == MentorJobEvent.JOB_COMPLETE) {
                 assertNotNull(job.context.get(GetService.SERVICE))
                 testPromise.complete()
             }
         }
+
         runBlocking(vertx.dispatcher()) {
+            vertx.deployVerticle(mentor)
             testPromise.future().onCompleteAwait()
             val stopPromise = Promise.promise<Void>()
             mentor.stop(stopPromise)
