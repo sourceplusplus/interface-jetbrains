@@ -13,7 +13,7 @@ import java.util.*
 import java.util.concurrent.PriorityBlockingQueue
 
 /**
- * todo: description.
+ * Handles the processing of [MentorJob]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

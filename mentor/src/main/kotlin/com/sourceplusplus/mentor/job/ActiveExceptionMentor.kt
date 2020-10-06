@@ -15,12 +15,14 @@ import io.vertx.core.Vertx
 /**
  * Searches failed traces to determine root cause source code location.
  *
+ * Todo: maintain created advice status (remove on new instances, etc)
+ *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ActiveExceptionMentor(
     override val vertx: Vertx,
-    rootPackage: String
+    userRootSourcePackage: String
 ) : MentorJob() {
 
     override val tasks: List<MentorTask> by lazy {
@@ -41,10 +43,8 @@ class ActiveExceptionMentor(
             //search failed traces to determine throwable source code location
             DetermineThrowableLocation(
                 GetTraceStacks.TRACE_STACKS,
-                rootPackage
+                userRootSourcePackage
             ),
-
-            //todo: maintain created advice status (remove on new instances, etc)
 
             if (config.repeatForever) {
                 DelayTask(config.repeatDelay)
