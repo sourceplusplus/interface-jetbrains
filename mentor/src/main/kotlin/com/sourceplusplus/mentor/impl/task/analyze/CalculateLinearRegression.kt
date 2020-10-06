@@ -1,9 +1,9 @@
 package com.sourceplusplus.mentor.impl.task.analyze
 
+import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
-import com.sourceplusplus.mentor.base.MentorJob.ContextKey
-import com.sourceplusplus.mentor.base.MentorJob.TaskContext
 import com.sourceplusplus.mentor.base.MentorTask
+import com.sourceplusplus.mentor.base.MentorTaskContext
 import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
@@ -50,8 +50,8 @@ class CalculateLinearRegression(
      * This task uses a persistent regression map so two tasks should never assume their using the same context.
      */
     override fun usingSameContext(
-        selfContext: TaskContext,
-        otherContext: TaskContext,
+        selfContext: MentorTaskContext,
+        otherContext: MentorTaskContext,
         task: MentorTask
     ): Boolean = false
 

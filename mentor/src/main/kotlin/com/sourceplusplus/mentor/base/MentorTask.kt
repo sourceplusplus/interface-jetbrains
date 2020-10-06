@@ -1,7 +1,5 @@
 package com.sourceplusplus.mentor.base
 
-import com.sourceplusplus.mentor.base.MentorJob.ContextKey
-import com.sourceplusplus.mentor.base.MentorJob.TaskContext
 import io.vertx.core.Future
 
 /**
@@ -32,15 +30,20 @@ abstract class MentorTask(
     override operator fun compareTo(other: MentorTask): Int = other.priority.compareTo(priority)
     override fun toString(): String = "${javaClass.simpleName}@${System.identityHashCode(this)}"
 
-    fun usingSameContext(selfJob: MentorJob, otherContext: TaskContext, task: MentorTask): Boolean {
+    fun usingSameContext(selfJob: MentorJob, otherContext: MentorTaskContext, task: MentorTask): Boolean {
         return usingSameContext(selfJob.context, otherContext, task)
     }
 
-    open fun usingSameContext(selfContext: TaskContext, otherContext: TaskContext, task: MentorTask): Boolean {
-        if (task.inputContextKeys.isEmpty()) {
-            return false
+    open fun usingSameContext(
+        selfContext: MentorTaskContext,
+        otherContext: MentorTaskContext,
+        task: MentorTask
+    ): Boolean {
+        return if (task.inputContextKeys.isEmpty()) {
+            false
+        } else {
+            task.inputContextKeys.all { selfContext.get(it) == otherContext.get(it) }
         }
-        return task.inputContextKeys.all { selfContext.get(it) == otherContext.get(it) }
     }
 
     open fun getAsyncFuture(): Future<Nothing> {

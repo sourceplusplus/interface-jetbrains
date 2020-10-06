@@ -1,7 +1,7 @@
 package com.sourceplusplus.mentor.impl.task.monitor
 
+import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
-import com.sourceplusplus.mentor.base.MentorJob.ContextKey
 import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
