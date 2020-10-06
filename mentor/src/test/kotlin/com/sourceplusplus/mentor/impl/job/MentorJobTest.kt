@@ -25,7 +25,7 @@ class MentorJobTest : MentorTest() {
         }
 
         val mentor = SourceMentor()
-        mentor.executeJob(simpleJob)
+        mentor.addJob(simpleJob)
         simpleJob.addJobListener { event, _ ->
             if (event == MentorJobEvent.JOB_COMPLETE) {
                 assertNotNull(simpleJob.context.get(GetService.SERVICE))

@@ -19,7 +19,7 @@ class ActiveExceptionMentorTest : MentorTest() {
         val job = ActiveExceptionMentor(vertx, "spp.example")
 
         val mentor = SourceMentor()
-        mentor.executeJob(job)
+        mentor.addJob(job)
         job.addJobListener { event, _ ->
             if (event == MentorJobEvent.JOB_COMPLETE) {
                 assertNotNull(job.context.get(GetService.SERVICE))

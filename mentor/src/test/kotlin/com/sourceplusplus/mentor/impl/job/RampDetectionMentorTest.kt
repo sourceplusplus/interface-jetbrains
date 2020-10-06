@@ -19,7 +19,7 @@ class RampDetectionMentorTest : MentorTest() {
         val job = RampDetectionMentor(vertx)
 
         val mentor = SourceMentor()
-        mentor.executeJob(job)//.withConfig(MentorJobConfig(repeatForever = true)))
+        mentor.addJob(job)//.withConfig(MentorJobConfig(repeatForever = true)))
         job.addJobListener { event, _ ->
             if (event == MentorJobEvent.JOB_COMPLETE) {
                 assertNotNull(job.context.get(GetService.SERVICE))
