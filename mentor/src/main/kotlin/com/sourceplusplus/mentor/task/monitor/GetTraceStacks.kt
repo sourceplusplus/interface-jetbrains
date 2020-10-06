@@ -22,7 +22,7 @@ class GetTraceStacks(
             MentorJob.ContextKey("GetTraceStacks.TRACE_STACKS")
     }
 
-    override val contextKeys = listOf(TRACE_STACKS)
+    override val outputContextKeys = listOf(TRACE_STACKS)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log(

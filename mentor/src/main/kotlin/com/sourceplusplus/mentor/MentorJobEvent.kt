@@ -10,5 +10,6 @@ enum class MentorJobEvent {
     TASK_COMPLETE,
     JOB_COMPLETE,
     JOB_RESCHEDULED,
-    CONTEXT_SHARED
+    CONTEXT_SHARED,
+    CONTEXT_REUSED
 }

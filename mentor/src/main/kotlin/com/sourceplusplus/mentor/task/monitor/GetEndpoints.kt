@@ -19,7 +19,7 @@ class GetEndpoints(
         val ENDPOINT_IDS: ContextKey<List<String>> = ContextKey("GetEndpoints.ENDPOINT_IDS")
     }
 
-    override val contextKeys = listOf(ENDPOINT_IDS)
+    override val outputContextKeys = listOf(ENDPOINT_IDS)
 
     override suspend fun executeTask(job: MentorJob) {
 

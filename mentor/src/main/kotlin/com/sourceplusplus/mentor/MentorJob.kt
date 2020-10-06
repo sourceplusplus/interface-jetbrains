@@ -44,7 +44,7 @@ abstract class MentorJob {
     }
 
     fun log(msg: String) {
-        log.info(msg)
+        log.debug("{$this}\n$msg\n")
     }
 
     fun resetJob() {
@@ -70,6 +70,8 @@ abstract class MentorJob {
         adviceListeners.add(adviceListener)
     }
 
+    override fun toString(): String = "${javaClass.simpleName}@${System.identityHashCode(this)}"
+
     class TaskContext {
         private val cache: IdentityHashMap<ContextKey<*>, Any> = IdentityHashMap()
 
@@ -89,9 +91,26 @@ abstract class MentorJob {
             cache.clear()
         }
 
-        fun copyContext(copyJob: MentorJob, copyTask: MentorTask) {
-            copyTask.contextKeys.forEach {
-                cache[it] = copyJob.context.get(it)
+        fun copyOutputContext(copyJob: MentorJob, copyTask: MentorTask) {
+            copyOutputContext(copyJob.context, copyTask)
+        }
+
+        fun copyOutputContext(copyContext: TaskContext, copyTask: MentorTask) {
+            copyTask.outputContextKeys.forEach {
+                cache[it] = copyContext.get(it)
+            }
+        }
+
+        fun copyFullContext(copyJob: MentorJob, copyTask: MentorTask) {
+            copyFullContext(copyJob.context, copyTask)
+        }
+
+        fun copyFullContext(copyContext: TaskContext, copyTask: MentorTask) {
+            copyTask.inputContextKeys.forEach {
+                cache[it] = copyContext.get(it)
+            }
+            copyTask.outputContextKeys.forEach {
+                cache[it] = copyContext.get(it)
             }
         }
     }

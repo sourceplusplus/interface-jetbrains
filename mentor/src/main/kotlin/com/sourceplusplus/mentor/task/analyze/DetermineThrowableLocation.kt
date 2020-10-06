@@ -12,7 +12,8 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 
 /**
- * todo: description.
+ * Todo: This task doesn't have any persistent memory so it should be able to be shared between contexts.
+ *       For that to work it would need to delegate advice adding to a task solely for adding advice.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -31,7 +32,7 @@ class DetermineThrowableLocation(
             ContextKey("DetermineThrowableLocation.ARTIFACT_LOCATION")
     }
 
-    override val contextKeys = listOf(ARTIFACT_LOCATION)
+    override val outputContextKeys = listOf(ARTIFACT_LOCATION)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Task configuration\n\tbyTraceStacksContext: $byTraceStacksContext\n\trootPackage: $rootPackage")

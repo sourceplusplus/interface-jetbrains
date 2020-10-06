@@ -4,7 +4,6 @@ import com.sourceplusplus.mentor.MentorJob
 import com.sourceplusplus.mentor.MentorTask
 import com.sourceplusplus.mentor.task.analyze.DetermineThrowableLocation
 import com.sourceplusplus.mentor.task.general.DelayTask
-import com.sourceplusplus.mentor.task.general.NoopTask
 import com.sourceplusplus.mentor.task.monitor.GetService
 import com.sourceplusplus.mentor.task.monitor.GetServiceInstance
 import com.sourceplusplus.mentor.task.monitor.GetTraceStacks
@@ -25,7 +24,7 @@ class ActiveExceptionMentor(
 ) : MentorJob() {
 
     override val tasks: List<MentorTask> by lazy {
-        listOf(
+        listOfNotNull(
             //get active service instance
             GetService(),
             GetServiceInstance(
@@ -49,9 +48,7 @@ class ActiveExceptionMentor(
 
             if (config.repeatForever) {
                 DelayTask(config.repeatDelay)
-            } else {
-                NoopTask()
-            }
+            } else null
         )
     }
 }
