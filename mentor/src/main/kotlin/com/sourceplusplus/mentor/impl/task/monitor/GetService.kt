@@ -1,9 +1,9 @@
-package com.sourceplusplus.mentor.task.monitor
+package com.sourceplusplus.mentor.impl.task.monitor
 
-import com.sourceplusplus.mentor.MentorJob
-import com.sourceplusplus.mentor.MentorJob.ContextKey
-import com.sourceplusplus.mentor.MentorJob.TaskContext
-import com.sourceplusplus.mentor.MentorTask
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorJob.ContextKey
+import com.sourceplusplus.mentor.base.MentorJob.TaskContext
+import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServices
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServicesAwait
 import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getCurrentService

@@ -1,6 +1,9 @@
 package com.sourceplusplus.mentor
 
-import com.sourceplusplus.mentor.MentorJob.TaskContext
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorJob.TaskContext
+import com.sourceplusplus.mentor.base.MentorJobEvent
+import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.protocol.advice.AdviceListener
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher

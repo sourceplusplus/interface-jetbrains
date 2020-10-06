@@ -1,6 +1,6 @@
-package com.sourceplusplus.mentor
+package com.sourceplusplus.mentor.base
 
-import com.sourceplusplus.mentor.MentorJob.TaskContext
+import com.sourceplusplus.mentor.base.MentorJob.TaskContext
 import com.sourceplusplus.protocol.advice.AdviceListener
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import io.vertx.core.Vertx

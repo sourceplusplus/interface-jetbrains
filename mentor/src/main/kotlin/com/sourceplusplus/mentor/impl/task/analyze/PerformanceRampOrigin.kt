@@ -1,7 +1,7 @@
-package com.sourceplusplus.mentor.task.analyze
+package com.sourceplusplus.mentor.impl.task.analyze
 
-import com.sourceplusplus.mentor.MentorJob
-import com.sourceplusplus.mentor.MentorTask
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorTask
 
 /**
  * todo: description.

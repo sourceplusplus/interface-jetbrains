@@ -1,9 +1,9 @@
-package com.sourceplusplus.mentor.job
+package com.sourceplusplus.mentor.impl.job
 
-import com.sourceplusplus.mentor.MentorJobEvent
+import com.sourceplusplus.mentor.base.MentorJobEvent
 import com.sourceplusplus.mentor.MentorTest
 import com.sourceplusplus.mentor.SourceMentor
-import com.sourceplusplus.mentor.task.monitor.GetService
+import com.sourceplusplus.mentor.impl.task.monitor.GetService
 import io.vertx.core.Promise
 import io.vertx.kotlin.core.onCompleteAwait
 import io.vertx.kotlin.coroutines.dispatcher
@@ -11,15 +11,15 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 
-class RampDetectionMentorTest : MentorTest() {
+class ActiveExceptionMentorTest : MentorTest() {
 
-    @Test(timeout = 15_000)
+    @Test(timeout = 15000)
     fun testJob() {
         val testPromise = Promise.promise<Nothing>()
-        val job = RampDetectionMentor(vertx)
+        val job = ActiveExceptionMentor(vertx, "spp.example")
 
         val mentor = SourceMentor()
-        mentor.executeJob(job)//.withConfig(MentorJobConfig(repeatForever = true)))
+        mentor.executeJob(job)
         vertx.deployVerticle(mentor)
 
         job.addJobListener { event, _ ->
@@ -36,4 +36,3 @@ class RampDetectionMentorTest : MentorTest() {
         }
     }
 }
-

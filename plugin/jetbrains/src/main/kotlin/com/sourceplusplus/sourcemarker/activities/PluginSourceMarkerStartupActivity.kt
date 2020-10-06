@@ -22,10 +22,10 @@ import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingle
 import com.sourceplusplus.marker.source.mark.api.component.jcef.config.BrowserLoadingListener
 import com.sourceplusplus.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
 import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfiguration
-import com.sourceplusplus.mentor.MentorJobConfig
+import com.sourceplusplus.mentor.base.MentorJobConfig
 import com.sourceplusplus.mentor.SourceMentor
-import com.sourceplusplus.mentor.job.ActiveExceptionMentor
-import com.sourceplusplus.mentor.job.RampDetectionMentor
+import com.sourceplusplus.mentor.impl.job.ActiveExceptionMentor
+import com.sourceplusplus.mentor.impl.job.RampDetectionMentor
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer

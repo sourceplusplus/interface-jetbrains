@@ -1,7 +1,7 @@
-package com.sourceplusplus.mentor.task.monitor
+package com.sourceplusplus.mentor.impl.task.monitor
 
-import com.sourceplusplus.mentor.MentorJob
-import com.sourceplusplus.mentor.MentorTask
+import com.sourceplusplus.mentor.base.MentorJob
+import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
