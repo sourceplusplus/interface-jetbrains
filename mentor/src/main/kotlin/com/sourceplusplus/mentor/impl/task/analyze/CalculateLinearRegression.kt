@@ -5,8 +5,6 @@ import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.mentor.base.MentorTaskContext
 import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.trace.Trace
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import org.apache.commons.math3.stat.regression.SimpleRegression
@@ -25,9 +23,9 @@ class CalculateLinearRegression(
 
     companion object {
         val TRACES: ContextKey<List<Trace>> = ContextKey("CalculateLinearRegression.TRACES")
+        val REGRESSION_MAP: ContextKey<Map<String, SimpleRegression>> =
+            ContextKey("CalculateLinearRegression.REGRESSION_MAP")
     }
-
-    override val outputContextKeys = listOf(TRACES)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Task configuration\n\tbyTracesContext: $byTracesContext")
@@ -45,17 +43,10 @@ class CalculateLinearRegression(
         regressionMap.forEach { entry ->
             if (entry.value.slope >= 0 && entry.value.rSquare >= confidence && entry.value.n >= 100) {
                 offendingTraces.addAll(traceResult.traces.filter { it.operationNames[0] == entry.key })
-
-                //todo: remove
-                job.addAdvice(
-                    RampDetectionAdvice(
-                        ArtifactQualifiedName(entry.key, "todo", ArtifactType.ENDPOINT),
-                        ApacheSimpleRegression(entry.value)
-                    )
-                )
             }
         }
         job.context.put(TRACES, offendingTraces)
+        job.context.put(REGRESSION_MAP, regressionMap)
     }
 
     /**

@@ -40,7 +40,7 @@ class FilterBoundedDatabaseQueries(
             }
         }
 
-        job.context.put(FilterTraceStacks.TRACE_SPANS, filteredSpans)
+        job.context.put(TRACE_SPANS, filteredSpans)
     }
 
     //todo: remove when jooq offers public access to parsed queries
