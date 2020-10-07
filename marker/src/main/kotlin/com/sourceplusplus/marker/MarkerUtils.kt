@@ -280,6 +280,22 @@ object MarkerUtils {
     @Synchronized
     fun getOrCreateMethodGutterMark(
         fileMarker: SourceFileMarker,
+        psiMethod: PsiMethod,
+        autoApply: Boolean = true
+    ): MethodGutterMark? {
+        return getOrCreateMethodGutterMark(fileMarker, psiMethod.nameIdentifier!!, autoApply)
+    }
+
+    /**
+     * todo: description.
+     *
+     * @since 0.0.1
+     */
+    @JvmStatic
+    @JvmOverloads
+    @Synchronized
+    fun getOrCreateMethodGutterMark(
+        fileMarker: SourceFileMarker,
         element: PsiElement,
         autoApply: Boolean = true
     ): MethodGutterMark? {

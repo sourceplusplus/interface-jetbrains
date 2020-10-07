@@ -11,24 +11,24 @@ import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class RampDetectionAdvice(
-    override val artifact: ArtifactQualifiedName,
-    val regression: SimpleRegression,
-) : ArtifactAdvice {
+    artifact: ArtifactQualifiedName,
+    regression: SimpleRegression
+) : ArtifactAdvice(artifact, AdviceCategory.CAUTIONARY) {
 
-    override val category: AdviceCategory = AdviceCategory.CAUTIONARY
+    var regression: SimpleRegression = regression
+        private set
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is RampDetectionAdvice) return false
-        if (artifact != other.artifact) return false
-        if (regression != other.regression) return false
-        return true
+    fun updateRegression(regression: SimpleRegression) {
+        this.regression = regression
+        triggerUpdated()
     }
 
-    override fun hashCode(): Int {
-        var result = artifact.hashCode()
-        result = 31 * result + regression.hashCode()
-        return result
+    override fun isSameArtifactAdvice(artifactAdvice: ArtifactAdvice): Boolean {
+        return artifactAdvice is RampDetectionAdvice && artifactAdvice.artifact == artifact
+    }
+
+    override fun updateArtifactAdvice(artifactAdvice: ArtifactAdvice) {
+        updateRegression((artifactAdvice as RampDetectionAdvice).regression)
     }
 
     interface SimpleRegression {
