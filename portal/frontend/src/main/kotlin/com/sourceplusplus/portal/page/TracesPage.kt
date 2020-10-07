@@ -122,6 +122,12 @@ class TracesPage(
             jq("#sidebar_overview_link").css("display", "none")
         }
 
+        when (traceOrderType) {
+            LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
+            SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
+            FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
+        }
+
         jq("#span_info_panel").css("display", "none")
         jq("#latest_traces_header").addClass("active_sub_tab")
             .removeClass("inactive_tab")
@@ -419,14 +425,6 @@ class TracesPage(
             } as HTMLTableRowElement
 
             jq("#stack_table").append(rowHtml)
-
-            /*
-            jq("#trace_bar_${i}").progress(
-                json(
-                    Pair("percent", spanInfo.totalTracePercent)
-                )
-            )
-            */
         }
     }
 
@@ -529,6 +527,8 @@ class TracesPage(
             "SolrJ" to "Solr",
             "cassandra-java-driver" to "Cassandra",
             "mariadb-jdbc" to "Mariadb",
+
+            //Custom added mappings
             "SpringRestTemplate" to "SpringMVC"
         )
     }
