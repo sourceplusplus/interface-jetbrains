@@ -3,6 +3,9 @@ package com.sourceplusplus.mentor.base
 import com.sourceplusplus.protocol.advice.AdviceListener
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import io.vertx.core.Vertx
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 /**
@@ -61,8 +64,10 @@ abstract class MentorJob {
         listeners.forEach { it.onEvent(event, data) }
     }
 
-    suspend fun addAdvice(artifactAdvice: ArtifactAdvice) {
-        adviceListeners.forEach { it.advised(artifactAdvice) }
+    fun addAdvice(artifactAdvice: ArtifactAdvice) {
+        GlobalScope.launch(vertx.dispatcher()) {
+            adviceListeners.forEach { it.advised(artifactAdvice) }
+        }
     }
 
     fun addAdviceListener(adviceListener: AdviceListener) {

@@ -149,7 +149,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 initPortal()
                 initMarker()
                 initMapper()
-                initMentor(project, config)
+                initMentor(config)
             }
         }
 
@@ -175,11 +175,14 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
      * Schedules long running, generic, and low-priority mentor jobs.
      * High-priority, specific, and short running mentor jobs are executed during source code navigation.
      */
-    private suspend fun initMentor(project: Project, config: SourceMarkerConfig): SourceMentor {
+    private suspend fun initMentor(config: SourceMarkerConfig): SourceMentor {
         val mentor = SourceMentor()
-        mentor.addAdviceListener(ArtifactAdviceListener())
-        mentor.addJobs(
+        val mentorAdviceListener = ArtifactAdviceListener()
+        SourceMarkerPlugin.addGlobalSourceMarkEventListener(mentorAdviceListener)
+        mentor.addAdviceListener(mentorAdviceListener)
 
+        //configure and add long running low-priority mentor jobs
+        mentor.addJobs(
             RampDetectionMentor(vertx).withConfig(
                 MentorJobConfig(
                     repeatForever = true,
@@ -188,7 +191,6 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 )
             )
         )
-
         if (config.rootSourcePackage != null) {
             mentor.addJob(
                 ActiveExceptionMentor(
