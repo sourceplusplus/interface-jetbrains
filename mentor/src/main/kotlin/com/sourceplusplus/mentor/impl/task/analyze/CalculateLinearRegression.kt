@@ -7,6 +7,7 @@ import com.sourceplusplus.mentor.base.MentorTaskContext
 import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.protocol.artifact.trace.Trace
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import org.apache.commons.math3.stat.regression.SimpleRegression
 
@@ -22,6 +23,12 @@ class CalculateLinearRegression(
     val regressionMap: MutableMap<String, SimpleRegression> = mutableMapOf()
 ) : MentorTask() {
 
+    companion object {
+        val TRACES: ContextKey<List<Trace>> = ContextKey("CalculateLinearRegression.TRACES")
+    }
+
+    override val outputContextKeys = listOf(TRACES)
+
     override suspend fun executeTask(job: MentorJob) {
         job.log("Task configuration\n\tbyTracesContext: $byTracesContext")
 
@@ -34,16 +41,21 @@ class CalculateLinearRegression(
 
         //todo: there should likely be a way to give endpoints priority based on the likelihood for it to be a performance ramp
 
-        regressionMap.forEach {
-            if (it.value.slope >= 0 && it.value.rSquare >= confidence && it.value.n >= 100) {
+        val offendingTraces = mutableListOf<Trace>()
+        regressionMap.forEach { entry ->
+            if (entry.value.slope >= 0 && entry.value.rSquare >= confidence && entry.value.n >= 100) {
+                offendingTraces.addAll(traceResult.traces.filter { it.operationNames[0] == entry.key })
+
+                //todo: remove
                 job.addAdvice(
                     RampDetectionAdvice(
-                        ArtifactQualifiedName(it.key, "todo", ArtifactType.ENDPOINT),
-                        ApacheSimpleRegression(it.value)
+                        ArtifactQualifiedName(entry.key, "todo", ArtifactType.ENDPOINT),
+                        ApacheSimpleRegression(entry.value)
                     )
                 )
             }
         }
+        job.context.put(TRACES, offendingTraces)
     }
 
     /**
