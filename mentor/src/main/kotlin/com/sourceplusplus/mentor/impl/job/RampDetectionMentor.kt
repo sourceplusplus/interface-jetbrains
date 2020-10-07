@@ -5,8 +5,10 @@ import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.mentor.impl.task.analyze.CalculateLinearRegression
 import com.sourceplusplus.mentor.impl.task.filter.FilterBoundedDatabaseQueries
 import com.sourceplusplus.mentor.impl.task.filter.FilterTraceStacks
+import com.sourceplusplus.mentor.impl.task.general.CreateArtifactAdvice
 import com.sourceplusplus.mentor.impl.task.general.DelayTask
 import com.sourceplusplus.mentor.impl.task.monitor.*
+import com.sourceplusplus.protocol.advice.AdviceType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanQuery
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
@@ -55,8 +57,11 @@ class RampDetectionMentor(
             ),
             FilterBoundedDatabaseQueries(FilterTraceStacks.TRACE_SPANS),
 
-//            //create RampDetectionAdvice
-//            CreateArtifactAdvice(AdviceType.RampDetectionAdvice),
+            //create RampDetectionAdvice
+            CreateArtifactAdvice(
+                FilterBoundedDatabaseQueries.TRACE_SPANS,
+                AdviceType.RampDetectionAdvice
+            ),
 
             if (config.repeatForever) {
                 DelayTask(config.repeatDelay)
