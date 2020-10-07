@@ -149,7 +149,7 @@ class TracesPage(
             jq(this).select()
         }
 
-        window.setInterval(updateOccurredLabels(), 2000)
+        window.setInterval({ updateOccurredLabels() }, 2000)
     }
 
     private fun clickedDisplayTraceStack(appUuid: String, artifactQualifiedName: String, globalTraceId: String) {
@@ -205,8 +205,8 @@ class TracesPage(
     private fun displayTraces(traceResult: TraceResult) {
         console.log(
             """>>>>>>>>>> Displaying traces - Artifact: ${traceResult.artifactSimpleName} 
-            - From: ${moment.unix(traceResult.start).format() as String} - To: ${
-                moment.unix(traceResult.stop).format() as String
+            - From: ${moment(traceResult.start.toString(), "x").format() as String} - To: ${
+                moment(traceResult.stop.toString(), "x").format() as String
             } 
             - Order type: ${traceResult.orderType} - Amount: ${traceResult.traces.size}
         """
@@ -224,7 +224,7 @@ class TracesPage(
             val htmlTraceId = globalTraceId.split(".").joinToString("")
             var operationName = trace.operationNames[0]
             if (operationName == traceResult.artifactQualifiedName) {
-                operationName = traceResult.artifactSimpleName.toString()
+                operationName = traceResult.artifactSimpleName!!
             }
 
             val rowHtml: HTMLTableRowElement = document.create.tr {
@@ -247,7 +247,8 @@ class TracesPage(
                         +operationName.replace("<", "&lt;").replace(">", "&gt;")
                     }
                 }
-                val occurred = moment(trace.start)
+
+                val occurred = moment(trace.start.toString(), "x")
                 val now = moment()
                 val timeOccurredDuration = moment.duration(now.diff(occurred))
                 td {
@@ -335,9 +336,8 @@ class TracesPage(
             "FAILED_TRACES" -> jq("#latest_traces_header_text").text("Failed Traces")
         }
 
-        jq("#trace_id_field").valueOf(traceStack[0].span.traceId)
-        jq("#time_occurred_field").valueOf(moment(traceStack[0].span.startTime).format())
-        jq("#traces_span").css("display", "none")
+        jq("#trace_id_field").`val`(traceStack[0].span.traceId)
+        jq("#time_occurred_field").`val`(moment(traceStack[0].span.startTime.toString(), "x").format())
 
         for (i in traceStack.indices) {
             val spanInfo = traceStack[i]
@@ -364,15 +364,15 @@ class TracesPage(
                             style = "margin-right:5px;vertical-align:bottom"
                             width = "18px"
                             height = "18px"
-                            src =  "../themes/default/assets/components/${component?.toUpperCase()}.png"
+                            src = "../themes/default/assets/components/${component?.toUpperCase()}.png"
                         }
-                        +spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")!!
+                        +spanInfo.operationName!!.replace("<", "&lt;").replace(">", "&gt;")
                     } else if (span.hasChildStack!! || (!js("externalPortal") as Boolean && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
                         i {
                             style = "font-size:1.5em;margin-right:5px;vertical-align:bottom"
                             classes = setOf("far", "fa-plus-square")
                         }
-                        +spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")!!
+                        +spanInfo.operationName!!.replace("<", "&lt;").replace(">", "&gt;")
                     } else {
                         i {
                             style = "font-size:1.5em;margin-right:5px"
@@ -380,7 +380,7 @@ class TracesPage(
                         }
                         span {
                             style = "vertical-align:top"
-                            +spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")!!
+                            +spanInfo.operationName!!.replace("<", "&lt;").replace(">", "&gt;")
                         }
                     }
                 }
@@ -431,7 +431,7 @@ class TracesPage(
     private fun updateOccurredLabels() {
         jq(".trace_time").each(fun(i: Int, traceTime: HTMLElement) {
             if (!traceTime.dataset["value"].isNullOrEmpty()) {
-                val occurred = moment((traceTime.dataset["value"])?.toLong())
+                val occurred = moment((traceTime.dataset["value"]), "x")
                 val now = moment()
                 val timeOccurredDuration = moment.duration(now.diff(occurred))
                 traceTime.innerText = getPrettyDuration(timeOccurredDuration, 1)
