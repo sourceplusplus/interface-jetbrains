@@ -3,12 +3,12 @@ package com.sourceplusplus.mentor.impl.job
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.mentor.impl.task.analyze.CalculateLinearRegression
+import com.sourceplusplus.mentor.impl.task.filter.FilterBoundedDatabaseQueries
+import com.sourceplusplus.mentor.impl.task.filter.FilterTraceStacks
 import com.sourceplusplus.mentor.impl.task.general.DelayTask
-import com.sourceplusplus.mentor.impl.task.monitor.GetEndpoints
-import com.sourceplusplus.mentor.impl.task.monitor.GetService
-import com.sourceplusplus.mentor.impl.task.monitor.GetServiceInstance
-import com.sourceplusplus.mentor.impl.task.monitor.GetTraces
+import com.sourceplusplus.mentor.impl.task.monitor.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.artifact.trace.TraceSpanQuery
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import io.vertx.core.Vertx
 
@@ -32,11 +32,9 @@ class RampDetectionMentor(
         listOfNotNull(
             //get active service instance
             GetService(),
-            GetServiceInstance(
-                GetService.SERVICE
-            ),
+            GetServiceInstance(GetService.SERVICE),
 
-            //iterate endpoints (likely offenders more frequently than non-likely offenders)
+            //iterate endpoints (checking likely offenders more frequently than non-likely offenders)
             GetEndpoints(),
             GetTraces(
                 GetEndpoints.ENDPOINT_IDS,
@@ -47,11 +45,22 @@ class RampDetectionMentor(
             //keep track of regression of endpoint duration
             CalculateLinearRegression(GetTraces.TRACE_RESULT, confidence), //todo: ARIMA model?
 
-            //todo: search source code of endpoint for culprits
+            //get trace stack for regressive endpoints
+            GetTraceStacks(byTracesContext = CalculateLinearRegression.TRACES),
+
+            //filter down by obvious regressive features
+            FilterTraceStacks(
+                GetTraceStacks.TRACE_STACKS,
+                filterQuery = TraceSpanQuery(tags = setOf("db.statement"))
+            ),
+            FilterBoundedDatabaseQueries(FilterTraceStacks.TRACE_SPANS),
+
+//            //create RampDetectionAdvice
+//            CreateArtifactAdvice(AdviceType.RampDetectionAdvice),
 
             if (config.repeatForever) {
                 DelayTask(config.repeatDelay)
-            } else null
+            } else null //todo: should likely move delay logic to SourceMentor
         )
     }
 }
