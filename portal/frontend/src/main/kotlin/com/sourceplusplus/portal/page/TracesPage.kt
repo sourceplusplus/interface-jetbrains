@@ -252,18 +252,18 @@ class TracesPage(
                     +getPrettyDuration(timeOccurredDuration, 1)
                 }
                 td {
-                    classes = setOf("collapsing")
+                    classes += "collapsing"
                     +trace.prettyDuration!!
                 }
                 td {
-                    classes = setOf("collapsing")
+                    classes += "collapsing"
                     style = "padding: 0; text-align: center; font-size: 20px"
                     if (trace.error!!) {
                         i {
                             classes = setOf("exclamation", "triangle", "red", "icon")
                         }
                     } else {
-                        style.plus("color:#808083")
+                        style.plus("color: #808083")
                         i {
                             classes = setOf("check", "icon")
                         }
@@ -336,51 +336,97 @@ class TracesPage(
         for (i in traceStack.indices) {
             val spanInfo = traceStack[i]
             val span = spanInfo.span
-            var rowHtml = """<tr><td onclick="clickedDisplaySpanInfo('${spanInfo.appUuid}','${spanInfo.rootArtifactQualifiedName}',
-                             '${span.traceId}','${span.segmentId}','${span.spanId}');" style="border-top: 0 !important; padding-left: 20px;">
-                          """
 
-            if (!COMPONENT_MAPPINGS[span.component].isNullOrEmpty() || span.component != "Unknown") {
-                var component = COMPONENT_MAPPINGS[span.component]
-                if (component == null) {
-                    component = span.component
+            val rowHtml: HTMLTableRowElement = document.create.tr {
+                td {
+                    onClickFunction = {
+                        clickedDisplaySpanInfo(
+                            spanInfo.appUuid,
+                            spanInfo.rootArtifactQualifiedName,
+                            span.traceId!!,
+                            span.segmentId,
+                            span.spanId!!
+                        )
+                    }
+                    style = "border-top: 0 !important; padding-left: 20px"
+                    if (!COMPONENT_MAPPINGS[span.component].isNullOrEmpty() || span.component != "Unknown") {
+                        var component = COMPONENT_MAPPINGS[span.component]
+                        if (component == null) {
+                            component = span.component
+                        }
+                        img {
+                            style = "margin-right:5px;vertical-align:bottom"
+                            width = "18px"
+                            height = "18px"
+                            src =  "../themes/default/assets/components/${component?.toUpperCase()}.png"
+                        }
+                        +spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")!!
+                    } else if (span.hasChildStack!! || (!js("externalPortal") as Boolean && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
+                        i {
+                            style = "font-size:1.5em;margin-right:5px;vertical-align:bottom"
+                            classes = setOf("far", "fa-plus-square")
+                        }
+                        +spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")!!
+                    } else {
+                        i {
+                            style = "font-size:1.5em;margin-right:5px"
+                            classes = setOf("far", "fa-info-square")
+                        }
+                        span {
+                            style = "vertical-align:top"
+                            +spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")!!
+                        }
+                    }
                 }
-                rowHtml += """<img style="margin-right:5px;vertical-align:bottom" width="18px" height="18px" src="../themes/default/assets/components/${component?.toUpperCase()}.png"></img>
-                              ${spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")}
-                           """
-            } else if (span.hasChildStack!! || (!js("externalPortal") as Boolean && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
-                rowHtml += """<i style="font-size:1.5em;margin-right:5px;vertical-align:bottom" class="far fa-plus-square"></i>
-                              ${spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")}
-                           """
-            } else {
-                rowHtml += """<i style="font-size:1.5em;margin-right:5px" class="far fa-info-square"></i>"""
-                rowHtml += """<span style="vertical-align:top">"""
-                rowHtml += spanInfo.operationName?.replace("<", "&lt;")?.replace(">", "&gt;")
-                rowHtml += "</span>"
-            }
-            rowHtml += "</td>"
+                td {
+                    classes += "collapsing"
+                    +spanInfo.timeTook
+                }
+                td {
+                    div {
+                        classes = setOf("ui", "red", "progress", "active")
+                        id = "trace_bar_${i}"
+                        attributes["data-percent"] = spanInfo.totalTracePercent.toString()
+                        style = "margin: 0"
+                        div {
+                            classes += "bar"
+                            style = "transition-duration: 300ms; display: block; width: ${spanInfo.totalTracePercent.toFixed(4)}%"
+                        }
+                    }
+                }
+                td {
+                    classes += "collapsing"
+                    style = "padding: 0; text-align: center; font-size: 20px"
+                    when {
+                        span.error!! -> {
+                            i {
+                                classes = setOf("skull", "crossbones", "red", "icon")
+                            }
+                        }
+                        span.childError && i > 0 -> {
+                            i {
+                                classes = setOf("exclamation", "triangle", "red", "icon")
+                            }
+                        }
+                        else -> {
+                            style.plus("color: #808083")
+                            i {
+                                classes = setOf("check", "icon")
+                            }
+                        }
+                    }
+                }
+            } as HTMLTableRowElement
 
-            rowHtml += """<td class="collapsing">${spanInfo.timeTook}</td>"""
-            rowHtml += """<td><div class="ui red progress" id="trace_bar_${i}" style="margin: 0">"""
-            rowHtml += """<div class="bar"></div></div></td>"""
-
-            rowHtml += when {
-                span.error!! -> """<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="skull crossbones red icon"></i></td></tr>"""
-                span.childError && i > 0 -> """<td class="collapsing" style="padding: 0; text-align: center; font-size: 20px"><i class="exclamation triangle red icon"></i></td></tr>"""
-                else -> """<td class="collapsing" style="padding: 0; text-align: center; color:#808083; font-size: 20px"><i class="check icon"></i></td></tr>"""
-            }
             jq("#stack_table").append(rowHtml)
 
             /*
             jq("#trace_bar_${i}").progress(
-                jsObject {
-                    percent = spanInfo.totalTracePercent
-                }
+                json(
+                    Pair("percent", spanInfo.totalTracePercent)
+                )
             )
             */
-            jq("#trace_bar_${i}").progress = json(
-                Pair("percent", spanInfo.totalTracePercent)
-            )
         }
     }
 
@@ -489,8 +535,6 @@ class TracesPage(
 }
 
 fun Double.toFixed(digits: Int): String = this.asDynamic().toFixed(digits) as String
-
-fun jsObject(init: dynamic.() -> Unit) = js("{}").apply(init)
 
 fun portalLog(message: String) {
     console.log(message);

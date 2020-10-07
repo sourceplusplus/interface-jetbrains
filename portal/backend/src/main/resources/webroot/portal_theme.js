@@ -2,6 +2,7 @@ function loadTheme() {
     $('.ui.calendar').calendar();
     $('.ui.dropdown').dropdown();
     $('.ui.sidebar').sidebar('setting', 'transition', 'overlay');
+    $('.ui.progress').progress();
 
     let latestTracesHeader = $('#latest_traces_header');
     if (latestTracesHeader.length) {
