@@ -15,10 +15,12 @@ fun main() {
         val portalUuid = queryParams.getOrElse("portal_uuid", { "null" })
         when (window.location.pathname) {
             "/traces" -> {
+                val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
+                val hideOverviewTab = queryParams.getOrElse("hide_overview_tab", { "false" }).toBoolean()
                 val traceOrderType = TraceOrderType.valueOf(
                     queryParams.getOrElse("order_type", { "LATEST_TRACES" }).toUpperCase()
                 )
-                TracesPage(portalUuid, traceOrderType).renderPage()
+                TracesPage(portalUuid, externalPortal, hideOverviewTab, traceOrderType).renderPage()
             }
             "/configuration" -> ConfigurationPage(portalUuid).renderPage()
             else -> OverviewPage(portalUuid).renderPage()

@@ -7,6 +7,7 @@ import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplayTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.PortalLogger
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.TracesTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplaySpanInfo
@@ -47,6 +48,8 @@ import kotlin.math.round
 @ExperimentalSerializationApi
 class TracesPage(
     private val portalUuid: String,
+    private val externalPortal: Boolean,
+    private val hideOverviewTab: Boolean,
     private val traceOrderType: TraceOrderType
 ) {
     init {
@@ -55,25 +58,14 @@ class TracesPage(
         eb.onopen = {
             js("portalConnected()")
             eb.registerHandler(DisplayTraces(portalUuid)) { error: String, message: dynamic ->
-                console.log("########## Calling displayTraces...")
                 val body: dynamic = message.body
                 val traceResult: TraceResult = Json.decodeFromDynamic(body)
-                console.log(">>>>>>>>>> artifactQualifiedName = ${traceResult.artifactQualifiedName}")
-                console.log(">>>>>>>>>> appUuid = ${traceResult.appUuid}")
-                console.log(">>>>>>>>>> artifactQualifiedName = ${traceResult.artifactQualifiedName}")
-                console.log(">>>>>>>>>> artifactSimpleName = ${traceResult.artifactSimpleName}")
-                console.log(">>>>>>>>>> orderType = ${traceResult.orderType}")
-                console.log(">>>>>>>>>> start = ${traceResult.start}")
-                console.log(">>>>>>>>>> stop = ${traceResult.stop}")
-                console.log(">>>>>>>>>> traceResult.traces = ${traceResult.traces[0]}")
-                console.log(">>>>>>>>>> total = ${traceResult.total}")
                 displayTraces(traceResult)
             }
             eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { error: String, message: dynamic ->
                 js("displayInnerTraces(message.body)")
             }
             eb.registerHandler(DisplayTraceStack(portalUuid)) { error: String, message: dynamic ->
-                console.log("########## Calling displayTraceStack...")
                 val body: dynamic = message.body
                 val traceStack: Array<TraceSpanInfo> = Json.decodeFromDynamic(body)
                 displayTraceStack(*traceStack)
@@ -117,7 +109,7 @@ class TracesPage(
     }
 
     private fun setupUI() {
-        if (js("hideOverviewTab") as Boolean) {
+        if (hideOverviewTab) {
             jq("#overview_link").css("display", "none")
             jq("#sidebar_overview_link").css("display", "none")
         }
@@ -164,7 +156,7 @@ class TracesPage(
         )
     }
 
-    fun clickedDisplaySpanInfo(
+    private fun clickedDisplaySpanInfo(
         appUuid: String,
         rootArtifactQualifiedName: String,
         traceId: String,
@@ -212,10 +204,10 @@ class TracesPage(
         """
         )
 
-        when (js("traceOrderType") as String) {
-            "LATEST_TRACES" -> jq("#latest_traces_header_text").text("Latest Traces")
-            "SLOWEST_TRACES" -> jq("#latest_traces_header_text").text("Slowest Traces")
-            "FAILED_TRACES" -> jq("#latest_traces_header_text").text("Failed Traces")
+        when (traceOrderType) {
+            LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
+            SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
+            FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
         }
 
         for (i in traceResult.traces.indices) {
@@ -294,9 +286,7 @@ class TracesPage(
     }
 
     private fun displayTraceStack(vararg traceStack: TraceSpanInfo) { //todo-chess-equality: [traceStack: List<TraceSpanInfo>]
-        js("portalLog('Displaying trace stack:');")
-        // portalLog("Displaying trace stack:")
-        // console.log("${JSON.stringify(traceStack)}")
+        portalLog(JSON.parse(JSON.stringify(traceStack)))
 
         //todo: move all this stuff to setupUI()
         jq("#latest_traces_header").removeClass("active")
@@ -330,10 +320,10 @@ class TracesPage(
 
         jq("#stack_table tr").remove()
 
-        when (js("traceOrderType") as String) {
-            "LATEST_TRACES" -> jq("#latest_traces_header_text").text("Latest Traces")
-            "SLOWEST_TRACES" -> jq("#latest_traces_header_text").text("Slowest Traces")
-            "FAILED_TRACES" -> jq("#latest_traces_header_text").text("Failed Traces")
+        when (traceOrderType) {
+            LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
+            SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
+            FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
         }
 
         jq("#trace_id_field").`val`(traceStack[0].span.traceId)
@@ -367,7 +357,7 @@ class TracesPage(
                             src = "../themes/default/assets/components/${component?.toUpperCase()}.png"
                         }
                         +spanInfo.operationName!!.replace("<", "&lt;").replace(">", "&gt;")
-                    } else if (span.hasChildStack!! || (!js("externalPortal") as Boolean && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
+                    } else if (span.hasChildStack!! || (externalPortal && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
                         i {
                             style = "font-size:1.5em;margin-right:5px;vertical-align:bottom"
                             classes = setOf("far", "fa-plus-square")
@@ -536,7 +526,7 @@ class TracesPage(
 
 fun Double.toFixed(digits: Int): String = this.asDynamic().toFixed(digits) as String
 
-fun portalLog(message: String) {
-    console.log(message);
-    eb.send("PortalLogger", message)
+fun portalLog(message: kotlin.js.Json) {
+    console.log("Displaying message: ${JSON.stringify(message)}")
+    eb.send(PortalLogger, message)
 }
