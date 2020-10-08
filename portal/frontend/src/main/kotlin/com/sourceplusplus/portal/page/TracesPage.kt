@@ -357,7 +357,7 @@ class TracesPage(
                             src = "../themes/default/assets/components/${component?.toUpperCase()}.png"
                         }
                         +spanInfo.operationName!!.replace("<", "&lt;").replace(">", "&gt;")
-                    } else if (span.hasChildStack!! || (externalPortal && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
+                    } else if (span.hasChildStack!! || (!externalPortal && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
                         i {
                             style = "font-size:1.5em;margin-right:5px;vertical-align:bottom"
                             classes = setOf("far", "fa-plus-square")
