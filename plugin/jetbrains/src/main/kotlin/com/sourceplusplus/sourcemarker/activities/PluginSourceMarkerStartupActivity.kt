@@ -23,6 +23,7 @@ import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
 import com.sourceplusplus.marker.source.mark.api.component.jcef.config.BrowserLoadingListener
 import com.sourceplusplus.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
+import com.sourceplusplus.marker.source.mark.api.filter.CreateSourceMarkFilter
 import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfiguration
 import com.sourceplusplus.mentor.SourceMentor
 import com.sourceplusplus.mentor.base.MentorJobConfig
@@ -37,6 +38,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.sourcemarker.listeners.ArtifactAdviceListener
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
+import com.sourceplusplus.sourcemarker.psi.PluginSqlProducerSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
@@ -147,7 +149,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
 
             if (connectedMonitor) {
                 initPortal()
-                initMarker()
+                initMarker(config)
                 initMapper()
                 initMentor(config)
             }
@@ -183,7 +185,9 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
 
         //configure and add long running low-priority mentor jobs
         mentor.addJobs(
-            RampDetectionMentor(vertx).withConfig(
+            RampDetectionMentor(
+                vertx, PluginSqlProducerSearch()
+            ).withConfig(
                 MentorJobConfig(
                     repeatForever = true,
                     repeatDelay = 30_000
@@ -194,8 +198,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
         if (config.rootSourcePackage != null) {
             mentor.addJob(
                 ActiveExceptionMentor(
-                    vertx,
-                    config.rootSourcePackage!!
+                    vertx, config.rootSourcePackage!!
                 ).withConfig(
                     MentorJobConfig(
                         repeatForever = true,
@@ -229,7 +232,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
         vertx.createHttpServer().requestHandler(router).listenAwait(8888, "localhost")
     }
 
-    private fun initMarker() {
+    private fun initMarker(config: SourceMarkerConfig) {
         SourceMarkerPlugin.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
 
         val gutterMarkConfig = GutterMarkConfiguration()
@@ -260,6 +263,14 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
 
         SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration = gutterMarkConfig
         SourceMarkerPlugin.configuration.defaultInlayMarkConfiguration.componentProvider = componentProvider
+
+        if (config.rootSourcePackage != null) {
+            SourceMarkerPlugin.configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->
+                artifactQualifiedName.startsWith(config.rootSourcePackage!!)
+            }
+        } else {
+            log.warn("Could not determine root source package. Skipped adding create source mark filter...")
+        }
     }
 
     override fun dispose() {

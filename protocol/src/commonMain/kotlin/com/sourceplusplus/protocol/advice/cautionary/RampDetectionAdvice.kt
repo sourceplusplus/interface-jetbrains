@@ -12,6 +12,7 @@ import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
  */
 class RampDetectionAdvice(
     artifact: ArtifactQualifiedName,
+    regressionSource: ArtifactQualifiedName,
     regression: SimpleRegression
 ) : ArtifactAdvice(artifact, AdviceCategory.CAUTIONARY) {
 
