@@ -2,7 +2,9 @@ package com.sourceplusplus.mentor.impl.job
 
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
+import com.sourceplusplus.mentor.extend.SqlProducerSearch
 import com.sourceplusplus.mentor.impl.task.analyze.CalculateLinearRegression
+import com.sourceplusplus.mentor.impl.task.analyze.DetermineTraceSpanArtifact
 import com.sourceplusplus.mentor.impl.task.filter.FilterBoundedDatabaseQueries
 import com.sourceplusplus.mentor.impl.task.filter.FilterTraceStacks
 import com.sourceplusplus.mentor.impl.task.general.CreateArtifactAdvice
@@ -27,6 +29,7 @@ import io.vertx.core.Vertx
  */
 class RampDetectionMentor(
     override val vertx: Vertx,
+    sqlProducerSearch: SqlProducerSearch,
     confidence: Double = 0.5
 ) : MentorJob() {
 
@@ -57,9 +60,14 @@ class RampDetectionMentor(
             ),
             FilterBoundedDatabaseQueries(FilterTraceStacks.TRACE_SPANS),
 
+            DetermineTraceSpanArtifact(
+                FilterBoundedDatabaseQueries.TRACE_SPANS,
+                sqlProducerSearch = sqlProducerSearch
+            ),
+
             //create RampDetectionAdvice
             CreateArtifactAdvice(
-                byTraceSpansContext = FilterBoundedDatabaseQueries.TRACE_SPANS,
+                byArtifactsContext = DetermineTraceSpanArtifact.ARTIFACTS,
                 adviceType = AdviceType.RampDetectionAdvice
             ),
 
