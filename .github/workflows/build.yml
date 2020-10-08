@@ -14,7 +14,12 @@
 ## JBIJPPTPL
 
 name: Build
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
 jobs:
 
   # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
@@ -165,6 +170,7 @@ jobs:
     name: Release Draft
     needs: [build, verify]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     steps:
 
       # Check out current repository
