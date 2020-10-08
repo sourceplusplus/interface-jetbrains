@@ -13,7 +13,7 @@
 //class ScalaEndpointNameDetectorTest : LightPlatformCodeInsightFixture4TestCase() {
 //
 //    @Test
-//    fun `SpringMVC RequestMapping method`() {
+//    fun `SpringMVCEndpoint RequestMapping method`() {
 //        @Language("Scala") val code = """
 //                    class TestController {
 //                        @org.springframework.web.bind.annotation.RequestMapping(value = Array("/doGet"), method = Array(RequestMethod.GET))
@@ -35,7 +35,7 @@
 //    }
 ////
 ////    @Test
-////    fun `SpringMVC GetMapping method`() {
+////    fun `SpringMVCEndpoint GetMapping method`() {
 ////        @Language("Groovy") val code = """
 ////                    class TestController {
 ////                        @org.springframework.web.bind.annotation.GetMapping(name = "/doGet")

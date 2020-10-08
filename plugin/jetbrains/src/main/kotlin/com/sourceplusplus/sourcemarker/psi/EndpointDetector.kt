@@ -5,8 +5,8 @@ import com.sourceplusplus.monitor.skywalking.track.EndpointTracker
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_ID
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_NAME
 import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
-import com.sourceplusplus.sourcemarker.psi.endpoint.SkywalkingTrace
-import com.sourceplusplus.sourcemarker.psi.endpoint.SpringMVC
+import com.sourceplusplus.sourcemarker.psi.endpoint.SkywalkingTraceEndpoint
+import com.sourceplusplus.sourcemarker.psi.endpoint.SpringMVCEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
@@ -30,8 +30,8 @@ class EndpointDetector {
     }
 
     private val detectorSet = setOf(
-        SkywalkingTrace(),
-        SpringMVC()
+        SkywalkingTraceEndpoint(),
+        SpringMVCEndpoint()
     )
 
     suspend fun getOrFindEndpointId(sourceMark: MethodSourceMark): String? {

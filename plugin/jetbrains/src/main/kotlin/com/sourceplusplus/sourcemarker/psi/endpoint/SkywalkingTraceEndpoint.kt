@@ -14,7 +14,7 @@ import java.util.*
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SkywalkingTrace : EndpointDetector.EndpointNameDeterminer {
+class SkywalkingTraceEndpoint : EndpointDetector.EndpointNameDeterminer {
 
     private val skywalkingTraceAnnotation = "org.apache.skywalking.apm.toolkit.trace.Trace"
 
