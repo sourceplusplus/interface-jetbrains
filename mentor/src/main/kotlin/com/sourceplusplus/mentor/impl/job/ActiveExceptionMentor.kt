@@ -31,9 +31,7 @@ class ActiveExceptionMentor(
         listOfNotNull(
             //get active service instance
             GetService(),
-            GetServiceInstance(
-                GetService.SERVICE
-            ),
+            GetServiceInstance(GetService.SERVICE),
 
             //fetch failed traces
             GetTraces(
