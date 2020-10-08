@@ -3,8 +3,8 @@ package com.sourceplusplus.mentor.impl.task.analyze
 import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
+import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
-import com.sourceplusplus.protocol.artifact.ArtifactLocation
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
@@ -28,16 +28,17 @@ class DetermineThrowableLocation(
             "(?:\\s*at\\s+)((?:[\\w\\s](?:\\\$+|\\.|\\/)?)+)" +
                     "\\.([\\w|_|\\\$|\\s|<|>]+)\\s*\\(([^\\(\\)]+(?:\\([^\\)]*\\))?)\\)"
         )
-        val ARTIFACT_LOCATION: ContextKey<ArtifactLocation> =
-            ContextKey("DetermineThrowableLocation.ARTIFACT_LOCATION")
+        val ARTIFACT_ADVICE: ContextKey<List<ArtifactAdvice>> =
+            ContextKey("DetermineThrowableLocation.ARTIFACT_ADVICE")
     }
 
-    override val outputContextKeys = listOf(ARTIFACT_LOCATION)
+    override val outputContextKeys = listOf(ARTIFACT_ADVICE)
 
     override suspend fun executeTask(job: MentorJob) {
         job.log("Task configuration\n\tbyTraceStacksContext: $byTraceStacksContext\n\trootPackage: $rootPackage")
 
         //todo: ArtifactLocation more appropriate naming than ArtifactQualifiedName
+        val foundArtifactLocations = mutableListOf<ActiveExceptionAdvice>()
         val traceStacks = job.context.get(byTraceStacksContext)
         traceStacks.forEach { traceStack ->
             traceStack.traceSpans.forEach { span ->
@@ -66,7 +67,7 @@ class DetermineThrowableLocation(
                             val location = domainExceptionLine.method
                             val lineNumber = domainExceptionLine.sourceAsLineNumber!!
 
-                            job.addAdvice(
+                            foundArtifactLocations.add(
                                 ActiveExceptionAdvice(
                                     ArtifactQualifiedName(
                                         identifier = location,
@@ -81,5 +82,7 @@ class DetermineThrowableLocation(
                 }
             }
         }
+
+        job.context.put(ARTIFACT_ADVICE, foundArtifactLocations)
     }
 }

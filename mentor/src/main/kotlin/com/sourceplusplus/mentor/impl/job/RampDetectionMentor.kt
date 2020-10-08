@@ -59,8 +59,8 @@ class RampDetectionMentor(
 
             //create RampDetectionAdvice
             CreateArtifactAdvice(
-                FilterBoundedDatabaseQueries.TRACE_SPANS,
-                AdviceType.RampDetectionAdvice
+                byTraceSpansContext = FilterBoundedDatabaseQueries.TRACE_SPANS,
+                adviceType = AdviceType.RampDetectionAdvice
             ),
 
             if (config.repeatForever) {
