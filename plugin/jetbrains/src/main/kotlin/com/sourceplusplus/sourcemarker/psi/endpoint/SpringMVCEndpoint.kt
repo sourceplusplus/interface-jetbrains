@@ -15,7 +15,7 @@ import java.util.*
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SpringMVC : EndpointDetector.EndpointNameDeterminer {
+class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
 
     private val requestMappingAnnotation = "org.springframework.web.bind.annotation.RequestMapping"
     private val qualifiedNameSet = setOf(
