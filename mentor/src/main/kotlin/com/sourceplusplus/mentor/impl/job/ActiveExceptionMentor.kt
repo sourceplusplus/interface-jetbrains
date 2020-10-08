@@ -3,11 +3,13 @@ package com.sourceplusplus.mentor.impl.job
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.mentor.impl.task.analyze.DetermineThrowableLocation
+import com.sourceplusplus.mentor.impl.task.general.CreateArtifactAdvice
 import com.sourceplusplus.mentor.impl.task.general.DelayTask
 import com.sourceplusplus.mentor.impl.task.monitor.GetService
 import com.sourceplusplus.mentor.impl.task.monitor.GetServiceInstance
 import com.sourceplusplus.mentor.impl.task.monitor.GetTraceStacks
 import com.sourceplusplus.mentor.impl.task.monitor.GetTraces
+import com.sourceplusplus.protocol.advice.AdviceType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import io.vertx.core.Vertx
@@ -44,6 +46,12 @@ class ActiveExceptionMentor(
             DetermineThrowableLocation(
                 GetTraceStacks.TRACE_STACKS,
                 userRootSourcePackage
+            ),
+
+            //create ActiveExceptionAdvice
+            CreateArtifactAdvice(
+                byArtifactAdviceContext = DetermineThrowableLocation.ARTIFACT_ADVICE,
+                adviceType = AdviceType.ActiveExceptionAdvice
             ),
 
             if (config.repeatForever) {
