@@ -16,6 +16,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTrace
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
+import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType.START_TIME
@@ -72,7 +73,9 @@ class TracesPage(
 
             }
             eb.registerHandler(DisplaySpanInfo(portalUuid)) { error: String, message: dynamic ->
-                js("displaySpanInfo(message.body)")
+                val body: dynamic = message.body
+                val traceSpan: TraceSpan = Json.decodeFromDynamic(body)
+                displaySpanInfo(traceSpan)
             }
 
             eb.publish(TracesTabOpened, "{'portalUuid': '$portalUuid', 'traceOrderType': '$traceOrderType'}")
@@ -201,7 +204,7 @@ class TracesPage(
                 moment(traceResult.stop.toString(), "x").format() as String
             } 
             - Order type: ${traceResult.orderType} - Amount: ${traceResult.traces.size}
-        """
+            """
         )
 
         when (traceOrderType) {
@@ -285,7 +288,7 @@ class TracesPage(
         updateOccurredLabels()
     }
 
-    private fun displayTraceStack(vararg traceStack: TraceSpanInfo) { //todo-chess-equality: [traceStack: List<TraceSpanInfo>]
+    private fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
         portalLog(JSON.parse(JSON.stringify(traceStack)))
 
         //todo: move all this stuff to setupUI()
@@ -418,6 +421,84 @@ class TracesPage(
         }
     }
 
+    private fun displaySpanInfo(spanInfo: TraceSpan) {
+        // portalLog(JSON.parse(JSON.stringify(spanInfo)))
+
+        //todo: move all this stuff to setupUI()
+        jq("#top_trace_table").css("display", "none")
+        jq("#trace_stack_table").css("visibility", "visible")
+        jq("#segment_id_span").css("display", "unset")
+        jq("#trace_stack_span").css("display", "none")
+
+        jq("#trace_stack_header").css("visibility", "visible")
+            .removeClass("active_sub_tab")
+            .addClass("inactive_tab")
+        jq("#latest_traces_header").removeClass("active_sub_tab")
+            .addClass("inactive_tab")
+
+        jq("#span_info_header").addClass("active_sub_tab")
+            .removeClass("inactive_tab")
+            .css("visibility", "visible")
+        jq("#trace_stack_table").css("display", "none")
+            .css("visibility", "hidden")
+        jq("#span_info_panel").css("display", "")
+            .css("visibility", "visible")
+
+        jq("#tag_table tr").remove()
+        jq("#span_info_start_trace_time").attr("data-value", spanInfo.startTime)
+        jq("#span_info_start_time").text(moment(spanInfo.startTime).format("h:mm:ss a"))
+        jq("#span_info_end_trace_time").attr("data-value", spanInfo.endTime)
+        jq("#span_info_end_time").text(moment(spanInfo.endTime).format("h:mm:ss a"))
+
+        updateOccurredLabels()
+
+        jq("#segment_id_field").valueOf(spanInfo.segmentId)
+
+        var gotTags = false
+        spanInfo.tags.forEach {
+            gotTags = true
+            val value = spanInfo.tags[it.key]
+            if (value != "") {
+                val rowHtml: HTMLTableRowElement = document.create.tr {
+                    td {
+                        +it.key
+                    }
+                    td {
+                        +it.value
+                    }
+                } as HTMLTableRowElement
+                jq("#tag_table").append(rowHtml)
+            }
+        }
+        if (gotTags) {
+            jq("#span_tag_div").removeClass("displaynone")
+        } else {
+            jq("#span_tag_div").addClass("displaynone")
+        }
+
+        var gotLogs = false
+        jq("#log_table").empty()
+        spanInfo.logs.forEach { log ->
+            gotLogs = true
+            val rowHtml: HTMLTableRowElement = document.create.tr {
+                td {
+                    style = "white-space: nowrap"
+                    b {
+                        +"${moment.unix(log.time, "x").format()}"
+                    }
+                    br
+                    +log.data
+                }
+            } as HTMLTableRowElement
+            jq("#log_table").append(rowHtml)
+        }
+        if (gotLogs) {
+            jq("#span_log_div").removeClass("displaynone")
+        } else {
+            jq("#span_log_div").addClass("displaynone")
+        }
+    }
+    
     private fun updateOccurredLabels() {
         jq(".trace_time").each(fun(i: Int, traceTime: HTMLElement) {
             if (!traceTime.dataset["value"].isNullOrEmpty()) {
