@@ -29,7 +29,7 @@ class PortalViewTracker : CoroutineVerticle() {
     override suspend fun start() {
         //get portal from cache to ensure it remains active
         vertx.eventBus().consumer<JsonObject>(KeepAlivePortal) { messageHandler ->
-            val portalUuid = JsonObject.mapFrom(messageHandler.body()).getString("portal_uuid")
+            val portalUuid = JsonObject.mapFrom(messageHandler.body()).getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)
             if (portal != null) {
                 SourcePortal.ensurePortalActive(portal)
@@ -47,16 +47,16 @@ class PortalViewTracker : CoroutineVerticle() {
 
         //user wants a new external portal
         vertx.eventBus().consumer<JsonObject>(ClickedViewAsExternalPortal) {
-            val portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portal_uuid"))!!
+            val portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portalUuid"))!!
             //close internal portal
             if (!portal.external) vertx.eventBus().send(ClosePortal, portal)
             //open external portal
-            it.reply(JsonObject().put("portal_uuid", portal.createExternalPortal().portalUuid))
+            it.reply(JsonObject().put("portalUuid", portal.createExternalPortal().portalUuid))
         }
 
         vertx.eventBus().consumer<JsonObject>(UpdatePortalArtifact) {
             val request = JsonObject.mapFrom(it.body())
-            val portalUuid = request.getString("portal_uuid")
+            val portalUuid = request.getString("portalUuid")
             val artifactQualifiedName = request.getString("artifact_qualified_name")
 
             val portal = SourcePortal.getPortal(portalUuid)!!
@@ -64,7 +64,7 @@ class PortalViewTracker : CoroutineVerticle() {
                 portal.viewingPortalArtifact = artifactQualifiedName
                 vertx.eventBus().publish(
                     ChangedPortalArtifact,
-                    JsonObject().put("portal_uuid", portalUuid)
+                    JsonObject().put("portalUuid", portalUuid)
                         .put("artifact_qualified_name", artifactQualifiedName)
                 )
             }

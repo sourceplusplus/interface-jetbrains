@@ -7,7 +7,9 @@ import com.sourceplusplus.portal.page.RealOverviewPage
 import com.sourceplusplus.portal.page.TracesPage
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import kotlinx.browser.window
+import kotlinx.serialization.ExperimentalSerializationApi
 
+@ExperimentalSerializationApi
 fun main() {
     jq().ready {
         val queryParams = getQueryMap()
@@ -15,10 +17,12 @@ fun main() {
         when (window.location.pathname) {
             "/overview" -> OverviewPage(portalUuid).renderPage()
             "/traces" -> {
+                val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
+                val hideOverviewTab = queryParams.getOrElse("hide_overview_tab", { "false" }).toBoolean()
                 val traceOrderType = TraceOrderType.valueOf(
                     queryParams.getOrElse("order_type", { "LATEST_TRACES" }).toUpperCase()
                 )
-                TracesPage(portalUuid, traceOrderType).renderPage()
+                TracesPage(portalUuid, externalPortal, hideOverviewTab, traceOrderType).renderPage()
             }
             "/configuration" -> ConfigurationPage(portalUuid).renderPage()
             else -> RealOverviewPage(portalUuid).renderPage()

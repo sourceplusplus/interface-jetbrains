@@ -30,7 +30,7 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
         vertx.eventBus().consumer<JsonObject>(ConfigurationTabOpened) {
             log.info("Configuration tab opened")
             val message = JsonObject.mapFrom(it.body())
-            val portal = SourcePortal.getPortal(message.getString("portal_uuid"))!!
+            val portal = SourcePortal.getPortal(message.getString("portalUuid"))!!
             portal.currentTab = thisTab
             SourcePortal.ensurePortalActive(portal)
             updateUI(portal)
@@ -45,7 +45,7 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
 
         vertx.eventBus().consumer<JsonObject>(UpdateArtifactEntryMethod) {
             val request = JsonObject.mapFrom(it.body())
-            val portal = SourcePortal.getPortal(request.getString("portal_uuid"))!!
+            val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
             if (!updateConfigurationPermitted) {
                 log.warn("Rejected artifact entry method update")
                 updateUI(portal)
@@ -67,7 +67,7 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
         }
         vertx.eventBus().consumer<JsonObject>(UpdateArtifactAutoSubscribe) {
             val request = JsonObject.mapFrom(it.body())
-            val portal = SourcePortal.getPortal(request.getString("portal_uuid"))!!
+            val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
             if (!updateConfigurationPermitted) {
                 log.warn("Rejected artifact auto subscribe update")
                 updateUI(portal)

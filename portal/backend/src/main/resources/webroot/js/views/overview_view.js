@@ -140,18 +140,18 @@ function updateChart(chartData) { //todo-chess-equality: [chartData: SplintChart
         $('#card_' + cards[i] + '_header').removeClass('spp_red_color');
         $('#card_' + cards[i] + '_header_label').removeClass('spp_red_color');
     }
-    $('#card_' + chartData.metric_type.toLowerCase() + '_header').addClass('spp_red_color');
-    $('#card_' + chartData.metric_type.toLowerCase() + '_header_label').addClass('spp_red_color');
-    if (chartData.metric_type.toLowerCase() === cards[0]) {
+    $('#card_' + chartData.metricType.toLowerCase() + '_header').addClass('spp_red_color');
+    $('#card_' + chartData.metricType.toLowerCase() + '_header_label').addClass('spp_red_color');
+    if (chartData.metricType.toLowerCase() === cards[0]) {
         tooltipMeasurement = "/min";
-    } else if (chartData.metric_type.toLowerCase() === cards[1]) {
+    } else if (chartData.metricType.toLowerCase() === cards[1]) {
         tooltipMeasurement = "ms";
-    } else if (chartData.metric_type.toLowerCase() === cards[2]) {
+    } else if (chartData.metricType.toLowerCase() === cards[2]) {
         tooltipMeasurement = "%";
     }
 
-    for (let i = 0; i < chartData.series_data.length; i++) {
-        let seriesData = chartData.series_data[i];
+    for (let i = 0; i < chartData.seriesData.length; i++) {
+        let seriesData = chartData.seriesData[i];
         let list = [];
         for (let z = 0; z < seriesData.values.length; z++) {
             let value = seriesData.values[z];
@@ -167,15 +167,15 @@ function updateChart(chartData) { //todo-chess-equality: [chartData: SplintChart
             });
         }
 
-        if (seriesData.series_index === 0) {
+        if (seriesData.seriesIndex === 0) {
             series0.data = list;
-        } else if (seriesData.series_index === 1) {
+        } else if (seriesData.seriesIndex === 1) {
             series1.data = list;
-        } else if (seriesData.series_index === 2) {
+        } else if (seriesData.seriesIndex === 2) {
             series2.data = list;
-        } else if (seriesData.series_index === 3) {
+        } else if (seriesData.seriesIndex === 3) {
             series3.data = list;
-        } else if (seriesData.series_index === 4) {
+        } else if (seriesData.seriesIndex === 4) {
             series4.data = list;
         } else if (seriesData.series_index === 5) {
             regressionSeries.data = list;

@@ -18,6 +18,7 @@ class ProtocolAddress {
             const val OpenedPortal = "OpenedPortal"
             const val ClosedPortal = "ClosedPortal"
             const val ChangedPortalArtifact = "ChangedPortalArtifact"
+            const val PortalLogger = "PortalLogger"
 
             //Portal - Real Overview
             const val RealOverviewTabOpened = "RealOverviewTabOpened"
@@ -72,6 +73,10 @@ class ProtocolAddress {
 
             fun DisplayTraceStack(portalUuid: String): String {
                 return "$portalUuid-DisplayTraceStack"
+            }
+
+            fun DisplayInnerTraceStack(portalUuid: String): String {
+                return "$portalUuid-DisplayInnerTraceStack"
             }
 
             fun DisplaySpanInfo(portalUuid: String): String {
