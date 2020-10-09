@@ -13,7 +13,7 @@ fun main() {
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portal_uuid", { "null" })
         when (window.location.pathname) {
-            "/overview" -> OverviewPage().renderPage()
+            "/overview" -> OverviewPage(portalUuid).renderPage()
             "/traces" -> {
                 val traceOrderType = TraceOrderType.valueOf(
                     queryParams.getOrElse("order_type", { "LATEST_TRACES" }).toUpperCase()
