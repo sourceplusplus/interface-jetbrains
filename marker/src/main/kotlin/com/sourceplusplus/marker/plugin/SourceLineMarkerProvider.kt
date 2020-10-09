@@ -11,6 +11,7 @@ import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
@@ -19,7 +20,7 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 
 /**
- * todo: description.
+ * Used to associate [GutterMark]s with IntelliJ PSI elements.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -33,6 +34,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
         val parent = element.parent
         if (parent is PsiClass && element === parent.nameIdentifier) {
+            //class gutter marks
             val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile) ?: return null
             val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
             if (!SourceMarkerPlugin.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
@@ -61,6 +63,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             || (parent is GrMethod && element === parent.nameIdentifierGroovy)
             || (parent is KtNamedFunction && element === parent.nameIdentifier)
         ) {
+            //method gutter marks
             val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile) ?: return null
             val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
             if (!SourceMarkerPlugin.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
@@ -88,8 +91,27 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                 navigationHandler,
                 CENTER
             )
+        } else {
+            //expression gutter marks
+            //todo: only works for manually created expression gutter marks atm
+            if (element.getUserData(SourceKey.GutterMark) != null) {
+                val gutterMark = element.getUserData(SourceKey.GutterMark)!!
+                var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
+                if (gutterMark.configuration.activateOnMouseClick) {
+                    navigationHandler = GutterIconNavigationHandler { _, elt ->
+                        elt!!.getUserData(SourceKey.GutterMark)!!.displayPopup()
+                    }
+                }
+                return LineMarkerInfo(
+                    element,
+                    element.textRange,
+                    gutterMark.configuration.icon,
+                    null,
+                    navigationHandler,
+                    CENTER
+                )
+            }
         }
-        //todo: class mark
 
         return null
     }
@@ -108,7 +130,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     }
 
     /**
-     * todo: description.
+     * Associates Groovy [GutterMark]s to PSI elements.
      *
      * @since 0.0.1
      */
@@ -119,7 +141,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     }
 
     /**
-     * todo: description.
+     * Associates Java [GutterMark]s to PSI elements.
      *
      * @since 0.0.1
      */
@@ -130,7 +152,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     }
 
     /**
-     * todo: description.
+     * Associates Kotlin [GutterMark]s to PSI elements.
      *
      * @since 0.0.1
      */

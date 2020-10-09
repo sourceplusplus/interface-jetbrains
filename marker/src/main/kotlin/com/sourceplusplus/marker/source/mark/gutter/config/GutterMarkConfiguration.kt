@@ -1,5 +1,6 @@
 package com.sourceplusplus.marker.source.mark.gutter.config
 
+import com.intellij.codeInsight.daemon.GutterMark
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponentProvider
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
 import com.sourceplusplus.marker.source.mark.api.config.SourceMarkConfiguration
@@ -7,7 +8,7 @@ import com.sourceplusplus.marker.source.mark.api.filter.ApplySourceMarkFilter
 import javax.swing.Icon
 
 /**
- * todo: description.
+ * Used to configure [GutterMark]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

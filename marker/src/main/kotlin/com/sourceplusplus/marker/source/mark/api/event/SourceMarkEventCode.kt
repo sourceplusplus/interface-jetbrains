@@ -1,7 +1,9 @@
 package com.sourceplusplus.marker.source.mark.api.event
 
+import com.sourceplusplus.marker.source.mark.api.SourceMark
+
 /**
- * todo: description.
+ * Represents general [SourceMark] events.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

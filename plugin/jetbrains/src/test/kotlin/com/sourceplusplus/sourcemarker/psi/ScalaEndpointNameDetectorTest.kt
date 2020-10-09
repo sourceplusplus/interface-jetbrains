@@ -13,7 +13,7 @@
 //class ScalaEndpointNameDetectorTest : LightPlatformCodeInsightFixture4TestCase() {
 //
 //    @Test
-//    fun `SpringMVC RequestMapping method`() {
+//    fun `SpringMVCEndpoint RequestMapping method`() {
 //        @Language("Scala") val code = """
 //                    class TestController {
 //                        @org.springframework.web.bind.annotation.RequestMapping(value = Array("/doGet"), method = Array(RequestMethod.GET))
@@ -28,14 +28,14 @@
 //        assertEquals(1, uFile.classes[0].methods.size)
 //
 //        runBlocking {
-//            val result = EndpointNameDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+//            val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
 //            assertTrue(result.isPresent)
 //            assertEquals("{GET}/doGet", result.get())
 //        }
 //    }
 ////
 ////    @Test
-////    fun `SpringMVC GetMapping method`() {
+////    fun `SpringMVCEndpoint GetMapping method`() {
 ////        @Language("Groovy") val code = """
 ////                    class TestController {
 ////                        @org.springframework.web.bind.annotation.GetMapping(name = "/doGet")
@@ -50,7 +50,7 @@
 ////        assertEquals(1, uFile.classes[0].methods.size)
 ////
 ////        runBlocking {
-////            val result = EndpointNameDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+////            val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
 ////            assertTrue(result.isPresent)
 ////            assertEquals("{GET}/doGet", result.get())
 ////        }
@@ -72,7 +72,7 @@
 ////        assertEquals(1, uFile.classes[0].methods.size)
 ////
 ////        runBlocking {
-////            val result = EndpointNameDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+////            val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
 ////            assertTrue(result.isPresent)
 ////            assertEquals("doGet", result.get())
 ////        }
@@ -94,7 +94,7 @@
 ////        assertEquals(1, uFile.classes[0].methods.size)
 ////
 ////        runBlocking {
-////            val result = EndpointNameDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+////            val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
 ////            assertTrue(result.isPresent)
 ////            assertEquals("TestController.doGet", result.get())
 ////        }

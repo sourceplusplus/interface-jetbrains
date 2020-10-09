@@ -1,9 +1,10 @@
 package com.sourceplusplus.marker.source.mark.api.filter
 
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 import java.util.function.Predicate
 
 /**
- * todo: description.
+ * Used to filter auto-created [SourceMark]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

@@ -7,7 +7,7 @@ import org.jetbrains.uast.UMethod
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin.configuration as pluginConfiguration
 
 /**
- * todo: description.
+ * Represents an [InlayMark] associated to a method artifact.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

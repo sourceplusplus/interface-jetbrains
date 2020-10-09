@@ -5,7 +5,7 @@ import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfigurati
 import org.slf4j.LoggerFactory
 
 /**
- * todo: description.
+ * A [SourceMark] which adds visualizations in the panel to the left of source code.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

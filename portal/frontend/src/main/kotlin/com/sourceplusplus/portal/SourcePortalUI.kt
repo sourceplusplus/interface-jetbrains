@@ -23,6 +23,7 @@ fun main() {
             "/configuration" -> ConfigurationPage(portalUuid).renderPage()
             else -> RealOverviewPage(portalUuid).renderPage()
         }
+        //todo: portals should have ability to cache pages so they don't need re-init
 
         js("loadTheme();")
     }
