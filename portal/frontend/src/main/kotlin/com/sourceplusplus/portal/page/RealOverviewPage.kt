@@ -19,9 +19,7 @@ import org.w3c.dom.Element
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class RealOverviewPage {
-
-    val portalUuid = "null"
+class RealOverviewPage(private val portalUuid: String) {
 
     init {
         console.log("Overview tab started")
