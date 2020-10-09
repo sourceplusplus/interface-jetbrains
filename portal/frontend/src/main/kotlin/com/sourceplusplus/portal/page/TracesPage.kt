@@ -31,6 +31,7 @@ class TracesPage(
 
         root.append {
             portalNav {
+                navItem(REAL_OVERVIEW)
                 navItem(OVERVIEW)
                 navItem(TRACES, isActive = true) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)

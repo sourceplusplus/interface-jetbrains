@@ -4,6 +4,7 @@ import com.sourceplusplus.portal.extensions.eb
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RealOverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
+import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointTableType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PageType.*
@@ -27,8 +28,9 @@ class RealOverviewPage(private val portalUuid: String) {
         eb.onopen = {
             js("portalConnected()")
 
-            eb.registerHandler(UpdateEndpoints(portalUuid)) { error: String, message: Any ->
-                displayEndpoints()
+            eb.registerHandler(UpdateEndpoints(portalUuid)) { error: String, message: dynamic ->
+//                val body: dynamic = message.body
+//                displayEndpoints(Json.decodeFromDynamic(body))
             }
 
             eb.publish(RealOverviewTabOpened, "{'portal_uuid': '$portalUuid'}")

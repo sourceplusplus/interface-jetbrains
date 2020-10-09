@@ -117,6 +117,7 @@ class OverviewPage(private val portalUuid: String) {
 
         root.append {
             portalNav {
+                navItem(REAL_OVERVIEW)
                 navItem(OVERVIEW, isActive = true)
                 navItem(TRACES) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
