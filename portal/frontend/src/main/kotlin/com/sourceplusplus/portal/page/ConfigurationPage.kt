@@ -16,7 +16,8 @@ import org.w3c.dom.Element
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ConfigurationPage {
+class ConfigurationPage(private val portalUuid: String) {
+
     fun renderPage() {
         console.log("Rendering Configuration page")
         val root: Element = document.getElementById("root")!!

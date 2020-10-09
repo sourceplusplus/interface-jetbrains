@@ -9,10 +9,12 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearOvervie
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayCard
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateChart
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.portal.BarTrendCard
 import com.sourceplusplus.protocol.portal.ChartItemType.*
 import com.sourceplusplus.protocol.portal.MetricType
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.protocol.portal.SplineChart
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.html.dom.append
@@ -25,11 +27,59 @@ import kotlin.js.json
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class OverviewPage {
+class OverviewPage(private val portalUuid: String) {
 
-    val portalUuid = "null"
     var currentMetricType: MetricType = MetricType.Throughput_Average
     var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
+    var tooltipMeasurement = "ms"
+
+    val series0 = mutableMapOf(
+        "name" to "99th percentile",
+        "type" to "line",
+        "color" to "#e1483b",
+        "hoverAnimation" to false,
+        "symbol" to "circle",
+        "symbolSize" to 8,
+        "showSymbol" to true,
+        "areaStyle" to {},
+        "data" to mutableListOf<Int>()
+    )
+    val series1 = mutableMapOf(
+        "name" to "95th percentile",
+        "type" to "line",
+        "color" to "#e1483b",
+        "showSymbol" to false,
+        "hoverAnimation" to false,
+        "areaStyle" to {},
+        "data" to mutableListOf<Int>()
+    )
+    val series2 = mutableMapOf(
+        "name" to "90th percentile",
+        "type" to "line",
+        "color" to "#e1483b",
+        "showSymbol" to false,
+        "hoverAnimation" to false,
+        "areaStyle" to {},
+        "data" to mutableListOf<Int>()
+    )
+    val series3 = mutableMapOf(
+        "name" to "75th percentile",
+        "type" to "line",
+        "color" to "#e1483b",
+        "showSymbol" to false,
+        "hoverAnimation" to false,
+        "areaStyle" to {},
+        "data" to mutableListOf<Int>()
+    )
+    val series4 = mutableMapOf(
+        "name" to "50th percentile",
+        "type" to "line",
+        "color" to "#e1483b",
+        "showSymbol" to false,
+        "hoverAnimation" to false,
+        "areaStyle" to {},
+        "data" to mutableListOf<Int>()
+    )
 
     init {
         console.log("Overview tab started")
@@ -91,6 +141,64 @@ class OverviewPage {
         }
 
         js("loadChart();")
+    }
+
+    fun displayCard(card: BarTrendCard) {
+        console.log("Displaying card")
+
+        document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = card.header
+    }
+
+    fun updateChart(chartData: SplineChart) {
+        console.log("Updating chart")
+
+        val cards = listOf("throughput_average", "responsetime_average", "servicelevelagreement_average")
+        for (i in cards.indices) {
+            jq("#card_" + cards[i] + "_header").removeClass("spp_red_color");
+            jq("#card_" + cards[i] + "_header_label").removeClass("spp_red_color");
+        }
+        jq("#card_" + chartData.metricType.name.toLowerCase() + "_header").addClass("spp_red_color");
+        jq("#card_" + chartData.metricType.name.toLowerCase() + "_header_label").addClass("spp_red_color");
+        if (chartData.metricType.name.toLowerCase() === cards[0]) {
+            tooltipMeasurement = "/min";
+        } else if (chartData.metricType.name.toLowerCase() === cards[1]) {
+            tooltipMeasurement = "ms";
+        } else if (chartData.metricType.name.toLowerCase() === cards[2]) {
+            tooltipMeasurement = "%";
+        }
+
+        for (i in chartData.seriesData.indices) {
+            val seriesData = chartData.seriesData[i];
+            val list = mutableListOf<Map<String, Any>>()
+            for (z in seriesData.values.indices) {
+                val value = seriesData.values[z];
+                val time = 0//todo: moment.unix(seriesData.times[z]).valueOf();
+
+                list.add(
+                    mapOf(
+                        "value" to listOf(time, value),
+                        "itemStyle" to mapOf(
+                            "normal" to mapOf(
+                                "color" to "#182d34"
+                            )
+                        )
+                    )
+                )
+
+                if (seriesData.seriesIndex == 0) {
+                    series0["data"] = list;
+                } else if (seriesData.seriesIndex == 1) {
+                    series1["data"] = list;
+                } else if (seriesData.seriesIndex == 2) {
+                    series2["data"] = list;
+                } else if (seriesData.seriesIndex == 3) {
+                    series3["data"] = list;
+                } else if (seriesData.seriesIndex == 4) {
+                    series4["data"] = list;
+                }
+            }
+        }
+        js("overviewChart.setOption({series: [series0, series1, series2, series3, series4]})")
     }
 
     private fun updateTime(interval: QueryTimeFrame) {

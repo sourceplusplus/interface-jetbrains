@@ -50,3 +50,25 @@ class Vertx {
         }
     }
 }
+
+
+//fun JsonObject.withCamelCaseKeys(): JsonObject {
+//    return JsonObject(mapKeys {
+//        var key = ""
+//        var uppercase = false
+//        for (ch in it.key) when {
+//            ch == '_' -> uppercase = true
+//            uppercase -> {
+//                key += ch.toUpperCase()
+//                uppercase = false
+//            }
+//            else -> key += ch
+//        }
+//        return@mapKeys key
+//    })
+//}
+//
+//inline fun <reified T> toProtocolMessage(any: Any): T {
+//    val body = parseToJsonElement(JSON.stringify(any)) as JsonObject
+//    return kotlinx.serialization.json.Json.decodeFromDynamic(JSON.parse(body.withCamelCaseKeys().toString()))
+//}
