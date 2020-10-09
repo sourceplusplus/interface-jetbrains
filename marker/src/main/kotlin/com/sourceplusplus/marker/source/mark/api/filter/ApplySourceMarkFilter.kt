@@ -4,7 +4,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import java.util.function.Predicate
 
 /**
- * todo: description.
+ * Used to filter auto-applied [SourceMark]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

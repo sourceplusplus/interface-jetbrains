@@ -10,7 +10,7 @@ import org.jetbrains.uast.UClass
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * todo: description.
+ * Represents a [GutterMark] associated to a class artifact.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

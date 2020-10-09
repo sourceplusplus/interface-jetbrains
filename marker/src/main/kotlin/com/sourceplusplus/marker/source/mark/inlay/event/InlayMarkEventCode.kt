@@ -1,9 +1,10 @@
 package com.sourceplusplus.marker.source.mark.inlay.event
 
 import com.sourceplusplus.marker.source.mark.api.event.IEventCode
+import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 
 /**
- * todo: description.
+ * Represents [InlayMark]-specific events.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

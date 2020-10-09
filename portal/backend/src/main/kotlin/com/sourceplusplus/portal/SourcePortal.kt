@@ -106,7 +106,8 @@ class SourcePortal(
     val configurationView: ConfigurationView = ConfigurationView()
     lateinit var viewingPortalArtifact: String
     var currentTab = PageType.OVERVIEW
-    var advice : MutableList<ArtifactAdvice> = mutableListOf()
+    var advice: MutableList<ArtifactAdvice> = mutableListOf()
+    //todo: portal should be able to fetch advice for an artifact instead of storing it
 
     fun cloneViews(portal: SourcePortal) {
         this.overviewView.cloneView(portal.overviewView)

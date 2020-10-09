@@ -3,6 +3,7 @@ package com.sourceplusplus.protocol.advice.informative
 import com.sourceplusplus.protocol.advice.AdviceCategory
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 
 /**
  * todo: description.
@@ -11,14 +12,30 @@ import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ActiveExceptionAdvice(
-    override val artifact: ArtifactQualifiedName
-) : ArtifactAdvice {
+    artifact: ArtifactQualifiedName,
+    stackTrace: JvmStackTrace
+) : ArtifactAdvice(artifact, AdviceCategory.INFORMATIVE) {
 
-    //todo: get active service instance
-    //todo: find failing traces
-    //todo: determine failing location
-    //todo: create advice
-    //todo: maintain created advice status (remove on new instances, etc)
+    var stackTrace: JvmStackTrace = stackTrace
+        private set
 
-    override val category: AdviceCategory = AdviceCategory.INFORMATIVE
+    fun updateStackTrace(stackTrace: JvmStackTrace) {
+        this.stackTrace = stackTrace
+        triggerUpdated()
+    }
+
+    /**
+     * Compares everything except [JvmStackTrace.message] as the message may just contain timestamp differences
+     * even though everything else is equivalent.
+     */
+    override fun isSameArtifactAdvice(artifactAdvice: ArtifactAdvice): Boolean {
+        return artifactAdvice is ActiveExceptionAdvice && artifactAdvice.artifact == artifact &&
+                artifactAdvice.stackTrace.exceptionType == stackTrace.exceptionType &&
+                artifactAdvice.stackTrace.elements == stackTrace.elements &&
+                artifactAdvice.stackTrace.causedBy == stackTrace.causedBy
+    }
+
+    override fun updateArtifactAdvice(artifactAdvice: ArtifactAdvice) {
+        updateStackTrace((artifactAdvice as ActiveExceptionAdvice).stackTrace)
+    }
 }

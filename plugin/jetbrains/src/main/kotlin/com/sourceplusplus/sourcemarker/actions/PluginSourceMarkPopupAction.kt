@@ -7,12 +7,11 @@ import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
-import com.sourceplusplus.marker.source.mark.api.key.SourceKey
-import com.sourceplusplus.monitor.skywalking.track.EndpointTracker
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
+import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_ID
+import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
 import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
-import com.sourceplusplus.sourcemarker.psi.EndpointNameDetector
-import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -28,12 +27,8 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
 
     companion object {
         private val log = LoggerFactory.getLogger(PluginSourceMarkPopupAction::class.java)
-        val SOURCE_PORTAL = SourceKey<SourcePortal>("SOURCE_PORTAL")
-        val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
-        val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
     }
 
-    private val endpointDetector = EndpointNameDetector()
     private var lastDisplayedInternalPortal: SourcePortal? = null
 
     override fun performPopupAction(sourceMark: SourceMark, editor: Editor) {
@@ -41,7 +36,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         if (sourceMark.getUserData(SOURCE_PORTAL) == null) {
             val sourcePortal = SourcePortal.getPortal(
                 //todo: appUuid/portalUuid
-                SourcePortal.register("null", "null", sourceMark.artifactQualifiedName, false)
+                SourcePortal.register("null", sourceMark.artifactQualifiedName, false)
             )
             sourceMark.putUserData(SOURCE_PORTAL, sourcePortal)
 
@@ -53,67 +48,41 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         }
         val sourcePortal = sourceMark.getUserData(SOURCE_PORTAL)!!
 
-        //todo: determine sourceportal context
         when (sourceMark) {
-            is ClassSourceMark -> GlobalScope.launch(vertx.dispatcher()) { performClassPopup(sourceMark) }
-            is MethodSourceMark -> GlobalScope.launch(vertx.dispatcher()) { performMethodPopup(sourceMark) }
+            is ClassSourceMark -> GlobalScope.launch(vertx.dispatcher()) {
+                performClassPopup(sourcePortal, sourceMark)
+            }
+            is MethodSourceMark -> GlobalScope.launch(vertx.dispatcher()) {
+                performMethodPopup(sourcePortal, sourceMark)
+            }
         }
 
-        //todo: use SourcePortalAPI to ensure correct view is showing (don't refresh if correct already viewing)
-        //todo: likely need to unregister old portal handlers
-        val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
-        if (sourcePortal != lastDisplayedInternalPortal) {
-            jcefComponent.getBrowser().cefBrowser.executeJavaScript(
-                """
-                    window.location.href = 'http://localhost:8080/?portal_uuid=${sourcePortal.portalUuid}';
-                """.trimIndent(),
-                "", 0
-            )
-        }
-
-        lastDisplayedInternalPortal = sourcePortal
         super.performPopupAction(sourceMark, editor)
     }
 
-    private suspend fun performClassPopup(sourceMark: ClassSourceMark) {
+    private suspend fun performClassPopup(sourcePortal: SourcePortal, sourceMark: ClassSourceMark) {
         //todo: get all endpoint keys for current file
         val endpointIds = sourceMark.sourceFileMarker.getSourceMarks()
             .filterIsInstance<MethodSourceMark>()
-            .filter { getOrFindEndpointId(it) != null }
+            .filter { it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null }
             .map { it.getUserData(ENDPOINT_ID)!! }
-        println(endpointIds)
+        println("Endpoint ids: $endpointIds")
 
         //todo: disable traces page, disable overview page
+        //todo: ability to show class popup directly above focus instead of above class
+        lastDisplayedInternalPortal = sourcePortal
     }
 
-    private suspend fun performMethodPopup(sourceMark: MethodSourceMark) {
-        val endpointId = getOrFindEndpointId(sourceMark)
-    }
+    private fun performMethodPopup(sourcePortal: SourcePortal, sourceMark: MethodSourceMark) {
+        val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
+        if (sourcePortal != lastDisplayedInternalPortal) {
+            val currentUrl = "/${sourcePortal.currentTab.name.toLowerCase()}" +
+                    "?portal_uuid=${sourcePortal.portalUuid}"
+            jcefComponent.getBrowser().cefBrowser.executeJavaScript(
+                "window.location.href = '$currentUrl';", currentUrl, 0
+            )
 
-    private suspend fun getOrFindEndpointId(sourceMark: MethodSourceMark): String? {
-        val cachedEndpointId = sourceMark.getUserData(ENDPOINT_ID)
-        if (cachedEndpointId != null) {
-            log.debug("Found cached endpoint id: $cachedEndpointId")
-            return cachedEndpointId
-        } else {
-            log.debug("Determining endpoint name")
-            val endpointName = endpointDetector.determineEndpointName(sourceMark).await().orElse(null)
-
-            if (endpointName != null) {
-                log.debug("Detected endpoint name: $endpointName")
-
-                log.debug("Determining endpoint id")
-                val endpoint = EndpointTracker.searchExactEndpoint(endpointName, vertx)
-                if (endpoint != null) {
-                    sourceMark.putUserData(ENDPOINT_NAME, endpoint.name)
-                    sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
-                    log.debug("Detected endpoint id: ${endpoint.id}")
-                    return endpoint.id
-                } else {
-                    log.debug("Could not find endpoint id for: $endpointName")
-                }
-            }
+            lastDisplayedInternalPortal = sourcePortal
         }
-        return null
     }
 }

@@ -5,7 +5,7 @@ import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 
 /**
- * todo: description.
+ * Used to associate custom data to PSI elements.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
