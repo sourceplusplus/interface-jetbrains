@@ -75,17 +75,17 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         val spanInfoRequest = messageHandler.body() as JsonObject
         log.debug("Clicked display span info: {}", spanInfoRequest)
 
-        val portalUuid = spanInfoRequest.getString("portal_uuid")
+        val portalUuid = spanInfoRequest.getString("portalUuid")
         val portal = SourcePortal.getPortal(portalUuid)!!
         val representation = portal.tracesView
         representation.viewType = TracesView.Companion.ViewType.SPAN_INFO
-        representation.traceId = spanInfoRequest.getString("trace_id")
-        representation.spanId = spanInfoRequest.getInteger("span_id")
+        representation.traceId = spanInfoRequest.getString("traceId")
+        representation.spanId = spanInfoRequest.getInteger("spanId")
         updateUI(portal)
     }
 
     private fun clickedDisplayTraces(it: Message<JsonObject>) {
-        val portal = SourcePortal.getPortal((it.body() as JsonObject).getString("portal_uuid"))!!
+        val portal = SourcePortal.getPortal((it.body() as JsonObject).getString("portalUuid"))!!
         val representation = portal.tracesView
         representation.viewType = TracesView.Companion.ViewType.TRACES
 
@@ -100,7 +100,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                 //                    val rootArtifactQualifiedName = stack.getJsonObject(0).getString("root_artifact_qualified_name")
                 //                    vertx.eventBus().send(
                 //                        NAVIGATE_TO_ARTIFACT.address,
-                //                        JsonObject().put("portal_uuid", portal.portalUuid)
+                //                        JsonObject().put("portalUuid", portal.portalUuid)
                 //                            .put("artifact_qualified_name", rootArtifactQualifiedName)
                 //                            .put("parent_stack_navigation", true)
                 //                    )
@@ -116,8 +116,8 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         val request = messageHandler.body() as JsonObject
         log.debug("Displaying trace stack: {}", request)
 
-        if (request.getString("trace_id") == null) {
-            val portal = SourcePortal.getPortal(request.getString("portal_uuid"))!!
+        if (request.getString("traceId") == null) {
+            val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
             portal.tracesView.viewType = TracesView.Companion.ViewType.TRACE_STACK
             updateUI(portal)
         } else {
@@ -126,10 +126,10 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                     it.cause().printStackTrace()
                     log.error("Failed to display trace stack", it.cause())
                 } else {
-                    val portal = SourcePortal.getPortal(request.getString("portal_uuid"))!!
+                    val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
                     portal.tracesView.viewType = TracesView.Companion.ViewType.TRACE_STACK
                     portal.tracesView.traceStack = it.result().body() as JsonArray
-                    portal.tracesView.traceId = request.getString("trace_id")
+                    portal.tracesView.traceId = request.getString("traceId")
                     updateUI(portal)
                 }
             }
@@ -139,14 +139,14 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
     private fun tracesTabOpened(it: Message<JsonObject>) {
         log.info("Traces tab opened")
         val message = JsonObject.mapFrom(it.body())
-        val portalUuid = message.getString("portal_uuid")
+        val portalUuid = message.getString("portalUuid")
         val portal = SourcePortal.getPortal(portalUuid)
         if (portal == null) {
             log.warn("Ignoring traces tab opened event. Unable to find portal: {}", portalUuid)
             return
         }
 
-        val orderType = message.getString("trace_order_type")
+        val orderType = message.getString("traceOrderType")
         if (orderType != null) {
             //user possibly changed current trace order type; todo: create event
             portal.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
@@ -204,9 +204,9 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
         for (i in 0 until traceStack.size()) {
             val span = traceStack.getJsonObject(i).getJsonObject("span")
-            if (span.getInteger("span_id") == spanId) {
-                val spanArtifactQualifiedName = span.getString("artifact_qualified_name")
-                if (portal.external && span.getBoolean("has_child_stack")) {
+            if (span.getInteger("spanId") == spanId) {
+                val spanArtifactQualifiedName = span.getString("artifactQualifiedName")
+                if (portal.external && span.getBoolean("hasChildStack")) {
 //                    val spanStackQuery = TraceSpanStackQuery.builder()
 //                        .oneLevelDeep(true).followExit(true)
 //                        .segmentId(span.getString("segment_id"))
@@ -278,7 +278,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 //                                    )
 //                                    vertx.eventBus().send(
 //                                        NAVIGATE_TO_ARTIFACT.address,
-//                                        JsonObject().put("portal_uuid", spanPortal.get().portalUuid)
+//                                        JsonObject().put("portalUuid", spanPortal.get().portalUuid)
 //                                            .put("artifact_qualified_name", spanArtifactQualifiedName)
 //                                    )
 //                                }
@@ -370,10 +370,10 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
     private fun getTraceStack(messageHandler: Message<JsonObject>) {
         val request = messageHandler.body() as JsonObject
-        val portalUuid = request.getString("portal_uuid")
-        val appUuid = request.getString("app_uuid")
-        val artifactQualifiedName = request.getString("artifact_qualified_name")
-        val globalTraceId = request.getString("trace_id")
+        val portalUuid = request.getString("portalUuid")
+        val appUuid = request.getString("appUuid")
+        val artifactQualifiedName = request.getString("artifactQualifiedName")
+        val globalTraceId = request.getString("traceId")
         log.trace(
             "Getting trace spans. Artifact qualified name: {} - Trace id: {}",
             getShortQualifiedFunctionName(artifactQualifiedName),

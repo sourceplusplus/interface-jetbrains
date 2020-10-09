@@ -3,7 +3,7 @@ var eb = new EventBus('http://localhost:8888/eventbus');
 //todo: it is likely that a disconnect signifies the portal is gone
 //todo: so on reconnect there will need to be another portal uuid registered
 
-var getPortalUuid = findGetParameter("portal_uuid");
+var getPortalUuid = findGetParameter("portalUuid");
 var portalUuid = (getPortalUuid) ? getPortalUuid : null;
 var getRequiresRegistration = findGetParameter("requires_registration");
 var requiresRegistration = (getRequiresRegistration) ? getRequiresRegistration : false;
@@ -18,7 +18,7 @@ var darkMode = (getDarkMode) ? (getDarkMode === 'true') : false;
 var getHideOverviewTab = findGetParameter("hide_overview_tab");
 var hideOverviewTab = (getHideOverviewTab) ? (getHideOverviewTab === 'true') : false;
 
-var mainGetQuery = '?portal_uuid=' + portalUuid;
+var mainGetQuery = '?portalUuid=' + portalUuid;
 var mainGetQueryWithoutPortalUuid = "";
 if (traceOrderType) {
     mainGetQueryWithoutPortalUuid += '&order_type=' + traceOrderType;
@@ -48,9 +48,9 @@ function findGetParameter(parameterName) {
 
 function clickedViewAsExternalPortal() {
     eb.send('ClickedViewAsExternalPortal', {
-        'portal_uuid': portalUuid
+        'portalUuid': portalUuid
     }, function (error, message) {
-        window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
+        window.open(window.location.href.split('?')[0] + '?portalUuid=' + message.body.portalUuid
             + '&external=true' + mainGetQueryWithoutPortalUuid, '_blank');
     });
 }
@@ -59,16 +59,16 @@ function portalConnected() {
     console.log("Portal successfully connected. Portal UUID: " + portalUuid);
     if (requiresRegistration) {
         eb.send("REGISTER_PORTAL", {
-            'app_uuid': findGetParameter("app_uuid"),
-            'artifact_qualified_name': findGetParameter("artifact_qualified_name")
+            'appUuid': findGetParameter("appUuid"),
+            'artifactQualifiedName': findGetParameter("artifactQualifiedName")
         }, function (error, message) {
-            window.open(window.location.href.split('?')[0] + '?portal_uuid=' + message.body.portal_uuid
+            window.open(window.location.href.split('?')[0] + '?portalUuid=' + message.body.portalUuid
                 + mainGetQueryWithoutPortalUuid, '_self');
         });
     } else if (externalPortal) {
         let keepAliveInterval = window.setInterval(function () {
             portalLog("Sent portal keep alive request. Portal UUID: " + portalUuid);
-            eb.send('KeepAlivePortal', {'portal_uuid': portalUuid}, function (error, message) {
+            eb.send('KeepAlivePortal', {'portalUuid': portalUuid}, function (error, message) {
                 if (error) {
                     clearInterval(keepAliveInterval);
                 }

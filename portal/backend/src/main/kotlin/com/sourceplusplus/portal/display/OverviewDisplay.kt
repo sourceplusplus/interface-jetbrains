@@ -62,7 +62,7 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
         //refresh with stats from cache (if avail)
         vertx.eventBus().consumer<JsonObject>(OverviewTabOpened) {
             log.info("Overview tab opened")
-            val portalUuid = it.body().getString("portal_uuid")
+            val portalUuid = it.body().getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
             portal.currentTab = thisTab
             SourcePortal.ensurePortalActive(portal)
@@ -70,7 +70,7 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
         }
         vertx.eventBus().consumer<ArtifactMetricResult>(ArtifactMetricUpdated) {
             val artifactMetricResult = it.body()
-            SourcePortal.getPortals(artifactMetricResult.appUuid!!, artifactMetricResult.artifactQualifiedName)
+            SourcePortal.getPortals(artifactMetricResult.appUuid, artifactMetricResult.artifactQualifiedName)
                 .forEach { portal ->
                     portal.overviewView.cacheMetricResult(artifactMetricResult)
                     updateUI(portal)
@@ -79,9 +79,9 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
 
         vertx.eventBus().consumer<JsonObject>(SetMetricTimeFrame) {
             val request = JsonObject.mapFrom(it.body())
-            val portal = SourcePortal.getPortal(request.getString("portal_uuid"))!!
+            val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
             val view = portal.overviewView
-            view.timeFrame = QueryTimeFrame.valueOf(request.getString("metric_time_frame").toUpperCase())
+            view.timeFrame = QueryTimeFrame.valueOf(request.getString("metricTimeFrame").toUpperCase())
             log.info("Overview time frame set to: " + view.timeFrame)
             updateUI(portal)
 
@@ -89,7 +89,7 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
         }
         vertx.eventBus().consumer<JsonObject>(SetActiveChartMetric) {
             val request = JsonObject.mapFrom(it.body())
-            val portal = SourcePortal.getPortal(request.getString("portal_uuid"))!!
+            val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
             portal.overviewView.activeChartMetric = valueOf(request.getString("metric_type"))
             updateUI(portal)
 
