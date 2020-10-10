@@ -36,6 +36,7 @@ import kotlinx.serialization.json.decodeFromDynamic
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLTableRowElement
+import org.w3c.dom.events.Event
 import org.w3c.dom.get
 import kotlin.js.json
 import kotlin.math.round
@@ -64,13 +65,14 @@ class TracesPage(
                 displayTraces(traceResult)
             }
             eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { error: String, message: dynamic ->
-                js("displayInnerTraces(message.body)")
+                val body: dynamic = message.body
+                val traceStack: Array<TraceSpanInfo> = Json.decodeFromDynamic(body)
+                displayTraceStack(*traceStack)
             }
             eb.registerHandler(DisplayTraceStack(portalUuid)) { error: String, message: dynamic ->
                 val body: dynamic = message.body
                 val traceStack: Array<TraceSpanInfo> = Json.decodeFromDynamic(body)
                 displayTraceStack(*traceStack)
-
             }
             eb.registerHandler(DisplaySpanInfo(portalUuid)) { error: String, message: dynamic ->
                 val body: dynamic = message.body
@@ -97,7 +99,11 @@ class TracesPage(
             }
             tracesContent {
                 navBar {
-                    tracesHeader(TRACE_ID, TIME_OCCURRED)
+                    tracesHeader(
+                        TRACE_ID, TIME_OCCURRED,
+                        onClickBackToTraces = clickBackToTraces,
+                        onClickBackToTraceStack = clickBackToTraceStack
+                    )
                     rightAlign {
                         externalPortalButton()
                     }
@@ -122,23 +128,6 @@ class TracesPage(
             SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
             FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
         }
-
-        jq("#span_info_panel").css("display", "none")
-        jq("#latest_traces_header").addClass("active_sub_tab")
-            .removeClass("inactive_tab")
-        jq("#top_trace_table").css("display", "")
-        jq("#trace_stack_table").css("visibility", "hidden")
-        jq("#traces_span").css("display", "unset")
-        jq("#trace_stack_span").css("display", "none")
-        jq("#segment_id_span").css("display", "none")
-
-        jq("#trace_stack_header").addClass("inactive_tab")
-            .removeClass("active_sub_tab")
-            .css("visibility", "hidden")
-
-        jq("#span_info_header").addClass("inactive_tab")
-            .removeClass("active_sub_tab")
-            .css("visibility", "hidden")
 
         jq("input[type='text']").on("click") {
             jq(this).select()
@@ -179,7 +168,7 @@ class TracesPage(
         )
     }
 
-    fun clickedBackToTraces() {
+    private val clickBackToTraces: (Event) -> Unit = {
         eb.send(
             ClickedDisplayTraces,
             json(
@@ -188,7 +177,7 @@ class TracesPage(
         )
     }
 
-    fun clickedBackToTraceStack() {
+    private val clickBackToTraceStack: (Event) -> Unit = {
         eb.send(
             ClickedDisplayTraceStack,
             json(
@@ -212,6 +201,25 @@ class TracesPage(
             SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
             FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
         }
+
+        jq("#span_info_panel").css("display", "none")
+        jq("#latest_traces_header").addClass("active_sub_tab")
+            .removeClass("inactive_tab")
+        jq("#top_trace_table").css("display", "")
+        jq("#trace_stack_table").css("visibility", "hidden")
+        jq("#traces_span").css("display", "unset")
+        jq("#trace_stack_span").css("display", "none")
+        jq("#segment_id_span").css("display", "none")
+
+        jq("#trace_stack_header").addClass("inactive_tab")
+            .removeClass("active_sub_tab")
+            .css("visibility", "hidden")
+
+        jq("#span_info_header").addClass("inactive_tab")
+            .removeClass("active_sub_tab")
+            .css("visibility", "hidden")
+
+        jq("#trace_table").empty()
 
         for (i in traceResult.traces.indices) {
             val trace = traceResult.traces[i]
@@ -323,14 +331,19 @@ class TracesPage(
 
         jq("#stack_table tr").remove()
 
-        when (traceOrderType) {
-            LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
-            SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
-            FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
+        if (traceStack[0].innerLevel > 0) {
+            jq("#latest_traces_header_text").text("Parent Stack")
+        } else {
+            when (traceOrderType) {
+                LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
+                SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
+                FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
+            }
         }
 
         jq("#trace_id_field").`val`(traceStack[0].span.traceId)
         jq("#time_occurred_field").`val`(moment(traceStack[0].span.startTime.toString(), "x").format())
+        jq("#traces_span").css("display", "none")
 
         for (i in traceStack.indices) {
             val spanInfo = traceStack[i]
