@@ -5,6 +5,7 @@ import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.events.Event
 
 fun TagConsumer<HTMLElement>.navBar(attached: Boolean = true, block: FlowContent.() -> Unit) {
     div("ui menu top ${if (attached) "attached" else ""} background_color") {
@@ -41,10 +42,10 @@ fun TagConsumer<HTMLElement>.calendar() {
     }
 }
 
-fun TagConsumer<HTMLElement>.tracesHeader(vararg traceStackHeaderTypes: TraceStackHeaderType = arrayOf()) {
+fun TagConsumer<HTMLElement>.tracesHeader(vararg traceStackHeaderTypes: TraceStackHeaderType = arrayOf(), onClickBackToTraces: (Event) -> Unit, onClickBackToTraceStack: (Event) -> Unit) {
     a(classes = "marginlefting ui item dropdown active_sub_tab") {
         id = "latest_traces_header"
-        onClick = "clickedBackToTraces()"
+        onClickFunction = onClickBackToTraces
         span {
             id = "latest_traces_header_text"
             +"Latest Traces"
@@ -52,7 +53,7 @@ fun TagConsumer<HTMLElement>.tracesHeader(vararg traceStackHeaderTypes: TraceSta
     }
     a(classes = "ui item dropdown visibility_hidden") {
         id = "trace_stack_header"
-        onClick = "clickedBackToTraceStack()"
+        onClickFunction = onClickBackToTraceStack
         span {
             id = "trace_stack_header_text"
             +"Trace Stack"
