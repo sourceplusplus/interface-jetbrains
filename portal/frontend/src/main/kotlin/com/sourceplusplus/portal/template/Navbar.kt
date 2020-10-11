@@ -42,7 +42,11 @@ fun TagConsumer<HTMLElement>.calendar() {
     }
 }
 
-fun TagConsumer<HTMLElement>.tracesHeader(vararg traceStackHeaderTypes: TraceStackHeaderType = arrayOf(), onClickBackToTraces: (Event) -> Unit, onClickBackToTraceStack: (Event) -> Unit) {
+fun TagConsumer<HTMLElement>.tracesHeader(
+    vararg traceStackHeaderTypes: TraceStackHeaderType = arrayOf(),
+    onClickBackToTraces: (Event) -> Unit,
+    onClickBackToTraceStack: (Event) -> Unit
+) {
     a(classes = "marginlefting ui item dropdown active_sub_tab") {
         id = "latest_traces_header"
         onClickFunction = onClickBackToTraces

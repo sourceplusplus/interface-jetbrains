@@ -14,7 +14,7 @@ data class TraceSpanInfo(
     val timeTook: String,
     val appUuid: String,
     val rootArtifactQualifiedName: String,
-    val operationName: String? = null,
+    val operationName: String,
     val totalTracePercent: Double,
     val innerLevel: Int = 0
 )

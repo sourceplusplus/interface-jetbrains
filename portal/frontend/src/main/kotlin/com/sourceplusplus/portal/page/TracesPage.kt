@@ -2,22 +2,19 @@ package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.extensions.eb
 import com.sourceplusplus.portal.extensions.jq
-import com.sourceplusplus.portal.extensions.moment
+import com.sourceplusplus.portal.extensions.toFixed
+import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplayTraces
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.PortalLogger
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.TracesTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraces
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
-import com.sourceplusplus.protocol.artifact.trace.TraceResult
-import com.sourceplusplus.protocol.artifact.trace.TraceSpan
-import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType.START_TIME
 import com.sourceplusplus.protocol.artifact.trace.TraceStackHeaderType.TIME_OCCURRED
@@ -30,16 +27,13 @@ import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.dom.create
 import kotlinx.html.js.onClickFunction
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
+import moment
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.HTMLTableRowElement
-import org.w3c.dom.events.Event
 import org.w3c.dom.get
 import kotlin.js.json
-import kotlin.math.round
 
 /**
  * todo: description.
@@ -47,40 +41,34 @@ import kotlin.math.round
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@ExperimentalSerializationApi
 class TracesPage(
     private val portalUuid: String,
-    private val externalPortal: Boolean,
-    private val hideOverviewTab: Boolean,
-    private val traceOrderType: TraceOrderType
+    private val externalPortal: Boolean = false,
+    private val hideOverviewTab: Boolean = false,
+    private val traceOrderType: TraceOrderType = LATEST_TRACES,
+    private var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
 ) {
+
     init {
         console.log("Traces tab started")
         setupUI()
+
+        @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
             js("portalConnected()")
-            eb.registerHandler(DisplayTraces(portalUuid)) { error: String, message: dynamic ->
-                val body: dynamic = message.body
-                val traceResult: TraceResult = Json.decodeFromDynamic(body)
-                displayTraces(traceResult)
+            eb.registerHandler(DisplayTraces(portalUuid)) { _: String, message: dynamic ->
+                displayTraces(Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { error: String, message: dynamic ->
-                val body: dynamic = message.body
-                val traceStack: Array<TraceSpanInfo> = Json.decodeFromDynamic(body)
-                displayTraceStack(*traceStack)
+            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { _: String, message: dynamic ->
+                displayTraceStack(*Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplayTraceStack(portalUuid)) { error: String, message: dynamic ->
-                val body: dynamic = message.body
-                val traceStack: Array<TraceSpanInfo> = Json.decodeFromDynamic(body)
-                displayTraceStack(*traceStack)
+            eb.registerHandler(DisplayTraceStack(portalUuid)) { _: String, message: dynamic ->
+                displayTraceStack(*Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplaySpanInfo(portalUuid)) { error: String, message: dynamic ->
-                val body: dynamic = message.body
-                val traceSpan: TraceSpan = Json.decodeFromDynamic(body)
-                displaySpanInfo(traceSpan)
+            eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: String, message: dynamic ->
+                displaySpanInfo(Json.decodeFromDynamic(message.body))
             }
-
-            eb.publish(TracesTabOpened, "{'portalUuid': '$portalUuid', 'traceOrderType': '$traceOrderType'}")
+            eb.publish(TracesTabOpened, json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType))
         }
     }
 
@@ -101,8 +89,8 @@ class TracesPage(
                 navBar {
                     tracesHeader(
                         TRACE_ID, TIME_OCCURRED,
-                        onClickBackToTraces = clickBackToTraces,
-                        onClickBackToTraceStack = clickBackToTraceStack
+                        onClickBackToTraces = { clickedBackToTraces() },
+                        onClickBackToTraceStack = { clickedBackToTraceStack() }
                     )
                     rightAlign {
                         externalPortalButton()
@@ -117,16 +105,256 @@ class TracesPage(
         }
     }
 
+    private fun displayTraces(traceResult: TraceResult) {
+        traceDisplayType = TraceDisplayType.TRACES
+        resetUI()
+
+        for (i in traceResult.traces.indices) {
+            val trace = traceResult.traces[i]
+            val globalTraceId = trace.traceIds[0]
+            val htmlTraceId = globalTraceId.split(".").joinToString("")
+            var operationName = trace.operationNames[0]
+            if (operationName == traceResult.artifactQualifiedName) {
+                operationName = traceResult.artifactSimpleName!!
+            }
+
+            val rowHtml = document.create.tr {
+                id = "trace-${htmlTraceId}"
+                td {
+                    onClickFunction = {
+                        clickedDisplayTraceStack(
+                            traceResult.appUuid,
+                            traceResult.artifactQualifiedName,
+                            globalTraceId
+                        )
+                    }
+                    style = "border-top: 0 !important; padding-left: 20px"
+                    i {
+                        style = "font-size:1.5em;margin-right:5px"
+                        classes = setOf("far", "fa-plus-square")
+                    }
+                    span {
+                        style = "vertical-align:top"
+                        +operationName.replace("<", "&lt;").replace(">", "&gt;")
+                    }
+                }
+
+                val occurred = moment(trace.start.toString(), "x")
+                val now = moment(moment.now())
+                val timeOccurredDuration = moment.duration(now.diff(occurred))
+                td {
+                    classes = setOf("trace_time", "collapsing")
+                    id = "trace_time_$htmlTraceId"
+                    attributes["data-value"] = trace.start.toString()
+                    style = "text-align: center"
+                    +timeOccurredDuration.toPrettyDuration(1)
+                }
+                td {
+                    classes += "collapsing"
+                    +trace.prettyDuration!!
+                }
+                td {
+                    classes += "collapsing"
+                    style = "padding: 0; text-align: center; font-size: 20px"
+                    if (trace.error!!) {
+                        i {
+                            classes = setOf("exclamation", "triangle", "red", "icon")
+                        }
+                    } else {
+                        style.plus("color: #808083")
+                        i {
+                            classes = setOf("check", "icon")
+                        }
+                    }
+                }
+            }
+
+            val traceTable: dynamic = document.getElementById("trace_table")
+            val tableRow = traceTable.rows[i]
+            if (tableRow != null) {
+                //update existing trace
+                if (tableRow.id != "trace-$htmlTraceId") {
+                    traceTable.rows[i].outerHTML = rowHtml
+                }
+            } else {
+                //add new trace
+                jq("#trace_table").append(rowHtml)
+            }
+        }
+
+        //force AOT update
+        updateOccurredLabels()
+    }
+
+    private fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
+        traceDisplayType = TraceDisplayType.TRACE_STACK
+        resetUI()
+
+        if (traceStack[0].innerLevel > 0) {
+            jq("#latest_traces_header_text").text("Parent Stack")
+        } else {
+            when (traceOrderType) {
+                LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
+                SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
+                FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
+            }
+        }
+
+        jq("#trace_id_field").`val`(traceStack[0].span.traceId)
+        jq("#time_occurred_field").`val`(moment(traceStack[0].span.startTime.toString(), "x").format())
+
+        for (i in traceStack.indices) {
+            val spanInfo = traceStack[i]
+            val span = spanInfo.span
+
+            val rowHtml = document.create.tr {
+                td {
+                    onClickFunction = {
+                        clickedDisplaySpanInfo(
+                            spanInfo.appUuid,
+                            spanInfo.rootArtifactQualifiedName,
+                            span.traceId,
+                            span.segmentId,
+                            span.spanId
+                        )
+                    }
+                    style = "border-top: 0 !important; padding-left: 20px"
+                    if (!COMPONENT_MAPPINGS[span.component].isNullOrEmpty() || span.component != "Unknown") {
+                        var component = COMPONENT_MAPPINGS[span.component]
+                        if (component == null) {
+                            component = span.component
+                        }
+                        img {
+                            style = "margin-right:5px;vertical-align:bottom"
+                            width = "18px"
+                            height = "18px"
+                            src = "../themes/default/assets/components/${component?.toUpperCase()}.png"
+                        }
+                        +spanInfo.operationName.replace("<", "&lt;").replace(">", "&gt;")
+                    } else if (span.hasChildStack!! || (!externalPortal && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
+                        i {
+                            style = "font-size:1.5em;margin-right:5px;vertical-align:bottom"
+                            classes = setOf("far", "fa-plus-square")
+                        }
+                        +spanInfo.operationName.replace("<", "&lt;").replace(">", "&gt;")
+                    } else {
+                        i {
+                            style = "font-size:1.5em;margin-right:5px"
+                            classes = setOf("far", "fa-info-square")
+                        }
+                        span {
+                            style = "vertical-align:top"
+                            +spanInfo.operationName.replace("<", "&lt;").replace(">", "&gt;")
+                        }
+                    }
+                }
+                td {
+                    classes += "collapsing"
+                    +spanInfo.timeTook
+                }
+                td {
+                    div {
+                        classes = setOf("ui", "red", "progress", "active")
+                        id = "trace_bar_${i}"
+                        attributes["data-percent"] = spanInfo.totalTracePercent.toString()
+                        style = "margin: 0"
+                        div {
+                            classes += "bar"
+                            style = "transition-duration: 300ms; display: block; width: ${
+                                spanInfo.totalTracePercent.toFixed(4) //todo: toFixed needed?
+                            }%"
+                        }
+                    }
+                }
+                td {
+                    classes += "collapsing"
+                    style = "padding: 0; text-align: center; font-size: 20px"
+                    when {
+                        span.error!! -> {
+                            i {
+                                classes = setOf("skull", "crossbones", "red", "icon")
+                            }
+                        }
+                        span.childError && i > 0 -> {
+                            i {
+                                classes = setOf("exclamation", "triangle", "red", "icon")
+                            }
+                        }
+                        else -> {
+                            style.plus("color: #808083")
+                            i {
+                                classes = setOf("check", "icon")
+                            }
+                        }
+                    }
+                }
+            }
+
+            jq("#stack_table").append(rowHtml)
+        }
+    }
+
+    private fun displaySpanInfo(spanInfo: TraceSpan) {
+        traceDisplayType = TraceDisplayType.SPAN_INFO
+        resetUI()
+
+        jq("#span_info_start_trace_time").attr("data-value", spanInfo.startTime)
+        jq("#span_info_start_time").text(moment(spanInfo.startTime.toString(), "x").format("h:mm:ss a"))
+        jq("#span_info_end_trace_time").attr("data-value", spanInfo.endTime)
+        jq("#span_info_end_time").text(moment(spanInfo.endTime.toString(), "x").format("h:mm:ss a"))
+        jq("#segment_id_field").valueOf(spanInfo.segmentId)
+
+        var gotTags = false
+        spanInfo.tags.forEach {
+            gotTags = true
+            val value = spanInfo.tags[it.key]
+            if (value != "") {
+                val rowHtml = document.create.tr {
+                    td {
+                        +it.key
+                    }
+                    td {
+                        +it.value
+                    }
+                }
+                jq("#tag_table").append(rowHtml)
+            }
+        }
+        if (gotTags) {
+            jq("#span_tag_div").removeClass("displaynone")
+        } else {
+            jq("#span_tag_div").addClass("displaynone")
+        }
+
+        jq("#log_table").empty()
+        var gotLogs = false
+        for (log in spanInfo.logs) {
+            gotLogs = true
+            val rowHtml = document.create.tr {
+                td {
+                    style = "white-space: nowrap"
+                    b {
+                        +moment(log.time, "x").format()
+                    }
+                    br
+                    +log.data
+                }
+            }
+            jq("#log_table").append(rowHtml)
+        }
+        if (gotLogs) {
+            jq("#span_log_div").removeClass("displaynone")
+        } else {
+            jq("#span_log_div").addClass("displaynone")
+        }
+    }
+
     private fun setupUI() {
+        resetUI()
+
         if (hideOverviewTab) {
             jq("#overview_link").css("display", "none")
             jq("#sidebar_overview_link").css("display", "none")
-        }
-
-        when (traceOrderType) {
-            LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
-            SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
-            FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
         }
 
         jq("input[type='text']").on("click") {
@@ -134,6 +362,113 @@ class TracesPage(
         }
 
         window.setInterval({ updateOccurredLabels() }, 2000)
+    }
+
+    //todo: clean up
+    private fun resetUI() {
+        when (traceDisplayType) {
+            TraceDisplayType.TRACES -> {
+                when (traceOrderType) {
+                    LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
+                    SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
+                    FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
+                }
+                jq("#span_info_panel").css("display", "none")
+                jq("#latest_traces_header").addClass("active_sub_tab")
+                    .removeClass("inactive_tab")
+                jq("#top_trace_table").css("display", "")
+                jq("#trace_stack_table").css("visibility", "hidden")
+                jq("#traces_span").css("display", "unset")
+                jq("#trace_stack_span").css("display", "none")
+                jq("#segment_id_span").css("display", "none")
+
+                jq("#trace_stack_header").addClass("inactive_tab")
+                    .removeClass("active_sub_tab")
+                    .css("visibility", "hidden")
+
+                jq("#span_info_header").addClass("inactive_tab")
+                    .removeClass("active_sub_tab")
+                    .css("visibility", "hidden")
+
+                jq("#trace_table").empty()
+            }
+            TraceDisplayType.TRACE_STACK -> {
+                jq("#latest_traces_header").removeClass("active")
+                jq("#span_info_panel").css("display", "none")
+                jq("#top_trace_table").css("display", "none")
+                jq("#trace_stack_table").css("display", "")
+                    .css("visibility", "visible")
+                jq("#segment_id_span").css("display", "none")
+                jq("#trace_stack_span").css("display", "unset")
+
+                jq("#trace_stack_header").removeClass("inactive_tab")
+                    .addClass("active_sub_tab")
+                    .css("visibility", "visible")
+
+                jq("#span_info_header").removeClass("active")
+                    .css("visibility", "hidden")
+
+                jq("#top_trace_table").css("display", "none")
+                jq("#trace_stack_table").css("visibility", "visible")
+                jq("#traces_span").css("display", "none")
+
+                jq("#latest_traces_header").removeClass("active_sub_tab")
+                    .addClass("inactive_tab")
+
+                jq("#trace_stack_header").addClass("active_sub_tab")
+                    .removeClass("inactive_tab")
+                    .css("visibility", "visible")
+
+                jq("#span_info_header").removeClass("active_sub_tab")
+                    .css("visibility", "hidden")
+
+                jq("#stack_table tr").remove()
+
+
+                jq("#traces_span").css("display", "none")
+            }
+            TraceDisplayType.SPAN_INFO -> {
+                jq("#top_trace_table").css("display", "none")
+                jq("#trace_stack_table").css("visibility", "visible")
+                jq("#segment_id_span").css("display", "unset")
+                jq("#trace_stack_span").css("display", "none")
+
+                jq("#trace_stack_header").css("visibility", "visible")
+                    .removeClass("active_sub_tab")
+                    .addClass("inactive_tab")
+                jq("#latest_traces_header").removeClass("active_sub_tab")
+                    .addClass("inactive_tab")
+
+                jq("#span_info_header").addClass("active_sub_tab")
+                    .removeClass("inactive_tab")
+                    .css("visibility", "visible")
+                jq("#trace_stack_table").css("display", "none")
+                    .css("visibility", "hidden")
+                jq("#span_info_panel").css("display", "")
+                    .css("visibility", "visible")
+
+                jq("#tag_table tr").remove()
+            }
+        }
+    }
+
+    private fun updateOccurredLabels() {
+        jq(".trace_time").each(fun(_: Int, traceTime: HTMLElement) {
+            if (!traceTime.dataset["value"].isNullOrEmpty()) {
+                val occurred = moment(traceTime.dataset["value"]!!, "x")
+                val now = moment(moment.now())
+                val timeOccurredDuration = moment.duration(now.diff(occurred))
+                traceTime.innerText = timeOccurredDuration.toPrettyDuration(1)
+            }
+        })
+    }
+
+    private fun clickedBackToTraces() {
+        eb.send(ClickedDisplayTraces, json("portalUuid" to portalUuid))
+    }
+
+    private fun clickedBackToTraceStack() {
+        eb.send(ClickedDisplayTraceStack, json("portalUuid" to portalUuid))
     }
 
     private fun clickedDisplayTraceStack(appUuid: String, artifactQualifiedName: String, globalTraceId: String) {
@@ -166,417 +501,6 @@ class TracesPage(
                 "spanId" to spanId
             )
         )
-    }
-
-    private val clickBackToTraces: (Event) -> Unit = {
-        eb.send(
-            ClickedDisplayTraces,
-            json(
-                "portalUuid" to portalUuid
-            )
-        )
-    }
-
-    private val clickBackToTraceStack: (Event) -> Unit = {
-        eb.send(
-            ClickedDisplayTraceStack,
-            json(
-                "portalUuid" to portalUuid
-            )
-        )
-    }
-
-    private fun displayTraces(traceResult: TraceResult) {
-        console.log(
-            """>>>>>>>>>> Displaying traces - Artifact: ${traceResult.artifactSimpleName} 
-            - From: ${moment(traceResult.start.toString(), "x").format() as String} - To: ${
-                moment(traceResult.stop.toString(), "x").format() as String
-            } 
-            - Order type: ${traceResult.orderType} - Amount: ${traceResult.traces.size}
-            """
-        )
-
-        when (traceOrderType) {
-            LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
-            SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
-            FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
-        }
-
-        jq("#span_info_panel").css("display", "none")
-        jq("#latest_traces_header").addClass("active_sub_tab")
-            .removeClass("inactive_tab")
-        jq("#top_trace_table").css("display", "")
-        jq("#trace_stack_table").css("visibility", "hidden")
-        jq("#traces_span").css("display", "unset")
-        jq("#trace_stack_span").css("display", "none")
-        jq("#segment_id_span").css("display", "none")
-
-        jq("#trace_stack_header").addClass("inactive_tab")
-            .removeClass("active_sub_tab")
-            .css("visibility", "hidden")
-
-        jq("#span_info_header").addClass("inactive_tab")
-            .removeClass("active_sub_tab")
-            .css("visibility", "hidden")
-
-        jq("#trace_table").empty()
-
-        for (i in traceResult.traces.indices) {
-            val trace = traceResult.traces[i]
-            val globalTraceId = trace.traceIds[0]
-            val htmlTraceId = globalTraceId.split(".").joinToString("")
-            var operationName = trace.operationNames[0]
-            if (operationName == traceResult.artifactQualifiedName) {
-                operationName = traceResult.artifactSimpleName!!
-            }
-
-            val rowHtml: HTMLTableRowElement = document.create.tr {
-                id = "trace-${htmlTraceId}"
-                td {
-                    onClickFunction = {
-                        clickedDisplayTraceStack(
-                            traceResult.appUuid,
-                            traceResult.artifactQualifiedName,
-                            globalTraceId
-                        )
-                    }
-                    style = "border-top: 0 !important; padding-left: 20px"
-                    i {
-                        style = "font-size:1.5em;margin-right:5px"
-                        classes = setOf("far", "fa-plus-square")
-                    }
-                    span {
-                        style = "vertical-align:top"
-                        +operationName.replace("<", "&lt;").replace(">", "&gt;")
-                    }
-                }
-
-                val occurred = moment(trace.start.toString(), "x")
-                val now = moment()
-                val timeOccurredDuration = moment.duration(now.diff(occurred))
-                td {
-                    classes = setOf("trace_time", "collapsing")
-                    id = "trace_time_$htmlTraceId"
-                    attributes["data-value"] = trace.start.toString()
-                    style = "text-align: center"
-                    +getPrettyDuration(timeOccurredDuration, 1)
-                }
-                td {
-                    classes += "collapsing"
-                    +trace.prettyDuration!!
-                }
-                td {
-                    classes += "collapsing"
-                    style = "padding: 0; text-align: center; font-size: 20px"
-                    if (trace.error!!) {
-                        i {
-                            classes = setOf("exclamation", "triangle", "red", "icon")
-                        }
-                    } else {
-                        style.plus("color: #808083")
-                        i {
-                            classes = setOf("check", "icon")
-                        }
-                    }
-                }
-            } as HTMLTableRowElement
-            console.log(">>>>>>>>>> rowHtml = $rowHtml")
-
-            val traceTable: dynamic = document.getElementById("trace_table")
-            val tableRow = traceTable.rows[i]
-            if (tableRow != null) {
-                if (tableRow.id != "trace-$htmlTraceId") {
-                    traceTable.rows[i].outerHTML = rowHtml
-                }
-            } else {
-                jq("#trace_table").append(rowHtml)
-            }
-        }
-
-        updateOccurredLabels()
-    }
-
-    private fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
-        portalLog(JSON.parse(JSON.stringify(traceStack)))
-
-        //todo: move all this stuff to setupUI()
-        jq("#latest_traces_header").removeClass("active")
-        jq("#span_info_panel").css("display", "none")
-        jq("#top_trace_table").css("display", "none")
-        jq("#trace_stack_table").css("display", "")
-            .css("visibility", "visible")
-        jq("#segment_id_span").css("display", "none")
-        jq("#trace_stack_span").css("display", "unset")
-
-        jq("#trace_stack_header").removeClass("inactive_tab")
-            .addClass("active_sub_tab")
-            .css("visibility", "visible")
-
-        jq("#span_info_header").removeClass("active")
-            .css("visibility", "hidden")
-
-        jq("#top_trace_table").css("display", "none")
-        jq("#trace_stack_table").css("visibility", "visible")
-        jq("#traces_span").css("display", "none")
-
-        jq("#latest_traces_header").removeClass("active_sub_tab")
-            .addClass("inactive_tab")
-
-        jq("#trace_stack_header").addClass("active_sub_tab")
-            .removeClass("inactive_tab")
-            .css("visibility", "visible")
-
-        jq("#span_info_header").removeClass("active_sub_tab")
-            .css("visibility", "hidden")
-
-        jq("#stack_table tr").remove()
-
-        if (traceStack[0].innerLevel > 0) {
-            jq("#latest_traces_header_text").text("Parent Stack")
-        } else {
-            when (traceOrderType) {
-                LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
-                SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
-                FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
-            }
-        }
-
-        jq("#trace_id_field").`val`(traceStack[0].span.traceId)
-        jq("#time_occurred_field").`val`(moment(traceStack[0].span.startTime.toString(), "x").format())
-        jq("#traces_span").css("display", "none")
-
-        for (i in traceStack.indices) {
-            val spanInfo = traceStack[i]
-            val span = spanInfo.span
-
-            val rowHtml: HTMLTableRowElement = document.create.tr {
-                td {
-                    onClickFunction = {
-                        clickedDisplaySpanInfo(
-                            spanInfo.appUuid,
-                            spanInfo.rootArtifactQualifiedName,
-                            span.traceId!!,
-                            span.segmentId,
-                            span.spanId!!
-                        )
-                    }
-                    style = "border-top: 0 !important; padding-left: 20px"
-                    if (!COMPONENT_MAPPINGS[span.component].isNullOrEmpty() || span.component != "Unknown") {
-                        var component = COMPONENT_MAPPINGS[span.component]
-                        if (component == null) {
-                            component = span.component
-                        }
-                        img {
-                            style = "margin-right:5px;vertical-align:bottom"
-                            width = "18px"
-                            height = "18px"
-                            src = "../themes/default/assets/components/${component?.toUpperCase()}.png"
-                        }
-                        +spanInfo.operationName!!.replace("<", "&lt;").replace(">", "&gt;")
-                    } else if (span.hasChildStack!! || (!externalPortal && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
-                        i {
-                            style = "font-size:1.5em;margin-right:5px;vertical-align:bottom"
-                            classes = setOf("far", "fa-plus-square")
-                        }
-                        +spanInfo.operationName!!.replace("<", "&lt;").replace(">", "&gt;")
-                    } else {
-                        i {
-                            style = "font-size:1.5em;margin-right:5px"
-                            classes = setOf("far", "fa-info-square")
-                        }
-                        span {
-                            style = "vertical-align:top"
-                            +spanInfo.operationName!!.replace("<", "&lt;").replace(">", "&gt;")
-                        }
-                    }
-                }
-                td {
-                    classes += "collapsing"
-                    +spanInfo.timeTook
-                }
-                td {
-                    div {
-                        classes = setOf("ui", "red", "progress", "active")
-                        id = "trace_bar_${i}"
-                        attributes["data-percent"] = spanInfo.totalTracePercent.toString()
-                        style = "margin: 0"
-                        div {
-                            classes += "bar"
-                            style = "transition-duration: 300ms; display: block; width: ${spanInfo.totalTracePercent.toFixed(4)}%"
-                        }
-                    }
-                }
-                td {
-                    classes += "collapsing"
-                    style = "padding: 0; text-align: center; font-size: 20px"
-                    when {
-                        span.error!! -> {
-                            i {
-                                classes = setOf("skull", "crossbones", "red", "icon")
-                            }
-                        }
-                        span.childError && i > 0 -> {
-                            i {
-                                classes = setOf("exclamation", "triangle", "red", "icon")
-                            }
-                        }
-                        else -> {
-                            style.plus("color: #808083")
-                            i {
-                                classes = setOf("check", "icon")
-                            }
-                        }
-                    }
-                }
-            } as HTMLTableRowElement
-
-            jq("#stack_table").append(rowHtml)
-        }
-    }
-
-    private fun displaySpanInfo(spanInfo: TraceSpan) {
-        // portalLog(JSON.parse(JSON.stringify(spanInfo)))
-
-        //todo: move all this stuff to setupUI()
-        jq("#top_trace_table").css("display", "none")
-        jq("#trace_stack_table").css("visibility", "visible")
-        jq("#segment_id_span").css("display", "unset")
-        jq("#trace_stack_span").css("display", "none")
-
-        jq("#trace_stack_header").css("visibility", "visible")
-            .removeClass("active_sub_tab")
-            .addClass("inactive_tab")
-        jq("#latest_traces_header").removeClass("active_sub_tab")
-            .addClass("inactive_tab")
-
-        jq("#span_info_header").addClass("active_sub_tab")
-            .removeClass("inactive_tab")
-            .css("visibility", "visible")
-        jq("#trace_stack_table").css("display", "none")
-            .css("visibility", "hidden")
-        jq("#span_info_panel").css("display", "")
-            .css("visibility", "visible")
-
-        jq("#tag_table tr").remove()
-        jq("#span_info_start_trace_time").attr("data-value", spanInfo.startTime)
-        jq("#span_info_start_time").text(moment(spanInfo.startTime).format("h:mm:ss a"))
-        jq("#span_info_end_trace_time").attr("data-value", spanInfo.endTime)
-        jq("#span_info_end_time").text(moment(spanInfo.endTime).format("h:mm:ss a"))
-
-        updateOccurredLabels()
-
-        jq("#segment_id_field").valueOf(spanInfo.segmentId)
-
-        var gotTags = false
-        spanInfo.tags.forEach {
-            gotTags = true
-            val value = spanInfo.tags[it.key]
-            if (value != "") {
-                val rowHtml: HTMLTableRowElement = document.create.tr {
-                    td {
-                        +it.key
-                    }
-                    td {
-                        +it.value
-                    }
-                } as HTMLTableRowElement
-                jq("#tag_table").append(rowHtml)
-            }
-        }
-        if (gotTags) {
-            jq("#span_tag_div").removeClass("displaynone")
-        } else {
-            jq("#span_tag_div").addClass("displaynone")
-        }
-
-        var gotLogs = false
-        jq("#log_table").empty()
-        spanInfo.logs.forEach { log ->
-            gotLogs = true
-            val rowHtml: HTMLTableRowElement = document.create.tr {
-                td {
-                    style = "white-space: nowrap"
-                    b {
-                        +"${moment.unix(log.time, "x").format()}"
-                    }
-                    br
-                    +log.data
-                }
-            } as HTMLTableRowElement
-            jq("#log_table").append(rowHtml)
-        }
-        if (gotLogs) {
-            jq("#span_log_div").removeClass("displaynone")
-        } else {
-            jq("#span_log_div").addClass("displaynone")
-        }
-    }
-    
-    private fun updateOccurredLabels() {
-        jq(".trace_time").each(fun(i: Int, traceTime: HTMLElement) {
-            if (!traceTime.dataset["value"].isNullOrEmpty()) {
-                val occurred = moment((traceTime.dataset["value"]), "x")
-                val now = moment()
-                val timeOccurredDuration = moment.duration(now.diff(occurred))
-                traceTime.innerText = getPrettyDuration(timeOccurredDuration, 1)
-            }
-        })
-    }
-
-    private fun getPrettyDuration(duration: dynamic, decimalPlaces: Int): String {
-        var prettyDuration: String
-        val postText: String
-        if (duration.months() > 0) {
-            val months = duration.months()
-            val durationDiff = duration.subtract(months, "months")
-            prettyDuration = (months + "mo " + (round(((durationDiff.asWeeks() * 10) / 10) as Double)).toFixed(
-                decimalPlaces
-            )) as String
-            postText = "w ago"
-        } else if (duration.weeks() > 0) {
-            val weeks = duration.weeks()
-            val durationDiff = duration.subtract(weeks, "weeks")
-            prettyDuration = (weeks + "w " + (round(((durationDiff.asDays() * 10) / 10) as Double)).toFixed(
-                decimalPlaces
-            )) as String
-            postText = "d ago"
-        } else if (duration.days() > 0) {
-            val days = duration.days()
-            val durationDiff = duration.subtract(days, "days")
-            prettyDuration = (days + "d " + (round(((durationDiff.asHours() * 10) / 10) as Double)).toFixed(
-                decimalPlaces
-            )) as String
-            postText = "h ago"
-        } else if (duration.hours() > 0) {
-            val hours = duration.hours()
-            val durationDiff = duration.subtract(hours, "hours")
-            prettyDuration = (hours + "h " + (round(((durationDiff.asMinutes() * 10) / 10) as Double)).toFixed(
-                decimalPlaces
-            )) as String
-            postText = "m ago"
-        } else if (duration.minutes() > 0) {
-            val minutes = duration.minutes()
-            val durationDiff = duration.subtract(minutes, "minutes")
-            val seconds = durationDiff.seconds()
-            if (seconds == 0) {
-                prettyDuration = (minutes + "") as String
-                postText = "m ago"
-            } else {
-                prettyDuration = (minutes + "m " + duration.seconds() + "") as String
-                postText = "s ago"
-            }
-        } else if (duration.seconds() > 0) {
-            prettyDuration = (duration.seconds() + "") as String
-            postText = "s ago"
-        } else {
-            prettyDuration = (round(((duration.asSeconds() * 10) / 10) as Double)).toFixed(decimalPlaces)
-            postText = "s ago"
-        }
-
-        if (prettyDuration.endsWith(".0")) {
-            prettyDuration = prettyDuration.substring(0, prettyDuration.length - 2)
-        }
-        return prettyDuration + postText
     }
 
     companion object {
@@ -616,11 +540,4 @@ class TracesPage(
             "SpringRestTemplate" to "SpringMVC"
         )
     }
-}
-
-fun Double.toFixed(digits: Int): String = this.asDynamic().toFixed(digits) as String
-
-fun portalLog(message: kotlin.js.Json) {
-    console.log("Displaying message: ${JSON.stringify(message)}")
-    eb.send(PortalLogger, message)
 }

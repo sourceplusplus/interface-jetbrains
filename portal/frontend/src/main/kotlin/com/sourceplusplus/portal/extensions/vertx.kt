@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package com.sourceplusplus.portal.extensions
 
 import kotlin.js.Json
@@ -32,17 +34,12 @@ class Vertx {
             return this
         }
 
-        @Deprecated("Use send(address: String, json: Json)")
-        fun send(address: String, json: String) {
-            js("eb.send(address, (0, eval)('(' + json + ')'));")
-        }
-
         fun send(address: String, json: Json) {
             js("eb.send(address, json);")
         }
 
-        fun publish(address: String, json: String) {
-            js("eb.publish(address, (0, eval)('(' + json + ')'));")
+        fun publish(address: String, json: Json) {
+            js("eb.publish(address, json);")
         }
 
         fun registerHandler(address: String, handler: (error: String, message: Any) -> Unit) {
@@ -50,25 +47,3 @@ class Vertx {
         }
     }
 }
-
-
-//fun JsonObject.withCamelCaseKeys(): JsonObject {
-//    return JsonObject(mapKeys {
-//        var key = ""
-//        var uppercase = false
-//        for (ch in it.key) when {
-//            ch == '_' -> uppercase = true
-//            uppercase -> {
-//                key += ch.toUpperCase()
-//                uppercase = false
-//            }
-//            else -> key += ch
-//        }
-//        return@mapKeys key
-//    })
-//}
-//
-//inline fun <reified T> toProtocolMessage(any: Any): T {
-//    val body = parseToJsonElement(JSON.stringify(any)) as JsonObject
-//    return kotlinx.serialization.json.Json.decodeFromDynamic(JSON.parse(body.withCamelCaseKeys().toString()))
-//}

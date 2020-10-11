@@ -106,7 +106,7 @@ class OverviewPage(private val portalUuid: String) {
             updateTime(QueryTimeFrame.valueOf(timeFrame.toUpperCase()))
             js("portalLog('Set initial time frame to: ' + timeFrame);")
 
-            eb.publish(OverviewTabOpened, "{'portalUuid': '$portalUuid'}")
+            eb.publish(OverviewTabOpened, json("portalUuid" to portalUuid))
         }
     }
 
