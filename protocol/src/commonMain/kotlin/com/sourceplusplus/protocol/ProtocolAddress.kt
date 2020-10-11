@@ -18,7 +18,6 @@ class ProtocolAddress {
             const val OpenedPortal = "OpenedPortal"
             const val ClosedPortal = "ClosedPortal"
             const val ChangedPortalArtifact = "ChangedPortalArtifact"
-            const val PortalLogger = "PortalLogger"
 
             //Portal - Overview
             const val OverviewTabOpened = "OverviewTabOpened"

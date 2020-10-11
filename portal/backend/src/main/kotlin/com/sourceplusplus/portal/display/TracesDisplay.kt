@@ -332,10 +332,10 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         spanQueryResult: TraceSpanStackQueryResult
     ): JsonArray {
         val spanInfos = ArrayList<TraceSpanInfo>()
-        val totalTime = spanQueryResult.traceSpans[0].endTime!! - spanQueryResult.traceSpans[0].startTime
+        val totalTime = spanQueryResult.traceSpans[0].endTime - spanQueryResult.traceSpans[0].startTime
 
         spanQueryResult.traceSpans.forEach { span ->
-            val timeTookMs = span.endTime!! - span.startTime
+            val timeTookMs = span.endTime - span.startTime
             val timeTook = humanReadableDuration(Duration.ofMillis(timeTookMs))
 
             //detect if operation name is really an artifact name
@@ -348,7 +348,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                 removePackageAndClassName(removePackageNames(finalSpan.artifactQualifiedName))
             } else {
                 finalSpan.endpointName
-            }
+            }!!
 
             spanInfos.add(
                 TraceSpanInfo(
