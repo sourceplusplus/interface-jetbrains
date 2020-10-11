@@ -224,6 +224,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete Artifact      
-      - uses: geekyeggo/delete-artifact@v1
+        uses: geekyeggo/delete-artifact@v1
         with:
           name: plugin-artifact
