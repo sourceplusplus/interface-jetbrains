@@ -6,9 +6,7 @@ import com.sourceplusplus.portal.page.OverviewPage
 import com.sourceplusplus.portal.page.TracesPage
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import kotlinx.browser.window
-import kotlinx.serialization.ExperimentalSerializationApi
 
-@ExperimentalSerializationApi
 fun main() {
     jq().ready {
         val queryParams = getQueryMap()
