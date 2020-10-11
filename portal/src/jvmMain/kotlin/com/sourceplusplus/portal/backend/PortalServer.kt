@@ -55,8 +55,11 @@ class PortalServer : CoroutineVerticle() {
         // Routes
         router.get("/").coroutineHandler { ctx -> getOverview(ctx) } //todo: could make whole application overview
         router.get("/overview").coroutineHandler { ctx -> getOverview(ctx) }
+        router.get("/overview.html").coroutineHandler { ctx -> getOverview(ctx) }
         router.get("/traces").coroutineHandler { ctx -> getTraces(ctx) }
+        router.get("/traces.html").coroutineHandler { ctx -> getTraces(ctx) }
         router.get("/configuration").coroutineHandler { ctx -> getConfiguration(ctx) }
+        router.get("/configuration.html").coroutineHandler { ctx -> getConfiguration(ctx) }
 
         // Static handler
         router.get("/*").handler {

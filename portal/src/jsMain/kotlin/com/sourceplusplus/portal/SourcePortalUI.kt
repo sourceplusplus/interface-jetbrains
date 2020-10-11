@@ -10,9 +10,9 @@ import kotlinx.browser.window
 fun main() {
     jq().ready {
         val queryParams = getQueryMap()
-        val portalUuid = queryParams.getOrElse("portal_uuid", { "null" })
+        val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
         when (window.location.pathname) {
-            "/traces" -> {
+            "/traces", "/traces.html" -> {
                 val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
                 val hideOverviewTab = queryParams.getOrElse("hide_overview_tab", { "false" }).toBoolean()
                 val traceOrderType = TraceOrderType.valueOf(
@@ -20,7 +20,7 @@ fun main() {
                 )
                 TracesPage(portalUuid, externalPortal, hideOverviewTab, traceOrderType).renderPage()
             }
-            "/configuration" -> ConfigurationPage(portalUuid).renderPage()
+            "/configuration", "/configuration.html" -> ConfigurationPage(portalUuid).renderPage()
             else -> OverviewPage(portalUuid).renderPage()
         }
 
