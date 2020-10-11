@@ -67,7 +67,6 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             DatabindCodec.mapper().registerModule(GuavaModule())
             DatabindCodec.mapper().registerModule(Jdk8Module())
             DatabindCodec.mapper().registerModule(JavaTimeModule())
-            DatabindCodec.mapper().propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
             DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
             DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
         }
