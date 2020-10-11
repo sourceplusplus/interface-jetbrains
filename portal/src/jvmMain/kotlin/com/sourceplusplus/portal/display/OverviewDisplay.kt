@@ -89,7 +89,7 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
         vertx.eventBus().consumer<JsonObject>(SetActiveChartMetric) {
             val request = JsonObject.mapFrom(it.body())
             val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
-            portal.overviewView.activeChartMetric = valueOf(request.getString("metric_type"))
+            portal.overviewView.activeChartMetric = valueOf(request.getString("metricType"))
             updateUI(portal)
 
             vertx.eventBus().send(ClearOverview(portal.portalUuid), null)
