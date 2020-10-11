@@ -114,4 +114,19 @@ tasks {
             showStandardStreams = true
         }
     }
+
+    //todo: should be a way to just add implementation() to dependencies
+    getByName("processResources") {
+        dependsOn(":portal:build")
+        doLast {
+            copy {
+                from(file("$rootDir/portal/build/distributions/portal.js"))
+                into(file("$rootDir/plugin/jetbrains/build/resources/main"))
+            }
+            copy {
+                from(file("$rootDir/portal/build/distributions/portal.js.map"))
+                into(file("$rootDir/plugin/jetbrains/build/resources/main"))
+            }
+        }
+    }
 }
