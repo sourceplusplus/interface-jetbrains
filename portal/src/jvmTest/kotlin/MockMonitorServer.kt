@@ -1,5 +1,4 @@
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
@@ -38,7 +37,6 @@ fun main() {
     DatabindCodec.mapper().registerModule(GuavaModule())
     DatabindCodec.mapper().registerModule(Jdk8Module())
     DatabindCodec.mapper().registerModule(JavaTimeModule())
-    // DatabindCodec.mapper().propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
     DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
     DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 

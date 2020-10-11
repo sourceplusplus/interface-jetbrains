@@ -27,7 +27,7 @@ class Vertx {
             js(
                 """
                     eb.onopen = function () { 
-                        frontend.com.sourceplusplus.portal.extensions.Vertx.EventBus.Companion.callKotlinOnOpen(); 
+                        portal.com.sourceplusplus.portal.extensions.Vertx.EventBus.Companion.callKotlinOnOpen(); 
                     }
                 """
             )

@@ -44,7 +44,7 @@ dependencies {
     implementation(project(":mentor"))
     implementation(project(":monitor:skywalking"))
     implementation(project(":protocol"))
-    implementation(project(":portal:frontend"))
+    implementation(project(":portal"))
 
     val vertxVersion = "3.9.2"
     implementation("com.github.sh5i:git-stein:v0.5.0")

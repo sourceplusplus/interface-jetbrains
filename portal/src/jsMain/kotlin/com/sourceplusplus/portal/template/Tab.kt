@@ -18,7 +18,7 @@ fun FlowContent.tabItem(pageType: PageType, isActive: Boolean, block: (FlowConte
             } else {
                 a(classes = "ui item hide_on_toggle") {
                     id = "overview_link"
-                    href = "overview"
+                    href = "overview.html"
                     i("icon demo-icon dashboard inactive_tab")
                 }
             }
@@ -44,7 +44,7 @@ fun FlowContent.tabItem(pageType: PageType, isActive: Boolean, block: (FlowConte
             } else {
                 a(classes = "ui item hide_on_toggle") {
                     id = "configuration_link"
-                    href = "configuration"
+                    href = "configuration.html"
                     i("icon configure inactive_tab")
                 }
             }

@@ -24,7 +24,7 @@ fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowCont
             } else {
                 a(classes = "item inactive_tab") {
                     id = "sidebar_overview_link"
-                    href = "overview"
+                    href = "overview.html"
                     +"Overview"
                 }
             }
@@ -48,7 +48,7 @@ fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowCont
             } else {
                 a(classes = "item inactive_tab") {
                     id = "sidebar_configuration_link"
-                    href = "configuration"
+                    href = "configuration.html"
                     +"Configuration"
                 }
             }
