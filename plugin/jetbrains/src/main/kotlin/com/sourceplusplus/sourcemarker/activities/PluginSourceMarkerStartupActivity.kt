@@ -170,7 +170,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             defaultConfiguration.browserLoadingListener = object : BrowserLoadingListener() {
                 override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
                     configuration.initialUrl =
-                        "http://localhost:8080/overview?portal_uuid=${SourcePortal.getPortals()[0].portalUuid}"
+                        "http://localhost:8080/overview?portalUuid=${SourcePortal.getPortals()[0].portalUuid}"
                 }
             }
         }
