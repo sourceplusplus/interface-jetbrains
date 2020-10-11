@@ -83,7 +83,6 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             DatabindCodec.mapper().registerModule(GuavaModule())
             DatabindCodec.mapper().registerModule(Jdk8Module())
             DatabindCodec.mapper().registerModule(JavaTimeModule())
-            DatabindCodec.mapper().propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
             DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
             DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
         }
@@ -255,7 +254,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             defaultConfiguration.browserLoadingListener = object : BrowserLoadingListener() {
                 override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
                     configuration.initialUrl =
-                        "http://localhost:8080/overview?portal_uuid=${SourcePortal.getPortals()[0].portalUuid}"
+                        "http://localhost:8080/overview?portalUuid=${SourcePortal.getPortals()[0].portalUuid}"
                 }
             }
         }

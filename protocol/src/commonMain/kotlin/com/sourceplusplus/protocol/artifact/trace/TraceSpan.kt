@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.artifact.trace
 
+import kotlinx.serialization.Serializable
+
 /**
  * todo: description.
  *
@@ -7,19 +9,20 @@ package com.sourceplusplus.protocol.artifact.trace
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 //todo: remove ?s
+@Serializable
 data class TraceSpan(
-    val traceId: String? = null,
+    val traceId: String,
     val segmentId: String,
-    val spanId: Int? = null,
-    val parentSpanId: Int? = null,
+    val spanId: Int,
+    val parentSpanId: Int,
     val refs: List<TraceSpanRef> = emptyList(),
-    val serviceCode: String? = null,
+    val serviceCode: String,
     val serviceInstanceName: String? = null,
     val startTime: Long,
-    val endTime: Long? = null,
+    val endTime: Long,
     val endpointName: String? = null,
     val artifactQualifiedName: String? = null,
-    val type: String? = null,
+    val type: String,
     val peer: String? = null,
     val component: String? = null,
     val error: Boolean? = null,
