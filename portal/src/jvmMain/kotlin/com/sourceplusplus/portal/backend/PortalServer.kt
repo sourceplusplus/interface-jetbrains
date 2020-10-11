@@ -30,13 +30,13 @@ import kotlinx.html.stream.appendHTML
  */
 class PortalServer : CoroutineVerticle() {
 
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            val vertx: Vertx = Vertx.vertx()
-            vertx.deployVerticle(PortalServer::class.java.name)
-        }
-    }
+//    companion object {
+//        @JvmStatic
+//        fun main(args: Array<String>) {
+//            val vertx: Vertx = Vertx.vertx()
+//            vertx.deployVerticle(PortalServer::class.java.name)
+//        }
+//    }
 
     override suspend fun start() {
         vertx.deployVerticleAwait(OverviewDisplay())
@@ -63,7 +63,7 @@ class PortalServer : CoroutineVerticle() {
 
         // Static handler
         router.get("/*").handler {
-            val fileStream = PortalServer::class.java.classLoader.getResourceAsStream("webroot" + it.request().path())
+            val fileStream = PortalServer::class.java.classLoader.getResourceAsStream(it.request().path())
             val response = it.response().setStatusCode(200)
             if (it.request().path().endsWith(".js")) {
                 response.putHeader("Content-Type", "text/javascript")
@@ -175,7 +175,7 @@ class PortalServer : CoroutineVerticle() {
             src = "source_eventbus_bridge.js"
         }
         script {
-            src = "frontend.js"
+            src = "portal.js"
         }
     }
 }

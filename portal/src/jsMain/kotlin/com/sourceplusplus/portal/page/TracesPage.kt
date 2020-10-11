@@ -68,7 +68,7 @@ class TracesPage(
             eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: String, message: dynamic ->
                 displaySpanInfo(Json.decodeFromDynamic(message.body))
             }
-            eb.publish(TracesTabOpened, json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType))
+            eb.publish(TracesTabOpened, json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name))
         }
     }
 
