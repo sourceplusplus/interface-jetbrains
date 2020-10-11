@@ -38,7 +38,7 @@ fun main() {
     DatabindCodec.mapper().registerModule(GuavaModule())
     DatabindCodec.mapper().registerModule(Jdk8Module())
     DatabindCodec.mapper().registerModule(JavaTimeModule())
-    DatabindCodec.mapper().propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+    // DatabindCodec.mapper().propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
     DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
     DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
@@ -55,7 +55,7 @@ fun main() {
     vertx.createHttpServer().requestHandler(router).listen(8888, "localhost")
 
     vertx.eventBus().consumer<String>(ClickedViewAsExternalPortal) {
-        it.reply(JsonObject().put("portal_uuid", "null"))
+        it.reply(JsonObject().put("portalUuid", "null"))
     }
 
     vertx.eventBus().consumer<Void>(OverviewTabOpened) {
@@ -70,7 +70,7 @@ fun main() {
     }
 
     vertx.eventBus().consumer<JsonObject>(SetActiveChartMetric) {
-        currentMetricType = MetricType.valueOf(it.body().getString("metric_type"))
+        currentMetricType = MetricType.valueOf(it.body().getString("metricType"))
         updateCards(vertx)
         displayChart(vertx)
     }
@@ -87,13 +87,17 @@ fun main() {
         for (i in 1..5) {
             val span = TraceSpan(
                 artifactQualifiedName = UUID.randomUUID().toString(),
+                parentSpanId = System.currentTimeMillis().toInt(),
                 traceId = "100",
                 segmentId = "100",
                 spanId = 100,
                 error = current().nextBoolean(),
                 hasChildStack = false,
                 startTime = Instant.now().toEpochMilli(), //todo: use Instant instead of long
-                component = "DATABASE"
+                component = "DATABASE",
+                endTime = System.currentTimeMillis(),
+                serviceCode = "SERVICE_CODE",
+                type = "TYPE"
             )
             val spanInfo = TraceSpanInfo(
                 span = span,
@@ -110,9 +114,14 @@ fun main() {
 
     vertx.eventBus().consumer<Void>(ClickedDisplaySpanInfo) {
         val span = TraceSpan(
+            traceId = "100-" + System.currentTimeMillis(),
+            parentSpanId = System.currentTimeMillis().toInt(),
+            spanId = System.currentTimeMillis().toInt(),
             segmentId = "100",
             startTime = Instant.now().toEpochMilli(), //todo: use Instant instead of long
             endTime = Instant.now().toEpochMilli(), //todo: use Instant instead of long
+            serviceCode = "SERVICE_CODE",
+            type = "TYPE",
             tags = mapOf(
                 "thing1" to UUID.randomUUID().toString(),
                 "thing2" to UUID.randomUUID().toString(),
@@ -121,7 +130,7 @@ fun main() {
                 "thing5" to UUID.randomUUID().toString()
             ),
             logs = listOf(
-                TraceSpanLogEntry(time = Clock.System.now().epochSeconds, data = UUID.randomUUID().toString())
+                TraceSpanLogEntry(time = Clock.System.now().toEpochMilliseconds(), data = UUID.randomUUID().toString())
             )
         )
         vertx.eventBus().displaySpanInfo("null", span)

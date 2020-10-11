@@ -96,8 +96,6 @@ class PortalServer : CoroutineVerticle() {
                 appendHTML().html {
                     head {
                         commonHead("Traces - SourceMarker")
-                        script { src = "js/traces.js" }
-                        script { src = "js/views/traces_view.js" }
                         script { src = "themes/default/assets/all.min.js" }
                     }
                     body { id = "root" }
