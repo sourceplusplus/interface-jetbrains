@@ -8,8 +8,7 @@ include 'mentor'
 include 'monitor'
 include 'plugin'
 include 'portal'
-include 'portal:backend'
-include 'portal:frontend'
+include 'portal'
 include 'protocol'
 
 //implementations

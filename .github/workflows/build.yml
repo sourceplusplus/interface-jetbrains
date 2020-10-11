@@ -237,7 +237,12 @@ jobs:
           asset_name: ${{ needs.build.outputs.artifact }}
           asset_content_type: application/zip
 
-      # Delete plugin artifact
-      - uses: geekyeggo/delete-artifact@v1
+  # Delete plugin artifact
+  cleanup:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Artifact      
+        uses: geekyeggo/delete-artifact@v1
         with:
           name: plugin-artifact
