@@ -44,7 +44,7 @@ dependencies {
     implementation(project(":mentor"))
     implementation(project(":monitor:skywalking"))
     implementation(project(":protocol"))
-    implementation(project(":portal:backend"))
+    implementation(project(":portal"))
 
     val vertxVersion = "3.9.2"
     implementation("com.github.sh5i:git-stein:v0.5.0")
@@ -112,6 +112,21 @@ tasks {
 
             outputs.upToDateWhen { false }
             showStandardStreams = true
+        }
+    }
+
+    //todo: should be a way to just add implementation() to dependencies
+    getByName("processResources") {
+        dependsOn(":portal:build")
+        doLast {
+            copy {
+                from(file("$rootDir/portal/build/distributions/portal.js"))
+                into(file("$rootDir/plugin/jetbrains/build/resources/main"))
+            }
+            copy {
+                from(file("$rootDir/portal/build/distributions/portal.js.map"))
+                into(file("$rootDir/plugin/jetbrains/build/resources/main"))
+            }
         }
     }
 }
