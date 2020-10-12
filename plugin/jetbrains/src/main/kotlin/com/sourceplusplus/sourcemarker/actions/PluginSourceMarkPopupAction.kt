@@ -77,7 +77,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
         if (sourcePortal != lastDisplayedInternalPortal) {
             val currentUrl = "/${sourcePortal.currentTab.name.toLowerCase()}" +
-                    "?portal_uuid=${sourcePortal.portalUuid}"
+                    "?portalUuid=${sourcePortal.portalUuid}"
             jcefComponent.getBrowser().cefBrowser.executeJavaScript(
                 "window.location.href = '$currentUrl';", currentUrl, 0
             )
