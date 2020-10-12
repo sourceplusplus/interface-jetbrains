@@ -63,12 +63,12 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
 fun QueryTraceQuery.Log.toProtocol(): TraceSpanLogEntry {
     if (data!!.find { it.key == "stack" } != null) {
         return TraceSpanLogEntry(
-            time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()).epochSeconds,
+            time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()).toEpochMilliseconds(),
             data = data.find { it.key == "stack" }!!.value!! //todo: correctly
         )
     }
     return TraceSpanLogEntry(
-        time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()).epochSeconds,
+        time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()).toEpochMilliseconds(),
         data = data.joinToString(separator = "\n") { it.key + " : " + it.value!! }
     )
 }
@@ -90,6 +90,7 @@ fun QueryTraceQuery.Span.toProtocol(): TraceSpan {
         parentSpanId = parentSpanId,
         refs = refs.map { it.toProtocol() },
         serviceCode = serviceCode,
+        //serviceInstanceName = serviceInstanceName, //todo: this
         startTime = (startTime as BigDecimal).toLong(),
         endTime = (endTime as BigDecimal).toLong(),
         endpointName = endpointName,
