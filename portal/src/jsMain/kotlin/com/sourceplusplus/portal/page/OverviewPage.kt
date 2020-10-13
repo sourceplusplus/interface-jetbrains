@@ -3,7 +3,6 @@ package com.sourceplusplus.portal.page
 import com.sourceplusplus.portal.extensions.eb
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointTableType
@@ -24,7 +23,10 @@ import kotlin.js.json
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class OverviewPage(private val portalUuid: String) {
+class OverviewPage(
+    override val portalUuid: String,
+    override val externalPortal: Boolean = false
+) : IOverviewPage {
 
     init {
         console.log("Overview tab started")
@@ -75,10 +77,7 @@ class OverviewPage(private val portalUuid: String) {
         }
     }
 
-    private fun updateTime(interval: QueryTimeFrame) {
-    }
-
-    fun displayEndpoints(endpointResult: EndpointResult) {
+    override fun displayEndpoints(endpointResult: EndpointResult) {
         console.log("Displaying endpoints")
         console.log("first endpoint: " + endpointResult.endpointMetrics[0].artifactQualifiedName)
         val root: Element = document.getElementById("endpoint_body_table")!!
@@ -104,5 +103,8 @@ class OverviewPage(private val portalUuid: String) {
                 }
             }
         }
+    }
+
+    override fun updateTime(interval: QueryTimeFrame) {
     }
 }

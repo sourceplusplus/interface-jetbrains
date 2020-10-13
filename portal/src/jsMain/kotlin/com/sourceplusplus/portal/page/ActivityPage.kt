@@ -27,59 +27,14 @@ import kotlin.js.json
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ActivityPage(private val portalUuid: String) {
+class ActivityPage(
+    override val portalUuid: String,
+    override val externalPortal: Boolean = false
+) : IActivityPage {
 
-    var currentMetricType: MetricType = MetricType.Throughput_Average
-    var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
-    var tooltipMeasurement = "ms"
-
-    val series0 = mutableMapOf(
-        "name" to "99th percentile",
-        "type" to "line",
-        "color" to "#e1483b",
-        "hoverAnimation" to false,
-        "symbol" to "circle",
-        "symbolSize" to 8,
-        "showSymbol" to true,
-        "areaStyle" to {},
-        "data" to mutableListOf<Int>()
-    )
-    val series1 = mutableMapOf(
-        "name" to "95th percentile",
-        "type" to "line",
-        "color" to "#e1483b",
-        "showSymbol" to false,
-        "hoverAnimation" to false,
-        "areaStyle" to {},
-        "data" to mutableListOf<Int>()
-    )
-    val series2 = mutableMapOf(
-        "name" to "90th percentile",
-        "type" to "line",
-        "color" to "#e1483b",
-        "showSymbol" to false,
-        "hoverAnimation" to false,
-        "areaStyle" to {},
-        "data" to mutableListOf<Int>()
-    )
-    val series3 = mutableMapOf(
-        "name" to "75th percentile",
-        "type" to "line",
-        "color" to "#e1483b",
-        "showSymbol" to false,
-        "hoverAnimation" to false,
-        "areaStyle" to {},
-        "data" to mutableListOf<Int>()
-    )
-    val series4 = mutableMapOf(
-        "name" to "50th percentile",
-        "type" to "line",
-        "color" to "#e1483b",
-        "showSymbol" to false,
-        "hoverAnimation" to false,
-        "areaStyle" to {},
-        "data" to mutableListOf<Int>()
-    )
+    override var currentMetricType: MetricType = MetricType.Throughput_Average
+    override var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
+    private var tooltipMeasurement = "ms"
 
     init {
         console.log("Activity tab started")
@@ -144,13 +99,13 @@ class ActivityPage(private val portalUuid: String) {
         js("loadChart();")
     }
 
-    fun displayCard(card: BarTrendCard) {
+    override fun displayCard(card: BarTrendCard) {
         console.log("Displaying card")
 
         document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = card.header
     }
 
-    fun updateChart(chartData: SplineChart) {
+    override fun updateChart(chartData: SplineChart) {
         console.log("Updating chart")
 
         val cards = listOf("throughput_average", "responsetime_average", "servicelevelagreement_average")
@@ -202,7 +157,7 @@ class ActivityPage(private val portalUuid: String) {
         js("overviewChart.setOption({series: [series0, series1, series2, series3, series4]})")
     }
 
-    private fun updateTime(interval: QueryTimeFrame) {
+    override fun updateTime(interval: QueryTimeFrame) {
         console.log("Update time: $interval")
         currentTimeFrame = interval
         localStorage.setItem("spp.metricTimeFrame", interval.name)
@@ -256,6 +211,56 @@ class ActivityPage(private val portalUuid: String) {
                 "portalUuid" to portalUuid,
                 "metricType" to currentMetricType.name
             )
+        )
+    }
+
+    companion object {
+        val series0 = mutableMapOf(
+            "name" to "99th percentile",
+            "type" to "line",
+            "color" to "#e1483b",
+            "hoverAnimation" to false,
+            "symbol" to "circle",
+            "symbolSize" to 8,
+            "showSymbol" to true,
+            "areaStyle" to {},
+            "data" to mutableListOf<Int>()
+        )
+        val series1 = mutableMapOf(
+            "name" to "95th percentile",
+            "type" to "line",
+            "color" to "#e1483b",
+            "showSymbol" to false,
+            "hoverAnimation" to false,
+            "areaStyle" to {},
+            "data" to mutableListOf<Int>()
+        )
+        val series2 = mutableMapOf(
+            "name" to "90th percentile",
+            "type" to "line",
+            "color" to "#e1483b",
+            "showSymbol" to false,
+            "hoverAnimation" to false,
+            "areaStyle" to {},
+            "data" to mutableListOf<Int>()
+        )
+        val series3 = mutableMapOf(
+            "name" to "75th percentile",
+            "type" to "line",
+            "color" to "#e1483b",
+            "showSymbol" to false,
+            "hoverAnimation" to false,
+            "areaStyle" to {},
+            "data" to mutableListOf<Int>()
+        )
+        val series4 = mutableMapOf(
+            "name" to "50th percentile",
+            "type" to "line",
+            "color" to "#e1483b",
+            "showSymbol" to false,
+            "hoverAnimation" to false,
+            "areaStyle" to {},
+            "data" to mutableListOf<Int>()
         )
     }
 }
