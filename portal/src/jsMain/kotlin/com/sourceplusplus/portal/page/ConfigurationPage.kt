@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.page
 
+import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.artifact.ArtifactConfigType.AUTO_SUBSCRIBE
 import com.sourceplusplus.protocol.artifact.ArtifactConfigType.ENTRY_METHOD
@@ -20,6 +21,8 @@ class ConfigurationPage(
     override val portalUuid: String,
     override val externalPortal: Boolean = false
 ) : IConfigurationPage {
+
+    private val eb = EventBus("http://localhost:8888/eventbus")
 
     fun renderPage() {
         console.log("Rendering Configuration page")

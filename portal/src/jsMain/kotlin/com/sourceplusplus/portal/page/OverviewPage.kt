@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.extensions.eb
+import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
@@ -28,6 +28,8 @@ class OverviewPage(
     override val externalPortal: Boolean = false
 ) : IOverviewPage {
 
+    private val eb = EventBus("http://localhost:8888/eventbus")
+
     init {
         console.log("Overview tab started")
 
@@ -35,7 +37,7 @@ class OverviewPage(
         eb.onopen = {
             js("portalConnected()")
 
-            eb.registerHandler(UpdateEndpoints(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->
                 displayEndpoints(Json.decodeFromDynamic(message.body))
             }
 

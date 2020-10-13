@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.extensions.eb
+import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toFixed
 import com.sourceplusplus.portal.extensions.toPrettyDuration
@@ -49,6 +49,8 @@ class TracesPage(
     override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
 ) : ITracesPage {
 
+    private val eb = EventBus("http://localhost:8888/eventbus")
+
     init {
         console.log("Traces tab started")
         setupUI()
@@ -56,16 +58,16 @@ class TracesPage(
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
             js("portalConnected()")
-            eb.registerHandler(DisplayTraces(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
                 displayTraces(Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
                 displayTraceStack(*Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplayTraceStack(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
                 displayTraceStack(*Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
                 displaySpanInfo(Json.decodeFromDynamic(message.body))
             }
             eb.publish(TracesTabOpened, json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name))
