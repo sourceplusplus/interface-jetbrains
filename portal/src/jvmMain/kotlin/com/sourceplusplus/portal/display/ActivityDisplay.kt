@@ -1,9 +1,9 @@
 package com.sourceplusplus.portal.display
 
-import com.codahale.metrics.Histogram
-import com.codahale.metrics.UniformReservoir
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayCard
+import com.sourceplusplus.portal.extensions.fromPerSecondToPrettyFrequency
+import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.portal.extensions.updateChart
 import com.sourceplusplus.protocol.ArtifactNameUtils.getShortQualifiedFunctionName
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactMetricUpdated
@@ -191,14 +191,14 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
     }
 
     fun updateCard(portal: SourcePortal, metricResult: ArtifactMetricResult, artifactMetrics: ArtifactMetrics) {
-        val avg = calculateAverage(artifactMetrics)
+        val avg = artifactMetrics.values.average()
         val percents = calculatePercents(artifactMetrics)
 
         when (artifactMetrics.metricType) {
             Throughput_Average -> {
                 val barTrendCard = BarTrendCard(
                     timeFrame = metricResult.timeFrame,
-                    header = toPrettyFrequency(avg / 60.0),
+                    header = (avg / 60.0).fromPerSecondToPrettyFrequency(),
                     meta = artifactMetrics.metricType.toString().toLowerCase(),
                     barGraphData = percents
                 )
@@ -207,7 +207,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             ResponseTime_Average -> {
                 val barTrendCard = BarTrendCard(
                     timeFrame = metricResult.timeFrame,
-                    header = toPrettyDuration(avg.toInt()),
+                    header = avg.toInt().toPrettyDuration(),
                     meta = artifactMetrics.metricType.toString().toLowerCase(),
                     barGraphData = percents
                 )
@@ -226,15 +226,8 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
                 )
                 vertx.eventBus().displayCard(portal.portalUuid, barTrendCard)
             }
+            else -> throw UnsupportedOperationException(artifactMetrics.metricType.name)
         }
-    }
-
-    private fun calculateAverage(artifactMetrics: ArtifactMetrics): Double {
-        val histogram = Histogram(UniformReservoir(artifactMetrics.values.size))
-        artifactMetrics.values.forEach {
-            histogram.update(it)
-        }
-        return histogram.snapshot.mean
     }
 
     private fun calculatePercents(artifactMetrics: ArtifactMetrics): DoubleArray {
@@ -268,34 +261,5 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             }
         }
         return percents.toDoubleArray()
-    }
-
-    private fun toPrettyDuration(millis: Int): String {
-        val days = millis / 86400000.0
-        if (days > 1) {
-            return "${days.toInt()}dys"
-        }
-        val hours = millis / 3600000.0
-        if (hours > 1) {
-            return "${hours.toInt()}hrs"
-        }
-        val minutes = millis / 60000.0
-        if (minutes > 1) {
-            return "${minutes.toInt()}mins"
-        }
-        val seconds = millis / 1000.0
-        if (seconds > 1) {
-            return "${seconds.toInt()}secs"
-        }
-        return "${millis}ms"
-    }
-
-    private fun toPrettyFrequency(perSecond: Double): String {
-        return when {
-            perSecond > 1000000.0 -> "${perSecond / 1000000.0.toInt()}M/sec"
-            perSecond > 1000.0 -> "${perSecond / 1000.0.toInt()}K/sec"
-            perSecond > 1.0 -> "${perSecond.toInt()}/sec"
-            else -> "${(perSecond * 60.0).toInt()}/min"
-        }
     }
 }
