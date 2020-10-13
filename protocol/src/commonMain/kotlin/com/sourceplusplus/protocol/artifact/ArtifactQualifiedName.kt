@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.artifact
 
+import com.sourceplusplus.protocol.ArtifactNameUtils
+
 /**
  * todo: description.
  *
@@ -10,5 +12,11 @@ data class ArtifactQualifiedName(
     val identifier: String,
     val commitId: String,
     val type: ArtifactType,
+    val lineNumber: Int? = null,
     val operationName: String? = null //todo: only method artifacts need
-)
+) {
+//    val qualifiedClassName: String?
+//        get() = ArtifactNameUtils.getQualifiedClassName(identifier)
+//    val qualifiedFunctionName: String?
+//        get() = ArtifactNameUtils.getFunctionSignature(identifier)
+}

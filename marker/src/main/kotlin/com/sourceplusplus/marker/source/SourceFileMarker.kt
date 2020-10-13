@@ -12,6 +12,7 @@ import com.intellij.psi.PsiJavaFile
 import com.sourceplusplus.marker.source.mark.api.*
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
+import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.inlay.MethodInlayMark
@@ -135,6 +136,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
                         SourceKey.InlayMark,
                         sourceMark
                     )
+                    is ExpressionGutterMark -> sourceMark.getPsiElement().putUserData(SourceKey.GutterMark, sourceMark)
                     is ExpressionInlayMark -> sourceMark.getPsiElement().putUserData(SourceKey.InlayMark, sourceMark)
                 }
 
@@ -184,7 +186,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         log.trace("Creating source mark. Expression: $psiExpression - Type: $type")
         return when (type) {
             SourceMark.Type.GUTTER -> {
-                TODO("Not yet implemented")
+                ExpressionGutterMark(this, psiExpression)
             }
             SourceMark.Type.INLAY -> {
                 ExpressionInlayMark(this, psiExpression)

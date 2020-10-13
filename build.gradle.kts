@@ -69,5 +69,5 @@ tasks {
 dockerCompose {
     dockerComposeWorkingDirectory = "./test/e2e"
     useComposeFiles = listOf("./docker-compose.yml")
-    captureContainersOutput = true
+    //captureContainersOutput = true
 }

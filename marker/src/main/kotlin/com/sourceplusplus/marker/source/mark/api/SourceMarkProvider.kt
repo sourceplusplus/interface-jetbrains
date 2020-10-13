@@ -5,7 +5,7 @@ import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 
 /**
- * todo: description.
+ * Returns a [SourceMark] given a PSI element.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
