@@ -15,22 +15,19 @@ var getExternal = findGetParameter("external");
 var externalPortal = (getExternal) ? (getExternal === 'true') : false;
 var getDarkMode = findGetParameter("dark_mode");
 var darkMode = (getDarkMode) ? (getDarkMode === 'true') : false;
-var getHideOverviewTab = findGetParameter("hide_overview_tab");
-var hideOverviewTab = (getHideOverviewTab) ? (getHideOverviewTab === 'true') : false;
+var getHideActivityTab = findGetParameter("hide_activity_tab");
+var hideActivityTab = (getHideActivityTab) ? (getHideActivityTab === 'true') : false;
 
 var mainGetQuery = '?portalUuid=' + portalUuid;
 var mainGetQueryWithoutPortalUuid = "";
-if (traceOrderType) {
-    mainGetQueryWithoutPortalUuid += '&order_type=' + traceOrderType;
-}
 if (externalPortal) {
     mainGetQueryWithoutPortalUuid += '&external=true';
 }
 if (darkMode) {
     mainGetQueryWithoutPortalUuid += '&dark_mode=true';
 }
-if (hideOverviewTab) {
-    mainGetQueryWithoutPortalUuid += '&hide_overview_tab=true';
+if (hideActivityTab) {
+    mainGetQueryWithoutPortalUuid += '&hide_activity_tab=true';
 }
 mainGetQuery += mainGetQueryWithoutPortalUuid;
 

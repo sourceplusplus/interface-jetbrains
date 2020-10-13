@@ -20,14 +20,14 @@ class ProtocolAddress {
             const val ChangedPortalArtifact = "ChangedPortalArtifact"
 
             //Portal - Overview
-            const val RealOverviewTabOpened = "RealOverviewTabOpened"
-            const val RefreshRealOverview = "RefreshRealOverview"
-
-            //Portal - Overview //todo: rename to activity
             const val OverviewTabOpened = "OverviewTabOpened"
+            const val RefreshOverview = "RefreshOverview"
+
+            //Portal - Activity
+            const val ActivityTabOpened = "ActivityTabOpened"
             const val SetMetricTimeFrame = "SetMetricTimeFrame"
             const val SetActiveChartMetric = "SetActiveChartMetric"
-            const val RefreshOverview = "RefreshOverview"
+            const val RefreshActivity = "RefreshActivity"
             const val ArtifactMetricUpdated = "ArtifactMetricUpdated"
 
             //Portal - Traces
@@ -55,8 +55,8 @@ class ProtocolAddress {
                 return "$portalUuid-UpdateEndpoints"
             }
 
-            fun ClearOverview(portalUuid: String): String {
-                return "$portalUuid-ClearOverview"
+            fun ClearActivity(portalUuid: String): String {
+                return "$portalUuid-ClearActivity"
             }
 
             fun UpdateChart(portalUuid: String): String {

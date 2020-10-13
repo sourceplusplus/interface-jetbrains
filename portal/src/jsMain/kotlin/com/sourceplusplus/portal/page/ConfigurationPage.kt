@@ -25,8 +25,8 @@ class ConfigurationPage(private val portalUuid: String) {
 
         root.append {
             portalNav {
-                navItem(REAL_OVERVIEW)
                 navItem(OVERVIEW)
+                navItem(ACTIVITY)
                 navItem(TRACES) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                 }

@@ -2,10 +2,9 @@ package com.sourceplusplus.portal.backend
 
 import com.sourceplusplus.portal.PortalViewTracker
 import com.sourceplusplus.portal.display.ConfigurationDisplay
-import com.sourceplusplus.portal.display.OverviewDisplay
+import com.sourceplusplus.portal.display.ActivityDisplay
 import com.sourceplusplus.portal.display.TracesDisplay
 import io.netty.buffer.Unpooled
-import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
@@ -38,7 +37,7 @@ class PortalServer : CoroutineVerticle() {
 //    }
 
     override suspend fun start() {
-        vertx.deployVerticleAwait(OverviewDisplay())
+        vertx.deployVerticleAwait(ActivityDisplay())
         vertx.deployVerticleAwait(TracesDisplay())
         vertx.deployVerticleAwait(ConfigurationDisplay(false)) //todo: dynamic
         vertx.deployVerticleAwait(PortalViewTracker())
@@ -52,9 +51,9 @@ class PortalServer : CoroutineVerticle() {
 //        router.route("/*").handler(StaticHandler.create())
 
         // Routes
-        router.get("/").coroutineHandler { ctx -> getRealOverview(ctx) } //todo: could make whole application overview
-        router.get("/overview").coroutineHandler { ctx -> getOverview(ctx) }
-        router.get("/overview.html").coroutineHandler { ctx -> getOverview(ctx) }
+        router.get("/").coroutineHandler { ctx -> getOverview(ctx) } //todo: could make whole application overview
+        router.get("/activity").coroutineHandler { ctx -> getActivity(ctx) }
+        router.get("/activity.html").coroutineHandler { ctx -> getActivity(ctx) }
         router.get("/traces").coroutineHandler { ctx -> getTraces(ctx) }
         router.get("/traces.html").coroutineHandler { ctx -> getTraces(ctx) }
         router.get("/configuration").coroutineHandler { ctx -> getConfiguration(ctx) }
@@ -77,7 +76,7 @@ class PortalServer : CoroutineVerticle() {
             .listenAwait(config.getInteger("http.port", 8080))
     }
 
-    private suspend fun getRealOverview(ctx: RoutingContext) {
+    private suspend fun getOverview(ctx: RoutingContext) {
         withContext(Dispatchers.Default) {
             ctx.respond(buildString {
                 appendHTML().html {
@@ -91,12 +90,12 @@ class PortalServer : CoroutineVerticle() {
         }
     }
 
-    private suspend fun getOverview(ctx: RoutingContext) {
+    private suspend fun getActivity(ctx: RoutingContext) {
         withContext(Dispatchers.Default) {
             ctx.respond(buildString {
                 appendHTML().html {
                     head {
-                        commonHead("Overview - SourceMarker")
+                        commonHead("Activity - SourceMarker")
                         script { src = "echarts.min.js" }
                         script { src = "js/views/overview_view.js" }
                     }

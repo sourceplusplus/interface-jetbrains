@@ -7,12 +7,11 @@ import com.sourceplusplus.portal.extensions.displayCard
 import com.sourceplusplus.portal.extensions.updateChart
 import com.sourceplusplus.protocol.ArtifactNameUtils.getShortQualifiedFunctionName
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactMetricUpdated
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ActivityTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetMetricTimeFrame
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearOverview
-import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearActivity
 import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.ArtifactMetrics
 import com.sourceplusplus.protocol.portal.*
@@ -40,10 +39,10 @@ import kotlin.collections.ArrayList
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
+class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
 
     companion object {
-        private val log = LoggerFactory.getLogger(OverviewDisplay::class.java)
+        private val log = LoggerFactory.getLogger(ActivityDisplay::class.java)
         private val decimalFormat = DecimalFormat(".#")
     }
 
@@ -52,16 +51,16 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
 
         vertx.setPeriodic(5000) {
             SourcePortal.getPortals().forEach {
-                if (it.currentTab == PageType.OVERVIEW) {
+                if (it.currentTab == PageType.ACTIVITY) {
                     //todo: only update if external or internal and currently displaying
-                    vertx.eventBus().send(RefreshOverview, it)
+                    vertx.eventBus().send(RefreshActivity, it)
                 }
             }
         }
 
         //refresh with stats from cache (if avail)
-        vertx.eventBus().consumer<JsonObject>(OverviewTabOpened) {
-            log.info("Overview tab opened")
+        vertx.eventBus().consumer<JsonObject>(ActivityTabOpened) {
+            log.info("Activity tab opened")
             val portalUuid = it.body().getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
             portal.currentTab = thisTab
@@ -72,7 +71,7 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
             val artifactMetricResult = it.body()
             SourcePortal.getPortals(artifactMetricResult.appUuid, artifactMetricResult.artifactQualifiedName)
                 .forEach { portal ->
-                    portal.overviewView.cacheMetricResult(artifactMetricResult)
+                    portal.activityView.cacheMetricResult(artifactMetricResult)
                     updateUI(portal)
                 }
         }
@@ -80,21 +79,21 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
         vertx.eventBus().consumer<JsonObject>(SetMetricTimeFrame) {
             val request = JsonObject.mapFrom(it.body())
             val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
-            val view = portal.overviewView
+            val view = portal.activityView
             view.timeFrame = QueryTimeFrame.valueOf(request.getString("metricTimeFrame").toUpperCase())
-            log.info("Overview time frame set to: " + view.timeFrame)
+            log.info("Activity time frame set to: " + view.timeFrame)
             updateUI(portal)
 
-            vertx.eventBus().send(RefreshOverview, portal)
+            vertx.eventBus().send(RefreshActivity, portal)
         }
         vertx.eventBus().consumer<JsonObject>(SetActiveChartMetric) {
             val request = JsonObject.mapFrom(it.body())
             val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
-            portal.overviewView.activeChartMetric = valueOf(request.getString("metricType"))
+            portal.activityView.activeChartMetric = valueOf(request.getString("metricType"))
             updateUI(portal)
 
-            vertx.eventBus().send(ClearOverview(portal.portalUuid), null)
-            vertx.eventBus().send(RefreshOverview, portal)
+            vertx.eventBus().send(ClearActivity(portal.portalUuid), null)
+            vertx.eventBus().send(RefreshActivity, portal)
         }
         log.info("{} started", javaClass.simpleName)
     }
@@ -104,7 +103,7 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
             return
         }
 
-        val artifactMetricResult = portal.overviewView.metricResult ?: return
+        val artifactMetricResult = portal.activityView.metricResult ?: return
         if (log.isTraceEnabled) {
             log.trace(
                 "Artifact metrics updated. Portal uuid: {} - App uuid: {} - Artifact qualified name: {} - Time frame: {}",
@@ -118,8 +117,8 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
         artifactMetricResult.artifactMetrics.forEach {
             updateCard(portal, artifactMetricResult, it)
             if ((it.metricType.responseTimePercentile
-                        && portal.overviewView.activeChartMetric == ResponseTime_Average)
-                || it.metricType == portal.overviewView.activeChartMetric
+                        && portal.activityView.activeChartMetric == ResponseTime_Average)
+                || it.metricType == portal.activityView.activeChartMetric
             ) {
                 updateSplineGraph(portal, artifactMetricResult, it)
             }

@@ -9,11 +9,11 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDispl
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ConfigurationTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RealOverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.TracesTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearOverview
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayArtifactConfiguration
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.trace.*
@@ -58,14 +58,14 @@ fun main() {
         it.reply(JsonObject().put("portalUuid", "null"))
     }
 
-    vertx.eventBus().consumer<Void>(RealOverviewTabOpened) {
+    vertx.eventBus().consumer<Void>(OverviewTabOpened) {
         displayEndpoints(vertx)
     }
 
-    vertx.eventBus().consumer<Void>(OverviewTabOpened) {
+    vertx.eventBus().consumer<Void>(ActivityTabOpened) {
         updateCards(vertx)
 
-        vertx.eventBus().publish(ClearOverview("null"), "")
+        vertx.eventBus().publish(ClearActivity("null"), "")
         displayChart(vertx)
     }
     vertx.setPeriodic(2500) {

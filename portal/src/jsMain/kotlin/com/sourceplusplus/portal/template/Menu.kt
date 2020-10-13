@@ -18,25 +18,25 @@ fun FlowContent.menu(block: FlowContent.() -> Unit) {
 
 fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowContent.() -> Unit)? = null) {
     when (pageType) {
-        PageType.REAL_OVERVIEW -> apply {
+        PageType.OVERVIEW -> apply {
             if (isActive) {
                 a(classes = "item active_tab") { +"Overview" }
             } else {
                 a(classes = "item inactive_tab") {
-                    id = "sidebar_real_overview_link"
+                    id = "sidebar_overview_link"
                     href = "/"
                     +"Overview"
                 }
             }
         }
-        PageType.OVERVIEW -> apply {
+        PageType.ACTIVITY -> apply {
             if (isActive) {
                 a(classes = "item active_tab") { +"Dashboard" }
             } else {
                 a(classes = "item inactive_tab") {
-                    id = "sidebar_overview_link"
-                    href = "overview.html"
-                    +"Overview"
+                    id = "sidebar_activity_link"
+                    href = "activity.html"
+                    +"Activity"
                 }
             }
         }
