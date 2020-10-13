@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.extensions.eb
+import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ActivityTabOpened
@@ -32,6 +32,7 @@ class ActivityPage(
     override val externalPortal: Boolean = false
 ) : IActivityPage {
 
+    private val eb = EventBus("http://localhost:8888/eventbus")
     override var currentMetricType: MetricType = MetricType.Throughput_Average
     override var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
     private var tooltipMeasurement = "ms"
@@ -43,13 +44,13 @@ class ActivityPage(
             js("portalConnected()")
             clickedViewAverageResponseTimeChart() //default = avg resp time
 
-            eb.registerHandler(ClearActivity(portalUuid)) { error: String, message: Any ->
+            eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, message: dynamic ->
                 js("clearActivity();")
             }
-            eb.registerHandler(DisplayCard(portalUuid)) { error: String, message: Any ->
+            eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
                 js("displayCard(message.body);")
             }
-            eb.registerHandler(UpdateChart(portalUuid)) { error: String, message: Any ->
+            eb.registerHandler(UpdateChart(portalUuid)) { _: dynamic, message: dynamic ->
                 js("updateChart(message.body);")
             }
 

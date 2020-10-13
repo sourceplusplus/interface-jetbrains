@@ -1,4 +1,4 @@
-var eb = new EventBus('http://localhost:8888/eventbus');
+//var eb = new EventBus('http://localhost:8888/eventbus');
 //eb.enableReconnect(true); //todo: more logic behind this
 //todo: it is likely that a disconnect signifies the portal is gone
 //todo: so on reconnect there will need to be another portal uuid registered
