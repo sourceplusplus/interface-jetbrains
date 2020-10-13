@@ -81,7 +81,6 @@ class OverviewPage(
 
     override fun displayEndpoints(endpointResult: EndpointResult) {
         console.log("Displaying endpoints")
-        console.log("first endpoint: " + endpointResult.endpointMetrics[0].artifactQualifiedName)
         val root: Element = document.getElementById("endpoint_body_table")!!
         root.append {
             endpointResult.endpointMetrics.forEach {
