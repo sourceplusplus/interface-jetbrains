@@ -111,8 +111,8 @@ var overviewChartOptions = {
     series: [series0, series1, series2, series3, series4, regressionSeries]
 };
 
-function clearOverview() {
-    console.log("Clearing overview");
+function clearActivity() {
+    console.log("Clearing activity");
 
     series0.data = [];
     series1.data = [];

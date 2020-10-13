@@ -8,7 +8,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshRealOverview
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
 import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
 import io.vertx.core.json.JsonObject
@@ -62,7 +62,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
 
     private suspend fun performClassPopup(sourcePortal: SourcePortal, sourceMark: ClassSourceMark) {
         vertx.eventBus().send(
-            RefreshRealOverview,
+            RefreshOverview,
             JsonObject().put("portalUuid", sourcePortal.portalUuid)
         )
         //todo: get all endpoint keys for current file
@@ -72,7 +72,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
 //            .map { it.getUserData(ENDPOINT_ID)!! }
 //        println("Endpoint ids: $endpointIds")
 
-        //todo: disable traces page, disable overview page
+        //todo: disable traces page, disable activity page
         //todo: ability to show class popup directly above focus instead of above class
         lastDisplayedInternalPortal = sourcePortal
     }

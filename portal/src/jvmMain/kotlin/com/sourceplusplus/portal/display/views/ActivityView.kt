@@ -7,12 +7,12 @@ import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Holds the current view for the Overview portal tab.
+ * Holds the current view for the Activity portal tab.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class OverviewView(
+class ActivityView(
     val portal: SourcePortal
 ) {
 
@@ -20,7 +20,7 @@ class OverviewView(
     var timeFrame = QueryTimeFrame.LAST_5_MINUTES
     var activeChartMetric = MetricType.ResponseTime_Average
 
-    fun cloneView(view: OverviewView) {
+    fun cloneView(view: ActivityView) {
         metricResultCache = view.metricResultCache
         timeFrame = view.timeFrame
         activeChartMetric = view.activeChartMetric

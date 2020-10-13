@@ -44,7 +44,7 @@ import kotlin.js.json
 class TracesPage(
     private val portalUuid: String,
     private val externalPortal: Boolean = false,
-    private val hideOverviewTab: Boolean = false,
+    private val hideActivityTab: Boolean = false,
     private val traceOrderType: TraceOrderType = LATEST_TRACES,
     private var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
 ) {
@@ -79,8 +79,8 @@ class TracesPage(
 
         root.append {
             portalNav {
-                navItem(REAL_OVERVIEW)
                 navItem(OVERVIEW)
+                navItem(ACTIVITY)
                 navItem(TRACES, isActive = true) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                 }
@@ -362,9 +362,9 @@ class TracesPage(
     private fun setupUI() {
         resetUI()
 
-        if (hideOverviewTab) {
-            jq("#overview_link").css("display", "none")
-            jq("#sidebar_overview_link").css("display", "none")
+        if (hideActivityTab) {
+            jq("#activity_link").css("display", "none")
+            jq("#sidebar_activity_link").css("display", "none")
         }
 
         jq("input[type='text']").on("click") {

@@ -10,28 +10,28 @@ fun FlowContent.tabs(block: FlowContent.() -> Unit) {
 
 fun FlowContent.tabItem(pageType: PageType, isActive: Boolean, block: (FlowContent.() -> Unit)? = null) {
     when (pageType) {
-        PageType.REAL_OVERVIEW -> apply {
+        PageType.OVERVIEW -> apply {
             if (isActive) {
                 a(classes = "ui dropdown item active_tab") {
                     i("icon demo-icon satellite")
                 }
             } else {
                 a(classes = "ui item hide_on_toggle") {
-                    id = "real_overview_link"
+                    id = "overview_link"
                     href = "/"
                     i("icon demo-icon satellite inactive_tab")
                 }
             }
         }
-        PageType.OVERVIEW -> apply {
+        PageType.ACTIVITY -> apply {
             if (isActive) {
                 a(classes = "ui dropdown item active_tab") {
                     i("icon demo-icon dashboard")
                 }
             } else {
                 a(classes = "ui item hide_on_toggle") {
-                    id = "overview_link"
-                    href = "overview.html"
+                    id = "activity_link"
+                    href = "activity.html"
                     i("icon demo-icon dashboard inactive_tab")
                 }
             }

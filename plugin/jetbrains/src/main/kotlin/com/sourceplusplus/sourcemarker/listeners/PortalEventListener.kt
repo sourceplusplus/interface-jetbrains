@@ -18,8 +18,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactMetr
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactTraceUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClosePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.QueryTraceStack
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshRealOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
@@ -43,19 +43,19 @@ class PortalEventListener : CoroutineVerticle() {
 
     override suspend fun start() {
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
-        vertx.eventBus().consumer<JsonObject>(RefreshRealOverview) {
+        vertx.eventBus().consumer<JsonObject>(RefreshOverview) {
             val portalUuid = it.body().getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
             runReadAction {
                 val fileMarker = SourceMarkerPlugin.getSourceFileMarker(portal.viewingPortalArtifact)!!
                 GlobalScope.launch(vertx.dispatcher()) {
-                    refreshRealOverview(fileMarker, portal)
+                    refreshOverview(fileMarker, portal)
                 }
             }
         }
-        vertx.eventBus().consumer<SourcePortal>(RefreshOverview) {
+        vertx.eventBus().consumer<SourcePortal>(RefreshActivity) {
             GlobalScope.launch(vertx.dispatcher()) {
-                refreshOverview(it.body())
+                refreshActivity(it.body())
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshTraces) {
@@ -97,7 +97,7 @@ class PortalEventListener : CoroutineVerticle() {
         }
     }
 
-    private suspend fun refreshRealOverview(fileMarker: SourceFileMarker, portal: SourcePortal) {
+    private suspend fun refreshOverview(fileMarker: SourceFileMarker, portal: SourcePortal) {
         val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
             .filter {
                 it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
@@ -109,7 +109,7 @@ class PortalEventListener : CoroutineVerticle() {
                 listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
                 it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it)!!,
                 ZonedDuration(
-                    ZonedDateTime.now().minusMinutes(portal.overviewView.timeFrame.minutes.toLong()),
+                    ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
                     ZonedDateTime.now(),
                     SkywalkingClient.DurationStep.MINUTE
                 )
@@ -118,7 +118,7 @@ class PortalEventListener : CoroutineVerticle() {
             val metricResult = toProtocol(
                 portal.appUuid,
                 it.artifactQualifiedName,
-                portal.overviewView.timeFrame,
+                portal.activityView.timeFrame,
                 metricsRequest,
                 metrics
             )
@@ -131,7 +131,7 @@ class PortalEventListener : CoroutineVerticle() {
         )
     }
 
-    private suspend fun refreshOverview(portal: SourcePortal) {
+    private suspend fun refreshActivity(portal: SourcePortal) {
         val sourceMark =
             SourceMarkerPlugin.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null && sourceMark is MethodSourceMark) {
@@ -141,7 +141,7 @@ class PortalEventListener : CoroutineVerticle() {
                     listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
                     endpointId,
                     ZonedDuration(
-                        ZonedDateTime.now().minusMinutes(portal.overviewView.timeFrame.minutes.toLong()),
+                        ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
                         ZonedDateTime.now(),
                         SkywalkingClient.DurationStep.MINUTE
                     )
@@ -150,7 +150,7 @@ class PortalEventListener : CoroutineVerticle() {
                 val metricResult = toProtocol(
                     portal.appUuid,
                     portal.viewingPortalArtifact,
-                    portal.overviewView.timeFrame,
+                    portal.activityView.timeFrame,
                     metricsRequest,
                     metrics
                 )
@@ -161,7 +161,7 @@ class PortalEventListener : CoroutineVerticle() {
 //                    endpointId,
 //                    5,
 //                    ZonedDuration(
-//                        ZonedDateTime.now().minusMinutes(portal.overviewView.timeFrame.minutes.toLong()),
+//                        ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
 //                        ZonedDateTime.now(),
 //                        SkywalkingClient.DurationStep.MINUTE
 //                    )
