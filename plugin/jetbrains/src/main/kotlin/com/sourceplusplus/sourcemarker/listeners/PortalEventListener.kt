@@ -1,7 +1,9 @@
 package com.sourceplusplus.sourcemarker.listeners
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runReadAction
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
@@ -17,8 +19,14 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactTrac
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClosePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshRealOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
+import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
+import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
+import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
@@ -35,6 +43,16 @@ class PortalEventListener : CoroutineVerticle() {
 
     override suspend fun start() {
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
+        vertx.eventBus().consumer<JsonObject>(RefreshRealOverview) {
+            val portalUuid = it.body().getString("portalUuid")
+            val portal = SourcePortal.getPortal(portalUuid)!!
+            runReadAction {
+                val fileMarker = SourceMarkerPlugin.getSourceFileMarker(portal.viewingPortalArtifact)!!
+                GlobalScope.launch(vertx.dispatcher()) {
+                    refreshRealOverview(fileMarker, portal)
+                }
+            }
+        }
         vertx.eventBus().consumer<SourcePortal>(RefreshOverview) {
             GlobalScope.launch(vertx.dispatcher()) {
                 refreshOverview(it.body())
@@ -77,6 +95,40 @@ class PortalEventListener : CoroutineVerticle() {
                 }
             }
         }
+    }
+
+    private suspend fun refreshRealOverview(fileMarker: SourceFileMarker, portal: SourcePortal) {
+        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
+            .filter {
+                it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
+            }
+
+        val endpointMetricResults = mutableListOf<ArtifactMetricResult>()
+        endpointMarks.forEach {
+            val metricsRequest = GetEndpointMetrics(
+                listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+                it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it)!!,
+                ZonedDuration(
+                    ZonedDateTime.now().minusMinutes(portal.overviewView.timeFrame.minutes.toLong()),
+                    ZonedDateTime.now(),
+                    SkywalkingClient.DurationStep.MINUTE
+                )
+            )
+            val metrics = EndpointMetricsTracker.getMetrics(metricsRequest, vertx)
+            val metricResult = toProtocol(
+                portal.appUuid,
+                it.artifactQualifiedName,
+                portal.overviewView.timeFrame,
+                metricsRequest,
+                metrics
+            )
+            endpointMetricResults.add(metricResult)
+        }
+
+        vertx.eventBus().send(
+            UpdateEndpoints(portal.portalUuid),
+            JsonObject(Json.encode(EndpointResult(endpointMetricResults)))
+        )
     }
 
     private suspend fun refreshOverview(portal: SourcePortal) {

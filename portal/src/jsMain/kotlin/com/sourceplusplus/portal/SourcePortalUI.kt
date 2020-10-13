@@ -13,7 +13,7 @@ fun main() {
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
         when (window.location.pathname) {
-            "/overview" -> OverviewPage(portalUuid).renderPage()
+            "/overview", "/overview.html" -> OverviewPage(portalUuid).renderPage()
             "/traces", "/traces.html" -> {
                 val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
                 val hideOverviewTab = queryParams.getOrElse("hide_overview_tab", { "false" }).toBoolean()

@@ -10,7 +10,6 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
-import io.vertx.ext.web.handler.LoggerHandler
 import io.vertx.ext.web.handler.ResponseTimeHandler
 import io.vertx.kotlin.core.deployVerticleAwait
 import io.vertx.kotlin.core.http.listenAwait
@@ -86,7 +85,7 @@ class PortalServer : CoroutineVerticle() {
                         commonHead("Overview - SourceMarker")
                         script { src = "themes/default/assets/all.min.js" }
                     }
-                    body("overflow_y_hidden") { id = "root" }
+                    body { id = "root" }
                 }
             })
         }

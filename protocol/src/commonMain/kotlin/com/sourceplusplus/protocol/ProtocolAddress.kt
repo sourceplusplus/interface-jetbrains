@@ -19,8 +19,9 @@ class ProtocolAddress {
             const val ClosedPortal = "ClosedPortal"
             const val ChangedPortalArtifact = "ChangedPortalArtifact"
 
-            //Portal - Real Overview
+            //Portal - Overview
             const val RealOverviewTabOpened = "RealOverviewTabOpened"
+            const val RefreshRealOverview = "RefreshRealOverview"
 
             //Portal - Overview //todo: rename to activity
             const val OverviewTabOpened = "OverviewTabOpened"
