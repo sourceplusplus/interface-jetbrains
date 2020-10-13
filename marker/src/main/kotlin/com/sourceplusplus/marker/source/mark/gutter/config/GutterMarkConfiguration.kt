@@ -4,10 +4,11 @@ import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkCompone
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
 import com.sourceplusplus.marker.source.mark.api.config.SourceMarkConfiguration
 import com.sourceplusplus.marker.source.mark.api.filter.ApplySourceMarkFilter
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import javax.swing.Icon
 
 /**
- * todo: description.
+ * Used to configure [GutterMark]s.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

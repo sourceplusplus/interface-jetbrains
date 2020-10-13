@@ -45,6 +45,17 @@ let series4 = {
     areaStyle: {},
     data: []
 };
+let regressionSeries = {
+    name: 'Predicted Regression',
+    type: 'line',
+    color: "#000",
+    hoverAnimation: false,
+    symbol: 'square',
+    symbolSize: 8,
+    showSymbol: true,
+    areaStyle: {},
+    data: []
+};
 
 var overviewChart = null;
 function loadChart() {
@@ -97,7 +108,7 @@ var overviewChartOptions = {
             color: labelColor
         }
     },
-    series: [series0, series1, series2, series3, series4]
+    series: [series0, series1, series2, series3, series4, regressionSeries]
 };
 
 function clearOverview() {
@@ -108,6 +119,7 @@ function clearOverview() {
     series2.data = [];
     series3.data = [];
     series4.data = [];
+    regressionSeries.data = [];
     overviewChart.setOption({
         series: []
     });
@@ -165,9 +177,11 @@ function updateChart(chartData) { //todo-chess-equality: [chartData: SplintChart
             series3.data = list;
         } else if (seriesData.seriesIndex === 4) {
             series4.data = list;
+        } else if (seriesData.series_index === 5) {
+            regressionSeries.data = list;
         }
     }
     overviewChart.setOption({
-        series: [series0, series1, series2, series3, series4]
+        series: [series0, series1, series2, series3, series4, regressionSeries]
     })
 }

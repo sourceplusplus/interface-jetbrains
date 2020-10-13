@@ -51,4 +51,14 @@ tasks {
             kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=compatibility")
         }
     }
+
+    test {
+        testLogging {
+            events("passed", "skipped", "failed")
+            setExceptionFormat("full")
+
+            outputs.upToDateWhen { false }
+            showStandardStreams = true
+        }
+    }
 }

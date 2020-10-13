@@ -4,7 +4,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 
 /**
- * todo: description.
+ * Used to configure, display, and dispose [SourceMark] components.
  *
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

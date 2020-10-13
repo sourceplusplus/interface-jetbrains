@@ -71,6 +71,7 @@ class SkywalkingClient(
             QueryBasicTracesQuery(
                 TraceQueryCondition(
                     endpointId = Input.optional(request.endpointId),
+                    endpointName = Input.optional(request.endpointName),
                     queryDuration = Input.optional(request.zonedDuration.toDuration(this)),
                     queryOrder = request.orderType.toQueryOrder(),
                     traceState = request.orderType.toTraceState(),
@@ -167,7 +168,7 @@ class SkywalkingClient(
      *
      * @since 0.0.1
      */
-    class LocalMessageCodec<T> internal constructor() : MessageCodec<T, T> {
+    class LocalMessageCodec<T>() : MessageCodec<T, T> {
         override fun encodeToWire(buffer: Buffer, o: T): Unit =
             throw UnsupportedOperationException("Not supported yet.")
 

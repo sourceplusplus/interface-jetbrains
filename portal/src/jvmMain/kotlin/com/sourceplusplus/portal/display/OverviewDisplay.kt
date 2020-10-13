@@ -12,6 +12,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverv
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetMetricTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearOverview
+import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.ArtifactMetrics
 import com.sourceplusplus.protocol.portal.*
@@ -166,6 +167,28 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
             seriesData = Collections.singletonList(seriesData)
         )
         vertx.eventBus().updateChart(portal.portalUuid, splineChart)
+
+//        if (portal.advice.isNotEmpty()) {
+//            for (advice in portal.advice) {
+//                if (advice is RampDetectionAdvice) {
+//                    val regressionSeriesData = SplineSeriesData(
+//                        seriesIndex = 5,
+//                        times = times.map { it.epochSeconds }, //todo: no epochSeconds
+//                        values = times.mapIndexed { i, it ->
+//                            if (splineChart.seriesData[0].values[i] == 0.0) {
+//                                0.0
+//                            } else {
+//                                advice.regression.predict(it.toEpochMilliseconds().toDouble())
+//                            }
+//                        }.toDoubleArray()
+//                    )
+//                    val regressionSplineChart = splineChart.copy(
+//                        seriesData = Collections.singletonList(regressionSeriesData)
+//                    )
+//                    vertx.eventBus().updateChart(portal.portalUuid, regressionSplineChart)
+//                }
+//            }
+//        }
     }
 
     fun updateCard(portal: SourcePortal, metricResult: ArtifactMetricResult, artifactMetrics: ArtifactMetrics) {

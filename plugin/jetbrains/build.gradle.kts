@@ -58,6 +58,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.11.1")
     implementation("io.dropwizard.metrics:metrics-core:4.1.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
+    implementation("org.jooq:jooq:3.13.5")
 }
 
 tasks {
