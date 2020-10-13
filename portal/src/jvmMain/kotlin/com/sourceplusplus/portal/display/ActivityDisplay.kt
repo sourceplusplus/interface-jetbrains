@@ -47,8 +47,6 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
     }
 
     override suspend fun start() {
-        super.start()
-
         vertx.setPeriodic(5000) {
             SourcePortal.getPortals().forEach {
                 if (it.currentTab == PageType.ACTIVITY) {

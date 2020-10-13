@@ -7,6 +7,7 @@ import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
+import com.sourceplusplus.monitor.skywalking.average
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointMetrics
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
@@ -14,16 +15,21 @@ import com.sourceplusplus.monitor.skywalking.toProtocol
 import com.sourceplusplus.monitor.skywalking.track.EndpointMetricsTracker
 import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.portal.extensions.fromPerSecondToPrettyFrequency
+import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactTraceUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClosePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
-import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
+import com.sourceplusplus.protocol.artifact.*
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
+import com.sourceplusplus.protocol.portal.MetricType
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -31,6 +37,9 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import java.lang.UnsupportedOperationException
+import java.text.DecimalFormat
 import java.time.ZonedDateTime
 
 /**
@@ -43,6 +52,12 @@ class PortalEventListener : CoroutineVerticle() {
 
     override suspend fun start() {
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
+        vertx.eventBus().consumer<JsonObject>(OverviewTabOpened) {
+            val portalUuid = it.body().getString("portalUuid")
+            val portal = SourcePortal.getPortal(portalUuid)!!
+            portal.currentTab = PageType.OVERVIEW
+            vertx.eventBus().send(RefreshOverview, it.body())
+        }
         vertx.eventBus().consumer<JsonObject>(RefreshOverview) {
             val portalUuid = it.body().getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
@@ -103,31 +118,63 @@ class PortalEventListener : CoroutineVerticle() {
                 it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
             }
 
-        val endpointMetricResults = mutableListOf<ArtifactMetricResult>()
+        val fetchMetricTypes = listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
+        val requestDuration = ZonedDuration(
+            ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
+            ZonedDateTime.now(),
+            SkywalkingClient.DurationStep.MINUTE
+        )
+        val endpointMetricResults = mutableListOf<ArtifactSummarizedResult>()
         endpointMarks.forEach {
             val metricsRequest = GetEndpointMetrics(
-                listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+                fetchMetricTypes,
                 it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it)!!,
-                ZonedDuration(
-                    ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
-                    ZonedDateTime.now(),
-                    SkywalkingClient.DurationStep.MINUTE
-                )
+                requestDuration
             )
             val metrics = EndpointMetricsTracker.getMetrics(metricsRequest, vertx)
-            val metricResult = toProtocol(
-                portal.appUuid,
-                it.artifactQualifiedName,
-                portal.activityView.timeFrame,
-                metricsRequest,
-                metrics
+            val endpointName = it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointName(it)!!
+
+            val summarizedMetrics = mutableListOf<ArtifactSummarizedMetrics>()
+            for (i in metrics.indices) {
+                val avg = metrics[i].values.average()
+                val metricType = MetricType.realValueOf(fetchMetricTypes[i])
+                val summaryValue = when (metricType) {
+                    MetricType.Throughput_Average -> (avg / 60.0).fromPerSecondToPrettyFrequency()
+                    MetricType.ResponseTime_Average -> avg.toInt().toPrettyDuration()
+                    MetricType.ServiceLevelAgreement_Average -> {
+                        if (avg == 0.0) "0%" else DecimalFormat(".#").format(avg / 100.0).toString() + "%"
+                    }
+                    else -> throw UnsupportedOperationException(fetchMetricTypes[i])
+                }
+                summarizedMetrics.add(ArtifactSummarizedMetrics(metricType, summaryValue))
+            }
+
+            endpointMetricResults.add(
+                ArtifactSummarizedResult(
+                    ArtifactQualifiedName(
+                        it.artifactQualifiedName,
+                        "todo",
+                        ArtifactType.ENDPOINT,
+                        operationName = endpointName
+                    ),
+                    summarizedMetrics
+                )
             )
-            endpointMetricResults.add(metricResult)
         }
 
         vertx.eventBus().send(
             UpdateEndpoints(portal.portalUuid),
-            JsonObject(Json.encode(EndpointResult(endpointMetricResults)))
+            JsonObject(
+                Json.encode(
+                    EndpointResult(
+                        portal.appUuid, portal.activityView.timeFrame,
+                        start = Instant.fromEpochMilliseconds(requestDuration.start.toInstant().toEpochMilli()),
+                        stop = Instant.fromEpochMilliseconds(requestDuration.stop.toInstant().toEpochMilli()),
+                        step = requestDuration.step.name,
+                        endpointMetricResults
+                    )
+                )
+            )
         )
     }
 

@@ -23,8 +23,6 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
     private var updateConfigurationPermitted: Boolean = false
 
     override suspend fun start() {
-        super.start()
-
         updateConfigurationPermitted = pluginAvailable
 
         vertx.eventBus().consumer<JsonObject>(ConfigurationTabOpened) {
