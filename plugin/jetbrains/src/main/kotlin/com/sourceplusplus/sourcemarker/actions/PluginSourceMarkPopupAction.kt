@@ -3,18 +3,12 @@ package com.sourceplusplus.sourcemarker.actions
 import com.intellij.openapi.editor.Editor
 import com.sourceplusplus.marker.source.mark.SourceMarkPopupAction
 import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
-import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
-import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
-import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 /**
@@ -32,13 +26,17 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
     private var lastDisplayedInternalPortal: SourcePortal? = null
 
     override fun performPopupAction(sourceMark: SourceMark, editor: Editor) {
-        //register source portal (if necessary)
         if (sourceMark.getUserData(SOURCE_PORTAL) == null) {
+            //register source portal
             val sourcePortal = SourcePortal.getPortal(
                 //todo: appUuid/portalUuid
                 SourcePortal.register("null", sourceMark.artifactQualifiedName, false)
             )
-            sourceMark.putUserData(SOURCE_PORTAL, sourcePortal)
+            sourceMark.putUserData(SOURCE_PORTAL, sourcePortal!!)
+            if (sourceMark is ClassSourceMark) {
+                //class-based portals start on overview page
+                sourcePortal.currentTab = PageType.OVERVIEW
+            }
 
             sourceMark.addEventListener { event ->
                 if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
@@ -48,39 +46,14 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
         }
         val sourcePortal = sourceMark.getUserData(SOURCE_PORTAL)!!
 
-        when (sourceMark) {
-            is ClassSourceMark -> GlobalScope.launch(vertx.dispatcher()) {
-                performClassPopup(sourcePortal, sourceMark)
-            }
-            is MethodSourceMark -> GlobalScope.launch(vertx.dispatcher()) {
-                performMethodPopup(sourcePortal, sourceMark)
-            }
-        }
-
+        refreshPortalIfNecessary(sourceMark, sourcePortal)
         super.performPopupAction(sourceMark, editor)
     }
 
-    private suspend fun performClassPopup(sourcePortal: SourcePortal, sourceMark: ClassSourceMark) {
-        vertx.eventBus().send(
-            RefreshOverview,
-            JsonObject().put("portalUuid", sourcePortal.portalUuid)
-        )
-        //todo: get all endpoint keys for current file
-//        val endpointIds = sourceMark.sourceFileMarker.getSourceMarks()
-//            .filterIsInstance<MethodSourceMark>()
-//            .filter { it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null }
-//            .map { it.getUserData(ENDPOINT_ID)!! }
-//        println("Endpoint ids: $endpointIds")
-
-        //todo: disable traces page, disable activity page
-        //todo: ability to show class popup directly above focus instead of above class
-        lastDisplayedInternalPortal = sourcePortal
-    }
-
-    private fun performMethodPopup(sourcePortal: SourcePortal, sourceMark: MethodSourceMark) {
+    private fun refreshPortalIfNecessary(sourceMark: SourceMark, sourcePortal: SourcePortal) {
         val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
         if (sourcePortal != lastDisplayedInternalPortal) {
-            val currentUrl = "/${sourcePortal.currentTab.name.toLowerCase()}" +
+            val currentUrl = "/${sourcePortal.currentTab.name.toLowerCase()}.html" +
                     "?portalUuid=${sourcePortal.portalUuid}"
             jcefComponent.getBrowser().cefBrowser.executeJavaScript(
                 "window.location.href = '$currentUrl';", currentUrl, 0
