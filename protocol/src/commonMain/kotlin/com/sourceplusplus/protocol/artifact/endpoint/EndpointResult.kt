@@ -1,6 +1,7 @@
 package com.sourceplusplus.protocol.artifact.endpoint
 
-import com.sourceplusplus.protocol.portal.SplineChart
+import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
+import kotlinx.serialization.Serializable
 
 /**
  * todo: description.
@@ -8,9 +9,7 @@ import com.sourceplusplus.protocol.portal.SplineChart
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Serializable
 data class EndpointResult(
-    val appUuid: String,
-    val start: Long, //todo: Instant
-    val stop: Long, //todo: Instant
-    val charts: List<SplineChart>
+    val endpointMetrics: List<ArtifactMetricResult>
 )

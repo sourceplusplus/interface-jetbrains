@@ -8,10 +8,10 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
-import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_ID
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshRealOverview
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
 import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
+import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -61,12 +61,16 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
     }
 
     private suspend fun performClassPopup(sourcePortal: SourcePortal, sourceMark: ClassSourceMark) {
+        vertx.eventBus().send(
+            RefreshRealOverview,
+            JsonObject().put("portalUuid", sourcePortal.portalUuid)
+        )
         //todo: get all endpoint keys for current file
-        val endpointIds = sourceMark.sourceFileMarker.getSourceMarks()
-            .filterIsInstance<MethodSourceMark>()
-            .filter { it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null }
-            .map { it.getUserData(ENDPOINT_ID)!! }
-        println("Endpoint ids: $endpointIds")
+//        val endpointIds = sourceMark.sourceFileMarker.getSourceMarks()
+//            .filterIsInstance<MethodSourceMark>()
+//            .filter { it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null }
+//            .map { it.getUserData(ENDPOINT_ID)!! }
+//        println("Endpoint ids: $endpointIds")
 
         //todo: disable traces page, disable overview page
         //todo: ability to show class popup directly above focus instead of above class

@@ -157,7 +157,11 @@ fun main() {
 }
 
 fun displayEndpoints(vertx: Vertx) {
-    vertx.eventBus().send(UpdateEndpoints("null"), JsonObject())
+    vertx.eventBus().send(
+        UpdateEndpoints("null"), JsonObject(
+            "{\"endpointMetrics\":[{\"appUuid\":\"null\",\"artifactQualifiedName\":\"spp.example.webapp.controller.WebappController.throwsException()\",\"timeFrame\":\"LAST_5_MINUTES\",\"start\":1602276441,\"stop\":1602276741,\"step\":\"MINUTE\",\"artifactMetrics\":[{\"metricType\":\"Throughput_Average\",\"values\":[60,60,60,60,60,16]},{\"metricType\":\"ResponseTime_Average\",\"values\":[2,2,2,2,1,1]},{\"metricType\":\"ServiceLevelAgreement_Average\",\"values\":[0,0,0,0,0,0]}]},{\"appUuid\":\"null\",\"artifactQualifiedName\":\"spp.example.webapp.controller.WebappController.createUser(java.lang.String,java.lang.String)\",\"timeFrame\":\"LAST_5_MINUTES\",\"start\":1602276442,\"stop\":1602276742,\"step\":\"MINUTE\",\"artifactMetrics\":[{\"metricType\":\"Throughput_Average\",\"values\":[300,300,300,300,300,82]},{\"metricType\":\"ResponseTime_Average\",\"values\":[0,0,0,0,0,0]},{\"metricType\":\"ServiceLevelAgreement_Average\",\"values\":[10000,10000,10000,10000,10000,10000]}]},{\"appUuid\":\"null\",\"artifactQualifiedName\":\"spp.example.webapp.controller.WebappController.userList()\",\"timeFrame\":\"LAST_5_MINUTES\",\"start\":1602276442,\"stop\":1602276742,\"step\":\"MINUTE\",\"artifactMetrics\":[{\"metricType\":\"Throughput_Average\",\"values\":[3000,3000,3000,3000,3000,817]},{\"metricType\":\"ResponseTime_Average\",\"values\":[5,6,7,7,7,9]},{\"metricType\":\"ServiceLevelAgreement_Average\",\"values\":[10000,10000,10000,10000,10000,10000]}]},{\"appUuid\":\"null\",\"artifactQualifiedName\":\"spp.example.webapp.controller.WebappController.getUser(long)\",\"timeFrame\":\"LAST_5_MINUTES\",\"start\":1602276443,\"stop\":1602276743,\"step\":\"MINUTE\",\"artifactMetrics\":[{\"metricType\":\"Throughput_Average\",\"values\":[6000,6000,6000,6000,6000,1635]},{\"metricType\":\"ResponseTime_Average\",\"values\":[0,0,0,0,0,0]},{\"metricType\":\"ServiceLevelAgreement_Average\",\"values\":[9986,9995,9993,9998,9980,9993]}]}]}"
+        )
+    )
 }
 
 fun displayChart(vertx: Vertx) {
