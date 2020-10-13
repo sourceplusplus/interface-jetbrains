@@ -42,12 +42,12 @@ import kotlin.js.json
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class TracesPage(
-    private val portalUuid: String,
-    private val externalPortal: Boolean = false,
-    private val hideActivityTab: Boolean = false,
-    private val traceOrderType: TraceOrderType = LATEST_TRACES,
-    private var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
-) {
+    override val portalUuid: String,
+    override val externalPortal: Boolean = false,
+    override val hideActivityTab: Boolean = false,
+    override var traceOrderType: TraceOrderType = LATEST_TRACES,
+    override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
+) : ITracesPage {
 
     init {
         console.log("Traces tab started")
@@ -115,7 +115,7 @@ class TracesPage(
         }
     }
 
-    private fun displayTraces(traceResult: TraceResult) {
+    override fun displayTraces(traceResult: TraceResult) {
         traceDisplayType = TraceDisplayType.TRACES
         resetUI()
 
@@ -196,7 +196,7 @@ class TracesPage(
         updateOccurredLabels()
     }
 
-    private fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
+    override fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
         traceDisplayType = TraceDisplayType.TRACE_STACK
         resetUI()
 
@@ -304,7 +304,7 @@ class TracesPage(
         }
     }
 
-    private fun displaySpanInfo(spanInfo: TraceSpan) {
+    override fun displaySpanInfo(spanInfo: TraceSpan) {
         traceDisplayType = TraceDisplayType.SPAN_INFO
         resetUI()
 

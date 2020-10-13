@@ -23,6 +23,11 @@ kotlin {
     }
 
     sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(":protocol"))
+            }
+        }
         val jvmMain by getting {
             dependencies {
                 val vertxVersion = "3.9.2"

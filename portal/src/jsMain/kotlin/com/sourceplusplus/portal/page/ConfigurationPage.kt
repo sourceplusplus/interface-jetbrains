@@ -16,7 +16,10 @@ import org.w3c.dom.Element
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ConfigurationPage(private val portalUuid: String) {
+class ConfigurationPage(
+    override val portalUuid: String,
+    override val externalPortal: Boolean = false
+) : IConfigurationPage {
 
     fun renderPage() {
         console.log("Rendering Configuration page")
