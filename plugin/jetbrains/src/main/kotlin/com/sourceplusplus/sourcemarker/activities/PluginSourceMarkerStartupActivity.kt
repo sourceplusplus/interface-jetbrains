@@ -262,8 +262,9 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             }
             defaultConfiguration.browserLoadingListener = object : BrowserLoadingListener() {
                 override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
-                    configuration.initialUrl =
-                        "http://localhost:8080/?portalUuid=${SourcePortal.getPortals()[0].portalUuid}"
+                    val initialPortal = SourcePortal.getPortals()[0]
+                    val page = "${initialPortal.currentTab.name.toLowerCase()}.html"
+                    configuration.initialUrl = "http://localhost:8080/$page?portalUuid=${initialPortal.portalUuid}"
                 }
             }
         }
