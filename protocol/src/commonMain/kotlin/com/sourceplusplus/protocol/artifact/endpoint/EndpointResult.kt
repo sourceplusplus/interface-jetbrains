@@ -1,6 +1,9 @@
 package com.sourceplusplus.protocol.artifact.endpoint
 
-import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
+import com.sourceplusplus.protocol.Serializers
+import com.sourceplusplus.protocol.artifact.ArtifactSummarizedResult
+import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,5 +14,12 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class EndpointResult(
-    val endpointMetrics: List<ArtifactMetricResult>
+    val appUuid: String,
+    val timeFrame: QueryTimeFrame,
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val start: Instant,
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val stop: Instant,
+    val step: String,
+    val endpointMetrics: List<ArtifactSummarizedResult>
 )

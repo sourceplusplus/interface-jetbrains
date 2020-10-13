@@ -38,7 +38,6 @@ class OverviewPage(private val portalUuid: String) {
             }
 
             eb.publish(OverviewTabOpened, json("portalUuid" to portalUuid))
-            eb.send(RefreshOverview, json("portalUuid" to portalUuid)) //todo: opened tab should imply refresh
         }
     }
 
@@ -91,20 +90,16 @@ class OverviewPage(private val portalUuid: String) {
                             i("far fa-globe") {
                                 style = "font-size:1.5em;margin-right:5px"
                             }
-                            +it.artifactQualifiedName
+                            +it.artifactQualifiedName.operationName!!
                         }
                     }
                     td {
                         +"HTTP" //todo: dynamic
                     }
-                    td {
-                        +"TODO"
-                    }
-                    td {
-                        +"TODO"
-                    }
-                    td {
-                        +"TODO"
+                    it.artifactSummarizedMetrics.forEach {
+                        td {
+                            +it.value
+                        }
                     }
                 }
             }
