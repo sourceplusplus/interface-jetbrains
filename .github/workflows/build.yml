@@ -237,9 +237,22 @@ jobs:
           asset_name: ${{ needs.build.outputs.artifact }}
           asset_content_type: application/zip
 
+  # Delete plugin artifact (No release draft)
+  cleanupNoReleaseDraft:
+    name: Cleanup (No Release Draft)
+    needs: [build, verify]
+    if: github.ref != 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Artifact      
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: plugin-artifact
+
   # Delete plugin artifact
   cleanup:
     name: Cleanup
+    needs: [build, verify, releaseDraft]
     runs-on: ubuntu-latest
     steps:
       - name: Delete Artifact      
