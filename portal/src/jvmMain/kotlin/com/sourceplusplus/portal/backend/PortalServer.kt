@@ -113,8 +113,6 @@ class PortalServer : CoroutineVerticle() {
                 appendHTML().html {
                     head {
                         commonHead("Configuration - SourceMarker")
-                        script { src = "js/configuration.js" }
-                        script { src = "js/views/configuration_view.js" }
                     }
                     body { id = "root" }
                 }
