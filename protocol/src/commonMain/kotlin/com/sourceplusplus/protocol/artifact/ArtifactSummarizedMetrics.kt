@@ -1,5 +1,6 @@
-package com.sourceplusplus.protocol.portal
+package com.sourceplusplus.protocol.artifact
 
+import com.sourceplusplus.protocol.portal.MetricType
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,8 +10,7 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class SplineChart(
+data class ArtifactSummarizedMetrics(
     val metricType: MetricType,
-    val timeFrame: QueryTimeFrame, //todo: use LocalDuration
-    val seriesData: List<SplineSeriesData>
+    val value: String
 )

@@ -15,15 +15,19 @@ class ProtocolAddress {
             const val KeepAlivePortal = "KeepAlivePortal" //todo: remove
             const val UpdatePortalArtifact = "UpdatePortalArtifact"
             const val CanOpenPortal = "CanOpenPortal"
-            const val OpenedPortal = "OpenedPortal"
-            const val ClosedPortal = "ClosedPortal"
+            //const val OpenedPortal = "OpenedPortal"
+            //const val ClosedPortal = "ClosedPortal"
             const val ChangedPortalArtifact = "ChangedPortalArtifact"
 
             //Portal - Overview
             const val OverviewTabOpened = "OverviewTabOpened"
+            const val RefreshOverview = "RefreshOverview"
+
+            //Portal - Activity
+            const val ActivityTabOpened = "ActivityTabOpened"
             const val SetMetricTimeFrame = "SetMetricTimeFrame"
             const val SetActiveChartMetric = "SetActiveChartMetric"
-            const val RefreshOverview = "RefreshOverview"
+            const val RefreshActivity = "RefreshActivity"
             const val ArtifactMetricUpdated = "ArtifactMetricUpdated"
 
             //Portal - Traces
@@ -47,8 +51,12 @@ class ProtocolAddress {
     @Suppress("FunctionName")
     class Portal {
         companion object {
-            fun ClearOverview(portalUuid: String): String {
-                return "$portalUuid-ClearOverview"
+            fun UpdateEndpoints(portalUuid: String): String {
+                return "$portalUuid-UpdateEndpoints"
+            }
+
+            fun ClearActivity(portalUuid: String): String {
+                return "$portalUuid-ClearActivity"
             }
 
             fun UpdateChart(portalUuid: String): String {

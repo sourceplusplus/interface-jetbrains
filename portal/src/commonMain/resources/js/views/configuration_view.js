@@ -1,7 +1,7 @@
 function setupUI() {
-    if (hideOverviewTab) {
-        $('#overview_link').css('display', 'none');
-        $('#sidebar_overview_link').css('display', 'none');
+    if (hideActivityTab) {
+        $('#activity_link').css('display', 'none');
+        $('#sidebar_activity_link').css('display', 'none');
     }
 
     $('#entry_method_toggle').change(function (e) {
