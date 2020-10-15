@@ -266,7 +266,7 @@ class TracesPage(
                 }
                 td {
                     div {
-                        classes = setOf("ui", "red", "progress", "active")
+                        classes = setOf("ui", "red", "progress")
                         id = "trace_bar_${i}"
                         attributes["data-percent"] = spanInfo.totalTracePercent.toString()
                         style = "margin: 0"

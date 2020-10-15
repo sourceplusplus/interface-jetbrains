@@ -44,6 +44,7 @@ class ActivityPage(
     override var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
     private var tooltipMeasurement = "ms"
     private var labelColor = if (darkMode) "grey" else "black"
+    private val symbolColor = if (darkMode) "grey" else "#182d34"
 
     private val tooltipFormatter: ((params: dynamic) -> String) = { params ->
         val time = params[0].value[0].toString()
@@ -214,7 +215,7 @@ class ActivityPage(
                         "value" to arrayOf(time, value),
                         "itemStyle" to json(
                             "normal" to json(
-                                "color" to "#182d34"
+                                "color" to symbolColor
                             )
                         )
                     )
