@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.extensions.eb
+import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toFixed
 import com.sourceplusplus.portal.extensions.toPrettyDuration
@@ -42,12 +42,14 @@ import kotlin.js.json
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class TracesPage(
-    private val portalUuid: String,
-    private val externalPortal: Boolean = false,
-    private val hideOverviewTab: Boolean = false,
-    private val traceOrderType: TraceOrderType = LATEST_TRACES,
-    private var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
-) {
+    override val portalUuid: String,
+    override val externalPortal: Boolean = false,
+    override val hideActivityTab: Boolean = false,
+    override var traceOrderType: TraceOrderType = LATEST_TRACES,
+    override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
+) : ITracesPage {
+
+    private val eb = EventBus("http://localhost:8888/eventbus")
 
     init {
         console.log("Traces tab started")
@@ -56,16 +58,16 @@ class TracesPage(
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
             js("portalConnected()")
-            eb.registerHandler(DisplayTraces(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
                 displayTraces(Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
                 displayTraceStack(*Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplayTraceStack(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
                 displayTraceStack(*Json.decodeFromDynamic(message.body))
             }
-            eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
                 displaySpanInfo(Json.decodeFromDynamic(message.body))
             }
             eb.publish(TracesTabOpened, json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name))
@@ -80,12 +82,13 @@ class TracesPage(
         root.append {
             portalNav {
                 navItem(OVERVIEW)
+                navItem(ACTIVITY)
                 navItem(TRACES, isActive = true) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                 }
                 navItem(CONFIGURATION)
             }
-            tracesContent {
+            pusherContent {
                 navBar {
                     tracesHeader(
                         TRACE_ID, TIME_OCCURRED,
@@ -96,16 +99,25 @@ class TracesPage(
                         externalPortalButton()
                     }
                 }
-                tracesTable {
-                    topTraceTable(OPERATION, OCCURRED, EXEC, STATUS)
-                    traceStackTable(OPERATION, EXEC, EXEC_PCT, STATUS)
+                wideColumn {
+                    table(
+                        "secondary_background_color no_top_margin",
+                        "top_trace_table", "trace_table",
+                        tableTypes = arrayOf(OPERATION, OCCURRED, EXEC, STATUS)
+                    )
+                    table(
+                        "trace_stack_table hidden_full_height",
+                        "trace_stack_table", "stack_table",
+                        "secondary_background_color", "stack_table_background",
+                        tableTypes = arrayOf(OPERATION, EXEC, EXEC_PCT, STATUS)
+                    )
                     spanInfoPanel(START_TIME, END_TIME)
                 }
             }
         }
     }
 
-    private fun displayTraces(traceResult: TraceResult) {
+    override fun displayTraces(traceResult: TraceResult) {
         traceDisplayType = TraceDisplayType.TRACES
         resetUI()
 
@@ -186,7 +198,7 @@ class TracesPage(
         updateOccurredLabels()
     }
 
-    private fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
+    override fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
         traceDisplayType = TraceDisplayType.TRACE_STACK
         resetUI()
 
@@ -294,7 +306,7 @@ class TracesPage(
         }
     }
 
-    private fun displaySpanInfo(spanInfo: TraceSpan) {
+    override fun displaySpanInfo(spanInfo: TraceSpan) {
         traceDisplayType = TraceDisplayType.SPAN_INFO
         resetUI()
 
@@ -352,9 +364,9 @@ class TracesPage(
     private fun setupUI() {
         resetUI()
 
-        if (hideOverviewTab) {
-            jq("#overview_link").css("display", "none")
-            jq("#sidebar_overview_link").css("display", "none")
+        if (hideActivityTab) {
+            jq("#activity_link").css("display", "none")
+            jq("#sidebar_activity_link").css("display", "none")
         }
 
         jq("input[type='text']").on("click") {

@@ -4,7 +4,7 @@ plugins {
 }
 
 kotlin {
-    jvm("jvm8") {
+    jvm {
         compilations["main"].kotlinOptions.jvmTarget = "1.8"
     }
     js {
@@ -25,17 +25,5 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
             }
         }
-
-//        val jsMain by getting {
-//            dependencies {
-//                implementation(kotlin("stdlib-js"))
-//            }
-//        }
-//
-//        val jsTest by getting {
-//            dependencies {
-//                implementation(kotlin("test-js"))
-//            }
-//        }
     }
 }

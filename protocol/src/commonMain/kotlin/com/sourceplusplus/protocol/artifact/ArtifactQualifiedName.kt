@@ -1,6 +1,6 @@
 package com.sourceplusplus.protocol.artifact
 
-import com.sourceplusplus.protocol.ArtifactNameUtils
+import kotlinx.serialization.Serializable
 
 /**
  * todo: description.
@@ -8,6 +8,7 @@ import com.sourceplusplus.protocol.ArtifactNameUtils
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Serializable
 data class ArtifactQualifiedName(
     val identifier: String,
     val commitId: String,

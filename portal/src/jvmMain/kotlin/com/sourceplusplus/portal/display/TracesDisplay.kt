@@ -40,8 +40,6 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
     }
 
     override suspend fun start() {
-        super.start()
-
         vertx.setPeriodic(5000) {
             SourcePortal.getPortals().forEach {
                 if (it.currentTab == PageType.TRACES) {

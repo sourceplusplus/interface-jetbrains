@@ -117,3 +117,7 @@ fun TraceOrderType.toTraceState(): TraceState {
         else -> TraceState.ALL
     }
 }
+
+fun Iterable<GetLinearIntValuesQuery.Value>.average(): Double {
+    return map { (it.value as BigDecimal).toInt() }.average()
+}

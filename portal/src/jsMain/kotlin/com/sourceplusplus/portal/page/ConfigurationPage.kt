@@ -2,6 +2,7 @@ package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.extensions.eb
 import com.sourceplusplus.portal.extensions.jq
+import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactAutoSubscribe
@@ -27,6 +28,12 @@ import kotlin.js.json
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ConfigurationPage(
+    override val portalUuid: String,
+    override val externalPortal: Boolean = false
+) : IConfigurationPage {
+
+    private val eb = EventBus("http://localhost:8888/eventbus")
+class ConfigurationPage(
     private val portalUuid: String,
     private val hideOverviewTab: Boolean = false
 ) {
@@ -34,7 +41,7 @@ class ConfigurationPage(
     init {
         console.log("Configuration tab started")
         setupUI()
-        
+
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
             js("portalConnected()")
@@ -53,6 +60,7 @@ class ConfigurationPage(
         root.append {
             portalNav {
                 navItem(OVERVIEW)
+                navItem(ACTIVITY)
                 navItem(TRACES) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                 }
@@ -97,7 +105,7 @@ class ConfigurationPage(
             jq("#artifact_endpoint").text("false")
         }
     }
-    
+
     private fun toggledEntryMethod(entryMethod: Boolean) {
         eb.send(UpdateArtifactEntryMethod, json("portalUuid" to portalUuid, "entry_method" to entryMethod))
     }
@@ -105,7 +113,7 @@ class ConfigurationPage(
     private fun toggledAutoSubscribe(autoSubscribe: Boolean) {
         eb.send(UpdateArtifactAutoSubscribe, json("portalUuid" to portalUuid, "auto_subscribe" to autoSubscribe))
     }
-    
+
     private fun setupUI() {
         if (hideOverviewTab) {
             jq("#overview_link").css("display", "none")
