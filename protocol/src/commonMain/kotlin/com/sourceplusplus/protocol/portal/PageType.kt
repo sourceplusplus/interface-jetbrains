@@ -10,5 +10,8 @@ enum class PageType {
     OVERVIEW,
     ACTIVITY,
     TRACES,
-    CONFIGURATION
+    CONFIGURATION;
+
+    val title = name.toLowerCase().capitalize()
+    val location = "${name.toLowerCase()}.html"
 }
