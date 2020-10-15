@@ -29,7 +29,7 @@ import kotlin.js.json
 class ConfigurationPage(
     override val portalUuid: String,
     override val externalPortal: Boolean = false,
-    private val hideOverviewTab: Boolean = false
+    private val hideActivityTab: Boolean = false
 ) : IConfigurationPage {
 
     private val eb = EventBus("http://localhost:8888/eventbus")
@@ -112,7 +112,7 @@ class ConfigurationPage(
     }
 
     private fun setupUI() {
-        if (hideOverviewTab) {
+        if (hideActivityTab) {
             jq("#activity_link").css("display", "none")
             jq("#sidebar_activity_link").css("display", "none")
         }
