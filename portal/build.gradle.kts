@@ -53,7 +53,7 @@ kotlin {
 
         val jsMain by getting {
             dependencies {
-//                implementation(npm("echarts", "4.8.0", generateExternals = true))
+                implementation(npm("echarts", "4.8.0", generateExternals = true))
 //                implementation(npm("fomantic-ui-less", "2.8.6"))
 //                implementation(npm("sockjs-client", "1.4.0", generateExternals = true))
 //                implementation(npm("vertx3-eventbus-client", "3.9.2", generateExternals = true))
