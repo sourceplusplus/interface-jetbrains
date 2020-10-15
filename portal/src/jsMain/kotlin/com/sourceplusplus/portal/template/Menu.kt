@@ -20,12 +20,23 @@ fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowCont
     when (pageType) {
         PageType.OVERVIEW -> apply {
             if (isActive) {
-                a(classes = "item active_tab") { +"Dashboard" }
+                a(classes = "item active_tab") { +"Overview" }
             } else {
                 a(classes = "item inactive_tab") {
                     id = "sidebar_overview_link"
-                    href = "overview.html"
+                    href = "/"
                     +"Overview"
+                }
+            }
+        }
+        PageType.ACTIVITY -> apply {
+            if (isActive) {
+                a(classes = "item active_tab") { +"Dashboard" }
+            } else {
+                a(classes = "item inactive_tab") {
+                    id = "sidebar_activity_link"
+                    href = "activity.html"
+                    +"Activity"
                 }
             }
         }
@@ -44,7 +55,7 @@ fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowCont
         }
         PageType.CONFIGURATION -> apply {
             if (isActive) {
-                a(classes = "item active_tab") { + "Configuration" }
+                a(classes = "item active_tab") { +"Configuration" }
             } else {
                 a(classes = "item inactive_tab") {
                     id = "sidebar_configuration_link"

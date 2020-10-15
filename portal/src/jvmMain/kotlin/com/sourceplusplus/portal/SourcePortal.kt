@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import com.sourceplusplus.portal.display.views.ConfigurationView
-import com.sourceplusplus.portal.display.views.OverviewView
+import com.sourceplusplus.portal.display.views.ActivityView
 import com.sourceplusplus.portal.display.views.TracesView
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.portal.PageType
@@ -101,16 +101,16 @@ class SourcePortal(
         }
     }
 
-    val overviewView: OverviewView = OverviewView(this)
+    val activityView: ActivityView = ActivityView(this)
     val tracesView: TracesView = TracesView()
     val configurationView: ConfigurationView = ConfigurationView()
     lateinit var viewingPortalArtifact: String
-    var currentTab = PageType.OVERVIEW
+    var currentTab = PageType.ACTIVITY
     var advice: MutableList<ArtifactAdvice> = mutableListOf()
     //todo: portal should be able to fetch advice for an artifact instead of storing it
 
     fun cloneViews(portal: SourcePortal) {
-        this.overviewView.cloneView(portal.overviewView)
+        this.activityView.cloneView(portal.activityView)
         this.tracesView.cloneView(portal.tracesView)
         this.configurationView.cloneView(portal.configurationView)
     }
