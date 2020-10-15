@@ -7,5 +7,5 @@ data class ArtifactConfiguration(
     val endpoint: Boolean,
     val subscribeAutomatically: Boolean,
     val endpointName: String,
-    val endpointIds: List<Long>
+    val endpointIds: List<Long> = emptyList()
 )

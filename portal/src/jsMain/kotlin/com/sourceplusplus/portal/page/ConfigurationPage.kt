@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.extensions.jq
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactAutoSubscribe
@@ -36,7 +36,6 @@ class ConfigurationPage(
 
     init {
         console.log("Configuration tab started")
-        setupUI()
 
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
@@ -74,6 +73,8 @@ class ConfigurationPage(
                 }
             }
         }
+
+        setupUI()
     }
 
     private fun updateArtifactConfigurationTable(artifact: ArtifactInformation) {
@@ -82,15 +83,15 @@ class ConfigurationPage(
         jq("#artifact_last_updated").text(moment.unix(artifact.lastUpdated).format("LLLL"))
 
         if (artifact.config.endpoint) {
-            jq("#entry_method_toggle").checkbox("set checked")
+            js("\$('#entry_method_toggle').checkbox(\"set checked\");")
         } else {
-            jq("#entry_method_toggle").checkbox("set unchecked")
+            js("\$('#entry_method_toggle').checkbox(\"set unchecked\");")
         }
 
         if (artifact.config.subscribeAutomatically) {
-            jq("#auto_subscribe_toggle").checkbox("set checked")
+            js("\$('#auto_subscribe_toggle').checkbox(\"set checked\");")
         } else {
-            jq("#auto_subscribe_toggle").checkbox("set unchecked")
+            js("\$('#auto_subscribe_toggle').checkbox(\"set unchecked\");")
         }
 
         if (!artifact.config.endpointName.isBlank()) {
@@ -103,11 +104,11 @@ class ConfigurationPage(
     }
 
     private fun toggledEntryMethod(entryMethod: Boolean) {
-        eb.send(UpdateArtifactEntryMethod, json("portalUuid" to portalUuid, "entry_method" to entryMethod))
+        eb.send(UpdateArtifactEntryMethod, json("portalUuid" to portalUuid, "entryMethod" to entryMethod))
     }
 
     private fun toggledAutoSubscribe(autoSubscribe: Boolean) {
-        eb.send(UpdateArtifactAutoSubscribe, json("portalUuid" to portalUuid, "auto_subscribe" to autoSubscribe))
+        eb.send(UpdateArtifactAutoSubscribe, json("portalUuid" to portalUuid, "autoSubscribe" to autoSubscribe))
     }
 
     private fun setupUI() {
