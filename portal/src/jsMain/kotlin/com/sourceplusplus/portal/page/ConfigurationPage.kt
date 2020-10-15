@@ -1,6 +1,5 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.extensions.eb
 import com.sourceplusplus.portal.extensions.jq
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.template.*
@@ -29,14 +28,11 @@ import kotlin.js.json
  */
 class ConfigurationPage(
     override val portalUuid: String,
-    override val externalPortal: Boolean = false
+    override val externalPortal: Boolean = false,
+    private val hideOverviewTab: Boolean = false
 ) : IConfigurationPage {
 
     private val eb = EventBus("http://localhost:8888/eventbus")
-class ConfigurationPage(
-    private val portalUuid: String,
-    private val hideOverviewTab: Boolean = false
-) {
 
     init {
         console.log("Configuration tab started")
@@ -45,7 +41,7 @@ class ConfigurationPage(
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
             js("portalConnected()")
-            eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: String, message: dynamic ->
+            eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
                 updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
             }
             eb.publish(ConfigurationTabOpened, json("portalUuid" to portalUuid))
@@ -116,8 +112,8 @@ class ConfigurationPage(
 
     private fun setupUI() {
         if (hideOverviewTab) {
-            jq("#overview_link").css("display", "none")
-            jq("#sidebar_overview_link").css("display", "none")
+            jq("#activity_link").css("display", "none")
+            jq("#sidebar_activity_link").css("display", "none")
         }
         jq("#entry_method_toggle").change(fun(e: dynamic) {
             toggledEntryMethod(e.target.checked == true)
