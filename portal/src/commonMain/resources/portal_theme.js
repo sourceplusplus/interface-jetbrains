@@ -31,6 +31,9 @@ function loadTheme() {
     $('#overview_link').attr('href', "overview.html" + mainGetQuery);
     $('#sidebar_overview_link').attr('href', "overview.html" + mainGetQuery);
 
+    $('#activity_link').attr('href', "activity.html" + mainGetQuery);
+    $('#sidebar_activity_link').attr('href', "activity.html" + mainGetQuery);
+
     $('#traces_link_latest').attr('href', "traces.html" + mainGetQuery + '&order_type=latest_traces');
     $('#traces_link_slowest').attr('href', "traces.html" + mainGetQuery + '&order_type=slowest_traces');
     $('#traces_link_failed').attr('href', "traces.html" + mainGetQuery + '&order_type=failed_traces');

@@ -6,7 +6,7 @@ import kotlinx.html.js.onClickFunction
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 
-fun TagConsumer<HTMLElement>.overviewContent(block: FlowContent.() -> Unit) {
+fun TagConsumer<HTMLElement>.activityContent(block: FlowContent.() -> Unit) {
     div("pusher") {
         block()
     }

@@ -1,8 +1,9 @@
 package com.sourceplusplus.sourcemarker.activities
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
-import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -33,6 +34,7 @@ import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
 import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
+import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.sourcemarker.listeners.ArtifactAdviceListener
@@ -54,6 +56,7 @@ import io.vertx.kotlin.core.http.listenAwait
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import org.apache.log4j.FileAppender
 import org.apache.log4j.Logger
 import org.apache.log4j.PatternLayout
@@ -79,6 +82,12 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             vertx.eventBus().registerDefaultCodec(ArtifactMetricResult::class.java, LocalMessageCodec())
             vertx.eventBus().registerDefaultCodec(TraceResult::class.java, LocalMessageCodec())
             vertx.eventBus().registerDefaultCodec(TraceSpanStackQueryResult::class.java, LocalMessageCodec())
+            vertx.eventBus().registerDefaultCodec(EndpointResult::class.java, LocalMessageCodec())
+
+            val module = SimpleModule()
+            module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
+            module.addDeserializer(Instant::class.java, KSerializers.KotlinInstantDeserializer())
+            DatabindCodec.mapper().registerModule(module)
 
             DatabindCodec.mapper().registerModule(GuavaModule())
             DatabindCodec.mapper().registerModule(Jdk8Module())
@@ -253,8 +262,9 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
             }
             defaultConfiguration.browserLoadingListener = object : BrowserLoadingListener() {
                 override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
-                    configuration.initialUrl =
-                        "http://localhost:8080/overview?portalUuid=${SourcePortal.getPortals()[0].portalUuid}"
+                    val initialPortal = SourcePortal.getPortals()[0]
+                    val page = "${initialPortal.currentTab.name.toLowerCase()}.html"
+                    configuration.initialUrl = "http://localhost:8080/$page?portalUuid=${initialPortal.portalUuid}"
                 }
             }
         }
@@ -280,7 +290,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
     }
 
     /**
-     * todo: description.
+     * Used to transmit protocol messages.
      *
      * @since 0.0.1
      */
@@ -294,5 +304,22 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
         override fun transform(o: T): T = o
         override fun name(): String = UUID.randomUUID().toString()
         override fun systemCodecID(): Byte = -1
+    }
+
+    /**
+     * Used to serialize/deserialize Kotlin classes.
+     *
+     * @since 0.0.1
+     */
+    class KSerializers {
+        class KotlinInstantSerializer : JsonSerializer<Instant>() {
+            override fun serialize(value: Instant, jgen: JsonGenerator, provider: SerializerProvider) =
+                jgen.writeNumber(value.toEpochMilliseconds())
+        }
+
+        class KotlinInstantDeserializer : JsonDeserializer<Instant>() {
+            override fun deserialize(p: JsonParser, p1: DeserializationContext): Instant =
+                Instant.fromEpochMilliseconds((p.codec.readTree(p) as JsonNode).longValue())
+        }
     }
 }

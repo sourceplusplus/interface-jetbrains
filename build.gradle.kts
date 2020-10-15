@@ -33,6 +33,7 @@ subprojects {
         mavenCentral()
         jcenter()
         maven(url = "https://kotlin.bintray.com/kotlinx/")
+        maven(url = "https://jitpack.io")
     }
 
     apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
