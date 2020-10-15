@@ -13,9 +13,10 @@ fun main() {
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
         val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
+        val darkMode = queryParams.getOrElse("dark_mode", { "false" }).toBoolean()
 
         when (window.location.pathname) {
-            "/activity", "/activity.html" -> ActivityPage(portalUuid, externalPortal).renderPage()
+            "/activity", "/activity.html" -> ActivityPage(portalUuid, externalPortal, darkMode).renderPage()
             "/traces", "/traces.html" -> {
                 val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
                 val traceOrderType = TraceOrderType.valueOf(
