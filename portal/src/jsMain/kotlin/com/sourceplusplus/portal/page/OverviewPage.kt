@@ -27,7 +27,8 @@ import kotlin.js.json
  */
 class OverviewPage(
     override val portalUuid: String,
-    override val externalPortal: Boolean = false
+    override val externalPortal: Boolean = false,
+    private val darkMode: Boolean = false
 ) : IOverviewPage {
 
     private val eb = EventBus("http://localhost:8888/eventbus")
@@ -53,7 +54,7 @@ class OverviewPage(
             link {
                 rel = "stylesheet"
                 type = "text/css"
-                href = "css/style.css"
+                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
             }
         }
         val root: Element = document.getElementById("root")!!

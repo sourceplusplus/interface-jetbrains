@@ -48,6 +48,7 @@ class TracesPage(
     override val hideActivityTab: Boolean = false,
     override var traceOrderType: TraceOrderType = LATEST_TRACES,
     override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
+    private val darkMode: Boolean = false
 ) : ITracesPage {
 
     private val eb = EventBus("http://localhost:8888/eventbus")
@@ -82,7 +83,7 @@ class TracesPage(
             link {
                 rel = "stylesheet"
                 type = "text/css"
-                href = "css/style.css"
+                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
             }
         }
         val root: Element = document.getElementById("root")!!

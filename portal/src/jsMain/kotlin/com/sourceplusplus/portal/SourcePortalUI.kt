@@ -23,11 +23,17 @@ fun main() {
                 val traceOrderType = TraceOrderType.valueOf(
                     queryParams.getOrElse("order_type", { "LATEST_TRACES" }).toUpperCase()
                 )
-                TracesPage(portalUuid, externalPortal, hideActivityTab, traceOrderType).renderPage()
+                TracesPage(
+                    portalUuid,
+                    externalPortal,
+                    hideActivityTab,
+                    traceOrderType,
+                    darkMode = darkMode
+                ).renderPage()
             }
             "/configuration", "/configuration.html" ->
-                ConfigurationPage(portalUuid, externalPortal, hideActivityTab).renderPage()
-            else -> OverviewPage(portalUuid, externalPortal).renderPage()
+                ConfigurationPage(portalUuid, externalPortal, hideActivityTab, darkMode).renderPage()
+            else -> OverviewPage(portalUuid, externalPortal, darkMode).renderPage()
         }
         //todo: portals should have ability to cache pages so they don't need re-init
 

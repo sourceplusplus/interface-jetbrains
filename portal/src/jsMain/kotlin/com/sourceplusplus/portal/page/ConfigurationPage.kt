@@ -31,7 +31,8 @@ import kotlin.js.json
 class ConfigurationPage(
     override val portalUuid: String,
     override val externalPortal: Boolean = false,
-    private val hideActivityTab: Boolean = false
+    private val hideActivityTab: Boolean = false,
+    private val darkMode: Boolean = false
 ) : IConfigurationPage {
 
     private val eb = EventBus("http://localhost:8888/eventbus")
@@ -56,7 +57,7 @@ class ConfigurationPage(
             link {
                 rel = "stylesheet"
                 type = "text/css"
-                href = "css/style.css"
+                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
             }
         }
         val root: Element = document.getElementById("root")!!
