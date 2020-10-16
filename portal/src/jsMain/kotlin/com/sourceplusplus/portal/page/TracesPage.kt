@@ -4,7 +4,14 @@ import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toFixed
+import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
+import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
+import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
+import com.sourceplusplus.portal.model.TraceStackHeaderType.TIME_OCCURRED
+import com.sourceplusplus.portal.model.TraceStackHeaderType.TRACE_ID
+import com.sourceplusplus.portal.model.TraceTableType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClickedDisplayTraceStack
@@ -16,12 +23,6 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTrace
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraces
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
-import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
-import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
-import com.sourceplusplus.portal.model.TraceStackHeaderType.TIME_OCCURRED
-import com.sourceplusplus.portal.model.TraceStackHeaderType.TRACE_ID
-import com.sourceplusplus.portal.model.TraceTableType.*
-import com.sourceplusplus.portal.model.PageType.*
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.html.*
@@ -163,13 +164,13 @@ class TracesPage(
                     }
                 }
 
-                val occurred = moment(trace.start.toString(), "x")
+                val occurred = trace.start.toMoment()
                 val now = moment(moment.now())
                 val timeOccurredDuration = moment.duration(now.diff(occurred))
                 td {
                     classes = setOf("trace_time", "collapsing")
                     id = "trace_time_$htmlTraceId"
-                    attributes["data-value"] = trace.start.toString()
+                    attributes["data-value"] = trace.start.toEpochMilliseconds().toString()
                     style = "text-align: center"
                     +timeOccurredDuration.toPrettyDuration(1)
                 }
@@ -225,7 +226,7 @@ class TracesPage(
         }
 
         jq("#trace_id_field").`val`(traceStack[0].span.traceId)
-        jq("#time_occurred_field").`val`(moment(traceStack[0].span.startTime.toString(), "x").format())
+        jq("#time_occurred_field").`val`(traceStack[0].span.startTime.toMoment().format())
 
         for (i in traceStack.indices) {
             val spanInfo = traceStack[i]
@@ -322,10 +323,10 @@ class TracesPage(
         traceDisplayType = TraceDisplayType.SPAN_INFO
         resetUI()
 
-        jq("#span_info_start_trace_time").attr("data-value", spanInfo.startTime)
-        jq("#span_info_start_time").text(moment(spanInfo.startTime.toString(), "x").format("h:mm:ss a"))
-        jq("#span_info_end_trace_time").attr("data-value", spanInfo.endTime)
-        jq("#span_info_end_time").text(moment(spanInfo.endTime.toString(), "x").format("h:mm:ss a"))
+        jq("#span_info_start_trace_time").attr("data-value", spanInfo.startTime.toEpochMilliseconds())
+        jq("#span_info_start_time").text(spanInfo.startTime.toMoment().format("h:mm:ss a"))
+        jq("#span_info_end_trace_time").attr("data-value", spanInfo.endTime.toEpochMilliseconds())
+        jq("#span_info_end_time").text(spanInfo.endTime.toMoment().format("h:mm:ss a"))
         jq("#segment_id_field").valueOf(spanInfo.segmentId)
 
         var gotTags = false
@@ -357,9 +358,7 @@ class TracesPage(
             val rowHtml = document.create.tr {
                 td {
                     style = "white-space: nowrap"
-                    b {
-                        +moment(log.time, "x").format()
-                    }
+                    b { +log.time.toMoment().format() }
                     br
                     +log.data
                 }

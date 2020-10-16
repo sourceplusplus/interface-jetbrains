@@ -1,5 +1,7 @@
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -32,10 +34,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.plus
-import java.time.Instant
+import kotlinx.datetime.Instant
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom.current
 
@@ -47,6 +46,11 @@ fun main() {
     DatabindCodec.mapper().registerModule(JavaTimeModule())
     DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
     DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
+
+    val module = SimpleModule()
+    module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
+    module.addDeserializer(Instant::class.java, KSerializers.KotlinInstantDeserializer())
+    DatabindCodec.mapper().registerModule(module)
 
     val vertx = Vertx.vertx()
     val sockJSHandler = SockJSHandler.create(vertx)
@@ -103,9 +107,9 @@ fun main() {
                 spanId = 100,
                 error = current().nextBoolean(),
                 hasChildStack = false,
-                startTime = Instant.now().toEpochMilli(), //todo: use Instant instead of long
+                startTime = Clock.System.now(),
+                endTime = Clock.System.now(),
                 component = "DATABASE",
-                endTime = System.currentTimeMillis(),
                 serviceCode = "SERVICE_CODE",
                 type = "TYPE"
             )
@@ -128,8 +132,8 @@ fun main() {
             parentSpanId = System.currentTimeMillis().toInt(),
             spanId = System.currentTimeMillis().toInt(),
             segmentId = "100",
-            startTime = Instant.now().toEpochMilli(), //todo: use Instant instead of long
-            endTime = Instant.now().toEpochMilli(), //todo: use Instant instead of long
+            startTime = Clock.System.now(),
+            endTime = Clock.System.now(),
             serviceCode = "SERVICE_CODE",
             type = "TYPE",
             tags = mapOf(
@@ -140,7 +144,7 @@ fun main() {
                 "thing5" to UUID.randomUUID().toString()
             ),
             logs = listOf(
-                TraceSpanLogEntry(time = Clock.System.now().toEpochMilliseconds(), data = UUID.randomUUID().toString())
+                TraceSpanLogEntry(time = Clock.System.now(), data = UUID.randomUUID().toString())
             )
         )
         vertx.eventBus().displaySpanInfo("null", span)
@@ -151,8 +155,8 @@ fun main() {
             DisplayArtifactConfiguration("null"), JsonObject.mapFrom(
                 ArtifactInformation(
                     artifactQualifiedName = UUID.randomUUID().toString(),
-                    createDate = Instant.now().epochSecond,
-                    lastUpdated = Instant.now().epochSecond,
+                    createDate = Clock.System.now(),
+                    lastUpdated = Clock.System.now(),
                     config = ArtifactConfiguration(
                         endpoint = current().nextBoolean(),
                         subscribeAutomatically = current().nextBoolean(),
@@ -279,8 +283,10 @@ fun displayChart(vertx: Vertx) {
         SplineSeriesData(
             0,
             listOf(
-                Clock.System.now().toEpochMilliseconds(),
-                Clock.System.now().plus(10, DateTimeUnit.SECOND, TimeZone.UTC).toEpochMilliseconds()
+                Instant.fromEpochMilliseconds(
+                    java.time.Instant.now().minusSeconds(10).toEpochMilli()
+                ),
+                Clock.System.now()
             ),
             doubleArrayOf(current().nextDouble(10.0), current().nextDouble(10.0))
         )
@@ -297,7 +303,7 @@ fun displayTraces(vertx: Vertx) {
             prettyDuration = "10s",
             duration = 10000,
             error = current().nextBoolean(),
-            start = Instant.now().toEpochMilli() //todo: instant instead of long
+            start = Clock.System.now()
         )
         traces.add(trace)
     }
@@ -306,8 +312,8 @@ fun displayTraces(vertx: Vertx) {
         appUuid = "null",
         artifactQualifiedName = UUID.randomUUID().toString(),
         artifactSimpleName = UUID.randomUUID().toString(),
-        start = Clock.System.now().toEpochMilliseconds(),
-        stop = Clock.System.now().toEpochMilliseconds(),
+        start = Clock.System.now(),
+        stop = Clock.System.now(),
         total = traces.size,
         traces = traces.toList(),
         orderType = TraceOrderType.LATEST_TRACES
@@ -325,4 +331,16 @@ fun updateCards(vertx: Vertx) {
     vertx.eventBus().displayCard("null", throughputAverageCard)
     vertx.eventBus().displayCard("null", responseTimeAverageCard)
     vertx.eventBus().displayCard("null", slaAverageCard)
+}
+
+class KSerializers {
+    class KotlinInstantSerializer : JsonSerializer<Instant>() {
+        override fun serialize(value: Instant, jgen: JsonGenerator, provider: SerializerProvider) =
+            jgen.writeNumber(value.toEpochMilliseconds())
+    }
+
+    class KotlinInstantDeserializer : JsonDeserializer<Instant>() {
+        override fun deserialize(p: JsonParser, p1: DeserializationContext): Instant =
+            Instant.fromEpochMilliseconds((p.codec.readTree(p) as JsonNode).longValue())
+    }
 }
