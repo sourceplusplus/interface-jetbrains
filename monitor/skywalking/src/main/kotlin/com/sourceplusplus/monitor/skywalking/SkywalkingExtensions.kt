@@ -53,7 +53,7 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
         segmentId = segmentId,
         operationNames = endpointNames,
         duration = duration,
-        start = start.toLong(),
+        start = Instant.fromEpochMilliseconds(start.toLong()),
         error = isError,
         traceIds = traceIds
     )
@@ -63,12 +63,12 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
 fun QueryTraceQuery.Log.toProtocol(): TraceSpanLogEntry {
     if (data!!.find { it.key == "stack" } != null) {
         return TraceSpanLogEntry(
-            time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()).toEpochMilliseconds(),
+            time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()),
             data = data.find { it.key == "stack" }!!.value!! //todo: correctly
         )
     }
     return TraceSpanLogEntry(
-        time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()).toEpochMilliseconds(),
+        time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()),
         data = data.joinToString(separator = "\n") { it.key + " : " + it.value!! }
     )
 }
@@ -91,8 +91,8 @@ fun QueryTraceQuery.Span.toProtocol(): TraceSpan {
         refs = refs.map { it.toProtocol() },
         serviceCode = serviceCode,
         //serviceInstanceName = serviceInstanceName, //todo: this
-        startTime = (startTime as BigDecimal).toLong(),
-        endTime = (endTime as BigDecimal).toLong(),
+        startTime = Instant.fromEpochMilliseconds((startTime as BigDecimal).toLong()),
+        endTime = Instant.fromEpochMilliseconds((endTime as BigDecimal).toLong()),
         endpointName = endpointName,
         type = type,
         peer = peer,

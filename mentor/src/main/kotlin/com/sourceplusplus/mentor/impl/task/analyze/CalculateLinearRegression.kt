@@ -34,7 +34,7 @@ class CalculateLinearRegression(
         for (trace in traceResult.traces) {
             regressionMap.putIfAbsent(trace.operationNames[0], SimpleRegression())
             val regression = regressionMap[trace.operationNames[0]]!!
-            regression.addData(trace.start.toDouble(), trace.duration.toDouble())
+            regression.addData(trace.start.toEpochMilliseconds().toDouble(), trace.duration.toDouble())
         }
 
         //todo: there should likely be a way to give endpoints priority based on the likelihood for it to be a performance ramp

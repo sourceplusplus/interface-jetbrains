@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.artifact.trace
 
+import com.sourceplusplus.protocol.Serializers
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**
@@ -18,8 +20,10 @@ data class TraceSpan(
     val refs: List<TraceSpanRef> = emptyList(),
     val serviceCode: String,
     val serviceInstanceName: String? = null,
-    val startTime: Long,
-    val endTime: Long,
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val startTime: Instant,
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val endTime: Instant,
     val endpointName: String? = null,
     val artifactQualifiedName: String? = null,
     val type: String,

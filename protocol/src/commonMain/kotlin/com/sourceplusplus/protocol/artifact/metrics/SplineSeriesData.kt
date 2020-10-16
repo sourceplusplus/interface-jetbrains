@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.artifact.metrics
 
+import com.sourceplusplus.protocol.Serializers
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,17 +13,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SplineSeriesData(
     val seriesIndex: Int,
-    val times: List<Long>, //todo: List<Instant>
+    val times: List<@Serializable(with = Serializers.InstantKSerializer::class) Instant>,
     val values: DoubleArray
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is SplineSeriesData) return false
-
         if (seriesIndex != other.seriesIndex) return false
         if (times != other.times) return false
         if (!values.contentEquals(other.values)) return false
-
         return true
     }
 

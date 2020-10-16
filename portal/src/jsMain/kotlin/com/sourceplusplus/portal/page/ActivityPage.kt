@@ -4,6 +4,7 @@ import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.echarts
 import com.sourceplusplus.portal.extensions.jq
+import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetActiveChartMetric
@@ -102,7 +103,7 @@ class ActivityPage(
 
             clickedViewAverageResponseTimeChart() //default = avg resp time
 
-            eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, message: dynamic ->
+            eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
                 clearActivity()
             }
             eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
@@ -219,7 +220,7 @@ class ActivityPage(
             val list = mutableListOf<kotlin.js.Json>()
             for (z in seriesData.values.indices) {
                 val value = seriesData.values[z]
-                val time = moment.unix(seriesData.times[z]).valueOf()
+                val time = seriesData.times[z].toMoment().valueOf()
 
                 list.add(
                     json(
