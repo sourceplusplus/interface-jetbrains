@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-//todo: remove ?s
 @Serializable
 data class TraceSpan(
     val traceId: String,
