@@ -129,7 +129,7 @@ class ActivityPage(
             link {
                 rel = "stylesheet"
                 type = "text/css"
-                href = "css/style.css"
+                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
             }
         }
         val root: Element = document.getElementById("root")!!
