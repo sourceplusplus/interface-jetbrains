@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.display.views
 
-import com.sourceplusplus.portal.model.TraceViewType
+import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import io.vertx.core.json.JsonArray
@@ -21,7 +21,7 @@ class TracesView {
     var traceStack: JsonArray? = null
     var innerTraceStack = Stack<JsonArray>()
     var orderType = TraceOrderType.LATEST_TRACES
-    var viewType = TraceViewType.TRACES
+    var viewType = TraceDisplayType.TRACES
     var traceId: String? = null
     var spanId: Int = 0
     var viewTraceAmount = 10

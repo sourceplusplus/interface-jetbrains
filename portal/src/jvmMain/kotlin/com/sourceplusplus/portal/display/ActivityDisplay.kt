@@ -155,8 +155,8 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             }
         val seriesData = SplineSeriesData(
             seriesIndex = seriesIndex,
-            times = times.map { Instant.fromEpochMilliseconds(it.toEpochMilliseconds()) }, //todo: no epochSeconds
-            values = finalArtifactMetrics.values.map { it.toDouble() }.toDoubleArray() //todo: or this
+            times = times.map { Instant.fromEpochMilliseconds(it.toEpochMilliseconds()) },
+            values = finalArtifactMetrics.values
         )
         val splineChart = SplineChart(
             metricType = finalArtifactMetrics.metricType,
@@ -177,7 +177,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
 //                            } else {
 //                                advice.regression.predict(it.toEpochMilliseconds().toDouble())
 //                            }
-//                        }.toDoubleArray()
+//                        }
 //                    )
 //                    val regressionSplineChart = splineChart.copy(
 //                        seriesData = Collections.singletonList(regressionSeriesData)
@@ -228,8 +228,8 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
         }
     }
 
-    private fun calculatePercents(artifactMetrics: ArtifactMetrics): DoubleArray {
-        val metricArr = ArrayList<Int>()
+    private fun calculatePercents(artifactMetrics: ArtifactMetrics): List<Double> {
+        val metricArr = ArrayList<Double>()
         when (artifactMetrics.values.size) {
             60 -> {
                 for (i in artifactMetrics.values.indices) {
@@ -252,12 +252,12 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
         val percentMax = metricArr.maxOrNull()!!
         val percents = ArrayList<Double>()
         for (i in metricArr.indices) {
-            if (percentMax == 0) {
+            if (percentMax == 0.0) {
                 percents.add(0.0)
             } else {
                 percents.add((metricArr[i] / percentMax) * 100.00)
             }
         }
-        return percents.toDoubleArray()
+        return percents
     }
 }

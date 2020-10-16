@@ -7,6 +7,7 @@ import com.sourceplusplus.portal.extensions.toFixed
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
 import com.sourceplusplus.portal.model.TraceStackHeaderType.TIME_OCCURRED
@@ -21,8 +22,11 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayInner
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraces
-import com.sourceplusplus.protocol.artifact.trace.*
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.artifact.trace.TraceResult
+import com.sourceplusplus.protocol.artifact.trace.TraceSpan
+import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.html.*
