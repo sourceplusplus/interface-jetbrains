@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal
 
+import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.page.ActivityPage
 import com.sourceplusplus.portal.page.ConfigurationPage
@@ -7,6 +8,7 @@ import com.sourceplusplus.portal.page.OverviewPage
 import com.sourceplusplus.portal.page.TracesPage
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import kotlinx.browser.window
+import kotlin.js.json
 
 fun main() {
     jq().ready {
@@ -48,17 +50,32 @@ fun main() {
     }
 }
 
-//todo: impl
-/*
-function clickedViewAsExternalPortal() {
-    eb.send('ClickedViewAsExternalPortal', {
-        'portalUuid': portalUuid
-    }, function (error, message) {
-        window.open(window.location.href.split('?')[0] + '?portalUuid=' + message.body.portalUuid
-            + '&external=true' + mainGetQueryWithoutPortalUuid, '_blank');
-    });
+fun getMainGetQueryWithoutPortalUuid(): String {
+    val queryParams = getQueryMap()
+    val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
+    val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
+    val darkMode = queryParams.getOrElse("dark_mode", { "false" }).toBoolean()
+    var mainGetQueryWithoutPortalUuid = ""
+    if (externalPortal) mainGetQueryWithoutPortalUuid += "&external=true"
+    if (darkMode) mainGetQueryWithoutPortalUuid += "&dark_mode=true"
+    if (hideActivityTab) mainGetQueryWithoutPortalUuid += "&hide_activity_tab=true"
+    return mainGetQueryWithoutPortalUuid
 }
 
+fun clickedViewAsExternalPortal(eb: EventBus) {
+    val queryParams = getQueryMap()
+    val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
+
+    eb.send("ClickedViewAsExternalPortal", json("portalUuid" to portalUuid), fun(_, message: dynamic) {
+        window.open(
+            "${window.location.href.split('?')[0]}?portalUuid=${message.body.portalUuid}&external=true${getMainGetQueryWithoutPortalUuid()}",
+            "_blank"
+        )
+    })
+}
+
+//todo: impl
+/*
 function portalConnected() {
     console.log("Portal successfully connected. Portal UUID: " + portalUuid);
     if (requiresRegistration) {
