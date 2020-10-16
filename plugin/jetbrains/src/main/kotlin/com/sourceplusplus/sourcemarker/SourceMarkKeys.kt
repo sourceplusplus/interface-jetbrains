@@ -16,8 +16,4 @@ object SourceMarkKeys {
     val SOURCE_PORTAL = SourceKey<SourcePortal>("SOURCE_PORTAL")
     val ENDPOINT_DETECTOR = SourceKey<EndpointDetector>("ENDPOINT_DETECTOR")
     val ARTIFACT_ADVICE = SourceKey<MutableList<ArtifactAdvice>>("ARTIFACT_ADVICE")
-
-    //todo: remove direct access and use endpoint detector
-    val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
-    val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
 }
