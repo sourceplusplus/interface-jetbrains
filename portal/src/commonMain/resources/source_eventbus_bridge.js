@@ -1,36 +1,3 @@
-//var eb = new EventBus('http://localhost:8888/eventbus');
-//eb.enableReconnect(true); //todo: more logic behind this
-//todo: it is likely that a disconnect signifies the portal is gone
-//todo: so on reconnect there will need to be another portal uuid registered
-
-var getPortalUuid = findGetParameter("portalUuid");
-var portalUuid = (getPortalUuid) ? getPortalUuid : null;
-var getRequiresRegistration = findGetParameter("requires_registration");
-var requiresRegistration = (getRequiresRegistration) ? getRequiresRegistration : false;
-var traceOrderType = findGetParameter("order_type");
-if (traceOrderType) {
-    traceOrderType = traceOrderType.toUpperCase();
-}
-var getExternal = findGetParameter("external");
-var externalPortal = (getExternal) ? (getExternal === 'true') : false;
-var getDarkMode = findGetParameter("dark_mode");
-var darkMode = (getDarkMode) ? (getDarkMode === 'true') : false;
-var getHideActivityTab = findGetParameter("hide_activity_tab");
-var hideActivityTab = (getHideActivityTab) ? (getHideActivityTab === 'true') : false;
-
-var mainGetQuery = '?portalUuid=' + portalUuid;
-var mainGetQueryWithoutPortalUuid = "";
-if (externalPortal) {
-    mainGetQueryWithoutPortalUuid += '&external=true';
-}
-if (darkMode) {
-    mainGetQueryWithoutPortalUuid += '&dark_mode=true';
-}
-if (hideActivityTab) {
-    mainGetQueryWithoutPortalUuid += '&hide_activity_tab=true';
-}
-mainGetQuery += mainGetQueryWithoutPortalUuid;
-
 function findGetParameter(parameterName) {
     let result = null, tmp = [];
     location.search

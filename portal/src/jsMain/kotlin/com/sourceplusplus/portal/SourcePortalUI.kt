@@ -12,6 +12,7 @@ fun main() {
     jq().ready {
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
+        val requiresRegistration = queryParams.getOrElse("requires_registration", { "false" }).toBoolean()
         val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
         val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
         val darkMode = queryParams.getOrElse("dark_mode", { "false" }).toBoolean()
@@ -30,8 +31,60 @@ fun main() {
         }
         //todo: portals should have ability to cache pages so they don't need re-init
 
-        js("loadTheme();")
+        var mainGetQuery = """?portalUuid=$portalUuid"""
+        var mainGetQueryWithoutPortalUuid = ""
+        if (externalPortal) mainGetQueryWithoutPortalUuid += "&external=true"
+        if (darkMode) mainGetQueryWithoutPortalUuid += "&dark_mode=true"
+        if (hideActivityTab) mainGetQueryWithoutPortalUuid += "&hide_activity_tab=true"
+        mainGetQuery += mainGetQueryWithoutPortalUuid
+
+        loadTheme(mainGetQuery)
     }
+}
+
+fun loadTheme(mainGetQuery: String) {
+    js("\$('.ui.calendar').calendar()")
+    js("\$('.ui.dropdown').dropdown()")
+    js("\$('.ui.sidebar').sidebar('setting', 'transition', 'overlay')")
+    js("\$('.ui.progress').progress()")
+
+    val latestTracesHeader = jq("#latest_traces_header")
+    if (latestTracesHeader.length > 0) {
+        js("latestTracesHeader.dropdown({on: null})")
+    }
+    val traceStackHeader = jq("#trace_stack_header")
+    if (traceStackHeader.length > 0) {
+        js("traceStackHeader.dropdown({on: 'hover'})")
+    }
+
+    jq(".openbtn").on("click", fun() {
+        jq(".ui.sidebar").toggleClass("very thin icon")
+        jq(".asd").toggleClass("marginlefting")
+        jq(".sidebar z").toggleClass("displaynone")
+        jq(".ui.accordion").toggleClass("displaynone")
+        jq(".ui.dropdown.item").toggleClass("displaynone")
+        jq(".hide_on_toggle").toggleClass("displaynone")
+        jq(".pusher").toggleClass("dimmed")
+
+        jq(".logo").find("img").toggle()
+    })
+    js("\$('.ui.accordion').accordion({selector: {}})")
+
+    jq("#overview_link").attr("href", "overview.html$mainGetQuery")
+    jq("#sidebar_overview_link").attr("href", "overview.html$mainGetQuery")
+
+    jq("#activity_link").attr("href", "activity.html$mainGetQuery")
+    jq("#sidebar_activity_link").attr("href", "activity.html$mainGetQuery")
+
+    jq("#traces_link_latest").attr("href", "traces.html$mainGetQuery&order_type=latest_traces")
+    jq("#traces_link_slowest").attr("href", "traces.html$mainGetQuery&order_type=slowest_traces")
+    jq("#traces_link_failed").attr("href", "traces.html$mainGetQuery&order_type=failed_traces")
+    jq("#sidebar_traces_link_latest").attr("href", "traces.html$mainGetQuery&order_type=latest_traces")
+    jq("#sidebar_traces_link_slowest").attr("href", "traces.html$mainGetQuery&order_type=slowest_traces")
+    jq("#sidebar_traces_link_failed").attr("href", "traces.html$mainGetQuery&order_type=failed_traces")
+
+    jq("#configuration_link").attr("href", "configuration.html$mainGetQuery")
+    jq("#sidebar_configuration_link").attr("href", "configuration.html$mainGetQuery")
 }
 
 fun getQueryMap(): Map<String, String> {
