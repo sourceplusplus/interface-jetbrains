@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker
+package com.sourceplusplus.sourcemarker.search
 
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
 import com.sourceplusplus.marker.source.mark.api.ExpressionSourceMark
@@ -6,6 +6,7 @@ import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.sourcemarker.SourceMarkKeys
 
 /**
  * todo: description.
