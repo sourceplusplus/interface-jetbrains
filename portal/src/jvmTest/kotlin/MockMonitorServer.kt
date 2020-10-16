@@ -16,6 +16,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.TracesTabOpe
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayArtifactConfiguration
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
+import com.sourceplusplus.protocol.artifact.ArtifactConfiguration
+import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.portal.*
 import io.vertx.core.Vertx
@@ -142,16 +144,18 @@ fun main() {
 
     vertx.eventBus().consumer<Void>(ConfigurationTabOpened) {
         vertx.eventBus().publish(
-            DisplayArtifactConfiguration("null"), JsonObject()
-                .put("artifact_qualified_name", UUID.randomUUID().toString())
-                .put("create_date", Instant.now().epochSecond)
-                .put("last_updated", Instant.now().epochSecond)
-                .put(
-                    "config", JsonObject()
-                        .put("endpoint", current().nextBoolean())
-                        .put("subscribe_automatically", current().nextBoolean())
-                        .put("endpoint_name", UUID.randomUUID().toString())
+            DisplayArtifactConfiguration("null"), JsonObject.mapFrom(
+                ArtifactInformation(
+                    artifactQualifiedName = UUID.randomUUID().toString(),
+                    createDate = Instant.now().epochSecond,
+                    lastUpdated = Instant.now().epochSecond,
+                    config = ArtifactConfiguration(
+                        endpoint = current().nextBoolean(),
+                        subscribeAutomatically = current().nextBoolean(),
+                        endpointName = UUID.randomUUID().toString()
+                    )
                 )
+            )
         )
     }
 }

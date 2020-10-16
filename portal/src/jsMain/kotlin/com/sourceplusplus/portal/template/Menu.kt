@@ -2,6 +2,7 @@ package com.sourceplusplus.portal.template
 
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.protocol.portal.PageType.*
 import kotlinx.html.*
 
 fun FlowContent.menu(block: FlowContent.() -> Unit) {
@@ -18,29 +19,18 @@ fun FlowContent.menu(block: FlowContent.() -> Unit) {
 
 fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowContent.() -> Unit)? = null) {
     when (pageType) {
-        PageType.OVERVIEW -> apply {
+        OVERVIEW, ACTIVITY, CONFIGURATION -> apply {
             if (isActive) {
-                a(classes = "item active_tab") { +"Overview" }
+                a(classes = "item active_tab") { +pageType.title }
             } else {
                 a(classes = "item inactive_tab") {
-                    id = "sidebar_overview_link"
-                    href = "/"
-                    +"Overview"
+                    id = "sidebar_${pageType.name.toLowerCase()}_link"
+                    href = pageType.location
+                    +pageType.title
                 }
             }
         }
-        PageType.ACTIVITY -> apply {
-            if (isActive) {
-                a(classes = "item active_tab") { +"Dashboard" }
-            } else {
-                a(classes = "item inactive_tab") {
-                    id = "sidebar_activity_link"
-                    href = "activity.html"
-                    +"Activity"
-                }
-            }
-        }
-        PageType.TRACES -> apply {
+        TRACES -> apply {
             var activeClass = "active_tab"
             if (!isActive) {
                 activeClass = "inactive_tab"
@@ -51,17 +41,6 @@ fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowCont
             }
             div("content") {
                 block?.let { it() }
-            }
-        }
-        PageType.CONFIGURATION -> apply {
-            if (isActive) {
-                a(classes = "item active_tab") { +"Configuration" }
-            } else {
-                a(classes = "item inactive_tab") {
-                    id = "sidebar_configuration_link"
-                    href = "configuration.html"
-                    +"Configuration"
-                }
             }
         }
     }

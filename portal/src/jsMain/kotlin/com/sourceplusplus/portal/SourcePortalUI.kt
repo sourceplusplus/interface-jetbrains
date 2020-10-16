@@ -13,18 +13,19 @@ fun main() {
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
         val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
+        val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
         val darkMode = queryParams.getOrElse("dark_mode", { "false" }).toBoolean()
 
         when (window.location.pathname) {
             "/activity", "/activity.html" -> ActivityPage(portalUuid, externalPortal, darkMode).renderPage()
             "/traces", "/traces.html" -> {
-                val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
                 val traceOrderType = TraceOrderType.valueOf(
                     queryParams.getOrElse("order_type", { "LATEST_TRACES" }).toUpperCase()
                 )
                 TracesPage(portalUuid, externalPortal, hideActivityTab, traceOrderType).renderPage()
             }
-            "/configuration", "/configuration.html" -> ConfigurationPage(portalUuid, externalPortal).renderPage()
+            "/configuration", "/configuration.html" ->
+                ConfigurationPage(portalUuid, externalPortal, hideActivityTab).renderPage()
             else -> OverviewPage(portalUuid, externalPortal).renderPage()
         }
         //todo: portals should have ability to cache pages so they don't need re-init
