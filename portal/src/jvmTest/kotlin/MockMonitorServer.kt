@@ -18,8 +18,12 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayArtif
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.ArtifactConfiguration
 import com.sourceplusplus.protocol.artifact.ArtifactInformation
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
+import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.protocol.artifact.metrics.SplineChart
+import com.sourceplusplus.protocol.artifact.metrics.SplineSeriesData
 import com.sourceplusplus.protocol.artifact.trace.*
-import com.sourceplusplus.protocol.portal.*
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec

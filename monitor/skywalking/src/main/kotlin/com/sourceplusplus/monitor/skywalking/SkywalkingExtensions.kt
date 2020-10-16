@@ -1,11 +1,11 @@
 package com.sourceplusplus.monitor.skywalking
 
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointMetrics
-import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
-import com.sourceplusplus.protocol.artifact.ArtifactMetrics
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetrics
 import com.sourceplusplus.protocol.artifact.trace.*
-import com.sourceplusplus.protocol.portal.MetricType
-import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery

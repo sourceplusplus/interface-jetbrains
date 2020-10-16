@@ -4,7 +4,7 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactAutoSubscribe
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactEntryMethod
-import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.portal.model.PageType
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
 

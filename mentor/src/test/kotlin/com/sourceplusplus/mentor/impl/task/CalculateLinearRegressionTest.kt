@@ -6,7 +6,7 @@ import com.sourceplusplus.mentor.MentorTest
 import com.sourceplusplus.mentor.impl.task.analyze.CalculateLinearRegression
 import com.sourceplusplus.mentor.impl.task.monitor.GetTraces
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
-import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.delay

@@ -8,8 +8,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateChart
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
-import com.sourceplusplus.protocol.portal.BarTrendCard
-import com.sourceplusplus.protocol.portal.SplineChart
+import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
+import com.sourceplusplus.protocol.artifact.metrics.SplineChart
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray

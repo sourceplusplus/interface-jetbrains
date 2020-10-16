@@ -2,7 +2,7 @@ package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.PortalPage
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
-import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 
 /**
  * todo: description.

@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.portal.TableType
-import com.sourceplusplus.protocol.portal.TraceSpanInfoType
+import com.sourceplusplus.portal.model.TableType
+import com.sourceplusplus.portal.model.TraceSpanInfoType
 import kotlinx.html.*
 import org.w3c.dom.HTMLElement
 

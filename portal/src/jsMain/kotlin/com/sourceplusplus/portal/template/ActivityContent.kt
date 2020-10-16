@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.portal.ChartItemType
+import com.sourceplusplus.portal.model.ChartItemType
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.HTMLElement

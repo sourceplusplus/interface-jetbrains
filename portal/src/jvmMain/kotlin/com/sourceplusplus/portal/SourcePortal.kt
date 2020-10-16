@@ -7,7 +7,7 @@ import com.sourceplusplus.portal.display.views.ConfigurationView
 import com.sourceplusplus.portal.display.views.ActivityView
 import com.sourceplusplus.portal.display.views.TracesView
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
-import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.portal.model.PageType
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.util.*

@@ -8,12 +8,12 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.Configuratio
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactAutoSubscribe
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactEntryMethod
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayArtifactConfiguration
-import com.sourceplusplus.protocol.portal.ArtifactConfigType.AUTO_SUBSCRIBE
-import com.sourceplusplus.protocol.portal.ArtifactConfigType.ENTRY_METHOD
-import com.sourceplusplus.protocol.portal.ArtifactInfoType.*
+import com.sourceplusplus.portal.model.ArtifactConfigType.AUTO_SUBSCRIBE
+import com.sourceplusplus.portal.model.ArtifactConfigType.ENTRY_METHOD
+import com.sourceplusplus.portal.model.ArtifactInfoType.*
 import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
-import com.sourceplusplus.protocol.portal.PageType.*
+import com.sourceplusplus.portal.model.PageType.*
 import kotlinx.browser.document
 import kotlinx.html.dom.append
 import kotlinx.html.js.link

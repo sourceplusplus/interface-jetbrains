@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.portal.ArtifactConfigType
-import com.sourceplusplus.protocol.portal.ArtifactInfoType
+import com.sourceplusplus.portal.model.ArtifactConfigType
+import com.sourceplusplus.portal.model.ArtifactInfoType
 import kotlinx.html.*
 import org.w3c.dom.HTMLElement
 

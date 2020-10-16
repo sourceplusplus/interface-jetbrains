@@ -1,8 +1,8 @@
 package com.sourceplusplus.protocol.artifact.endpoint
 
 import com.sourceplusplus.protocol.Serializers
-import com.sourceplusplus.protocol.artifact.ArtifactSummarizedResult
-import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 

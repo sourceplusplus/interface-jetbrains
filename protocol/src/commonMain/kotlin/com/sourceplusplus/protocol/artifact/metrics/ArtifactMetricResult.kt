@@ -1,7 +1,7 @@
-package com.sourceplusplus.protocol.artifact
+package com.sourceplusplus.protocol.artifact.metrics
 
 import com.sourceplusplus.protocol.Serializers
-import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 

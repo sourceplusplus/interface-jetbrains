@@ -28,12 +28,12 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverv
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactSummarizedMetrics
-import com.sourceplusplus.protocol.artifact.ArtifactSummarizedResult
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
-import com.sourceplusplus.protocol.portal.MetricType
-import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject

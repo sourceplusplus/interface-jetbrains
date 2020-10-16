@@ -1,5 +1,6 @@
-package com.sourceplusplus.protocol.artifact
+package com.sourceplusplus.protocol.artifact.metrics
 
+import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import kotlinx.serialization.Serializable
 
 /**

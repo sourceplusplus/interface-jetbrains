@@ -1,8 +1,8 @@
 package com.sourceplusplus.portal.template
 
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
-import com.sourceplusplus.protocol.portal.PageType
-import com.sourceplusplus.protocol.portal.PageType.*
+import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.portal.model.PageType.*
 import kotlinx.html.*
 
 fun FlowContent.menu(block: FlowContent.() -> Unit) {
