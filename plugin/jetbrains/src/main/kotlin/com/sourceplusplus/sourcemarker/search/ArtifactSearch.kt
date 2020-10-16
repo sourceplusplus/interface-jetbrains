@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker
+package com.sourceplusplus.sourcemarker.search
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
@@ -27,6 +27,8 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object ArtifactSearch {
+
+    @Suppress("UnstableApiUsage")
     suspend fun findArtifact(artifact: ArtifactQualifiedName): PsiElement? {
         val promise = Promise.promise<Optional<PsiElement>>()
         val project = ProjectManager.getInstance().openProjects[0]
