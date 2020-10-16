@@ -26,6 +26,7 @@ import kotlinx.browser.window
 import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.dom.create
+import kotlinx.html.js.link
 import kotlinx.html.js.onClickFunction
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
@@ -57,7 +58,8 @@ class TracesPage(
 
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
-            js("portalConnected()")
+            //js("portalConnected()")
+
             eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
                 displayTraces(Json.decodeFromDynamic(message.body))
             }
@@ -76,6 +78,13 @@ class TracesPage(
 
     fun renderPage() {
         println("Rending Traces page")
+        document.getElementsByTagName("head")[0]!!.append {
+            link {
+                rel = "stylesheet"
+                type = "text/css"
+                href = "css/style.css"
+            }
+        }
         val root: Element = document.getElementById("root")!!
         root.innerHTML = ""
 

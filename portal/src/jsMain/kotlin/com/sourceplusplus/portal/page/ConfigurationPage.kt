@@ -15,9 +15,11 @@ import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PageType.*
 import kotlinx.browser.document
 import kotlinx.html.dom.append
+import kotlinx.html.js.link
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import org.w3c.dom.Element
+import org.w3c.dom.get
 import kotlin.js.json
 
 /**
@@ -39,7 +41,8 @@ class ConfigurationPage(
 
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
-            js("portalConnected()")
+            //js("portalConnected()")
+
             eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
                 updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
             }
@@ -49,6 +52,13 @@ class ConfigurationPage(
 
     fun renderPage() {
         console.log("Rendering Configuration page")
+        document.getElementsByTagName("head")[0]!!.append {
+            link {
+                rel = "stylesheet"
+                type = "text/css"
+                href = "css/style.css"
+            }
+        }
         val root: Element = document.getElementById("root")!!
         root.innerHTML = ""
 
