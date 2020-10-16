@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.psi.regresion
+package com.sourceplusplus.sourcemarker.psi.sqlsource
 
 import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.util.PsiUtil
