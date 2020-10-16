@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.artifact.trace.TraceStackHeaderType
+import com.sourceplusplus.protocol.portal.TraceStackHeaderType
 import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction

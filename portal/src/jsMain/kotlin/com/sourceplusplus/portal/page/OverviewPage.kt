@@ -6,7 +6,7 @@ import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
-import com.sourceplusplus.protocol.artifact.endpoint.EndpointTableType
+import com.sourceplusplus.protocol.portal.EndpointTableType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.protocol.portal.QueryTimeFrame

@@ -1,6 +1,4 @@
-package com.sourceplusplus.protocol.artifact.endpoint
-
-import com.sourceplusplus.protocol.portal.TableType
+package com.sourceplusplus.protocol.portal
 
 /**
  * todo: description.

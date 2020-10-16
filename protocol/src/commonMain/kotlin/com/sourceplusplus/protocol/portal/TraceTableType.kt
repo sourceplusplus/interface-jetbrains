@@ -1,6 +1,4 @@
-package com.sourceplusplus.protocol.artifact.trace
-
-import com.sourceplusplus.protocol.portal.TableType
+package com.sourceplusplus.protocol.portal
 
 /**
  * todo: description.
