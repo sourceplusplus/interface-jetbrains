@@ -86,10 +86,10 @@ fun TagConsumer<HTMLElement>.tracesHeader(
     }
 }
 
-fun TagConsumer<HTMLElement>.externalPortalButton() {
+fun TagConsumer<HTMLElement>.externalPortalButton(onClick: (Event) -> Unit) {
     div("first_menu_button_margin align_content_center") {
         div("ui icon basic button") {
-            onClick = "clickedViewAsExternalPortal()"
+            onClickFunction = onClick
             i("icon external link spp_red_color")
         }
     }

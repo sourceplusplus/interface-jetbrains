@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.actions
 
+import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.editor.Editor
 import com.sourceplusplus.marker.source.mark.SourceMarkPopupAction
 import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
@@ -10,6 +11,7 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
 import org.slf4j.LoggerFactory
+import javax.swing.UIManager
 
 /**
  * todo: description.
@@ -53,8 +55,9 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
     private fun refreshPortalIfNecessary(sourceMark: SourceMark, sourcePortal: SourcePortal) {
         val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
         if (sourcePortal != lastDisplayedInternalPortal) {
+            val darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
             val currentUrl = "/${sourcePortal.currentTab.name.toLowerCase()}.html" +
-                    "?portalUuid=${sourcePortal.portalUuid}"
+                    "?portalUuid=${sourcePortal.portalUuid}&dark_mode=$darkMode"
             jcefComponent.getBrowser().cefBrowser.executeJavaScript(
                 "window.location.href = '$currentUrl';", currentUrl, 0
             )

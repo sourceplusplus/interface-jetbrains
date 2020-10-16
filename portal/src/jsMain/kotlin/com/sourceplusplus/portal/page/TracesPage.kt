@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toFixed
 import com.sourceplusplus.portal.extensions.toPrettyDuration
@@ -26,6 +27,7 @@ import kotlinx.browser.window
 import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.dom.create
+import kotlinx.html.js.link
 import kotlinx.html.js.onClickFunction
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
@@ -47,17 +49,18 @@ class TracesPage(
     override val hideActivityTab: Boolean = false,
     override var traceOrderType: TraceOrderType = LATEST_TRACES,
     override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
+    private val darkMode: Boolean = false
 ) : ITracesPage {
 
     private val eb = EventBus("http://localhost:8888/eventbus")
 
     init {
         console.log("Traces tab started")
-        setupUI()
 
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
-            js("portalConnected()")
+            //js("portalConnected()")
+
             eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
                 displayTraces(Json.decodeFromDynamic(message.body))
             }
@@ -76,6 +79,13 @@ class TracesPage(
 
     fun renderPage() {
         println("Rending Traces page")
+        document.getElementsByTagName("head")[0]!!.append {
+            link {
+                rel = "stylesheet"
+                type = "text/css"
+                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
+            }
+        }
         val root: Element = document.getElementById("root")!!
         root.innerHTML = ""
 
@@ -96,7 +106,7 @@ class TracesPage(
                         onClickBackToTraceStack = { clickedBackToTraceStack() }
                     )
                     rightAlign {
-                        externalPortalButton()
+                        externalPortalButton { clickedViewAsExternalPortal(eb) }
                     }
                 }
                 wideColumn {
@@ -115,6 +125,8 @@ class TracesPage(
                 }
             }
         }
+
+        setupUI()
     }
 
     override fun displayTraces(traceResult: TraceResult) {
@@ -266,7 +278,7 @@ class TracesPage(
                 }
                 td {
                     div {
-                        classes = setOf("ui", "red", "progress", "active")
+                        classes = setOf("ui", "red", "progress")
                         id = "trace_bar_${i}"
                         attributes["data-percent"] = spanInfo.totalTracePercent.toString()
                         style = "margin: 0"
@@ -363,6 +375,9 @@ class TracesPage(
 
     private fun setupUI() {
         resetUI()
+
+        js("\$('#latest_traces_header').dropdown({on: null})")
+        js("\$('#trace_stack_header').dropdown({on: 'hover'})")
 
         if (hideActivityTab) {
             jq("#activity_link").css("display", "none")
