@@ -45,11 +45,11 @@
 }
 
 .inactive_tab {
-    color: #3C3F41;
+    color: grey !important;
 }
 
 .sidebar_sub_text_color {
-    color: #3C3F41 !important;
+    color: grey !important;
 }
 
 .background_color {
@@ -274,4 +274,28 @@
 
 .ui.celled.table > tbody > tr > td, .ui.celled.table > tbody > tr > th, .ui.celled.table > tfoot > tr > td, .ui.celled.table > tfoot > tr > th, .ui.celled.table > thead > tr > th, .ui.celled.table > tr > td, .ui.celled.table > tr > th {
     border-left: 1px solid #2B2B2B;
+}
+
+.ui.mini.statistic > .value, .ui.mini.statistics .statistic > .value {
+    color: grey;
+}
+
+.ui.statistic > .label, .ui.statistics .statistic > .label {
+    color: grey;
+}
+
+.ui.basic.button:hover {
+    background: #242424;
+}
+
+.ui.basic.button:active {
+    background: #242424;
+}
+
+.ui.basic.button:focus {
+    background: #242424;
+}
+
+.ui.pointing.dropdown > .menu:not(.hidden)::after {
+    background: none;
 }
