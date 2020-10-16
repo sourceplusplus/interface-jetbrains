@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.artifact
+package com.sourceplusplus.protocol.portal
 
 /**
  * todo: description.

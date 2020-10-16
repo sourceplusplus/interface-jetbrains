@@ -16,11 +16,11 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTrace
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraces
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
-import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType.END_TIME
-import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfoType.START_TIME
-import com.sourceplusplus.protocol.artifact.trace.TraceStackHeaderType.TIME_OCCURRED
-import com.sourceplusplus.protocol.artifact.trace.TraceStackHeaderType.TRACE_ID
-import com.sourceplusplus.protocol.artifact.trace.TraceTableType.*
+import com.sourceplusplus.protocol.portal.TraceSpanInfoType.END_TIME
+import com.sourceplusplus.protocol.portal.TraceSpanInfoType.START_TIME
+import com.sourceplusplus.protocol.portal.TraceStackHeaderType.TIME_OCCURRED
+import com.sourceplusplus.protocol.portal.TraceStackHeaderType.TRACE_ID
+import com.sourceplusplus.protocol.portal.TraceTableType.*
 import com.sourceplusplus.protocol.portal.PageType.*
 import kotlinx.browser.document
 import kotlinx.browser.window
