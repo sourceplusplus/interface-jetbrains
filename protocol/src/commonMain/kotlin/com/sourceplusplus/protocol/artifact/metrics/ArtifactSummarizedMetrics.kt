@@ -1,6 +1,5 @@
-package com.sourceplusplus.protocol.artifact
+package com.sourceplusplus.protocol.artifact.metrics
 
-import com.sourceplusplus.protocol.portal.MetricType
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,7 +9,7 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class ArtifactMetrics(
+data class ArtifactSummarizedMetrics(
     val metricType: MetricType,
-    val values: List<Int>
+    val value: String
 )

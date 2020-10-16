@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.portal.TraceStackHeaderType
-import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.portal.model.TraceStackHeaderType
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.HTMLElement

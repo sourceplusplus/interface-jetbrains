@@ -17,7 +17,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.QueryTraceSt
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.TracesTabOpened
 import com.sourceplusplus.protocol.artifact.trace.*
-import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.portal.model.PageType
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray

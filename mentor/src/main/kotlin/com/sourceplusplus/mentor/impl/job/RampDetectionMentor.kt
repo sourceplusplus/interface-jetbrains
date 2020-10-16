@@ -13,7 +13,7 @@ import com.sourceplusplus.mentor.impl.task.monitor.*
 import com.sourceplusplus.protocol.advice.AdviceType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanQuery
-import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import io.vertx.core.Vertx
 
 /**

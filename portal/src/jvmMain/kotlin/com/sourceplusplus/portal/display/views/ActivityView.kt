@@ -1,9 +1,9 @@
 package com.sourceplusplus.portal.display.views
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.artifact.ArtifactMetricResult
-import com.sourceplusplus.protocol.portal.MetricType
-import com.sourceplusplus.protocol.portal.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
+import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import java.util.concurrent.ConcurrentHashMap
 
 /**

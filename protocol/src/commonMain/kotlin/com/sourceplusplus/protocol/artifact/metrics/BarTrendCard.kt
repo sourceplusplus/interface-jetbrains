@@ -1,5 +1,6 @@
-package com.sourceplusplus.protocol.portal
+package com.sourceplusplus.protocol.artifact.metrics
 
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import kotlinx.serialization.Serializable
 
 /**

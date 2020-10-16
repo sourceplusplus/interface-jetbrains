@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.portal
+package com.sourceplusplus.protocol.artifact.metrics
 
 import kotlinx.serialization.Serializable
 

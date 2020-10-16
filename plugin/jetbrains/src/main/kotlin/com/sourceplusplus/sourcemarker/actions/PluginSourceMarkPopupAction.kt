@@ -8,7 +8,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
 import org.slf4j.LoggerFactory
 import javax.swing.UIManager

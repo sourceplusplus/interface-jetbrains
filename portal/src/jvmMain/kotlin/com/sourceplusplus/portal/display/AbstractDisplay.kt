@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.portal.model.PageType
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 
 /**
