@@ -168,7 +168,7 @@ class SkywalkingClient(
      *
      * @since 0.0.1
      */
-    class LocalMessageCodec<T>() : MessageCodec<T, T> {
+    class LocalMessageCodec<T> : MessageCodec<T, T> {
         override fun encodeToWire(buffer: Buffer, o: T): Unit =
             throw UnsupportedOperationException("Not supported yet.")
 

@@ -195,7 +195,11 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 )
             } else {
                 editor.visualPositionToXY(
-                    editor.offsetToVisualPosition(editor.document.getLineStartOffset(editor.caretModel.logicalPosition.line))
+                    editor.offsetToVisualPosition(
+                        editor.document.getLineStartOffset(
+                            editor.caretModel.logicalPosition.line
+                        )
+                    )
                 )
             }
             displayPoint.y -= popupComponentSize.height + 4
