@@ -55,7 +55,6 @@ class TracesPage(
 
     init {
         console.log("Traces tab started")
-        setupUI()
 
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
@@ -125,6 +124,8 @@ class TracesPage(
                 }
             }
         }
+
+        setupUI()
     }
 
     override fun displayTraces(traceResult: TraceResult) {
@@ -373,6 +374,9 @@ class TracesPage(
 
     private fun setupUI() {
         resetUI()
+
+        js("\$('#latest_traces_header').dropdown({on: null})")
+        js("\$('#trace_stack_header').dropdown({on: 'hover'})")
 
         if (hideActivityTab) {
             jq("#activity_link").css("display", "none")
