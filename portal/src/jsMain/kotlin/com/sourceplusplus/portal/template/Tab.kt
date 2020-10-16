@@ -25,15 +25,13 @@ fun FlowContent.tabItem(pageType: PageType, isActive: Boolean, block: (FlowConte
             }
         }
         TRACES -> apply {
-            var activeClass = "active_tab"
-            if (!isActive) {
-                activeClass = "inactive_tab"
-            }
+            val activeClass = if (isActive) "active_tab" else "inactive_tab"
             div("ui dropdown item $activeClass") {
                 unsafe {
                     +"""<z class="displaynone">Traces</z>"""
                 }
-                i(pageType.icon)
+
+                i(pageType.icon + " $activeClass")
                 block?.let { it() }
             }
         }
