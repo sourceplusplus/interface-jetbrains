@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
@@ -75,7 +76,7 @@ class OverviewPage(
                     //calendar()
 
                     rightAlign {
-                        externalPortalButton()
+                        externalPortalButton { clickedViewAsExternalPortal(eb) }
                     }
                 }
                 wideColumn {

@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ConfigurationTabOpened
@@ -75,7 +76,7 @@ class ConfigurationPage(
             configurationContent {
                 navBar(false) {
                     rightAlign {
-                        externalPortalButton()
+                        externalPortalButton { clickedViewAsExternalPortal(eb) }
                     }
                 }
                 configurationTable {
