@@ -3,17 +3,18 @@ package com.sourceplusplus.portal.page
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
+import com.sourceplusplus.portal.extensions.toMoment
+import com.sourceplusplus.portal.model.ArtifactConfigType.AUTO_SUBSCRIBE
+import com.sourceplusplus.portal.model.ArtifactConfigType.ENTRY_METHOD
+import com.sourceplusplus.portal.model.ArtifactInfoType.*
+import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactAutoSubscribe
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactEntryMethod
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayArtifactConfiguration
-import com.sourceplusplus.portal.model.ArtifactConfigType.AUTO_SUBSCRIBE
-import com.sourceplusplus.portal.model.ArtifactConfigType.ENTRY_METHOD
-import com.sourceplusplus.portal.model.ArtifactInfoType.*
 import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
-import com.sourceplusplus.portal.model.PageType.*
 import kotlinx.browser.document
 import kotlinx.html.dom.append
 import kotlinx.html.js.link
@@ -91,8 +92,8 @@ class ConfigurationPage(
 
     private fun updateArtifactConfigurationTable(artifact: ArtifactInformation) {
         jq("#artifact_qualified_name").text(artifact.artifactQualifiedName)
-        jq("#artifact_create_date").text(moment.unix(artifact.createDate).format("LLLL"))
-        jq("#artifact_last_updated").text(moment.unix(artifact.lastUpdated).format("LLLL"))
+        jq("#artifact_create_date").text(artifact.createDate.toMoment().format("LLLL"))
+        jq("#artifact_last_updated").text(artifact.lastUpdated.toMoment().format("LLLL"))
 
         if (artifact.config.endpoint) {
             js("\$('#entry_method_toggle').checkbox(\"set checked\");")

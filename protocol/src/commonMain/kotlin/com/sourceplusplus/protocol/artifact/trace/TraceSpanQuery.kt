@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.artifact.trace
 
+import kotlinx.datetime.Instant
+
 /**
  * todo: description.
  *
@@ -14,8 +16,8 @@ data class TraceSpanQuery(
 //    val refs: List<TraceSpanRef> = emptyList(),
     val serviceCode: String? = null,
     val serviceInstanceName: String? = null,
-    val startTime: Long? = null,
-    val endTime: Long? = null,
+    val startTime: Instant? = null,
+    val endTime: Instant? = null,
     val endpointName: String? = null,
     val artifactQualifiedName: String? = null,
     val type: String? = null,

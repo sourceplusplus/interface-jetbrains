@@ -11,6 +11,7 @@ import io.vertx.kotlin.core.eventbus.requestAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 
 /**
  * todo: description.
@@ -34,8 +35,8 @@ class EndpointTracesTracker(private val skywalkingClient: SkywalkingClient) : Co
                         appUuid = request.appUuid,
                         artifactQualifiedName = request.artifactQualifiedName,
                         orderType = request.orderType,
-                        start = request.zonedDuration.start.toInstant().toEpochMilli(),
-                        stop = request.zonedDuration.start.toInstant().toEpochMilli(),
+                        start = Instant.fromEpochMilliseconds(request.zonedDuration.start.toInstant().toEpochMilli()),
+                        stop = Instant.fromEpochMilliseconds(request.zonedDuration.start.toInstant().toEpochMilli()),
                         total = traceStack.size,
                         traces = traceStack
                     )

@@ -7,13 +7,13 @@ import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.portal.extensions.updateChart
 import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.protocol.ArtifactNameUtils.getShortQualifiedFunctionName
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ActivityTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetMetricTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearActivity
-import com.sourceplusplus.protocol.artifact.*
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.*
 import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
 import io.vertx.core.json.JsonObject
@@ -155,8 +155,8 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             }
         val seriesData = SplineSeriesData(
             seriesIndex = seriesIndex,
-            times = times.map { it.epochSeconds }, //todo: no epochSeconds
-            values = finalArtifactMetrics.values.map { it.toDouble() }.toDoubleArray() //todo: or this
+            times = times.map { Instant.fromEpochMilliseconds(it.toEpochMilliseconds()) },
+            values = finalArtifactMetrics.values
         )
         val splineChart = SplineChart(
             metricType = finalArtifactMetrics.metricType,
@@ -177,7 +177,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
 //                            } else {
 //                                advice.regression.predict(it.toEpochMilliseconds().toDouble())
 //                            }
-//                        }.toDoubleArray()
+//                        }
 //                    )
 //                    val regressionSplineChart = splineChart.copy(
 //                        seriesData = Collections.singletonList(regressionSeriesData)
@@ -228,8 +228,8 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
         }
     }
 
-    private fun calculatePercents(artifactMetrics: ArtifactMetrics): DoubleArray {
-        val metricArr = ArrayList<Int>()
+    private fun calculatePercents(artifactMetrics: ArtifactMetrics): List<Double> {
+        val metricArr = ArrayList<Double>()
         when (artifactMetrics.values.size) {
             60 -> {
                 for (i in artifactMetrics.values.indices) {
@@ -252,12 +252,12 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
         val percentMax = metricArr.maxOrNull()!!
         val percents = ArrayList<Double>()
         for (i in metricArr.indices) {
-            if (percentMax == 0) {
+            if (percentMax == 0.0) {
                 percents.add(0.0)
             } else {
                 percents.add((metricArr[i] / percentMax) * 100.00)
             }
         }
-        return percents.toDoubleArray()
+        return percents
     }
 }

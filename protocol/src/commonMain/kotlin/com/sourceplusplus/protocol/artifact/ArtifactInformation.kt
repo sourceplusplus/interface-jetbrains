@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.artifact
 
+import com.sourceplusplus.protocol.Serializers
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,7 +13,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ArtifactInformation(
     val artifactQualifiedName: String,
-    val createDate: Long,
-    val lastUpdated: Long,
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val createDate: Instant,
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val lastUpdated: Instant,
     val config: ArtifactConfiguration
 )

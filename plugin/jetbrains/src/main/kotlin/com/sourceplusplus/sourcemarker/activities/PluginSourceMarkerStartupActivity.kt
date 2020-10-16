@@ -34,8 +34,8 @@ import com.sourceplusplus.mentor.impl.job.RampDetectionMentor
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.sourcemarker.listeners.ArtifactAdviceListener
@@ -298,7 +298,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
      *
      * @since 0.0.1
      */
-    class LocalMessageCodec<T> internal constructor() : MessageCodec<T, T> {
+    class LocalMessageCodec<T> : MessageCodec<T, T> {
         override fun encodeToWire(buffer: Buffer, o: T): Unit =
             throw UnsupportedOperationException("Not supported yet.")
 
