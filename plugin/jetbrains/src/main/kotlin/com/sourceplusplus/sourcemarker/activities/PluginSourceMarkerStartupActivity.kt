@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -63,6 +64,7 @@ import org.apache.log4j.PatternLayout
 import org.slf4j.LoggerFactory
 import java.awt.Dimension
 import java.util.*
+import javax.swing.UIManager
 
 /**
  * todo: description.
@@ -264,7 +266,9 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
                 override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
                     val initialPortal = SourcePortal.getPortals()[0]
                     val page = "${initialPortal.currentTab.name.toLowerCase()}.html"
-                    configuration.initialUrl = "http://localhost:8080/$page?portalUuid=${initialPortal.portalUuid}"
+                    val darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
+                    configuration.initialUrl =
+                        "http://localhost:8080/$page?portalUuid=${initialPortal.portalUuid}&dark_mode=$darkMode"
                 }
             }
         }

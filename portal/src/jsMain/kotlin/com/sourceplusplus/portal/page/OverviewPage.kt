@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
@@ -12,9 +13,11 @@ import com.sourceplusplus.protocol.portal.QueryTimeFrame
 import kotlinx.browser.document
 import kotlinx.html.*
 import kotlinx.html.dom.append
+import kotlinx.html.js.link
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import org.w3c.dom.Element
+import org.w3c.dom.get
 import kotlin.js.json
 
 /**
@@ -25,7 +28,8 @@ import kotlin.js.json
  */
 class OverviewPage(
     override val portalUuid: String,
-    override val externalPortal: Boolean = false
+    override val externalPortal: Boolean = false,
+    private val darkMode: Boolean = false
 ) : IOverviewPage {
 
     private val eb = EventBus("http://localhost:8888/eventbus")
@@ -35,7 +39,7 @@ class OverviewPage(
 
         @Suppress("EXPERIMENTAL_API_USAGE")
         eb.onopen = {
-            js("portalConnected()")
+            //js("portalConnected()")
 
             eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->
                 displayEndpoints(Json.decodeFromDynamic(message.body))
@@ -47,6 +51,13 @@ class OverviewPage(
 
     fun renderPage() {
         println("Rending Overview page")
+        document.getElementsByTagName("head")[0]!!.append {
+            link {
+                rel = "stylesheet"
+                type = "text/css"
+                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
+            }
+        }
         val root: Element = document.getElementById("root")!!
         root.innerHTML = ""
 
@@ -65,7 +76,7 @@ class OverviewPage(
                     //calendar()
 
                     rightAlign {
-                        externalPortalButton()
+                        externalPortalButton { clickedViewAsExternalPortal(eb) }
                     }
                 }
                 wideColumn {
