@@ -37,7 +37,7 @@ fun main() {
         }
         //todo: portals should have ability to cache pages so they don't need re-init
 
-        var mainGetQuery = """?portalUuid=$portalUuid"""
+        var mainGetQuery = "?portalUuid=$portalUuid"
         var mainGetQueryWithoutPortalUuid = ""
         if (externalPortal) mainGetQueryWithoutPortalUuid += "&external=true"
         if (darkMode) mainGetQueryWithoutPortalUuid += "&dark_mode=true"
@@ -53,15 +53,6 @@ fun loadTheme(mainGetQuery: String) {
     js("\$('.ui.dropdown').dropdown()")
     js("\$('.ui.sidebar').sidebar('setting', 'transition', 'overlay')")
     js("\$('.ui.progress').progress()")
-
-    val latestTracesHeader = jq("#latest_traces_header")
-    if (latestTracesHeader.length > 0) {
-        js("latestTracesHeader.dropdown({on: null})")
-    }
-    val traceStackHeader = jq("#trace_stack_header")
-    if (traceStackHeader.length > 0) {
-        js("traceStackHeader.dropdown({on: 'hover'})")
-    }
 
     jq(".openbtn").on("click", fun() {
         jq(".ui.sidebar").toggleClass("very thin icon")
