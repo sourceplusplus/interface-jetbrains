@@ -24,11 +24,11 @@
 }
 
 .spp_blue {
-    background-color: #313335 !important;
+    background-color: #242424 !important;
 }
 
 .spp_blue_color {
-    color: #313335 !important;
+    color: #2B2B2B !important;
 }
 
 .spp_red_color {
@@ -58,7 +58,7 @@
 
 .secondary_background_color {
     background-color: #313335 !important;
-    border-color: #313335 !important;
+    border-color: #242424 !important;
     color: grey !important;
 }
 
@@ -71,11 +71,12 @@
 }
 
 .ui.toggle.checkbox input:checked ~ label {
-    color: #e1483b !important
+    color: #e1483b !important;
 }
 
 .stack_table_background {
-    background-color: grey;
+    background-color: #313335 !important;
+    color: grey !important;
 }
 
 .trace_stack_table {
@@ -83,7 +84,8 @@
 }
 
 .span_segment_background {
-    background-color: grey !important;
+    background-color: #313335 !important;
+    color: grey !important;
 }
 
 .overflow_y_hidden {
@@ -99,7 +101,8 @@
 }
 
 .openbtn_background_white {
-    background-color: #ffffff !important;
+    background-color: #3C3F41 !important;
+    color: white !important;
     height: 45px !important;
 }
 
@@ -218,10 +221,81 @@
 
 .margin_right_white {
     margin-right: 10px !important;
-    background-color: #ffffff !important;
+    /*background-color: #ffffff !important;*/
 }
 
 .margin_left_no_padding {
     padding: 0 !important;
     margin-left: 10px !important;
+}
+
+#latest_traces_header {
+    color: grey;
+}
+
+#trace_stack_header {
+    color: grey;
+}
+
+#span_tag_div {
+    background: #2B2B2B;
+}
+
+#span_tag_table {
+    background: #3C3F41;
+    color: grey;
+}
+
+#span_log_div {
+    background: #2B2B2B;
+}
+
+#log_tag_table {
+    background: #3C3F41;
+    color: grey;
+}
+
+#log_tag_table tr td {
+    color: grey;
+}
+
+#top_trace_table {
+    border: none !important;
+}
+
+.ui.table > thead > tr > th {
+    color: grey !important;
+    background: #242424;
+}
+
+.ui.attached.menu:not(.tabular) {
+    border: 1px solid #242424
+}
+
+.ui.celled.table > tbody > tr > td, .ui.celled.table > tbody > tr > th, .ui.celled.table > tfoot > tr > td, .ui.celled.table > tfoot > tr > th, .ui.celled.table > thead > tr > th, .ui.celled.table > tr > td, .ui.celled.table > tr > th {
+    border-left: 1px solid #2B2B2B;
+}
+
+.ui.mini.statistic > .value, .ui.mini.statistics .statistic > .value {
+    color: grey;
+}
+
+.ui.statistic > .label, .ui.statistics .statistic > .label {
+    color: grey;
+}
+
+.ui.basic.button:hover {
+    background: #242424;
+}
+
+.ui.basic.button:active {
+    background: #242424;
+}
+
+.ui.basic.button:focus {
+    background: #242424;
+}
+
+.ui.pointing.dropdown > .menu:not(.hidden)::after {
+    background: none;
 }

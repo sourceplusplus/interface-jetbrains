@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.listeners
 
+import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
@@ -26,7 +27,10 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshActiv
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
-import com.sourceplusplus.protocol.artifact.*
+import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.ArtifactSummarizedMetrics
+import com.sourceplusplus.protocol.artifact.ArtifactSummarizedResult
+import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.portal.MetricType
 import com.sourceplusplus.protocol.portal.PageType
@@ -38,9 +42,9 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import java.lang.UnsupportedOperationException
 import java.text.DecimalFormat
 import java.time.ZonedDateTime
+import javax.swing.UIManager
 
 /**
  * todo: description.
@@ -51,6 +55,12 @@ import java.time.ZonedDateTime
 class PortalEventListener : CoroutineVerticle() {
 
     override suspend fun start() {
+        //listen for theme changes
+        UIManager.addPropertyChangeListener {
+            val darkMode = (it.newValue !is IntelliJLaf)
+            //todo: update existing portals
+        }
+
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
         vertx.eventBus().consumer<JsonObject>(OverviewTabOpened) {
             val portalUuid = it.body().getString("portalUuid")
