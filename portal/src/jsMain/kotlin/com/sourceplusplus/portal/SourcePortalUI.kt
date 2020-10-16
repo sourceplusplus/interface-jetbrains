@@ -39,27 +39,8 @@ fun main() {
         }
         //todo: portals should have ability to cache pages so they don't need re-init
 
-        var mainGetQuery = "?portalUuid=$portalUuid"
-        var mainGetQueryWithoutPortalUuid = ""
-        if (externalPortal) mainGetQueryWithoutPortalUuid += "&external=true"
-        if (darkMode) mainGetQueryWithoutPortalUuid += "&dark_mode=true"
-        if (hideActivityTab) mainGetQueryWithoutPortalUuid += "&hide_activity_tab=true"
-        mainGetQuery += mainGetQueryWithoutPortalUuid
-
-        loadTheme(mainGetQuery)
+        loadTheme()
     }
-}
-
-fun getMainGetQueryWithoutPortalUuid(): String {
-    val queryParams = getQueryMap()
-    val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
-    val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
-    val darkMode = queryParams.getOrElse("dark_mode", { "false" }).toBoolean()
-    var mainGetQueryWithoutPortalUuid = ""
-    if (externalPortal) mainGetQueryWithoutPortalUuid += "&external=true"
-    if (darkMode) mainGetQueryWithoutPortalUuid += "&dark_mode=true"
-    if (hideActivityTab) mainGetQueryWithoutPortalUuid += "&hide_activity_tab=true"
-    return mainGetQueryWithoutPortalUuid
 }
 
 fun clickedViewAsExternalPortal(eb: EventBus) {
@@ -99,7 +80,7 @@ function portalConnected() {
 }
  */
 
-fun loadTheme(mainGetQuery: String) {
+fun loadTheme() {
     js("\$('.ui.calendar').calendar()")
     js("\$('.ui.dropdown').dropdown()")
     js("\$('.ui.sidebar').sidebar('setting', 'transition', 'overlay')")
@@ -118,6 +99,7 @@ fun loadTheme(mainGetQuery: String) {
     })
     js("\$('.ui.accordion').accordion({selector: {}})")
 
+    val mainGetQuery = getMainGetQuery()
     jq("#overview_link").attr("href", "overview.html$mainGetQuery")
     jq("#sidebar_overview_link").attr("href", "overview.html$mainGetQuery")
 
@@ -133,6 +115,26 @@ fun loadTheme(mainGetQuery: String) {
 
     jq("#configuration_link").attr("href", "configuration.html$mainGetQuery")
     jq("#sidebar_configuration_link").attr("href", "configuration.html$mainGetQuery")
+}
+
+fun getMainGetQuery(): String {
+    val queryParams = getQueryMap()
+    val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
+    var mainGetQuery = "?portalUuid=$portalUuid"
+    mainGetQuery += getMainGetQueryWithoutPortalUuid()
+    return mainGetQuery
+}
+
+fun getMainGetQueryWithoutPortalUuid(): String {
+    val queryParams = getQueryMap()
+    val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
+    val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
+    val darkMode = queryParams.getOrElse("dark_mode", { "false" }).toBoolean()
+    var mainGetQueryWithoutPortalUuid = ""
+    if (externalPortal) mainGetQueryWithoutPortalUuid += "&external=true"
+    if (darkMode) mainGetQueryWithoutPortalUuid += "&dark_mode=true"
+    if (hideActivityTab) mainGetQueryWithoutPortalUuid += "&hide_activity_tab=true"
+    return mainGetQueryWithoutPortalUuid
 }
 
 fun getQueryMap(): Map<String, String> {
