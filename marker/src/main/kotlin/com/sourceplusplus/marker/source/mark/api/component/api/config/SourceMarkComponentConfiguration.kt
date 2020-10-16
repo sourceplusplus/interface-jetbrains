@@ -14,7 +14,7 @@ open class SourceMarkComponentConfiguration {
     var useHeavyPopup = true
     var hideOnMouseMotion = false
     var hideOnScroll = true
-    var showAboveClass: Boolean = true
+    var showAboveClass: Boolean = false
     var showAboveMethod: Boolean = true
     var showAboveExpression: Boolean = false
     var componentSizeEvaluator: ComponentSizeEvaluator = ComponentSizeEvaluator()

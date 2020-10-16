@@ -177,10 +177,6 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         this.editor = editor
 
         SwingUtilities.invokeLater {
-            val displayPoint = editor.visualPositionToXY(
-                editor.offsetToVisualPosition(editor.document.getLineStartOffset(lineNumber))
-            )
-
             val popup: Disposable
             val popupComponent = sourceMarkComponent.getComponent()
             val dynamicSize = sourceMarkComponent.configuration.componentSizeEvaluator
@@ -190,14 +186,21 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             }
             val popupComponentSize = popupComponent.preferredSize
 
-            if (sourceMarkComponent.configuration.useHeavyPopup) {
-                if ((this is ClassSourceMark && sourceMarkComponent.configuration.showAboveClass)
-                    || (this is MethodSourceMark && sourceMarkComponent.configuration.showAboveMethod)
-                    || (this is ExpressionSourceMark && sourceMarkComponent.configuration.showAboveExpression)
-                ) {
-                    displayPoint.y -= popupComponentSize.height + 4
-                }
+            val displayPoint = if ((this is ClassSourceMark && sourceMarkComponent.configuration.showAboveClass)
+                || (this is MethodSourceMark && sourceMarkComponent.configuration.showAboveMethod)
+                || (this is ExpressionSourceMark && sourceMarkComponent.configuration.showAboveExpression)
+            ) {
+                editor.visualPositionToXY(
+                    editor.offsetToVisualPosition(editor.document.getLineStartOffset(lineNumber))
+                )
+            } else {
+                editor.visualPositionToXY(
+                    editor.offsetToVisualPosition(editor.document.getLineStartOffset(editor.caretModel.logicalPosition.line))
+                )
+            }
+            displayPoint.y -= popupComponentSize.height + 4
 
+            if (sourceMarkComponent.configuration.useHeavyPopup) {
                 popup = JBPopupFactory.getInstance()
                     .createComponentPopupBuilder(popupComponent, popupComponent)
                     .setShowBorder(false)
