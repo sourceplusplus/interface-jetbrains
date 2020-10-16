@@ -23,6 +23,7 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
 import com.intellij.ui.paint.EffectPainter
 import com.sourceplusplus.marker.MarkerUtils
+import com.sourceplusplus.marker.plugin.SourceMarkerPlugin.getSourceFileMarker
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
@@ -80,7 +81,7 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                 || (parent is GrMethod && element === parent.nameIdentifierGroovy)
                 || (parent is KtNamedFunction && element === parent.nameIdentifier)
             ) {
-                val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile)!!
+                val fileMarker = getSourceFileMarker(element.containingFile)!!
                 currentProject = fileMarker.project
 
                 val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
@@ -90,7 +91,7 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                     MarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
                 }
             } else if (element is PsiStatement) {
-                val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile)!!
+                val fileMarker = getSourceFileMarker(element.containingFile)!!
                 currentProject = fileMarker.project
 
                 val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(
@@ -128,7 +129,7 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
 
         return object : FactoryInlayHintsCollector(editor) {
             override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
-                val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile) ?: return true
+                val fileMarker = getSourceFileMarker(element.containingFile) ?: return true
                 val inlayMark = createInlayMarkIfNecessary(element) ?: return true
                 if (!fileMarker.containsSourceMark(inlayMark) && !inlayMark.canApply()) return true
                 if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply()
@@ -211,18 +212,49 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                     virtualText.icon!!.paintIcon(null, g, virtualText.iconLocation.x, virtualText.iconLocation.y)
                 }
                 g.font = font
-                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(false))
+                g.setRenderingHint(
+                    RenderingHints.KEY_TEXT_ANTIALIASING,
+                    AntialiasingType.getKeyForCurrentScope(false)
+                )
                 g.color = foreground
                 g.drawString(virtualText.getRenderedVirtualText(), 0, ascent)
                 val effectColor = virtualText.textAttributes.effectColor
                 if (effectColor != null) {
                     g.color = effectColor
                     when (virtualText.textAttributes.effectType) {
-                        EffectType.LINE_UNDERSCORE -> EffectPainter.LINE_UNDERSCORE.paint(g, 0, ascent, width, descent, font)
-                        EffectType.BOLD_LINE_UNDERSCORE -> EffectPainter.BOLD_LINE_UNDERSCORE.paint(g, 0, ascent, width, descent, font)
+                        EffectType.LINE_UNDERSCORE -> EffectPainter.LINE_UNDERSCORE.paint(
+                            g,
+                            0,
+                            ascent,
+                            width,
+                            descent,
+                            font
+                        )
+                        EffectType.BOLD_LINE_UNDERSCORE -> EffectPainter.BOLD_LINE_UNDERSCORE.paint(
+                            g,
+                            0,
+                            ascent,
+                            width,
+                            descent,
+                            font
+                        )
                         EffectType.STRIKEOUT -> EffectPainter.STRIKE_THROUGH.paint(g, 0, ascent, width, height, font)
-                        EffectType.WAVE_UNDERSCORE -> EffectPainter.WAVE_UNDERSCORE.paint(g, 0, ascent, width, descent, font)
-                        EffectType.BOLD_DOTTED_LINE -> EffectPainter.BOLD_DOTTED_UNDERSCORE.paint(g, 0, ascent, width, descent, font)
+                        EffectType.WAVE_UNDERSCORE -> EffectPainter.WAVE_UNDERSCORE.paint(
+                            g,
+                            0,
+                            ascent,
+                            width,
+                            descent,
+                            font
+                        )
+                        EffectType.BOLD_DOTTED_LINE -> EffectPainter.BOLD_DOTTED_UNDERSCORE.paint(
+                            g,
+                            0,
+                            ascent,
+                            width,
+                            descent,
+                            font
+                        )
                         else -> {
                         }
                     }

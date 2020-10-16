@@ -1,5 +1,7 @@
 package com.sourceplusplus.portal.extensions
 
+import kotlinx.datetime.Instant
+import moment
 import moment.Duration
 import kotlin.math.round
 
@@ -52,3 +54,5 @@ fun Duration.toPrettyDuration(decimalPlaces: Int): String {
 }
 
 fun Double.toFixed(digits: Int): String = this.asDynamic().toFixed(digits) as String
+
+fun Instant.toMoment(): moment.Moment = moment(toEpochMilliseconds(), "x")

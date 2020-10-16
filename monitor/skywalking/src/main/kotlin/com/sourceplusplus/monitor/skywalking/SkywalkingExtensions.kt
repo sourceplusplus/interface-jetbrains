@@ -1,14 +1,13 @@
 package com.sourceplusplus.monitor.skywalking
 
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointMetrics
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetrics
-import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.trace.*
 import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
-import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.QueryOrder
@@ -36,16 +35,8 @@ fun toProtocol(
 fun GetLinearIntValuesQuery.Result.toProtocol(metricType: String): ArtifactMetrics {
     return ArtifactMetrics(
         metricType = MetricType.realValueOf(metricType),
-        values = values.map { (it.value as BigDecimal).toInt() }
+        values = values.map { (it.value as BigDecimal).toDouble() }
     )
-}
-
-fun GetMultipleLinearIntValuesQuery.Value.toProtocol(): Int {
-    return (value as BigDecimal).toInt()
-}
-
-fun GetLinearIntValuesQuery.Result.toDoubleArray(): DoubleArray {
-    return values.map { (it.value as BigDecimal).toDouble() }.toDoubleArray()
 }
 
 fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
@@ -53,7 +44,7 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
         segmentId = segmentId,
         operationNames = endpointNames,
         duration = duration,
-        start = start.toLong(),
+        start = Instant.fromEpochMilliseconds(start.toLong()),
         error = isError,
         traceIds = traceIds
     )
@@ -63,12 +54,12 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
 fun QueryTraceQuery.Log.toProtocol(): TraceSpanLogEntry {
     if (data!!.find { it.key == "stack" } != null) {
         return TraceSpanLogEntry(
-            time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()).toEpochMilliseconds(),
+            time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()),
             data = data.find { it.key == "stack" }!!.value!! //todo: correctly
         )
     }
     return TraceSpanLogEntry(
-        time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()).toEpochMilliseconds(),
+        time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()),
         data = data.joinToString(separator = "\n") { it.key + " : " + it.value!! }
     )
 }
@@ -91,8 +82,8 @@ fun QueryTraceQuery.Span.toProtocol(): TraceSpan {
         refs = refs.map { it.toProtocol() },
         serviceCode = serviceCode,
         //serviceInstanceName = serviceInstanceName, //todo: this
-        startTime = (startTime as BigDecimal).toLong(),
-        endTime = (endTime as BigDecimal).toLong(),
+        startTime = Instant.fromEpochMilliseconds((startTime as BigDecimal).toLong()),
+        endTime = Instant.fromEpochMilliseconds((endTime as BigDecimal).toLong()),
         endpointName = endpointName,
         type = type,
         peer = peer,

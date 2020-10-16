@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.artifact.trace
 
+import com.sourceplusplus.protocol.Serializers
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,6 +12,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class TraceSpanLogEntry(
-    val time: Long, //todo: Instant
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val time: Instant,
     val data: String
 )

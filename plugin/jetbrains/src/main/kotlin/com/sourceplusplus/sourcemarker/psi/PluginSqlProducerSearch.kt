@@ -7,7 +7,7 @@ import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.mentor.extend.SqlProducerSearch
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.sourcemarker.ArtifactSearch
+import com.sourceplusplus.sourcemarker.search.ArtifactSearch
 import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
 import com.sourceplusplus.sourcemarker.psi.sqlsource.SpringDataSqlSource
 import io.vertx.core.Promise

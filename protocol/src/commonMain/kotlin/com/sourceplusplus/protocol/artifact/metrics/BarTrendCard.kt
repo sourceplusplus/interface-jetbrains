@@ -14,17 +14,15 @@ data class BarTrendCard(
     val timeFrame: QueryTimeFrame? = null,
     val header: String,
     val meta: String,
-    val barGraphData: DoubleArray? = null
+    val barGraphData: List<Double>
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is BarTrendCard) return false
-
         if (timeFrame != other.timeFrame) return false
         if (header != other.header) return false
         if (meta != other.meta) return false
-        if (!barGraphData.contentEquals(other.barGraphData)) return false
-
+        if (barGraphData != other.barGraphData) return false
         return true
     }
 
@@ -32,7 +30,7 @@ data class BarTrendCard(
         var result = timeFrame.hashCode()
         result = 31 * result + header.hashCode()
         result = 31 * result + meta.hashCode()
-        result = 31 * result + barGraphData.contentHashCode()
+        result = 31 * result + barGraphData.hashCode()
         return result
     }
 }

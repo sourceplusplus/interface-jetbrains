@@ -1,7 +1,11 @@
 package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.PortalPage
-import com.sourceplusplus.protocol.artifact.trace.*
+import com.sourceplusplus.portal.model.TraceDisplayType
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.artifact.trace.TraceResult
+import com.sourceplusplus.protocol.artifact.trace.TraceSpan
+import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
 
 /**
  * todo: description.

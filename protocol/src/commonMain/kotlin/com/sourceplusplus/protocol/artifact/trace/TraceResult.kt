@@ -1,5 +1,7 @@
 package com.sourceplusplus.protocol.artifact.trace
 
+import com.sourceplusplus.protocol.Serializers
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,8 +16,10 @@ data class TraceResult(
     val artifactQualifiedName: String,
     val artifactSimpleName: String? = null,
     val orderType: TraceOrderType,
-    val start: Long, //todo: Instant
-    val stop: Long, //todo: Instant
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val start: Instant,
+    @Serializable(with = Serializers.InstantKSerializer::class)
+    val stop: Instant,
     val step: String? = null,
     val traces: List<Trace>,
     val total: Int
