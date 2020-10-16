@@ -1,9 +1,8 @@
 package com.sourceplusplus.sourcemarker.psi
 
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
+import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.monitor.skywalking.track.EndpointTracker
-import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_ID
-import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_NAME
 import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
 import com.sourceplusplus.sourcemarker.psi.endpoint.SkywalkingTraceEndpoint
 import com.sourceplusplus.sourcemarker.psi.endpoint.SpringMVCEndpoint
@@ -27,6 +26,8 @@ class EndpointDetector {
 
     companion object {
         private val log = LoggerFactory.getLogger(EndpointDetector::class.java)
+        private val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
+        private val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
     }
 
     private val detectorSet = setOf(
