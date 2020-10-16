@@ -288,7 +288,7 @@ fun displayChart(vertx: Vertx) {
                 ),
                 Clock.System.now()
             ),
-            doubleArrayOf(current().nextDouble(10.0), current().nextDouble(10.0))
+            listOf(current().nextDouble(10.0), current().nextDouble(10.0))
         )
     val splineChart = SplineChart(currentMetricType, QueryTimeFrame.LAST_15_MINUTES, listOf(seriesData))
     vertx.eventBus().updateChart("null", splineChart)
@@ -323,11 +323,23 @@ fun displayTraces(vertx: Vertx) {
 
 fun updateCards(vertx: Vertx) {
     val throughputAverageCard =
-        BarTrendCard(meta = "throughput_average", header = current().nextInt(100).toString())
+        BarTrendCard(
+            meta = "throughput_average",
+            header = current().nextInt(100).toString(),
+            barGraphData = emptyList()
+        )
     val responseTimeAverageCard =
-        BarTrendCard(meta = "responsetime_average", header = current().nextInt(100).toString())
+        BarTrendCard(
+            meta = "responsetime_average",
+            header = current().nextInt(100).toString(),
+            barGraphData = emptyList()
+        )
     val slaAverageCard =
-        BarTrendCard(meta = "servicelevelagreement_average", header = current().nextInt(100).toString())
+        BarTrendCard(
+            meta = "servicelevelagreement_average",
+            header = current().nextInt(100).toString(),
+            barGraphData = emptyList()
+        )
     vertx.eventBus().displayCard("null", throughputAverageCard)
     vertx.eventBus().displayCard("null", responseTimeAverageCard)
     vertx.eventBus().displayCard("null", slaAverageCard)

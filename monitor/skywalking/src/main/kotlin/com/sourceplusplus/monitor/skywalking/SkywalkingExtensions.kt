@@ -1,14 +1,13 @@
 package com.sourceplusplus.monitor.skywalking
 
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointMetrics
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetrics
-import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.trace.*
 import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
-import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.QueryOrder
@@ -36,16 +35,8 @@ fun toProtocol(
 fun GetLinearIntValuesQuery.Result.toProtocol(metricType: String): ArtifactMetrics {
     return ArtifactMetrics(
         metricType = MetricType.realValueOf(metricType),
-        values = values.map { (it.value as BigDecimal).toInt() }
+        values = values.map { (it.value as BigDecimal).toDouble() }
     )
-}
-
-fun GetMultipleLinearIntValuesQuery.Value.toProtocol(): Int {
-    return (value as BigDecimal).toInt()
-}
-
-fun GetLinearIntValuesQuery.Result.toDoubleArray(): DoubleArray {
-    return values.map { (it.value as BigDecimal).toDouble() }.toDoubleArray()
 }
 
 fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {

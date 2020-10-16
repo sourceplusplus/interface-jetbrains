@@ -5,7 +5,7 @@ import com.sourceplusplus.portal.extensions.displaySpanInfo
 import com.sourceplusplus.portal.extensions.displayTraceStack
 import com.sourceplusplus.portal.extensions.displayTraces
 import com.sourceplusplus.portal.model.PageType
-import com.sourceplusplus.portal.model.TraceViewType
+import com.sourceplusplus.portal.model.TraceDisplayType.*
 import com.sourceplusplus.protocol.ArtifactNameUtils.getShortQualifiedFunctionName
 import com.sourceplusplus.protocol.ArtifactNameUtils.removePackageAndClassName
 import com.sourceplusplus.protocol.ArtifactNameUtils.removePackageNames
@@ -67,9 +67,9 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         }
 
         when (portal.tracesView.viewType) {
-            TraceViewType.TRACES -> displayTraces(portal)
-            TraceViewType.TRACE_STACK -> displayTraceStack(portal)
-            TraceViewType.SPAN_INFO -> displaySpanInfo(portal)
+            TRACES -> displayTraces(portal)
+            TRACE_STACK -> displayTraceStack(portal)
+            SPAN_INFO -> displaySpanInfo(portal)
         }
     }
 
@@ -80,7 +80,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         val portalUuid = spanInfoRequest.getString("portalUuid")
         val portal = SourcePortal.getPortal(portalUuid)!!
         val representation = portal.tracesView
-        representation.viewType = TraceViewType.SPAN_INFO
+        representation.viewType = SPAN_INFO
         representation.traceId = spanInfoRequest.getString("traceId")
         representation.spanId = spanInfoRequest.getInteger("spanId")
         updateUI(portal)
@@ -89,10 +89,10 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
     private fun clickedDisplayTraces(it: Message<JsonObject>) {
         val portal = SourcePortal.getPortal((it.body() as JsonObject).getString("portalUuid"))!!
         val representation = portal.tracesView
-        representation.viewType = TraceViewType.TRACES
+        representation.viewType = TRACES
 
         if (representation.innerTraceStack.size > 0) {
-            representation.viewType = TraceViewType.TRACE_STACK
+            representation.viewType = TRACE_STACK
             val stack = representation.innerTraceStack.pop()
 
             if (representation.innerTrace) {
@@ -120,7 +120,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
         if (request.getString("traceId") == null) {
             val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
-            portal.tracesView.viewType = TraceViewType.TRACE_STACK
+            portal.tracesView.viewType = TRACE_STACK
             updateUI(portal)
         } else {
             vertx.eventBus().request<JsonArray>(GetTraceStack, request) {
@@ -129,7 +129,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                     log.error("Failed to display trace stack", it.cause())
                 } else {
                     val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
-                    portal.tracesView.viewType = TraceViewType.TRACE_STACK
+                    portal.tracesView.viewType = TRACE_STACK
                     portal.tracesView.traceStack = it.result().body() as JsonArray
                     portal.tracesView.traceId = request.getString("traceId")
                     updateUI(portal)
@@ -178,7 +178,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         val traceId = representation.traceId
         val traceStack = representation.traceStack
 
-        if (representation.innerTrace && representation.viewType != TraceViewType.SPAN_INFO) {
+        if (representation.innerTrace && representation.viewType != SPAN_INFO) {
             val innerTraceStackInfo = InnerTraceStackInfo(
                 innerLevel = representation.innerTraceStack.size,
                 traceStack = representation.innerTraceStack.peek().toString()
@@ -322,7 +322,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             representation.cacheArtifactTraceResult(updatedArtifactTraceResult)
 
             if (it.viewingPortalArtifact == updatedArtifactTraceResult.artifactQualifiedName
-                && it.tracesView.viewType == TraceViewType.TRACES
+                && it.tracesView.viewType == TRACES
             ) {
                 updateUI(it)
             }
@@ -340,7 +340,6 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
         spanQueryResult.traceSpans.forEach { span ->
             val timeTook = span.endTime - span.startTime
-            val timeTookHumanReadable = humanReadableDuration(timeTook)
 
             //detect if operation name is really an artifact name
             val finalSpan = if (QUALIFIED_NAME_PATTERN.matcher(span.endpointName!!).matches()) {
@@ -360,7 +359,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                     appUuid = appUuid,
                     rootArtifactQualifiedName = rootArtifactQualifiedName,
                     operationName = operationName,
-                    timeTook = timeTookHumanReadable,
+                    timeTook = humanReadableDuration(timeTook),
                     totalTracePercent = if (totalTime.toLongMilliseconds() == 0L) 0.0 else timeTook / totalTime * 100.0
                 )
             )
