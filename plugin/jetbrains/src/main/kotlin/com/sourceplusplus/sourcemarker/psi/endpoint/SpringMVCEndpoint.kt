@@ -7,6 +7,10 @@ import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.expressions.UInjectionHost
 import org.jetbrains.uast.java.JavaUQualifiedReferenceExpression
+import org.jetbrains.uast.kotlin.KotlinAbstractUExpression
+import org.jetbrains.uast.kotlin.KotlinUAnnotation
+import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
+import org.jetbrains.uast.kotlin.expressions.KotlinUCollectionLiteralExpression
 import java.util.*
 
 /**
@@ -19,12 +23,12 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
 
     private val requestMappingAnnotation = "org.springframework.web.bind.annotation.RequestMapping"
     private val qualifiedNameSet = setOf(
+        requestMappingAnnotation,
         "org.springframework.web.bind.annotation.GetMapping",
         "org.springframework.web.bind.annotation.PostMapping",
         "org.springframework.web.bind.annotation.PutMapping",
         "org.springframework.web.bind.annotation.DeleteMapping",
-        "org.springframework.web.bind.annotation.PatchMapping",
-        requestMappingAnnotation
+        "org.springframework.web.bind.annotation.PatchMapping"
     )
 
     override fun determineEndpointName(uMethod: UMethod): Future<Optional<String>> {
@@ -35,16 +39,37 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                 if (annotation != null) {
                     if (annotationName == requestMappingAnnotation) {
                         val endpointNameExpr = annotation.findAttributeValue("value")
-                        val value = (endpointNameExpr as UInjectionHost).evaluateToString()
-                        val method = (annotation.findAttributeValue("method")
-                                as JavaUQualifiedReferenceExpression).selector
-                        promise.complete(Optional.of("{$method}$value"))
+                        val methodExpr = annotation.findAttributeValue("method")
+                        if (endpointNameExpr is KotlinAbstractUExpression) {
+                            val value = if (endpointNameExpr is KotlinUCollectionLiteralExpression) {
+                                endpointNameExpr.valueArguments[0].evaluate()
+                            } else {
+                                endpointNameExpr.evaluate()
+                            }
+                            val method =
+                                ((methodExpr as KotlinUCollectionLiteralExpression)
+                                    .valueArguments[0] as KotlinUQualifiedReferenceExpression)
+                                    .selector.asSourceString()
+                            promise.complete(Optional.of("{$method}$value"))
+                        } else {
+                            val value = (endpointNameExpr as UInjectionHost).evaluateToString()
+                            val method =
+                                (methodExpr as JavaUQualifiedReferenceExpression).selector
+                            promise.complete(Optional.of("{$method}$value"))
+                        }
                     } else {
-                        val endpointNameExpr = annotation.findAttributeValue("name")
-                        val value = (endpointNameExpr as UInjectionHost).evaluateToString()
-                        val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
-                            .replace("Mapping", "").toUpperCase()
-                        promise.complete(Optional.of("{$method}$value"))
+                        if (annotation is KotlinUAnnotation) {
+                            val value = annotation.findAttributeValue("value")!!.evaluate()
+                            val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
+                                .replace("Mapping", "").toUpperCase()
+                            promise.complete(Optional.of("{$method}$value"))
+                        } else {
+                            val endpointNameExpr = annotation.findAttributeValue("name")
+                            val value = (endpointNameExpr as UInjectionHost).evaluateToString()
+                            val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
+                                .replace("Mapping", "").toUpperCase()
+                            promise.complete(Optional.of("{$method}$value"))
+                        }
                     }
                 }
             }
