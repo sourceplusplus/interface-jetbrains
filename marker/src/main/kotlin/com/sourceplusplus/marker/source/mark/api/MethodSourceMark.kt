@@ -4,7 +4,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiInvalidElementAccessException
-import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.sourceplusplus.marker.MarkerUtils
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
@@ -97,8 +97,8 @@ abstract class MethodSourceMark(
         return psiMethod
     }
 
-    override fun getPsiElement(): PsiMethod {
-        return psiMethod.sourcePsi as PsiMethod
+    override fun getPsiElement(): PsiNameIdentifierOwner {
+        return psiMethod.sourcePsi as PsiNameIdentifierOwner
     }
 
     fun updatePsiMethod(psiMethod: UMethod): Boolean {
