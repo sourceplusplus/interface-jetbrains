@@ -4,9 +4,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import org.jetbrains.plugins.groovy.lang.psi.uast.GrUReferenceExpression
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.expressions.UInjectionHost
-import org.jetbrains.uast.java.JavaUQualifiedReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinAbstractUExpression
 import org.jetbrains.uast.kotlin.KotlinUAnnotation
 import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
@@ -38,8 +39,8 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                 val annotation = uMethod.findAnnotation(annotationName)
                 if (annotation != null) {
                     if (annotationName == requestMappingAnnotation) {
-                        val endpointNameExpr = annotation.findAttributeValue("value")
-                        val methodExpr = annotation.findAttributeValue("method")
+                        val endpointNameExpr = annotation.attributeValues.find { it.name == "value" }!!.expression
+                        val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
                         if (endpointNameExpr is KotlinAbstractUExpression) {
                             val value = if (endpointNameExpr is KotlinUCollectionLiteralExpression) {
                                 endpointNameExpr.valueArguments[0].evaluate()
@@ -53,8 +54,11 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                             promise.complete(Optional.of("{$method}$value"))
                         } else {
                             val value = (endpointNameExpr as UInjectionHost).evaluateToString()
-                            val method =
-                                (methodExpr as JavaUQualifiedReferenceExpression).selector
+                            val method = if (methodExpr is UQualifiedReferenceExpression) {
+                                methodExpr.selector.toString()
+                            } else {
+                                (methodExpr as GrUReferenceExpression).resolvedName.toString()
+                            }
                             promise.complete(Optional.of("{$method}$value"))
                         }
                     } else {
@@ -69,8 +73,12 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                                 .replace("Mapping", "").toUpperCase()
                             promise.complete(Optional.of("{$method}$value"))
                         } else {
-                            val endpointNameExpr = annotation.findAttributeValue("name")
-                            val value = (endpointNameExpr as UInjectionHost).evaluateToString()
+                            val endpointNameExpr = annotation.attributeValues.find { it.name == "name" }!!
+                            val value = if (endpointNameExpr is UInjectionHost) {
+                                endpointNameExpr.evaluateToString()
+                            } else {
+                                endpointNameExpr.evaluate()
+                            } as String
                             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                                 .replace("Mapping", "").toUpperCase()
                             promise.complete(Optional.of("{$method}$value"))

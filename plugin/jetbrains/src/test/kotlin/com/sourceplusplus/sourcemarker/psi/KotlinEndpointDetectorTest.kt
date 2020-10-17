@@ -7,10 +7,7 @@ import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
-@RunWith(JUnit4::class)
 class KotlinEndpointDetectorTest : EndpointDetectorTest() {
 
     @Test

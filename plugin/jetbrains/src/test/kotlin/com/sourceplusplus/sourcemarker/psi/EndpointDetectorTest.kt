@@ -3,13 +3,23 @@ package com.sourceplusplus.sourcemarker.psi
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import org.junit.After
 import org.junit.Before
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 
-open abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
+@RunWith(JUnit4::class)
+abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     @Before
     public override fun setUp() {
         super.setUp()
 
+        myFixture.addClass(
+            "package org.springframework.web.bind.annotation;\n" +
+                    "\n" +
+                    "public enum RequestMethod {\n" +
+                    "\tGET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE\n" +
+                    "}\n"
+        )
         myFixture.addClass(
             "package org.springframework.web.bind.annotation;\n" +
                     "\n" +

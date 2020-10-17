@@ -6,7 +6,6 @@ import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.expressions.UInjectionHost
-import org.jetbrains.uast.kotlin.KotlinAbstractUExpression
 import java.util.*
 
 /**
@@ -24,11 +23,11 @@ class SkywalkingTraceEndpoint : EndpointDetector.EndpointNameDeterminer {
         ApplicationManager.getApplication().runReadAction {
             val annotation = uMethod.findAnnotation(skywalkingTraceAnnotation)
             if (annotation != null) {
-                val operationNameExpr = annotation.findAttributeValue("operationName")
-                val value = if (operationNameExpr is KotlinAbstractUExpression) {
-                    operationNameExpr.evaluate()
+                val operationNameExpr = annotation.attributeValues.find { it.name == "operationName" }
+                val value = if (operationNameExpr is UInjectionHost) {
+                    operationNameExpr.evaluateToString()
                 } else {
-                    (operationNameExpr as UInjectionHost?)?.evaluateToString()
+                    operationNameExpr?.evaluate()
                 } as String?
                 if (value == null || value == "") {
                     promise.complete(Optional.of("${uMethod.containingClass!!.qualifiedName}.${uMethod.name}"))
