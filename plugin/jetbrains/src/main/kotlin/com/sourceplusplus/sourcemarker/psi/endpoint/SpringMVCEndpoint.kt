@@ -59,7 +59,12 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                         }
                     } else {
                         if (annotation is KotlinUAnnotation) {
-                            val value = annotation.findAttributeValue("value")!!.evaluate()
+                            val valueExpr = annotation.findAttributeValue("value")!!
+                            val value = if (valueExpr is KotlinUCollectionLiteralExpression) {
+                                valueExpr.valueArguments[0].evaluate()
+                            } else {
+                                valueExpr.evaluate()
+                            }
                             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                                 .replace("Mapping", "").toUpperCase()
                             promise.complete(Optional.of("{$method}$value"))
