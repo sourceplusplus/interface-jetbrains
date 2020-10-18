@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.listeners
 
-import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
@@ -14,7 +14,7 @@ import com.sourceplusplus.sourcemarker.GutterMarkIcons
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ARTIFACT_ADVICE
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
-import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -108,7 +108,7 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
 
     override fun handleEvent(event: SourceMarkEvent) {
         if (event.eventCode == SourceMarkEventCode.MARK_ADDED) {
-            GlobalScope.launch(vertx.dispatcher()) {
+            GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
                 pendingAdvice.toList().forEach {
                     advised(it)
                 }

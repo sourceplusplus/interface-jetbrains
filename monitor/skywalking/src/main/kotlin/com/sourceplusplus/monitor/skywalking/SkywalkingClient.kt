@@ -40,16 +40,20 @@ class SkywalkingClient(
 
         fun registerCodecs(vertx: Vertx) {
             log.info("Registering Apache SkyWalking codecs")
-            vertx.eventBus().registerDefaultCodec(GetMultipleEndpointMetrics::class.java, LocalMessageCodec())
-            vertx.eventBus().registerDefaultCodec(GetEndpointTraces::class.java, LocalMessageCodec())
-            vertx.eventBus().registerDefaultCodec(GetEndpointMetrics::class.java, LocalMessageCodec())
-            vertx.eventBus().registerDefaultCodec(GetAllServicesQuery.Result::class.java, LocalMessageCodec())
-            vertx.eventBus().registerDefaultCodec(GetServiceInstancesQuery.Result::class.java, LocalMessageCodec())
-            vertx.eventBus().registerDefaultCodec(SearchEndpointQuery.Result::class.java, LocalMessageCodec())
-            vertx.eventBus().registerDefaultCodec(QueryBasicTracesQuery.Result::class.java, LocalMessageCodec())
-            vertx.eventBus().registerDefaultCodec(
-                ArrayList::class.java, LocalMessageCodec()
-            ) //todo: should likely wrap in object
+            val isRegisteredMap = vertx.sharedData().getLocalMap<String, Boolean>("registered_codecs")
+            if (!isRegisteredMap.getOrDefault("SkywalkingClient", false)) {
+                vertx.eventBus().registerDefaultCodec(GetMultipleEndpointMetrics::class.java, LocalMessageCodec())
+                vertx.eventBus().registerDefaultCodec(GetEndpointTraces::class.java, LocalMessageCodec())
+                vertx.eventBus().registerDefaultCodec(GetEndpointMetrics::class.java, LocalMessageCodec())
+                vertx.eventBus().registerDefaultCodec(GetAllServicesQuery.Result::class.java, LocalMessageCodec())
+                vertx.eventBus().registerDefaultCodec(GetServiceInstancesQuery.Result::class.java, LocalMessageCodec())
+                vertx.eventBus().registerDefaultCodec(SearchEndpointQuery.Result::class.java, LocalMessageCodec())
+                vertx.eventBus().registerDefaultCodec(QueryBasicTracesQuery.Result::class.java, LocalMessageCodec())
+                vertx.eventBus().registerDefaultCodec(
+                    ArrayList::class.java, LocalMessageCodec()
+                ) //todo: should likely wrap in object
+                isRegisteredMap["SkywalkingClient"] = true
+            }
         }
     }
 

@@ -2,7 +2,10 @@ package com.sourceplusplus.sourcemarker.settings
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.ProjectManager
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.core.json.Json
+import kotlinx.coroutines.runBlocking
 import javax.swing.JComponent
 
 /**
@@ -24,6 +27,10 @@ class SourceMarkerConfigurable : Configurable {
             Json.encode(updatedConfig)
         )
         form!!.applySourceMarkerConfig(updatedConfig)
+
+        runBlocking {
+            SourceMarkerPlugin.restart(ProjectManager.getInstance().openProjects[0])
+        }
     }
 
     override fun createComponent(): JComponent {
