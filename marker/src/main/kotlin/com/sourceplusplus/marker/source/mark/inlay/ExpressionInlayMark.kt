@@ -4,7 +4,7 @@ import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.ExpressionSourceMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
 import org.jetbrains.uast.UExpression
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin.configuration as pluginConfiguration
+import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfiguration
 
 /**
  * Represents an [InlayMark] associated to an expression artifact.

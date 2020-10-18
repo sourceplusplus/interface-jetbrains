@@ -12,7 +12,8 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import com.sourceplusplus.marker.MarkerUtils
+import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import org.slf4j.LoggerFactory
@@ -43,7 +44,7 @@ class FileActivityListener : FileEditorManagerListener {
             val psiFile = PsiManager.getInstance(source.project).findFile(file)!!
             val fileMarker = psiFile.getUserData(SourceFileMarker.KEY)
             if (fileMarker != null) {
-                SourceMarkerPlugin.deactivateSourceFileMarker(fileMarker)
+                SourceMarker.deactivateSourceFileMarker(fileMarker)
             }
         }
     }
@@ -75,7 +76,7 @@ class FileActivityListener : FileEditorManagerListener {
                         return
                     }
 
-                    val lineNumber = MarkerUtils.convertPointToLineNumber(psiFile.project, e.mouseEvent.point)
+                    val lineNumber = SourceMarkerUtils.convertPointToLineNumber(psiFile.project, e.mouseEvent.point)
                     if (lineNumber == -1) {
                         return
                     }

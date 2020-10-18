@@ -18,7 +18,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.search.ProjectScope
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
@@ -190,7 +190,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
     private suspend fun initMentor(config: SourceMarkerConfig): SourceMentor {
         val mentor = SourceMentor()
         val mentorAdviceListener = ArtifactAdviceListener()
-        SourceMarkerPlugin.addGlobalSourceMarkEventListener(mentorAdviceListener)
+        SourceMarker.addGlobalSourceMarkEventListener(mentorAdviceListener)
         mentor.addAdviceListener(mentorAdviceListener)
 
         //configure and add long running low-priority mentor jobs
@@ -243,7 +243,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
     }
 
     private fun initMarker(config: SourceMarkerConfig) {
-        SourceMarkerPlugin.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
+        SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
 
         val gutterMarkConfig = GutterMarkConfiguration()
         gutterMarkConfig.activateOnMouseHover = false
@@ -274,11 +274,11 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
         }
         gutterMarkConfig.componentProvider = componentProvider
 
-        SourceMarkerPlugin.configuration.defaultGutterMarkConfiguration = gutterMarkConfig
-        SourceMarkerPlugin.configuration.defaultInlayMarkConfiguration.componentProvider = componentProvider
+        SourceMarker.configuration.defaultGutterMarkConfiguration = gutterMarkConfig
+        SourceMarker.configuration.defaultInlayMarkConfiguration.componentProvider = componentProvider
 
         if (config.rootSourcePackage != null) {
-            SourceMarkerPlugin.configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->
+            SourceMarker.configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->
                 artifactQualifiedName.startsWith(config.rootSourcePackage!!)
             }
         } else {
@@ -287,8 +287,8 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity(), Disposa
     }
 
     override fun dispose() {
-        if (SourceMarkerPlugin.enabled) {
-            SourceMarkerPlugin.clearAvailableSourceFileMarkers()
+        if (SourceMarker.enabled) {
+            SourceMarker.clearAvailableSourceFileMarkers()
         }
         vertx.close()
     }

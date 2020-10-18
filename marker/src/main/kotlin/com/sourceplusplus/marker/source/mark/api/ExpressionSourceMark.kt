@@ -4,7 +4,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
-import com.sourceplusplus.marker.MarkerUtils
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
@@ -26,7 +26,7 @@ import kotlin.collections.HashMap
 abstract class ExpressionSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiExpression: UExpression,
-    override var artifactQualifiedName: String = MarkerUtils.getFullyQualifiedName(psiExpression)
+    override var artifactQualifiedName: String = SourceMarkerUtils.getFullyQualifiedName(psiExpression)
 ) : SourceMark {
 
     override var editor: Editor? = null
@@ -36,7 +36,7 @@ abstract class ExpressionSourceMark(
     override val isMethodMark: Boolean = true
     override val valid: Boolean; get() {
         return try {
-            psiExpression.isPsiValid && artifactQualifiedName == MarkerUtils.getFullyQualifiedName(psiExpression)
+            psiExpression.isPsiValid && artifactQualifiedName == SourceMarkerUtils.getFullyQualifiedName(psiExpression)
         } catch (ex: PsiInvalidElementAccessException) {
             false
         }
@@ -95,7 +95,7 @@ abstract class ExpressionSourceMark(
 
     fun updatePsiExpression(psiExpression: UExpression): Boolean {
         this.psiExpression = psiExpression
-        val newArtifactQualifiedName = MarkerUtils.getFullyQualifiedName(psiExpression)
+        val newArtifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(psiExpression)
         if (artifactQualifiedName != newArtifactQualifiedName) {
             check(sourceFileMarker.removeSourceMark(this, autoRefresh = false))
             val oldArtifactQualifiedName = artifactQualifiedName

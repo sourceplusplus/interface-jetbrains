@@ -19,7 +19,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
 import com.sourceplusplus.marker.plugin.SourceInlayProvider
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.config.SourceMarkConfiguration
@@ -86,7 +86,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
     fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true)
     fun apply(addToMarker: Boolean = true) {
-        SourceMarkerPlugin.getGlobalSourceMarkEventListeners().forEach(::addEventListener)
+        SourceMarker.getGlobalSourceMarkEventListeners().forEach(::addEventListener)
 
         if (addToMarker) {
             check(sourceFileMarker.applySourceMark(this, autoRefresh = true, overrideFilter = true))
