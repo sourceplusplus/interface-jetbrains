@@ -7,8 +7,8 @@ import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.mentor.extend.SqlProducerSearch
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.search.ArtifactSearch
-import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
 import com.sourceplusplus.sourcemarker.psi.sqlsource.SpringDataSqlSource
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
@@ -56,7 +56,7 @@ class PluginSqlProducerSearch : SqlProducerSearch {
         runReadAction {
             dependencySearch(searchArtifact.toUElementOfType()!!)
 
-            GlobalScope.launch(vertx.dispatcher()) {
+            GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
                 var keepSearching = true
                 for (method in possibleRegressionSources) {
                     for (detector in detectorSet) {
