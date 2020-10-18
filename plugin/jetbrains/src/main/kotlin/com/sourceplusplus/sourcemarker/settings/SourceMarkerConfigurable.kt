@@ -22,24 +22,21 @@ class SourceMarkerConfigurable : Configurable {
 
     override fun apply() {
         val updatedConfig = form!!.pluginConfig
-        PropertiesComponent.getInstance().setValue(
-            "sourcemarker_plugin_config",
-            Json.encode(updatedConfig)
-        )
+        val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
+        projectSettings.setValue("sourcemarker_plugin_config", Json.encode(updatedConfig))
         form!!.applySourceMarkerConfig(updatedConfig)
 
         runBlocking {
-            SourceMarkerPlugin.restart(ProjectManager.getInstance().openProjects[0])
+            SourceMarkerPlugin.init(ProjectManager.getInstance().openProjects[0])
         }
     }
 
     override fun createComponent(): JComponent {
         if (form == null) {
-            val config = if (
-                PropertiesComponent.getInstance().isValueSet("sourcemarker_plugin_config")
-            ) {
+            val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
+            val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
                 Json.decodeValue(
-                    PropertiesComponent.getInstance().getValue("sourcemarker_plugin_config"),
+                    projectSettings.getValue("sourcemarker_plugin_config"),
                     SourceMarkerConfig::class.java
                 )
             } else {
