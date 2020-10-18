@@ -18,17 +18,19 @@ import org.apache.log4j.PatternLayout
  */
 class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
 
-    override fun runActivity(project: Project) {
-        if (ApplicationManager.getApplication().isUnitTestMode) {
-            return //todo: change when integration tests are added
-        }
-
+    init {
         if (System.getProperty("sourcemarker.debug.capture_logs", "false")!!.toBoolean()) {
             val fa = FileAppender()
             fa.file = "/tmp/sourcemarker.log"
             fa.layout = PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n")
             fa.activateOptions()
             Logger.getLogger("com.sourceplusplus").addAppender(fa)
+        }
+    }
+
+    override fun runActivity(project: Project) {
+        if (ApplicationManager.getApplication().isUnitTestMode) {
+            return //tests manually set up necessary components
         }
 
         //setup plugin

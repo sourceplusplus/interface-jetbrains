@@ -96,9 +96,15 @@ object SourceMarkerPlugin {
     }
 
     suspend fun init(project: Project) {
-        val config = if (PropertiesComponent.getInstance().isValueSet("sourcemarker_plugin_config")) {
+        log.info("Initializing SourceMarkerPlugin on project: {}", project)
+        SourceMarker.clearAvailableSourceFileMarkers()
+        deploymentIds.forEach { vertx.undeployAwait(it) }
+        deploymentIds.clear()
+
+        val projectSettings = PropertiesComponent.getInstance(project)
+        val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
             Json.decodeValue(
-                PropertiesComponent.getInstance().getValue("sourcemarker_plugin_config"),
+                projectSettings.getValue("sourcemarker_plugin_config"),
                 SourceMarkerConfig::class.java
             )
         } else {
@@ -107,7 +113,7 @@ object SourceMarkerPlugin {
 
         //attempt to determine root source package automatically (if necessary)
         val checkRootPackage = Promise.promise<Nothing>()
-        if (config.rootSourcePackage == null) {
+        if (config.rootSourcePackage.isNullOrBlank()) {
             ApplicationManager.getApplication().runReadAction {
                 var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
                     ?.getSubPackages(ProjectScope.getProjectScope(project))
@@ -124,7 +130,7 @@ object SourceMarkerPlugin {
                     }
                     if (rootPackage != null) {
                         config.rootSourcePackage = rootPackage
-                        PropertiesComponent.getInstance().setValue("sourcemarker_plugin_config", Json.encode(config))
+                        projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
                     }
                 }
                 checkRootPackage.complete()
@@ -161,17 +167,6 @@ object SourceMarkerPlugin {
                 }
             }
         }
-    }
-
-    suspend fun restart(project: Project) {
-        if (SourceMarker.enabled) {
-            SourceMarker.clearAvailableSourceFileMarkers()
-        }
-        deploymentIds.forEach {
-            vertx.undeployAwait(it)
-        }
-        deploymentIds.clear()
-        init(project)
     }
 
     private suspend fun initMonitor(config: SourceMarkerConfig) {
