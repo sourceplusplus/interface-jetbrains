@@ -5,6 +5,8 @@ import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUReferenceExpression
+import org.jetbrains.plugins.scala.lang.psi.uast.expressions.ScUMethodCallExpression
+import org.jetbrains.plugins.scala.lang.psi.uast.expressions.ScUQualifiedReferenceExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.expressions.UInjectionHost
@@ -51,6 +53,11 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                                 ((methodExpr as KotlinUCollectionLiteralExpression)
                                     .valueArguments[0] as KotlinUQualifiedReferenceExpression)
                                     .selector.asSourceString()
+                            promise.complete(Optional.of("{$method}$value"))
+                        } else if (endpointNameExpr is ScUMethodCallExpression) {
+                            val value = endpointNameExpr.valueArguments[0].evaluate()
+                            val method = ((methodExpr as ScUMethodCallExpression).valueArguments[0]
+                                    as ScUQualifiedReferenceExpression).resolve()!!.text
                             promise.complete(Optional.of("{$method}$value"))
                         } else {
                             val value = (endpointNameExpr as UInjectionHost).evaluateToString()
