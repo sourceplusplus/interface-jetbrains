@@ -4,7 +4,7 @@ import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
 import org.jetbrains.uast.UMethod
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin.configuration as pluginConfiguration
+import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfiguration
 
 /**
  * Represents an [InlayMark] associated to a method artifact.

@@ -5,7 +5,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiInvalidElementAccessException
-import com.sourceplusplus.marker.MarkerUtils
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
@@ -102,7 +102,7 @@ abstract class ClassSourceMark(
 
     fun updatePsiClass(psiClass: UClass): Boolean {
         this.psiClass = psiClass
-        val newArtifactQualifiedName = MarkerUtils.getFullyQualifiedName(psiClass)
+        val newArtifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(psiClass)
         if (artifactQualifiedName != newArtifactQualifiedName) {
             check(sourceFileMarker.removeSourceMark(this, autoRefresh = false, autoDispose = false))
             val oldArtifactQualifiedName = artifactQualifiedName

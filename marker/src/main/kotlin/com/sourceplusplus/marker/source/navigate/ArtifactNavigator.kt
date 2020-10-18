@@ -5,7 +5,7 @@ import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.PsiNavigateUtil
-import com.sourceplusplus.marker.MarkerUtils
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 
@@ -20,31 +20,31 @@ class ArtifactNavigator {
     //todo: remove method from method names and support navigating to classes?
 
     fun navigateToMethod(project: Project, artifactQualifiedName: String): PsiElement {
-        val classQualifiedName = MarkerUtils.getQualifiedClassName(artifactQualifiedName)
+        val classQualifiedName = SourceMarkerUtils.getQualifiedClassName(artifactQualifiedName)
         val psiClass = JavaPsiFacade.getInstance(project).findClass(
             classQualifiedName,
             GlobalSearchScope.allScope(project)
         )
         for (theMethod in psiClass!!.methods) {
             val uMethod = theMethod.toUElement() as UMethod
-            val qualifiedName = MarkerUtils.getFullyQualifiedName(uMethod)
+            val qualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
             if (qualifiedName == artifactQualifiedName) {
                 PsiNavigateUtil.navigate(theMethod)
-                return MarkerUtils.getNameIdentifier(theMethod)!!
+                return SourceMarkerUtils.getNameIdentifier(theMethod)!!
             }
         }
         throw IllegalArgumentException("Failed to find: $artifactQualifiedName")
     }
 
     fun canNavigateToMethod(project: Project, artifactQualifiedName: String): Boolean {
-        val classQualifiedName = MarkerUtils.getQualifiedClassName(artifactQualifiedName)
+        val classQualifiedName = SourceMarkerUtils.getQualifiedClassName(artifactQualifiedName)
         val psiClass = JavaPsiFacade.getInstance(project).findClass(
             classQualifiedName,
             GlobalSearchScope.allScope(project)
         )
         for (theMethod in psiClass!!.methods) {
             val uMethod = theMethod.toUElement() as UMethod
-            val qualifiedName = MarkerUtils.getFullyQualifiedName(uMethod)
+            val qualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
             if (qualifiedName == artifactQualifiedName) {
                 return true
             }
