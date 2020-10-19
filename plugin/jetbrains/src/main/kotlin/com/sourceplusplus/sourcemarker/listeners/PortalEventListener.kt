@@ -3,7 +3,7 @@ package com.sourceplusplus.sourcemarker.listeners
 import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
@@ -18,15 +18,15 @@ import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.fromPerSecondToPrettyFrequency
 import com.sourceplusplus.portal.extensions.toPrettyDuration
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactMetricUpdated
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactTraceUpdated
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ClosePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.QueryTraceStack
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshActivity
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshOverview
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshTraces
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
@@ -72,7 +72,7 @@ class PortalEventListener : CoroutineVerticle() {
             val portalUuid = it.body().getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
             runReadAction {
-                val fileMarker = SourceMarkerPlugin.getSourceFileMarker(portal.viewingPortalArtifact)!!
+                val fileMarker = SourceMarker.getSourceFileMarker(portal.viewingPortalArtifact)!!
                 GlobalScope.launch(vertx.dispatcher()) {
                     refreshOverview(fileMarker, portal)
                 }
@@ -98,7 +98,7 @@ class PortalEventListener : CoroutineVerticle() {
 
     private suspend fun refreshTraces(portal: SourcePortal) {
         val sourceMark =
-            SourceMarkerPlugin.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+            SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
@@ -190,7 +190,7 @@ class PortalEventListener : CoroutineVerticle() {
 
     private suspend fun refreshActivity(portal: SourcePortal) {
         val sourceMark =
-            SourceMarkerPlugin.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+            SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
@@ -252,7 +252,7 @@ class PortalEventListener : CoroutineVerticle() {
     }
 
     private fun closePortal(portal: SourcePortal) {
-        val sourceMark = SourceMarkerPlugin.getSourceMark(
+        val sourceMark = SourceMarker.getSourceMark(
             portal.viewingPortalArtifact, SourceMark.Type.GUTTER
         )
         if (sourceMark != null) {

@@ -7,7 +7,7 @@ import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfigurati
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import org.jetbrains.uast.UMethod
 import java.util.concurrent.atomic.AtomicBoolean
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin.configuration as pluginConfiguration
+import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfiguration
 
 /**
  * Represents a [GutterMark] associated to a method artifact.

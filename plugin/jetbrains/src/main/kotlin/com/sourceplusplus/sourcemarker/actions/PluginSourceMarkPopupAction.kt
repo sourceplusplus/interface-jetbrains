@@ -10,7 +10,6 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
-import org.slf4j.LoggerFactory
 import javax.swing.UIManager
 
 /**
@@ -20,10 +19,6 @@ import javax.swing.UIManager
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
-
-    companion object {
-        private val log = LoggerFactory.getLogger(PluginSourceMarkPopupAction::class.java)
-    }
 
     private var lastDisplayedInternalPortal: SourcePortal? = null
 

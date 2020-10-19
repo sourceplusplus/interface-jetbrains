@@ -1,10 +1,10 @@
 package com.sourceplusplus.portal.extensions
 
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayCard
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplaySpanInfo
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraceStack
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayTraces
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateChart
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayCard
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateChart
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo

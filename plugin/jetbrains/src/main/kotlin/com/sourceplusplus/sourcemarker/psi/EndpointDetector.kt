@@ -3,7 +3,7 @@ package com.sourceplusplus.sourcemarker.psi
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.monitor.skywalking.track.EndpointTracker
-import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.psi.endpoint.SkywalkingTraceEndpoint
 import com.sourceplusplus.sourcemarker.psi.endpoint.SpringMVCEndpoint
 import io.vertx.core.Future
@@ -76,7 +76,7 @@ class EndpointDetector {
 
     private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodSourceMark) {
         log.debug("Determining endpoint id")
-        val endpoint = EndpointTracker.searchExactEndpoint(endpointName, vertx)
+        val endpoint = EndpointTracker.searchExactEndpoint(endpointName, SourceMarkerPlugin.vertx)
         if (endpoint != null) {
             sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
             log.debug("Detected endpoint id: ${endpoint.id}")
@@ -91,7 +91,7 @@ class EndpointDetector {
 
     fun determineEndpointName(uMethod: UMethod): Future<Optional<String>> {
         val promise = Promise.promise<Optional<String>>()
-        GlobalScope.launch(vertx.dispatcher()) {
+        GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
             detectorSet.forEach {
                 try {
                     val endpointName = it.determineEndpointName(uMethod).await()

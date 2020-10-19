@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.listeners
 
-import com.sourceplusplus.marker.MarkerUtils
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
@@ -14,7 +14,7 @@ import com.sourceplusplus.sourcemarker.GutterMarkIcons
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ARTIFACT_ADVICE
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.SOURCE_PORTAL
-import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.vertx
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -45,7 +45,7 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
 
     private suspend fun createEndpointAdvice(advice: ArtifactAdvice) {
         val operationName = advice.artifact.identifier
-        val sourceMark = SourceMarkerPlugin.getSourceMarks()
+        val sourceMark = SourceMarker.getSourceMarks()
             .filterIsInstance<MethodSourceMark>()
             .firstOrNull { it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointName(it) == operationName }
         if (sourceMark != null) {
@@ -58,9 +58,9 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
     private fun createExpressionAdvice(advice: ArtifactAdvice) {
         val qualifiedClassName = advice.artifact.identifier
             .substring(0, advice.artifact.identifier.lastIndexOf("."))
-        val fileMarker = SourceMarkerPlugin.getSourceFileMarker(qualifiedClassName)
+        val fileMarker = SourceMarker.getSourceFileMarker(qualifiedClassName)
         if (fileMarker != null) {
-            val gutterMark = MarkerUtils.getOrCreateExpressionGutterMark(
+            val gutterMark = SourceMarkerUtils.getOrCreateExpressionGutterMark(
                 fileMarker, advice.artifact.lineNumber!!
             )!!
             if (!fileMarker.containsSourceMark(gutterMark)) {
@@ -108,7 +108,7 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
 
     override fun handleEvent(event: SourceMarkEvent) {
         if (event.eventCode == SourceMarkEventCode.MARK_ADDED) {
-            GlobalScope.launch(vertx.dispatcher()) {
+            GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
                 pendingAdvice.toList().forEach {
                     advised(it)
                 }

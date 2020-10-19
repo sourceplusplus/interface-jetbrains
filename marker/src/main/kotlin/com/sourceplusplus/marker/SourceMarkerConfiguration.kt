@@ -1,4 +1,4 @@
-package com.sourceplusplus.marker.plugin.config
+package com.sourceplusplus.marker
 
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.SourceFileMarkerProvider

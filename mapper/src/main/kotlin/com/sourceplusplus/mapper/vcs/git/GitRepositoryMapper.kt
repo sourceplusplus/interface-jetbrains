@@ -7,7 +7,7 @@ import com.intellij.psi.JavaRecursiveElementVisitor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.impl.source.tree.LeafPsiElement
-import com.sourceplusplus.marker.MarkerUtils.getFullyQualifiedName
+import com.sourceplusplus.marker.source.SourceMarkerUtils.getFullyQualifiedName
 import jp.ac.titech.c.se.stein.PorcelainAPI
 import jp.ac.titech.c.se.stein.core.Context
 import jp.ac.titech.c.se.stein.core.EntrySet

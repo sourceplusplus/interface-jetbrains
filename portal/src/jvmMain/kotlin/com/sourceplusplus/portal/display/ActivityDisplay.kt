@@ -7,12 +7,12 @@ import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.portal.extensions.updateChart
 import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.protocol.ArtifactNameUtils.getShortQualifiedFunctionName
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ActivityTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ArtifactMetricUpdated
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.RefreshActivity
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetActiveChartMetric
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetMetricTimeFrame
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearActivity
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.*
 import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
@@ -64,6 +64,10 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             portal.currentTab = thisTab
             SourcePortal.ensurePortalActive(portal)
             updateUI(portal)
+
+            //for some reason clearing (resizing) the activity chart is necessary once SourceMarkerPlugin.init()
+            //has been called more than once; for now just do it whenever the activity tab is opened
+            vertx.eventBus().send(ClearActivity(portal.portalUuid), null)
         }
         vertx.eventBus().consumer<ArtifactMetricResult>(ArtifactMetricUpdated) {
             val artifactMetricResult = it.body()

@@ -18,7 +18,11 @@ import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 class EndpointTracker(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
 
     override suspend fun start() {
-        vertx.eventBus().registerDefaultCodec(EndpointQuery::class.java, LocalMessageCodec())
+        val isRegisteredMap = vertx.sharedData().getLocalMap<String, Boolean>("registered_codecs")
+        if (!isRegisteredMap.getOrDefault("EndpointTracker", false)) {
+            vertx.eventBus().registerDefaultCodec(EndpointQuery::class.java, LocalMessageCodec())
+            isRegisteredMap["EndpointTracker"] = true
+        }
 
         vertx.eventBus().localConsumer<String>(searchExactEndpointAddress) {
             launch(vertx.dispatcher()) {

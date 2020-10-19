@@ -1,6 +1,6 @@
 package com.sourceplusplus.sourcemarker.search
 
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.ExpressionSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
@@ -26,7 +26,7 @@ object SourceMarkSearch {
 
     private suspend fun findEndpointSourceMark(artifact: ArtifactQualifiedName): MethodSourceMark? {
         val operationName = artifact.identifier
-        return SourceMarkerPlugin.getSourceMarks()
+        return SourceMarker.getSourceMarks()
             .filterIsInstance<MethodSourceMark>()
             .firstOrNull {
                 it.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)!!.getOrFindEndpointName(it) == operationName
@@ -36,7 +36,7 @@ object SourceMarkSearch {
     private fun findExpressionAdvice(artifact: ArtifactQualifiedName): ExpressionSourceMark? {
         val qualifiedClassName = artifact.identifier
             .substring(0, artifact.identifier.lastIndexOf("."))
-        val fileMarker = SourceMarkerPlugin.getSourceFileMarker(qualifiedClassName)
+        val fileMarker = SourceMarker.getSourceFileMarker(qualifiedClassName)
         return if (fileMarker != null) {
             fileMarker.getSourceMarks().find {
                 it.lineNumber == artifact.lineNumber!!

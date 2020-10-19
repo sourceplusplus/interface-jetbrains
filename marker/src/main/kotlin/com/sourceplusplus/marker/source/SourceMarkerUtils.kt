@@ -1,4 +1,4 @@
-package com.sourceplusplus.marker
+package com.sourceplusplus.marker.source
 
 import com.intellij.lang.Language
 import com.intellij.openapi.editor.Document
@@ -7,7 +7,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
-import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
@@ -28,9 +27,9 @@ import java.util.*
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object MarkerUtils {
+object SourceMarkerUtils {
 
-    private val log = LoggerFactory.getLogger(MarkerUtils::class.java)
+    private val log = LoggerFactory.getLogger(SourceMarkerUtils::class.java)
 
     /**
      * todo: description.
