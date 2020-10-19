@@ -8,11 +8,11 @@ import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ChartItemType.*
 import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.portal.template.*
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ActivityTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.SetActiveChartMetric
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.ClearActivity
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayCard
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateChart
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayCard
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateChart
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
