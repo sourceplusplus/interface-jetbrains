@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
  *  - user hovered over S++ icon
  *  - user opened/closed portal
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PortalViewTracker : CoroutineVerticle() {

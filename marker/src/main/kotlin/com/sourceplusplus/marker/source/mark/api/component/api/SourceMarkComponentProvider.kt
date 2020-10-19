@@ -6,7 +6,7 @@ import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMark
 /**
  * Used to configure, display, and dispose [SourceMark] components.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface SourceMarkComponentProvider {

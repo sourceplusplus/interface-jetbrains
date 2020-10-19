@@ -3,7 +3,7 @@ package com.sourceplusplus.protocol
 /**
  * Useful methods for formatting artifact names.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object ArtifactNameUtils {

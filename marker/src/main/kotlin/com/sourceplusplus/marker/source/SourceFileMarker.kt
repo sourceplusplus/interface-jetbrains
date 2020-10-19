@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory
  * Used to mark a source code file with SourceMarker artifact marks.
  * SourceMarker artifact marks can be used to subscribe to and collect source code runtime information.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {

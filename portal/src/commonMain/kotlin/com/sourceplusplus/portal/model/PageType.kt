@@ -3,7 +3,7 @@ package com.sourceplusplus.portal.model
 /**
  * Contains the available possible portal tabs.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 enum class PageType(val icon: String) {

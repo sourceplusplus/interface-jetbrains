@@ -15,7 +15,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
  * Todo: This task doesn't have any persistent memory so it should be able to be shared between contexts.
  *       For that to work it would need to delegate advice adding to a task solely for adding advice.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class DetermineThrowableLocation(

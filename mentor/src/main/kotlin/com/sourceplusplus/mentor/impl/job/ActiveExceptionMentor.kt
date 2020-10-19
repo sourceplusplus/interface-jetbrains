@@ -19,7 +19,7 @@ import io.vertx.core.Vertx
  *
  * Todo: maintain created advice status (remove on new instances, etc)
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ActiveExceptionMentor(

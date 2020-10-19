@@ -9,7 +9,7 @@ import io.vertx.core.Future
  *
  * Must implement [remainValidDuration] for consideration for task reuse.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 abstract class MentorTask(

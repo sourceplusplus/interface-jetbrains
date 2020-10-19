@@ -11,7 +11,7 @@ import kotlin.collections.HashMap
 /**
  * Holds the current view for the Traces portal tab.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class TracesView {

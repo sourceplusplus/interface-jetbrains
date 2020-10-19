@@ -67,7 +67,7 @@ import javax.swing.UIManager
 /**
  * todo: description.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkerPlugin {
@@ -294,7 +294,7 @@ object SourceMarkerPlugin {
     /**
      * Used to transmit protocol messages.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     class LocalMessageCodec<T> : MessageCodec<T, T> {
         override fun encodeToWire(buffer: Buffer, o: T): Unit =
@@ -311,7 +311,7 @@ object SourceMarkerPlugin {
     /**
      * Used to serialize/deserialize Kotlin classes.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     class KSerializers {
         class KotlinInstantSerializer : JsonSerializer<Instant>() {

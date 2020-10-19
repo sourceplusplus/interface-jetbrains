@@ -20,7 +20,7 @@ import kotlin.collections.HashMap
 /**
  * Represents a [SourceMark] associated to an expression artifact.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 abstract class ExpressionSourceMark(

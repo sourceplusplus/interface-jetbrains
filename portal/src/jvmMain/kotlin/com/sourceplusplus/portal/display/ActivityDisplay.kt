@@ -36,7 +36,7 @@ import kotlin.collections.ArrayList
  *  - Minimum/Maximum response time
  *  - Average SLA
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {

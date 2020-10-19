@@ -3,7 +3,7 @@ package com.sourceplusplus.mentor.base
 /**
  * Represents events [MentorJob]s may emit.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 enum class MentorJobEvent {

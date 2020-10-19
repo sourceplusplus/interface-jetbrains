@@ -26,7 +26,7 @@ import java.util.*
 /**
  * todo: description.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class SkywalkingClient(
@@ -170,7 +170,7 @@ class SkywalkingClient(
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     class LocalMessageCodec<T> : MessageCodec<T, T> {
         override fun encodeToWire(buffer: Buffer, o: T): Unit =

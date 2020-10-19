@@ -7,7 +7,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 /**
  * Contains common portal tab functionality.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 abstract class AbstractDisplay(val thisTab: PageType) : CoroutineVerticle() {

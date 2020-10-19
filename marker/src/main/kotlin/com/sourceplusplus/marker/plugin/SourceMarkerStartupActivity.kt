@@ -9,7 +9,7 @@ import com.intellij.openapi.startup.StartupActivity
 /**
  * todo: description.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 open class SourceMarkerStartupActivity : StartupActivity {
