@@ -59,6 +59,7 @@ class SourceMentor : CoroutineVerticle() {
         while (running) {
             log.info("Waiting for next task...")
             var currentTask: MentorTask = runInterruptible(Dispatchers.IO) { taskQueue.take() }
+            if (!running) return
             log.info("Processing task: $currentTask")
 
             //find jobs requiring task (execute once then share results)

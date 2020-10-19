@@ -54,6 +54,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.kotlin.core.deployVerticleAwait
 import io.vertx.kotlin.core.http.listenAwait
 import io.vertx.kotlin.core.undeployAwait
+import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -97,9 +98,7 @@ object SourceMarkerPlugin {
 
     suspend fun init(project: Project) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
-        SourceMarker.clearAvailableSourceFileMarkers()
-        deploymentIds.forEach { vertx.undeployAwait(it) }
-        deploymentIds.clear()
+        restartIfNecessary()
 
         val projectSettings = PropertiesComponent.getInstance(project)
         val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
@@ -167,6 +166,18 @@ object SourceMarkerPlugin {
                 }
             }
         }
+    }
+
+    private suspend fun restartIfNecessary() {
+        val clearMarkers = Promise.promise<Nothing>()
+        ApplicationManager.getApplication().runReadAction {
+            SourceMarker.clearAvailableSourceFileMarkers()
+            clearMarkers.complete()
+        }
+
+        deploymentIds.forEach { vertx.undeployAwait(it) }
+        deploymentIds.clear()
+        clearMarkers.future().await()
     }
 
     private suspend fun initMonitor(config: SourceMarkerConfig) {

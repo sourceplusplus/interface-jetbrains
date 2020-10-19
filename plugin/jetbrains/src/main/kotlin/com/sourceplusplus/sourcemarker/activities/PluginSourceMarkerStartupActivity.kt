@@ -4,8 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.apache.log4j.FileAppender
 import org.apache.log4j.Logger
 import org.apache.log4j.PatternLayout
@@ -34,7 +33,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
         }
 
         //setup plugin
-        GlobalScope.launch {
+        runBlocking {
             SourceMarkerPlugin.init(project)
         }
         super.runActivity(project)
