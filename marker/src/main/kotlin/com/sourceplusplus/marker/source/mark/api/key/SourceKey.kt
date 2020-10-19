@@ -7,7 +7,7 @@ import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 /**
  * Used to associate custom data to PSI elements.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class SourceKey<T>(val name: String) {

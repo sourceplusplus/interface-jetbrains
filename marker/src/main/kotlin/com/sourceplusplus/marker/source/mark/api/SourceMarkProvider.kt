@@ -7,7 +7,7 @@ import org.jetbrains.uast.UMethod
 /**
  * Returns a [SourceMark] given a PSI element.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface SourceMarkProvider {

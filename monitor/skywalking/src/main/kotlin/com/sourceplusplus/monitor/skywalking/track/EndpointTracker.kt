@@ -12,7 +12,7 @@ import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 /**
  * todo: description.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class EndpointTracker(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {

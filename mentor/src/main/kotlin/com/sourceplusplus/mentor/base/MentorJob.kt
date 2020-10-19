@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 /**
  * Keeps track of the order and current position of [MentorTask]s which require processing.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 abstract class MentorJob {

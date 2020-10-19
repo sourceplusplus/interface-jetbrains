@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 /**
  * Delays the processing of a job by a specified duration.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class DelayTask(private val delay: Long) : MentorTask(true) {

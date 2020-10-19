@@ -9,7 +9,7 @@ import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfigurati
 /**
  * Represents an [InlayMark] associated to a method artifact.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 open class MethodInlayMark @JvmOverloads constructor(

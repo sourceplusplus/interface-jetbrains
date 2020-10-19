@@ -28,7 +28,7 @@ import java.util.regex.Pattern
 /**
  * Based off FinerGit.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class GitRepositoryMapper(private val project: Project) : RepositoryRewriter() {

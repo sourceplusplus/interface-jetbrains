@@ -24,7 +24,7 @@ import java.util.*
 /**
  * Utility functions for working with [SourceMark]s.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkerUtils {
@@ -34,7 +34,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getElementAtLine(file: PsiFile, line: Int): PsiElement? {
@@ -50,7 +50,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     @JvmOverloads
@@ -68,7 +68,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     @JvmOverloads
@@ -129,7 +129,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     @JvmOverloads
@@ -147,7 +147,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     @JvmOverloads
@@ -208,7 +208,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getUniversalExpression(element: PsiStatement): PsiElement {
@@ -222,7 +222,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     @JvmOverloads
@@ -272,7 +272,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     @JvmOverloads
@@ -288,7 +288,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     @JvmOverloads
@@ -346,7 +346,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     @JvmOverloads
@@ -404,7 +404,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getNameIdentifier(nameIdentifierOwner: PsiNameIdentifierOwner): PsiElement? {
@@ -425,7 +425,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getQualifiedClassName(qualifiedName: String): String {
@@ -441,7 +441,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getFullyQualifiedName(expression: UExpression): String {
@@ -464,7 +464,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getFullyQualifiedName(method: PsiMethod): String {
@@ -474,7 +474,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getFullyQualifiedName(method: UMethod): String {
@@ -485,7 +485,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getFullyQualifiedName(theClass: UClass): String {
@@ -496,7 +496,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun getQualifiedName(method: UMethod): String {
@@ -527,7 +527,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     @JvmStatic
     fun convertPointToLineNumber(project: Project, p: Point): Int {

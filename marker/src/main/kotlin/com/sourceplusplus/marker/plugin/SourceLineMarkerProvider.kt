@@ -23,7 +23,7 @@ import org.jetbrains.uast.toUElement
 /**
  * Used to associate [GutterMark]s with IntelliJ PSI elements.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
@@ -133,7 +133,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     /**
      * Associates Groovy [GutterMark]s to PSI elements.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     class GroovyDescriptor : SourceLineMarkerProvider() {
         override fun getName(): String {
@@ -144,7 +144,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     /**
      * Associates Java [GutterMark]s to PSI elements.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     class JavaDescriptor : SourceLineMarkerProvider() {
         override fun getName(): String {
@@ -155,7 +155,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     /**
      * Associates Kotlin [GutterMark]s to PSI elements.
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     class KotlinDescriptor : SourceLineMarkerProvider() {
         override fun getName(): String {

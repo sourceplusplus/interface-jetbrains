@@ -24,7 +24,7 @@ import io.vertx.core.Vertx
  * [Smith and Williams 2002] C. U. Smith and L. G. Williams, Performance Solutions: A Practical Guide to
  * Creating Responsive, Scalable Software, Boston, MA, Addison-Wesley, 2002.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class RampDetectionMentor(

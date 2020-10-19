@@ -11,7 +11,7 @@ import javax.swing.JComponent
 /**
  * Used to view and edit plugin configuration.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class SourceMarkerConfigurable : Configurable {

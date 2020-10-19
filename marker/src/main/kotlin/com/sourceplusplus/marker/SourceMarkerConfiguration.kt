@@ -9,7 +9,7 @@ import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
 /**
  * Used to configure [SourceFileMarker]s.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class SourceMarkerConfiguration {

@@ -41,7 +41,7 @@ import kotlin.concurrent.schedule
 /**
  * Used to associate visualizations near and/or inside of source code.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener {

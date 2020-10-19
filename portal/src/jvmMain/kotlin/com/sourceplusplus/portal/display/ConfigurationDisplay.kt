@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 /**
  * Used to display and configure a given source code artifact.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDisplay(PageType.CONFIGURATION) {

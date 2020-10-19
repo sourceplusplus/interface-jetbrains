@@ -7,7 +7,7 @@ import com.sourceplusplus.marker.source.mark.api.filter.ApplySourceMarkFilter
 /**
  * Used to configure [SourceMark]s.
  *
- * @since 0.0.1
+ * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface SourceMarkConfiguration {
