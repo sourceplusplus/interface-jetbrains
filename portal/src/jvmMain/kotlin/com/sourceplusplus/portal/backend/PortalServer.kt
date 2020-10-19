@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.backend
 
+import com.google.common.io.ByteStreams
 import com.sourceplusplus.portal.PortalViewTracker
 import com.sourceplusplus.portal.display.ActivityDisplay
 import com.sourceplusplus.portal.display.ConfigurationDisplay
@@ -39,7 +40,7 @@ class PortalServer : CoroutineVerticle() {
             if (it.request().path().endsWith(".js")) {
                 response.putHeader("Content-Type", "text/javascript")
             }
-            response.end(Buffer.buffer(Unpooled.copiedBuffer(fileStream!!.readAllBytes())))
+            response.end(Buffer.buffer(Unpooled.copiedBuffer(ByteStreams.toByteArray(fileStream!!))))
             //todo: add cache headers
         }
 
