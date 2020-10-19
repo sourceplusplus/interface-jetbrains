@@ -64,6 +64,10 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             portal.currentTab = thisTab
             SourcePortal.ensurePortalActive(portal)
             updateUI(portal)
+
+            //for some reason clearing (resizing) the activity chart is necessary once SourceMarkerPlugin.init()
+            //has been called more than once; for now just do it whenever the activity tab is opened
+            vertx.eventBus().send(ClearActivity(portal.portalUuid), null)
         }
         vertx.eventBus().consumer<ArtifactMetricResult>(ArtifactMetricUpdated) {
             val artifactMetricResult = it.body()
