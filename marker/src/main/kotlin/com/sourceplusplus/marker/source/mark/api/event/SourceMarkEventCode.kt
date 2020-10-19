@@ -8,6 +8,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 enum class SourceMarkEventCode(private val code: Int) : IEventCode {
     MARK_ADDED(1000),
     MARK_REMOVED(1001),

@@ -9,6 +9,7 @@ import com.sourceplusplus.marker.source.mark.gutter.GutterMark
  * @since 0.0.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 enum class GutterMarkEventCode(private val code: Int) : IEventCode {
     GUTTER_MARK_VISIBLE(2000),
     GUTTER_MARK_HIDDEN(2001);

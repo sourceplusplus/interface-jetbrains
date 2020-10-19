@@ -2,7 +2,10 @@ package com.sourceplusplus.sourcemarker.settings
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.ProjectManager
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.core.json.Json
+import kotlinx.coroutines.runBlocking
 import javax.swing.JComponent
 
 /**
@@ -19,20 +22,21 @@ class SourceMarkerConfigurable : Configurable {
 
     override fun apply() {
         val updatedConfig = form!!.pluginConfig
-        PropertiesComponent.getInstance().setValue(
-            "sourcemarker_plugin_config",
-            Json.encode(updatedConfig)
-        )
+        val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
+        projectSettings.setValue("sourcemarker_plugin_config", Json.encode(updatedConfig))
         form!!.applySourceMarkerConfig(updatedConfig)
+
+        runBlocking {
+            SourceMarkerPlugin.init(ProjectManager.getInstance().openProjects[0])
+        }
     }
 
     override fun createComponent(): JComponent {
         if (form == null) {
-            val config = if (
-                PropertiesComponent.getInstance().isValueSet("sourcemarker_plugin_config")
-            ) {
+            val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
+            val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
                 Json.decodeValue(
-                    PropertiesComponent.getInstance().getValue("sourcemarker_plugin_config"),
+                    projectSettings.getValue("sourcemarker_plugin_config"),
                     SourceMarkerConfig::class.java
                 )
             } else {

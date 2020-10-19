@@ -3,8 +3,8 @@ package com.sourceplusplus.portal.page
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.template.*
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.OverviewTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.UpdateEndpoints
+import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.portal.model.EndpointTableType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*

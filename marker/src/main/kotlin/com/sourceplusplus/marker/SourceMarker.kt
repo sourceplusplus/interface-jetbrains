@@ -1,12 +1,10 @@
-package com.sourceplusplus.marker.plugin
+package com.sourceplusplus.marker
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.intellij.psi.PsiFile
-import com.sourceplusplus.marker.plugin.config.SourceMarkerConfiguration
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.SourceFileMarkerProvider
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.navigate.ArtifactNavigator
@@ -19,7 +17,7 @@ import org.slf4j.LoggerFactory
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 //todo: should be per project
-object SourceMarkerPlugin : SourceFileMarkerProvider {
+object SourceMarker {
 
     @Volatile
     var enabled = true
@@ -30,7 +28,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
 
     fun clearAvailableSourceFileMarkers() {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.forEach {
             deactivateSourceFileMarker(it.value)
@@ -39,7 +37,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     }
 
     fun refreshAvailableSourceFileMarkers(recreateFileMarkers: Boolean) {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
 
         if (recreateFileMarkers) {
             val previousFileMarkers = getAvailableSourceFileMarkers()
@@ -55,7 +53,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     }
 
     fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
 
         if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
             sourceFileMarker.clearSourceMarks()
@@ -67,7 +65,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     }
 
     fun getSourceFileMarker(psiFile: PsiFile): SourceFileMarker? {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
 
         var fileMarker = psiFile.getUserData(SourceFileMarker.KEY)
         if (fileMarker != null) {
@@ -84,7 +82,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     }
 
     fun getSourceFileMarker(classQualifiedName: String): SourceFileMarker? {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.values.forEach { marker ->
             if (marker.getClassQualifiedNames().contains(classQualifiedName)) {
@@ -95,7 +93,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     }
 
     fun getAvailableSourceFileMarkers(): List<SourceFileMarker> {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
 
         return ImmutableList.copyOf(availableSourceFileMarkers.values)
     }
@@ -109,7 +107,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     }
 
     fun getSourceMark(artifactQualifiedName: String, type: SourceMark.Type): SourceMark? {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.values.forEach {
             val sourceMark = it.getSourceMark(artifactQualifiedName, type)
@@ -121,7 +119,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     }
 
     fun getSourceMarks(artifactQualifiedName: String): List<SourceMark> {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.values.forEach {
             val sourceMarks = it.getSourceMarks(artifactQualifiedName)
@@ -133,7 +131,7 @@ object SourceMarkerPlugin : SourceFileMarkerProvider {
     }
 
     fun getSourceMarks(): List<SourceMark> {
-        check(enabled) { "SourceMarkerPlugin disabled" }
+        check(enabled) { "SourceMarker disabled" }
         return availableSourceFileMarkers.values.flatMap { it.getSourceMarks() }
     }
 }

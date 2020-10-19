@@ -22,8 +22,9 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
 import com.intellij.ui.paint.EffectPainter
-import com.sourceplusplus.marker.MarkerUtils
-import com.sourceplusplus.marker.plugin.SourceMarkerPlugin.getSourceFileMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.SourceMarker.getSourceFileMarker
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
@@ -55,7 +56,7 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
         private var currentProject: Project? = null
 
         init {
-            SourceMarkerPlugin.addGlobalSourceMarkEventListener { event ->
+            SourceMarker.addGlobalSourceMarkEventListener { event ->
                 when (event.eventCode) {
                     InlayMarkEventCode.VIRTUAL_TEXT_UPDATED -> {
                         ApplicationManager.getApplication().invokeLater {
@@ -84,23 +85,23 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                 val fileMarker = getSourceFileMarker(element.containingFile)!!
                 currentProject = fileMarker.project
 
-                val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
-                return if (!SourceMarkerPlugin.configuration.createSourceMarkFilter.test(artifactQualifiedName)) {
+                val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
+                return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) {
                     null
                 } else {
-                    MarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
+                    SourceMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
                 }
             } else if (element is PsiStatement) {
                 val fileMarker = getSourceFileMarker(element.containingFile)!!
                 currentProject = fileMarker.project
 
-                val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(
-                    MarkerUtils.getUniversalExpression(element).toUElement() as UExpression
+                val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(
+                    SourceMarkerUtils.getUniversalExpression(element).toUElement() as UExpression
                 )
-                return if (!SourceMarkerPlugin.configuration.createSourceMarkFilter.test(artifactQualifiedName)) {
+                return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) {
                     null
                 } else {
-                    MarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
+                    SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
                 }
             }
             return null
@@ -123,7 +124,7 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
         settings: NoSettings,
         sink: InlayHintsSink
     ): InlayHintsCollector? {
-        if (!SourceMarkerPlugin.enabled) {
+        if (!SourceMarker.enabled) {
             return null
         }
 

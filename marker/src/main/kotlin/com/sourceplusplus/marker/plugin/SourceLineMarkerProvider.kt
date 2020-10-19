@@ -7,7 +7,8 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment.CENTER
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
-import com.sourceplusplus.marker.MarkerUtils
+import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
@@ -28,21 +29,21 @@ import org.jetbrains.uast.toUElement
 abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
-        if (!SourceMarkerPlugin.enabled) {
+        if (!SourceMarker.enabled) {
             return null
         }
 
         val parent = element.parent
         if (parent is PsiClass && element === parent.nameIdentifier) {
             //class gutter marks
-            val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile) ?: return null
-            val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
-            if (!SourceMarkerPlugin.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
+            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
+            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
+            if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
 
             //check by artifact name first due to user can erroneously name same class twice
             var gutterMark = fileMarker.getSourceMark(artifactQualifiedName, SourceMark.Type.GUTTER) as ClassGutterMark?
             if (gutterMark == null) {
-                gutterMark = MarkerUtils.getOrCreateClassGutterMark(fileMarker, element) ?: return null
+                gutterMark = SourceMarkerUtils.getOrCreateClassGutterMark(fileMarker, element) ?: return null
             }
 
             var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
@@ -64,9 +65,9 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             || (parent is KtNamedFunction && element === parent.nameIdentifier)
         ) {
             //method gutter marks
-            val fileMarker = SourceMarkerPlugin.getSourceFileMarker(element.containingFile) ?: return null
-            val artifactQualifiedName = MarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
-            if (!SourceMarkerPlugin.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
+            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
+            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
+            if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
 
             //check by artifact name first due to user can erroneously name same method twice
             var gutterMark = fileMarker.getSourceMark(
@@ -74,7 +75,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                 SourceMark.Type.GUTTER
             ) as MethodGutterMark?
             if (gutterMark == null) {
-                gutterMark = MarkerUtils.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
+                gutterMark = SourceMarkerUtils.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
             }
 
             var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
@@ -120,12 +121,12 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         elements: MutableList<out PsiElement>,
         result: MutableCollection<in LineMarkerInfo<*>>
     ) {
-        if (!SourceMarkerPlugin.enabled) {
+        if (!SourceMarker.enabled) {
             return
         }
 
         elements.stream().map { it.containingFile }.distinct().forEach {
-            SourceMarkerPlugin.getSourceFileMarker(it)?.removeInvalidSourceMarks()
+            SourceMarker.getSourceFileMarker(it)?.removeInvalidSourceMarks()
         }
     }
 

@@ -9,10 +9,10 @@ import com.sourceplusplus.portal.model.ArtifactConfigType.ENTRY_METHOD
 import com.sourceplusplus.portal.model.ArtifactInfoType.*
 import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.portal.template.*
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.ConfigurationTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactAutoSubscribe
-import com.sourceplusplus.protocol.ProtocolAddress.Global.Companion.UpdateArtifactEntryMethod
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.Companion.DisplayArtifactConfiguration
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe
+import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactEntryMethod
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayArtifactConfiguration
 import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import kotlinx.browser.document

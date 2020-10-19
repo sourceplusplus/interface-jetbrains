@@ -45,11 +45,21 @@ class SourceMentor : CoroutineVerticle() {
         }
     }
 
+    override suspend fun stop() {
+        running = false
+        stillValidTasks.clear()
+        taskQueue.clear()
+        jobList.clear()
+        adviceListeners.clear()
+        log.info("SourceMentor stopped")
+    }
+
     private suspend fun runJobProcessing() {
         running = true
         while (running) {
             log.info("Waiting for next task...")
             var currentTask: MentorTask = runInterruptible(Dispatchers.IO) { taskQueue.take() }
+            if (!running) return
             log.info("Processing task: $currentTask")
 
             //find jobs requiring task (execute once then share results)
@@ -85,6 +95,7 @@ class SourceMentor : CoroutineVerticle() {
     }
 
     private suspend fun executeTask(job: MentorJob, task: MentorTask) {
+        if (!running) return
         job.log("Executing task: $task")
         task.executeTask(job)
         if (!task.asyncTask) {
@@ -109,6 +120,7 @@ class SourceMentor : CoroutineVerticle() {
         jobsWhichRequireTask: List<MentorJob>,
         currentTask: MentorTask
     ) {
+        if (!running) return
         val tasksStillRequired = Collections.newSetFromMap(
             IdentityHashMap<MentorTask, Boolean>()
         )
