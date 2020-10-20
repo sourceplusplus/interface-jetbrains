@@ -80,13 +80,22 @@ class SourcePortal(
         }
 
         fun register(appUuid: String, artifactQualifiedName: String, external: Boolean): String {
-            return register(UUID.randomUUID().toString(), appUuid, artifactQualifiedName, external)
+            return register(
+                UUID.randomUUID().toString(), appUuid, artifactQualifiedName, PortalConfiguration(external = external)
+            )
         }
 
-        fun register(portalUuid: String, appUuid: String, artifactQualifiedName: String, external: Boolean): String {
-            val portal = SourcePortal(
-                portalUuid, Objects.requireNonNull(appUuid), PortalConfiguration(external = external)
-            )
+        fun register(appUuid: String, artifactQualifiedName: String, configuration: PortalConfiguration): String {
+            return register(UUID.randomUUID().toString(), appUuid, artifactQualifiedName, configuration)
+        }
+
+        fun register(
+            portalUuid: String,
+            appUuid: String,
+            artifactQualifiedName: String,
+            configuration: PortalConfiguration
+        ): String {
+            val portal = SourcePortal(portalUuid, Objects.requireNonNull(appUuid), configuration)
             portal.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
             portalMap.put(portalUuid, portal)
@@ -129,7 +138,9 @@ class SourcePortal(
     }
 
     fun createExternalPortal(): SourcePortal {
-        val portalClone = getPortal(register(appUuid, viewingPortalArtifact, true))!!
+        val portalClone = getPortal(
+            register(appUuid, viewingPortalArtifact, configuration.copy(external = true))
+        )!!
         portalClone.cloneViews(this)
         return portalClone
     }
