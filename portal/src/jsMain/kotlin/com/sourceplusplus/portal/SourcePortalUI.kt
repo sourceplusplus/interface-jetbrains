@@ -6,6 +6,7 @@ import com.sourceplusplus.portal.page.ActivityPage
 import com.sourceplusplus.portal.page.ConfigurationPage
 import com.sourceplusplus.portal.page.OverviewPage
 import com.sourceplusplus.portal.page.TracesPage
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
@@ -66,7 +67,7 @@ fun clickedViewAsExternalPortal(eb: EventBus) {
     val queryParams = getQueryMap()
     val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
 
-    eb.send("ClickedViewAsExternalPortal", json("portalUuid" to portalUuid), fun(_, message: dynamic) {
+    eb.send(ClickedViewAsExternalPortal, json("portalUuid" to portalUuid), fun(_, message: dynamic) {
         window.open(
             "${window.location.href.split('?')[0]}?portalUuid=${message.body.portalUuid}&external=true${getMainGetQueryWithoutPortalUuid()}",
             "_blank"

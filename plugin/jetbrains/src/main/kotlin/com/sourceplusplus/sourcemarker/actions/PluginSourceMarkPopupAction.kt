@@ -55,9 +55,9 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
     private fun refreshPortalIfNecessary(sourceMark: SourceMark, sourcePortal: SourcePortal) {
         val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
         if (sourcePortal != lastDisplayedInternalPortal) {
-            val darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
+            sourcePortal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
             val currentUrl = "/${sourcePortal.currentTab.name.toLowerCase()}.html" +
-                    "?portalUuid=${sourcePortal.portalUuid}&dark_mode=$darkMode"
+                    "?portalUuid=${sourcePortal.portalUuid}"
             jcefComponent.getBrowser().cefBrowser.executeJavaScript(
                 "window.location.href = '$currentUrl';", currentUrl, 0
             )
