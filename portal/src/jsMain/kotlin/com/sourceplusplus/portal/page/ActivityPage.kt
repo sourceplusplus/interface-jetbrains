@@ -18,16 +18,16 @@ import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.metrics.SplineChart
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.html.dom.append
-import kotlinx.html.js.link
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import moment
 import org.w3c.dom.Element
-import org.w3c.dom.get
 import kotlin.js.json
 
 /**
@@ -38,17 +38,16 @@ import kotlin.js.json
  */
 class ActivityPage(
     override val portalUuid: String,
-    override val externalPortal: Boolean = false,
-    val darkMode: Boolean = false
+    private val eb: EventBus
 ) : IActivityPage {
 
-    private val eb = EventBus("http://localhost:8888/eventbus")
+    private lateinit var configuration: PortalConfiguration
     private var overviewChart: dynamic = null
     override var currentMetricType: MetricType = MetricType.Throughput_Average
     override var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
     private var tooltipMeasurement = "ms"
-    private var labelColor = if (darkMode) "grey" else "black"
-    private val symbolColor = if (darkMode) "grey" else "#182d34"
+    private val labelColor by lazy { if (configuration.darkMode) "grey" else "black" }
+    private val symbolColor by lazy { if (configuration.darkMode) "grey" else "#182d34" }
 
     private val tooltipFormatter: ((params: dynamic) -> String) = { params ->
         val time = params[0].value[0].toString()
@@ -58,93 +57,84 @@ class ActivityPage(
     private val axisFormatter: ((value: dynamic) -> String) = { value ->
         moment(value.toString(), "x").format("LT")
     }
-    private val overviewChartOptions = json(
-        "grid" to json(
-            "top" to 20,
-            "bottom" to 30,
-            "left" to 55,
-            "right" to 0
-        ),
-        "tooltip" to json(
-            "trigger" to "axis",
-            "formatter" to tooltipFormatter,
-            "axisPointer" to json(
-                "animation" to false
-            )
-        ),
-        "xAxis" to json(
-            "type" to "time",
-            "splitLine" to json(
-                "show" to true
+    private val overviewChartOptions by lazy {
+        json(
+            "grid" to json(
+                "top" to 20,
+                "bottom" to 30,
+                "left" to 55,
+                "right" to 0
             ),
-            "axisLabel" to json(
-                "formatter" to axisFormatter,
-                "color" to labelColor
-            )
-        ),
-        "yAxis" to json(
-            "type" to "value",
-            "boundaryGap" to arrayOf(0, "100%"),
-            "splitLine" to json(
-                "show" to false
+            "tooltip" to json(
+                "trigger" to "axis",
+                "formatter" to tooltipFormatter,
+                "axisPointer" to json(
+                    "animation" to false
+                )
             ),
-            "axisLabel" to json(
-                "color" to labelColor
-            )
-        ),
-        "series" to arrayOf(series0, series1, series2, series3, series4, regressionSeries)
-    )
-
-    init {
-        console.log("Activity tab started")
-        console.log("Connecting portal")
-        eb.onopen = {
-            //js("portalConnected()")
-
-            clickedViewAverageResponseTimeChart() //default = avg resp time
-
-            eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
-                clearActivity()
-            }
-            eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
-                displayCard(Json.decodeFromDynamic(message.body))
-            }
-            eb.registerHandler(UpdateChart(portalUuid)) { _: dynamic, message: dynamic ->
-                updateChart(Json.decodeFromDynamic(message.body))
-            }
-
-            var timeFrame = localStorage.getItem("spp.metricTimeFrame")
-            if (timeFrame == null) {
-                timeFrame = currentTimeFrame.name
-                localStorage.setItem("spp.metricTimeFrame", timeFrame)
-            }
-            updateTime(QueryTimeFrame.valueOf(timeFrame.toUpperCase()))
-            //js("portalLog('Set initial time frame to: ' + timeFrame);")
-
-            eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
-        }
+            "xAxis" to json(
+                "type" to "time",
+                "splitLine" to json(
+                    "show" to true
+                ),
+                "axisLabel" to json(
+                    "formatter" to axisFormatter,
+                    "color" to labelColor
+                )
+            ),
+            "yAxis" to json(
+                "type" to "value",
+                "boundaryGap" to arrayOf(0, "100%"),
+                "splitLine" to json(
+                    "show" to false
+                ),
+                "axisLabel" to json(
+                    "color" to labelColor
+                )
+            ),
+            "series" to arrayOf(series0, series1, series2, series3, series4, regressionSeries)
+        )
     }
 
-    fun renderPage() {
-        println("Rending Activity page")
-        document.getElementsByTagName("head")[0]!!.append {
-            link {
-                rel = "stylesheet"
-                type = "text/css"
-                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
-            }
+    @ExperimentalSerializationApi
+    override fun setupEventbus() {
+        clickedViewAverageResponseTimeChart() //default = avg resp time
+
+        eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
+            clearActivity()
         }
+        eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
+            displayCard(Json.decodeFromDynamic(message.body))
+        }
+        eb.registerHandler(UpdateChart(portalUuid)) { _: dynamic, message: dynamic ->
+            updateChart(Json.decodeFromDynamic(message.body))
+        }
+
+        var timeFrame = localStorage.getItem("spp.metricTimeFrame")
+        if (timeFrame == null) {
+            timeFrame = currentTimeFrame.name
+            localStorage.setItem("spp.metricTimeFrame", timeFrame)
+        }
+        updateTime(QueryTimeFrame.valueOf(timeFrame.toUpperCase()))
+        //js("portalLog('Set initial time frame to: ' + timeFrame);")
+
+        eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
+    }
+
+    override fun renderPage(portalConfiguration: PortalConfiguration) {
+        println("Rending Activity page")
+        this.configuration = portalConfiguration
+
         val root: Element = document.getElementById("root")!!
         root.innerHTML = ""
-
         root.append {
             portalNav {
-                navItem(OVERVIEW)
-                navItem(ACTIVITY, isActive = true)
-                navItem(TRACES) {
+                if (configuration.visibleOverview) navItem(OVERVIEW)
+                if (configuration.visibleActivity) navItem(ACTIVITY, isActive = true)
+                if (configuration.visibleTraces) navItem(TRACES) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                 }
-                navItem(CONFIGURATION)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION)
             }
             activityContent {
                 navBar {
@@ -192,8 +182,7 @@ class ActivityPage(
     }
 
     override fun displayCard(card: BarTrendCard) {
-        console.log("Displaying card")
-
+        console.log("Displaying card. Type: ${card.meta}")
         document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = card.header
     }
 

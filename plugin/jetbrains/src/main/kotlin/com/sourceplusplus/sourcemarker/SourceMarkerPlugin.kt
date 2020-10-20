@@ -271,9 +271,8 @@ object SourceMarkerPlugin {
                 override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
                     val initialPortal = SourcePortal.getPortals()[0]
                     val page = "${initialPortal.currentTab.name.toLowerCase()}.html"
-                    val darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
-                    configuration.initialUrl =
-                        "http://localhost:8080/$page?portalUuid=${initialPortal.portalUuid}&dark_mode=$darkMode"
+                    initialPortal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
+                    configuration.initialUrl = "http://localhost:8080/$page?portalUuid=${initialPortal.portalUuid}"
                 }
             }
         }

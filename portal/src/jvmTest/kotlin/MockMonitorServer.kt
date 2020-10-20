@@ -12,6 +12,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceSta
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
@@ -26,6 +27,7 @@ import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.metrics.SplineChart
 import com.sourceplusplus.protocol.artifact.metrics.SplineSeriesData
 import com.sourceplusplus.protocol.artifact.trace.*
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
@@ -66,6 +68,10 @@ fun main() {
 
     vertx.eventBus().consumer<String>(ClickedViewAsExternalPortal) {
         it.reply(JsonObject().put("portalUuid", "null"))
+    }
+
+    vertx.eventBus().consumer<String>(GetPortalConfiguration) {
+        it.reply(JsonObject.mapFrom(PortalConfiguration().copy(external = true)))
     }
 
     vertx.eventBus().consumer<Void>(OverviewTabOpened) {

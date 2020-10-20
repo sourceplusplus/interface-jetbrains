@@ -49,7 +49,7 @@ class PortalViewTracker : CoroutineVerticle() {
         vertx.eventBus().consumer<JsonObject>(ClickedViewAsExternalPortal) {
             val portal = SourcePortal.getPortal(JsonObject.mapFrom(it.body()).getString("portalUuid"))!!
             //close internal portal
-            if (!portal.external) vertx.eventBus().send(ClosePortal, portal)
+            if (!portal.configuration.external) vertx.eventBus().send(ClosePortal, portal)
             //open external portal
             it.reply(JsonObject().put("portalUuid", portal.createExternalPortal().portalUuid))
         }

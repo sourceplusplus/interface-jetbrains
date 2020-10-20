@@ -2,22 +2,21 @@ package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
+import com.sourceplusplus.portal.model.EndpointTableType
+import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
-import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
-import com.sourceplusplus.portal.model.EndpointTableType
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
-import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.html.*
 import kotlinx.html.dom.append
-import kotlinx.html.js.link
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import org.w3c.dom.Element
-import org.w3c.dom.get
 import kotlin.js.json
 
 /**
@@ -28,47 +27,32 @@ import kotlin.js.json
  */
 class OverviewPage(
     override val portalUuid: String,
-    override val externalPortal: Boolean = false,
-    private val darkMode: Boolean = false
+    private val eb: EventBus
 ) : IOverviewPage {
 
-    private val eb = EventBus("http://localhost:8888/eventbus")
+    private lateinit var configuration: PortalConfiguration
 
-    init {
-        console.log("Overview tab started")
-
-        @Suppress("EXPERIMENTAL_API_USAGE")
-        eb.onopen = {
-            //js("portalConnected()")
-
-            eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->
-                displayEndpoints(Json.decodeFromDynamic(message.body))
-            }
-
-            eb.publish(OverviewTabOpened, json("portalUuid" to portalUuid))
+    override fun setupEventbus() {
+        eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->
+            displayEndpoints(Json.decodeFromDynamic(message.body))
         }
+        eb.publish(OverviewTabOpened, json("portalUuid" to portalUuid))
     }
 
-    fun renderPage() {
+    override fun renderPage(portalConfiguration: PortalConfiguration) {
         println("Rending Overview page")
-        document.getElementsByTagName("head")[0]!!.append {
-            link {
-                rel = "stylesheet"
-                type = "text/css"
-                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
-            }
-        }
+        this.configuration = portalConfiguration
+
         val root: Element = document.getElementById("root")!!
         root.innerHTML = ""
-
         root.append {
             portalNav {
-                navItem(OVERVIEW, isActive = true)
-                navItem(ACTIVITY)
-                navItem(TRACES) {
+                if (configuration.visibleOverview) navItem(OVERVIEW, isActive = true)
+                if (configuration.visibleActivity) navItem(ACTIVITY)
+                if (configuration.visibleTraces) navItem(TRACES) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                 }
-                navItem(CONFIGURATION)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION)
             }
             pusherContent {
                 navBar {

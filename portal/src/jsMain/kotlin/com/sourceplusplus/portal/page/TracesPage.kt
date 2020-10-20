@@ -27,12 +27,12 @@ import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.dom.create
-import kotlinx.html.js.link
 import kotlinx.html.js.onClickFunction
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
@@ -50,58 +50,43 @@ import kotlin.js.json
  */
 class TracesPage(
     override val portalUuid: String,
-    override val externalPortal: Boolean = false,
-    override val hideActivityTab: Boolean = false,
+    private val eb: EventBus,
     override var traceOrderType: TraceOrderType = LATEST_TRACES,
-    override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES,
-    private val darkMode: Boolean = false
+    override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES
 ) : ITracesPage {
 
-    private val eb = EventBus("http://localhost:8888/eventbus")
+    private lateinit var configuration: PortalConfiguration
 
-    init {
-        console.log("Traces tab started")
-
-        @Suppress("EXPERIMENTAL_API_USAGE")
-        eb.onopen = {
-            //js("portalConnected()")
-
-            eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
-                displayTraces(Json.decodeFromDynamic(message.body))
-            }
-            eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
-                displayTraceStack(*Json.decodeFromDynamic(message.body))
-            }
-            eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
-                displayTraceStack(*Json.decodeFromDynamic(message.body))
-            }
-            eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
-                displaySpanInfo(Json.decodeFromDynamic(message.body))
-            }
-            eb.publish(TracesTabOpened, json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name))
+    override fun setupEventbus() {
+        eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
+            displayTraces(Json.decodeFromDynamic(message.body))
         }
+        eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
+            displayTraceStack(*Json.decodeFromDynamic(message.body))
+        }
+        eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
+            displayTraceStack(*Json.decodeFromDynamic(message.body))
+        }
+        eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
+            displaySpanInfo(Json.decodeFromDynamic(message.body))
+        }
+        eb.publish(TracesTabOpened, json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name))
     }
 
-    fun renderPage() {
+    override fun renderPage(portalConfiguration: PortalConfiguration) {
         println("Rending Traces page")
-        document.getElementsByTagName("head")[0]!!.append {
-            link {
-                rel = "stylesheet"
-                type = "text/css"
-                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
-            }
-        }
+        this.configuration = portalConfiguration
+
         val root: Element = document.getElementById("root")!!
         root.innerHTML = ""
-
         root.append {
             portalNav {
-                navItem(OVERVIEW)
-                navItem(ACTIVITY)
-                navItem(TRACES, isActive = true) {
+                if (configuration.visibleOverview) navItem(OVERVIEW)
+                if (configuration.visibleActivity) navItem(ACTIVITY)
+                if (configuration.visibleTraces) navItem(TRACES, isActive = true) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                 }
-                navItem(CONFIGURATION)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true)
             }
             pusherContent {
                 navBar {
@@ -260,7 +245,7 @@ class TracesPage(
                             src = "../themes/default/assets/components/${component?.toUpperCase()}.png"
                         }
                         +spanInfo.operationName.replace("<", "&lt;").replace(">", "&gt;")
-                    } else if (span.hasChildStack!! || (!externalPortal && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
+                    } else if (span.hasChildStack!! || (!configuration.external && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
                         i {
                             style = "font-size:1.5em;margin-right:5px;vertical-align:bottom"
                             classes = setOf("far", "fa-plus-square")
@@ -382,7 +367,7 @@ class TracesPage(
         js("\$('#latest_traces_header').dropdown({on: null})")
         js("\$('#trace_stack_header').dropdown({on: 'hover'})")
 
-        if (hideActivityTab) {
+        if (!configuration.visibleActivity) {
             jq("#activity_link").css("display", "none")
             jq("#sidebar_activity_link").css("display", "none")
         }
