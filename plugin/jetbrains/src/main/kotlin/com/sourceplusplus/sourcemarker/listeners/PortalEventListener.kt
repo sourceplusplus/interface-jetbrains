@@ -34,6 +34,7 @@ import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -61,6 +62,11 @@ class PortalEventListener : CoroutineVerticle() {
             //todo: update existing portals
         }
 
+        vertx.eventBus().consumer<String>(GetPortalConfiguration) {
+            val portalUuid = it.body()
+            val portal = SourcePortal.getPortal(portalUuid)!!
+            it.reply(JsonObject.mapFrom(portal.configuration))
+        }
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
         vertx.eventBus().consumer<JsonObject>(OverviewTabOpened) {
             val portalUuid = it.body().getString("portalUuid")

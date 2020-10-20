@@ -16,7 +16,6 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
 interface ITracesPage : PortalPage {
     var traceOrderType: TraceOrderType
     var traceDisplayType: TraceDisplayType
-    val hideActivityTab: Boolean
 
     fun displayTraces(traceResult: TraceResult)
     fun displayTraceStack(vararg traceStack: TraceSpanInfo)
