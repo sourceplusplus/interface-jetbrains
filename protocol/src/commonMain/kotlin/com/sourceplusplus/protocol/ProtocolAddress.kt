@@ -13,6 +13,7 @@ object ProtocolAddress {
         const val ClickedViewAsExternalPortal = "ClickedViewAsExternalPortal"
         const val KeepAlivePortal = "KeepAlivePortal" //todo: remove
         const val UpdatePortalArtifact = "UpdatePortalArtifact"
+        const val GetPortalConfiguration = "GetPortalConfiguration"
         const val CanOpenPortal = "CanOpenPortal"
         //const val OpenedPortal = "OpenedPortal"
         //const val ClosedPortal = "ClosedPortal"
