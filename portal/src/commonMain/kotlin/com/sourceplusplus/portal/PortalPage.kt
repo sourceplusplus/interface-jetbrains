@@ -1,5 +1,7 @@
 package com.sourceplusplus.portal
 
+import com.sourceplusplus.protocol.portal.PortalConfiguration
+
 /**
  * todo: description.
  *
@@ -8,5 +10,7 @@ package com.sourceplusplus.portal
  */
 interface PortalPage {
     val portalUuid: String
-    val externalPortal: Boolean
+
+    fun setupEventbus()
+    fun renderPage(portalConfiguration: PortalConfiguration)
 }

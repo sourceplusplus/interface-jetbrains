@@ -31,8 +31,13 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
             )
             sourceMark.putUserData(SOURCE_PORTAL, sourcePortal!!)
             if (sourceMark is ClassSourceMark) {
-                //class-based portals start on overview page
+                //class-based portals only have overview page
                 sourcePortal.currentTab = PageType.OVERVIEW
+                sourcePortal.configuration.visibleActivity = false
+                sourcePortal.configuration.visibleTraces = false
+            } else {
+                //method-based portals don't have overview page
+                sourcePortal.configuration.visibleOverview = false
             }
 
             sourceMark.addEventListener { event ->
@@ -50,9 +55,9 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
     private fun refreshPortalIfNecessary(sourceMark: SourceMark, sourcePortal: SourcePortal) {
         val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
         if (sourcePortal != lastDisplayedInternalPortal) {
-            val darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
+            sourcePortal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
             val currentUrl = "/${sourcePortal.currentTab.name.toLowerCase()}.html" +
-                    "?portalUuid=${sourcePortal.portalUuid}&dark_mode=$darkMode"
+                    "?portalUuid=${sourcePortal.portalUuid}"
             jcefComponent.getBrowser().cefBrowser.executeJavaScript(
                 "window.location.href = '$currentUrl';", currentUrl, 0
             )

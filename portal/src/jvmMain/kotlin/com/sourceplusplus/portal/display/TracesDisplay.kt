@@ -97,7 +97,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
             if (representation.innerTrace) {
                 updateUI(portal)
-            } else if (!portal.external) {
+            } else if (!portal.configuration.external) {
                 //navigating back to parent stack
 //                val rootArtifactQualifiedName = stack.getJsonObject(0).getString("root_artifact_qualified_name")
 //                vertx.eventBus().send(
@@ -208,7 +208,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             val span = traceStack.getJsonObject(i).getJsonObject("span")
             if (span.getInteger("spanId") == spanId) {
                 val spanArtifactQualifiedName = span.getString("artifactQualifiedName")
-                if (portal.external && span.getBoolean("hasChildStack")) {
+                if (portal.configuration.external && span.getBoolean("hasChildStack")) {
 //                    val spanStackQuery = TraceSpanStackQuery.builder()
 //                        .oneLevelDeep(true).followExit(true)
 //                        .segmentId(span.getString("segment_id"))

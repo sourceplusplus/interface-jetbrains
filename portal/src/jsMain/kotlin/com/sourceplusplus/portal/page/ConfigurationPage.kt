@@ -15,13 +15,12 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactEntryMet
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayArtifactConfiguration
 import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.html.dom.append
-import kotlinx.html.js.link
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import org.w3c.dom.Element
-import org.w3c.dom.get
 import kotlin.js.json
 
 /**
@@ -32,47 +31,32 @@ import kotlin.js.json
  */
 class ConfigurationPage(
     override val portalUuid: String,
-    override val externalPortal: Boolean = false,
-    private val hideActivityTab: Boolean = false,
-    private val darkMode: Boolean = false
+    private val eb: EventBus
 ) : IConfigurationPage {
 
-    private val eb = EventBus("http://localhost:8888/eventbus")
+    private lateinit var configuration: PortalConfiguration
 
-    init {
-        console.log("Configuration tab started")
-
-        @Suppress("EXPERIMENTAL_API_USAGE")
-        eb.onopen = {
-            //js("portalConnected()")
-
-            eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
-                updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
-            }
-            eb.publish(ConfigurationTabOpened, json("portalUuid" to portalUuid))
+    override fun setupEventbus() {
+        eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
+            updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
         }
+        eb.publish(ConfigurationTabOpened, json("portalUuid" to portalUuid))
     }
 
-    fun renderPage() {
+    override fun renderPage(portalConfiguration: PortalConfiguration) {
         console.log("Rendering Configuration page")
-        document.getElementsByTagName("head")[0]!!.append {
-            link {
-                rel = "stylesheet"
-                type = "text/css"
-                href = "css/" + if (darkMode) "dark_style.css" else "style.css"
-            }
-        }
+        this.configuration = portalConfiguration
+
         val root: Element = document.getElementById("root")!!
         root.innerHTML = ""
-
         root.append {
             portalNav {
-                navItem(OVERVIEW)
-                navItem(ACTIVITY)
-                navItem(TRACES) {
+                if (configuration.visibleOverview) navItem(OVERVIEW)
+                if (configuration.visibleActivity) navItem(ACTIVITY)
+                if (configuration.visibleTraces) navItem(TRACES) {
                     navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
                 }
-                navItem(CONFIGURATION, isActive = true)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true)
             }
             configurationContent {
                 navBar(false) {
@@ -125,7 +109,7 @@ class ConfigurationPage(
     }
 
     private fun setupUI() {
-        if (hideActivityTab) {
+        if (!configuration.visibleActivity) {
             jq("#activity_link").css("display", "none")
             jq("#sidebar_activity_link").css("display", "none")
         }
