@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.intellij.ide.ui.laf.IntelliJLaf
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -33,6 +33,7 @@ import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
+import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
@@ -62,7 +63,6 @@ import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
 import java.awt.Dimension
 import java.util.*
-import javax.swing.UIManager
 
 /**
  * todo: description.
@@ -83,6 +83,7 @@ object SourceMarkerPlugin {
         vertx.eventBus().registerDefaultCodec(TraceResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(TraceSpanStackQueryResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(EndpointResult::class.java, LocalMessageCodec())
+        vertx.eventBus().registerDefaultCodec(JvmStackTraceElement::class.java, LocalMessageCodec())
 
         val module = SimpleModule()
         module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
@@ -92,6 +93,7 @@ object SourceMarkerPlugin {
         DatabindCodec.mapper().registerModule(GuavaModule())
         DatabindCodec.mapper().registerModule(Jdk8Module())
         DatabindCodec.mapper().registerModule(JavaTimeModule())
+        DatabindCodec.mapper().registerModule(KotlinModule())
         DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
     }
