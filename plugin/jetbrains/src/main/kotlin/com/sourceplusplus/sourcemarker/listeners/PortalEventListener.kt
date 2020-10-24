@@ -3,6 +3,7 @@ package com.sourceplusplus.sourcemarker.listeners
 import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.project.ProjectManager
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
@@ -18,9 +19,12 @@ import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.fromPerSecondToPrettyFrequency
 import com.sourceplusplus.portal.extensions.toPrettyDuration
+import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
@@ -28,14 +32,14 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
+import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
-import com.sourceplusplus.portal.model.PageType
-import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
+import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -99,6 +103,19 @@ class PortalEventListener : CoroutineVerticle() {
             GlobalScope.launch(vertx.dispatcher()) {
                 handler.reply(EndpointTracesTracker.getTraceStack(traceId, vertx))
             }
+        }
+        vertx.eventBus().consumer<JsonObject>(ClickedStackTraceElement) { handler ->
+            val message = handler.body()
+            val portalUuid = message.getString("portalUuid")
+            val portal = SourcePortal.getPortal(portalUuid)!!
+            if (!portal.configuration.external) vertx.eventBus().send(ClosePortal, portal)
+
+            val element = Json.decodeValue(
+                message.getJsonObject("stackTraceElement").toString(),
+                JvmStackTraceElement::class.java
+            )
+            val project = ProjectManager.getInstance().openProjects[0]
+            ArtifactNavigator.navigateTo(project, element)
         }
     }
 

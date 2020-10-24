@@ -7,7 +7,6 @@ import com.intellij.psi.PsiFile
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
-import com.sourceplusplus.marker.source.navigate.ArtifactNavigator
 import org.slf4j.LoggerFactory
 
 /**
@@ -22,7 +21,6 @@ object SourceMarker {
     @Volatile
     var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
-    val artifactNavigator = ArtifactNavigator()
     private val log = LoggerFactory.getLogger(javaClass)
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
