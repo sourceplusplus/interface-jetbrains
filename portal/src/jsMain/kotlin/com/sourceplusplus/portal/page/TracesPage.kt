@@ -91,7 +91,7 @@ class TracesPage(
             pusherContent {
                 navBar {
                     tracesHeader(
-                        TRACE_ID, TIME_OCCURRED,
+                        //TRACE_ID, TIME_OCCURRED,
                         onClickBackToTraces = { clickedBackToTraces() },
                         onClickBackToTraceStack = { clickedBackToTraceStack() }
                     )
