@@ -17,11 +17,13 @@ import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
+import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
@@ -30,15 +32,19 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.dom.addClass
+import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.dom.create
 import kotlinx.html.js.onClickFunction
+import kotlinx.html.js.tr
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import moment
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.Node
 import org.w3c.dom.get
 import kotlin.js.json
 
@@ -74,7 +80,7 @@ class TracesPage(
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
-        println("Rending Traces page")
+        console.log("Rending Traces page")
         this.configuration = portalConfiguration
 
         val root: Element = document.getElementById("root")!!
@@ -120,6 +126,7 @@ class TracesPage(
     }
 
     override fun displayTraces(traceResult: TraceResult) {
+        console.log("Displaying ${traceResult.total} traces")
         traceDisplayType = TraceDisplayType.TRACES
         resetUI()
 
@@ -201,6 +208,7 @@ class TracesPage(
     }
 
     override fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
+        console.log("Displaying trace stack")
         traceDisplayType = TraceDisplayType.TRACE_STACK
         resetUI()
 
@@ -309,6 +317,7 @@ class TracesPage(
     }
 
     override fun displaySpanInfo(spanInfo: TraceSpan) {
+        console.log("Displaying span info")
         traceDisplayType = TraceDisplayType.SPAN_INFO
         resetUI()
 
@@ -342,22 +351,66 @@ class TracesPage(
 
         jq("#log_table").empty()
         var gotLogs = false
-        for (log in spanInfo.logs) {
+        for ((logIndex, log) in spanInfo.logs.withIndex()) {
             gotLogs = true
-            val rowHtml = document.create.tr {
-                td {
-                    style = "white-space: nowrap"
-                    b { +log.time.toMoment().format() }
-                    br
-                    +log.data
+            document.getElementById("log_table")!!.append {
+                tr {
+                    td {
+                        p { id = "log_data_$logIndex" }
+                    }
                 }
             }
-            jq("#log_table").append(rowHtml)
+
+            var logData: Node = document.getElementById("log_data_$logIndex")!!
+            val stackTrace = JvmStackTrace.fromString(log.data)
+            if (stackTrace != null) {
+                logData.appendChild(document.create.span {
+                    h5("ui top attached header") {
+                        span("spp_red_color") { +stackTrace.exceptionType }
+                        if (stackTrace.message != null) {
+                            br
+                            +stackTrace.message!!
+                        }
+                    }
+                })
+                logData = logData.appendChild(document.create.div("ui attached segment") {
+                    style = "white-space: break-word"
+                })
+
+                for ((i, el) in stackTrace.elements.withIndex()) {
+                    logData.appendChild(document.create.span {
+                        if (i > 0) br
+                        unsafe { +"&emsp;" }
+                        if (el.sourceAsLineNumber != null) {
+                            a {
+                                onClickFunction = {
+                                    eb.send(
+                                        ClickedStackTraceElement, json(
+                                            "portalUuid" to portalUuid,
+                                            "stackTraceElement" to el
+                                        )
+                                    )
+                                }
+                                href = "javascript:void(0);"
+                                +el.toString(true)
+                            }
+                        } else {
+                            +el.toString(true)
+                        }
+                    })
+                }
+            } else {
+                logData.appendChild(document.create.span {
+                    +log.data
+                })
+            }
         }
+
+        val spanLogDiv = document.getElementById("span_log_div")!!
         if (gotLogs) {
-            jq("#span_log_div").removeClass("displaynone")
+            spanLogDiv.removeClass("displaynone")
         } else {
-            jq("#span_log_div").addClass("displaynone")
+            spanLogDiv.addClass("displaynone")
         }
     }
 
