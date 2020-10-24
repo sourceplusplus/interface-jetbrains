@@ -15,7 +15,7 @@ class JvmStackTrace(
 
     fun getElements(hideApacheSkywalking: Boolean): List<JvmStackTraceElement> {
         if (hideApacheSkywalking) {
-            //skip skywalking interceptor element and the $original/$auxiliary elements
+            //skip skywalking interceptor element(s) and accompanying $original/$auxiliary elements
             val finalElements = mutableListOf<JvmStackTraceElement>()
             var skipTo = 0
             val reversedElements = elements.reversed()
@@ -28,8 +28,9 @@ class JvmStackTrace(
                     while (x++ < reversedElements.size) {
                         val tillEl = reversedElements[x]
                         if (tillEl.sourceAsLineNumber != null) {
-                            skipTo = x + 1
+                            //copy over source line number
                             finalElements[finalElements.size - 1] = needsUpdateEl.copy(source = tillEl.source)
+                            skipTo = x + 1
                             break
                         }
                     }
