@@ -208,7 +208,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             val span = traceStack.getJsonObject(i).getJsonObject("span")
             if (span.getInteger("spanId") == spanId) {
                 val spanArtifactQualifiedName = span.getString("artifactQualifiedName")
-                if (portal.configuration.external && span.getBoolean("hasChildStack")) {
+                if (portal.configuration.external && span.getBoolean("hasChildStack") == true) {
 //                    val spanStackQuery = TraceSpanStackQuery.builder()
 //                        .oneLevelDeep(true).followExit(true)
 //                        .segmentId(span.getString("segment_id"))
