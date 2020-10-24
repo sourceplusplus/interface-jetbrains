@@ -13,7 +13,39 @@ class JvmStackTrace(
     val causedBy: JvmStackTrace? = null
 ) {
 
+    fun getElements(hideApacheSkywalking: Boolean): List<JvmStackTraceElement> {
+        if (hideApacheSkywalking) {
+            //skip skywalking interceptor element and the $original/$auxiliary elements
+            val finalElements = mutableListOf<JvmStackTraceElement>()
+            var skipTo = 0
+            val reversedElements = elements.reversed()
+            for (i in reversedElements.indices) {
+                if (i < skipTo) continue
+                val el = reversedElements[i]
+                if (el.method == skywalkingInterceptor) {
+                    val needsUpdateEl = reversedElements[i - 1]
+                    var x = i
+                    while (x++ < reversedElements.size) {
+                        val tillEl = reversedElements[x]
+                        if (tillEl.sourceAsLineNumber != null) {
+                            skipTo = x + 1
+                            finalElements[finalElements.size - 1] = needsUpdateEl.copy(source = tillEl.source)
+                            break
+                        }
+                    }
+                } else {
+                    finalElements.add(el)
+                }
+            }
+            return finalElements.reversed()
+        } else {
+            return elements
+        }
+    }
+
     companion object {
+        private const val skywalkingInterceptor =
+            "org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstMethodsInter.intercept"
         private val frameRegex = Regex(
             "(?:\\s*at\\s+)((?:[\\w\\s](?:\\\$+|\\.|\\/)?)+)" +
                     "\\.([\\w|_|\\\$|\\s|<|>]+)\\s*\\(([^\\(\\)]+(?:\\([^\\)]*\\))?)\\)"

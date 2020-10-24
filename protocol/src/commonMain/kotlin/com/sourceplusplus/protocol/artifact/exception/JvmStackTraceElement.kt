@@ -27,11 +27,16 @@ data class JvmStackTraceElement(
 
     override fun toString(): String = toString(false)
 
-    fun toString(shortenName: Boolean): String {
-        return if (shortenName) {
+    fun toString(shorten: Boolean): String {
+        return if (shorten) {
             val shortName = getShortQualifiedClassName(method.substring(0, method.lastIndexOf("."))) +
                     method.substring(method.lastIndexOf("."))
-            "at $shortName($source)"
+            val lineNumber = sourceAsLineNumber
+            if (lineNumber != null) {
+                "at $shortName() line: $lineNumber"
+            } else {
+                "at $shortName($source)"
+            }
         } else {
             "at $method($source)"
         }

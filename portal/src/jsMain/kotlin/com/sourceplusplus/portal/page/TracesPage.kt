@@ -374,10 +374,10 @@ class TracesPage(
                     }
                 })
                 logData = logData.appendChild(document.create.div("ui attached segment") {
-                    style = "white-space: break-word"
+                    style = "word-break: break-word"
                 })
 
-                for ((i, el) in stackTrace.elements.withIndex()) {
+                for ((i, el) in stackTrace.getElements(true).withIndex()) {
                     logData.appendChild(document.create.span {
                         if (i > 0) br
                         unsafe { +"&emsp;" }
