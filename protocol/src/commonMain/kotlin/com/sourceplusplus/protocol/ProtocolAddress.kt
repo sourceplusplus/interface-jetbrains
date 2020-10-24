@@ -39,6 +39,7 @@ object ProtocolAddress {
         const val RefreshTraces = "RefreshTraces"
         const val ArtifactTraceUpdated = "ArtifactTraceUpdated"
         const val QueryTraceStack = "QueryTraceStack"
+        const val ClickedStackTraceElement = "ClickedStackTraceElement"
 
         //Portal - Configuration
         const val ConfigurationTabOpened = "ConfigurationTabOpened"
