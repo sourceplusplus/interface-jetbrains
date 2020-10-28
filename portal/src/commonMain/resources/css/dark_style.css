@@ -299,3 +299,8 @@
 .ui.pointing.dropdown > .menu:not(.hidden)::after {
     background: none;
 }
+
+.overview_row_padding {
+    padding-top: 0.678em !important;
+    padding-bottom: 0.678em !important;
+}

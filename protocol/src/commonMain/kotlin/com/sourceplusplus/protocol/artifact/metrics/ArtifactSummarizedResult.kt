@@ -1,6 +1,7 @@
 package com.sourceplusplus.protocol.artifact.metrics
 
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,5 +13,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ArtifactSummarizedResult(
     val artifactQualifiedName: ArtifactQualifiedName,
-    val artifactSummarizedMetrics: List<ArtifactSummarizedMetrics>
+    val artifactSummarizedMetrics: List<ArtifactSummarizedMetrics>,
+    val endpointType: EndpointType
 )

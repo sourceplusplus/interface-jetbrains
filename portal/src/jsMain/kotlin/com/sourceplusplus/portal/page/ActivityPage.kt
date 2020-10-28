@@ -10,6 +10,7 @@ import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayCard
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateChart
@@ -257,7 +258,7 @@ class ActivityPage(
         currentTimeFrame = interval
         localStorage.setItem("spp.metricTimeFrame", interval.name)
         eb.send(
-            "SetMetricTimeFrame",
+            SetMetricTimeFrame,
             json(
                 "portalUuid" to portalUuid,
                 "metricTimeFrame" to interval.name
