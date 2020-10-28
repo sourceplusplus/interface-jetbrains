@@ -186,6 +186,7 @@ fun displayEndpoints(vertx: Vertx) {
    "step":"MINUTE",
    "endpointMetrics":[
       {
+         "endpointType": "HTTP",
          "artifactQualifiedName":{
             "identifier":"spp.example.webapp.controller.WebappController.getUser(long)",
             "commitId":"todo",
@@ -209,6 +210,7 @@ fun displayEndpoints(vertx: Vertx) {
          ]
       },
       {
+         "endpointType": "HTTP",
          "artifactQualifiedName":{
             "identifier":"spp.example.webapp.controller.WebappController.createUser(java.lang.String,java.lang.String)",
             "commitId":"todo",
@@ -232,6 +234,7 @@ fun displayEndpoints(vertx: Vertx) {
          ]
       },
       {
+         "endpointType": "HTTP",
          "artifactQualifiedName":{
             "identifier":"spp.example.webapp.controller.WebappController.throwsException()",
             "commitId":"todo",
@@ -255,6 +258,7 @@ fun displayEndpoints(vertx: Vertx) {
          ]
       },
       {
+         "endpointType": "HTTP",
          "artifactQualifiedName":{
             "identifier":"spp.example.webapp.controller.WebappController.userList()",
             "commitId":"todo",

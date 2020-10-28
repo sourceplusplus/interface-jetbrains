@@ -30,10 +30,13 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetOverviewTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
+import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
@@ -76,6 +79,12 @@ class PortalEventListener : CoroutineVerticle() {
             val portalUuid = it.body().getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
             portal.currentTab = PageType.OVERVIEW
+            vertx.eventBus().send(RefreshOverview, it.body())
+        }
+        vertx.eventBus().consumer<JsonObject>(SetOverviewTimeFrame) {
+            val portalUuid = it.body().getString("portalUuid")
+            val portal = SourcePortal.getPortal(portalUuid)!!
+            portal.overviewView.timeFrame = QueryTimeFrame.valueOf(it.body().getString("queryTimeFrame"))
             vertx.eventBus().send(RefreshOverview, it.body())
         }
         vertx.eventBus().consumer<JsonObject>(RefreshOverview) {
@@ -153,7 +162,7 @@ class PortalEventListener : CoroutineVerticle() {
 
         val fetchMetricTypes = listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
         val requestDuration = ZonedDuration(
-            ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
+            ZonedDateTime.now().minusMinutes(portal.overviewView.timeFrame.minutes.toLong()),
             ZonedDateTime.now(),
             SkywalkingClient.DurationStep.MINUTE
         )
@@ -190,7 +199,8 @@ class PortalEventListener : CoroutineVerticle() {
                         ArtifactType.ENDPOINT,
                         operationName = endpointName
                     ),
-                    summarizedMetrics
+                    summarizedMetrics,
+                    EndpointType.HTTP
                 )
             )
         }
@@ -200,7 +210,7 @@ class PortalEventListener : CoroutineVerticle() {
             JsonObject(
                 Json.encode(
                     EndpointResult(
-                        portal.appUuid, portal.activityView.timeFrame,
+                        portal.appUuid, portal.overviewView.timeFrame,
                         start = Instant.fromEpochMilliseconds(requestDuration.start.toInstant().toEpochMilli()),
                         stop = Instant.fromEpochMilliseconds(requestDuration.stop.toInstant().toEpochMilli()),
                         step = requestDuration.step.name,

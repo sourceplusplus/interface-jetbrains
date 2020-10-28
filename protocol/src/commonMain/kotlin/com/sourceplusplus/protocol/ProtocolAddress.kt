@@ -22,6 +22,7 @@ object ProtocolAddress {
         //Portal - Overview
         const val OverviewTabOpened = "OverviewTabOpened"
         const val RefreshOverview = "RefreshOverview"
+        const val SetOverviewTimeFrame = "SetOverviewTimeFrame"
 
         //Portal - Activity
         const val ActivityTabOpened = "ActivityTabOpened"

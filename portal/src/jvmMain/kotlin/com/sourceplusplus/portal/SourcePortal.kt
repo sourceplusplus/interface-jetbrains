@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import com.sourceplusplus.portal.display.views.ActivityView
 import com.sourceplusplus.portal.display.views.ConfigurationView
+import com.sourceplusplus.portal.display.views.OverviewView
 import com.sourceplusplus.portal.display.views.TracesView
 import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
@@ -24,6 +25,48 @@ class SourcePortal(
     val appUuid: String,
     val configuration: PortalConfiguration
 ) : Closeable {
+
+    val overviewView: OverviewView = OverviewView()
+    val activityView: ActivityView = ActivityView(this)
+    val tracesView: TracesView = TracesView()
+    val configurationView: ConfigurationView = ConfigurationView()
+    lateinit var viewingPortalArtifact: String
+    var currentTab = PageType.ACTIVITY
+    var advice: MutableList<ArtifactAdvice> = mutableListOf()
+    //todo: portal should be able to fetch advice for an artifact instead of storing it
+
+    fun cloneViews(portal: SourcePortal) {
+        this.overviewView.cloneView(portal.overviewView)
+        this.activityView.cloneView(portal.activityView)
+        this.tracesView.cloneView(portal.tracesView)
+        this.configurationView.cloneView(portal.configurationView)
+    }
+
+    override fun close() {
+        log.info("Closed portal: $portalUuid")
+        portalMap.invalidate(portalUuid)
+        //todo: de-register portal consumers
+        log.info("Active portals: " + portalMap.size())
+    }
+
+    fun createExternalPortal(): SourcePortal {
+        val portalClone = getPortal(
+            register(appUuid, viewingPortalArtifact, configuration.copy(external = true))
+        )!!
+        portalClone.cloneViews(this)
+        return portalClone
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is SourcePortal) return false
+        if (portalUuid != other.portalUuid) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return portalUuid.hashCode()
+    }
 
     companion object {
         private val log = LoggerFactory.getLogger(SourcePortal::class.java)
@@ -114,45 +157,5 @@ class SourcePortal(
         fun getPortal(portalUuid: String): SourcePortal? {
             return portalMap.getIfPresent(portalUuid)
         }
-    }
-
-    val activityView: ActivityView = ActivityView(this)
-    val tracesView: TracesView = TracesView()
-    val configurationView: ConfigurationView = ConfigurationView()
-    lateinit var viewingPortalArtifact: String
-    var currentTab = PageType.ACTIVITY
-    var advice: MutableList<ArtifactAdvice> = mutableListOf()
-    //todo: portal should be able to fetch advice for an artifact instead of storing it
-
-    fun cloneViews(portal: SourcePortal) {
-        this.activityView.cloneView(portal.activityView)
-        this.tracesView.cloneView(portal.tracesView)
-        this.configurationView.cloneView(portal.configurationView)
-    }
-
-    override fun close() {
-        log.info("Closed portal: $portalUuid")
-        portalMap.invalidate(portalUuid)
-        //todo: de-register portal consumers
-        log.info("Active portals: " + portalMap.size())
-    }
-
-    fun createExternalPortal(): SourcePortal {
-        val portalClone = getPortal(
-            register(appUuid, viewingPortalArtifact, configuration.copy(external = true))
-        )!!
-        portalClone.cloneViews(this)
-        return portalClone
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is SourcePortal) return false
-        if (portalUuid != other.portalUuid) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return portalUuid.hashCode()
     }
 }
