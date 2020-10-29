@@ -13,6 +13,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
+import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
@@ -95,9 +96,20 @@ class OverviewPage(
                 tr {
                     td("overview_row_padding") {
                         if (it.endpointType == EndpointType.HTTP) {
+                            var slaPercent = it.artifactSummarizedMetrics.find {
+                                it.metricType == MetricType.ServiceLevelAgreement_Average
+                            }!!.value.replace("%", "").toDoubleOrNull()
+                            if (slaPercent != null) slaPercent /= 100
+                            val percent = slaPercent ?: 1.0
+                            val color2 = Color(24, 45, 52)
+                            val color1 = Color(225, 72, 59)
+                            val r: Double = color1.red + percent * (color2.red - color1.red)
+                            val g: Double = color1.green + percent * (color2.green - color1.green)
+                            val b: Double = color1.blue + percent * (color2.blue - color1.blue)
+
                             span {
-                                i("far fa-globe-americas spp_blue_color") {
-                                    style = "font-size:1.5em;margin-right:5px"
+                                i("far fa-globe-americas") {
+                                    style = "font-size:1.5em; margin-right:5px; color:rgb($r, $g, $b)"
                                 }
                             }
                             span {
@@ -171,4 +183,10 @@ class OverviewPage(
 
         jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
     }
+
+    private data class Color(
+        val red: Int,
+        val blue: Int,
+        val green: Int
+    )
 }

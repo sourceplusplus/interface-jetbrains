@@ -4,6 +4,7 @@ import com.google.common.io.ByteStreams
 import com.sourceplusplus.portal.PortalViewTracker
 import com.sourceplusplus.portal.display.ActivityDisplay
 import com.sourceplusplus.portal.display.ConfigurationDisplay
+import com.sourceplusplus.portal.display.OverviewDisplay
 import com.sourceplusplus.portal.display.TracesDisplay
 import io.netty.buffer.Unpooled
 import io.vertx.core.buffer.Buffer
@@ -22,6 +23,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 class PortalServer : CoroutineVerticle() {
 
     override suspend fun start() {
+        vertx.deployVerticleAwait(OverviewDisplay())
         vertx.deployVerticleAwait(ActivityDisplay())
         vertx.deployVerticleAwait(TracesDisplay())
         vertx.deployVerticleAwait(ConfigurationDisplay(false)) //todo: dynamic
