@@ -1,4 +1,4 @@
-package com.sourceplusplus.monitor.skywalking.track
+package com.sourceplusplus.monitor.skywalking.bridge
 
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.LocalMessageCodec
@@ -15,18 +15,18 @@ import monitor.skywalking.protocol.metadata.SearchEndpointQuery
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class EndpointTracker(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
+class EndpointBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
 
     override suspend fun start() {
         val isRegisteredMap = vertx.sharedData().getLocalMap<String, Boolean>("registered_codecs")
-        if (!isRegisteredMap.getOrDefault("EndpointTracker", false)) {
+        if (!isRegisteredMap.getOrDefault("EndpointBridge", false)) {
             vertx.eventBus().registerDefaultCodec(EndpointQuery::class.java, LocalMessageCodec())
-            isRegisteredMap["EndpointTracker"] = true
+            isRegisteredMap["EndpointBridge"] = true
         }
 
         vertx.eventBus().localConsumer<String>(searchExactEndpointAddress) {
             launch(vertx.dispatcher()) {
-                val service = ServiceTracker.getCurrentService(vertx)
+                val service = ServiceBridge.getCurrentService(vertx)
                 if (service != null) {
                     val endpointName = it.body()
                     val endpoints = skywalkingClient.searchEndpoint(endpointName, service.id, 10)
@@ -48,7 +48,7 @@ class EndpointTracker(private val skywalkingClient: SkywalkingClient) : Coroutin
 
         vertx.eventBus().localConsumer<EndpointQuery>(getEndpointsAddress) {
             launch(vertx.dispatcher()) {
-                val service = ServiceTracker.getCurrentService(vertx)
+                val service = ServiceBridge.getCurrentService(vertx)
                 if (service != null) {
                     val endpointQuery = it.body()
                     val endpoints = skywalkingClient.searchEndpoint(

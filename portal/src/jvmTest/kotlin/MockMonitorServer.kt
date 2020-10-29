@@ -42,6 +42,7 @@ import java.util.concurrent.ThreadLocalRandom.current
 
 var currentMetricType = MetricType.ResponseTime_Average
 
+//todo: can re-write this by essentially writing a PortalEventListener equivalent
 fun main() {
     DatabindCodec.mapper().registerModule(GuavaModule())
     DatabindCodec.mapper().registerModule(Jdk8Module())

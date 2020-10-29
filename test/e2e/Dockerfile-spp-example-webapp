@@ -1,8 +1,8 @@
 FROM openjdk:11-jre
 ADD ./spp-example-webapp-boot-1.0-SNAPSHOT.zip /spp-example-webapp-boot-1.0-SNAPSHOT.zip
 
-COPY ./apache-skywalking-apm-es7-8.1.0.tar.gz /apache-skywalking-apm-es7-8.1.0.tar.gz
-RUN tar -xzf ./apache-skywalking-apm-es7-8.1.0.tar.gz
+COPY ./apache-skywalking-apm-es7-8.2.0.tar.gz /apache-skywalking-apm-es7-8.2.0.tar.gz
+RUN tar -xzf ./apache-skywalking-apm-es7-8.2.0.tar.gz
 
 #ADD ./agent.config /apache-skywalking-apm-bin/agent/config/agent.config
 #ADD ./customize_enhance.xml /apache-skywalking-apm-bin/agent/config/customize_enhance.xml

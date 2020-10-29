@@ -1,5 +1,6 @@
 package com.sourceplusplus.protocol.artifact
 
+import com.sourceplusplus.protocol.Serializers.ArtifactTypeSerializer
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,6 +13,7 @@ import kotlinx.serialization.Serializable
 data class ArtifactQualifiedName(
     val identifier: String,
     val commitId: String,
+    @Serializable(with = ArtifactTypeSerializer::class)
     val type: ArtifactType,
     val lineNumber: Int? = null,
     val operationName: String? = null //todo: only method artifacts need

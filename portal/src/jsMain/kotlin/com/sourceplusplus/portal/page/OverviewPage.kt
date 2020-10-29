@@ -6,6 +6,7 @@ import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.model.EndpointTableType
 import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.portal.template.*
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetOverviewTimeFrame
@@ -21,8 +22,10 @@ import kotlinx.browser.window
 import kotlinx.dom.clear
 import kotlinx.html.*
 import kotlinx.html.dom.append
+import kotlinx.html.js.onClickFunction
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
+import kotlinx.serialization.json.encodeToDynamic
 import org.w3c.dom.Element
 import kotlin.js.json
 
@@ -66,7 +69,7 @@ class OverviewPage(
                 }
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION)
             }
-            pusherContent {
+            portalContent {
                 navBar {
                     timeDropdown(*QueryTimeFrame.values()) { updateTime(it) }
                     //calendar()
@@ -94,6 +97,15 @@ class OverviewPage(
         root.append {
             endpointResult.endpointMetrics.forEach {
                 tr {
+                    onClickFunction = { _ ->
+                        eb.send(
+                            ClickedEndpointArtifact, json(
+                                "portalUuid" to portalUuid,
+                                "artifactQualifiedName" to Json.encodeToDynamic(it.artifactQualifiedName)
+                            )
+                        )
+                    }
+
                     td("overview_row_padding") {
                         if (it.endpointType == EndpointType.HTTP) {
                             var slaPercent = it.artifactSummarizedMetrics.find {

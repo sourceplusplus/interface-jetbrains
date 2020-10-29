@@ -5,7 +5,7 @@ import com.sourceplusplus.portal.model.TraceSpanInfoType
 import kotlinx.html.*
 import org.w3c.dom.HTMLElement
 
-fun TagConsumer<HTMLElement>.pusherContent(block: FlowContent.() -> Unit) {
+fun TagConsumer<HTMLElement>.portalContent(block: FlowContent.() -> Unit) {
     div("pusher background_color") {
         block()
     }

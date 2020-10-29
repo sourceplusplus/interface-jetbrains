@@ -3,7 +3,7 @@ package com.sourceplusplus.mentor.impl.task.monitor
 import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
-import com.sourceplusplus.monitor.skywalking.track.EndpointTracker
+import com.sourceplusplus.monitor.skywalking.bridge.EndpointBridge
 
 /**
  * todo: description.
@@ -24,7 +24,7 @@ class GetEndpoints(
     override suspend fun executeTask(job: MentorJob) {
 
         //todo: need way to iterate endpoints
-        val endpoints = EndpointTracker.getEndpoints(100, job.vertx)
+        val endpoints = EndpointBridge.getEndpoints(100, job.vertx)
         endpoints.forEach {
             backoffConfig?.config?.put(it.id, -1)
         }

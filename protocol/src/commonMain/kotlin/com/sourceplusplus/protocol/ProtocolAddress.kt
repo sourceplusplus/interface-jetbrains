@@ -7,8 +7,10 @@ package com.sourceplusplus.protocol
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object ProtocolAddress {
-    object Global {
+    object Global { //todo: could probably rename to Plugin to indicate it's the module consuming message
         //Portal
+        const val FindAndOpenPortal = "FindAndOpenPortal"
+        const val OpenPortal = "OpenPortal"
         const val ClosePortal = "ClosePortal"
         const val ClickedViewAsExternalPortal = "ClickedViewAsExternalPortal"
         const val KeepAlivePortal = "KeepAlivePortal" //todo: remove
@@ -18,11 +20,13 @@ object ProtocolAddress {
         //const val OpenedPortal = "OpenedPortal"
         //const val ClosedPortal = "ClosedPortal"
         const val ChangedPortalArtifact = "ChangedPortalArtifact"
+        const val NavigateToArtifact = "NavigateToArtifact"
 
         //Portal - Overview
         const val OverviewTabOpened = "OverviewTabOpened"
         const val RefreshOverview = "RefreshOverview"
         const val SetOverviewTimeFrame = "SetOverviewTimeFrame"
+        const val ClickedEndpointArtifact = "ClickedEndpointArtifact"
 
         //Portal - Activity
         const val ActivityTabOpened = "ActivityTabOpened"

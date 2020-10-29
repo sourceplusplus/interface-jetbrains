@@ -10,8 +10,6 @@ import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
-import com.sourceplusplus.portal.model.TraceStackHeaderType.TIME_OCCURRED
-import com.sourceplusplus.portal.model.TraceStackHeaderType.TRACE_ID
 import com.sourceplusplus.portal.model.TraceTableType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
@@ -94,7 +92,7 @@ class TracesPage(
                 }
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true)
             }
-            pusherContent {
+            portalContent {
                 navBar {
                     tracesHeader(
                         //TRACE_ID, TIME_OCCURRED,

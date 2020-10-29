@@ -1,4 +1,4 @@
-package com.sourceplusplus.monitor.skywalking.track
+package com.sourceplusplus.monitor.skywalking.bridge
 
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.DurationStep
@@ -17,7 +17,7 @@ import java.time.ZonedDateTime
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ServiceTracker(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
+class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
 
     var currentService: GetAllServicesQuery.Result? = null
     var activeServices: List<GetAllServicesQuery.Result> = emptyList()

@@ -1,9 +1,13 @@
 package com.sourceplusplus.sourcemarker.listeners
 
+import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.sourcemarker.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 import org.slf4j.LoggerFactory
@@ -23,12 +27,30 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
 
     override fun handleEvent(event: SourceMarkEvent) {
         if (event.eventCode == SourceMarkEventCode.MARK_ADDED) {
-            if (event.sourceMark is MethodSourceMark) {
-                val methodMark = event.sourceMark as MethodSourceMark
-                methodMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
+            val sourceMark = event.sourceMark
 
-                //todo: gather and display markings
-                //todo: gather and display advice
+            //register portal for source mark
+            val sourcePortal = SourcePortal.getPortal(
+                SourcePortal.register("null", sourceMark.artifactQualifiedName, false) //todo: appUuid
+            )
+            sourceMark.putUserData(SourceMarkKeys.SOURCE_PORTAL, sourcePortal!!)
+            if (sourceMark is ClassSourceMark) {
+                //class-based portals only have overview page
+                sourcePortal.currentTab = PageType.OVERVIEW
+                sourcePortal.configuration.visibleActivity = false
+                sourcePortal.configuration.visibleTraces = false
+            } else {
+                //method-based portals don't have overview page
+                sourcePortal.configuration.visibleOverview = false
+            }
+            sourceMark.addEventListener {
+                if (it.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+                    it.sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!.close()
+                }
+            }
+
+            if (sourceMark is MethodSourceMark) {
+                sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
             }
         }
     }
