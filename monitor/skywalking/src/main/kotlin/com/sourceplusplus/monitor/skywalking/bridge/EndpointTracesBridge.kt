@@ -1,4 +1,4 @@
-package com.sourceplusplus.monitor.skywalking.track
+package com.sourceplusplus.monitor.skywalking.bridge
 
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
@@ -19,7 +19,7 @@ import kotlinx.datetime.Instant
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class EndpointTracesTracker(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
+class EndpointTracesBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
 
     override suspend fun start() {
         vertx.eventBus().localConsumer<GetEndpointTraces>(getTracesAddress) {

@@ -53,9 +53,9 @@ tasks {
     register("downloadSkywalking") {
         doLast {
             println("Downloading Apache SkyWalking")
-            val f = File(projectDir, "test/e2e/apache-skywalking-apm-es7-8.1.0.tar.gz")
+            val f = File(projectDir, "test/e2e/apache-skywalking-apm-es7-8.2.0.tar.gz")
             if (!f.exists()) {
-                java.net.URL("https://downloads.apache.org/skywalking/8.1.0/apache-skywalking-apm-es7-8.1.0.tar.gz")
+                java.net.URL("https://downloads.apache.org/skywalking/8.2.0/apache-skywalking-apm-es7-8.2.0.tar.gz")
                     .openStream().use { input ->
                         java.io.FileOutputStream(f).use { output ->
                             input.copyTo(output)

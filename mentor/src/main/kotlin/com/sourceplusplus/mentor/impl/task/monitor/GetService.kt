@@ -4,10 +4,10 @@ import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.mentor.base.MentorTaskContext
-import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServices
-import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getActiveServicesAwait
-import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getCurrentService
-import com.sourceplusplus.monitor.skywalking.track.ServiceTracker.Companion.getCurrentServiceAwait
+import com.sourceplusplus.monitor.skywalking.bridge.ServiceBridge.Companion.getActiveServices
+import com.sourceplusplus.monitor.skywalking.bridge.ServiceBridge.Companion.getActiveServicesAwait
+import com.sourceplusplus.monitor.skywalking.bridge.ServiceBridge.Companion.getCurrentService
+import com.sourceplusplus.monitor.skywalking.bridge.ServiceBridge.Companion.getCurrentServiceAwait
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import java.util.*
 

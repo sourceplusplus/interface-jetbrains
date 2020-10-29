@@ -1,4 +1,4 @@
-package com.sourceplusplus.monitor.skywalking.track
+package com.sourceplusplus.monitor.skywalking.bridge
 
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.DurationStep
@@ -17,14 +17,14 @@ import java.time.ZonedDateTime
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ServiceInstanceTracker(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
+class ServiceInstanceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
 
     var currentServiceInstance: GetServiceInstancesQuery.Result? = null
     var activeServicesInstances: List<GetServiceInstancesQuery.Result> = emptyList()
 
     override suspend fun start() {
         //update active/current service instances on service update
-        ServiceTracker.currentServiceConsumer(vertx).handler {
+        ServiceBridge.currentServiceConsumer(vertx).handler {
             launch(vertx.dispatcher()) {
                 activeServicesInstances = skywalkingClient.run {
                     getServiceInstances(

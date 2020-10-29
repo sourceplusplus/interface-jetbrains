@@ -2,7 +2,7 @@ package com.sourceplusplus.monitor.skywalking
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.toDeferred
-import com.sourceplusplus.monitor.skywalking.track.*
+import com.sourceplusplus.monitor.skywalking.bridge.*
 import io.vertx.kotlin.core.deployVerticleAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
@@ -40,11 +40,11 @@ class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
             val timezone = Integer.parseInt(response.data!!.result!!.timezone)
             val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
-            vertx.deployVerticleAwait(ServiceTracker(skywalkingClient))
-            vertx.deployVerticleAwait(ServiceInstanceTracker(skywalkingClient))
-            vertx.deployVerticleAwait(EndpointTracker(skywalkingClient))
-            vertx.deployVerticleAwait(EndpointMetricsTracker(skywalkingClient))
-            vertx.deployVerticleAwait(EndpointTracesTracker(skywalkingClient))
+            vertx.deployVerticleAwait(ServiceBridge(skywalkingClient))
+            vertx.deployVerticleAwait(ServiceInstanceBridge(skywalkingClient))
+            vertx.deployVerticleAwait(EndpointBridge(skywalkingClient))
+            vertx.deployVerticleAwait(EndpointMetricsBridge(skywalkingClient))
+            vertx.deployVerticleAwait(EndpointTracesBridge(skywalkingClient))
         }
     }
 }

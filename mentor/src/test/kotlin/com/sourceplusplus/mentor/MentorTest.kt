@@ -2,7 +2,7 @@ package com.sourceplusplus.mentor
 
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
-import com.sourceplusplus.monitor.skywalking.track.ServiceTracker
+import com.sourceplusplus.monitor.skywalking.bridge.ServiceBridge
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import io.vertx.core.Vertx
@@ -29,7 +29,7 @@ open class MentorTest {
 
             runBlocking(vertx.dispatcher()) {
                 vertx.deployVerticleAwait(SkywalkingMonitor("http://172.17.0.1:12800/graphql"))
-                ServiceTracker.getCurrentServiceAwait(vertx)
+                ServiceBridge.getCurrentServiceAwait(vertx)
             }
             setup = true
         }

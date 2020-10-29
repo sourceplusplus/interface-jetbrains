@@ -3,7 +3,7 @@ package com.sourceplusplus.mentor.impl.task.monitor
 import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
-import com.sourceplusplus.monitor.skywalking.track.ServiceInstanceTracker.Companion.getServiceInstances
+import com.sourceplusplus.monitor.skywalking.bridge.ServiceInstanceBridge.Companion.getServiceInstances
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import java.util.*

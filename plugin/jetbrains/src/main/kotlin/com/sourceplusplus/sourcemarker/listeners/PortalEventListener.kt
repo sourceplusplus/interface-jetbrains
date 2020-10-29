@@ -8,14 +8,15 @@ import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.average
+import com.sourceplusplus.monitor.skywalking.bridge.EndpointMetricsBridge
+import com.sourceplusplus.monitor.skywalking.bridge.EndpointTracesBridge
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointMetrics
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.monitor.skywalking.toProtocol
-import com.sourceplusplus.monitor.skywalking.track.EndpointMetricsTracker
-import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.fromPerSecondToPrettyFrequency
 import com.sourceplusplus.portal.extensions.toPrettyDuration
@@ -23,7 +24,10 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.FindAndOpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
+import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
+import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
@@ -37,6 +41,7 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.sourcemarker.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
 import io.vertx.core.json.Json
@@ -58,6 +63,8 @@ import javax.swing.UIManager
  */
 class PortalEventListener : CoroutineVerticle() {
 
+    private var lastDisplayedInternalPortal: SourcePortal? = null
+
     override suspend fun start() {
         //listen for theme changes
         UIManager.addPropertyChangeListener {
@@ -70,6 +77,16 @@ class PortalEventListener : CoroutineVerticle() {
             val portal = SourcePortal.getPortal(portalUuid)!!
             it.reply(JsonObject.mapFrom(portal.configuration))
         }
+        vertx.eventBus().consumer<ArtifactQualifiedName>(FindAndOpenPortal) {
+            val artifactQualifiedName = it.body()
+            runReadAction {
+                val sourceMarks = SourceMarker.getSourceMarks(artifactQualifiedName.identifier)
+                if (sourceMarks.isNotEmpty()) {
+                    openPortal(sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
+                }
+            }
+        }
+        vertx.eventBus().consumer<SourcePortal>(OpenPortal) { openPortal(it.body()) }
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
         vertx.eventBus().consumer<JsonObject>(RefreshOverview) {
             val portalUuid = it.body().getString("portalUuid")
@@ -94,7 +111,7 @@ class PortalEventListener : CoroutineVerticle() {
         vertx.eventBus().consumer<String>(QueryTraceStack) { handler ->
             val traceId = handler.body()
             GlobalScope.launch(vertx.dispatcher()) {
-                handler.reply(EndpointTracesTracker.getTraceStack(traceId, vertx))
+                handler.reply(EndpointTracesBridge.getTraceStack(traceId, vertx))
             }
         }
         vertx.eventBus().consumer<JsonObject>(ClickedStackTraceElement) { handler ->
@@ -110,6 +127,11 @@ class PortalEventListener : CoroutineVerticle() {
             val project = ProjectManager.getInstance().openProjects[0]
             ArtifactNavigator.navigateTo(project, element)
         }
+        vertx.eventBus().consumer<ArtifactQualifiedName>(NavigateToArtifact) {
+            val artifactQualifiedName = it.body()
+            val project = ProjectManager.getInstance().openProjects[0]
+            ArtifactNavigator.navigateTo(project, artifactQualifiedName)
+        }
     }
 
     private suspend fun refreshTraces(portal: SourcePortal) {
@@ -119,7 +141,7 @@ class PortalEventListener : CoroutineVerticle() {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
                 GlobalScope.launch(vertx.dispatcher()) {
-                    val traceResult = EndpointTracesTracker.getTraces(
+                    val traceResult = EndpointTracesBridge.getTraces(
                         GetEndpointTraces(
                             appUuid = portal.appUuid,
                             artifactQualifiedName = portal.viewingPortalArtifact,
@@ -157,7 +179,7 @@ class PortalEventListener : CoroutineVerticle() {
                 it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it)!!,
                 requestDuration
             )
-            val metrics = EndpointMetricsTracker.getMetrics(metricsRequest, vertx)
+            val metrics = EndpointMetricsBridge.getMetrics(metricsRequest, vertx)
             val endpointName = it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointName(it)!!
 
             val summarizedMetrics = mutableListOf<ArtifactSummarizedMetrics>()
@@ -220,7 +242,7 @@ class PortalEventListener : CoroutineVerticle() {
                         SkywalkingClient.DurationStep.MINUTE
                     )
                 )
-                val metrics = EndpointMetricsTracker.getMetrics(metricsRequest, vertx)
+                val metrics = EndpointMetricsBridge.getMetrics(metricsRequest, vertx)
                 val metricResult = toProtocol(
                     portal.appUuid,
                     portal.viewingPortalArtifact,
@@ -240,7 +262,7 @@ class PortalEventListener : CoroutineVerticle() {
 //                        SkywalkingClient.DurationStep.MINUTE
 //                    )
 //                )
-//                val multiMetrics = EndpointMetricsTracker.getMultipleMetrics(
+//                val multiMetrics = EndpointMetricsBridge.getMultipleMetrics(
 //                    multipleMetricsRequest, vertx
 //                )
 //                multiMetrics.forEachIndexed { i, it ->
@@ -264,6 +286,32 @@ class PortalEventListener : CoroutineVerticle() {
                         artifactMetrics = finalArtifactMetrics
                     )
                 )
+            }
+        }
+    }
+
+    private fun openPortal(portal: SourcePortal) {
+        val sourceMark = SourceMarker.getSourceMark(
+            portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+        )
+        if (sourceMark != null) {
+            ApplicationManager.getApplication().invokeLater(sourceMark::displayPopup)
+
+            val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
+            if (portal != lastDisplayedInternalPortal) {
+                portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
+                val host = "http://localhost:8080"
+                val currentUrl = "$host/${portal.currentTab.name.toLowerCase()}.html" +
+                        "?portalUuid=${portal.portalUuid}"
+
+                if (lastDisplayedInternalPortal == null) {
+                    jcefComponent.configuration.initialUrl = currentUrl
+                } else {
+                    jcefComponent.getBrowser().cefBrowser.executeJavaScript(
+                        "window.location.href = '$currentUrl';", currentUrl, 0
+                    )
+                }
+                lastDisplayedInternalPortal = portal
             }
         }
     }

@@ -6,7 +6,7 @@ import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
-import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
+import com.sourceplusplus.monitor.skywalking.bridge.EndpointTracesBridge
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
@@ -45,7 +45,7 @@ class GetTraces(
         if (byEndpointIds != null) {
             var finalTraceResult: TraceResult? = null
             job.context.get(byEndpointIds).forEach { endpointId ->
-                val traces = EndpointTracesTracker.getTraces(
+                val traces = EndpointTracesBridge.getTraces(
                     GetEndpointTraces(
                         endpointId = endpointId,
                         appUuid = "null", //todo: likely not necessary
@@ -69,7 +69,7 @@ class GetTraces(
             job.context.put(TRACE_RESULT, finalTraceResult!!)
             job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${finalTraceResult!!.traces.size}")
         } else {
-            val traces = EndpointTracesTracker.getTraces(
+            val traces = EndpointTracesBridge.getTraces(
                 GetEndpointTraces(
                     endpointName = endpointName,
                     appUuid = "null", //todo: likely not necessary

@@ -3,7 +3,7 @@ package com.sourceplusplus.mentor.impl.task.monitor
 import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
-import com.sourceplusplus.monitor.skywalking.track.EndpointTracesTracker
+import com.sourceplusplus.monitor.skywalking.bridge.EndpointTracesBridge
 import com.sourceplusplus.protocol.artifact.trace.Trace
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
@@ -38,14 +38,14 @@ class GetTraceStacks(
         if (byTraceResultContext != null)          {
             val traceResult = job.context.get(byTraceResultContext)
             traceResult.traces.distinctBy { it.operationNames }.forEach { trace ->
-                val traceStack = EndpointTracesTracker.getTraceStack(trace.traceIds[0], job.vertx)
+                val traceStack = EndpointTracesBridge.getTraceStack(trace.traceIds[0], job.vertx)
                 traceStacks.add(traceStack)
             }
         } else {
             //todo: can merge this clause with above clause
             val traces = job.context.get(byTracesContext!!)
             traces.distinctBy { it.operationNames }.forEach { trace ->
-                val traceStack = EndpointTracesTracker.getTraceStack(trace.traceIds[0], job.vertx)
+                val traceStack = EndpointTracesBridge.getTraceStack(trace.traceIds[0], job.vertx)
                 traceStacks.add(traceStack)
             }
         }

@@ -11,6 +11,7 @@ import com.intellij.psi.search.FilenameIndex.getFilesByName
 import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.util.PsiNavigateUtil
 import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
@@ -34,6 +35,12 @@ object ArtifactNavigator {
                 val offset = document.getLineStartOffset(element.sourceAsLineNumber!! - 1)
                 PsiNavigationSupport.getInstance().createNavigatable(project, file.virtualFile, offset).navigate(true)
             }
+        }
+    }
+
+    fun navigateTo(project: Project, artifactQualifiedName: ArtifactQualifiedName) {
+        ApplicationManager.getApplication().invokeLater {
+            navigateToMethod(project, artifactQualifiedName.identifier)
         }
     }
 

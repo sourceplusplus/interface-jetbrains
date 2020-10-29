@@ -32,6 +32,7 @@ import com.sourceplusplus.mentor.impl.job.RampDetectionMentor
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
+import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
@@ -65,7 +66,7 @@ import java.awt.Dimension
 import java.util.*
 
 /**
- * todo: description.
+ * Sets up the SourceMarker plugin by configuring and initializing the various modules.
  *
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -84,6 +85,7 @@ object SourceMarkerPlugin {
         vertx.eventBus().registerDefaultCodec(TraceSpanStackQueryResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(EndpointResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(JvmStackTraceElement::class.java, LocalMessageCodec())
+        vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
 
         val module = SimpleModule()
         module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
@@ -267,13 +269,6 @@ object SourceMarkerPlugin {
                         portalWidth = 775
                     }
                     return Dimension(portalWidth, 250)
-                }
-            }
-            defaultConfiguration.browserLoadingListener = object : BrowserLoadingListener() {
-                override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
-                    val initialPortal = SourcePortal.getPortals()[0]
-                    val page = "${initialPortal.currentTab.name.toLowerCase()}.html"
-                    configuration.initialUrl = "http://localhost:8080/$page?portalUuid=${initialPortal.portalUuid}"
                 }
             }
         }

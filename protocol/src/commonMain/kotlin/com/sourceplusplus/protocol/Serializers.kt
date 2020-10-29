@@ -1,5 +1,6 @@
 package com.sourceplusplus.protocol
 
+import com.sourceplusplus.protocol.artifact.ArtifactType
 import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -24,5 +25,16 @@ class Serializers {
 
         override fun deserialize(decoder: Decoder) = Instant.fromEpochMilliseconds(decoder.decodeLong())
         override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeLong(value.toEpochMilliseconds())
+    }
+
+    class ArtifactTypeSerializer : KSerializer<ArtifactType> {
+
+        override val descriptor = PrimitiveSerialDescriptor(
+            "com.sourceplusplus.protocol.ArtifactTypeSerializer",
+            PrimitiveKind.STRING
+        )
+
+        override fun deserialize(decoder: Decoder) = ArtifactType.valueOf(decoder.decodeString())
+        override fun serialize(encoder: Encoder, value: ArtifactType) = encoder.encodeString(value.name)
     }
 }
