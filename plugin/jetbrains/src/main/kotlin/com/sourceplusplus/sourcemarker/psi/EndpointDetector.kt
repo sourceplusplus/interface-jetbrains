@@ -38,7 +38,7 @@ class EndpointDetector {
     suspend fun getOrFindEndpointId(sourceMark: MethodSourceMark): String? {
         val cachedEndpointId = sourceMark.getUserData(ENDPOINT_ID)
         return if (cachedEndpointId != null) {
-            log.debug("Found cached endpoint id: $cachedEndpointId")
+            log.trace("Found cached endpoint id: $cachedEndpointId")
             cachedEndpointId
         } else {
             getOrFindEndpoint(sourceMark)
@@ -49,7 +49,7 @@ class EndpointDetector {
     suspend fun getOrFindEndpointName(sourceMark: MethodSourceMark): String? {
         val cachedEndpointName = sourceMark.getUserData(ENDPOINT_NAME)
         return if (cachedEndpointName != null) {
-            log.debug("Found cached endpoint name: $cachedEndpointName")
+            log.trace("Found cached endpoint name: $cachedEndpointName")
             cachedEndpointName
         } else {
             getOrFindEndpoint(sourceMark)
@@ -60,13 +60,15 @@ class EndpointDetector {
     private suspend fun getOrFindEndpoint(sourceMark: MethodSourceMark) {
         if (sourceMark.getUserData(ENDPOINT_NAME) == null || sourceMark.getUserData(ENDPOINT_ID) == null) {
             if (sourceMark.getUserData(ENDPOINT_NAME) == null) {
-                log.debug("Determining endpoint name")
+                log.trace("Determining endpoint name")
                 val endpointName = determineEndpointName(sourceMark).await().orElse(null)
                 if (endpointName != null) {
                     log.debug("Detected endpoint name: $endpointName")
                     sourceMark.putUserData(ENDPOINT_NAME, endpointName)
 
                     determineEndpointId(endpointName, sourceMark)
+                } else {
+                    log.trace("Could not find endpoint name for: ${sourceMark.artifactQualifiedName}")
                 }
             } else {
                 determineEndpointId(sourceMark.getUserData(ENDPOINT_NAME)!!, sourceMark)
@@ -75,7 +77,7 @@ class EndpointDetector {
     }
 
     private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodSourceMark) {
-        log.debug("Determining endpoint id")
+        log.trace("Determining endpoint id")
         val endpoint = EndpointBridge.searchExactEndpoint(endpointName, SourceMarkerPlugin.vertx)
         if (endpoint != null) {
             sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
