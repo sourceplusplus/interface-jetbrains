@@ -18,8 +18,8 @@ import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
-import com.sourceplusplus.marker.plugin.SourceInlayProvider
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.plugin.SourceInlayProvider
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.config.SourceMarkConfiguration
@@ -153,6 +153,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 Disposer.dispose(visiblePopup!!)
             }
             visiblePopup = null
+            triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.PORTAL_CLOSED))
         }
     }
 
@@ -232,6 +233,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             }
             visiblePopup = popup
             openedMarks.add(this)
+            triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.PORTAL_OPENED))
 
             //dispose popup when mouse hovers off popup
             if (sourceMarkComponent.configuration.hideOnMouseMotion) {

@@ -48,11 +48,10 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
 
     override suspend fun start() {
         vertx.setPeriodic(5000) {
-            SourcePortal.getPortals().forEach {
-                if (it.currentTab == PageType.ACTIVITY) {
-                    //todo: only update if external or internal and currently displaying
-                    vertx.eventBus().send(RefreshActivity, it)
-                }
+            SourcePortal.getPortals().filter {
+                it.currentTab == PageType.ACTIVITY && (it.visible || it.configuration.external)
+            }.forEach {
+                vertx.eventBus().send(RefreshActivity, it)
             }
         }
 

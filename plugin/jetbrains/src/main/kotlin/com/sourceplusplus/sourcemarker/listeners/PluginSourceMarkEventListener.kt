@@ -26,7 +26,15 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
     }
 
     override fun handleEvent(event: SourceMarkEvent) {
-        if (event.eventCode == SourceMarkEventCode.MARK_ADDED) {
+        if (event.eventCode == SourceMarkEventCode.PORTAL_OPENED) {
+            val sourceMark = event.sourceMark
+            val sourcePortal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+            sourcePortal.visible = true
+        } else if (event.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
+            val sourceMark = event.sourceMark
+            val sourcePortal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+            sourcePortal.visible = false
+        } else if (event.eventCode == SourceMarkEventCode.MARK_ADDED) {
             val sourceMark = event.sourceMark
 
             //register portal for source mark

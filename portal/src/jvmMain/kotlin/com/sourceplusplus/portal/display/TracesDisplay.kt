@@ -45,13 +45,13 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
     override suspend fun start() {
         vertx.setPeriodic(5000) {
-            SourcePortal.getPortals().forEach {
-                if (it.currentTab == PageType.TRACES) {
-                    //todo: only update if external or internal and currently displaying
-                    vertx.eventBus().send(RefreshTraces, it)
-                }
+            SourcePortal.getPortals().filter {
+                it.currentTab == PageType.TRACES && (it.visible || it.configuration.external)
+            }.forEach {
+                vertx.eventBus().send(RefreshTraces, it)
             }
         }
+
         vertx.eventBus().consumer(TracesTabOpened, this@TracesDisplay::tracesTabOpened)
         vertx.eventBus().consumer<TraceResult>(ArtifactTraceUpdated) { handleArtifactTraceResult(it.body()) }
         vertx.eventBus().consumer(ClickedDisplayTraceStack, this@TracesDisplay::clickedDisplayTraceStack)
