@@ -26,6 +26,7 @@ class SourcePortal(
     val configuration: PortalConfiguration
 ) : Closeable {
 
+    var visible: Boolean = false
     val overviewView: OverviewView = OverviewView()
     val activityView: ActivityView = ActivityView(this)
     val tracesView: TracesView = TracesView()

@@ -12,7 +12,9 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 enum class SourceMarkEventCode(private val code: Int) : IEventCode {
     MARK_ADDED(1000),
     MARK_REMOVED(1001),
-    NAME_CHANGED(1002);
+    NAME_CHANGED(1002),
+    PORTAL_OPENED(1003),
+    PORTAL_CLOSED(1004);
 
     override fun code(): Int {
         return this.code
