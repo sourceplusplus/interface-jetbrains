@@ -291,9 +291,7 @@ class PortalEventListener : CoroutineVerticle() {
     }
 
     private fun openPortal(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(
-            portal.viewingPortalArtifact, SourceMark.Type.GUTTER
-        )
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null) {
             ApplicationManager.getApplication().invokeLater(sourceMark::displayPopup)
 
@@ -317,9 +315,7 @@ class PortalEventListener : CoroutineVerticle() {
     }
 
     private fun closePortal(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(
-            portal.viewingPortalArtifact, SourceMark.Type.GUTTER
-        )
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null) {
             ApplicationManager.getApplication().invokeLater(sourceMark::closePopup)
         }
