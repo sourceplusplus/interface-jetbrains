@@ -18,6 +18,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression
 class CalculateLinearRegression(
     private val byTracesContext: ContextKey<TraceResult>,
     private val confidence: Double,
+    private val minimumSampleCount: Int = 100,
     val regressionMap: MutableMap<String, SimpleRegression> = mutableMapOf()
 ) : MentorTask() {
 
@@ -41,9 +42,13 @@ class CalculateLinearRegression(
 
         val offendingTraces = mutableListOf<Trace>()
         regressionMap.forEach { entry ->
-            if (entry.value.slope >= 0 && entry.value.rSquare >= confidence && entry.value.n >= 100) {
+            if (entry.value.slope >= 0 && entry.value.rSquare >= confidence && entry.value.n >= minimumSampleCount) {
                 offendingTraces.addAll(traceResult.traces.filter { it.operationNames[0] == entry.key })
             }
+        }
+
+        if (offendingTraces.isNotEmpty()) {
+            job.log("Found ${offendingTraces.size} offending traces")
         }
         job.context.put(TRACES, offendingTraces)
         job.context.put(REGRESSION_MAP, regressionMap)
