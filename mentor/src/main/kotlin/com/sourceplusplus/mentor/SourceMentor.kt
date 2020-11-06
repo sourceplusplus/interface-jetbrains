@@ -64,6 +64,7 @@ class SourceMentor : CoroutineVerticle() {
 
             //find jobs requiring task (execute once then share results)
             val jobsWhichRequireTask = jobList.filter { it.isCurrentTask(currentTask) }
+            if (jobsWhichRequireTask.isEmpty()) continue
 
             //search still valid tasks for current task
             var reusingTask = false
