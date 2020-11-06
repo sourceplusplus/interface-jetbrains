@@ -7,6 +7,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.protocol.advice.AdviceListener
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactType
@@ -64,10 +65,8 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
                 fileMarker, advice.artifact.lineNumber!!
             )!!
             if (!fileMarker.containsSourceMark(gutterMark)) {
-                gutterMark.configuration.icon = GutterMarkIcons.exclamationTriangle
-
-                addAdviceData(gutterMark, advice)
                 gutterMark.apply()
+                addAdviceData(gutterMark, advice)
 
                 //todo: instead should have a method for getting expression/inlay marks inside of a specified method
 //                val containingMethod = gutterMark.getPsiElement().getContainingMethod()
@@ -117,6 +116,12 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
     }
 
     private fun addAdviceData(sourceMark: SourceMark, advice: ArtifactAdvice) {
+        if (sourceMark is GutterMark) {
+            sourceMark.configuration.icon = GutterMarkIcons.getGutterMarkIcon(advice)
+            sourceMark.setVisible(true)
+            sourceMark.sourceFileMarker.refresh()
+        }
+
         pendingAdvice.remove(advice)
         if (sourceMark.getUserData(ARTIFACT_ADVICE) == null) {
             sourceMark.putUserData(ARTIFACT_ADVICE, mutableListOf())
