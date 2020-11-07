@@ -4,12 +4,12 @@ import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
+import com.sourceplusplus.monitor.skywalking.bridge.EndpointTracesBridge
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
-import com.sourceplusplus.monitor.skywalking.bridge.EndpointTracesBridge
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import java.time.ZonedDateTime
 
 /**
@@ -42,6 +42,7 @@ class GetTraces(
                     "limit: $limit"
         )
 
+        val traceResult: TraceResult
         if (byEndpointIds != null) {
             var finalTraceResult: TraceResult? = null
             job.context.get(byEndpointIds).forEach { endpointId ->
@@ -65,11 +66,9 @@ class GetTraces(
                     finalTraceResult!!.mergeWith(traces)
                 }
             }
-
-            job.context.put(TRACE_RESULT, finalTraceResult!!)
-            job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${finalTraceResult!!.traces.size}")
+            traceResult = finalTraceResult!!
         } else {
-            val traces = EndpointTracesBridge.getTraces(
+            traceResult = EndpointTracesBridge.getTraces(
                 GetEndpointTraces(
                     endpointName = endpointName,
                     appUuid = "null", //todo: likely not necessary
@@ -83,9 +82,12 @@ class GetTraces(
                     pageSize = limit
                 ), job.vertx
             )
-
-            job.context.put(TRACE_RESULT, traces)
-            job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${traces.traces.size}")
         }
+
+        if (traceResult.traces.isNotEmpty()) {
+            job.log("Found ${traceResult.traces.size} matching traces")
+        }
+        job.context.put(TRACE_RESULT, traceResult)
+        job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${traceResult.traces.size}")
     }
 }
