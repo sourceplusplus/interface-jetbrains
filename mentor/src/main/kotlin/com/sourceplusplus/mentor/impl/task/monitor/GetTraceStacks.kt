@@ -17,7 +17,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 class GetTraceStacks(
     private val byTraceResultContext: ContextKey<TraceResult>? = null,
     private val byTracesContext: ContextKey<List<Trace>>? = null,
-    private val distinctByOperationName: Boolean = true //todo: impl
+    private val distinctByOperationName: Boolean = true
 ) : MentorTask() {
 
     companion object {
@@ -35,19 +35,17 @@ class GetTraceStacks(
         )
 
         val traceStacks = mutableListOf<TraceSpanStackQueryResult>()
-        if (byTraceResultContext != null)          {
-            val traceResult = job.context.get(byTraceResultContext)
-            traceResult.traces.distinctBy { it.operationNames }.forEach { trace ->
-                val traceStack = EndpointTracesBridge.getTraceStack(trace.traceIds[0], job.vertx)
-                traceStacks.add(traceStack)
-            }
+        var traces = if (byTraceResultContext != null) {
+            job.context.get(byTraceResultContext).traces
         } else {
-            //todo: can merge this clause with above clause
-            val traces = job.context.get(byTracesContext!!)
-            traces.distinctBy { it.operationNames }.forEach { trace ->
-                val traceStack = EndpointTracesBridge.getTraceStack(trace.traceIds[0], job.vertx)
-                traceStacks.add(traceStack)
-            }
+            job.context.get(byTracesContext!!)
+        }
+        if (distinctByOperationName) {
+            traces = traces.distinctBy { it.operationNames }
+        }
+        traces.forEach { trace ->
+            val traceStack = EndpointTracesBridge.getTraceStack(trace.traceIds[0], job.vertx)
+            traceStacks.add(traceStack)
         }
 
         job.context.put(TRACE_STACKS, traceStacks)
