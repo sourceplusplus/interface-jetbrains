@@ -57,10 +57,10 @@ class SourceMentor : CoroutineVerticle() {
     private suspend fun runJobProcessing() {
         running = true
         while (running) {
-            log.info("Waiting for next task...")
+            log.trace("Waiting for next task...")
             var currentTask: MentorTask = runInterruptible(Dispatchers.IO) { taskQueue.take() }
             if (!running) return
-            log.info("Processing task: $currentTask")
+            log.trace("Processing task: $currentTask")
 
             //find jobs requiring task (execute once then share results)
             val jobsWhichRequireTask = jobList.filter { it.isCurrentTask(currentTask) }
@@ -70,7 +70,7 @@ class SourceMentor : CoroutineVerticle() {
             var reusingTask = false
             val stillValidTask = stillValidTasks.find { it.task == currentTask }
             if (stillValidTask != null) {
-                log.info("Found cached task: ${stillValidTask.task}")
+                log.debug("Found cached task: ${stillValidTask.task}")
                 if (currentTask.usingSameContext(jobsWhichRequireTask[0], stillValidTask.context, currentTask)) {
                     currentTask = stillValidTask.task
                     reusingTask = true
@@ -162,9 +162,9 @@ class SourceMentor : CoroutineVerticle() {
     private fun addTask(task: MentorTask) {
         if (!taskQueue.contains(task)) {
             taskQueue.add(task)
-            log.info("Added task: $task")
+            log.trace("Added task: $task")
         } else {
-            log.info("Ignoring duplicate task: $task")
+            log.trace("Ignoring duplicate task: $task")
         }
     }
 
