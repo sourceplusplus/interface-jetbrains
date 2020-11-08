@@ -35,7 +35,6 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
     private val pendingAdvice = mutableSetOf<ArtifactAdvice>()
 
     override suspend fun advised(advice: ArtifactAdvice) {
-        log.info("New artifact advice: $advice")
         when (advice.artifact.type) {
             ArtifactType.ENDPOINT -> createEndpointAdvice(advice)
             ArtifactType.STATEMENT -> runReadAction { createExpressionAdvice(advice) }
@@ -83,8 +82,22 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
         if (sourceMark.getUserData(ARTIFACT_ADVICE) == null) {
             sourceMark.putUserData(ARTIFACT_ADVICE, mutableListOf())
         }
-        sourceMark.getUserData(ARTIFACT_ADVICE)!!.add(advice)
-        sourceMark.getUserData(SOURCE_PORTAL)?.advice?.add(advice)
-        log.info("Added artifact advice: $advice")
+
+        val activeAdvice = sourceMark.getUserData(ARTIFACT_ADVICE)!!
+        val updatedAdvice = activeAdvice.any {
+            if (it.isSameArtifactAdvice(advice)) {
+                it.updateArtifactAdvice(advice)
+                true
+            } else {
+                false
+            }
+        }
+        if (updatedAdvice) {
+            log.trace("Updated artifact advice: $advice")
+        } else {
+            activeAdvice.add(advice)
+            sourceMark.getUserData(SOURCE_PORTAL)?.advice?.add(advice)
+            log.debug("Added artifact advice: $advice")
+        }
     }
 }

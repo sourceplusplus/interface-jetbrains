@@ -29,7 +29,7 @@ class CalculateLinearRegression(
     }
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log("Task configuration\n\tbyTracesContext: $byTracesContext")
+        job.trace("Task configuration\n\tbyTracesContext: $byTracesContext")
 
         val traceResult = job.context.get(byTracesContext)
         for (trace in traceResult.traces) {

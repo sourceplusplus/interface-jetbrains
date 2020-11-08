@@ -33,7 +33,8 @@ abstract class ExpressionSourceMark(
     override lateinit var sourceMarkComponent: SourceMarkComponent
     override var visiblePopup: Disposable? = null
     override val isClassMark: Boolean = false
-    override val isMethodMark: Boolean = true
+    override val isMethodMark: Boolean = false
+    override val isExpressionMark: Boolean = true
     override val valid: Boolean; get() {
         return try {
             psiExpression.isPsiValid && artifactQualifiedName == SourceMarkerUtils.getFullyQualifiedName(psiExpression)

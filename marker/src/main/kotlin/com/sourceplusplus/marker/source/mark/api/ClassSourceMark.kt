@@ -34,6 +34,7 @@ abstract class ClassSourceMark(
     override var visiblePopup: Disposable? = null
     override val isClassMark: Boolean = true
     override val isMethodMark: Boolean = false
+    override val isExpressionMark: Boolean = false
     override val valid: Boolean; get() {
         return try {
             psiClass.isPsiValid && artifactQualifiedName == psiClass.qualifiedName!!

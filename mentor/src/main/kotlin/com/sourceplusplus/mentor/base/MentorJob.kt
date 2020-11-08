@@ -29,7 +29,6 @@ abstract class MentorJob {
     private var complete: Boolean = false
     private val listeners: MutableList<MentorJobListener> = mutableListOf()
     private val adviceListeners: MutableList<AdviceListener> = mutableListOf()
-    private val activeAdvice: MutableList<ArtifactAdvice> = mutableListOf()
 
     fun addJobListener(jobListener: MentorJobListener) = listeners.add(jobListener)
     fun currentTask(): MentorTask = tasks[currentTask]
@@ -46,8 +45,12 @@ abstract class MentorJob {
         emitEvent(MentorJobEvent.JOB_COMPLETE)
     }
 
+    fun trace(msg: String) {
+        log.trace("{$this}: $msg")
+    }
+
     fun log(msg: String) {
-        log.debug("{$this}\n$msg\n")
+        log.debug("{$this}: $msg")
     }
 
     fun resetJob() {
@@ -67,20 +70,7 @@ abstract class MentorJob {
 
     fun addAdvice(advice: ArtifactAdvice) {
         GlobalScope.launch(vertx.dispatcher()) {
-            val updatedAdvice = activeAdvice.any {
-                if (it.isSameArtifactAdvice(advice)) {
-                    if (it !== advice) { //todo: how does the same advice get here?
-                        it.updateArtifactAdvice(advice)
-                    }
-                    true
-                } else {
-                    false
-                }
-            }
-            if (!updatedAdvice) {
-                activeAdvice.add(advice)
-                adviceListeners.forEach { it.advised(advice) }
-            }
+            adviceListeners.forEach { it.advised(advice) }
         }
     }
 

@@ -44,7 +44,7 @@ class SourcePortal(
     }
 
     override fun close() {
-        log.info("Closed portal: $portalUuid")
+        log.info("Closed portal: $portalUuid - Artifact: $viewingPortalArtifact")
         portalMap.invalidate(portalUuid)
         //todo: de-register portal consumers
         log.info("Active portals: " + portalMap.size())
@@ -144,7 +144,7 @@ class SourcePortal(
 
             portalMap.put(portalUuid, portal)
             log.info(
-                "Registered external SourceMarker Portal. Portal UUID: {} - App UUID: {} - Artifact: {}",
+                "Registered SourceMarker Portal. Portal UUID: {} - App UUID: {} - Artifact: {}",
                 portalUuid, appUuid, artifactQualifiedName
             )
             log.info("Active portals: " + portalMap.size())

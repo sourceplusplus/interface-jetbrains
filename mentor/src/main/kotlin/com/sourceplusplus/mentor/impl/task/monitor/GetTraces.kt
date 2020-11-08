@@ -37,7 +37,7 @@ class GetTraces(
     override val outputContextKeys = listOf(TRACE_RESULT)
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log(
+        job.trace(
             "Task configuration\n\t" +
                     "orderType: $orderType\n\t" +
                     "timeFrame: $timeFrame\n\t" +
@@ -94,6 +94,6 @@ class GetTraces(
             job.log("Found ${traceResult.traces.size} matching traces")
         }
         job.context.put(TRACE_RESULT, traceResult)
-        job.log("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${traceResult.traces.size}")
+        job.trace("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${traceResult.traces.size}")
     }
 }

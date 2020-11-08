@@ -31,7 +31,7 @@ class GetServiceInstance(
     override val outputContextKeys = listOf(SERVICE_INSTANCE)
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log("Task configuration\n\tbyContext: $byContext\n\tbyId: $byId\n\tbyName: $byName")
+        job.trace("Task configuration\n\tbyContext: $byContext\n\tbyId: $byId\n\tbyName: $byName")
 
         val serviceId = if (byContext != null) {
             job.context.get(byContext).id
@@ -42,7 +42,7 @@ class GetServiceInstance(
         for (serviceInstance in getServiceInstances(serviceId, job.vertx)) {
             if (isMatch(serviceInstance)) {
                 job.context.put(SERVICE_INSTANCE, serviceInstance)
-                job.log("Added context\n\tKey: $SERVICE_INSTANCE\n\tValue: $serviceInstance")
+                job.trace("Added context\n\tKey: $SERVICE_INSTANCE\n\tValue: $serviceInstance")
                 break
             }
         }

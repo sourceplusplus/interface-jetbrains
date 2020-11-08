@@ -70,12 +70,12 @@ class SourceMentor : CoroutineVerticle() {
             var reusingTask = false
             val stillValidTask = stillValidTasks.find { it.task == currentTask }
             if (stillValidTask != null) {
-                log.debug("Found cached task: ${stillValidTask.task}")
+                log.trace("Found cached task: ${stillValidTask.task}")
                 if (currentTask.usingSameContext(jobsWhichRequireTask[0], stillValidTask.context, currentTask)) {
                     currentTask = stillValidTask.task
                     reusingTask = true
                     jobsWhichRequireTask[0].context.copyOutputContext(stillValidTask.context, currentTask)
-                    jobsWhichRequireTask[0].log("Copied cached context for task: $currentTask")
+                    jobsWhichRequireTask[0].trace("Copied cached context for task: $currentTask")
                     jobsWhichRequireTask[0].emitEvent(MentorJobEvent.CONTEXT_REUSED, currentTask)
                 } else {
                     executeTask(jobsWhichRequireTask[0], currentTask)
@@ -86,7 +86,7 @@ class SourceMentor : CoroutineVerticle() {
 
             if (!reusingTask && currentTask.asyncTask) {
                 currentTask.getAsyncFuture().onComplete {
-                    jobsWhichRequireTask[0].log("Executed task: $currentTask")
+                    jobsWhichRequireTask[0].trace("Executed task: $currentTask")
                     handleTaskCompletion(jobsWhichRequireTask, currentTask)
                 }
             } else {
@@ -97,14 +97,14 @@ class SourceMentor : CoroutineVerticle() {
 
     private suspend fun executeTask(job: MentorJob, task: MentorTask) {
         if (!running) return
-        job.log("Executing task: $task")
+        job.trace("Executing task: $task")
         task.executeTask(job)
         if (!task.asyncTask) {
-            job.log("Executed task: $task")
+            job.trace("Executed task: $task")
         }
 
         if (task.remainValidDuration > 0) {
-            job.log("Caching task: $task")
+            job.trace("Caching task: $task")
             val cacheContext = MentorTaskContext()
             cacheContext.copyFullContext(job, task)
 
@@ -112,7 +112,7 @@ class SourceMentor : CoroutineVerticle() {
             launch(vertx.dispatcher()) {
                 delay(task.remainValidDuration)
                 stillValidTasks.removeIf { it.task === task }
-                job.log("Removed cached task: $task")
+                job.trace("Removed cached task: $task")
             }
         }
     }
@@ -130,7 +130,7 @@ class SourceMentor : CoroutineVerticle() {
                 .usingSameContext(jobsWhichRequireTask[i].context, jobsWhichRequireTask[0].context, currentTask)
             if (sameContext) {
                 jobsWhichRequireTask[i].context.copyOutputContext(jobsWhichRequireTask[0], currentTask)
-                jobsWhichRequireTask[i].log("Copied context for task: $currentTask")
+                jobsWhichRequireTask[i].trace("Copied context for task: $currentTask")
                 jobsWhichRequireTask[i].emitEvent(MentorJobEvent.CONTEXT_SHARED, currentTask)
             } else {
                 val task = jobsWhichRequireTask[i].currentTask()

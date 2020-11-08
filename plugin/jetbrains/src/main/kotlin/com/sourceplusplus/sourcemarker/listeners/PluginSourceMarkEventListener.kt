@@ -52,16 +52,12 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
                 //method-based portals don't have overview page
                 sourcePortal.configuration.visibleOverview = false
             }
-            sourceMark.addEventListener {
-                if (it.eventCode == SourceMarkEventCode.MARK_REMOVED) {
-                    it.sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!.close()
-                }
-            }
 
             if (sourceMark is MethodSourceMark) {
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
             }
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+            event.sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!.close()
             SourceMarkConstructor.tearDownSourceMark(event.sourceMark)
         }
     }

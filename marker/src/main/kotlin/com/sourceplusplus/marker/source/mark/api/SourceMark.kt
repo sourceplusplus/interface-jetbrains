@@ -70,6 +70,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val type: Type
     val isClassMark: Boolean
     val isMethodMark: Boolean
+    val isExpressionMark: Boolean
     val moduleName: String
     val artifactQualifiedName: String
     val sourceFileMarker: SourceFileMarker

@@ -34,6 +34,7 @@ abstract class MethodSourceMark(
     override var visiblePopup: Disposable? = null
     override val isClassMark: Boolean = false
     override val isMethodMark: Boolean = true
+    override val isExpressionMark: Boolean = false
     override val valid: Boolean; get() {
         return try {
             psiMethod.isPsiValid && artifactQualifiedName == SourceMarkerUtils.getFullyQualifiedName(psiMethod)

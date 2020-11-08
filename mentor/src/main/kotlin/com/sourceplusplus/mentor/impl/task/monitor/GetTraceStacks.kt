@@ -27,7 +27,7 @@ class GetTraceStacks(
     override val outputContextKeys = listOf(TRACE_STACKS)
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log(
+        job.trace(
             "Task configuration\n\t" +
                     "byTraceResultContext: $byTraceResultContext\n\t" +
                     "byTracesContext: $byTracesContext\n\t" +
@@ -49,6 +49,6 @@ class GetTraceStacks(
         }
 
         job.context.put(TRACE_STACKS, traceStacks)
-        job.log("Added context\n\tKey: $TRACE_STACKS\n\tSize: ${traceStacks.size}")
+        job.trace("Added context\n\tKey: $TRACE_STACKS\n\tSize: ${traceStacks.size}")
     }
 }
