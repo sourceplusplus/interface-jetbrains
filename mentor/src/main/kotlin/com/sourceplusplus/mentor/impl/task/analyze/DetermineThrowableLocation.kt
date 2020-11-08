@@ -53,7 +53,9 @@ class DetermineThrowableLocation(
                                         commitId = "todo", //todo: get commit id from service instance
                                         type = ArtifactType.STATEMENT,
                                         lineNumber = lineNumber
-                                    ), stackTrace = stackTrace
+                                    ),
+                                    stackTrace = stackTrace,
+                                    occurredAt = span.startTime
                                 )
                             )
                         }

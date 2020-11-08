@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker
+package com.sourceplusplus.sourcemarker.mark
 
 import com.intellij.openapi.util.IconLoader
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark

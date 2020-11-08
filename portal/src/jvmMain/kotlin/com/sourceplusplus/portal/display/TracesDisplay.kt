@@ -6,9 +6,9 @@ import com.sourceplusplus.portal.extensions.displayTraceStack
 import com.sourceplusplus.portal.extensions.displayTraces
 import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.portal.model.TraceDisplayType.*
-import com.sourceplusplus.protocol.ArtifactNameUtils.getShortQualifiedFunctionName
-import com.sourceplusplus.protocol.ArtifactNameUtils.removePackageAndClassName
-import com.sourceplusplus.protocol.ArtifactNameUtils.removePackageNames
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageAndClassName
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageNames
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
@@ -19,6 +19,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayInnerTraceStack
 import com.sourceplusplus.protocol.artifact.trace.*
+import com.sourceplusplus.protocol.utils.humanReadable
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -26,7 +27,6 @@ import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.regex.Pattern
-import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.toDuration
 
@@ -308,7 +308,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
     private fun handleArtifactTraceResult(portals: List<SourcePortal>, artifactTraceResult: TraceResult) {
         val traces = ArrayList<Trace>()
         artifactTraceResult.traces.forEach {
-            traces.add(it.copy(prettyDuration = humanReadableDuration(it.duration.toDuration(MILLISECONDS))))
+            traces.add(it.copy(prettyDuration = it.duration.toDuration(MILLISECONDS).humanReadable()))
         }
         val updatedArtifactTraceResult = artifactTraceResult.copy(
             traces = traces,
@@ -359,7 +359,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                     appUuid = appUuid,
                     rootArtifactQualifiedName = rootArtifactQualifiedName,
                     operationName = operationName,
-                    timeTook = humanReadableDuration(timeTook),
+                    timeTook = timeTook.humanReadable(),
                     totalTracePercent = if (totalTime.toLongMilliseconds() == 0L) 0.0 else timeTook / totalTime * 100.0
                 )
             )
@@ -414,15 +414,5 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 //                    }
 //                }
         }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private fun humanReadableDuration(duration: Duration): String {
-        if (duration.inSeconds < 1) {
-            return "${duration.toLongMilliseconds()}ms"
-        }
-        return duration.toString().substring(2)
-            .replace("(\\d[HMS])(?!$)", "$1 ")
-            .toLowerCase()
     }
 }

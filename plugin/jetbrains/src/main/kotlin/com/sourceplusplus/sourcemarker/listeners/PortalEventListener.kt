@@ -18,8 +18,6 @@ import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.monitor.skywalking.toProtocol
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.extensions.fromPerSecondToPrettyFrequency
-import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
@@ -41,8 +39,10 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
-import com.sourceplusplus.sourcemarker.SourceMarkKeys
-import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
+import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
+import com.sourceplusplus.protocol.utils.toPrettyDuration
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject

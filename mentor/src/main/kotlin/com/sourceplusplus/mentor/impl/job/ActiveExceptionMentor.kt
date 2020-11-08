@@ -6,12 +6,11 @@ import com.sourceplusplus.mentor.impl.task.analyze.DetermineThrowableLocation
 import com.sourceplusplus.mentor.impl.task.general.CreateArtifactAdvice
 import com.sourceplusplus.mentor.impl.task.general.DelayTask
 import com.sourceplusplus.mentor.impl.task.monitor.GetService
-import com.sourceplusplus.mentor.impl.task.monitor.GetServiceInstance
 import com.sourceplusplus.mentor.impl.task.monitor.GetTraceStacks
 import com.sourceplusplus.mentor.impl.task.monitor.GetTraces
 import com.sourceplusplus.protocol.advice.AdviceType
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import io.vertx.core.Vertx
 
 /**
@@ -29,12 +28,12 @@ class ActiveExceptionMentor(
 
     override val tasks: List<MentorTask> by lazy {
         listOfNotNull(
-            //get active service instance
+            //get active service
             GetService(),
-            GetServiceInstance(GetService.SERVICE),
 
             //fetch failed traces
             GetTraces(
+                GetService.SERVICE,
                 orderType = TraceOrderType.FAILED_TRACES,
                 timeFrame = QueryTimeFrame.LAST_15_MINUTES
             ),

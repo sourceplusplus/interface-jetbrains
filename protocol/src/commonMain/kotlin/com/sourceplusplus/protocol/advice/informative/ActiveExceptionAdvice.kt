@@ -1,9 +1,11 @@
 package com.sourceplusplus.protocol.advice.informative
 
 import com.sourceplusplus.protocol.advice.AdviceCategory
+import com.sourceplusplus.protocol.advice.AdviceType
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import kotlinx.datetime.Instant
 
 /**
  * todo: description.
@@ -13,14 +15,18 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
  */
 class ActiveExceptionAdvice(
     artifact: ArtifactQualifiedName,
-    stackTrace: JvmStackTrace
-) : ArtifactAdvice(artifact, AdviceCategory.INFORMATIVE) {
+    stackTrace: JvmStackTrace,
+    occurredAt: Instant
+) : ArtifactAdvice(artifact, AdviceCategory.INFORMATIVE, AdviceType.ActiveExceptionAdvice) {
 
     var stackTrace: JvmStackTrace = stackTrace
         private set
+    var occurredAt: Instant = occurredAt
+        private set
 
-    fun updateStackTrace(stackTrace: JvmStackTrace) {
+    fun update(stackTrace: JvmStackTrace, occurredAt: Instant) {
         this.stackTrace = stackTrace
+        this.occurredAt = occurredAt
         triggerUpdated()
     }
 
@@ -36,6 +42,10 @@ class ActiveExceptionAdvice(
     }
 
     override fun updateArtifactAdvice(artifactAdvice: ArtifactAdvice) {
-        updateStackTrace((artifactAdvice as ActiveExceptionAdvice).stackTrace)
+        update((artifactAdvice as ActiveExceptionAdvice).stackTrace, artifactAdvice.occurredAt)
+    }
+
+    override fun toString(): String {
+        return "$type{$artifact - ${stackTrace.exceptionType} @ $occurredAt}"
     }
 }

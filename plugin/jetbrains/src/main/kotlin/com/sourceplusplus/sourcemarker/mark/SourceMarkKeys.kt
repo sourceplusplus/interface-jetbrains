@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker
+package com.sourceplusplus.sourcemarker.mark
 
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey

@@ -74,6 +74,8 @@ class SkywalkingClient(
         val response = apolloClient.query(
             QueryBasicTracesQuery(
                 TraceQueryCondition(
+                    serviceId = Input.optional(request.serviceId),
+                    serviceInstanceId = Input.optional(request.serviceInstanceId),
                     endpointId = Input.optional(request.endpointId),
                     endpointName = Input.optional(request.endpointName),
                     queryDuration = Input.optional(request.zonedDuration.toDuration(this)),

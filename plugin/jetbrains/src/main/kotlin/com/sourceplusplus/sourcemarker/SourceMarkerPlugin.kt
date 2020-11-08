@@ -66,7 +66,7 @@ import java.awt.Dimension
 import java.util.*
 
 /**
- * Sets up the SourceMarker plugin by configuring and initializing the various modules.
+ * Sets up the SourceMarker plugin by configuring and initializing the various plugin modules.
  *
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -77,6 +77,9 @@ object SourceMarkerPlugin {
     private val deploymentIds = mutableListOf<String>()
     val vertx: Vertx = Vertx.vertx()
 
+    /**
+     * Setup Vert.x EventBus for communication between plugin modules.
+     */
     init {
         log.debug("Registering SourceMarker protocol codecs")
         vertx.eventBus().registerDefaultCodec(SourcePortal::class.java, LocalMessageCodec())
