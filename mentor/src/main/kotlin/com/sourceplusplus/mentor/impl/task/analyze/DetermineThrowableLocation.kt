@@ -30,7 +30,7 @@ class DetermineThrowableLocation(
     override val outputContextKeys = listOf(ARTIFACT_ADVICE)
 
     override suspend fun executeTask(job: MentorJob) {
-        job.log("Task configuration\n\tbyTraceStacksContext: $byTraceStacksContext\n\trootPackage: $rootPackage")
+        job.trace("Task configuration\n\tbyTraceStacksContext: $byTraceStacksContext\n\trootPackage: $rootPackage")
 
         //todo: ArtifactLocation more appropriate naming than ArtifactQualifiedName
         val foundArtifactLocations = mutableListOf<ActiveExceptionAdvice>()

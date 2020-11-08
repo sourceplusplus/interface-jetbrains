@@ -21,6 +21,7 @@ import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.getContainingUMethod
 import org.slf4j.LoggerFactory
 
 /**
@@ -180,6 +181,12 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         return sourceMarks.find {
             it is ExpressionSourceMark && it.valid && it.psiExpression.sourcePsi === psiElement && it.type == type
         } as ExpressionSourceMark?
+    }
+
+    open fun getMethodExpressionSourceMark(methodSourceMark: MethodSourceMark): List<ExpressionSourceMark> {
+        return sourceMarks.filterIsInstance<ExpressionSourceMark>().filter {
+            it.valid && it.psiExpression.getContainingUMethod() == methodSourceMark.psiMethod
+        }
     }
 
     override fun createSourceMark(psiExpression: UExpression, type: SourceMark.Type): ExpressionSourceMark {

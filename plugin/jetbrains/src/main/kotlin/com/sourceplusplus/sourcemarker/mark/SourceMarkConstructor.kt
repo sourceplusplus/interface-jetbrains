@@ -38,9 +38,11 @@ object SourceMarkConstructor {
         artifactAdvice.forEach {
             when (it.type) {
                 AdviceType.ActiveExceptionAdvice -> {
-                    val timerId = sourceMark.getUserData(ADVICE_TIMER)!!
-                    SourceMarkerPlugin.vertx.cancelTimer(timerId)
-                    sourceMark.putUserData(ADVICE_TIMER, null)
+                    val timerId = sourceMark.getUserData(ADVICE_TIMER)
+                    if (timerId != null) {
+                        SourceMarkerPlugin.vertx.cancelTimer(timerId)
+                        sourceMark.putUserData(ADVICE_TIMER, null)
+                    }
                 }
                 else -> {
                     //no additional tear down necessary
