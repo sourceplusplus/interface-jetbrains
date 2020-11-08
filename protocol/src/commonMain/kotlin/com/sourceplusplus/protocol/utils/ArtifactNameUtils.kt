@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol
+package com.sourceplusplus.protocol.utils
 
 /**
  * Useful methods for formatting artifact names.

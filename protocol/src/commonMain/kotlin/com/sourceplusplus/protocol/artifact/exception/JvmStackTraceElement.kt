@@ -1,6 +1,6 @@
 package com.sourceplusplus.protocol.artifact.exception
 
-import com.sourceplusplus.protocol.ArtifactNameUtils.getShortQualifiedClassName
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedClassName
 
 /**
  * todo: description.

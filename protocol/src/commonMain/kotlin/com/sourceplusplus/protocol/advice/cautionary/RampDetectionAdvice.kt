@@ -1,6 +1,7 @@
 package com.sourceplusplus.protocol.advice.cautionary
 
 import com.sourceplusplus.protocol.advice.AdviceCategory
+import com.sourceplusplus.protocol.advice.AdviceType
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 
@@ -14,7 +15,7 @@ class RampDetectionAdvice(
     artifact: ArtifactQualifiedName,
     regressionSource: ArtifactQualifiedName,
     regression: SimpleRegression
-) : ArtifactAdvice(artifact, AdviceCategory.CAUTIONARY) {
+) : ArtifactAdvice(artifact, AdviceCategory.CAUTIONARY, AdviceType.RampDetectionAdvice) {
 
     var regression: SimpleRegression = regression
         private set

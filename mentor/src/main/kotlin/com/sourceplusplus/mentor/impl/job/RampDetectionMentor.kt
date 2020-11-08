@@ -9,11 +9,14 @@ import com.sourceplusplus.mentor.impl.task.filter.FilterBoundedDatabaseQueries
 import com.sourceplusplus.mentor.impl.task.filter.FilterTraceStacks
 import com.sourceplusplus.mentor.impl.task.general.CreateArtifactAdvice
 import com.sourceplusplus.mentor.impl.task.general.DelayTask
-import com.sourceplusplus.mentor.impl.task.monitor.*
+import com.sourceplusplus.mentor.impl.task.monitor.GetEndpoints
+import com.sourceplusplus.mentor.impl.task.monitor.GetService
+import com.sourceplusplus.mentor.impl.task.monitor.GetTraceStacks
+import com.sourceplusplus.mentor.impl.task.monitor.GetTraces
 import com.sourceplusplus.protocol.advice.AdviceType
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanQuery
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import io.vertx.core.Vertx
 
 /**
@@ -35,14 +38,14 @@ class RampDetectionMentor(
 
     override val tasks: List<MentorTask> by lazy {
         listOfNotNull(
-            //get active service instance
+            //get active service
             GetService(),
-            GetServiceInstance(GetService.SERVICE),
 
             //iterate endpoints (checking likely offenders more frequently than non-likely offenders)
-            GetEndpoints(),
+            GetEndpoints(GetService.SERVICE),
             GetTraces(
-                GetEndpoints.ENDPOINT_IDS,
+                GetService.SERVICE,
+                byEndpointIds = GetEndpoints.ENDPOINT_IDS,
                 orderType = TraceOrderType.LATEST_TRACES,
                 timeFrame = QueryTimeFrame.LAST_15_MINUTES
             ),
@@ -73,7 +76,7 @@ class RampDetectionMentor(
 
             if (config.repeatForever) {
                 DelayTask(config.repeatDelay)
-            } else null //todo: should likely move delay logic to SourceMentor
+            } else null
         )
     }
 }

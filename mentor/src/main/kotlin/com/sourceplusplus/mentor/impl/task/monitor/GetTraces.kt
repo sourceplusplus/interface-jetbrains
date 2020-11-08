@@ -10,6 +10,8 @@ import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
+import monitor.skywalking.protocol.metadata.GetAllServicesQuery
+import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import java.time.ZonedDateTime
 
 /**
@@ -19,7 +21,8 @@ import java.time.ZonedDateTime
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class GetTraces(
-    //todo: serviceId/serviceInstanceId
+    private val byServiceId: ContextKey<GetAllServicesQuery.Result>,
+    private val byServiceInstanceId: ContextKey<GetServiceInstancesQuery.Result>? = null,
     private val byEndpointIds: ContextKey<List<String>>? = null,
     private val orderType: TraceOrderType,
     private val timeFrame: QueryTimeFrame, //todo: impl start/end in QueryTimeFrame
@@ -42,12 +45,15 @@ class GetTraces(
                     "limit: $limit"
         )
 
+        val serviceInstanceId = if (byServiceInstanceId != null) job.context.get(byServiceInstanceId).id else null
         val traceResult: TraceResult
         if (byEndpointIds != null) {
             var finalTraceResult: TraceResult? = null
             job.context.get(byEndpointIds).forEach { endpointId ->
                 val traces = EndpointTracesBridge.getTraces(
                     GetEndpointTraces(
+                        serviceId = job.context.get(byServiceId).id,
+                        serviceInstanceId = serviceInstanceId,
                         endpointId = endpointId,
                         appUuid = "null", //todo: likely not necessary
                         artifactQualifiedName = "null", //todo: likely not necessary

@@ -10,7 +10,8 @@ import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
  */
 abstract class ArtifactAdvice(
     val artifact: ArtifactQualifiedName,
-    val category: AdviceCategory
+    val category: AdviceCategory,
+    val type: AdviceType
 ) {
 
     private val artifactAdviceListeners = mutableListOf<ArtifactAdviceListener>()

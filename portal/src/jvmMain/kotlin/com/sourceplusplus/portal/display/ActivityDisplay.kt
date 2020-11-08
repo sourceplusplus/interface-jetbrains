@@ -2,11 +2,9 @@ package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayCard
-import com.sourceplusplus.portal.extensions.fromPerSecondToPrettyFrequency
-import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.portal.extensions.updateChart
 import com.sourceplusplus.portal.model.PageType
-import com.sourceplusplus.protocol.ArtifactNameUtils.getShortQualifiedFunctionName
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
@@ -16,6 +14,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.*
 import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
+import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
+import com.sourceplusplus.protocol.utils.toPrettyDuration
 import io.vertx.core.json.JsonObject
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant

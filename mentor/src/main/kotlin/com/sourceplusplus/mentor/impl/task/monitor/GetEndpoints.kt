@@ -4,6 +4,7 @@ import com.sourceplusplus.mentor.base.ContextKey
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.monitor.skywalking.bridge.EndpointBridge
+import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 
 /**
  * todo: description.
@@ -12,6 +13,7 @@ import com.sourceplusplus.monitor.skywalking.bridge.EndpointBridge
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class GetEndpoints(
+    private val byContext: ContextKey<GetAllServicesQuery.Result>,
     private val backoffConfig: BackoffConfig? = null
 ) : MentorTask() {
 
@@ -22,9 +24,8 @@ class GetEndpoints(
     override val outputContextKeys = listOf(ENDPOINT_IDS)
 
     override suspend fun executeTask(job: MentorJob) {
-
         //todo: need way to iterate endpoints
-        val endpoints = EndpointBridge.getEndpoints(100, job.vertx)
+        val endpoints = EndpointBridge.getEndpoints(job.context.get(byContext).id, 100, job.vertx)
         endpoints.forEach {
             backoffConfig?.config?.put(it.id, -1)
         }

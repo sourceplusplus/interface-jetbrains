@@ -6,7 +6,7 @@ import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.sourcemarker.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 
 /**
  * todo: description.

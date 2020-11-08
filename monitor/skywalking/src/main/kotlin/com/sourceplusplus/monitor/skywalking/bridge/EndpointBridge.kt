@@ -52,7 +52,7 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                 if (service != null) {
                     val endpointQuery = it.body()
                     val endpoints = skywalkingClient.searchEndpoint(
-                        "", service.id, endpointQuery.limit
+                        "", endpointQuery.serviceId ?: service.id, endpointQuery.limit
                     )
                     it.reply(endpoints)
                 } else {
@@ -73,10 +73,15 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                 .body()
         }
 
-        suspend fun getEndpoints(limit: Int, vertx: Vertx): List<SearchEndpointQuery.Result> {
+        suspend fun getEndpoints(
+            serviceId: String? = null,
+            limit: Int,
+            vertx: Vertx
+        ): List<SearchEndpointQuery.Result> {
             return vertx.eventBus()
                 .requestAwait<List<SearchEndpointQuery.Result>>(
                     getEndpointsAddress, EndpointQuery(
+                        serviceId = serviceId,
                         limit = limit
                     )
                 ).body()
@@ -84,6 +89,7 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
     }
 
     data class EndpointQuery(
+        val serviceId: String? = null,
         val limit: Int
     )
 }

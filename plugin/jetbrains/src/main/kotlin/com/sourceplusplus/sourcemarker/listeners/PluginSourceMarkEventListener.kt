@@ -7,8 +7,9 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.model.PageType
-import com.sourceplusplus.sourcemarker.SourceMarkKeys
-import com.sourceplusplus.sourcemarker.SourceMarkKeys.ENDPOINT_DETECTOR
+import com.sourceplusplus.sourcemarker.mark.SourceMarkConstructor
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 import org.slf4j.LoggerFactory
 
@@ -60,6 +61,8 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
             if (sourceMark is MethodSourceMark) {
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
             }
+        } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+            SourceMarkConstructor.tearDownSourceMark(event.sourceMark)
         }
     }
 }
