@@ -9,13 +9,18 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 /**
- * todo: description.
+ * Used to serialize/deserialize protocol messages.
  *
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class Serializers {
 
+    /**
+     * Used to serialize/deserialize [Instant] classes.
+     *
+     * @since 0.1.0
+     */
     class InstantKSerializer : KSerializer<Instant> {
 
         override val descriptor = PrimitiveSerialDescriptor(
@@ -27,6 +32,11 @@ class Serializers {
         override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeLong(value.toEpochMilliseconds())
     }
 
+    /**
+     * Used to serialize/deserialize [ArtifactType] classes.
+     *
+     * @since 0.1.0
+     */
     class ArtifactTypeSerializer : KSerializer<ArtifactType> {
 
         override val descriptor = PrimitiveSerialDescriptor(
