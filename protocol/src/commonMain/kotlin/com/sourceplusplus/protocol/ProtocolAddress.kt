@@ -1,7 +1,7 @@
 package com.sourceplusplus.protocol
 
 /**
- * todo: description.
+ * Contains all the public addresses which consume and send protocol messages.
  *
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -17,8 +17,6 @@ object ProtocolAddress {
         const val UpdatePortalArtifact = "UpdatePortalArtifact"
         const val GetPortalConfiguration = "GetPortalConfiguration"
         const val CanOpenPortal = "CanOpenPortal"
-        //const val OpenedPortal = "OpenedPortal"
-        //const val ClosedPortal = "ClosedPortal"
         const val ChangedPortalArtifact = "ChangedPortalArtifact"
         const val NavigateToArtifact = "NavigateToArtifact"
 

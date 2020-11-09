@@ -2,13 +2,12 @@
 # https://github.com/detekt/detekt/blob/master/detekt-core/src/main/resources/default-detekt-config.yml
 
 build:
-  maxIssues: 30
+  maxIssues: 24
 
 comments:
-  UndocumentedPublicFunction: #todo: remove
-    active: false
-  UndocumentedPublicProperty: #todo: remove
-    active: false
+  UndocumentedPublicClass:
+    active: true
+
 formatting:
   Indentation:
     active: true
@@ -16,6 +15,7 @@ formatting:
     active: false
   NoWildcardImports:
     active: false
+
 style:
   ForbiddenComment:
     active: false
