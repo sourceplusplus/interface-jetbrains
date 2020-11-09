@@ -21,8 +21,6 @@ import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
-import com.sourceplusplus.marker.source.mark.api.component.jcef.config.BrowserLoadingListener
-import com.sourceplusplus.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
 import com.sourceplusplus.marker.source.mark.api.filter.CreateSourceMarkFilter
 import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfiguration
 import com.sourceplusplus.mentor.SourceMentor
@@ -312,11 +310,21 @@ object SourceMarkerPlugin {
      * @since 0.1.0
      */
     class KSerializers {
+        /**
+         * Used to serialize [Instant] classes.
+         *
+         * @since 0.1.0
+         */
         class KotlinInstantSerializer : JsonSerializer<Instant>() {
             override fun serialize(value: Instant, jgen: JsonGenerator, provider: SerializerProvider) =
                 jgen.writeNumber(value.toEpochMilliseconds())
         }
 
+        /**
+         * Used to deserialize [Instant] classes.
+         *
+         * @since 0.1.0
+         */
         class KotlinInstantDeserializer : JsonDeserializer<Instant>() {
             override fun deserialize(p: JsonParser, p1: DeserializationContext): Instant =
                 Instant.fromEpochMilliseconds((p.codec.readTree(p) as JsonNode).longValue())

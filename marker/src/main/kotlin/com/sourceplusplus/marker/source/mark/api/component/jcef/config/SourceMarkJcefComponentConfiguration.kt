@@ -2,10 +2,11 @@ package com.sourceplusplus.marker.source.mark.api.component.jcef.config
 
 import com.intellij.ui.jcef.JBCefBrowser
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
+import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import java.awt.Dimension
 
 /**
- * todo: description.
+ * Used to configure [SourceMarkJcefComponent].
  *
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -46,9 +47,10 @@ class SourceMarkJcefComponentConfiguration : SourceMarkComponentConfiguration() 
     }
 }
 
+/**
+ * Used to listen for JCEF browser creation events.
+ */
 open class BrowserLoadingListener {
-    open fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
-    }
-    open fun afterBrowserCreated(browser: JBCefBrowser) {
-    }
+    open fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) = Unit
+    open fun afterBrowserCreated(browser: JBCefBrowser) = Unit
 }

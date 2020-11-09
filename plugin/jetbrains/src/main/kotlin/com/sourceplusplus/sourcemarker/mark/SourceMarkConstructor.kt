@@ -55,7 +55,9 @@ object SourceMarkConstructor {
     fun getOrSetupSourceMark(fileMarker: SourceFileMarker, advice: ArtifactAdvice): SourceMark {
         when (advice.type) {
             AdviceType.RampDetectionAdvice -> {
-                val gutterMark = getOrCreateExpressionGutterMark(fileMarker, advice.artifact.lineNumber!!)!!
+                val gutterMark = getOrCreateExpressionGutterMark(
+                    fileMarker, advice.artifact.lineNumber!!
+                )!!
                 if (!fileMarker.containsSourceMark(gutterMark)) {
                     attachAdvice(gutterMark, advice)
                     gutterMark.apply()
@@ -63,7 +65,9 @@ object SourceMarkConstructor {
                 return gutterMark
             }
             AdviceType.ActiveExceptionAdvice -> {
-                val inlayMark = getOrCreateExpressionInlayMark(fileMarker, advice.artifact.lineNumber!!)!!
+                val inlayMark = getOrCreateExpressionInlayMark(
+                    fileMarker, advice.artifact.lineNumber!!
+                )!!
                 if (!fileMarker.containsSourceMark(inlayMark)) {
                     attachAdvice(inlayMark, advice)
                     inlayMark.apply()
@@ -89,9 +93,16 @@ object SourceMarkConstructor {
             is ActiveExceptionAdvice -> {
                 val expressionMark = inlayMark as ExpressionInlayMark
                 val prettyTimeAgo = if (expressionMark.getPsiExpresion() is UThrowExpression) {
-                    { " //Last occurred ${(Clock.System.now() - advice.occurredAt).toPrettyDuration()} ago       " }
+                    {
+                        val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() + " ago"
+                        " //Last occurred $occurred       "
+                    }
                 } else {
-                    { " //Threw ${advice.stackTrace.exceptionType.substringAfterLast(".")} ${(Clock.System.now() - advice.occurredAt).toPrettyDuration()} ago       " }
+                    {
+                        val exceptionType = advice.stackTrace.exceptionType.substringAfterLast(".")
+                        val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() + " ago"
+                        " //Threw $exceptionType $occurred       "
+                    }
                 }
 
                 inlayMark.configuration.virtualText = InlayMarkVirtualText(inlayMark, prettyTimeAgo.invoke())
