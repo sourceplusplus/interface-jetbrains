@@ -1,12 +1,13 @@
 package com.sourceplusplus.mentor.impl.task
 
+import com.sourceplusplus.mentor.MentorTest
 import com.sourceplusplus.mentor.base.MentorJob
 import com.sourceplusplus.mentor.base.MentorTask
-import com.sourceplusplus.mentor.MentorTest
 import com.sourceplusplus.mentor.impl.task.analyze.CalculateLinearRegression
+import com.sourceplusplus.mentor.impl.task.monitor.GetService
 import com.sourceplusplus.mentor.impl.task.monitor.GetTraces
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.delay
@@ -26,8 +27,9 @@ class CalculateLinearRegressionTest : MentorTest() {
 
         runBlocking(vertx.dispatcher()) {
             delay(5000)
-
+            GetService().executeTask(emptyJob)
             val getTraces = GetTraces(
+                GetService.SERVICE,
                 orderType = TraceOrderType.LATEST_TRACES,
                 timeFrame = QueryTimeFrame.LAST_15_MINUTES,
                 endpointName = "{GET}/users",
