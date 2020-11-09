@@ -18,8 +18,9 @@ SourceMarker is a JetBrains-powered plugin which provides continuous feedback ca
 - Service, service instance, endpoint metrics
 - Database access metrics
 - Integrated distributed trace mapping
+- Active exception correlation/tracking
 - Performance anti-pattern detection
-  - Performance Ramp
+  - [The Ramp]( http://www.spe-ed.com/papers/moreanti.pdf )
 
 ## Demonstration
 
