@@ -101,10 +101,12 @@ The Traces view is used to navigate gathered distributed traces. The Traces view
 
 #### Trace Stack
 
-Clicking on any trace
+Clicking on an individual trace will display the direct children traces. If those child traces have children as well which can be correlated to specific source code, clicking on those traces will display the next layer of traces and simultaneously navigate to the correlating source code.
 
 ![](../.github/media/screenshots/trace_stack.gif)
 
 #### Span Info
+
+Clicking on an individual trace span will display the span information. This include data like span tags, logs, and exceptions.
 
 ![](../.github/media/screenshots/span_info.gif)
