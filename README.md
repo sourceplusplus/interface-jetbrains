@@ -9,7 +9,7 @@
 ## Description
 
 <!-- Plugin description -->
-SourceMarker is a JetBrains-based plugin which implements Feedback-Driven Development (continuous feedback) technology via integration with [Apache SkyWalking](https://github.com/apache/skywalking). SourceMarker can be used to help debug and prevent production runtime issues by providing contextualized behavior about your source code throughout development.
+SourceMarker is a JetBrains-powered plugin which provides continuous feedback capabilities via integration with [Apache SkyWalking](https://github.com/apache/skywalking). SourceMarker increases software development productivity via the Feedback-Driven Development (FDD) approach, a methodology of combining IDE and APM technology to create tighter feedback loops.
 <!-- Plugin description end -->
 
 ## Features
@@ -18,8 +18,9 @@ SourceMarker is a JetBrains-based plugin which implements Feedback-Driven Develo
 - Service, service instance, endpoint metrics
 - Database access metrics
 - Integrated distributed trace mapping
+- Active exception correlation/tracking
 - Performance anti-pattern detection
-  - Performance Ramp
+  - [The Ramp]( http://www.spe-ed.com/papers/moreanti.pdf )
 
 ## Demonstration
 
@@ -35,7 +36,12 @@ SourceMarker is a JetBrains-based plugin which implements Feedback-Driven Develo
 - Manually:
 
   Download the [latest release](https://github.com/sourceplusplus/SourceMarker/releases/latest) and install it manually using
-  <kbd>Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+  <kbd>Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙</kbd> > <kbd>Install plugin from disk...</kbd>
+
+## Usage
+
+- [Getting Started](docs/getting-started.md)
+- [Quick Start](docs/quick-start.md)
 
 # Development
 
