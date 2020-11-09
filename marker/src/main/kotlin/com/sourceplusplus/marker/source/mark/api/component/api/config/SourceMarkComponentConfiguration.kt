@@ -1,10 +1,11 @@
 package com.sourceplusplus.marker.source.mark.api.component.api.config
 
 import com.intellij.openapi.editor.Editor
+import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import java.awt.Dimension
 
 /**
- * todo: description.
+ * Used to configure [SourceMarkComponent].
  *
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -34,6 +35,9 @@ open class SourceMarkComponentConfiguration {
     }
 }
 
+/**
+ * Allows a [SourceMarkComponent] to be dynamically sized.
+ */
 open class ComponentSizeEvaluator {
     open fun getDynamicSize(editor: Editor, configuration: SourceMarkComponentConfiguration): Dimension? {
         return null

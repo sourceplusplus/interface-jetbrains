@@ -38,7 +38,8 @@ class CalculateLinearRegression(
             regression.addData(trace.start.toEpochMilliseconds().toDouble(), trace.duration.toDouble())
         }
 
-        //todo: there should likely be a way to give endpoints priority based on the likelihood for it to be a performance ramp
+        //todo: there should likely be a way to give endpoints priority
+        // based on the likelihood for it to be a performance ramp
 
         val offendingTraces = mutableListOf<Trace>()
         regressionMap.forEach { entry ->

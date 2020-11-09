@@ -51,9 +51,9 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                         annotation.lang === Language.findLanguageByID("Scala") -> {
                             promise.complete(handleScalaAnnotation(annotation, annotationName))
                         }
-                        else -> {
-                            throw UnsupportedOperationException("Language ${annotation.lang} is not currently supported")
-                        }
+                        else -> throw UnsupportedOperationException(
+                            "Language ${annotation.lang} is not currently supported"
+                        )
                     }
                 }
             }

@@ -24,8 +24,12 @@ class DetermineTraceSpanArtifact(
 ) : MentorTask() {
 
     companion object {
-        val ARTIFACTS: ContextKey<List<ArtifactQualifiedName>> = ContextKey("DetermineTraceSpanArtifact.ARTIFACTS")
-        val RESOLUTION_MAP: ContextKey<Map<ArtifactQualifiedName, String>> = ContextKey("DetermineTraceSpanArtifact.ARTIFACTS")
+        val ARTIFACTS: ContextKey<List<ArtifactQualifiedName>> = ContextKey(
+            "DetermineTraceSpanArtifact.ARTIFACTS"
+        )
+        val RESOLUTION_MAP: ContextKey<Map<ArtifactQualifiedName, String>> = ContextKey(
+            "DetermineTraceSpanArtifact.ARTIFACTS"
+        )
         private val parser: Parser = DSL.using(DefaultConfiguration()).parser()
     }
 

@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
- * todo: description.
+ * Used to communicate with Apache SkyWalking.
  *
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -170,7 +170,7 @@ class SkywalkingClient(
     }
 
     /**
-     * todo: description.
+     * Used to transmit Apache SkyWalking messages.
      *
      * @since 0.1.0
      */

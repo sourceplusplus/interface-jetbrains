@@ -22,9 +22,9 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
 import com.intellij.ui.paint.EffectPainter
-import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.SourceMarker.getSourceFileMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
@@ -85,7 +85,9 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                 val fileMarker = getSourceFileMarker(element.containingFile)!!
                 currentProject = fileMarker.project
 
-                val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
+                val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(
+                    element.parent.toUElement() as UMethod
+                )
                 return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) {
                     null
                 } else {
