@@ -20,7 +20,7 @@ open class MethodGutterMark(
     override var psiMethod: UMethod
 ) : MethodSourceMark(sourceFileMarker, psiMethod), GutterMark {
 
-    override val configuration: GutterMarkConfiguration = pluginConfiguration.defaultGutterMarkConfiguration.copy()
+    override val configuration: GutterMarkConfiguration = pluginConfiguration.gutterMarkConfiguration.copy()
     private var visible: AtomicBoolean = AtomicBoolean()
 
     override fun isVisible(): Boolean {

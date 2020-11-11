@@ -14,6 +14,7 @@ import com.sourceplusplus.marker.source.mark.inlay.InlayMark
  */
 data class InlayMarkConfiguration(
     override var applySourceMarkFilter: ApplySourceMarkFilter = ApplySourceMarkFilter.NONE,
+    var strictlyManualCreation: Boolean = false,
     var virtualText: InlayMarkVirtualText? = null,
     var activateOnMouseClick: Boolean = true,
     override var activateOnKeyboardShortcut: Boolean = false, //todo: remove

@@ -15,5 +15,5 @@ import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfigurati
 open class ExpressionInlayMark @JvmOverloads constructor(
     override val sourceFileMarker: SourceFileMarker,
     override var psiExpression: UExpression,
-    override val configuration: InlayMarkConfiguration = pluginConfiguration.defaultInlayMarkConfiguration.copy()
+    override val configuration: InlayMarkConfiguration = pluginConfiguration.inlayMarkConfiguration.copy()
 ) : ExpressionSourceMark(sourceFileMarker, psiExpression), InlayMark
