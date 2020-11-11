@@ -53,6 +53,10 @@ abstract class MentorJob {
         log.debug("{$this}: $msg")
     }
 
+    fun warn(msg: String) {
+        log.warn("{$this}: $msg")
+    }
+
     fun resetJob() {
         log("Job reset")
         currentTask = -1

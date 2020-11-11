@@ -8,6 +8,7 @@ import org.jooq.Parser
 import org.jooq.Query
 import org.jooq.impl.DSL
 import org.jooq.impl.DefaultConfiguration
+import org.jooq.impl.ParserException
 
 
 /**
@@ -33,10 +34,14 @@ class FilterBoundedDatabaseQueries(
 
         val traceSpans = job.context.get(byTraceSpansContext)
         traceSpans.forEach { traceSpan ->
-            //todo: impl more scenarios, etc
-            val query: Query = parser.parseQuery(traceSpan.tags["db.statement"])
-            if (!query.hasLimit()) {
-                filteredSpans.add(traceSpan)
+            try {
+                //todo: impl more scenarios, etc
+                val query: Query = parser.parseQuery(traceSpan.tags["db.statement"])
+                if (!query.hasLimit()) {
+                    filteredSpans.add(traceSpan)
+                }
+            } catch (ex: ParserException) {
+                job.warn("Unsupported query: ${ex.sql()}")
             }
         }
 
