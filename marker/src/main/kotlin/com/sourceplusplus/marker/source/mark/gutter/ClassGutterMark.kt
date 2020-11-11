@@ -20,8 +20,7 @@ open class ClassGutterMark(
     override var psiClass: UClass
 ) : ClassSourceMark(sourceFileMarker, psiClass), GutterMark {
 
-    final override val configuration: GutterMarkConfiguration =
-        SourceMarker.configuration.defaultGutterMarkConfiguration
+    final override val configuration: GutterMarkConfiguration = SourceMarker.configuration.gutterMarkConfiguration
     private var visible: AtomicBoolean = AtomicBoolean()
 
     override fun isVisible(): Boolean {

@@ -275,8 +275,9 @@ object SourceMarkerPlugin {
         }
         gutterMarkConfig.componentProvider = componentProvider
 
-        SourceMarker.configuration.defaultGutterMarkConfiguration = gutterMarkConfig
-        SourceMarker.configuration.defaultInlayMarkConfiguration.componentProvider = componentProvider
+        SourceMarker.configuration.gutterMarkConfiguration = gutterMarkConfig
+        SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
+        SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true
 
         if (config.rootSourcePackage != null) {
             SourceMarker.configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->

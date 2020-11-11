@@ -15,5 +15,5 @@ import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfigurati
 open class MethodInlayMark @JvmOverloads constructor(
     override val sourceFileMarker: SourceFileMarker,
     override var psiMethod: UMethod,
-    override val configuration: InlayMarkConfiguration = pluginConfiguration.defaultInlayMarkConfiguration.copy()
+    override val configuration: InlayMarkConfiguration = pluginConfiguration.inlayMarkConfiguration.copy()
 ) : MethodSourceMark(sourceFileMarker, psiMethod), InlayMark

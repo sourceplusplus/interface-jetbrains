@@ -20,7 +20,7 @@ open class ExpressionGutterMark(
     override var psiExpression: UExpression
 ) : ExpressionSourceMark(sourceFileMarker, psiExpression), GutterMark {
 
-    override val configuration: GutterMarkConfiguration = pluginConfiguration.defaultGutterMarkConfiguration.copy()
+    override val configuration: GutterMarkConfiguration = pluginConfiguration.gutterMarkConfiguration.copy()
     private var visible: AtomicBoolean = AtomicBoolean()
 
     override fun isVisible(): Boolean {

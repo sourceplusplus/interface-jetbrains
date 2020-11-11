@@ -15,6 +15,6 @@ import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
 class SourceMarkerConfiguration {
     var createSourceMarkFilter: CreateSourceMarkFilter = CreateSourceMarkFilter.ALL
     var sourceFileMarkerProvider: SourceFileMarkerProvider = object : SourceFileMarkerProvider {}
-    var defaultGutterMarkConfiguration: GutterMarkConfiguration = GutterMarkConfiguration()
-    var defaultInlayMarkConfiguration: InlayMarkConfiguration = InlayMarkConfiguration()
+    var gutterMarkConfiguration: GutterMarkConfiguration = GutterMarkConfiguration()
+    var inlayMarkConfiguration: InlayMarkConfiguration = InlayMarkConfiguration()
 }

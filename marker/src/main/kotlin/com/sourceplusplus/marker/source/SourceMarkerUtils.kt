@@ -446,19 +446,7 @@ object SourceMarkerUtils {
     @JvmStatic
     fun getFullyQualifiedName(expression: UExpression): String {
         val qualifiedMethodName = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
-        val psiFile = expression.getContainingUFile()!!.sourcePsi
-        val document: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile)!!
-
-        return if (expression is UDeclarationsExpression) {
-            //todo: support for multi-declaration statements
-            """$qualifiedMethodName#${
-                document.getLineNumber(expression.declarations[0].sourcePsi!!.textOffset)
-            }#${Base64.getEncoder().encodeToString(expression.toString().toByteArray())}"""
-        } else {
-            """$qualifiedMethodName#${
-                document.getLineNumber(expression.sourcePsi!!.textOffset)
-            }#${Base64.getEncoder().encodeToString(expression.toString().toByteArray())}"""
-        }
+        return """$qualifiedMethodName#${Base64.getEncoder().encodeToString(expression.toString().toByteArray())}"""
     }
 
     /**

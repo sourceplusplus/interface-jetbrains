@@ -16,7 +16,6 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
@@ -25,10 +24,12 @@ import com.intellij.ui.paint.EffectPainter
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.SourceMarker.getSourceFileMarker
 import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
 import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.kotlin.psi.psiUtil.getParentOfType
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
@@ -53,7 +54,6 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
         @Volatile
         @JvmField
         var latestInlayMarkAddedAt: Long = -1L
-        private var currentProject: Project? = null
 
         init {
             SourceMarker.addGlobalSourceMarkEventListener { event ->
@@ -83,26 +83,18 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                 || (parent is KtNamedFunction && element === parent.nameIdentifier)
             ) {
                 val fileMarker = getSourceFileMarker(element.containingFile)!!
-                currentProject = fileMarker.project
-
                 val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(
                     element.parent.toUElement() as UMethod
                 )
-                return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) {
-                    null
-                } else {
+                return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
                     SourceMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
                 }
             } else if (element is PsiStatement) {
                 val fileMarker = getSourceFileMarker(element.containingFile)!!
-                currentProject = fileMarker.project
-
                 val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(
                     SourceMarkerUtils.getUniversalExpression(element).toUElement() as UExpression
                 )
-                return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) {
-                    null
-                } else {
+                return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
                     SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
                 }
             }
@@ -133,7 +125,12 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
         return object : FactoryInlayHintsCollector(editor) {
             override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
                 val fileMarker = getSourceFileMarker(element.containingFile) ?: return true
-                val inlayMark = createInlayMarkIfNecessary(element) ?: return true
+                var inlayMark = element.getUserData(SourceKey.InlayMark)
+                if (inlayMark == null) {
+                    if (SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation) return true else {
+                        inlayMark = createInlayMarkIfNecessary(element) ?: return true
+                    }
+                }
                 if (!fileMarker.containsSourceMark(inlayMark) && !inlayMark.canApply()) return true
                 if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply()
                 val virtualText = inlayMark.configuration.virtualText ?: return true
@@ -150,30 +147,33 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                     }
                 }
 
+                val statement = if (element is PsiStatement) element else {
+                    element.getParentOfType(true)
+                }!!
                 if (virtualText.useInlinePresentation) {
                     if (virtualText.showAfterLastChildWhenInline) {
                         sink.addInlineElement(
-                            element.lastChild.textRange.endOffset,
+                            statement.lastChild.textRange.endOffset,
                             virtualText.relatesToPrecedingText,
                             representation
                         )
                     } else {
                         sink.addInlineElement(
-                            element.textRange.startOffset,
+                            statement.textRange.startOffset,
                             virtualText.relatesToPrecedingText,
                             representation
                         )
                     }
                 } else {
-                    if (element.parent is PsiMethod) {
-                        virtualText.spacingTillMethodText = element.parent.prevSibling.text
+                    if (statement.parent is PsiMethod) {
+                        virtualText.spacingTillMethodText = statement.parent.prevSibling.text
                             .replace("\n", "").count { it == ' ' }
                     }
 
-                    var startOffset = element.textRange.startOffset
+                    var startOffset = statement.textRange.startOffset
                     if (virtualText.showBeforeAnnotationsWhenBlock) {
-                        if (element.parent is PsiMethod) {
-                            val annotations = (element.parent as PsiMethod).annotations
+                        if (statement.parent is PsiMethod) {
+                            val annotations = (statement.parent as PsiMethod).annotations
                             if (annotations.isNotEmpty()) {
                                 startOffset = annotations[0].textRange.startOffset
                             }
