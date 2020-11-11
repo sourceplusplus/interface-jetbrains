@@ -46,7 +46,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
                     is KtFile -> true
                     else -> false
                 }
-            } catch (t: Throwable) {
+            } catch (ex: NoClassDefFoundError) {
                 false
             }
         }
