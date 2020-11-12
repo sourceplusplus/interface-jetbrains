@@ -6,6 +6,7 @@ import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import org.jooq.Parser
 import org.jooq.Query
+import org.jooq.SelectQuery
 import org.jooq.impl.DSL
 import org.jooq.impl.DefaultConfiguration
 import org.jooq.impl.ParserException
@@ -37,7 +38,7 @@ class FilterBoundedDatabaseQueries(
             try {
                 //todo: impl more scenarios, etc
                 val query: Query = parser.parseQuery(traceSpan.tags["db.statement"])
-                if (!query.hasLimit()) {
+                if (query is SelectQuery<*> && !query.hasLimit()) {
                     filteredSpans.add(traceSpan)
                 }
             } catch (ex: ParserException) {
@@ -49,7 +50,7 @@ class FilterBoundedDatabaseQueries(
     }
 
     //todo: remove when jooq offers public access to parsed queries
-    private fun Query.hasLimit(): Boolean {
+    private fun SelectQuery<*>.hasLimit(): Boolean {
         val limitField = javaClass.getDeclaredField("limit")
         limitField.isAccessible = true
         val limit = limitField.get(this)
