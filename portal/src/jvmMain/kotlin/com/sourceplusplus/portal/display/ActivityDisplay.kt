@@ -4,7 +4,6 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayCard
 import com.sourceplusplus.portal.extensions.updateChart
 import com.sourceplusplus.portal.model.PageType
-import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
@@ -14,14 +13,16 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.*
 import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
 import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import io.vertx.core.json.JsonObject
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import org.slf4j.LoggerFactory
 import java.text.DecimalFormat
-import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -126,15 +127,17 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
         }
     }
 
-    fun updateSplineGraph(portal: SourcePortal, metricResult: ArtifactMetricResult, artifactMetrics: ArtifactMetrics) {
-        val times = ArrayList<Instant>() //todo: no toJavaInstant/fromEpochMilliseconds
+    private fun updateSplineGraph(
+        portal: SourcePortal,
+        metricResult: ArtifactMetricResult,
+        artifactMetrics: ArtifactMetrics
+    ) {
+        val times = ArrayList<Instant>()
         var current = metricResult.start
         times.add(current)
-        while (current.toJavaInstant().isBefore(metricResult.stop.toJavaInstant())) {
+        while (current.toEpochMilliseconds() < metricResult.stop.toEpochMilliseconds()) {
             if (metricResult.step == "MINUTE") {
-                current = Instant.fromEpochMilliseconds(
-                    current.toJavaInstant().plus(1, ChronoUnit.MINUTES).toEpochMilli()
-                )
+                current = current.plus(DateTimeUnit.Companion.MINUTE, TimeZone.UTC)
                 times.add(current)
             } else {
                 throw UnsupportedOperationException("Invalid step: " + metricResult.step)
@@ -147,15 +150,14 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             artifactMetrics
         }
 
-        val seriesIndex =
-            when (finalArtifactMetrics.metricType) {
-                ResponseTime_99Percentile -> 0
-                ResponseTime_95Percentile -> 1
-                ResponseTime_90Percentile -> 2
-                ResponseTime_75Percentile -> 3
-                ResponseTime_50Percentile -> 4
-                else -> 0
-            }
+        val seriesIndex = when (finalArtifactMetrics.metricType) {
+            ResponseTime_99Percentile -> 0
+            ResponseTime_95Percentile -> 1
+            ResponseTime_90Percentile -> 2
+            ResponseTime_75Percentile -> 3
+            ResponseTime_50Percentile -> 4
+            else -> 0
+        }
         val seriesData = SplineSeriesData(
             seriesIndex = seriesIndex,
             times = times.map { Instant.fromEpochMilliseconds(it.toEpochMilliseconds()) },
@@ -191,7 +193,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
 //        }
     }
 
-    fun updateCard(portal: SourcePortal, metricResult: ArtifactMetricResult, artifactMetrics: ArtifactMetrics) {
+    private fun updateCard(portal: SourcePortal, metricResult: ArtifactMetricResult, artifactMetrics: ArtifactMetrics) {
         val avg = artifactMetrics.values.average()
         val percents = calculatePercents(artifactMetrics)
 
