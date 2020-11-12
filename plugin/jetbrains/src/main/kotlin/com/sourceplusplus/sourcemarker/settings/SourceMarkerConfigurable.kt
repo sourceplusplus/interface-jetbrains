@@ -2,6 +2,7 @@ package com.sourceplusplus.sourcemarker.settings
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.core.json.Json
@@ -26,8 +27,11 @@ class SourceMarkerConfigurable : Configurable {
         projectSettings.setValue("sourcemarker_plugin_config", Json.encode(updatedConfig))
         form!!.applySourceMarkerConfig(updatedConfig)
 
-        runBlocking {
-            SourceMarkerPlugin.init(ProjectManager.getInstance().openProjects[0])
+        val activeProject = ProjectManager.getInstance().openProjects[0]
+        DumbService.getInstance(activeProject).smartInvokeLater {
+            runBlocking {
+                SourceMarkerPlugin.init(activeProject)
+            }
         }
     }
 
