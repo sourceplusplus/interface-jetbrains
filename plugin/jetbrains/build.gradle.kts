@@ -5,8 +5,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "0.4.22"
-    id("org.jetbrains.changelog") version "0.5.0"
+    id("org.jetbrains.intellij") version "0.6.3"
+    id("org.jetbrains.changelog") version "0.6.2"
 }
 
 // Import variables from gradle.properties file
@@ -30,7 +30,7 @@ intellij {
     downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
 
-    setPlugins("java", "Groovy", "Kotlin", "org.intellij.scala:2020.2.27")
+    setPlugins("java", "Groovy", "Kotlin")
 }
 tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
 tasks.getByName<JavaExec>("runIde") {
@@ -49,20 +49,20 @@ dependencies {
     implementation(project(":protocol"))
     implementation(project(":portal"))
 
-    val vertxVersion = "3.9.2"
+    val vertxVersion = "3.9.4"
     implementation("com.github.sh5i:git-stein:v0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("io.vertx:vertx-web:$vertxVersion") //todo: remove after sockjs bridge removed
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.11.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.11.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.1")
-    implementation("io.dropwizard.metrics:metrics-core:4.1.10.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.11.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.11.3")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3")
+    implementation("io.dropwizard.metrics:metrics-core:4.1.14")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
-    implementation("org.jooq:jooq:3.13.5")
+    implementation("org.jooq:jooq:3.14.3")
 }
 
 tasks {

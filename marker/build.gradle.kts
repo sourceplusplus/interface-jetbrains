@@ -8,14 +8,14 @@ repositories {
 }
 
 dependencies {
-    val intellijVersion = "202.6948.69"
-    val kotlinVersion = "1.4.0"
+    val intellijVersion = "202.7660.26"
+    val kotlinVersion = "1.4.10"
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:29.0-jre")
     implementation("org.jetbrains:annotations:19.0.0")
     compileOnly("org.slf4j:slf4j-api:1.7.30")
-    compileOnly("org.jetbrains.intellij.deps.jcef:jcef:77.1.18-g8e8d602-chromium-77.0.3865.120")
+    compileOnly("org.jetbrains.intellij.deps.jcef:jcef:81.2.24-gc0b313d-chromium-81.0.4044.113")
     compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:analysis:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-analysis:$intellijVersion") { isTransitive = false }
@@ -37,7 +37,7 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:util-rt:$intellijVersion") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion") { isTransitive = false }
-    testImplementation("junit:junit:4.12")
+    testImplementation("junit:junit:4.13.1")
 }
 
 tasks {
