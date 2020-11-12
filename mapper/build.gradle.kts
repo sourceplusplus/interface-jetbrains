@@ -9,13 +9,13 @@ repositories {
 }
 
 dependencies {
-    val intellijVersion = "202.6948.69"
+    val intellijVersion = "202.7660.26"
 
     implementation(project(":protocol"))
     compileOnly(project(":marker")) //todo: only need MarkerUtils
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.apache.commons:commons-lang3:3.11")
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.8.0.202006091008-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:5.9.0.202009080501-r")
     implementation("com.google.guava:guava:29.0-jre")
 
     compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion") { isTransitive = false }
