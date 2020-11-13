@@ -118,7 +118,7 @@ fun main() {
                 endTime = Clock.System.now(),
                 component = "DATABASE",
                 serviceCode = "SERVICE_CODE",
-                type = "TYPE"
+                type = listOf("Entry", "Exit", "Local", "UNRECOGNIZED").random()
             )
             val spanInfo = TraceSpanInfo(
                 span = span,
@@ -142,7 +142,7 @@ fun main() {
             startTime = Clock.System.now(),
             endTime = Clock.System.now(),
             serviceCode = "SERVICE_CODE",
-            type = "TYPE",
+            type = listOf("Entry", "Exit", "Local", "UNRECOGNIZED").random(),
             tags = mapOf(
                 "thing1" to UUID.randomUUID().toString(),
                 "thing2" to UUID.randomUUID().toString(),
