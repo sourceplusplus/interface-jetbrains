@@ -7,9 +7,9 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateChart
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
-import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
 import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
 import com.sourceplusplus.protocol.artifact.metrics.SplineChart
+import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -29,25 +29,15 @@ fun EventBus.displayCard(portalUuid: String, card: BarTrendCard) {
     send(DisplayCard(portalUuid), JsonObject(Json.encode(card)))
 }
 
-//todo: name says spaninfo but is tracespan
-fun EventBus.displaySpanInfo(portalUuid: String, span: TraceSpan) {
+fun EventBus.displayTraceSpan(portalUuid: String, span: TraceSpan) {
     send(DisplaySpanInfo(portalUuid), JsonObject(Json.encode(span)))
 }
 
 @Deprecated("")
-fun EventBus.displaySpanInfo(portalUuid: String, span: JsonObject) {
+fun EventBus.displayTraceSpan(portalUuid: String, span: JsonObject) {
     send(DisplaySpanInfo(portalUuid), span)
 }
 
-fun EventBus.displayTraceStack(portalUuid: String, traceSpans: List<TraceSpanInfo>) {
-    val arr = JsonArray()
-    traceSpans.forEach {
-        arr.add(JsonObject(Json.encode(it)))
-    }
-    send(DisplayTraceStack(portalUuid), arr)
-}
-
-@Deprecated("")
-fun EventBus.displayTraceStack(portalUuid: String, traceSpans: JsonArray) {
-    send(DisplayTraceStack(portalUuid), traceSpans)
+fun EventBus.displayTraceStack(portalUuid: String, traceStackPath: TraceStackPath) {
+    send(DisplayTraceStack(portalUuid), JsonObject(Json.encode(traceStackPath)))
 }

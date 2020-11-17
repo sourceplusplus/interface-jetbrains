@@ -29,16 +29,8 @@ fun Duration.toPrettyDuration(decimalPlaces: Int): String {
         prettyDuration = "${hours}h " + (round((durationDiff.asMinutes().toDouble() * 10)) / 10).toFixed(decimalPlaces)
         postText = "m ago"
     } else if (minutes().toInt() > 0) {
-        val minutes = minutes()
-        val durationDiff = subtract(minutes, "minutes")
-        val seconds = durationDiff.seconds()
-        if (seconds == 0) {
-            prettyDuration = (minutes.toString() + "")
-            postText = "m ago"
-        } else {
-            prettyDuration = (minutes.toString() + "m " + seconds() + "")
-            postText = "s ago"
-        }
+        prettyDuration = "${minutes()}"
+        postText = "m ago"
     } else if (seconds().toInt() > 0) {
         prettyDuration = (seconds().toString() + "")
         postText = "s ago"

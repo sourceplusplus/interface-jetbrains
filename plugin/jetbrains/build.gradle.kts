@@ -1,6 +1,5 @@
 import org.jetbrains.changelog.closure
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java")
@@ -66,16 +65,6 @@ dependencies {
 }
 
 tasks {
-    withType<JavaCompile> {
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
-    }
-    listOf("compileKotlin", "compileTestKotlin").forEach {
-        getByName<KotlinCompile>(it) {
-            kotlinOptions.jvmTarget = "1.8"
-        }
-    }
-
     patchPluginXml {
         version(pluginVersion)
         sinceBuild(pluginSinceBuild)
@@ -108,16 +97,6 @@ tasks {
         dependsOn("patchChangelog")
         token(System.getenv("PUBLISH_TOKEN"))
         channels(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
-    }
-
-    test {
-        testLogging {
-            events("passed", "skipped", "failed")
-            setExceptionFormat("full")
-
-            outputs.upToDateWhen { false }
-            showStandardStreams = true
-        }
     }
 
     //todo: should be a way to just add implementation() to dependencies

@@ -27,7 +27,9 @@ class SourceMarkJcefComponent(
         private val client: JBCefClient by lazy { JBCefApp.getInstance().createClient() }
 
         init {
-            Disposer.register(ApplicationManager.getApplication(), client)
+            if (!ApplicationManager.getApplication().isUnitTestMode) {
+                Disposer.register(ApplicationManager.getApplication(), client)
+            }
         }
     }
 

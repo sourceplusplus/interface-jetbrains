@@ -11,5 +11,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ArtifactSummarizedMetrics(
     val metricType: MetricType,
-    val value: String
+    var value: Double
 )

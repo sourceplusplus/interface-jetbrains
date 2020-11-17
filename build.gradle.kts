@@ -42,6 +42,30 @@ subprojects {
             parallel = true
             buildUponDefaultConfig = true
         }
+
+        withType<JavaCompile> {
+            sourceCompatibility = "1.8"
+            targetCompatibility = "1.8"
+        }
+        withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+            kotlinOptions.apiVersion = "1.4"
+            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.freeCompilerArgs +=
+                listOf(
+                    "-Xno-optimized-callable-references",
+                    "-Xjvm-default=compatibility"
+                )
+        }
+
+        withType<Test> {
+            testLogging {
+                events("passed", "skipped", "failed")
+                setExceptionFormat("full")
+
+                outputs.upToDateWhen { false }
+                showStandardStreams = true
+            }
+        }
     }
 }
 

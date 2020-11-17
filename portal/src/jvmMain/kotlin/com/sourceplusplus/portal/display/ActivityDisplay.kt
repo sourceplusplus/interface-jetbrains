@@ -254,7 +254,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             }
         }
 
-        val percentMax = metricArr.maxOrNull()!!
+        val percentMax = metricArr.max()!!
         val percents = ArrayList<Double>()
         for (i in metricArr.indices) {
             if (percentMax == 0.0) {

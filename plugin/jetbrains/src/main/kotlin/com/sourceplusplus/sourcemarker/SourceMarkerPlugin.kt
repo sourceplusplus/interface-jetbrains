@@ -36,6 +36,7 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
+import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.sourcemarker.listeners.ArtifactAdviceListener
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
@@ -83,6 +84,7 @@ object SourceMarkerPlugin {
         vertx.eventBus().registerDefaultCodec(SourcePortal::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(ArtifactMetricResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(TraceResult::class.java, LocalMessageCodec())
+        vertx.eventBus().registerDefaultCodec(TraceStack::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(TraceSpanStackQueryResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(EndpointResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(JvmStackTraceElement::class.java, LocalMessageCodec())
@@ -123,7 +125,9 @@ object SourceMarkerPlugin {
                     ?.getSubPackages(ProjectScope.getProjectScope(project))
 
                 //remove non-code packages
-                basePackages = basePackages!!.filter { it.qualifiedName != "asciidoc" }.toTypedArray()
+                basePackages = basePackages!!.filter {
+                    it.qualifiedName != "asciidoc" && it.qualifiedName != "lib"
+                }.toTypedArray()
 
                 //determine deepest common source package
                 if (basePackages.isNotEmpty()) {
@@ -133,6 +137,7 @@ object SourceMarkerPlugin {
                         basePackages = basePackages[0]!!.getSubPackages(ProjectScope.getProjectScope(project))
                     }
                     if (rootPackage != null) {
+                        log.info("Detected root source package: $rootPackage")
                         config.rootSourcePackage = rootPackage
                         projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
                     }

@@ -13,6 +13,8 @@ import com.intellij.util.PsiNavigateUtil
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import io.vertx.core.Promise
+import io.vertx.kotlin.coroutines.await
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 
@@ -56,6 +58,14 @@ object ArtifactNavigator {
             }
         }
         throw IllegalArgumentException("Failed to find: $artifactQualifiedName")
+    }
+
+    suspend fun canNavigateTo(project: Project, artifactQualifiedName: ArtifactQualifiedName): Boolean {
+        val promise = Promise.promise<Boolean>()
+        ApplicationManager.getApplication().invokeLater {
+            promise.complete(canNavigateToMethod(project, artifactQualifiedName.identifier))
+        }
+        return promise.future().await()
     }
 
     fun canNavigateToMethod(project: Project, artifactQualifiedName: String): Boolean {

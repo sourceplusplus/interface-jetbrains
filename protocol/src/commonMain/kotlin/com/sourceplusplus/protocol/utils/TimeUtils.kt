@@ -33,16 +33,6 @@ fun Double.fromPerSecondToPrettyFrequency(): String {
 }
 
 @OptIn(ExperimentalTime::class)
-fun Duration.humanReadable(): String {
-    if (inSeconds < 1) {
-        return "${toLongMilliseconds()}ms"
-    }
-    return toString().substring(2)
-        .replace("(\\d[HMS])(?!$)", "$1 ")
-        .toLowerCase()
-}
-
-@OptIn(ExperimentalTime::class)
 fun Duration.toPrettyDuration(): String {
     toComponents { days, hours, minutes, seconds, _ ->
         var prettyDuration = ""
@@ -53,14 +43,14 @@ fun Duration.toPrettyDuration(): String {
             if (prettyDuration.isNotEmpty()) prettyDuration += " "
             prettyDuration += "${hours}h"
         }
-        if (minutes > 0) {
+        if (days == 0 && minutes > 0) {
             if (prettyDuration.isNotEmpty()) prettyDuration += " "
             prettyDuration += "${minutes}m"
-        } else if (seconds > 0) {
+        } else if (minutes == 0 && seconds > 0) {
             if (prettyDuration.isNotEmpty()) prettyDuration += " "
             prettyDuration += "${seconds}s"
         } else if (days == 0 && hours == 0 && minutes == 0) {
-            prettyDuration = "moments"
+            prettyDuration = "${inMilliseconds.toInt()}ms"
         }
         return prettyDuration
     }

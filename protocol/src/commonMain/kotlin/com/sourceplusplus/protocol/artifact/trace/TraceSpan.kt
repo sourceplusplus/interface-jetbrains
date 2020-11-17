@@ -33,5 +33,38 @@ data class TraceSpan(
     val hasChildStack: Boolean? = null,
     val layer: String? = null,
     val tags: Map<String, String> = emptyMap(),
-    val logs: List<TraceSpanLogEntry> = emptyList()
-)
+    val logs: List<TraceSpanLogEntry> = emptyList(),
+    val meta: MutableMap<String, String> = mutableMapOf()
+) {
+    fun putMetaInt(tag: String, value: Int) {
+        meta[tag] = value.toString()
+    }
+
+    fun putMetaLong(tag: String, value: Long) {
+        meta[tag] = value.toString()
+    }
+
+    fun putMetaDouble(tag: String, value: Double) {
+        meta[tag] = value.toString()
+    }
+
+    fun putMetaString(tag: String, value: String) {
+        meta[tag] = value
+    }
+
+    fun putMetaInt(tag: String): Int? {
+        return meta[tag]?.toIntOrNull()
+    }
+
+    fun getMetaLong(tag: String): Long {
+        return meta[tag]!!.toLong()
+    }
+
+    fun getMetaDouble(tag: String): Double {
+        return meta[tag]!!.toDouble()
+    }
+
+    fun getMetaString(tag: String): String {
+        return meta[tag]!!
+    }
+}

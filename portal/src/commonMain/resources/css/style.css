@@ -200,3 +200,9 @@
     padding-top: 0.678em !important;
     padding-bottom: 0.678em !important;
 }
+
+.ui.indeterminate.spp_light_blue_bar.progress .bar::before,
+.ui.progress .spp_light_blue_bar.bar,
+.ui.spp_light_blue_bar.progress .bar {
+    background-color: #506970;
+}

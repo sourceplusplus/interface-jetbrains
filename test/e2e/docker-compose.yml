@@ -24,7 +24,7 @@ services:
 #    container_name: skywalking-ui
 #    hostname: skywalking-ui
 #    ports:
-#      - "8888:8080"
+#      - "9999:8080"
 #    depends_on:
 #      - skywalking-oap
 #    links:

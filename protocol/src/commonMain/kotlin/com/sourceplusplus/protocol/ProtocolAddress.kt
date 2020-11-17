@@ -9,6 +9,7 @@ package com.sourceplusplus.protocol
 object ProtocolAddress {
     object Global { //todo: could probably rename to Plugin to indicate it's the module consuming message
         //Portal
+        const val FindPortal = "FindAndOpenPortal"
         const val FindAndOpenPortal = "FindAndOpenPortal"
         const val OpenPortal = "OpenPortal"
         const val ClosePortal = "ClosePortal"
@@ -18,6 +19,7 @@ object ProtocolAddress {
         const val GetPortalConfiguration = "GetPortalConfiguration"
         const val CanOpenPortal = "CanOpenPortal"
         const val ChangedPortalArtifact = "ChangedPortalArtifact"
+        const val CanNavigateToArtifact = "CanNavigateToArtifact"
         const val NavigateToArtifact = "NavigateToArtifact"
 
         //Portal - Overview
@@ -37,6 +39,7 @@ object ProtocolAddress {
         const val TracesTabOpened = "TracesTabOpened"
         const val ClickedDisplayTraces = "ClickedDisplayTraces"
         const val ClickedDisplayTraceStack = "ClickedDisplayTraceStack"
+        const val ClickedDisplayInnerTraceStack = "ClickedDisplayInnerTraceStack"
         const val ClickedDisplaySpanInfo = "ClickedDisplaySpanInfo"
         const val GetTraceStack = "GetTraceStack"
         const val RefreshTraces = "RefreshTraces"
@@ -75,10 +78,6 @@ object ProtocolAddress {
 
         fun DisplayTraceStack(portalUuid: String): String {
             return "$portalUuid-DisplayTraceStack"
-        }
-
-        fun DisplayInnerTraceStack(portalUuid: String): String {
-            return "$portalUuid-DisplayInnerTraceStack"
         }
 
         fun DisplaySpanInfo(portalUuid: String): String {

@@ -20,29 +20,10 @@ dependencies {
     testImplementation(project(":monitor:skywalking"))
 }
 
-//todo: should be able to move to root project
 tasks {
-    withType<JavaCompile> {
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
-    }
-    listOf("compileKotlin", "compileTestKotlin").forEach {
-        getByName<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>(it) {
-            kotlinOptions.jvmTarget = "1.8"
-        }
-    }
-
     test {
         dependsOn(":downloadSkywalking", ":composeUp")
         rootProject.tasks.findByName("composeUp")!!.mustRunAfter("downloadSkywalking")
         finalizedBy(":composeDown")
-
-        testLogging {
-            events("passed", "skipped", "failed")
-            setExceptionFormat("full")
-
-            outputs.upToDateWhen { false }
-            showStandardStreams = true
-        }
     }
 }
