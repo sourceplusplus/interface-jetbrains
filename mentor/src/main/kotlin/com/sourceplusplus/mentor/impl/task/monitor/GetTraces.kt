@@ -91,7 +91,7 @@ class GetTraces(
         }
 
         if (traceResult.traces.isNotEmpty()) {
-            job.log("Found ${traceResult.traces.size} matching traces")
+            job.trace("Found ${traceResult.traces.size} matching traces")
         }
         job.context.put(TRACE_RESULT, traceResult)
         job.trace("Added context\n\tKey: $TRACE_RESULT\n\tSize: ${traceResult.traces.size}")
