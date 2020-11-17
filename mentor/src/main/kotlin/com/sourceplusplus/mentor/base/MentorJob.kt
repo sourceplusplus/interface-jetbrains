@@ -58,7 +58,7 @@ abstract class MentorJob {
     }
 
     fun resetJob() {
-        log("Job reset")
+        trace("Job reset")
         currentTask = -1
         context.clear()
     }
