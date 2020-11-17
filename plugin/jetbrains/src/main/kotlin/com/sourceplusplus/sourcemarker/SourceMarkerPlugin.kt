@@ -70,6 +70,7 @@ import java.util.*
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 object SourceMarkerPlugin {
 
     private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
