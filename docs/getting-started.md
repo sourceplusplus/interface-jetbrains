@@ -103,7 +103,9 @@ The Traces view is used to navigate gathered distributed traces. The Traces view
 
 Clicking on an individual trace will display the direct children traces. If those child traces have children as well which can be correlated to specific source code, clicking on those traces will display the next layer of traces and simultaneously navigate to the correlating source code.
 
-![](../.github/media/screenshots/trace_stack.gif)
+![](../.github/media/screenshots/trace_stack.png)
+
+
 
 #### Span Info
 
