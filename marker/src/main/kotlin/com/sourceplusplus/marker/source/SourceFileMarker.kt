@@ -3,6 +3,7 @@ package com.sourceplusplus.marker.source
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Sets
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiClassOwner
@@ -65,7 +66,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     }
 
     open fun refresh() {
-        if (!psiFile.project.isDisposed) {
+        if (!psiFile.project.isDisposed && !ApplicationManager.getApplication().isUnitTestMode) {
             DaemonCodeAnalyzer.getInstance(psiFile.project).restart(psiFile)
         }
     }

@@ -3,7 +3,6 @@ package com.sourceplusplus.portal.page
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
-import com.sourceplusplus.portal.extensions.toFixed
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.portal.model.PageType.*
@@ -12,22 +11,20 @@ import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
 import com.sourceplusplus.portal.model.TraceTableType.*
 import com.sourceplusplus.portal.template.*
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
-import com.sourceplusplus.protocol.artifact.trace.TraceResult
-import com.sourceplusplus.protocol.artifact.trace.TraceSpan
-import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
 import com.sourceplusplus.protocol.portal.PortalConfiguration
+import com.sourceplusplus.protocol.utils.toPrettyDuration
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.dom.addClass
@@ -45,6 +42,7 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import org.w3c.dom.get
 import kotlin.js.json
+import kotlin.time.ExperimentalTime
 
 /**
  * todo: description.
@@ -65,16 +63,19 @@ class TracesPage(
         eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
             displayTraces(Json.decodeFromDynamic(message.body))
         }
-        eb.registerHandler(DisplayInnerTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
-            displayTraceStack(*Json.decodeFromDynamic(message.body))
-        }
         eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
             displayTraceStack(*Json.decodeFromDynamic(message.body))
         }
         eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
             displaySpanInfo(Json.decodeFromDynamic(message.body))
         }
-        eb.publish(TracesTabOpened, json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name))
+        eb.publish(
+            TracesTabOpened, json(
+                "portalUuid" to portalUuid,
+                "traceOrderType" to traceOrderType.name,
+                "traceDisplayType" to traceDisplayType.name
+            )
+        )
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
@@ -107,13 +108,13 @@ class TracesPage(
                     table(
                         "secondary_background_color no_top_margin",
                         "top_trace_table", "trace_table",
-                        tableTypes = arrayOf(OPERATION, OCCURRED, EXEC, STATUS)
+                        tableTypes = arrayOf(OPERATION, OCCURRED, EXEC)
                     )
                     table(
                         "trace_stack_table hidden_full_height",
                         "trace_stack_table", "stack_table",
                         "secondary_background_color", "stack_table_background",
-                        tableTypes = arrayOf(OPERATION, EXEC, EXEC_PCT, STATUS)
+                        tableTypes = arrayOf(OPERATION, COMPONENT, EXEC_PCT, EXEC)
                     )
                     spanInfoPanel(START_TIME, END_TIME)
                 }
@@ -123,6 +124,7 @@ class TracesPage(
         setupUI()
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun displayTraces(traceResult: TraceResult) {
         console.log("Displaying ${traceResult.total} traces")
         traceDisplayType = TraceDisplayType.TRACES
@@ -139,6 +141,8 @@ class TracesPage(
 
             val rowHtml = document.create.tr {
                 id = "trace-${htmlTraceId}"
+                if (trace.error == true) classes += "negative"
+
                 td {
                     onClickFunction = {
                         clickedDisplayTraceStack(
@@ -150,7 +154,11 @@ class TracesPage(
                     style = "border-top: 0 !important; padding-left: 20px"
                     i {
                         style = "font-size:1.5em;margin-right:5px"
-                        classes = setOf("far", "fa-plus-square")
+                        classes = setOf(
+                            "far",
+                            "fa-globe-americas",
+                            if (trace.error == true) "spp_red_color" else "spp_blue_color"
+                        )
                     }
                     span {
                         style = "vertical-align:top"
@@ -164,27 +172,15 @@ class TracesPage(
                 td {
                     classes = setOf("trace_time", "collapsing")
                     id = "trace_time_$htmlTraceId"
+                    attributes["data-sort-value"] = trace.start.toEpochMilliseconds().toString()
                     attributes["data-value"] = trace.start.toEpochMilliseconds().toString()
                     style = "text-align: center"
                     +timeOccurredDuration.toPrettyDuration(1)
                 }
                 td {
                     classes += "collapsing"
-                    +trace.prettyDuration!!
-                }
-                td {
-                    classes += "collapsing"
-                    style = "padding: 0; text-align: center; font-size: 20px"
-                    if (trace.error!!) {
-                        i {
-                            classes = setOf("exclamation", "triangle", "red", "icon")
-                        }
-                    } else {
-                        style.plus("color: #808083")
-                        i {
-                            classes = setOf("check", "icon")
-                        }
-                    }
+                    attributes["data-sort-value"] = trace.duration.toString()
+                    +trace.duration.toPrettyDuration()
                 }
             }
 
@@ -205,12 +201,12 @@ class TracesPage(
         updateOccurredLabels()
     }
 
-    override fun displayTraceStack(vararg traceStack: TraceSpanInfo) {
+    override fun displayTraceStack(traceStackPath: TraceStackPath) {
         console.log("Displaying trace stack")
         traceDisplayType = TraceDisplayType.TRACE_STACK
         resetUI()
 
-        if (traceStack[0].innerLevel > 0) {
+        if (traceStackPath.getCurrentRoot() != null) {
             jq("#latest_traces_header_text").text("Parent Stack")
         } else {
             when (traceOrderType) {
@@ -220,93 +216,134 @@ class TracesPage(
             }
         }
 
-        jq("#trace_id_field").`val`(traceStack[0].span.traceId)
-        jq("#time_occurred_field").`val`(traceStack[0].span.startTime.toMoment().format())
+        for ((segIdx, segment) in traceStackPath.traceStack.filter {
+            traceStackPath.getCurrentSegment() == null || it == traceStackPath.getCurrentSegment()
+        }.withIndex()) {
+            if (segIdx != 0) {
+                jq("#stack_table").append(document.create.tr {
+                    td { div("ui horizontal divider") }
+                    td { div("ui horizontal divider") }
+                    td { div("ui horizontal divider") }
+                    td { div("ui horizontal divider") }
+                })
+            }
 
-        for (i in traceStack.indices) {
-            val spanInfo = traceStack[i]
-            val span = spanInfo.span
+            displayTraceSegment(segment, traceStackPath)
+        }
+    }
 
+    @OptIn(ExperimentalTime::class)
+    private fun displayTraceSegment(segment: TraceStack.Segment, traceStackPath: TraceStackPath) {
+        val segmentSpans = segment.traceSpans
+        val spans = if (traceStackPath.getCurrentRoot() != null) {
+            listOf(traceStackPath.getCurrentRoot()!!) + segment.getChildren(traceStackPath.getCurrentRoot()!!)
+        } else {
+            listOf(segmentSpans[0]) + segment.getChildren(0)
+        }
+        jq("#trace_id_field").`val`(spans[0].traceId)
+        jq("#time_occurred_field").`val`(spans[0].startTime.toMoment().format())
+
+        for (i in spans.indices) {
+            val span = spans[i]
             val rowHtml = document.create.tr {
+                if (span.error == true) classes += "negative"
+
                 td {
                     onClickFunction = {
-                        clickedDisplaySpanInfo(
-                            spanInfo.appUuid,
-                            spanInfo.rootArtifactQualifiedName,
-                            span.traceId,
-                            span.segmentId,
-                            span.spanId
-                        )
+                        if (segment.hasChildren(span) && span.spanId > 0 && span !== traceStackPath.getCurrentRoot()) {
+                            clickedDisplayInnerTraceStack(
+                                span.getMetaString("appUuid"),
+                                span.traceId,
+                                span.segmentId,
+                                span.spanId
+                            )
+                        } else {
+                            clickedDisplaySpanInfo(
+                                span.getMetaString("appUuid"),
+                                span.getMetaString("rootArtifactQualifiedName"),
+                                span.traceId,
+                                span.segmentId,
+                                span.spanId
+                            )
+                        }
                     }
                     style = "border-top: 0 !important; padding-left: 20px"
-                    if (!COMPONENT_MAPPINGS[span.component].isNullOrEmpty() || span.component != "Unknown") {
+
+                    if (span.type == "Entry") {
+                        i {
+                            style = "font-size:1.5em;margin-right:5px"
+                            classes = setOf(
+                                "fal",
+                                "fa-share",
+                                if (span.error == true) "spp_red_color" else "spp_blue_color"
+                            )
+                        }
+                    } else if (span.type == "Exit") {
+                        i {
+                            style = "font-size:1.5em;margin-right:5px"
+                            classes = setOf(
+                                "fal",
+                                "fa-reply",
+                                if (span.error == true) "spp_red_color" else "spp_blue_color"
+                            )
+                        }
+                    } else {
+                        i {
+                            style = "font-size:1.5em;margin-right:5px"
+                            classes = setOf(
+                                "fal",
+                                "fa-chevron-double-right",
+                                if (span.error == true) "spp_red_color" else "spp_blue_color"
+                            )
+                        }
+                    }
+                    span {
+                        style = "vertical-align:top"
+                        +span.getMetaString("operationName")
+                            .replace("<", "&lt;")
+                            .replace(">", "&gt;")
+                    }
+                }
+                td {
+                    classes += "collapsing"
+                    if (span.component != "Unknown") {
                         var component = COMPONENT_MAPPINGS[span.component]
                         if (component == null) {
                             component = span.component
                         }
                         img {
-                            style = "margin-right:5px;vertical-align:bottom"
                             width = "18px"
                             height = "18px"
                             src = "../themes/default/assets/components/${component?.toUpperCase()}.png"
                         }
-                        +spanInfo.operationName.replace("<", "&lt;").replace(">", "&gt;")
-                    } else if (span.hasChildStack!! || (!configuration.external && !span.artifactQualifiedName.isNullOrEmpty() && i > 0)) {
-                        i {
-                            style = "font-size:1.5em;margin-right:5px;vertical-align:bottom"
-                            classes = setOf("far", "fa-plus-square")
-                        }
-                        +spanInfo.operationName.replace("<", "&lt;").replace(">", "&gt;")
                     } else {
                         i {
                             style = "font-size:1.5em;margin-right:5px"
-                            classes = setOf("far", "fa-info-square")
-                        }
-                        span {
-                            style = "vertical-align:top"
-                            +spanInfo.operationName.replace("<", "&lt;").replace(">", "&gt;")
+                            classes = setOf("far", "fa-microchip")
                         }
                     }
                 }
                 td {
-                    classes += "collapsing"
-                    +spanInfo.timeTook
-                }
-                td {
+                    attributes["data-sort-value"] = span.getMetaDouble("totalTracePercent").toString()
+
                     div {
-                        classes = setOf("ui", "red", "progress")
+                        classes = setOf("ui", "spp_light_blue_bar", "progress")
                         id = "trace_bar_${i}"
-                        attributes["data-percent"] = spanInfo.totalTracePercent.toString()
+                        attributes["data-percent"] = span.getMetaDouble("totalTracePercent").toString()
                         style = "margin: 0"
                         div {
                             classes += "bar"
                             style = "transition-duration: 300ms; display: block; width: ${
-                                spanInfo.totalTracePercent.toFixed(4) //todo: toFixed needed?
+                                span.getMetaDouble("totalTracePercent")
                             }%"
                         }
                     }
                 }
                 td {
                     classes += "collapsing"
-                    style = "padding: 0; text-align: center; font-size: 20px"
-                    when {
-                        span.error!! -> {
-                            i {
-                                classes = setOf("skull", "crossbones", "red", "icon")
-                            }
-                        }
-                        span.childError && i > 0 -> {
-                            i {
-                                classes = setOf("exclamation", "triangle", "red", "icon")
-                            }
-                        }
-                        else -> {
-                            style.plus("color: #808083")
-                            i {
-                                classes = setOf("check", "icon")
-                            }
-                        }
-                    }
+                    val duration = (span.endTime - span.startTime)
+                    attributes["data-sort-value"] = duration.toLongMilliseconds().toString()
+                    +duration.toPrettyDuration()
                 }
             }
 
@@ -545,6 +582,19 @@ class TracesPage(
                 "appUuid" to appUuid,
                 "artifactQualifiedName" to artifactQualifiedName,
                 "traceId" to globalTraceId
+            )
+        )
+    }
+
+    private fun clickedDisplayInnerTraceStack(appUuid: String, traceId: String, segmentId: String, spanId: Int) {
+        eb.send(
+            ClickedDisplayInnerTraceStack,
+            json(
+                "portalUuid" to portalUuid,
+                "appUuid" to appUuid,
+                "traceId" to traceId,
+                "segmentId" to segmentId,
+                "spanId" to spanId
             )
         )
     }

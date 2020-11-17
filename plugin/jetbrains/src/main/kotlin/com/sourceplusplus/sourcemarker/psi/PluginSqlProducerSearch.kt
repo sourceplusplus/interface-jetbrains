@@ -58,7 +58,7 @@ class PluginSqlProducerSearch : SqlProducerSearch {
 
             GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
                 var keepSearching = true
-                for (method in possibleRegressionSources) {
+                for (method in possibleRegressionSources) { //todo: fix dupes
                     for (detector in detectorSet) {
                         try {
                             if (detector.isSqlSource(query, method)) {
@@ -89,17 +89,21 @@ class PluginSqlProducerSearch : SqlProducerSearch {
     private fun dependencySearch(method: UMethod) {
         method.accept(object : AbstractUastVisitor() {
             override fun visitCallExpression(node: UCallExpression): Boolean {
-                val calledMethod = node.resolve() as PsiMethod
-                if (calledMethod.body == null) {
-                    possibleRegressionSources.add(CalledMethod(node, calledMethod))
+                val calledMethod = node.resolve()
+                if (calledMethod != null) {
+                    if (calledMethod.body == null) {
+                        possibleRegressionSources.add(CalledMethod(node, calledMethod))
 
-                    if (calledMethod !is ClsMethodImpl) {
-                        //interface/abstract method; search implementations
-                        val implMethods = OverridingMethodsSearch.search(calledMethod).toList()
-                        implMethods.forEach {
-                            dependencySearch(it.toUElementOfType()!!)
+                        if (calledMethod !is ClsMethodImpl) {
+                            //interface/abstract method; search implementations
+                            val implMethods = OverridingMethodsSearch.search(calledMethod).toList()
+                            implMethods.forEach {
+                                dependencySearch(it.toUElementOfType()!!)
+                            }
                         }
                     }
+                } else {
+                    log.warn("Failed to resolve: $node")
                 }
                 return super.visitCallExpression(node)
             }

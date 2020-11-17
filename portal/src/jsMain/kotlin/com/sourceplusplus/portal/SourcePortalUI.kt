@@ -2,6 +2,7 @@ package com.sourceplusplus.portal
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
+import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.page.ActivityPage
 import com.sourceplusplus.portal.page.ConfigurationPage
 import com.sourceplusplus.portal.page.OverviewPage
@@ -31,9 +32,12 @@ fun main() {
             "/activity", "/activity.html" -> ActivityPage(portalUuid, eb)
             "/traces", "/traces.html" -> {
                 val traceOrderType = TraceOrderType.valueOf(
-                    queryParams.getOrElse("order_type", { "LATEST_TRACES" }).toUpperCase()
+                    queryParams.getOrElse("orderType", { "LATEST_TRACES" }).toUpperCase()
                 )
-                TracesPage(portalUuid, eb, traceOrderType)
+                val traceDisplayType = TraceDisplayType.valueOf(
+                    queryParams.getOrElse("displayType", { "TRACES" }).toUpperCase()
+                )
+                TracesPage(portalUuid, eb, traceOrderType, traceDisplayType)
             }
             "/configuration", "/configuration.html" -> ConfigurationPage(portalUuid, eb)
             else -> OverviewPage(portalUuid, eb)
@@ -43,7 +47,7 @@ fun main() {
         eb.onopen = {
             console.log("Portal connected")
             eb.send(GetPortalConfiguration, portalUuid) { _, message: dynamic ->
-                println("Received portal configuration. Portal: $portalUuid")
+                console.log("Received portal configuration. Portal: $portalUuid")
                 val portalConfiguration = Json.decodeFromDynamic<PortalConfiguration>(message.body)
                 document.getElementsByTagName("head")[0]!!.append {
                     link {
@@ -80,6 +84,7 @@ fun loadTheme() {
     js("\$('.ui.dropdown').dropdown()")
     js("\$('.ui.sidebar').sidebar('setting', 'transition', 'overlay')")
     js("\$('.ui.progress').progress()")
+    js("\$('.ui.table').tablesort()")
 
     jq(".openbtn").on("click", fun() {
         jq(".ui.sidebar").toggleClass("very thin icon")
@@ -101,12 +106,12 @@ fun loadTheme() {
     jq("#activity_link").attr("href", "activity.html$mainGetQuery")
     jq("#sidebar_activity_link").attr("href", "activity.html$mainGetQuery")
 
-    jq("#traces_link_latest").attr("href", "traces.html$mainGetQuery&order_type=latest_traces")
-    jq("#traces_link_slowest").attr("href", "traces.html$mainGetQuery&order_type=slowest_traces")
-    jq("#traces_link_failed").attr("href", "traces.html$mainGetQuery&order_type=failed_traces")
-    jq("#sidebar_traces_link_latest").attr("href", "traces.html$mainGetQuery&order_type=latest_traces")
-    jq("#sidebar_traces_link_slowest").attr("href", "traces.html$mainGetQuery&order_type=slowest_traces")
-    jq("#sidebar_traces_link_failed").attr("href", "traces.html$mainGetQuery&order_type=failed_traces")
+    jq("#traces_link_latest").attr("href", "traces.html$mainGetQuery&orderType=latest_traces")
+    jq("#traces_link_slowest").attr("href", "traces.html$mainGetQuery&orderType=slowest_traces")
+    jq("#traces_link_failed").attr("href", "traces.html$mainGetQuery&orderType=failed_traces")
+    jq("#sidebar_traces_link_latest").attr("href", "traces.html$mainGetQuery&orderType=latest_traces")
+    jq("#sidebar_traces_link_slowest").attr("href", "traces.html$mainGetQuery&orderType=slowest_traces")
+    jq("#sidebar_traces_link_failed").attr("href", "traces.html$mainGetQuery&orderType=failed_traces")
 
     jq("#configuration_link").attr("href", "configuration.html$mainGetQuery")
     jq("#sidebar_configuration_link").attr("href", "configuration.html$mainGetQuery")

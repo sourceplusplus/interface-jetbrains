@@ -52,4 +52,8 @@ class RampDetectionAdvice(
 
         fun predict(x: Double): Double
     }
+
+    override fun toString(): String {
+        return "$type{$artifact - Confidence: ${regression.rSquare}"
+    }
 }

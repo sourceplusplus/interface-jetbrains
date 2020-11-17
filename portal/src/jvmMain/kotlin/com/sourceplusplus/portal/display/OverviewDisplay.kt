@@ -46,10 +46,11 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
             val artifactQualifiedName = Json.decodeValue(
                 it.body().getJsonObject("artifactQualifiedName").toString(), ArtifactQualifiedName::class.java
             )
-            if (!portal.configuration.external) vertx.eventBus().send(ClosePortal, portal)
-
-            vertx.eventBus().send(NavigateToArtifact, artifactQualifiedName)
-            vertx.eventBus().send(FindAndOpenPortal, artifactQualifiedName)
+            if (!portal.configuration.external) {
+                vertx.eventBus().send(ClosePortal, portal)
+                vertx.eventBus().send(NavigateToArtifact, artifactQualifiedName)
+                vertx.eventBus().send(FindAndOpenPortal, artifactQualifiedName)
+            }
         }
     }
 

@@ -19,7 +19,6 @@ data class Trace(
     val start: Instant,
     val error: Boolean? = null,
     val traceIds: List<String>,
-    val prettyDuration: String? = null,
     val partial: Boolean = false,
     val segmentId: String? = null
 )

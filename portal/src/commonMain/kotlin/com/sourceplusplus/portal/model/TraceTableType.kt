@@ -11,8 +11,8 @@ enum class TraceTableType(
     override val isCentered: Boolean
 ) : TableType {
     OPERATION("Operation", false),
+    COMPONENT("", true),
     OCCURRED("Occurred", true),
     EXEC("Exec", true),
-    EXEC_PCT("Exec (%)", true),
-    STATUS("Status", true);
+    EXEC_PCT("Exec (%)", true)
 }

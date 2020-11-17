@@ -24,7 +24,7 @@ fun TagConsumer<HTMLElement>.table(
     tableBodyBackground: String = "",
     vararg tableTypes: TableType = arrayOf()
 ) {
-    this@table.table("ui celled striped table unstackable $tableClasses") {
+    this@table.table("ui sortable celled striped table unstackable $tableClasses") {
         id = tableId
         thead(tableBackground) {
             tr {

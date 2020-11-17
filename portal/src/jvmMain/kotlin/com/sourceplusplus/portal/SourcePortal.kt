@@ -129,7 +129,11 @@ class SourcePortal(
             )
         }
 
-        fun register(appUuid: String, artifactQualifiedName: String, configuration: PortalConfiguration): String {
+        fun register(
+            appUuid: String,
+            artifactQualifiedName: String,
+            configuration: PortalConfiguration = PortalConfiguration()
+        ): String {
             return register(UUID.randomUUID().toString(), appUuid, artifactQualifiedName, configuration)
         }
 
@@ -137,7 +141,7 @@ class SourcePortal(
             portalUuid: String,
             appUuid: String,
             artifactQualifiedName: String,
-            configuration: PortalConfiguration
+            configuration: PortalConfiguration = PortalConfiguration()
         ): String {
             val portal = SourcePortal(portalUuid, Objects.requireNonNull(appUuid), configuration)
             portal.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)

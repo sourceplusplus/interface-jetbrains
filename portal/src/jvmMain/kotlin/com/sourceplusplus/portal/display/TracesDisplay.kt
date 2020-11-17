@@ -1,34 +1,42 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.extensions.displaySpanInfo
+import com.sourceplusplus.portal.extensions.displayTraceSpan
 import com.sourceplusplus.portal.extensions.displayTraceStack
 import com.sourceplusplus.portal.extensions.displayTraces
 import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceDisplayType.*
-import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
-import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageAndClassName
-import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageNames
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.CanNavigateToArtifact
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.FindPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetTraceStack
+import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
+import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayInnerTraceStack
+import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.protocol.artifact.ArtifactType.METHOD
 import com.sourceplusplus.protocol.artifact.trace.*
-import com.sourceplusplus.protocol.utils.humanReadable
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageAndClassName
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageNames
 import io.vertx.core.eventbus.Message
-import io.vertx.core.json.Json
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.regex.Pattern
 import kotlin.time.ExperimentalTime
-import kotlin.time.toDuration
 
 /**
  * Displays traces (and the underlying spans) for a given source code artifact.
@@ -55,6 +63,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         vertx.eventBus().consumer(TracesTabOpened, this@TracesDisplay::tracesTabOpened)
         vertx.eventBus().consumer<TraceResult>(ArtifactTraceUpdated) { handleArtifactTraceResult(it.body()) }
         vertx.eventBus().consumer(ClickedDisplayTraceStack, this@TracesDisplay::clickedDisplayTraceStack)
+        vertx.eventBus().consumer(ClickedDisplayInnerTraceStack, this@TracesDisplay::clickedDisplayInnerTraceStack)
         vertx.eventBus().consumer(ClickedDisplayTraces, this@TracesDisplay::clickedDisplayTraces)
         vertx.eventBus().consumer(ClickedDisplaySpanInfo, this@TracesDisplay::clickedDisplaySpanInfo)
         vertx.eventBus().consumer(GetTraceStack, this@TracesDisplay::getTraceStack)
@@ -91,21 +100,24 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         val representation = portal.tracesView
         representation.viewType = TRACES
 
-        if (representation.innerTraceStack.size > 0) {
+        if (representation.traceStackPath?.getCurrentRoot() != null) {
             representation.viewType = TRACE_STACK
-            val stack = representation.innerTraceStack.pop()
+            representation.traceStackPath!!.removeLastRoot()
 
-            if (representation.innerTrace) {
-                updateUI(portal)
-            } else if (!portal.configuration.external) {
+            if (!portal.configuration.external) {
                 //navigating back to parent stack
-//                val rootArtifactQualifiedName = stack.getJsonObject(0).getString("root_artifact_qualified_name")
-//                vertx.eventBus().send(
-//                    NAVIGATE_TO_ARTIFACT.address,
-//                    JsonObject().put("portalUuid", portal.portalUuid)
-//                        .put("artifact_qualified_name", rootArtifactQualifiedName)
-//                        .put("parent_stack_navigation", true)
-//                )
+                val artifactQualifiedName = ArtifactQualifiedName(
+                    representation.traceStackPath!!.getCurrentRoot()?.artifactQualifiedName
+                        ?: representation.rootArtifactQualifiedName!!, "", METHOD
+                )
+
+                vertx.eventBus().send(ClosePortal, portal)
+                vertx.eventBus().send(NavigateToArtifact, artifactQualifiedName)
+                vertx.eventBus().request<SourcePortal?>(FindPortal, artifactQualifiedName) {
+                    val navPortal = it.result().body()!!
+                    navPortal.currentTab = PageType.TRACES
+                    vertx.eventBus().send(OpenPortal, navPortal)
+                }
             } else {
                 updateUI(portal)
             }
@@ -123,18 +135,60 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             portal.tracesView.viewType = TRACE_STACK
             updateUI(portal)
         } else {
-            vertx.eventBus().request<JsonArray>(GetTraceStack, request) {
+            vertx.eventBus().request<TraceStack>(GetTraceStack, request) {
                 if (it.failed()) {
                     it.cause().printStackTrace()
                     log.error("Failed to display trace stack", it.cause())
                 } else {
                     val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
                     portal.tracesView.viewType = TRACE_STACK
-                    portal.tracesView.traceStack = it.result().body() as JsonArray
+                    portal.tracesView.traceStack = it.result().body()
+                    portal.tracesView.traceStackPath = TraceStackPath(it.result().body())
                     portal.tracesView.traceId = request.getString("traceId")
                     updateUI(portal)
                 }
             }
+        }
+    }
+
+    private fun clickedDisplayInnerTraceStack(messageHandler: Message<JsonObject>) {
+        val request = messageHandler.body() as JsonObject
+        log.debug("Displaying inner trace stack: {}", request)
+
+        val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
+        portal.tracesView.viewType = TRACE_STACK
+        portal.tracesView.traceStackPath!!.follow(request.getString("segmentId"), request.getInteger("spanId"))
+
+        if (!portal.configuration.external) {
+            val traceSpan = portal.tracesView.traceStackPath!!.getCurrentRoot()!!
+            val artifactQualifiedName = ArtifactQualifiedName(traceSpan.artifactQualifiedName!!, "", METHOD)
+            vertx.eventBus().request<Boolean>(CanNavigateToArtifact, artifactQualifiedName) {
+                if (it.succeeded()) {
+                    if (it.result().body()) {
+                        vertx.eventBus().send(ClosePortal, portal)
+                        vertx.eventBus().send(NavigateToArtifact, artifactQualifiedName)
+                        vertx.eventBus().request<SourcePortal?>(FindPortal, artifactQualifiedName) {
+                            val navPortal = it.result().body()!!
+                            navPortal.currentTab = PageType.TRACES
+                            navPortal.tracesView.cloneView(portal.tracesView)
+                            navPortal.tracesView.innerTraceStack = true
+                            if (navPortal.tracesView.rootArtifactQualifiedName == null) {
+                                navPortal.tracesView.rootArtifactQualifiedName = portal.viewingPortalArtifact
+                            }
+                            portal.tracesView.traceStackPath!!.removeLastRoot()
+                            vertx.eventBus().send(OpenPortal, navPortal)
+                        }
+                    } else {
+                        SourcePortal.ensurePortalActive(portal)
+                        updateUI(portal)
+                    }
+                } else {
+                    log.error("Failed to determine if artifact is navigable", it.cause())
+                }
+            }
+        } else {
+            SourcePortal.ensurePortalActive(portal)
+            updateUI(portal)
         }
     }
 
@@ -154,6 +208,13 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             portal.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
         }
         portal.currentTab = thisTab
+
+        val displayType = message.getString("traceDisplayType")
+        if (displayType != null) {
+            portal.tracesView.viewType = TraceDisplayType.valueOf(displayType)
+        } else {
+            portal.tracesView.viewType = TRACES
+        }
         SourcePortal.ensurePortalActive(portal)
         updateUI(portal)
 
@@ -175,121 +236,23 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
     private fun displayTraceStack(portal: SourcePortal) {
         val representation = portal.tracesView
-        val traceId = representation.traceId
-        val traceStack = representation.traceStack
-
-        if (representation.innerTrace && representation.viewType != SPAN_INFO) {
-            val innerTraceStackInfo = InnerTraceStackInfo(
-                innerLevel = representation.innerTraceStack.size,
-                traceStack = representation.innerTraceStack.peek().toString()
-            )
-            vertx.eventBus().publish(
-                DisplayInnerTraceStack(portal.portalUuid),
-                JsonObject(Json.encode(innerTraceStackInfo))
-            )
-            log.info("Displayed inner trace stack. Stack size: {}", representation.innerTraceStack.peek().size())
-        } else if (traceStack != null && !traceStack.isEmpty) {
-            vertx.eventBus().displayTraceStack(portal.portalUuid, representation.traceStack!!)
-            log.info("Displayed trace stack for id: {} - Stack size: {}", traceId, traceStack.size())
-        }
+        vertx.eventBus().displayTraceStack(portal.portalUuid, representation.traceStackPath!!)
+        log.info("Displayed trace stack path for id: {}", representation.traceId)
     }
 
     private fun displaySpanInfo(portal: SourcePortal) {
         val traceId = portal.tracesView.traceId!!
         val spanId = portal.tracesView.spanId
         val representation = portal.tracesView
-        val traceStack = if (representation.innerTrace) {
-            representation.innerTraceStack.peek()
-        } else {
-            representation.getTraceStack(traceId)!!
-        }
+        val traceStack = representation.getTraceStack(traceId)!!
 
         for (i in 0 until traceStack.size()) {
-            val span = traceStack.getJsonObject(i).getJsonObject("span")
-            if (span.getInteger("spanId") == spanId) {
-                val spanArtifactQualifiedName = span.getString("artifactQualifiedName")
-                if (portal.configuration.external && span.getBoolean("hasChildStack") == true) {
-//                    val spanStackQuery = TraceSpanStackQuery.builder()
-//                        .oneLevelDeep(true).followExit(true)
-//                        .segmentId(span.getString("segment_id"))
-//                        .spanId(span.getLong("span_id"))
-//                        .traceId(traceId).build()
-//                    SourcePortalConfig.current.getCoreClient(portal.appUuid).getTraceSpans(portal.appUuid,
-//                        portal.portalUI.viewingPortalArtifact, spanStackQuery, {
-//                            if (it.failed()) {
-////                                log.error("Failed to get trace spans", it.cause())
-//                                vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
-//                            } else {
-//                                val queryResult = it.result()
-//                                val spanTracesView = portal.portalUI.tracesView
-//                                        spanTracesView.viewType = TracesView.Companion.ViewType.TRACE_STACK
-//                                spanTracesView.innerTraceStack.push(
-//                                    handleTraceStack(
-//                                        portal.appUuid, portal.portalUI.viewingPortalArtifact, queryResult
-//                                    )
-//                                )
-//
-//                                displayTraceStack(portal)
-//                            }
-//                        })
-                    break
-                } else if (spanArtifactQualifiedName == null ||
-                    spanArtifactQualifiedName == portal.viewingPortalArtifact
-                ) {
-                    vertx.eventBus().displaySpanInfo(portal.portalUuid, span)
+            val span = traceStack.traceSpans[i]
+            if (span.spanId == spanId) {
+                val spanArtifactQualifiedName = span.meta["artifactQualifiedName"]
+                if (spanArtifactQualifiedName == null || spanArtifactQualifiedName == portal.viewingPortalArtifact) {
+                    vertx.eventBus().displayTraceSpan(portal.portalUuid, span)
                     log.info("Displayed trace span info: {}", span)
-                } else {
-//                    vertx.eventBus().request<Boolean>(
-//                        CAN_NAVIGATE_TO_ARTIFACT.address, JsonObject()
-//                            .put("app_uuid", portal.appUuid)
-//                            .put("artifact_qualified_name", spanArtifactQualifiedName)
-//                    ) {
-//                        if (it.succeeded() && it.result().body() == true) {
-//                            val spanStackQuery = TraceSpanStackQuery.builder()
-//                                .oneLevelDeep(true).followExit(true)
-//                                .segmentId(span.getString("segment_id"))
-//                                .spanId(span.getLong("span_id"))
-//                                .traceId(traceId).build()
-//
-//                            val spanPortal = SourcePortal.getInternalPortal(portal.appUuid, spanArtifactQualifiedName)
-//                            if (!spanPortal.isPresent) {
-////                                log.error("Failed to get span portal: {}", spanArtifactQualifiedName)
-//                                vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
-//                                return@request
-//                            }
-//
-//                            //todo: cache
-//                            SourcePortalConfig.current.getCoreClient(portal.appUuid).getTraceSpans(
-//                                portal.appUuid,
-//                                portal.portalUI.viewingPortalArtifact, spanStackQuery
-//                            ) {
-//                                if (it.failed()) {
-////                                        log.error("Failed to get trace spans", it.cause())
-//                                    vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
-//                                } else {
-//                                    //navigated away from portal; reset to trace stack
-//                                    portal.portalUI.tracesView.viewType = TracesView.Companion.ViewType.TRACE_STACK
-//
-//                                    val queryResult = it.result()
-//                                    val spanTracesView = spanPortal.get().portalUI.tracesView
-//                                    spanTracesView.viewType = TracesView.Companion.ViewType.TRACE_STACK
-//                                    spanTracesView.innerTraceStack.push(
-//                                        handleTraceStack(
-//                                            portal.appUuid, portal.portalUI.viewingPortalArtifact, queryResult
-//                                        )
-//                                    )
-//                                    vertx.eventBus().send(
-//                                        NAVIGATE_TO_ARTIFACT.address,
-//                                        JsonObject().put("portalUuid", spanPortal.get().portalUuid)
-//                                            .put("artifact_qualified_name", spanArtifactQualifiedName)
-//                                    )
-//                                }
-//                            }
-//                        } else {
-//                            vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_SPAN_INFO", span)
-////                            log.info("Displayed trace span info: {}", span)
-//                        }
-//                    }
                 }
             }
         }
@@ -306,12 +269,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
     @OptIn(ExperimentalTime::class)
     private fun handleArtifactTraceResult(portals: List<SourcePortal>, artifactTraceResult: TraceResult) {
-        val traces = ArrayList<Trace>()
-        artifactTraceResult.traces.forEach {
-            traces.add(it.copy(prettyDuration = it.duration.toDuration(MILLISECONDS).humanReadable()))
-        }
         val updatedArtifactTraceResult = artifactTraceResult.copy(
-            traces = traces,
             artifactSimpleName = removePackageAndClassName(
                 removePackageNames(artifactTraceResult.artifactQualifiedName)
             )
@@ -334,8 +292,8 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         appUuid: String,
         rootArtifactQualifiedName: String,
         spanQueryResult: TraceSpanStackQueryResult
-    ): JsonArray {
-        val spanInfos = ArrayList<TraceSpanInfo>()
+    ): TraceStack {
+        val spanInfos = ArrayList<TraceSpan>()
         val totalTime = spanQueryResult.traceSpans[0].endTime - spanQueryResult.traceSpans[0].startTime
 
         spanQueryResult.traceSpans.forEach { span ->
@@ -354,17 +312,18 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             }!!
 
             spanInfos.add(
-                TraceSpanInfo(
-                    span = finalSpan,
-                    appUuid = appUuid,
-                    rootArtifactQualifiedName = rootArtifactQualifiedName,
-                    operationName = operationName,
-                    timeTook = timeTook.humanReadable(),
-                    totalTracePercent = if (totalTime.toLongMilliseconds() == 0L) 0.0 else timeTook / totalTime * 100.0
-                )
+                finalSpan.apply {
+                    putMetaString("appUuid", appUuid)
+                    putMetaString("rootArtifactQualifiedName", rootArtifactQualifiedName)
+                    putMetaString("operationName", operationName)
+                    putMetaDouble(
+                        "totalTracePercent", if (totalTime.toLongMilliseconds() == 0L) 0.0
+                        else timeTook / totalTime * 100.0
+                    )
+                }
             )
         }
-        return JsonArray(Json.encode(spanInfos))
+        return TraceStack(spanInfos)
     }
 
     private fun getTraceStack(messageHandler: Message<JsonObject>) {
@@ -396,23 +355,6 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                     messageHandler.reply(representation.getTraceStack(globalTraceId))
                 }
             }
-//            val traceStackQuery = TraceSpanStackQuery.builder()
-//                .oneLevelDeep(true)
-//                .traceId(globalTraceId).build()
-//            SourcePortalConfig.current.getCoreClient(appUuid)
-//                .getTraceSpans(appUuid, artifactQualifiedName, traceStackQuery) {
-//                    if (it.failed()) {
-////                        log.error("Failed to get trace spans", it.cause())
-//                    } else {
-//                        representation.cacheTraceStack(
-//                            globalTraceId, handleTraceStack(
-//                                appUuid, artifactQualifiedName, it.result()
-//                            )
-//                        )
-//                        messageHandler.reply(representation.getTraceStack(globalTraceId))
-////                        context.stop()
-//                    }
-//                }
         }
     }
 }

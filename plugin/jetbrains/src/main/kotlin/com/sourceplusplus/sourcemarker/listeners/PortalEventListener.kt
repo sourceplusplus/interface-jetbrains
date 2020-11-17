@@ -4,8 +4,11 @@ import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
@@ -18,11 +21,14 @@ import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.monitor.skywalking.toProtocol
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.CanNavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FindAndOpenPortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.FindPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
 import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
@@ -39,11 +45,10 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
-import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
-import com.sourceplusplus.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
+import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -51,7 +56,6 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import java.text.DecimalFormat
 import java.time.ZonedDateTime
 import javax.swing.UIManager
 
@@ -77,16 +81,37 @@ class PortalEventListener : CoroutineVerticle() {
             val portal = SourcePortal.getPortal(portalUuid)!!
             it.reply(JsonObject.mapFrom(portal.configuration))
         }
+        vertx.eventBus().consumer<ArtifactQualifiedName>(FindPortal) {
+            val artifactQualifiedName = it.body()
+            val sourceMarks = SourceMarker.getSourceMarks(artifactQualifiedName.identifier)
+            if (sourceMarks.isNotEmpty()) {
+                it.reply(sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
+            } else {
+                GlobalScope.launch(vertx.dispatcher()) {
+                    val classArtifact = findArtifact(artifactQualifiedName.copy(type = ArtifactType.CLASS))
+                    val fileMarker = SourceMarker.getSourceFileMarker((classArtifact as PsiClass).containingFile)!!
+                    val searchArtifact = findArtifact(artifactQualifiedName) as PsiNameIdentifierOwner
+                    runReadAction {
+                        val gutterMark = SourceMarkerUtils.getOrCreateMethodGutterMark(
+                            fileMarker, searchArtifact.nameIdentifier!!
+                        )!!
+                        it.reply(gutterMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
+                    }
+                }
+            }
+        }
         vertx.eventBus().consumer<ArtifactQualifiedName>(FindAndOpenPortal) {
             val artifactQualifiedName = it.body()
             runReadAction {
                 val sourceMarks = SourceMarker.getSourceMarks(artifactQualifiedName.identifier)
                 if (sourceMarks.isNotEmpty()) {
-                    openPortal(sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
+                    val portal = sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                    openPortal(portal)
+                    it.reply(portal)
                 }
             }
         }
-        vertx.eventBus().consumer<SourcePortal>(OpenPortal) { openPortal(it.body()) }
+        vertx.eventBus().consumer<SourcePortal>(OpenPortal) { openPortal(it.body()); it.reply(it.body()) }
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
         vertx.eventBus().consumer<JsonObject>(RefreshOverview) {
             val portalUuid = it.body().getString("portalUuid")
@@ -127,6 +152,13 @@ class PortalEventListener : CoroutineVerticle() {
             val project = ProjectManager.getInstance().openProjects[0]
             ArtifactNavigator.navigateTo(project, element)
         }
+        vertx.eventBus().consumer<ArtifactQualifiedName>(CanNavigateToArtifact) {
+            val artifactQualifiedName = it.body()
+            val project = ProjectManager.getInstance().openProjects[0]
+            GlobalScope.launch(vertx.dispatcher()) {
+                it.reply(ArtifactNavigator.canNavigateTo(project, artifactQualifiedName))
+            }
+        }
         vertx.eventBus().consumer<ArtifactQualifiedName>(NavigateToArtifact) {
             val artifactQualifiedName = it.body()
             val project = ProjectManager.getInstance().openProjects[0]
@@ -135,8 +167,7 @@ class PortalEventListener : CoroutineVerticle() {
     }
 
     private suspend fun refreshTraces(portal: SourcePortal) {
-        val sourceMark =
-            SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
@@ -186,15 +217,7 @@ class PortalEventListener : CoroutineVerticle() {
             for (i in metrics.indices) {
                 val avg = metrics[i].values.average()
                 val metricType = MetricType.realValueOf(fetchMetricTypes[i])
-                val summaryValue = when (metricType) {
-                    MetricType.Throughput_Average -> (avg / 60.0).fromPerSecondToPrettyFrequency()
-                    MetricType.ResponseTime_Average -> avg.toInt().toPrettyDuration()
-                    MetricType.ServiceLevelAgreement_Average -> {
-                        if (avg == 0.0) "0%" else DecimalFormat(".#").format(avg / 100.0).toString() + "%"
-                    }
-                    else -> throw UnsupportedOperationException(fetchMetricTypes[i])
-                }
-                summarizedMetrics.add(ArtifactSummarizedMetrics(metricType, summaryValue))
+                summarizedMetrics.add(ArtifactSummarizedMetrics(metricType, avg))
             }
 
             endpointMetricResults.add(
@@ -252,40 +275,7 @@ class PortalEventListener : CoroutineVerticle() {
                 )
 
                 val finalArtifactMetrics = metricResult.artifactMetrics.toMutableList()
-//                val multipleMetricsRequest = GetMultipleEndpointMetrics(
-//                    "endpoint_percentile",
-//                    endpointId,
-//                    5,
-//                    ZonedDuration(
-//                        ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
-//                        ZonedDateTime.now(),
-//                        SkywalkingClient.DurationStep.MINUTE
-//                    )
-//                )
-//                val multiMetrics = EndpointMetricsBridge.getMultipleMetrics(
-//                    multipleMetricsRequest, vertx
-//                )
-//                multiMetrics.forEachIndexed { i, it ->
-//                    finalArtifactMetrics.add(
-//                        ArtifactMetrics(
-//                            metricType = when (i) {
-//                                0 -> MetricType.ResponseTime_50Percentile
-//                                1 -> MetricType.ResponseTime_75Percentile
-//                                2 -> MetricType.ResponseTime_90Percentile
-//                                3 -> MetricType.ResponseTime_95Percentile
-//                                4 -> MetricType.ResponseTime_99Percentile
-//                                else -> throw IllegalStateException()
-//                            },
-//                            values = it.values.map { it.toProtocol() }
-//                        )
-//                    )
-//                }
-
-                vertx.eventBus().send(
-                    ArtifactMetricUpdated, metricResult.copy(
-                        artifactMetrics = finalArtifactMetrics
-                    )
-                )
+                vertx.eventBus().send(ArtifactMetricUpdated, metricResult.copy(artifactMetrics = finalArtifactMetrics))
             }
         }
     }
@@ -299,8 +289,11 @@ class PortalEventListener : CoroutineVerticle() {
             if (portal != lastDisplayedInternalPortal) {
                 portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
                 val host = "http://localhost:8080"
-                val currentUrl = "$host/${portal.currentTab.name.toLowerCase()}.html" +
-                        "?portalUuid=${portal.portalUuid}"
+                var currentUrl = "$host/${portal.currentTab.name.toLowerCase()}.html?portalUuid=${portal.portalUuid}"
+                if (portal.currentTab == PageType.TRACES) {
+                    currentUrl += "&orderType=" + portal.tracesView.orderType.name
+                    currentUrl += "&displayType=" + portal.tracesView.viewType.name
+                }
 
                 if (lastDisplayedInternalPortal == null) {
                     jcefComponent.configuration.initialUrl = currentUrl

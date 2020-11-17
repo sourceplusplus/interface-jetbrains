@@ -6,11 +6,9 @@ import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.mentor.base.MentorTaskContext
 import com.sourceplusplus.protocol.advice.AdviceListener
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.awaitBlocking
 import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.PriorityBlockingQueue
@@ -58,7 +56,7 @@ class SourceMentor : CoroutineVerticle() {
         running = true
         while (running) {
             log.trace("Waiting for next task...")
-            var currentTask: MentorTask = runInterruptible(Dispatchers.IO) { taskQueue.take() }
+            var currentTask: MentorTask = awaitBlocking { taskQueue.take() }
             if (!running) return
             log.trace("Processing task: $currentTask")
 

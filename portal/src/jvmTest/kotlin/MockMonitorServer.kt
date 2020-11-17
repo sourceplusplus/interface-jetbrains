@@ -39,10 +39,14 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom.current
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.toDuration
 
 var currentMetricType = MetricType.ResponseTime_Average
 
 //todo: can re-write this by essentially writing a PortalEventListener equivalent
+@OptIn(ExperimentalTime::class)
 fun main() {
     DatabindCodec.mapper().registerModule(GuavaModule())
     DatabindCodec.mapper().registerModule(Jdk8Module())
@@ -104,7 +108,7 @@ fun main() {
     }
 
     vertx.eventBus().consumer<String>(ClickedDisplayTraceStack) {
-        val traceSpans = mutableListOf<TraceSpanInfo>()
+        val traceSpans = mutableListOf<TraceSpan>()
         for (i in 1..5) {
             val span = TraceSpan(
                 artifactQualifiedName = UUID.randomUUID().toString(),
@@ -115,22 +119,19 @@ fun main() {
                 error = current().nextBoolean(),
                 hasChildStack = false,
                 startTime = Clock.System.now(),
-                endTime = Clock.System.now(),
+                endTime = Clock.System.now().plus(current().nextLong(1000).toDuration(DurationUnit.SECONDS)),
                 component = "DATABASE",
                 serviceCode = "SERVICE_CODE",
                 type = listOf("Entry", "Exit", "Local", "UNRECOGNIZED").random()
             )
-            val spanInfo = TraceSpanInfo(
-                span = span,
-                appUuid = "null",
-                rootArtifactQualifiedName = UUID.randomUUID().toString(),
-                operationName = UUID.randomUUID().toString(),
-                timeTook = "10s",
-                totalTracePercent = current().nextDouble(100.0)
-            )
-            traceSpans.add(spanInfo)
+            traceSpans.add(span.apply {
+                putMetaString("appUuid", "null")
+                putMetaString("rootArtifactQualifiedName", UUID.randomUUID().toString())
+                putMetaString("operationName", UUID.randomUUID().toString())
+                putMetaDouble("totalTracePercent", current().nextDouble(100.0))
+            })
         }
-        vertx.eventBus().displayTraceStack("null", traceSpans)
+        vertx.eventBus().displayTraceStack("null", TraceStackPath(TraceStack(traceSpans)))
     }
 
     vertx.eventBus().consumer<Void>(ClickedDisplaySpanInfo) {
@@ -154,7 +155,7 @@ fun main() {
                 TraceSpanLogEntry(time = Clock.System.now(), data = UUID.randomUUID().toString())
             )
         )
-        vertx.eventBus().displaySpanInfo("null", span)
+        vertx.eventBus().displayTraceSpan("null", span)
     }
 
     vertx.eventBus().consumer<Void>(ConfigurationTabOpened) {
@@ -198,15 +199,15 @@ fun displayEndpoints(vertx: Vertx) {
          "artifactSummarizedMetrics":[
             {
                "metricType":"Throughput_Average",
-               "value":"98/sec"
+               "value":5880.0
             },
             {
                "metricType":"ResponseTime_Average",
-               "value":"0ms"
+               "value":0.0
             },
             {
                "metricType":"ServiceLevelAgreement_Average",
-               "value":"99.9%"
+               "value":9999.0
             }
          ]
       },
@@ -222,15 +223,15 @@ fun displayEndpoints(vertx: Vertx) {
          "artifactSummarizedMetrics":[
             {
                "metricType":"Throughput_Average",
-               "value":"4/sec"
+               "value":240.0
             },
             {
                "metricType":"ResponseTime_Average",
-               "value":"0ms"
+               "value":0.0
             },
             {
                "metricType":"ServiceLevelAgreement_Average",
-               "value":"100.0%"
+               "value":10000.0
             }
          ]
       },
@@ -246,15 +247,15 @@ fun displayEndpoints(vertx: Vertx) {
          "artifactSummarizedMetrics":[
             {
                "metricType":"Throughput_Average",
-               "value":"59/min"
+               "value":8.16666667
             },
             {
                "metricType":"ResponseTime_Average",
-               "value":"1ms"
+               "value":1.0
             },
             {
                "metricType":"ServiceLevelAgreement_Average",
-               "value":"0%"
+               "value":0.0
             }
          ]
       },
@@ -270,15 +271,15 @@ fun displayEndpoints(vertx: Vertx) {
          "artifactSummarizedMetrics":[
             {
                "metricType":"Throughput_Average",
-               "value":"49/sec"
+               "value":2940.0
             },
             {
                "metricType":"ResponseTime_Average",
-               "value":"15ms"
+               "value":15.0
             },
             {
                "metricType":"ServiceLevelAgreement_Average",
-               "value":"100.0%"
+               "value":10000.0
             }
          ]
       }
@@ -305,16 +306,16 @@ fun displayChart(vertx: Vertx) {
     vertx.eventBus().updateChart("null", splineChart)
 }
 
+@OptIn(ExperimentalTime::class)
 fun displayTraces(vertx: Vertx) {
     val traces = mutableListOf<Trace>()
     for (i in 1..20) {
         val trace = Trace(
             traceIds = listOf("${current().nextInt()}.${current().nextInt()}"),
             operationNames = listOf(UUID.randomUUID().toString()),
-            prettyDuration = "10s",
-            duration = 10000,
+            duration = current().nextInt(0, 1000000),
             error = current().nextBoolean(),
-            start = Clock.System.now()
+            start = Clock.System.now() - i.toDuration(DurationUnit.SECONDS)
         )
         traces.add(trace)
     }

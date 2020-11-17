@@ -3,8 +3,8 @@ package com.sourceplusplus.portal.display.views
 import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
-import io.vertx.core.json.JsonArray
-import java.util.*
+import com.sourceplusplus.protocol.artifact.trace.TraceStack
+import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 
@@ -17,14 +17,16 @@ import kotlin.collections.HashMap
 class TracesView {
 
     var traceResultCache = ConcurrentHashMap<TraceOrderType, TraceResult>()
-    var traceStacks = HashMap<String, JsonArray>() //todo: evicting cache
-    var traceStack: JsonArray? = null
-    var innerTraceStack = Stack<JsonArray>()
+    var traceStacks = HashMap<String, TraceStack>() //todo: evicting cache
+    var traceStack: TraceStack? = null
     var orderType = TraceOrderType.LATEST_TRACES
     var viewType = TraceDisplayType.TRACES
     var traceId: String? = null
+    var traceStackPath: TraceStackPath? = null
     var spanId: Int = 0
     var viewTraceAmount = 10
+    var innerTraceStack = false
+    var rootArtifactQualifiedName: String? = null
 
     fun cacheArtifactTraceResult(artifactTraceResult: TraceResult) {
         val currentTraceResult = traceResultCache[artifactTraceResult.orderType]
@@ -39,28 +41,26 @@ class TracesView {
     val artifactTraceResult: TraceResult?
         get() = traceResultCache[orderType]
 
-    fun cacheTraceStack(traceId: String, traceStack: JsonArray) {
+    fun cacheTraceStack(traceId: String, traceStack: TraceStack) {
         traceStacks[traceId] = traceStack
     }
 
-    fun getTraceStack(traceId: String): JsonArray? {
+    fun getTraceStack(traceId: String): TraceStack? {
         return traceStacks[traceId]
     }
-
-    val innerTrace: Boolean
-        get() = !innerTraceStack.isEmpty()
 
     fun cloneView(view: TracesView) {
         traceResultCache = ConcurrentHashMap(view.traceResultCache)
         traceStacks = HashMap(view.traceStacks)
         traceStack = if (view.traceStack != null) {
-            JsonArray().addAll(view.traceStack)
+            view.traceStack!!.copy(traceSpans = view.traceStack!!.traceSpans.toList())
         } else {
             null
         }
-
-        view.innerTraceStack.reversed().forEach {
-            innerTraceStack.push(it)
+        traceStackPath = if (view.traceStackPath != null) {
+            view.traceStackPath!!.copy(path = view.traceStackPath!!.path.toMutableList())
+        } else {
+            null
         }
         orderType = view.orderType
         viewType = view.viewType

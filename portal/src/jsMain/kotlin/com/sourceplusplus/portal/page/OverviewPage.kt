@@ -17,6 +17,8 @@ import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
+import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
+import com.sourceplusplus.protocol.utils.toPrettyDuration
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.dom.clear
@@ -96,6 +98,10 @@ class OverviewPage(
 
         root.append {
             endpointResult.endpointMetrics.forEach {
+                val slaPercent = it.artifactSummarizedMetrics.find {
+                    it.metricType == MetricType.ServiceLevelAgreement_Average
+                }!!.value / 100.0
+
                 tr {
                     onClickFunction = { _ ->
                         eb.send(
@@ -105,19 +111,17 @@ class OverviewPage(
                             )
                         )
                     }
+                    if (slaPercent <= 60.0) {
+                        classes += "negative"
+                    }
 
                     td("overview_row_padding") {
                         if (it.endpointType == EndpointType.HTTP) {
-                            var slaPercent = it.artifactSummarizedMetrics.find {
-                                it.metricType == MetricType.ServiceLevelAgreement_Average
-                            }!!.value.replace("%", "").toDoubleOrNull()
-                            if (slaPercent != null) slaPercent /= 100
-                            val percent = slaPercent ?: 1.0
                             val color2 = Color(24, 45, 52)
                             val color1 = Color(225, 72, 59)
-                            val r: Double = color1.red + percent * (color2.red - color1.red)
-                            val g: Double = color1.green + percent * (color2.green - color1.green)
-                            val b: Double = color1.blue + percent * (color2.blue - color1.blue)
+                            val r: Double = color1.red + slaPercent * (color2.red - color1.red)
+                            val g: Double = color1.green + slaPercent * (color2.green - color1.green)
+                            val b: Double = color1.blue + slaPercent * (color2.blue - color1.blue)
 
                             span {
                                 i("far fa-globe-americas") {
@@ -168,8 +172,19 @@ class OverviewPage(
                         +it.endpointType.name
                     }
                     it.artifactSummarizedMetrics.forEach {
+                        val summaryValue = when (it.metricType) {
+                            MetricType.Throughput_Average -> (it.value / 60.0).fromPerSecondToPrettyFrequency()
+                            MetricType.ResponseTime_Average -> it.value.toInt().toPrettyDuration()
+                            MetricType.ServiceLevelAgreement_Average -> {
+                                Double
+                                if (it.value == 0.0) "0%" else (it.value / 100.0).asDynamic().toFixed(2) + "%"
+                            }
+                            else -> throw UnsupportedOperationException("Unable to format: ${it.metricType}")
+                        } as String
+
                         td("overview_row_padding collapsing") {
-                            +it.value
+                            attributes["data-sort-value"] = it.value.toString()
+                            +summaryValue
                         }
                     }
                 }

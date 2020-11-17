@@ -39,26 +39,3 @@ dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion") { isTransitive = false }
     testImplementation("junit:junit:4.13.1")
 }
-
-tasks {
-    withType<JavaCompile> {
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
-    }
-    listOf("compileKotlin", "compileTestKotlin").forEach {
-        getByName<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>(it) {
-            kotlinOptions.jvmTarget = "1.8"
-            kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=compatibility")
-        }
-    }
-
-    test {
-        testLogging {
-            events("passed", "skipped", "failed")
-            setExceptionFormat("full")
-
-            outputs.upToDateWhen { false }
-            showStandardStreams = true
-        }
-    }
-}

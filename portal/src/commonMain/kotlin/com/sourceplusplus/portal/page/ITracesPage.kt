@@ -5,7 +5,7 @@ import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
-import com.sourceplusplus.protocol.artifact.trace.TraceSpanInfo
+import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
 
 /**
  * todo: description.
@@ -18,6 +18,6 @@ interface ITracesPage : PortalPage {
     var traceDisplayType: TraceDisplayType
 
     fun displayTraces(traceResult: TraceResult)
-    fun displayTraceStack(vararg traceStack: TraceSpanInfo)
+    fun displayTraceStack(traceStackPath: TraceStackPath)
     fun displaySpanInfo(spanInfo: TraceSpan)
 }

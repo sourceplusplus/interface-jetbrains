@@ -1,0 +1,200 @@
+[
+  {
+    "traceId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541225",
+    "segmentId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541224",
+    "spanId": 0,
+    "parentSpanId": -1,
+    "refs": [],
+    "serviceCode": "Your_ApplicationName",
+    "serviceInstanceName": null,
+    "startTime": 1605487330854,
+    "endTime": 1605487330855,
+    "endpointName": "/users",
+    "artifactQualifiedName": null,
+    "type": "Exit",
+    "peer": "localhost:8888",
+    "component": "SpringRestTemplate",
+    "error": false,
+    "childError": false,
+    "hasChildStack": null,
+    "layer": "Http",
+    "tags": {
+      "url": "http://localhost:8888/users",
+      "http.method": "GET"
+    },
+    "logs": [],
+    "meta": {
+      "appUuid": "null",
+      "rootArtifactQualifiedName": "spp.example.webapp.controller.WebappController.userList()",
+      "operationName": "/users",
+      "totalTracePercent": "100.0"
+    }
+  },
+  {
+    "traceId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541225",
+    "segmentId": "4dc611c1901e4f9db1c6cc3a8d1bed45.59.16054873308541420",
+    "spanId": 0,
+    "parentSpanId": -1,
+    "refs": [
+      {
+        "traceId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541225",
+        "parentSegmentId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541224",
+        "parentSpanId": 0,
+        "type": "CROSS_PROCESS"
+      }
+    ],
+    "serviceCode": "Your_ApplicationName",
+    "serviceInstanceName": null,
+    "startTime": 1605487330854,
+    "endTime": 1605487330855,
+    "endpointName": "{GET}/users",
+    "artifactQualifiedName": null,
+    "type": "Entry",
+    "peer": "",
+    "component": "SpringMVC",
+    "error": false,
+    "childError": false,
+    "hasChildStack": null,
+    "layer": "Http",
+    "tags": {
+      "url": "http://localhost:8888/users",
+      "http.method": "GET"
+    },
+    "logs": [
+      {
+        "time": 1605487330854,
+        "data": "event : info\nmessage : Getting user list"
+      }
+    ],
+    "meta": {
+      "appUuid": "null",
+      "rootArtifactQualifiedName": "spp.example.webapp.controller.WebappController.userList()",
+      "operationName": "{GET}/users",
+      "totalTracePercent": "100.0"
+    }
+  },
+  {
+    "traceId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541225",
+    "segmentId": "4dc611c1901e4f9db1c6cc3a8d1bed45.59.16054873308541420",
+    "spanId": 1,
+    "parentSpanId": 0,
+    "refs": [],
+    "serviceCode": "Your_ApplicationName",
+    "serviceInstanceName": null,
+    "startTime": 1605487330854,
+    "endTime": 1605487330855,
+    "endpointName": "spp.example.webapp.service.UserServiceImpl.getUsers()",
+    "artifactQualifiedName": "spp.example.webapp.service.UserServiceImpl.getUsers()",
+    "type": "Local",
+    "peer": "",
+    "component": "Unknown",
+    "error": false,
+    "childError": false,
+    "hasChildStack": null,
+    "layer": "Unknown",
+    "tags": {},
+    "logs": [],
+    "meta": {
+      "appUuid": "null",
+      "rootArtifactQualifiedName": "spp.example.webapp.controller.WebappController.userList()",
+      "operationName": "getUsers()",
+      "totalTracePercent": "100.0"
+    }
+  },
+  {
+    "traceId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541225",
+    "segmentId": "4dc611c1901e4f9db1c6cc3a8d1bed45.59.16054873308541420",
+    "spanId": 2,
+    "parentSpanId": 1,
+    "refs": [],
+    "serviceCode": "Your_ApplicationName",
+    "serviceInstanceName": null,
+    "startTime": 1605487330855,
+    "endTime": 1605487330855,
+    "endpointName": "H2/JDBI/PreparedStatement/executeQuery",
+    "artifactQualifiedName": null,
+    "type": "Exit",
+    "peer": "localhost:-1",
+    "component": "h2-jdbc-driver",
+    "error": false,
+    "childError": false,
+    "hasChildStack": null,
+    "layer": "Database",
+    "tags": {
+      "db.type": "sql",
+      "db.instance": "spp",
+      "db.statement": "select user0_.id as id1_0_, user0_.firstname as firstnam2_0_, user0_.lastname as lastname3_0_ from User user0_"
+    },
+    "logs": [],
+    "meta": {
+      "appUuid": "null",
+      "rootArtifactQualifiedName": "spp.example.webapp.controller.WebappController.userList()",
+      "operationName": "H2/JDBI/PreparedStatement/executeQuery",
+      "totalTracePercent": "0.0"
+    }
+  },
+  {
+    "traceId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541225",
+    "segmentId": "4dc611c1901e4f9db1c6cc3a8d1bed45.59.16054873308541420",
+    "spanId": 3,
+    "parentSpanId": 1,
+    "refs": [],
+    "serviceCode": "Your_ApplicationName",
+    "serviceInstanceName": null,
+    "startTime": 1605487330855,
+    "endTime": 1605487330855,
+    "endpointName": "H2/JDBI/Connection/commit",
+    "artifactQualifiedName": null,
+    "type": "Exit",
+    "peer": "localhost:-1",
+    "component": "h2-jdbc-driver",
+    "error": false,
+    "childError": false,
+    "hasChildStack": null,
+    "layer": "Database",
+    "tags": {
+      "db.type": "sql",
+      "db.instance": "spp",
+      "db.statement": ""
+    },
+    "logs": [],
+    "meta": {
+      "appUuid": "null",
+      "rootArtifactQualifiedName": "spp.example.webapp.controller.WebappController.userList()",
+      "operationName": "H2/JDBI/Connection/commit",
+      "totalTracePercent": "0.0"
+    }
+  },
+  {
+    "traceId": "4dc611c1901e4f9db1c6cc3a8d1bed45.73.16054873308541225",
+    "segmentId": "4dc611c1901e4f9db1c6cc3a8d1bed45.59.16054873308541420",
+    "spanId": 4,
+    "parentSpanId": 1,
+    "refs": [],
+    "serviceCode": "Your_ApplicationName",
+    "serviceInstanceName": null,
+    "startTime": 1605487330855,
+    "endTime": 1605487330855,
+    "endpointName": "H2/JDBI/Connection/commit",
+    "artifactQualifiedName": null,
+    "type": "Exit",
+    "peer": "localhost:-1",
+    "component": "h2-jdbc-driver",
+    "error": false,
+    "childError": false,
+    "hasChildStack": null,
+    "layer": "Database",
+    "tags": {
+      "db.type": "sql",
+      "db.instance": "spp",
+      "db.statement": ""
+    },
+    "logs": [],
+    "meta": {
+      "appUuid": "null",
+      "rootArtifactQualifiedName": "spp.example.webapp.controller.WebappController.userList()",
+      "operationName": "H2/JDBI/Connection/commit",
+      "totalTracePercent": "0.0"
+    }
+  }
+]

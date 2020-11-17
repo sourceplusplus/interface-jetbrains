@@ -44,9 +44,9 @@ class DetermineTraceSpanArtifact(
                 val fullTrace = job.context.get(GetTraces.TRACE_RESULT).traces.find {
                     it.traceIds[0] == traceSpan.traceId
                 }!! //todo: cannot assume GetTraces.TRACE_RESULT exists
+                val endpointArtifact = ArtifactQualifiedName(fullTrace.operationNames[0], "todo", ArtifactType.ENDPOINT)
                 val sqlSource = sqlProducerSearch.determineSource(
-                    parser.parseQuery(traceSpan.tags["db.statement"]),
-                    ArtifactQualifiedName(fullTrace.operationNames[0], "todo", ArtifactType.ENDPOINT),
+                    parser.parseQuery(traceSpan.tags["db.statement"]), endpointArtifact
                 )
                 if (sqlSource.isPresent) {
                     //got exact source
@@ -54,7 +54,8 @@ class DetermineTraceSpanArtifact(
                     resolutionMap[sqlSource.get()] = fullTrace.operationNames[0]
                 } else {
                     //endpoint method is best guess
-                    TODO()
+                    foundArtifacts.add(endpointArtifact)
+                    resolutionMap[endpointArtifact] = fullTrace.operationNames[0]
                 }
             }
         }
