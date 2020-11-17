@@ -20,11 +20,7 @@ SourceMarker is a JetBrains-powered plugin which provides continuous feedback ca
 - Integrated distributed trace mapping
 - Active exception correlation/tracking
 - Performance anti-pattern detection
-  - [The Ramp]( http://www.spe-ed.com/papers/moreanti.pdf )
-
-## Demonstration
-
-[![](https://img.youtube.com/vi/_pML3VleIlo/0.jpg)](https://www.youtube.com/watch?v=_pML3VleIlo)
+  - [The Ramp](mentor/src/main/kotlin/com/sourceplusplus/mentor/impl/job/RampDetectionMentor.kt)
 
 ## Installation
 
