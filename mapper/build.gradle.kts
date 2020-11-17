@@ -24,5 +24,5 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:util:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-psi:$intellijVersion") { isTransitive = false }
 
-    testImplementation("junit:junit:4.13")
+    testImplementation("junit:junit:4.13.1")
 }

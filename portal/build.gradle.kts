@@ -4,18 +4,7 @@ plugins {
 }
 
 kotlin {
-    jvm {
-        val main by compilations.getting {
-            kotlinOptions {
-                jvmTarget = JavaVersion.VERSION_1_8.toString()
-            }
-        }
-        val test by compilations.getting {
-            kotlinOptions {
-                jvmTarget = JavaVersion.VERSION_1_8.toString()
-            }
-        }
-    }
+    jvm {}
     js {
         useCommonJs()
         browser()

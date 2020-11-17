@@ -4,9 +4,7 @@ plugins {
 }
 
 kotlin {
-    jvm {
-        compilations["main"].kotlinOptions.jvmTarget = "1.8"
-    }
+    jvm {}
     js {
         browser { }
     }
