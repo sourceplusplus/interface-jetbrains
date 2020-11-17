@@ -4,7 +4,7 @@ plugins {
 }
 
 kotlin {
-    jvm {}
+    jvm { }
     js {
         browser { }
     }
