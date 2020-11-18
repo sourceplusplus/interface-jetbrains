@@ -15,7 +15,7 @@ import org.jetbrains.uast.toUElement
 import org.junit.Before
 import java.io.File
 
-open class SourceMapperTest : LightPlatformCodeInsightFixture4TestCase() {
+abstract class SourceMapperTest : LightPlatformCodeInsightFixture4TestCase() {
 
     protected lateinit var sourceCodeTokenizer: SourceCodeTokenizer
 
