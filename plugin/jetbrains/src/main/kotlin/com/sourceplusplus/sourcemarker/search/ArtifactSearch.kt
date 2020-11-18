@@ -60,17 +60,14 @@ object ArtifactSearch {
                 promise.tryComplete(Optional.empty())
             } else {
                 //todo: should be saving endpoints somewhere so don't always have to scan entire application
-                val groovySourceFiles = FileBasedIndex.getInstance().getContainingFiles(
-                    FileTypeIndex.NAME, GroovyFileType.GROOVY_FILE_TYPE,
-                    GlobalSearchScope.projectScope(project)
+                val groovySourceFiles = FileTypeIndex.getFiles(
+                    GroovyFileType.GROOVY_FILE_TYPE, GlobalSearchScope.projectScope(project)
                 )
-                val javaSourceFiles = FileBasedIndex.getInstance().getContainingFiles(
-                    FileTypeIndex.NAME, JavaFileType.INSTANCE,
-                    GlobalSearchScope.projectScope(project)
+                val javaSourceFiles = FileTypeIndex.getFiles(
+                    JavaFileType.INSTANCE, GlobalSearchScope.projectScope(project)
                 )
-                val kotlinSourceFiles = FileBasedIndex.getInstance().getContainingFiles(
-                    FileTypeIndex.NAME, KotlinFileType.INSTANCE,
-                    GlobalSearchScope.projectScope(project)
+                val kotlinSourceFiles = FileTypeIndex.getFiles(
+                    KotlinFileType.INSTANCE, GlobalSearchScope.projectScope(project)
                 )
 
                 val endpointDetector = EndpointDetector()
