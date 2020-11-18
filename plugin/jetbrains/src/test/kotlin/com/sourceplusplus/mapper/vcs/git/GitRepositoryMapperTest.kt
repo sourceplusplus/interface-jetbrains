@@ -4,6 +4,7 @@ import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestC
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.intellij.lang.annotations.Language
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 
@@ -127,6 +128,7 @@ class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
 //        gitMapper.targetSourceDirectory.deleteRecursively()
 //    }
 
+    @Ignore
     @Test
     fun `tokenized scala getter method`() {
         Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->

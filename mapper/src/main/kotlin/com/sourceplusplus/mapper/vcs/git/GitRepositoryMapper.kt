@@ -36,7 +36,7 @@ class GitRepositoryMapper(private val project: Project) : RepositoryRewriter() {
 
     companion object {
         private val log = LoggerFactory.getLogger(GitRepositoryMapper::class.java)
-        private val supportedFileTypes = hashSetOf("java", "groovy", "kotlin", "scala")
+        private val supportedFileTypes = hashSetOf("java", "groovy", "kotlin")
         val originalCommitIdPattern = Pattern.compile("<OriginalCommitID:(.+)>")!!
     }
 

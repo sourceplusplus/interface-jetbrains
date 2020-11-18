@@ -29,7 +29,7 @@ intellij {
     downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
 
-    setPlugins("java", "Groovy", "Kotlin", "org.intellij.scala:2020.2.49")
+    setPlugins("java", "Groovy", "Kotlin")
 }
 tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
 tasks.getByName<JavaExec>("runIde") {
