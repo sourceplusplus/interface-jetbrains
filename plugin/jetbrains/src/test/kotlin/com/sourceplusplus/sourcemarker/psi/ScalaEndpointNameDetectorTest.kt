@@ -6,8 +6,10 @@ import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
+import org.junit.Ignore
 import org.junit.Test
 
+@Ignore
 class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
 
     @Test
