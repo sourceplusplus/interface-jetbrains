@@ -57,8 +57,8 @@ SourceMarker is a JetBrains-powered plugin which provides continuous feedback ca
 
 | Module                        | Description                                                          | Version |
 | ----------------------------- | -------------------------------------------------------------------- | ------- |
-| :monitor:skywalking           | Apache SkyWalking monitor implementation                             | 0.1.0   |
-| :plugin:jetbrains             | JetBrains plugin implementation                                      | 0.1.0   |
+| :monitor:skywalking           | Apache SkyWalking monitor implementation                             | 0.1.1   |
+| :plugin:jetbrains             | JetBrains plugin implementation                                      | 0.1.1   |
 
 ## Attribution
 
