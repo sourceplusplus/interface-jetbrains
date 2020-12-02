@@ -37,7 +37,7 @@ class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
             log.error("Failed to get Apache SkyWalking time info. Response: $response")
             throw RuntimeException("Failed to get time info") //todo: throw more appropriate error
         } else {
-            val timezone = Integer.parseInt(response.data!!.result!!.timezone)
+            val timezone = Integer.parseInt(response.data!!.result!!.timezone) / 100
             val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
             vertx.deployVerticleAwait(ServiceBridge(skywalkingClient))
