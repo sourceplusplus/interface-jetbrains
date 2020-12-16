@@ -1,3 +1,13 @@
+# Requirements
+
+ - [JetBrains IDE](https://www.jetbrains.com)
+    - IntelliJ IDEA Community — 2020.2 — 2020.3
+    - IntelliJ IDEA Educational — 2020.2 — 2020.2.4
+    - IntelliJ IDEA Ultimate — 2020.2 — 2020.3
+    - Android Studio — 202.4357 — 203.*
+ - [Apache SkyWalking](https://skywalking.apache.org/) (ver. 8+)
+
+
 
 # Installation
 
