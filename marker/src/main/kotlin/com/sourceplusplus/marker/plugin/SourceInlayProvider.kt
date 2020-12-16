@@ -83,9 +83,7 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                 || (parent is KtNamedFunction && element === parent.nameIdentifier)
             ) {
                 val fileMarker = getSourceFileMarker(element.containingFile)!!
-                val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(
-                    element.parent.toUElement() as UMethod
-                )
+                val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(parent.toUElement() as UMethod)
                 return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
                     SourceMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
                 }
