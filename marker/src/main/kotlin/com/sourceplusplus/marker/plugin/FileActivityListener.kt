@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory
  */
 class FileActivityListener : FileEditorManagerListener {
 
-    //todo: determine common top level package name
-
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
         if (DumbService.isDumb(source.project)) {
             log.debug("Ignoring file opened: $file")
