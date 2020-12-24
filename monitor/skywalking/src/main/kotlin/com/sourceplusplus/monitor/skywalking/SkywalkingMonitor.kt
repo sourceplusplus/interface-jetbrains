@@ -1,7 +1,7 @@
 package com.sourceplusplus.monitor.skywalking
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.coroutines.toDeferred
+import com.apollographql.apollo.coroutines.await
 import com.sourceplusplus.monitor.skywalking.bridge.*
 import io.vertx.kotlin.core.deployVerticleAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -32,12 +32,12 @@ class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
             .serverUrl(serverUrl)
             .build()
 
-        val response = client.query(GetTimeInfoQuery()).toDeferred().await()
+        val response = client.query(GetTimeInfoQuery()).await()
         if (response.hasErrors()) {
-            log.error("Failed to get Apache SkyWalking time info. Response: $response")
-            throw RuntimeException("Failed to get time info") //todo: throw more appropriate error
+            response.errors!!.forEach { log.error(it.message) }
+            throw RuntimeException("Failed to get Apache SkyWalking time info")
         } else {
-            val timezone = Integer.parseInt(response.data!!.result!!.timezone)
+            val timezone = Integer.parseInt(response.data!!.result!!.timezone) / 100
             val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
             vertx.deployVerticleAwait(ServiceBridge(skywalkingClient))
