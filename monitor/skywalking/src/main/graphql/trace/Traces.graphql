@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-query queryBasicTraces($condition: TraceQueryCondition!){
+query queryBasicTraces($condition: TraceQueryCondition!) {
     result: queryBasicTraces(condition: $condition){
         total
         traces {
