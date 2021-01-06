@@ -1,6 +1,6 @@
 package com.sourceplusplus.mapper.vcs.git
 
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase
+import com.sourceplusplus.mapper.SourceMapperTest
 import com.sourceplusplus.mapper.api.impl.SourceMapperImpl
 import com.sourceplusplus.mapper.vcs.git.GitRepositoryMapper.Companion.originalCommitIdPattern
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
@@ -14,18 +14,10 @@ import org.eclipse.jgit.revwalk.RevSort
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.transport.URIish
 import org.intellij.lang.annotations.Language
-import org.junit.Before
 import org.junit.Test
 import java.io.File
 
-class MethodRenameTest : LightPlatformCodeInsightFixture4TestCase() {
-
-    @Before
-    fun init() {
-        if (File("/tmp/git-repo").exists()) {
-            File("/tmp/git-repo").deleteRecursively()
-        }
-    }
+class MethodRenameTest : SourceMapperTest() {
 
     @Test
     fun `java get original method name`() {
@@ -55,7 +47,7 @@ class MethodRenameTest : LightPlatformCodeInsightFixture4TestCase() {
             git.commit().setMessage("Renamed method").call()
         }
 
-        val gitMapper = GitRepositoryMapper(project)
+        val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
@@ -106,7 +98,7 @@ class MethodRenameTest : LightPlatformCodeInsightFixture4TestCase() {
             git.commit().setMessage("Renamed method").call()
         }
 
-        val gitMapper = GitRepositoryMapper(project)
+        val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
@@ -131,7 +123,7 @@ class MethodRenameTest : LightPlatformCodeInsightFixture4TestCase() {
 
     @Test
     fun `java get reinitialize original method name`() {
-        val gitMapper = GitRepositoryMapper(project)
+        val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         val git = Git.init().setDirectory(File("/tmp/git-repo")).call()
         @Language("Java") val code = """
             public class GetterMethod {
@@ -216,7 +208,7 @@ class MethodRenameTest : LightPlatformCodeInsightFixture4TestCase() {
 
     @Test
     fun `java get reinitialize updated method name`() {
-        val gitMapper = GitRepositoryMapper(project)
+        val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         val git = Git.init().setDirectory(File("/tmp/git-repo")).call()
         @Language("Java") val code = """
             public class GetterMethod {

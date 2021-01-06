@@ -1,6 +1,6 @@
 package com.sourceplusplus.mapper.vcs.git
 
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase
+import com.sourceplusplus.mapper.SourceMapperTest
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.intellij.lang.annotations.Language
@@ -8,7 +8,7 @@ import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 
-class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
+class GitRepositoryMapperTest : SourceMapperTest() {
 
     @Test
     fun `tokenized java getter method`() {
@@ -27,7 +27,7 @@ class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
         }
 
         val fileRepo = FileRepository("/tmp/git-repo/.git")
-        val gitMapper = GitRepositoryMapper(project)
+        val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         gitMapper.initialize(fileRepo)
 
         val finerMethodFile = File(gitMapper.targetSourceDirectory, "GetterMethod.getStr().mjava")
@@ -68,7 +68,7 @@ class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
         }
 
         val fileRepo = FileRepository("/tmp/git-repo/.git")
-        val gitMapper = GitRepositoryMapper(project)
+        val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         gitMapper.initialize(fileRepo)
 
         val finerMethodFile = File(gitMapper.targetSourceDirectory, "GetterMethod.getStr().mgroovy")
@@ -132,7 +132,7 @@ class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
     @Test
     fun `tokenized scala getter method`() {
         Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
-        //todo: @Language("Scala") doesn't work
+            //todo: @Language("Scala") doesn't work
             @Language("Scala") val code = """
                 class GetterMethod {
                   private var str: String = _
@@ -148,7 +148,7 @@ class GitRepositoryMapperTest : LightPlatformCodeInsightFixture4TestCase() {
         }
 
         val fileRepo = FileRepository("/tmp/git-repo/.git")
-        val gitMapper = GitRepositoryMapper(project)
+        val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         gitMapper.initialize(fileRepo)
 
         val finerMethodFile = File(gitMapper.targetSourceDirectory, "GetterMethod.getStr().mscala")

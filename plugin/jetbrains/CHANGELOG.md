@@ -3,6 +3,8 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+### Upgraded
+- Apache SkyWalking (8.2.0 -> 8.3.0)
 
 ## [0.1.1] - 2020-12-01
 ### Fixed
