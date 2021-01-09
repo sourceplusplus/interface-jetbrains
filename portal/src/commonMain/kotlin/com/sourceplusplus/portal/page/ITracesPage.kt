@@ -1,11 +1,10 @@
 package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.IPortalPage
-import com.sourceplusplus.portal.model.TraceDisplayType
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 
 /**
  * todo: description.
@@ -13,11 +12,10 @@ import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface ITracesPage : IPortalPage {
-    var traceOrderType: TraceOrderType
-    var traceDisplayType: TraceDisplayType
+abstract class ITracesPage : IPortalPage {
+    override lateinit var configuration: PortalConfiguration
 
-    fun displayTraces(traceResult: TraceResult)
-    fun displayTraceStack(traceStackPath: TraceStackPath)
-    fun displaySpanInfo(spanInfo: TraceSpan)
+    abstract fun displayTraces(traceResult: TraceResult)
+    abstract fun displayTraceStack(traceStackPath: TraceStackPath)
+    abstract fun displaySpanInfo(spanInfo: TraceSpan)
 }

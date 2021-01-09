@@ -39,9 +39,7 @@ import kotlin.js.json
 class OverviewPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IOverviewPage, PortalPage {
-
-    private lateinit var configuration: PortalConfiguration
+) : IOverviewPage(), PortalPage {
 
     override fun setupEventbus() {
         eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->

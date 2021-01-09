@@ -10,6 +10,7 @@ import com.sourceplusplus.protocol.portal.PortalConfiguration
  */
 interface IPortalPage {
     val portalUuid: String
+    var configuration: PortalConfiguration
 
     fun setupEventbus()
     fun renderPage(portalConfiguration: PortalConfiguration)

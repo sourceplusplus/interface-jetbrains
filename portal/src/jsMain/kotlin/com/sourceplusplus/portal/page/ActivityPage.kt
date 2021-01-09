@@ -39,14 +39,9 @@ import kotlin.js.json
 class ActivityPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IActivityPage, PortalPage {
+) : IActivityPage(), PortalPage {
 
-    private lateinit var configuration: PortalConfiguration
     private var overviewChart: dynamic = null
-    private var tooltipMeasurement = "ms"
-    private val labelColor by lazy { if (configuration.darkMode) "grey" else "black" }
-    private val symbolColor by lazy { if (configuration.darkMode) "grey" else "#182d34" }
-
     private val tooltipFormatter: ((params: dynamic) -> String) = { params ->
         val time = params[0].value[0].toString()
         val measurement = params[0].value[1].toString().toDouble()

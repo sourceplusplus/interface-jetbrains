@@ -53,11 +53,9 @@ import kotlin.time.ExperimentalTime
 class TracesPage(
     override val portalUuid: String,
     private val eb: EventBus,
-    override var traceOrderType: TraceOrderType = LATEST_TRACES,
-    override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES
-) : ITracesPage {
-
-    private lateinit var configuration: PortalConfiguration
+    private var traceOrderType: TraceOrderType,
+    private var traceDisplayType: TraceDisplayType
+) : ITracesPage(), PortalPage {
 
     override fun setupEventbus() {
         eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
@@ -127,8 +125,7 @@ class TracesPage(
     @OptIn(ExperimentalTime::class)
     override fun displayTraces(traceResult: TraceResult) {
         console.log("Displaying ${traceResult.total} traces")
-        traceDisplayType = TraceDisplayType.TRACES
-        resetUI()
+        resetUI(TraceDisplayType.TRACES, traceResult.orderType)
 
         for (i in traceResult.traces.indices) {
             val trace = traceResult.traces[i]
@@ -203,13 +200,12 @@ class TracesPage(
 
     override fun displayTraceStack(traceStackPath: TraceStackPath) {
         console.log("Displaying trace stack")
-        traceDisplayType = TraceDisplayType.TRACE_STACK
-        resetUI()
+        resetUI(TraceDisplayType.TRACE_STACK)
 
         if (traceStackPath.getCurrentRoot() != null) {
             jq("#latest_traces_header_text").text("Parent Stack")
         } else {
-            when (traceOrderType) {
+            when (traceStackPath.orderType) {
                 LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
                 SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
                 FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
@@ -353,8 +349,7 @@ class TracesPage(
 
     override fun displaySpanInfo(spanInfo: TraceSpan) {
         console.log("Displaying span info")
-        traceDisplayType = TraceDisplayType.SPAN_INFO
-        resetUI()
+        resetUI(TraceDisplayType.SPAN_INFO)
 
         jq("#span_info_start_trace_time").attr("data-value", spanInfo.startTime.toEpochMilliseconds())
         jq("#span_info_start_time").text(spanInfo.startTime.toMoment().format("h:mm:ss a"))
@@ -450,7 +445,7 @@ class TracesPage(
     }
 
     private fun setupUI() {
-        resetUI()
+        resetUI(TraceDisplayType.TRACES)
 
         js("\$('#latest_traces_header').dropdown({on: null})")
         js("\$('#trace_stack_header').dropdown({on: 'hover'})")
@@ -468,7 +463,7 @@ class TracesPage(
     }
 
     //todo: clean up
-    private fun resetUI() {
+    private fun resetUI(traceDisplayType: TraceDisplayType, traceOrderType: TraceOrderType? = null) {
         when (traceDisplayType) {
             TraceDisplayType.TRACES -> {
                 when (traceOrderType) {

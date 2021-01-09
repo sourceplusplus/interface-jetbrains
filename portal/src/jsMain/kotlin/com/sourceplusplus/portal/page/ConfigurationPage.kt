@@ -32,9 +32,7 @@ import kotlin.js.json
 class ConfigurationPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IConfigurationPage {
-
-    private lateinit var configuration: PortalConfiguration
+) : IConfigurationPage(), PortalPage {
 
     override fun setupEventbus() {
         eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
