@@ -21,7 +21,6 @@ import com.sourceplusplus.protocol.artifact.metrics.SplineChart
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
-import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.html.dom.append
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -40,12 +39,10 @@ import kotlin.js.json
 class ActivityPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IActivityPage {
+) : IActivityPage, PortalPage {
 
     private lateinit var configuration: PortalConfiguration
     private var overviewChart: dynamic = null
-    override var currentMetricType: MetricType = MetricType.Throughput_Average
-    override var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
     private var tooltipMeasurement = "ms"
     private val labelColor by lazy { if (configuration.darkMode) "grey" else "black" }
     private val symbolColor by lazy { if (configuration.darkMode) "grey" else "#182d34" }
@@ -99,8 +96,6 @@ class ActivityPage(
 
     @ExperimentalSerializationApi
     override fun setupEventbus() {
-        clickedViewAverageResponseTimeChart() //default = avg resp time
-
         eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
             clearActivity()
         }
@@ -111,19 +106,11 @@ class ActivityPage(
             updateChart(Json.decodeFromDynamic(message.body))
         }
 
-        var timeFrame = localStorage.getItem("spp.metricTimeFrame")
-        if (timeFrame == null) {
-            timeFrame = currentTimeFrame.name
-            localStorage.setItem("spp.metricTimeFrame", timeFrame)
-        }
-        updateTime(QueryTimeFrame.valueOf(timeFrame.toUpperCase()))
-        //js("portalLog('Set initial time frame to: ' + timeFrame);")
-
         eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
-        println("Rending Activity page")
+        console.log("Rending Activity page")
         this.configuration = portalConfiguration
 
         val root: Element = document.getElementById("root")!!
@@ -158,7 +145,7 @@ class ActivityPage(
     }
 
     fun loadChart() {
-        println("Loading chart")
+        console.log("Loading chart")
         overviewChart = echarts.init(document.getElementById("overview_chart"))
         window.onresize = {
             console.log("Resizing overview chart")
@@ -184,11 +171,14 @@ class ActivityPage(
 
     override fun displayCard(card: BarTrendCard) {
         console.log("Displaying card. Type: ${card.meta}")
+        setActiveTime(card.timeFrame)
+
         document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = card.header
     }
 
     override fun updateChart(chartData: SplineChart) {
         console.log("Updating chart")
+        setActiveTime(chartData.timeFrame)
 
         val cards = listOf("throughput_average", "responsetime_average", "servicelevelagreement_average")
         for (i in cards.indices) {
@@ -255,8 +245,6 @@ class ActivityPage(
 
     override fun updateTime(interval: QueryTimeFrame) {
         console.log("Update time: $interval")
-        currentTimeFrame = interval
-        localStorage.setItem("spp.metricTimeFrame", interval.name)
         eb.send(
             SetMetricTimeFrame,
             json(
@@ -265,47 +253,38 @@ class ActivityPage(
             )
         )
 
-        jq("#last_5_minutes_time").removeClass("active")
-        jq("#last_15_minutes_time").removeClass("active")
-        jq("#last_30_minutes_time").removeClass("active")
-        jq("#last_hour_time").removeClass("active")
-        jq("#last_3_hours_time").removeClass("active")
-
-        jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
+        setActiveTime(interval)
     }
 
     private fun clickedViewAverageThroughputChart() {
         console.log("Clicked view average throughput")
-        currentMetricType = MetricType.Throughput_Average
         eb.send(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to currentMetricType.name
+                "metricType" to MetricType.Throughput_Average.name
             )
         )
     }
 
     private fun clickedViewAverageResponseTimeChart() {
         console.log("Clicked view average response time")
-        currentMetricType = MetricType.ResponseTime_Average
         eb.send(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to currentMetricType.name
+                "metricType" to MetricType.ResponseTime_Average.name
             )
         )
     }
 
     private fun clickedViewAverageSLAChart() {
         console.log("Clicked view average SLA")
-        currentMetricType = MetricType.ServiceLevelAgreement_Average
         eb.send(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to currentMetricType.name
+                "metricType" to MetricType.ServiceLevelAgreement_Average.name
             )
         )
     }

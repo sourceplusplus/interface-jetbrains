@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.PortalPage
+import com.sourceplusplus.portal.IPortalPage
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 
@@ -10,7 +10,7 @@ import com.sourceplusplus.protocol.artifact.QueryTimeFrame
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IOverviewPage : PortalPage {
+interface IOverviewPage : IPortalPage {
 
     fun displayEndpoints(endpointResult: EndpointResult)
     fun updateTime(interval: QueryTimeFrame)

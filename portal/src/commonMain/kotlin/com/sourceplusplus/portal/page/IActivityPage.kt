@@ -1,8 +1,7 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.PortalPage
+import com.sourceplusplus.portal.IPortalPage
 import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
-import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.SplineChart
 
@@ -12,9 +11,7 @@ import com.sourceplusplus.protocol.artifact.metrics.SplineChart
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IActivityPage : PortalPage {
-    var currentMetricType: MetricType
-    var currentTimeFrame: QueryTimeFrame
+interface IActivityPage : IPortalPage {
 
     fun displayCard(card: BarTrendCard)
     fun updateChart(chartData: SplineChart)

@@ -2,7 +2,6 @@ package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
-import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.model.EndpointTableType
 import com.sourceplusplus.portal.model.PageType.*
 import com.sourceplusplus.portal.template.*
@@ -40,7 +39,7 @@ import kotlin.js.json
 class OverviewPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IOverviewPage {
+) : IOverviewPage, PortalPage {
 
     private lateinit var configuration: PortalConfiguration
 
@@ -57,7 +56,7 @@ class OverviewPage(
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
-        println("Rending Overview page")
+        console.log("Rending Overview page")
         this.configuration = portalConfiguration
 
         val root: Element = document.getElementById("root")!!
@@ -202,13 +201,7 @@ class OverviewPage(
             )
         )
 
-        jq("#last_5_minutes_time").removeClass("active")
-        jq("#last_15_minutes_time").removeClass("active")
-        jq("#last_30_minutes_time").removeClass("active")
-        jq("#last_hour_time").removeClass("active")
-        jq("#last_3_hours_time").removeClass("active")
-
-        jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
+        setActiveTime(interval)
     }
 
     private data class Color(

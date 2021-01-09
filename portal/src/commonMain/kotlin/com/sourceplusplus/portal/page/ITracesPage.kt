@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.PortalPage
+import com.sourceplusplus.portal.IPortalPage
 import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
@@ -13,7 +13,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface ITracesPage : PortalPage {
+interface ITracesPage : IPortalPage {
     var traceOrderType: TraceOrderType
     var traceDisplayType: TraceDisplayType
 
