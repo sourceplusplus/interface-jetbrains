@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
@@ -52,9 +53,7 @@ import kotlin.time.ExperimentalTime
  */
 class TracesPage(
     override val portalUuid: String,
-    private val eb: EventBus,
-    private var traceOrderType: TraceOrderType,
-    private var traceDisplayType: TraceDisplayType
+    private val eb: EventBus
 ) : ITracesPage(), PortalPage {
 
     override fun setupEventbus() {
@@ -67,13 +66,7 @@ class TracesPage(
         eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
             displaySpanInfo(Json.decodeFromDynamic(message.body))
         }
-        eb.publish(
-            TracesTabOpened, json(
-                "portalUuid" to portalUuid,
-                "traceOrderType" to traceOrderType.name,
-                "traceDisplayType" to traceDisplayType.name
-            )
-        )
+        eb.publish(TracesTabOpened, json("portalUuid" to portalUuid))
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
@@ -87,7 +80,11 @@ class TracesPage(
                 if (configuration.visibleOverview) navItem(OVERVIEW)
                 if (configuration.visibleActivity) navItem(ACTIVITY)
                 if (configuration.visibleTraces) navItem(TRACES, isActive = true) {
-                    navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
+                    navSubItems(
+                        PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, LATEST_TRACES) },
+                        PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, SLOWEST_TRACES) },
+                        PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, FAILED_TRACES) }
+                    )
                 }
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true)
             }
@@ -124,7 +121,7 @@ class TracesPage(
 
     @OptIn(ExperimentalTime::class)
     override fun displayTraces(traceResult: TraceResult) {
-        console.log("Displaying ${traceResult.total} traces")
+        console.log("Displaying ${traceResult.total} traces - ${traceResult.orderType}")
         resetUI(TraceDisplayType.TRACES, traceResult.orderType)
 
         for (i in traceResult.traces.indices) {

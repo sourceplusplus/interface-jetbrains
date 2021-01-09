@@ -1,9 +1,9 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.portal.model.PageType.*
 import kotlinx.html.*
+import kotlinx.html.js.onClickFunction
 
 fun FlowContent.tabs(block: FlowContent.() -> Unit) {
     block()
@@ -38,13 +38,12 @@ fun FlowContent.tabItem(pageType: PageType, isActive: Boolean, block: (FlowConte
     }
 }
 
-fun FlowContent.subTabItem(vararg traceOrderTypes: TraceOrderType = arrayOf()) {
+fun FlowContent.subTabItem(vararg subItems: PortalNavSubItem) {
     div("menu secondary_background_color") {
-        for (traceType in traceOrderTypes) {
+        for (item in subItems) {
             a(classes = "item") {
-                id = "traces_link_${traceType.id}"
-                href = traceType.id
-                span("menu_tooltip_text") { +traceType.description }
+                onClickFunction = item.onClick
+                span("menu_tooltip_text") { +item.traceOrderType.description }
             }
         }
     }

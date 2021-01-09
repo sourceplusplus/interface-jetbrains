@@ -20,9 +20,9 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetTraceOrderType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.ArtifactType.METHOD
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
@@ -61,6 +61,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         }
 
         vertx.eventBus().consumer(TracesTabOpened, this@TracesDisplay::tracesTabOpened)
+        vertx.eventBus().consumer(SetTraceOrderType, this@TracesDisplay::setTraceOrderType)
         vertx.eventBus().consumer<TraceResult>(ArtifactTraceUpdated) { handleArtifactTraceResult(it.body()) }
         vertx.eventBus().consumer(ClickedDisplayTraceStack, this@TracesDisplay::clickedDisplayTraceStack)
         vertx.eventBus().consumer(ClickedDisplayInnerTraceStack, this@TracesDisplay::clickedDisplayInnerTraceStack)
@@ -143,7 +144,8 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                     val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
                     portal.tracesView.viewType = TRACE_STACK
                     portal.tracesView.traceStack = it.result().body()
-                    portal.tracesView.traceStackPath = TraceStackPath(it.result().body())
+                    portal.tracesView.traceStackPath =
+                        TraceStackPath(it.result().body(), orderType = portal.tracesView.orderType)
                     portal.tracesView.traceId = request.getString("traceId")
                     updateUI(portal)
                 }
@@ -202,19 +204,28 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             return
         }
 
-        val orderType = message.getString("traceOrderType")
-        if (orderType != null) {
-            //user possibly changed current trace order type; todo: create event
-            portal.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
-        }
         portal.currentTab = thisTab
+        portal.tracesView.viewType = TRACES
+        SourcePortal.ensurePortalActive(portal)
+        updateUI(portal)
 
-        val displayType = message.getString("traceDisplayType")
-        if (displayType != null) {
-            portal.tracesView.viewType = TraceDisplayType.valueOf(displayType)
-        } else {
-            portal.tracesView.viewType = TRACES
+        vertx.eventBus().send(RefreshTraces, portal)
+    }
+
+    private fun setTraceOrderType(it: Message<JsonObject>) {
+        log.info("Changed trace order type")
+        val message = JsonObject.mapFrom(it.body())
+        val portalUuid = message.getString("portalUuid")
+        val portal = SourcePortal.getPortal(portalUuid)
+        if (portal == null) {
+            log.warn("Ignoring traces tab opened event. Unable to find portal: {}", portalUuid)
+            return
         }
+
+        portal.currentTab = thisTab
+        val orderType = message.getString("traceOrderType")!!
+        portal.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
+
         SourcePortal.ensurePortalActive(portal)
         updateUI(portal)
 

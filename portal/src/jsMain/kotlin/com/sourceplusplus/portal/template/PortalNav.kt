@@ -1,12 +1,13 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import kotlinx.html.FlowContent
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.style
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.events.Event
 
 class PortalNavigationConfiguration(private val flowContent: FlowContent) {
 
@@ -36,13 +37,13 @@ class PortalNavigationConfiguration(private val flowContent: FlowContent) {
         }
     }
 
-    fun navSubItem(vararg traceOrderTypes: TraceOrderType = arrayOf()) {
-        when (mode) {
-            ModeType.MENU -> flowContent.subMenuItem(*traceOrderTypes)
-            ModeType.TAB -> flowContent.subTabItem(*traceOrderTypes)
-        }
+    fun navSubItems(vararg subItems: PortalNavSubItem) = when (mode) {
+        ModeType.MENU -> subItems.forEach { flowContent.subMenuItem(it.traceOrderType, it.onClick) }
+        ModeType.TAB -> flowContent.subTabItem(*subItems)
     }
 }
+
+data class PortalNavSubItem(val traceOrderType: TraceOrderType, val onClick: (Event) -> Unit)
 
 fun TagConsumer<HTMLElement>.portalNav(block: PortalNavigationConfiguration.() -> Unit) {
     div("ui sidebar vertical left menu overlay visible very thin icon spp_blue webkit_transition") {

@@ -37,6 +37,7 @@ object ProtocolAddress {
 
         //Portal - Traces
         const val TracesTabOpened = "TracesTabOpened"
+        const val SetTraceOrderType = "SetTraceOrderType"
         const val ClickedDisplayTraces = "ClickedDisplayTraces"
         const val ClickedDisplayTraceStack = "ClickedDisplayTraceStack"
         const val ClickedDisplayInnerTraceStack = "ClickedDisplayInnerTraceStack"

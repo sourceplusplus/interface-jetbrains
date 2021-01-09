@@ -2,11 +2,11 @@ package com.sourceplusplus.portal
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
-import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.page.ActivityPage
 import com.sourceplusplus.portal.page.ConfigurationPage
 import com.sourceplusplus.portal.page.OverviewPage
 import com.sourceplusplus.portal.page.TracesPage
+import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
@@ -31,13 +31,7 @@ fun main() {
         val currentPage = when (window.location.pathname) {
             "/activity", "/activity.html" -> ActivityPage(portalUuid, eb)
             "/traces", "/traces.html" -> {
-                val traceOrderType = TraceOrderType.valueOf(
-                    queryParams.getOrElse("orderType", { "LATEST_TRACES" }).toUpperCase()
-                )
-                val traceDisplayType = TraceDisplayType.valueOf(
-                    queryParams.getOrElse("displayType", { "TRACES" }).toUpperCase()
-                )
-                TracesPage(portalUuid, eb, traceOrderType, traceDisplayType)
+                TracesPage(portalUuid, eb)
             }
             "/configuration", "/configuration.html" -> ConfigurationPage(portalUuid, eb)
             else -> OverviewPage(portalUuid, eb)
@@ -87,15 +81,7 @@ fun loadTheme() {
     js("\$('.ui.table').tablesort()")
 
     jq(".openbtn").on("click", fun() {
-        jq(".ui.sidebar").toggleClass("very thin icon")
-        jq(".asd").toggleClass("marginlefting")
-        jq(".sidebar z").toggleClass("displaynone")
-        jq(".ui.accordion").toggleClass("displaynone")
-        jq(".ui.dropdown.item").toggleClass("displaynone")
-        jq(".hide_on_toggle").toggleClass("displaynone")
-        jq(".pusher").toggleClass("dimmed")
-
-        jq(".logo").find("img").toggle()
+        toggleSidebar()
     })
     js("\$('.ui.accordion').accordion({selector: {}})")
 
@@ -106,15 +92,21 @@ fun loadTheme() {
     jq("#activity_link").attr("href", "activity.html$mainGetQuery")
     jq("#sidebar_activity_link").attr("href", "activity.html$mainGetQuery")
 
-    jq("#traces_link_latest").attr("href", "traces.html$mainGetQuery&orderType=latest_traces")
-    jq("#traces_link_slowest").attr("href", "traces.html$mainGetQuery&orderType=slowest_traces")
-    jq("#traces_link_failed").attr("href", "traces.html$mainGetQuery&orderType=failed_traces")
-    jq("#sidebar_traces_link_latest").attr("href", "traces.html$mainGetQuery&orderType=latest_traces")
-    jq("#sidebar_traces_link_slowest").attr("href", "traces.html$mainGetQuery&orderType=slowest_traces")
-    jq("#sidebar_traces_link_failed").attr("href", "traces.html$mainGetQuery&orderType=failed_traces")
 
     jq("#configuration_link").attr("href", "configuration.html$mainGetQuery")
     jq("#sidebar_configuration_link").attr("href", "configuration.html$mainGetQuery")
+}
+
+fun toggleSidebar() {
+    jq(".ui.sidebar").toggleClass("very thin icon")
+    jq(".asd").toggleClass("marginlefting")
+    jq(".sidebar z").toggleClass("displaynone")
+    jq(".ui.accordion").toggleClass("displaynone")
+    jq(".ui.dropdown.item").toggleClass("displaynone")
+    jq(".hide_on_toggle").toggleClass("displaynone")
+    jq(".pusher").toggleClass("dimmed")
+
+    jq(".logo").find("img").toggle()
 }
 
 fun getMainGetQuery(): String {
@@ -149,6 +141,16 @@ fun getQueryMap(): Map<String, String> {
         }
     }
     return queryPairs
+}
+
+fun clickedTracesOrderType(eb: EventBus, traceOrderType: TraceOrderType) {
+    val queryParams = getQueryMap()
+    val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
+
+    eb.publish(
+        ProtocolAddress.Global.SetTraceOrderType,
+        json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name)
+    )
 }
 
 external fun decodeURIComponent(encodedURI: String): String
