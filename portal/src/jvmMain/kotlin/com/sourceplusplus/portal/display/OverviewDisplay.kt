@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FindAndOpenPortal
@@ -31,7 +31,7 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
         vertx.eventBus().consumer<JsonObject>(OverviewTabOpened) {
             val portalUuid = it.body().getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
-            portal.currentTab = PageType.OVERVIEW
+            portal.configuration.currentPage = PageType.OVERVIEW
             vertx.eventBus().send(RefreshOverview, it.body())
         }
         vertx.eventBus().consumer<JsonObject>(SetOverviewTimeFrame) {

@@ -7,7 +7,7 @@ import com.sourceplusplus.portal.extensions.echarts
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ChartItemType.*
-import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric

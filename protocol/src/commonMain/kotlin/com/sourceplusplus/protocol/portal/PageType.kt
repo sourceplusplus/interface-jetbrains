@@ -1,4 +1,4 @@
-package com.sourceplusplus.portal.model
+package com.sourceplusplus.protocol.portal
 
 /**
  * Contains the available possible portal tabs.

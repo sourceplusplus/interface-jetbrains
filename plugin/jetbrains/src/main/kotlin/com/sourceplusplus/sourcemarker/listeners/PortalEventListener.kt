@@ -21,7 +21,7 @@ import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.monitor.skywalking.toProtocol
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.CanNavigateToArtifact
@@ -289,8 +289,8 @@ class PortalEventListener : CoroutineVerticle() {
             if (portal != lastDisplayedInternalPortal) {
                 portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
                 val host = "http://localhost:8080"
-                var currentUrl = "$host/${portal.currentTab.name.toLowerCase()}.html?portalUuid=${portal.portalUuid}"
-                if (portal.currentTab == PageType.TRACES) {
+                var currentUrl = "$host/${portal.configuration.currentPage.name.toLowerCase()}.html?portalUuid=${portal.portalUuid}"
+                if (portal.configuration.currentPage == PageType.TRACES) {
                     currentUrl += "&orderType=" + portal.tracesView.orderType.name
                     currentUrl += "&displayType=" + portal.tracesView.viewType.name
                 }

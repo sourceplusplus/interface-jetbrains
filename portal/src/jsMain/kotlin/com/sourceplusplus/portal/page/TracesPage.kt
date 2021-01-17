@@ -6,7 +6,7 @@ import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
-import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME

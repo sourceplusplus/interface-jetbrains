@@ -21,6 +21,7 @@ object ProtocolAddress {
         const val ChangedPortalArtifact = "ChangedPortalArtifact"
         const val CanNavigateToArtifact = "CanNavigateToArtifact"
         const val NavigateToArtifact = "NavigateToArtifact"
+        const val RenderPage = "RenderPage"
 
         //Portal - Overview
         const val OverviewTabOpened = "OverviewTabOpened"
@@ -57,6 +58,10 @@ object ProtocolAddress {
 
     @Suppress("FunctionName")
     object Portal {
+        fun RenderPage(portalUuid: String): String {
+            return "$portalUuid-RenderPage"
+        }
+
         fun UpdateEndpoints(portalUuid: String): String {
             return "$portalUuid-UpdateEndpoints"
         }

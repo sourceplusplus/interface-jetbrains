@@ -8,7 +8,7 @@ import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ArtifactConfigType.AUTO_SUBSCRIBE
 import com.sourceplusplus.portal.model.ArtifactConfigType.ENTRY_METHOD
 import com.sourceplusplus.portal.model.ArtifactInfoType.*
-import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe

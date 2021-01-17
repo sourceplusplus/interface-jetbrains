@@ -9,7 +9,9 @@ import com.sourceplusplus.portal.page.TracesPage
 import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -22,19 +24,19 @@ import kotlin.js.json
 
 fun main() {
     jq().ready {
-        //todo: portals should have ability to cache pages so they don't need re-init
-
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
-
         val eb = EventBus("http://localhost:8888/eventbus")
+
+        val overviewPage = OverviewPage(portalUuid, eb)
+        val activityPage = ActivityPage(portalUuid, eb)
+        val tracesPage = TracesPage(portalUuid, eb)
+        val configurationPage = ConfigurationPage(portalUuid, eb)
         val currentPage = when (window.location.pathname) {
-            "/activity", "/activity.html" -> ActivityPage(portalUuid, eb)
-            "/traces", "/traces.html" -> {
-                TracesPage(portalUuid, eb)
-            }
-            "/configuration", "/configuration.html" -> ConfigurationPage(portalUuid, eb)
-            else -> OverviewPage(portalUuid, eb)
+            "/activity", "/activity.html" -> activityPage
+            "/traces", "/traces.html" -> tracesPage
+            "/configuration", "/configuration.html" -> configurationPage
+            else -> overviewPage
         }
 
         console.log("Connecting portal")
@@ -54,6 +56,27 @@ fun main() {
                 loadTheme()
 
                 currentPage.setupEventbus()
+            }
+
+            eb.registerHandler(RenderPage(portalUuid)) { _: dynamic, message: dynamic ->
+                val portalConfiguration = Json.decodeFromDynamic<PortalConfiguration>(message.body)
+                val renderPage = when (portalConfiguration.currentPage) {
+                    PageType.OVERVIEW  -> overviewPage
+                    PageType.ACTIVITY -> activityPage
+                    PageType.TRACES -> tracesPage
+                    PageType.CONFIGURATION -> configurationPage
+                }
+                document.getElementsByTagName("head")[0]!!.append {
+                    link {
+                        rel = "stylesheet"
+                        type = "text/css"
+                        href = "css/" + if (portalConfiguration.darkMode) "dark_style.css" else "style.css"
+                    }
+                }
+                renderPage.renderPage(portalConfiguration)
+                loadTheme()
+
+                renderPage.setupEventbus()
             }
         }
 

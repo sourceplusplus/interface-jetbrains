@@ -4,7 +4,7 @@ import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.model.EndpointTableType
-import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
