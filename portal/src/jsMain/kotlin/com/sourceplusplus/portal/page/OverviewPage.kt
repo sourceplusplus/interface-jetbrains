@@ -4,11 +4,12 @@ import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.model.EndpointTableType
+import com.sourceplusplus.portal.setActiveTime
 import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
-import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetOverviewTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
@@ -40,13 +41,16 @@ import kotlin.js.json
 class OverviewPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IOverviewPage(), PortalPage {
+) : IOverviewPage() {
 
     override fun setupEventbus() {
-        eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->
-            displayEndpoints(Json.decodeFromDynamic(message.body))
+        if (!setup) {
+            setup = true
+            eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->
+                displayEndpoints(Json.decodeFromDynamic(message.body))
+            }
         }
-        eb.publish(OverviewTabOpened, json("portalUuid" to portalUuid))
+        eb.send(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {

@@ -11,7 +11,7 @@ import com.sourceplusplus.protocol.portal.PortalConfiguration
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-abstract class IOverviewPage : IPortalPage {
+abstract class IOverviewPage : IPortalPage() {
     override lateinit var configuration: PortalConfiguration
 
     abstract fun displayEndpoints(endpointResult: EndpointResult)

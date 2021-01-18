@@ -18,7 +18,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
-import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
@@ -55,19 +55,22 @@ import kotlin.time.ExperimentalTime
 class TracesPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : ITracesPage(), PortalPage {
+) : ITracesPage() {
 
     override fun setupEventbus() {
-        eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
-            displayTraces(Json.decodeFromDynamic(message.body))
+        if (!setup) {
+            setup = true
+            eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
+                displayTraces(Json.decodeFromDynamic(message.body))
+            }
+            eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
+                displayTraceStack(*Json.decodeFromDynamic(message.body))
+            }
+            eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
+                displaySpanInfo(Json.decodeFromDynamic(message.body))
+            }
         }
-        eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
-            displayTraceStack(*Json.decodeFromDynamic(message.body))
-        }
-        eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
-            displaySpanInfo(Json.decodeFromDynamic(message.body))
-        }
-        eb.publish(TracesTabOpened, json("portalUuid" to portalUuid))
+        eb.send(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {

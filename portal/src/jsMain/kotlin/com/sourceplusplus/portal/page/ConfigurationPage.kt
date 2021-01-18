@@ -11,7 +11,7 @@ import com.sourceplusplus.portal.model.ArtifactInfoType.*
 import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactEntryMethod
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayArtifactConfiguration
@@ -35,13 +35,16 @@ import kotlin.js.json
 class ConfigurationPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IConfigurationPage(), PortalPage {
+) : IConfigurationPage() {
 
     override fun setupEventbus() {
-        eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
-            updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
+        if (!setup) {
+            setup = true
+            eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
+                updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
+            }
         }
-        eb.publish(ConfigurationTabOpened, json("portalUuid" to portalUuid))
+        eb.send(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {

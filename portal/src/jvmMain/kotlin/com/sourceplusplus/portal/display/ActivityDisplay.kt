@@ -3,8 +3,8 @@ package com.sourceplusplus.portal.display
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayCard
 import com.sourceplusplus.portal.extensions.updateChart
-import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric

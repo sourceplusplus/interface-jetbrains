@@ -1,7 +1,6 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactEntryMethod
 import com.sourceplusplus.protocol.portal.PageType
@@ -25,14 +24,6 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
     override suspend fun start() {
         updateConfigurationPermitted = pluginAvailable
 
-        vertx.eventBus().consumer<JsonObject>(ConfigurationTabOpened) {
-            log.info("Configuration tab opened")
-            val message = JsonObject.mapFrom(it.body())
-            val portal = SourcePortal.getPortal(message.getString("portalUuid"))!!
-            portal.configuration.currentPage = thisTab
-            SourcePortal.ensurePortalActive(portal)
-            updateUI(portal)
-        }
 //        vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
 //            log.debug("Artifact configuration updated")
 //            def artifact = it.body() as SourceArtifact

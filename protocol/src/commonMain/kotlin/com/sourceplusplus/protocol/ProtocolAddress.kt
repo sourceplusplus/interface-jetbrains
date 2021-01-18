@@ -18,14 +18,13 @@ object ProtocolAddress {
         const val UpdatePortalArtifact = "UpdatePortalArtifact"
         const val GetPortalConfiguration = "GetPortalConfiguration"
         const val SetCurrentPage = "SetCurrentPage"
+        const val RefreshPortal = "RefreshPortal"
         const val CanOpenPortal = "CanOpenPortal"
         const val ChangedPortalArtifact = "ChangedPortalArtifact"
         const val CanNavigateToArtifact = "CanNavigateToArtifact"
         const val NavigateToArtifact = "NavigateToArtifact"
-        const val RenderPage = "RenderPage"
 
         //Portal - Overview
-        const val OverviewTabOpened = "OverviewTabOpened"
         const val RefreshOverview = "RefreshOverview"
         const val SetOverviewTimeFrame = "SetOverviewTimeFrame"
         const val ClickedEndpointArtifact = "ClickedEndpointArtifact"
@@ -38,7 +37,6 @@ object ProtocolAddress {
         const val ArtifactMetricUpdated = "ArtifactMetricUpdated"
 
         //Portal - Traces
-        const val TracesTabOpened = "TracesTabOpened"
         const val SetTraceOrderType = "SetTraceOrderType"
         const val ClickedDisplayTraces = "ClickedDisplayTraces"
         const val ClickedDisplayTraceStack = "ClickedDisplayTraceStack"
@@ -51,7 +49,6 @@ object ProtocolAddress {
         const val ClickedStackTraceElement = "ClickedStackTraceElement"
 
         //Portal - Configuration
-        const val ConfigurationTabOpened = "ConfigurationTabOpened"
         const val DisplayArtifactConfiguration = "DisplayArtifactConfiguration"
         const val UpdateArtifactEntryMethod = "UpdateArtifactEntryMethod"
         const val UpdateArtifactAutoSubscribe = "UpdateArtifactAutoSubscribe"

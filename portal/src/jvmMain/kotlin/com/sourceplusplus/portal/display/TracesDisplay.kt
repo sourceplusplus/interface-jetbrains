@@ -20,7 +20,6 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetTraceOrderType
-import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType.METHOD
@@ -56,7 +55,6 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             }
         }
 
-        vertx.eventBus().consumer(TracesTabOpened, this@TracesDisplay::tracesTabOpened)
         vertx.eventBus().consumer(SetTraceOrderType, this@TracesDisplay::setTraceOrderType)
         vertx.eventBus().consumer<TraceResult>(ArtifactTraceUpdated) { handleArtifactTraceResult(it.body()) }
         vertx.eventBus().consumer(ClickedDisplayTraceStack, this@TracesDisplay::clickedDisplayTraceStack)
@@ -188,24 +186,6 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             SourcePortal.ensurePortalActive(portal)
             updateUI(portal)
         }
-    }
-
-    private fun tracesTabOpened(it: Message<JsonObject>) {
-        log.info("Traces tab opened")
-        val message = JsonObject.mapFrom(it.body())
-        val portalUuid = message.getString("portalUuid")
-        val portal = SourcePortal.getPortal(portalUuid)
-        if (portal == null) {
-            log.warn("Ignoring traces tab opened event. Unable to find portal: {}", portalUuid)
-            return
-        }
-
-        portal.configuration.currentPage = thisTab
-        portal.tracesView.viewType = TRACES
-        SourcePortal.ensurePortalActive(portal)
-        updateUI(portal)
-
-        vertx.eventBus().send(RefreshTraces, portal)
     }
 
     private fun setTraceOrderType(it: Message<JsonObject>) {

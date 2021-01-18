@@ -11,6 +11,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalP
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
@@ -94,7 +95,7 @@ fun setCurrentPage(eb: EventBus, portalUuid: String, pageType: PageType) {
 fun clickedViewAsExternalPortal(eb: EventBus, portalUuid: String) {
     eb.send(ClickedViewAsExternalPortal, json("portalUuid" to portalUuid), fun(_, message: dynamic) {
         window.open(
-            "${window.location.href.split('?')[0]}?portalUuid=${message.body.portalUuid}}",
+            "${window.location.href.split('?')[0]}?portalUuid=${message.body.portalUuid}",
             "_blank"
         )
     })
@@ -144,6 +145,15 @@ fun clickedTracesOrderType(eb: EventBus, portalUuid: String, traceOrderType: Tra
         ProtocolAddress.Global.SetTraceOrderType,
         json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name)
     )
+}
+
+fun setActiveTime(interval: QueryTimeFrame) {
+    jq("#last_5_minutes_time").removeClass("active")
+    jq("#last_15_minutes_time").removeClass("active")
+    jq("#last_30_minutes_time").removeClass("active")
+    jq("#last_hour_time").removeClass("active")
+    jq("#last_3_hours_time").removeClass("active")
+    jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
 }
 
 external fun decodeURIComponent(encodedURI: String): String

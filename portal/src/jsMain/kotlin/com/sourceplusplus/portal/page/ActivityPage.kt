@@ -7,10 +7,12 @@ import com.sourceplusplus.portal.extensions.echarts
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ChartItemType.*
+import com.sourceplusplus.portal.setActiveTime
 import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
@@ -42,7 +44,7 @@ import kotlin.js.json
 class ActivityPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IActivityPage(), PortalPage {
+) : IActivityPage() {
 
     private var overviewChart: dynamic = null
     private val tooltipFormatter: ((params: dynamic) -> String) = { params ->
@@ -94,17 +96,21 @@ class ActivityPage(
 
     @ExperimentalSerializationApi
     override fun setupEventbus() {
-        eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
-            clearActivity()
-        }
-        eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
-            displayCard(Json.decodeFromDynamic(message.body))
-        }
-        eb.registerHandler(UpdateChart(portalUuid)) { _: dynamic, message: dynamic ->
-            updateChart(Json.decodeFromDynamic(message.body))
-        }
+        if (!setup) {
+            setup = true
+            eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
+                clearActivity()
+            }
+            eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
+                displayCard(Json.decodeFromDynamic(message.body))
+            }
+            eb.registerHandler(UpdateChart(portalUuid)) { _: dynamic, message: dynamic ->
+                updateChart(Json.decodeFromDynamic(message.body))
+            }
 
-        eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
+            eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
+        }
+        eb.send(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {

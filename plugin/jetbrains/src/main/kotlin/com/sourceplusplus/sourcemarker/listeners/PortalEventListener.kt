@@ -35,6 +35,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
@@ -78,12 +79,26 @@ class PortalEventListener : CoroutineVerticle() {
             //todo: update existing portals
         }
 
+        vertx.eventBus().consumer<Any>(RefreshPortal) {
+            val portal = if (it.body() is String) {
+                SourcePortal.getPortal(it.body() as String)
+            } else {
+                it.body() as SourcePortal
+            }!!
+            when (portal.configuration.currentPage) {
+                PageType.OVERVIEW -> vertx.eventBus().send(RefreshOverview, portal)
+                PageType.ACTIVITY -> vertx.eventBus().send(RefreshActivity, portal)
+                PageType.TRACES -> vertx.eventBus().send(RefreshTraces, portal)
+                PageType.CONFIGURATION -> TODO()
+            }
+        }
         vertx.eventBus().consumer<JsonObject>(SetCurrentPage) {
             val portalUuid = it.body().getString("portalUuid")
             val pageType = PageType.valueOf(it.body().getString("pageType"))
             val portal = SourcePortal.getPortal(portalUuid)!!
             portal.configuration.currentPage = pageType
             it.reply(JsonObject.mapFrom(portal.configuration))
+            vertx.eventBus().send(RefreshPortal, portal)
         }
         vertx.eventBus().consumer<String>(GetPortalConfiguration) {
             val portalUuid = it.body()
@@ -124,7 +139,8 @@ class PortalEventListener : CoroutineVerticle() {
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
         vertx.eventBus().consumer<SourcePortal>(RefreshOverview) {
             runReadAction {
-                val fileMarker = SourceMarker.getSourceFileMarker(getQualifiedClassName(it.body().viewingPortalArtifact)!!)!!
+                val fileMarker =
+                    SourceMarker.getSourceFileMarker(getQualifiedClassName(it.body().viewingPortalArtifact)!!)!!
                 GlobalScope.launch(vertx.dispatcher()) {
                     refreshOverview(fileMarker, it.body())
                 }
@@ -296,11 +312,7 @@ class PortalEventListener : CoroutineVerticle() {
             if (portal != lastDisplayedInternalPortal) {
                 portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
                 val host = "http://localhost:8080"
-                var currentUrl = "$host/?portalUuid=${portal.portalUuid}"
-                if (portal.configuration.currentPage == PageType.TRACES) {
-                    currentUrl += "&orderType=" + portal.tracesView.orderType.name
-                    currentUrl += "&displayType=" + portal.tracesView.viewType.name
-                }
+                val currentUrl = "$host/index.html?portalUuid=${portal.portalUuid}"
 
                 if (lastDisplayedInternalPortal == null) {
                     jcefComponent.configuration.initialUrl = currentUrl

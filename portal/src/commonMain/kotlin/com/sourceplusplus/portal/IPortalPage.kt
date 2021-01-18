@@ -8,10 +8,11 @@ import com.sourceplusplus.protocol.portal.PortalConfiguration
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IPortalPage {
-    val portalUuid: String
-    var configuration: PortalConfiguration
+abstract class IPortalPage {
+    var setup = false
+    abstract val portalUuid: String
+    abstract var configuration: PortalConfiguration
 
-    fun setupEventbus()
-    fun renderPage(portalConfiguration: PortalConfiguration)
+    abstract fun setupEventbus()
+    abstract fun renderPage(portalConfiguration: PortalConfiguration)
 }
