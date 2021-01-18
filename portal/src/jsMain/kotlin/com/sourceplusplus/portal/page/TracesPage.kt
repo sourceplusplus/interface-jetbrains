@@ -86,9 +86,9 @@ class TracesPage(
                 })
                 if (configuration.visibleTraces) navItem(TRACES, isActive = true, null) {
                     navSubItems(
-                        PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, LATEST_TRACES) },
-                        PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, SLOWEST_TRACES) },
-                        PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, FAILED_TRACES) }
+                        PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, portalUuid, LATEST_TRACES) },
+                        PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, portalUuid, SLOWEST_TRACES) },
+                        PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
                     )
                 }
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true, onClick = {
@@ -103,7 +103,7 @@ class TracesPage(
                         onClickBackToTraceStack = { clickedBackToTraceStack() }
                     )
                     rightAlign {
-                        externalPortalButton { clickedViewAsExternalPortal(eb) }
+                        externalPortalButton { clickedViewAsExternalPortal(eb, portalUuid) }
                     }
                 }
                 wideColumn {

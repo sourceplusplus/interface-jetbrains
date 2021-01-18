@@ -91,13 +91,10 @@ fun setCurrentPage(eb: EventBus, portalUuid: String, pageType: PageType) {
     }
 }
 
-fun clickedViewAsExternalPortal(eb: EventBus) {
-    val queryParams = getQueryMap()
-    val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
-
+fun clickedViewAsExternalPortal(eb: EventBus, portalUuid: String) {
     eb.send(ClickedViewAsExternalPortal, json("portalUuid" to portalUuid), fun(_, message: dynamic) {
         window.open(
-            "${window.location.href.split('?')[0]}?portalUuid=${message.body.portalUuid}&external=true${getMainGetQueryWithoutPortalUuid()}",
+            "${window.location.href.split('?')[0]}?portalUuid=${message.body.portalUuid}}",
             "_blank"
         )
     })
@@ -128,18 +125,6 @@ fun toggleSidebar() {
     jq(".logo").find("img").toggle()
 }
 
-fun getMainGetQueryWithoutPortalUuid(): String {
-    val queryParams = getQueryMap()
-    val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
-    val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
-    val darkMode = queryParams.getOrElse("dark_mode", { "false" }).toBoolean()
-    var mainGetQueryWithoutPortalUuid = ""
-    if (externalPortal) mainGetQueryWithoutPortalUuid += "&external=true"
-    if (darkMode) mainGetQueryWithoutPortalUuid += "&dark_mode=true"
-    if (hideActivityTab) mainGetQueryWithoutPortalUuid += "&hide_activity_tab=true"
-    return mainGetQueryWithoutPortalUuid
-}
-
 fun getQueryMap(): Map<String, String> {
     val queryPairs: MutableMap<String, String> = LinkedHashMap()
     if (window.location.search.isNotEmpty()) {
@@ -154,10 +139,7 @@ fun getQueryMap(): Map<String, String> {
     return queryPairs
 }
 
-fun clickedTracesOrderType(eb: EventBus, traceOrderType: TraceOrderType) {
-    val queryParams = getQueryMap()
-    val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
-
+fun clickedTracesOrderType(eb: EventBus, portalUuid: String, traceOrderType: TraceOrderType) {
     eb.publish(
         ProtocolAddress.Global.SetTraceOrderType,
         json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name)
