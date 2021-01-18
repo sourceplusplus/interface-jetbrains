@@ -7,7 +7,6 @@ import com.sourceplusplus.portal.display.views.ActivityView
 import com.sourceplusplus.portal.display.views.ConfigurationView
 import com.sourceplusplus.portal.display.views.OverviewView
 import com.sourceplusplus.portal.display.views.TracesView
-import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import org.slf4j.LoggerFactory
@@ -29,10 +28,9 @@ class SourcePortal(
     var visible: Boolean = false
     val overviewView: OverviewView = OverviewView()
     val activityView: ActivityView = ActivityView(this)
-    val tracesView: TracesView = TracesView()
+    val tracesView: TracesView = TracesView(this)
     val configurationView: ConfigurationView = ConfigurationView()
     lateinit var viewingPortalArtifact: String
-    var currentTab = PageType.ACTIVITY
     var advice: MutableList<ArtifactAdvice> = mutableListOf()
     //todo: portal should be able to fetch advice for an artifact instead of storing it
 
@@ -96,7 +94,7 @@ class SourcePortal(
         fun getSimilarPortals(portal: SourcePortal): List<SourcePortal> {
             return portalMap.asMap().values.filter {
                 it.appUuid == portal.appUuid && it.viewingPortalArtifact == portal.viewingPortalArtifact &&
-                        it.currentTab == portal.currentTab
+                        it.configuration.currentPage == portal.configuration.currentPage
             }
         }
 

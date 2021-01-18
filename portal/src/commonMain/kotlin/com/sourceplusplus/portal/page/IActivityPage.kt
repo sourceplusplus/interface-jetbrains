@@ -1,10 +1,10 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.PortalPage
-import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
-import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.portal.IPortalPage
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
 import com.sourceplusplus.protocol.artifact.metrics.SplineChart
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 
 /**
  * todo: description.
@@ -12,11 +12,14 @@ import com.sourceplusplus.protocol.artifact.metrics.SplineChart
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IActivityPage : PortalPage {
-    var currentMetricType: MetricType
-    var currentTimeFrame: QueryTimeFrame
+abstract class IActivityPage : IPortalPage() {
 
-    fun displayCard(card: BarTrendCard)
-    fun updateChart(chartData: SplineChart)
-    fun updateTime(interval: QueryTimeFrame)
+    override lateinit var configuration: PortalConfiguration
+    var tooltipMeasurement = "ms"
+    val labelColor by lazy { if (configuration.darkMode) "grey" else "black" }
+    val symbolColor by lazy { if (configuration.darkMode) "grey" else "#182d34" }
+
+    abstract fun displayCard(card: BarTrendCard)
+    abstract fun updateChart(chartData: SplineChart)
+    abstract fun updateTime(interval: QueryTimeFrame)
 }

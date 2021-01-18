@@ -11,7 +11,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TraceStackPath(
     val traceStack: TraceStack,
-    val path: List<TraceSpan> = mutableListOf()
+    val path: List<TraceSpan> = mutableListOf(),
+    val orderType: TraceOrderType
 ) {
 
     fun getCurrentSegment(): TraceStack.Segment? {

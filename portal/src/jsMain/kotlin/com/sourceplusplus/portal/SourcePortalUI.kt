@@ -2,14 +2,18 @@ package com.sourceplusplus.portal
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
-import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.page.ActivityPage
 import com.sourceplusplus.portal.page.ConfigurationPage
 import com.sourceplusplus.portal.page.OverviewPage
 import com.sourceplusplus.portal.page.TracesPage
+import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -22,26 +26,14 @@ import kotlin.js.json
 
 fun main() {
     jq().ready {
-        //todo: portals should have ability to cache pages so they don't need re-init
-
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
-
         val eb = EventBus("http://localhost:8888/eventbus")
-        val currentPage = when (window.location.pathname) {
-            "/activity", "/activity.html" -> ActivityPage(portalUuid, eb)
-            "/traces", "/traces.html" -> {
-                val traceOrderType = TraceOrderType.valueOf(
-                    queryParams.getOrElse("orderType", { "LATEST_TRACES" }).toUpperCase()
-                )
-                val traceDisplayType = TraceDisplayType.valueOf(
-                    queryParams.getOrElse("displayType", { "TRACES" }).toUpperCase()
-                )
-                TracesPage(portalUuid, eb, traceOrderType, traceDisplayType)
-            }
-            "/configuration", "/configuration.html" -> ConfigurationPage(portalUuid, eb)
-            else -> OverviewPage(portalUuid, eb)
-        }
+
+        val overviewPage = OverviewPage(portalUuid, eb)
+        val activityPage = ActivityPage(portalUuid, eb)
+        val tracesPage = TracesPage(portalUuid, eb)
+        val configurationPage = ConfigurationPage(portalUuid, eb)
 
         console.log("Connecting portal")
         eb.onopen = {
@@ -49,6 +41,12 @@ fun main() {
             eb.send(GetPortalConfiguration, portalUuid) { _, message: dynamic ->
                 console.log("Received portal configuration. Portal: $portalUuid")
                 val portalConfiguration = Json.decodeFromDynamic<PortalConfiguration>(message.body)
+                val renderPage = when (portalConfiguration.currentPage) {
+                    PageType.OVERVIEW -> overviewPage
+                    PageType.ACTIVITY -> activityPage
+                    PageType.TRACES -> tracesPage
+                    PageType.CONFIGURATION -> configurationPage
+                }
                 document.getElementsByTagName("head")[0]!!.append {
                     link {
                         rel = "stylesheet"
@@ -56,10 +54,31 @@ fun main() {
                         href = "css/" + if (portalConfiguration.darkMode) "dark_style.css" else "style.css"
                     }
                 }
-                currentPage.renderPage(portalConfiguration)
+                renderPage.renderPage(portalConfiguration)
                 loadTheme()
 
-                currentPage.setupEventbus()
+                renderPage.setupEventbus()
+            }
+
+            eb.registerHandler(RenderPage(portalUuid)) { _: dynamic, message: dynamic ->
+                val portalConfiguration = Json.decodeFromDynamic<PortalConfiguration>(message.body)
+                val renderPage = when (portalConfiguration.currentPage) {
+                    PageType.OVERVIEW -> overviewPage
+                    PageType.ACTIVITY -> activityPage
+                    PageType.TRACES -> tracesPage
+                    PageType.CONFIGURATION -> configurationPage
+                }
+                document.getElementsByTagName("head")[0]!!.append {
+                    link {
+                        rel = "stylesheet"
+                        type = "text/css"
+                        href = "css/" + if (portalConfiguration.darkMode) "dark_style.css" else "style.css"
+                    }
+                }
+                renderPage.renderPage(portalConfiguration)
+                loadTheme()
+
+                renderPage.setupEventbus()
             }
         }
 
@@ -67,13 +86,16 @@ fun main() {
     }
 }
 
-fun clickedViewAsExternalPortal(eb: EventBus) {
-    val queryParams = getQueryMap()
-    val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
+fun setCurrentPage(eb: EventBus, portalUuid: String, pageType: PageType) {
+    eb.send(SetCurrentPage, json("portalUuid" to portalUuid, "pageType" to pageType.name)) { _, message: dynamic ->
+        eb.send(RenderPage(portalUuid), message.body)
+    }
+}
 
+fun clickedViewAsExternalPortal(eb: EventBus, portalUuid: String) {
     eb.send(ClickedViewAsExternalPortal, json("portalUuid" to portalUuid), fun(_, message: dynamic) {
         window.open(
-            "${window.location.href.split('?')[0]}?portalUuid=${message.body.portalUuid}&external=true${getMainGetQueryWithoutPortalUuid()}",
+            "${window.location.href.split('?')[0]}?portalUuid=${message.body.portalUuid}",
             "_blank"
         )
     })
@@ -87,54 +109,21 @@ fun loadTheme() {
     js("\$('.ui.table').tablesort()")
 
     jq(".openbtn").on("click", fun() {
-        jq(".ui.sidebar").toggleClass("very thin icon")
-        jq(".asd").toggleClass("marginlefting")
-        jq(".sidebar z").toggleClass("displaynone")
-        jq(".ui.accordion").toggleClass("displaynone")
-        jq(".ui.dropdown.item").toggleClass("displaynone")
-        jq(".hide_on_toggle").toggleClass("displaynone")
-        jq(".pusher").toggleClass("dimmed")
-
-        jq(".logo").find("img").toggle()
+        toggleSidebar()
     })
     js("\$('.ui.accordion').accordion({selector: {}})")
-
-    val mainGetQuery = getMainGetQuery()
-    jq("#overview_link").attr("href", "overview.html$mainGetQuery")
-    jq("#sidebar_overview_link").attr("href", "overview.html$mainGetQuery")
-
-    jq("#activity_link").attr("href", "activity.html$mainGetQuery")
-    jq("#sidebar_activity_link").attr("href", "activity.html$mainGetQuery")
-
-    jq("#traces_link_latest").attr("href", "traces.html$mainGetQuery&orderType=latest_traces")
-    jq("#traces_link_slowest").attr("href", "traces.html$mainGetQuery&orderType=slowest_traces")
-    jq("#traces_link_failed").attr("href", "traces.html$mainGetQuery&orderType=failed_traces")
-    jq("#sidebar_traces_link_latest").attr("href", "traces.html$mainGetQuery&orderType=latest_traces")
-    jq("#sidebar_traces_link_slowest").attr("href", "traces.html$mainGetQuery&orderType=slowest_traces")
-    jq("#sidebar_traces_link_failed").attr("href", "traces.html$mainGetQuery&orderType=failed_traces")
-
-    jq("#configuration_link").attr("href", "configuration.html$mainGetQuery")
-    jq("#sidebar_configuration_link").attr("href", "configuration.html$mainGetQuery")
 }
 
-fun getMainGetQuery(): String {
-    val queryParams = getQueryMap()
-    val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
-    var mainGetQuery = "?portalUuid=$portalUuid"
-    mainGetQuery += getMainGetQueryWithoutPortalUuid()
-    return mainGetQuery
-}
+fun toggleSidebar() {
+    jq(".ui.sidebar").toggleClass("very thin icon")
+    jq(".asd").toggleClass("marginlefting")
+    jq(".sidebar z").toggleClass("displaynone")
+    jq(".ui.accordion").toggleClass("displaynone")
+    jq(".ui.dropdown.item").toggleClass("displaynone")
+    jq(".hide_on_toggle").toggleClass("displaynone")
+    jq(".pusher").toggleClass("dimmed")
 
-fun getMainGetQueryWithoutPortalUuid(): String {
-    val queryParams = getQueryMap()
-    val externalPortal = queryParams.getOrElse("external", { "false" }).toBoolean()
-    val hideActivityTab = queryParams.getOrElse("hide_activity_tab", { "false" }).toBoolean()
-    val darkMode = queryParams.getOrElse("dark_mode", { "false" }).toBoolean()
-    var mainGetQueryWithoutPortalUuid = ""
-    if (externalPortal) mainGetQueryWithoutPortalUuid += "&external=true"
-    if (darkMode) mainGetQueryWithoutPortalUuid += "&dark_mode=true"
-    if (hideActivityTab) mainGetQueryWithoutPortalUuid += "&hide_activity_tab=true"
-    return mainGetQueryWithoutPortalUuid
+    jq(".logo").find("img").toggle()
 }
 
 fun getQueryMap(): Map<String, String> {
@@ -151,6 +140,22 @@ fun getQueryMap(): Map<String, String> {
     return queryPairs
 }
 
+fun clickedTracesOrderType(eb: EventBus, portalUuid: String, traceOrderType: TraceOrderType) {
+    eb.publish(
+        ProtocolAddress.Global.SetTraceOrderType,
+        json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name)
+    )
+}
+
+fun setActiveTime(interval: QueryTimeFrame) {
+    jq("#last_5_minutes_time").removeClass("active")
+    jq("#last_15_minutes_time").removeClass("active")
+    jq("#last_30_minutes_time").removeClass("active")
+    jq("#last_hour_time").removeClass("active")
+    jq("#last_3_hours_time").removeClass("active")
+    jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
+}
+
 external fun decodeURIComponent(encodedURI: String): String
 
 //todo: impl
@@ -163,8 +168,7 @@ function portalConnected() {
             'appUuid': findGetParameter("appUuid"),
             'artifactQualifiedName': findGetParameter("artifactQualifiedName")
         }, function (error, message) {
-            window.open(window.location.href.split('?')[0] + '?portalUuid=' + message.body.portalUuid
-                + mainGetQueryWithoutPortalUuid, '_self');
+            window.open(window.location.href.split('?')[0] + '?portalUuid=' + message.body.portalUuid, '_self');
         });
     } else if (externalPortal) {
         let keepAliveInterval = window.setInterval(function () {

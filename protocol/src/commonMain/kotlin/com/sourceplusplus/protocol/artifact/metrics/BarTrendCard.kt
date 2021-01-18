@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class BarTrendCard(
-    val timeFrame: QueryTimeFrame? = null,
+    val timeFrame: QueryTimeFrame,
     val header: String,
     val meta: String,
     val barGraphData: List<Double>

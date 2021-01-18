@@ -1,22 +1,24 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
-import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
 import com.sourceplusplus.portal.model.TraceTableType.*
+import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
-import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
@@ -52,46 +54,51 @@ import kotlin.time.ExperimentalTime
  */
 class TracesPage(
     override val portalUuid: String,
-    private val eb: EventBus,
-    override var traceOrderType: TraceOrderType = LATEST_TRACES,
-    override var traceDisplayType: TraceDisplayType = TraceDisplayType.TRACES
-) : ITracesPage {
-
-    private lateinit var configuration: PortalConfiguration
+    private val eb: EventBus
+) : ITracesPage() {
 
     override fun setupEventbus() {
-        eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
-            displayTraces(Json.decodeFromDynamic(message.body))
+        if (!setup) {
+            setup = true
+            eb.registerHandler(DisplayTraces(portalUuid)) { _: dynamic, message: dynamic ->
+                displayTraces(Json.decodeFromDynamic(message.body))
+            }
+            eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
+                displayTraceStack(*Json.decodeFromDynamic(message.body))
+            }
+            eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
+                displaySpanInfo(Json.decodeFromDynamic(message.body))
+            }
         }
-        eb.registerHandler(DisplayTraceStack(portalUuid)) { _: dynamic, message: dynamic ->
-            displayTraceStack(*Json.decodeFromDynamic(message.body))
-        }
-        eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
-            displaySpanInfo(Json.decodeFromDynamic(message.body))
-        }
-        eb.publish(
-            TracesTabOpened, json(
-                "portalUuid" to portalUuid,
-                "traceOrderType" to traceOrderType.name,
-                "traceDisplayType" to traceDisplayType.name
-            )
-        )
+        eb.send(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
         console.log("Rending Traces page")
         this.configuration = portalConfiguration
 
+        document.title = "Traces - SourceMarker"
         val root: Element = document.getElementById("root")!!
+        root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
         root.append {
             portalNav {
-                if (configuration.visibleOverview) navItem(OVERVIEW)
-                if (configuration.visibleActivity) navItem(ACTIVITY)
-                if (configuration.visibleTraces) navItem(TRACES, isActive = true) {
-                    navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
+                if (configuration.visibleOverview) navItem(OVERVIEW, onClick = {
+                    setCurrentPage(eb, portalUuid, OVERVIEW)
+                })
+                if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
+                    setCurrentPage(eb, portalUuid, ACTIVITY)
+                })
+                if (configuration.visibleTraces) navItem(TRACES, isActive = true, null) {
+                    navSubItems(
+                        PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, portalUuid, LATEST_TRACES) },
+                        PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, portalUuid, SLOWEST_TRACES) },
+                        PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
+                    )
                 }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true, onClick = {
+                    setCurrentPage(eb, portalUuid, CONFIGURATION)
+                })
             }
             portalContent {
                 navBar {
@@ -101,7 +108,7 @@ class TracesPage(
                         onClickBackToTraceStack = { clickedBackToTraceStack() }
                     )
                     rightAlign {
-                        externalPortalButton { clickedViewAsExternalPortal(eb) }
+                        externalPortalButton { clickedViewAsExternalPortal(eb, portalUuid) }
                     }
                 }
                 wideColumn {
@@ -126,9 +133,8 @@ class TracesPage(
 
     @OptIn(ExperimentalTime::class)
     override fun displayTraces(traceResult: TraceResult) {
-        console.log("Displaying ${traceResult.total} traces")
-        traceDisplayType = TraceDisplayType.TRACES
-        resetUI()
+        console.log("Displaying ${traceResult.total} traces - ${traceResult.orderType}")
+        resetUI(TraceDisplayType.TRACES, traceResult.orderType)
 
         for (i in traceResult.traces.indices) {
             val trace = traceResult.traces[i]
@@ -203,13 +209,12 @@ class TracesPage(
 
     override fun displayTraceStack(traceStackPath: TraceStackPath) {
         console.log("Displaying trace stack")
-        traceDisplayType = TraceDisplayType.TRACE_STACK
-        resetUI()
+        resetUI(TraceDisplayType.TRACE_STACK)
 
         if (traceStackPath.getCurrentRoot() != null) {
             jq("#latest_traces_header_text").text("Parent Stack")
         } else {
-            when (traceOrderType) {
+            when (traceStackPath.orderType) {
                 LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
                 SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
                 FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
@@ -353,8 +358,7 @@ class TracesPage(
 
     override fun displaySpanInfo(spanInfo: TraceSpan) {
         console.log("Displaying span info")
-        traceDisplayType = TraceDisplayType.SPAN_INFO
-        resetUI()
+        resetUI(TraceDisplayType.SPAN_INFO)
 
         jq("#span_info_start_trace_time").attr("data-value", spanInfo.startTime.toEpochMilliseconds())
         jq("#span_info_start_time").text(spanInfo.startTime.toMoment().format("h:mm:ss a"))
@@ -450,7 +454,7 @@ class TracesPage(
     }
 
     private fun setupUI() {
-        resetUI()
+        resetUI(TraceDisplayType.TRACES)
 
         js("\$('#latest_traces_header').dropdown({on: null})")
         js("\$('#trace_stack_header').dropdown({on: 'hover'})")
@@ -468,7 +472,7 @@ class TracesPage(
     }
 
     //todo: clean up
-    private fun resetUI() {
+    private fun resetUI(traceDisplayType: TraceDisplayType, traceOrderType: TraceOrderType? = null) {
         when (traceDisplayType) {
             TraceDisplayType.TRACES -> {
                 when (traceOrderType) {

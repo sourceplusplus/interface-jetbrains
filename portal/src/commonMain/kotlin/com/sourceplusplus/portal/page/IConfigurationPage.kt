@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.PortalPage
+import com.sourceplusplus.portal.IPortalPage
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 
 /**
  * todo: description.
@@ -8,4 +9,6 @@ import com.sourceplusplus.portal.PortalPage
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IConfigurationPage : PortalPage
+abstract class IConfigurationPage : IPortalPage() {
+    override lateinit var configuration: PortalConfiguration
+}
