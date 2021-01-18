@@ -1,12 +1,12 @@
 package com.sourceplusplus.portal.display.views
 
+import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.HashMap
 
 /**
  * Holds the current view for the Traces portal tab.
@@ -14,7 +14,9 @@ import kotlin.collections.HashMap
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class TracesView {
+class TracesView(
+    val portal: SourcePortal
+) {
 
     var traceResultCache = ConcurrentHashMap<TraceOrderType, TraceResult>()
     var traceStacks = HashMap<String, TraceStack>() //todo: evicting cache
@@ -24,7 +26,7 @@ class TracesView {
     var traceId: String? = null
     var traceStackPath: TraceStackPath? = null
     var spanId: Int = 0
-    var viewTraceAmount = 10
+    private var viewTraceAmount = if (portal.configuration.external) 20 else 10
     var innerTraceStack = false
     var rootArtifactQualifiedName: String? = null
 

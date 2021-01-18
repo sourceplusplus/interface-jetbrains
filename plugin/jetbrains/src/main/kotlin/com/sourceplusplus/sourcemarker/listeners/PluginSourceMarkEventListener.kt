@@ -6,7 +6,7 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.mark.SourceMarkConstructor
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
@@ -45,7 +45,7 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
             sourceMark.putUserData(SourceMarkKeys.SOURCE_PORTAL, sourcePortal!!)
             if (sourceMark is ClassSourceMark) {
                 //class-based portals only have overview page
-                sourcePortal.currentTab = PageType.OVERVIEW
+                sourcePortal.configuration.currentPage = PageType.OVERVIEW
                 sourcePortal.configuration.visibleActivity = false
                 sourcePortal.configuration.visibleTraces = false
             } else {

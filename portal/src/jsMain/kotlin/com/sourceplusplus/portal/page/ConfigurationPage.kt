@@ -1,15 +1,17 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ArtifactConfigType.AUTO_SUBSCRIBE
 import com.sourceplusplus.portal.model.ArtifactConfigType.ENTRY_METHOD
 import com.sourceplusplus.portal.model.ArtifactInfoType.*
-import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.portal.setCurrentPage
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactEntryMethod
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayArtifactConfiguration
@@ -17,6 +19,7 @@ import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
+import kotlinx.dom.removeClass
 import kotlinx.html.dom.append
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
@@ -32,36 +35,49 @@ import kotlin.js.json
 class ConfigurationPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IConfigurationPage {
-
-    private lateinit var configuration: PortalConfiguration
+) : IConfigurationPage() {
 
     override fun setupEventbus() {
-        eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
-            updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
+        if (!setup) {
+            setup = true
+            eb.registerHandler(DisplayArtifactConfiguration(portalUuid)) { _: dynamic, message: dynamic ->
+                updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
+            }
         }
-        eb.publish(ConfigurationTabOpened, json("portalUuid" to portalUuid))
+        eb.send(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
         console.log("Rendering Configuration page")
         this.configuration = portalConfiguration
 
+        document.title = "Configuration - SourceMarker"
         val root: Element = document.getElementById("root")!!
+        root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
         root.append {
             portalNav {
-                if (configuration.visibleOverview) navItem(OVERVIEW)
-                if (configuration.visibleActivity) navItem(ACTIVITY)
-                if (configuration.visibleTraces) navItem(TRACES) {
-                    navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
+                if (configuration.visibleOverview) navItem(OVERVIEW, onClick = {
+                    setCurrentPage(eb, portalUuid, OVERVIEW)
+                })
+                if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
+                    setCurrentPage(eb, portalUuid, ACTIVITY)
+                })
+                if (configuration.visibleTraces) navItem(TRACES, false, null) {
+                    navSubItems(
+                        PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, portalUuid, LATEST_TRACES) },
+                        PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, portalUuid, SLOWEST_TRACES) },
+                        PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
+                    )
                 }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true, onClick = {
+                    setCurrentPage(eb, portalUuid, CONFIGURATION)
+                })
             }
             configurationContent {
                 navBar(false) {
                     rightAlign {
-                        externalPortalButton { clickedViewAsExternalPortal(eb) }
+                        externalPortalButton { clickedViewAsExternalPortal(eb, portalUuid) }
                     }
                 }
                 configurationTable {

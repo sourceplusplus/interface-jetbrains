@@ -4,8 +4,7 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayTraceSpan
 import com.sourceplusplus.portal.extensions.displayTraceStack
 import com.sourceplusplus.portal.extensions.displayTraces
-import com.sourceplusplus.portal.model.PageType
-import com.sourceplusplus.portal.model.TraceDisplayType
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.portal.model.TraceDisplayType.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.CanNavigateToArtifact
@@ -20,9 +19,9 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
-import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetTraceOrderType
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.ArtifactType.METHOD
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
@@ -30,10 +29,6 @@ import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageAndClass
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageNames
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.regex.Pattern
 import kotlin.time.ExperimentalTime
@@ -54,13 +49,13 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
     override suspend fun start() {
         vertx.setPeriodic(5000) {
             SourcePortal.getPortals().filter {
-                it.currentTab == PageType.TRACES && (it.visible || it.configuration.external)
+                it.configuration.currentPage == PageType.TRACES && (it.visible || it.configuration.external)
             }.forEach {
                 vertx.eventBus().send(RefreshTraces, it)
             }
         }
 
-        vertx.eventBus().consumer(TracesTabOpened, this@TracesDisplay::tracesTabOpened)
+        vertx.eventBus().consumer(SetTraceOrderType, this@TracesDisplay::setTraceOrderType)
         vertx.eventBus().consumer<TraceResult>(ArtifactTraceUpdated) { handleArtifactTraceResult(it.body()) }
         vertx.eventBus().consumer(ClickedDisplayTraceStack, this@TracesDisplay::clickedDisplayTraceStack)
         vertx.eventBus().consumer(ClickedDisplayInnerTraceStack, this@TracesDisplay::clickedDisplayInnerTraceStack)
@@ -71,7 +66,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
     }
 
     override fun updateUI(portal: SourcePortal) {
-        if (portal.currentTab != thisTab) {
+        if (portal.configuration.currentPage != thisTab) {
             return
         }
 
@@ -115,7 +110,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                 vertx.eventBus().send(NavigateToArtifact, artifactQualifiedName)
                 vertx.eventBus().request<SourcePortal?>(FindPortal, artifactQualifiedName) {
                     val navPortal = it.result().body()!!
-                    navPortal.currentTab = PageType.TRACES
+                    navPortal.configuration.currentPage = PageType.TRACES
                     vertx.eventBus().send(OpenPortal, navPortal)
                 }
             } else {
@@ -143,7 +138,8 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                     val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
                     portal.tracesView.viewType = TRACE_STACK
                     portal.tracesView.traceStack = it.result().body()
-                    portal.tracesView.traceStackPath = TraceStackPath(it.result().body())
+                    portal.tracesView.traceStackPath =
+                        TraceStackPath(it.result().body(), orderType = portal.tracesView.orderType)
                     portal.tracesView.traceId = request.getString("traceId")
                     updateUI(portal)
                 }
@@ -169,7 +165,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                         vertx.eventBus().send(NavigateToArtifact, artifactQualifiedName)
                         vertx.eventBus().request<SourcePortal?>(FindPortal, artifactQualifiedName) {
                             val navPortal = it.result().body()!!
-                            navPortal.currentTab = PageType.TRACES
+                            navPortal.configuration.currentPage = PageType.TRACES
                             navPortal.tracesView.cloneView(portal.tracesView)
                             navPortal.tracesView.innerTraceStack = true
                             if (navPortal.tracesView.rootArtifactQualifiedName == null) {
@@ -192,8 +188,8 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         }
     }
 
-    private fun tracesTabOpened(it: Message<JsonObject>) {
-        log.info("Traces tab opened")
+    private fun setTraceOrderType(it: Message<JsonObject>) {
+        log.info("Changed trace order type")
         val message = JsonObject.mapFrom(it.body())
         val portalUuid = message.getString("portalUuid")
         val portal = SourcePortal.getPortal(portalUuid)
@@ -202,19 +198,14 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             return
         }
 
-        val orderType = message.getString("traceOrderType")
-        if (orderType != null) {
-            //user possibly changed current trace order type; todo: create event
-            portal.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
+        if (portal.configuration.currentPage != PageType.TRACES) {
+            portal.configuration.currentPage = thisTab
+            vertx.eventBus().send(RenderPage(portal.portalUuid), JsonObject.mapFrom(portal.configuration))
         }
-        portal.currentTab = thisTab
 
-        val displayType = message.getString("traceDisplayType")
-        if (displayType != null) {
-            portal.tracesView.viewType = TraceDisplayType.valueOf(displayType)
-        } else {
-            portal.tracesView.viewType = TRACES
-        }
+        val orderType = message.getString("traceOrderType")!!
+        portal.tracesView.orderType = TraceOrderType.valueOf(orderType.toUpperCase())
+
         SourcePortal.ensurePortalActive(portal)
         updateUI(portal)
 

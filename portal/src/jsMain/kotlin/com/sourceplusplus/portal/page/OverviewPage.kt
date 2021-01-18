@@ -1,14 +1,15 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
-import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.model.EndpointTableType
-import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.portal.setActiveTime
+import com.sourceplusplus.portal.setCurrentPage
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
-import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetOverviewTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
@@ -20,8 +21,8 @@ import com.sourceplusplus.protocol.portal.PortalConfiguration
 import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import kotlinx.browser.document
-import kotlinx.browser.window
 import kotlinx.dom.clear
+import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.js.onClickFunction
@@ -40,36 +41,44 @@ import kotlin.js.json
 class OverviewPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IOverviewPage {
-
-    private lateinit var configuration: PortalConfiguration
+) : IOverviewPage() {
 
     override fun setupEventbus() {
-        eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->
-            displayEndpoints(Json.decodeFromDynamic(message.body))
+        if (!setup) {
+            setup = true
+            eb.registerHandler(UpdateEndpoints(portalUuid)) { _: dynamic, message: dynamic ->
+                displayEndpoints(Json.decodeFromDynamic(message.body))
+            }
         }
-        eb.publish(OverviewTabOpened, json("portalUuid" to portalUuid))
-
-        //periodically refresh overview
-        window.setInterval({
-            eb.publish(RefreshOverview, json("portalUuid" to portalUuid))
-        }, 5_000)
+        eb.send(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
-        println("Rending Overview page")
+        console.log("Rending Overview page")
         this.configuration = portalConfiguration
 
+        document.title = "Overview - SourceMarker"
         val root: Element = document.getElementById("root")!!
+        root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
         root.append {
             portalNav {
-                if (configuration.visibleOverview) navItem(OVERVIEW, isActive = true)
-                if (configuration.visibleActivity) navItem(ACTIVITY)
-                if (configuration.visibleTraces) navItem(TRACES) {
-                    navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
+                if (configuration.visibleOverview) navItem(OVERVIEW, isActive = true, onClick = {
+                    setCurrentPage(eb, portalUuid, OVERVIEW)
+                })
+                if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
+                    setCurrentPage(eb, portalUuid, ACTIVITY)
+                })
+                if (configuration.visibleTraces) navItem(TRACES, false, null) {
+                    navSubItems(
+                        PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, portalUuid, LATEST_TRACES) },
+                        PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, portalUuid, SLOWEST_TRACES) },
+                        PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
+                    )
                 }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
+                    setCurrentPage(eb, portalUuid, CONFIGURATION)
+                })
             }
             portalContent {
                 navBar {
@@ -77,7 +86,7 @@ class OverviewPage(
                     //calendar()
 
                     rightAlign {
-                        externalPortalButton { clickedViewAsExternalPortal(eb) }
+                        externalPortalButton { clickedViewAsExternalPortal(eb, portalUuid) }
                     }
                 }
                 wideColumn {
@@ -202,13 +211,7 @@ class OverviewPage(
             )
         )
 
-        jq("#last_5_minutes_time").removeClass("active")
-        jq("#last_15_minutes_time").removeClass("active")
-        jq("#last_30_minutes_time").removeClass("active")
-        jq("#last_hour_time").removeClass("active")
-        jq("#last_3_hours_time").removeClass("active")
-
-        jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
+        setActiveTime(interval)
     }
 
     private data class Color(

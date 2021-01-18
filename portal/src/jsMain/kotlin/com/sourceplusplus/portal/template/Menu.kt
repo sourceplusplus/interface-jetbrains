@@ -1,9 +1,12 @@
 package com.sourceplusplus.portal.template
 
+import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.protocol.portal.PageType.*
+import com.sourceplusplus.portal.toggleSidebar
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
-import com.sourceplusplus.portal.model.PageType
-import com.sourceplusplus.portal.model.PageType.*
 import kotlinx.html.*
+import kotlinx.html.js.onClickFunction
+import org.w3c.dom.events.Event
 
 fun FlowContent.menu(block: FlowContent.() -> Unit) {
     div("ui accordion displaynone") {
@@ -17,16 +20,20 @@ fun FlowContent.menu(block: FlowContent.() -> Unit) {
     }
 }
 
-fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowContent.() -> Unit)? = null) {
+fun FlowContent.menuItem(
+    pageType: PageType,
+    isActive: Boolean,
+    onClick: ((Event) -> Unit)?,
+    block: (FlowContent.() -> Unit)? = null
+) {
     when (pageType) {
         OVERVIEW, ACTIVITY, CONFIGURATION -> apply {
             if (isActive) {
                 a(classes = "item active_tab") { +pageType.title }
             } else {
                 a(classes = "item inactive_tab") {
-                    id = "sidebar_${pageType.name.toLowerCase()}_link"
-                    href = pageType.location
                     +pageType.title
+                    if (onClick != null) onClickFunction = onClick
                 }
             }
         }
@@ -46,12 +53,12 @@ fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowCont
     }
 }
 
-fun FlowContent.subMenuItem(vararg traceOrderTypes: TraceOrderType = arrayOf()) {
-    for (traceType in traceOrderTypes) {
-        a(classes = "item sidebar_sub_text_color") {
-            id = "sidebar_traces_link_${traceType.id}"
-            href = traceType.id
-            +traceType.description
+fun FlowContent.subMenuItem(traceOrderType: TraceOrderType, onClick: (Event) -> Unit) {
+    a(classes = "item sidebar_sub_text_color") {
+        onClickFunction = {
+            toggleSidebar()
+            onClick.invoke(it)
         }
+        +traceOrderType.description
     }
 }
