@@ -28,7 +28,7 @@ fun main() {
     jq().ready {
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
-        val eb = EventBus("http://localhost:8888/eventbus")
+        val eb = EventBus("http://localhost:${window["portalBridgePort"]}/eventbus")
 
         val overviewPage = OverviewPage(portalUuid, eb)
         val activityPage = ActivityPage(portalUuid, eb)
