@@ -13,6 +13,7 @@ import io.vertx.ext.web.handler.ResponseTimeHandler
 import io.vertx.kotlin.core.deployVerticleAwait
 import io.vertx.kotlin.core.http.listenAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import java.nio.charset.Charset
 
 /**
  * todo: description.
@@ -20,7 +21,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PortalServer : CoroutineVerticle() {
+class PortalServer(private val bridgePort: Int) : CoroutineVerticle() {
 
     override suspend fun start() {
         vertx.deployVerticleAwait(OverviewDisplay())
@@ -32,14 +33,19 @@ class PortalServer : CoroutineVerticle() {
         val router = Router.router(vertx)
         router.route().handler(ResponseTimeHandler.create())
 
-//        // Static handler
-//        router.route("/*").handler(StaticHandler.create())
-
         // Static handler
         router.get("/*").handler {
-            val fileStream = PortalServer::class.java.classLoader.getResourceAsStream(it.request().path())
+            var fileStream = PortalServer::class.java.classLoader.getResourceAsStream(it.request().path())
             val response = it.response().setStatusCode(200)
-            if (it.request().path().endsWith(".js")) {
+            if (it.request().path() == "/" || it.request().path().endsWith(".html")) {
+                fileStream = PortalServer::class.java.classLoader.getResourceAsStream("/index.html")
+                response.end(
+                    Buffer.buffer(
+                        Unpooled.copiedBuffer(ByteStreams.toByteArray(fileStream!!)).toString(Charset.defaultCharset())
+                            .replace("window.portalBridgePort = 8888", "window.portalBridgePort = $bridgePort")
+                    )
+                )
+            } else if (it.request().path().endsWith(".js")) {
                 response.putHeader("Content-Type", "text/javascript")
             }
             response.end(Buffer.buffer(Unpooled.copiedBuffer(ByteStreams.toByteArray(fileStream!!))))
@@ -47,8 +53,11 @@ class PortalServer : CoroutineVerticle() {
         }
 
         // Start the server
-        vertx.createHttpServer()
+        val httpPort = vertx.sharedData().getLocalMap<String, Int>("portal")
+            .getOrDefault("http.port", 0)
+        val server = vertx.createHttpServer()
             .requestHandler(router)
-            .listenAwait(config.getInteger("http.port", 8080))
+            .listenAwait(httpPort)
+        vertx.sharedData().getLocalMap<String, Int>("portal")["http.port"] = server.actualPort()
     }
 }

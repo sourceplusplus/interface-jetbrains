@@ -311,8 +311,9 @@ class PortalEventListener : CoroutineVerticle() {
             val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
             if (portal != lastDisplayedInternalPortal) {
                 portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
-                val host = "http://localhost:8080"
-                val currentUrl = "$host/index.html?portalUuid=${portal.portalUuid}"
+                val port = vertx.sharedData().getLocalMap<String, Int>("portal")["http.port"]!!
+                val host = "http://localhost:$port"
+                val currentUrl = "$host/?portalUuid=${portal.portalUuid}"
 
                 if (lastDisplayedInternalPortal == null) {
                     jcefComponent.configuration.initialUrl = currentUrl

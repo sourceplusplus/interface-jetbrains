@@ -242,10 +242,6 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initPortal() {
-        //todo: load portal config (custom themes, etc)
-        deploymentIds.add(vertx.deployVerticleAwait(PortalServer()))
-        deploymentIds.add(vertx.deployVerticleAwait(PortalEventListener()))
-
         //todo: portal should be connected to event bus without bridge
         val sockJSHandler = SockJSHandler.create(vertx)
         val portalBridgeOptions = SockJSBridgeOptions()
@@ -255,7 +251,13 @@ object SourceMarkerPlugin {
 
         val router = Router.router(vertx)
         router.route("/eventbus/*").handler(sockJSHandler)
-        vertx.createHttpServer().requestHandler(router).listenAwait(8888, "localhost")
+        val bridgePort = vertx.sharedData().getLocalMap<String, Int>("portal")
+            .getOrDefault("bridge.port", 0)
+        val bridgeServer = vertx.createHttpServer().requestHandler(router).listenAwait(bridgePort, "localhost")
+
+        //todo: load portal config (custom themes, etc)
+        deploymentIds.add(vertx.deployVerticleAwait(PortalServer(bridgeServer.actualPort())))
+        deploymentIds.add(vertx.deployVerticleAwait(PortalEventListener()))
     }
 
     private fun initMarker(config: SourceMarkerConfig) {

@@ -26,7 +26,6 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.cli.common.toBooleanLenient
 import org.junit.Assume.assumeTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -77,14 +76,17 @@ class StandaloneServer : LightJavaCodeInsightFixtureTestCase() {
         assumeTrue((System.getenv("STANDALONE_ENABLED")?.toBooleanLenient() ?: false))
         val className = "spp.example.webapp.controller.WebappController"
         val artifactName = "$className.userList()"
+        val portalUuid = "5471535f-2a5f-4ed2-bfaf-65345c59fd7b"
         println(
             "Portal UUID: " + SourcePortal.register(
-                "5471535f-2a5f-4ed2-bfaf-65345c59fd7b",
+                portalUuid,
                 "null",
                 artifactName,
                 PortalConfiguration(external = true)
             )
         )
+
+        SourceMarkerPlugin.vertx.sharedData().getLocalMap<String, Int>("portal")["bridge.port"] = 8888
         runBlocking {
             SourceMarkerPlugin.init(project)
         }
