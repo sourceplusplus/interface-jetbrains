@@ -11,6 +11,7 @@ import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
 import com.sourceplusplus.portal.model.TraceTableType.*
+import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
@@ -77,16 +78,22 @@ class TracesPage(
         root.innerHTML = ""
         root.append {
             portalNav {
-                if (configuration.visibleOverview) navItem(OVERVIEW)
-                if (configuration.visibleActivity) navItem(ACTIVITY)
-                if (configuration.visibleTraces) navItem(TRACES, isActive = true) {
+                if (configuration.visibleOverview) navItem(OVERVIEW, onClick = {
+                    setCurrentPage(eb, portalUuid, OVERVIEW)
+                })
+                if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
+                    setCurrentPage(eb, portalUuid, ACTIVITY)
+                })
+                if (configuration.visibleTraces) navItem(TRACES, isActive = true, null) {
                     navSubItems(
                         PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, LATEST_TRACES) },
                         PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, SLOWEST_TRACES) },
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, FAILED_TRACES) }
                     )
                 }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true, onClick = {
+                    setCurrentPage(eb, portalUuid, CONFIGURATION)
+                })
             }
             portalContent {
                 navBar {

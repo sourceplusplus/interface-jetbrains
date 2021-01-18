@@ -4,12 +4,18 @@ import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PageType.*
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
+import org.w3c.dom.events.Event
 
 fun FlowContent.tabs(block: FlowContent.() -> Unit) {
     block()
 }
 
-fun FlowContent.tabItem(pageType: PageType, isActive: Boolean, block: (FlowContent.() -> Unit)? = null) {
+fun FlowContent.tabItem(
+    pageType: PageType,
+    isActive: Boolean,
+    onClick: ((Event) -> Unit)?,
+    block: (FlowContent.() -> Unit)? = null
+) {
     when (pageType) {
         OVERVIEW, ACTIVITY, CONFIGURATION -> apply {
             if (isActive) {
@@ -18,8 +24,7 @@ fun FlowContent.tabItem(pageType: PageType, isActive: Boolean, block: (FlowConte
                 }
             } else {
                 a(classes = "ui item hide_on_toggle") {
-                    id = "${pageType.name.toLowerCase()}_link"
-                    href = pageType.location
+                    if (onClick != null) onClickFunction = onClick
                     i("${pageType.icon} inactive_tab")
                 }
             }

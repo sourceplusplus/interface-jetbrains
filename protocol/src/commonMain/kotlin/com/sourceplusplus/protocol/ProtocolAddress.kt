@@ -17,6 +17,7 @@ object ProtocolAddress {
         const val KeepAlivePortal = "KeepAlivePortal" //todo: remove
         const val UpdatePortalArtifact = "UpdatePortalArtifact"
         const val GetPortalConfiguration = "GetPortalConfiguration"
+        const val SetCurrentPage = "SetCurrentPage"
         const val CanOpenPortal = "CanOpenPortal"
         const val ChangedPortalArtifact = "ChangedPortalArtifact"
         const val CanNavigateToArtifact = "CanNavigateToArtifact"

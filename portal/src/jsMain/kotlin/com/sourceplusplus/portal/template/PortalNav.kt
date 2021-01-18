@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.portal.PageType
 import kotlinx.html.FlowContent
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
@@ -28,12 +28,17 @@ class PortalNavigationConfiguration(private val flowContent: FlowContent) {
         mode = ModeType.TAB
     }
 
-    fun navItem(pageType: PageType, isActive: Boolean = false, block: (FlowContent.() -> Unit)? = null) {
+    fun navItem(
+        pageType: PageType,
+        isActive: Boolean = false,
+        onClick: ((Event) -> Unit)? = null,
+        block: (FlowContent.() -> Unit)? = null
+    ) {
         menuItems.add {
-            flowContent.menuItem(pageType, isActive, block)
+            flowContent.menuItem(pageType, isActive, onClick, block)
         }
         tabItems.add {
-            flowContent.tabItem(pageType, isActive, block)
+            flowContent.tabItem(pageType, isActive, onClick, block)
         }
     }
 

@@ -8,6 +8,7 @@ import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ArtifactConfigType.AUTO_SUBSCRIBE
 import com.sourceplusplus.portal.model.ArtifactConfigType.ENTRY_METHOD
 import com.sourceplusplus.portal.model.ArtifactInfoType.*
+import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
@@ -50,16 +51,22 @@ class ConfigurationPage(
         root.innerHTML = ""
         root.append {
             portalNav {
-                if (configuration.visibleOverview) navItem(OVERVIEW)
-                if (configuration.visibleActivity) navItem(ACTIVITY)
-                if (configuration.visibleTraces) navItem(TRACES) {
+                if (configuration.visibleOverview) navItem(OVERVIEW, onClick = {
+                    setCurrentPage(eb, portalUuid, OVERVIEW)
+                })
+                if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
+                    setCurrentPage(eb, portalUuid, ACTIVITY)
+                })
+                if (configuration.visibleTraces) navItem(TRACES, false, null) {
                     navSubItems(
                         PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, LATEST_TRACES) },
                         PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, SLOWEST_TRACES) },
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, FAILED_TRACES) }
                     )
                 }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true, onClick = {
+                    setCurrentPage(eb, portalUuid, CONFIGURATION)
+                })
             }
             configurationContent {
                 navBar(false) {

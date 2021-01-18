@@ -20,16 +20,20 @@ fun FlowContent.menu(block: FlowContent.() -> Unit) {
     }
 }
 
-fun FlowContent.menuItem(pageType: PageType, isActive: Boolean, block: (FlowContent.() -> Unit)? = null) {
+fun FlowContent.menuItem(
+    pageType: PageType,
+    isActive: Boolean,
+    onClick: ((Event) -> Unit)?,
+    block: (FlowContent.() -> Unit)? = null
+) {
     when (pageType) {
         OVERVIEW, ACTIVITY, CONFIGURATION -> apply {
             if (isActive) {
                 a(classes = "item active_tab") { +pageType.title }
             } else {
                 a(classes = "item inactive_tab") {
-                    id = "sidebar_${pageType.name.toLowerCase()}_link"
-                    href = pageType.location
                     +pageType.title
+                    if (onClick != null) onClickFunction = onClick
                 }
             }
         }

@@ -4,11 +4,11 @@ import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.model.EndpointTableType
+import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetOverviewTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
@@ -20,7 +20,6 @@ import com.sourceplusplus.protocol.portal.PortalConfiguration
 import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import kotlinx.browser.document
-import kotlinx.browser.window
 import kotlinx.dom.clear
 import kotlinx.html.*
 import kotlinx.html.dom.append
@@ -47,11 +46,6 @@ class OverviewPage(
             displayEndpoints(Json.decodeFromDynamic(message.body))
         }
         eb.publish(OverviewTabOpened, json("portalUuid" to portalUuid))
-
-        //periodically refresh overview
-        window.setInterval({
-            eb.publish(RefreshOverview, json("portalUuid" to portalUuid))
-        }, 5_000)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
@@ -62,16 +56,22 @@ class OverviewPage(
         root.innerHTML = ""
         root.append {
             portalNav {
-                if (configuration.visibleOverview) navItem(OVERVIEW, isActive = true)
-                if (configuration.visibleActivity) navItem(ACTIVITY)
-                if (configuration.visibleTraces) navItem(TRACES) {
+                if (configuration.visibleOverview) navItem(OVERVIEW, isActive = true, onClick = {
+                    setCurrentPage(eb, portalUuid, OVERVIEW)
+                })
+                if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
+                    setCurrentPage(eb, portalUuid, ACTIVITY)
+                })
+                if (configuration.visibleTraces) navItem(TRACES, false, null) {
                     navSubItems(
                         PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, LATEST_TRACES) },
                         PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, SLOWEST_TRACES) },
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, FAILED_TRACES) }
                     )
                 }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
+                    setCurrentPage(eb, portalUuid, CONFIGURATION)
+                })
             }
             portalContent {
                 navBar {

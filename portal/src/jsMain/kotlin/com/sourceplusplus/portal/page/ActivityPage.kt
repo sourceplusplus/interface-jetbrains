@@ -7,6 +7,7 @@ import com.sourceplusplus.portal.extensions.echarts
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ChartItemType.*
+import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
@@ -113,16 +114,22 @@ class ActivityPage(
         root.innerHTML = ""
         root.append {
             portalNav {
-                if (configuration.visibleOverview) navItem(OVERVIEW)
-                if (configuration.visibleActivity) navItem(ACTIVITY, isActive = true)
-                if (configuration.visibleTraces) navItem(TRACES) {
+                if (configuration.visibleOverview) navItem(OVERVIEW, onClick = {
+                    setCurrentPage(eb, portalUuid, OVERVIEW)
+                })
+                if (configuration.visibleActivity) navItem(ACTIVITY, isActive = true, onClick = {
+                    setCurrentPage(eb, portalUuid, ACTIVITY)
+                })
+                if (configuration.visibleTraces) navItem(TRACES, false, null) {
                     navSubItems(
                         PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, LATEST_TRACES) },
                         PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, SLOWEST_TRACES) },
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, FAILED_TRACES) }
                     )
                 }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
+                    setCurrentPage(eb, portalUuid, CONFIGURATION)
+                })
             }
             activityContent {
                 navBar {

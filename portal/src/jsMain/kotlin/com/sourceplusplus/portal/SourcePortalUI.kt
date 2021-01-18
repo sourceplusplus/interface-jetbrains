@@ -9,6 +9,7 @@ import com.sourceplusplus.portal.page.TracesPage
 import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.PageType
@@ -32,12 +33,6 @@ fun main() {
         val activityPage = ActivityPage(portalUuid, eb)
         val tracesPage = TracesPage(portalUuid, eb)
         val configurationPage = ConfigurationPage(portalUuid, eb)
-        val currentPage = when (window.location.pathname) {
-            "/activity", "/activity.html" -> activityPage
-            "/traces", "/traces.html" -> tracesPage
-            "/configuration", "/configuration.html" -> configurationPage
-            else -> overviewPage
-        }
 
         console.log("Connecting portal")
         eb.onopen = {
@@ -45,6 +40,12 @@ fun main() {
             eb.send(GetPortalConfiguration, portalUuid) { _, message: dynamic ->
                 console.log("Received portal configuration. Portal: $portalUuid")
                 val portalConfiguration = Json.decodeFromDynamic<PortalConfiguration>(message.body)
+                val renderPage = when (portalConfiguration.currentPage) {
+                    PageType.OVERVIEW -> overviewPage
+                    PageType.ACTIVITY -> activityPage
+                    PageType.TRACES -> tracesPage
+                    PageType.CONFIGURATION -> configurationPage
+                }
                 document.getElementsByTagName("head")[0]!!.append {
                     link {
                         rel = "stylesheet"
@@ -52,16 +53,16 @@ fun main() {
                         href = "css/" + if (portalConfiguration.darkMode) "dark_style.css" else "style.css"
                     }
                 }
-                currentPage.renderPage(portalConfiguration)
+                renderPage.renderPage(portalConfiguration)
                 loadTheme()
 
-                currentPage.setupEventbus()
+                renderPage.setupEventbus()
             }
 
             eb.registerHandler(RenderPage(portalUuid)) { _: dynamic, message: dynamic ->
                 val portalConfiguration = Json.decodeFromDynamic<PortalConfiguration>(message.body)
                 val renderPage = when (portalConfiguration.currentPage) {
-                    PageType.OVERVIEW  -> overviewPage
+                    PageType.OVERVIEW -> overviewPage
                     PageType.ACTIVITY -> activityPage
                     PageType.TRACES -> tracesPage
                     PageType.CONFIGURATION -> configurationPage
@@ -81,6 +82,12 @@ fun main() {
         }
 
         Unit //todo: why is this necessary
+    }
+}
+
+fun setCurrentPage(eb: EventBus, portalUuid: String, pageType: PageType) {
+    eb.send(SetCurrentPage, json("portalUuid" to portalUuid, "pageType" to pageType.name)) { _, message: dynamic ->
+        eb.send(RenderPage(portalUuid), message.body)
     }
 }
 
@@ -107,17 +114,6 @@ fun loadTheme() {
         toggleSidebar()
     })
     js("\$('.ui.accordion').accordion({selector: {}})")
-
-    val mainGetQuery = getMainGetQuery()
-    jq("#overview_link").attr("href", "overview.html$mainGetQuery")
-    jq("#sidebar_overview_link").attr("href", "overview.html$mainGetQuery")
-
-    jq("#activity_link").attr("href", "activity.html$mainGetQuery")
-    jq("#sidebar_activity_link").attr("href", "activity.html$mainGetQuery")
-
-
-    jq("#configuration_link").attr("href", "configuration.html$mainGetQuery")
-    jq("#sidebar_configuration_link").attr("href", "configuration.html$mainGetQuery")
 }
 
 fun toggleSidebar() {
@@ -130,14 +126,6 @@ fun toggleSidebar() {
     jq(".pusher").toggleClass("dimmed")
 
     jq(".logo").find("img").toggle()
-}
-
-fun getMainGetQuery(): String {
-    val queryParams = getQueryMap()
-    val portalUuid = queryParams.getOrElse("portalUuid", { "null" })
-    var mainGetQuery = "?portalUuid=$portalUuid"
-    mainGetQuery += getMainGetQueryWithoutPortalUuid()
-    return mainGetQuery
 }
 
 fun getMainGetQueryWithoutPortalUuid(): String {
