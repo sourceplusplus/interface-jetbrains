@@ -21,6 +21,7 @@ import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import kotlinx.browser.document
 import kotlinx.dom.clear
+import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.js.onClickFunction
@@ -52,7 +53,9 @@ class OverviewPage(
         console.log("Rending Overview page")
         this.configuration = portalConfiguration
 
+        document.title = "Overview - SourceMarker"
         val root: Element = document.getElementById("root")!!
+        root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
         root.append {
             portalNav {

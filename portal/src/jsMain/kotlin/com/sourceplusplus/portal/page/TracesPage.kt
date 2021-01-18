@@ -74,7 +74,9 @@ class TracesPage(
         console.log("Rending Traces page")
         this.configuration = portalConfiguration
 
+        document.title = "Traces - SourceMarker"
         val root: Element = document.getElementById("root")!!
+        root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
         root.append {
             portalNav {

@@ -24,6 +24,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.dom.addClass
 import kotlinx.html.dom.append
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -110,7 +111,9 @@ class ActivityPage(
         console.log("Rending Activity page")
         this.configuration = portalConfiguration
 
+        document.title = "Activity - SourceMarker"
         val root: Element = document.getElementById("root")!!
+        root.addClass("overflow_y_hidden")
         root.innerHTML = ""
         root.append {
             portalNav {

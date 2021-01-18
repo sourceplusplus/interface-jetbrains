@@ -28,7 +28,7 @@ class SourcePortal(
     var visible: Boolean = false
     val overviewView: OverviewView = OverviewView()
     val activityView: ActivityView = ActivityView(this)
-    val tracesView: TracesView = TracesView()
+    val tracesView: TracesView = TracesView(this)
     val configurationView: ConfigurationView = ConfigurationView()
     lateinit var viewingPortalArtifact: String
     var advice: MutableList<ArtifactAdvice> = mutableListOf()

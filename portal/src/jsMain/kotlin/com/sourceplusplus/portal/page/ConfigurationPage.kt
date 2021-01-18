@@ -19,6 +19,7 @@ import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
+import kotlinx.dom.removeClass
 import kotlinx.html.dom.append
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
@@ -47,7 +48,9 @@ class ConfigurationPage(
         console.log("Rendering Configuration page")
         this.configuration = portalConfiguration
 
+        document.title = "Configuration - SourceMarker"
         val root: Element = document.getElementById("root")!!
+        root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
         root.append {
             portalNav {
