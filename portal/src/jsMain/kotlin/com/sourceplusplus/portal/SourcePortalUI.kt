@@ -168,8 +168,7 @@ function portalConnected() {
             'appUuid': findGetParameter("appUuid"),
             'artifactQualifiedName': findGetParameter("artifactQualifiedName")
         }, function (error, message) {
-            window.open(window.location.href.split('?')[0] + '?portalUuid=' + message.body.portalUuid
-                + mainGetQueryWithoutPortalUuid, '_self');
+            window.open(window.location.href.split('?')[0] + '?portalUuid=' + message.body.portalUuid, '_self');
         });
     } else if (externalPortal) {
         let keepAliveInterval = window.setInterval(function () {
