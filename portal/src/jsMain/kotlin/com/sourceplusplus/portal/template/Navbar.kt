@@ -1,7 +1,9 @@
 package com.sourceplusplus.portal.template
 
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.model.TraceStackHeaderType
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.LATEST_TRACES
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.HTMLElement
@@ -25,7 +27,7 @@ fun TagConsumer<HTMLElement>.timeDropdown(
                     div("item") {
                         id = "last_${timeFrame.id}_time"
                         onClickFunction = { updateTimeFrame(timeFrame) }
-                        span("menu_tooltip_text") { +"LAST ${timeFrame.description}" }
+                        span("menu_tooltip_text") { + translate("LAST ${timeFrame.description}") }
                     }
                 }
             }
@@ -52,7 +54,7 @@ fun TagConsumer<HTMLElement>.tracesHeader(
         onClickFunction = onClickBackToTraces
         span {
             id = "latest_traces_header_text"
-            +"Latest Traces"
+            + translate(LATEST_TRACES.description)
         }
     }
     a(classes = "ui item dropdown visibility_hidden") {
@@ -60,7 +62,7 @@ fun TagConsumer<HTMLElement>.tracesHeader(
         onClickFunction = onClickBackToTraceStack
         span {
             id = "trace_stack_header_text"
-            +"Trace Stack"
+            + translate("Trace Stack")
         }
         div("menu") {
             id = "trace_stack_menu"
@@ -81,7 +83,7 @@ fun TagConsumer<HTMLElement>.tracesHeader(
         id = "span_info_header"
         span {
             id = "span_info_header_text"
-            +"Span Info"
+            + translate("Span Info")
         }
     }
 }

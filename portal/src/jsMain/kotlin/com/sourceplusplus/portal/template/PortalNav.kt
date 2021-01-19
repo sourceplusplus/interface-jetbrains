@@ -1,12 +1,13 @@
 package com.sourceplusplus.portal.template
 
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
-import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.protocol.portal.PageType
 import kotlinx.html.FlowContent
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.style
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.events.Event
 
 class PortalNavigationConfiguration(private val flowContent: FlowContent) {
 
@@ -27,22 +28,27 @@ class PortalNavigationConfiguration(private val flowContent: FlowContent) {
         mode = ModeType.TAB
     }
 
-    fun navItem(pageType: PageType, isActive: Boolean = false, block: (FlowContent.() -> Unit)? = null) {
+    fun navItem(
+        pageType: PageType,
+        isActive: Boolean = false,
+        onClick: ((Event) -> Unit)? = null,
+        block: (FlowContent.() -> Unit)? = null
+    ) {
         menuItems.add {
-            flowContent.menuItem(pageType, isActive, block)
+            flowContent.menuItem(pageType, isActive, onClick, block)
         }
         tabItems.add {
-            flowContent.tabItem(pageType, isActive, block)
+            flowContent.tabItem(pageType, isActive, onClick, block)
         }
     }
 
-    fun navSubItem(vararg traceOrderTypes: TraceOrderType = arrayOf()) {
-        when (mode) {
-            ModeType.MENU -> flowContent.subMenuItem(*traceOrderTypes)
-            ModeType.TAB -> flowContent.subTabItem(*traceOrderTypes)
-        }
+    fun navSubItems(vararg subItems: PortalNavSubItem) = when (mode) {
+        ModeType.MENU -> subItems.forEach { flowContent.subMenuItem(it.traceOrderType, it.onClick) }
+        ModeType.TAB -> flowContent.subTabItem(*subItems)
     }
 }
+
+data class PortalNavSubItem(val traceOrderType: TraceOrderType, val onClick: (Event) -> Unit)
 
 fun TagConsumer<HTMLElement>.portalNav(block: PortalNavigationConfiguration.() -> Unit) {
     div("ui sidebar vertical left menu overlay visible very thin icon spp_blue webkit_transition") {

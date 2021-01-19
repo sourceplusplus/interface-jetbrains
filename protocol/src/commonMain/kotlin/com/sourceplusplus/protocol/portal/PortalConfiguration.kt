@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PortalConfiguration(
+    var currentPage: PageType = PageType.ACTIVITY,
     var darkMode: Boolean = false,
     var external: Boolean = false,
     var visibleOverview: Boolean = true,

@@ -1,10 +1,9 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactEntryMethod
-import com.sourceplusplus.portal.model.PageType
+import com.sourceplusplus.protocol.portal.PageType
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
 
@@ -25,14 +24,6 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
     override suspend fun start() {
         updateConfigurationPermitted = pluginAvailable
 
-        vertx.eventBus().consumer<JsonObject>(ConfigurationTabOpened) {
-            log.info("Configuration tab opened")
-            val message = JsonObject.mapFrom(it.body())
-            val portal = SourcePortal.getPortal(message.getString("portalUuid"))!!
-            portal.currentTab = thisTab
-            SourcePortal.ensurePortalActive(portal)
-            updateUI(portal)
-        }
 //        vertx.eventBus().consumer(PluginBridgeEndpoints.ARTIFACT_CONFIG_UPDATED.address, {
 //            log.debug("Artifact configuration updated")
 //            def artifact = it.body() as SourceArtifact
@@ -88,7 +79,7 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
     }
 
     override fun updateUI(portal: SourcePortal) {
-        if (portal.currentTab != thisTab) {
+        if (portal.configuration.currentPage != thisTab) {
             return
         }
 
@@ -111,7 +102,7 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
 
     fun cacheAndDisplayArtifactConfiguration(portal: SourcePortal, artifact: JsonObject) {
         portal.configurationView.artifact = artifact
-        if (portal.currentTab == thisTab) {
+        if (portal.configuration.currentPage == thisTab) {
 //            vertx.eventBus().send(portal.portalUuid + "-$DISPLAY_ARTIFACT_CONFIGURATION", JsonObject(Json.encode(
 //                    artifact.withArtifactQualifiedName(getShortQualifiedFunctionName(artifact.artifactQualifiedName())))))
         }

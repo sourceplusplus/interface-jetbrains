@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.template
 
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.model.ChartItemType
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
@@ -41,11 +42,11 @@ fun FlowContent.chartItem(chartItemType: ChartItemType, isActive: Boolean = fals
             onClickFunction = onClick
             div("value align_left $isActiveClass".trim()) {
                 id = "card_${chartItemType.id}_${chartItemType.type}_header"
-                +"n/a"
+                + translate("n/a")
             }
             div("label align_left $isActiveClass".trim()) {
                 id = "card_${chartItemType.id}_${chartItemType.type}_header_label"
-                +"${chartItemType.abbr} ${chartItemType.label}"
+                + translate("${chartItemType.abbr} ${chartItemType.label}")
             }
         }
     }

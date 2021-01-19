@@ -47,18 +47,18 @@ SourceMarker is a JetBrains-powered plugin which provides continuous feedback ca
 
 | Module                        | Description                                                          | Version |
 | ----------------------------- | -------------------------------------------------------------------- | ------- |
-| :mapper                       | Tracks source code artifact refactoring                              | 0.1.0   |
-| :marker                       | Used to tie visual marks & popups to source code artifacts           | 0.1.0   |
+| :mapper                       | Tracks source code artifact refactoring                              | 0.1.1   |
+| :marker                       | Used to tie visual marks & popups to source code artifacts           | 0.1.1   |
 | :mentor                       | Produces source code artifact informative/cautionary advice          | 0.1.0   |
-| :portal                       | Used to visually display contextualized artifact data/advice         | 0.1.0   |
-| :protocol                     | Common communication data models                                     | 0.1.0   |
+| :portal                       | Used to visually display contextualized artifact data/advice         | 0.1.1   |
+| :protocol                     | Common communication data models                                     | 0.1.1   |
 
 ### Implementation
 
 | Module                        | Description                                                          | Version |
 | ----------------------------- | -------------------------------------------------------------------- | ------- |
-| :monitor:skywalking           | Apache SkyWalking monitor implementation                             | 0.1.1   |
-| :plugin:jetbrains             | JetBrains plugin implementation                                      | 0.1.1   |
+| :monitor:skywalking           | Apache SkyWalking monitor implementation                             | 0.1.2   |
+| :plugin:jetbrains             | JetBrains plugin implementation                                      | 0.1.2   |
 
 ## Attribution
 

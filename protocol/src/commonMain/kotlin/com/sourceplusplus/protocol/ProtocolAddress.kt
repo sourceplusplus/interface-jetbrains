@@ -17,13 +17,15 @@ object ProtocolAddress {
         const val KeepAlivePortal = "KeepAlivePortal" //todo: remove
         const val UpdatePortalArtifact = "UpdatePortalArtifact"
         const val GetPortalConfiguration = "GetPortalConfiguration"
+        const val SetCurrentPage = "SetCurrentPage"
+        const val RefreshPortal = "RefreshPortal"
         const val CanOpenPortal = "CanOpenPortal"
         const val ChangedPortalArtifact = "ChangedPortalArtifact"
         const val CanNavigateToArtifact = "CanNavigateToArtifact"
         const val NavigateToArtifact = "NavigateToArtifact"
+        const val GetPortalTranslations = "GetPortalTranslations"
 
         //Portal - Overview
-        const val OverviewTabOpened = "OverviewTabOpened"
         const val RefreshOverview = "RefreshOverview"
         const val SetOverviewTimeFrame = "SetOverviewTimeFrame"
         const val ClickedEndpointArtifact = "ClickedEndpointArtifact"
@@ -36,7 +38,7 @@ object ProtocolAddress {
         const val ArtifactMetricUpdated = "ArtifactMetricUpdated"
 
         //Portal - Traces
-        const val TracesTabOpened = "TracesTabOpened"
+        const val SetTraceOrderType = "SetTraceOrderType"
         const val ClickedDisplayTraces = "ClickedDisplayTraces"
         const val ClickedDisplayTraceStack = "ClickedDisplayTraceStack"
         const val ClickedDisplayInnerTraceStack = "ClickedDisplayInnerTraceStack"
@@ -46,9 +48,9 @@ object ProtocolAddress {
         const val ArtifactTraceUpdated = "ArtifactTraceUpdated"
         const val QueryTraceStack = "QueryTraceStack"
         const val ClickedStackTraceElement = "ClickedStackTraceElement"
+        const val FetchMoreTraces = "FetchMoreTraces"
 
         //Portal - Configuration
-        const val ConfigurationTabOpened = "ConfigurationTabOpened"
         const val DisplayArtifactConfiguration = "DisplayArtifactConfiguration"
         const val UpdateArtifactEntryMethod = "UpdateArtifactEntryMethod"
         const val UpdateArtifactAutoSubscribe = "UpdateArtifactAutoSubscribe"
@@ -56,6 +58,10 @@ object ProtocolAddress {
 
     @Suppress("FunctionName")
     object Portal {
+        fun RenderPage(portalUuid: String): String {
+            return "$portalUuid-RenderPage"
+        }
+
         fun UpdateEndpoints(portalUuid: String): String {
             return "$portalUuid-UpdateEndpoints"
         }

@@ -6,21 +6,13 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.sourceplusplus.portal.extensions.*
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ConfigurationTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
-import com.sourceplusplus.protocol.ProtocolAddress.Global.OverviewTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
-import com.sourceplusplus.protocol.ProtocolAddress.Global.TracesTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayArtifactConfiguration
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
-import com.sourceplusplus.protocol.artifact.ArtifactConfiguration
-import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
@@ -79,16 +71,6 @@ fun main() {
         it.reply(JsonObject.mapFrom(PortalConfiguration().copy(external = true)))
     }
 
-    vertx.eventBus().consumer<Void>(OverviewTabOpened) {
-        displayEndpoints(vertx)
-    }
-
-    vertx.eventBus().consumer<Void>(ActivityTabOpened) {
-        updateCards(vertx)
-
-        vertx.eventBus().publish(ClearActivity("null"), "")
-        displayChart(vertx)
-    }
     vertx.setPeriodic(2500) {
         updateCards(vertx)
         displayChart(vertx)
@@ -101,9 +83,6 @@ fun main() {
     }
 
     vertx.eventBus().consumer<Void>(ClickedDisplayTraces) {
-        displayTraces(vertx)
-    }
-    vertx.eventBus().consumer<Void>(TracesTabOpened) {
         displayTraces(vertx)
     }
 
@@ -131,7 +110,10 @@ fun main() {
                 putMetaDouble("totalTracePercent", current().nextDouble(100.0))
             })
         }
-        vertx.eventBus().displayTraceStack("null", TraceStackPath(TraceStack(traceSpans)))
+        vertx.eventBus().displayTraceStack(
+            "null",
+            TraceStackPath(TraceStack(traceSpans), orderType = TraceOrderType.LATEST_TRACES)
+        )
     }
 
     vertx.eventBus().consumer<Void>(ClickedDisplaySpanInfo) {
@@ -156,23 +138,6 @@ fun main() {
             )
         )
         vertx.eventBus().displayTraceSpan("null", span)
-    }
-
-    vertx.eventBus().consumer<Void>(ConfigurationTabOpened) {
-        vertx.eventBus().publish(
-            DisplayArtifactConfiguration("null"), JsonObject.mapFrom(
-                ArtifactInformation(
-                    artifactQualifiedName = UUID.randomUUID().toString(),
-                    createDate = Clock.System.now(),
-                    lastUpdated = Clock.System.now(),
-                    config = ArtifactConfiguration(
-                        endpoint = current().nextBoolean(),
-                        subscribeAutomatically = current().nextBoolean(),
-                        endpointName = UUID.randomUUID().toString()
-                    )
-                )
-            )
-        )
     }
 }
 
@@ -336,18 +301,21 @@ fun displayTraces(vertx: Vertx) {
 fun updateCards(vertx: Vertx) {
     val throughputAverageCard =
         BarTrendCard(
+            timeFrame = QueryTimeFrame.LAST_15_MINUTES,
             meta = "throughput_average",
             header = current().nextInt(100).toString(),
             barGraphData = emptyList()
         )
     val responseTimeAverageCard =
         BarTrendCard(
+            timeFrame = QueryTimeFrame.LAST_15_MINUTES,
             meta = "responsetime_average",
             header = current().nextInt(100).toString(),
             barGraphData = emptyList()
         )
     val slaAverageCard =
         BarTrendCard(
+            timeFrame = QueryTimeFrame.LAST_15_MINUTES,
             meta = "servicelevelagreement_average",
             header = current().nextInt(100).toString(),
             barGraphData = emptyList()

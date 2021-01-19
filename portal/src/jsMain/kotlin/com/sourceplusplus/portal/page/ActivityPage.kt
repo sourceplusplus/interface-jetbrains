@@ -1,14 +1,19 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.PortalBundle.translate
+import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.echarts
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ChartItemType.*
-import com.sourceplusplus.portal.model.PageType.*
+import com.sourceplusplus.portal.setActiveTime
+import com.sourceplusplus.portal.setCurrentPage
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
@@ -21,8 +26,8 @@ import com.sourceplusplus.protocol.artifact.metrics.SplineChart
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
-import kotlinx.browser.localStorage
 import kotlinx.browser.window
+import kotlinx.dom.addClass
 import kotlinx.html.dom.append
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -40,20 +45,13 @@ import kotlin.js.json
 class ActivityPage(
     override val portalUuid: String,
     private val eb: EventBus
-) : IActivityPage {
+) : IActivityPage() {
 
-    private lateinit var configuration: PortalConfiguration
     private var overviewChart: dynamic = null
-    override var currentMetricType: MetricType = MetricType.Throughput_Average
-    override var currentTimeFrame = QueryTimeFrame.LAST_5_MINUTES
-    private var tooltipMeasurement = "ms"
-    private val labelColor by lazy { if (configuration.darkMode) "grey" else "black" }
-    private val symbolColor by lazy { if (configuration.darkMode) "grey" else "#182d34" }
-
     private val tooltipFormatter: ((params: dynamic) -> String) = { params ->
         val time = params[0].value[0].toString()
         val measurement = params[0].value[1].toString().toDouble()
-        moment(time, "x").format("LTS") + " : " + measurement + tooltipMeasurement
+        moment(time, "x").format("LTS") + " : " + measurement + translate(tooltipMeasurement)
     }
     private val axisFormatter: ((value: dynamic) -> String) = { value ->
         moment(value.toString(), "x").format("LT")
@@ -99,43 +97,49 @@ class ActivityPage(
 
     @ExperimentalSerializationApi
     override fun setupEventbus() {
-        clickedViewAverageResponseTimeChart() //default = avg resp time
+        if (!setup) {
+            setup = true
+            eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
+                clearActivity()
+            }
+            eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
+                displayCard(Json.decodeFromDynamic(message.body))
+            }
+            eb.registerHandler(UpdateChart(portalUuid)) { _: dynamic, message: dynamic ->
+                updateChart(Json.decodeFromDynamic(message.body))
+            }
 
-        eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
-            clearActivity()
+            eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
         }
-        eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
-            displayCard(Json.decodeFromDynamic(message.body))
-        }
-        eb.registerHandler(UpdateChart(portalUuid)) { _: dynamic, message: dynamic ->
-            updateChart(Json.decodeFromDynamic(message.body))
-        }
-
-        var timeFrame = localStorage.getItem("spp.metricTimeFrame")
-        if (timeFrame == null) {
-            timeFrame = currentTimeFrame.name
-            localStorage.setItem("spp.metricTimeFrame", timeFrame)
-        }
-        updateTime(QueryTimeFrame.valueOf(timeFrame.toUpperCase()))
-        //js("portalLog('Set initial time frame to: ' + timeFrame);")
-
-        eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
+        eb.send(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
-        println("Rending Activity page")
+        console.log("Rending Activity page")
         this.configuration = portalConfiguration
 
+        document.title = translate("Activity - SourceMarker")
         val root: Element = document.getElementById("root")!!
+        root.addClass("overflow_y_hidden")
         root.innerHTML = ""
         root.append {
             portalNav {
-                if (configuration.visibleOverview) navItem(OVERVIEW)
-                if (configuration.visibleActivity) navItem(ACTIVITY, isActive = true)
-                if (configuration.visibleTraces) navItem(TRACES) {
-                    navSubItem(LATEST_TRACES, SLOWEST_TRACES, FAILED_TRACES)
+                if (configuration.visibleOverview) navItem(OVERVIEW, onClick = {
+                    setCurrentPage(eb, portalUuid, OVERVIEW)
+                })
+                if (configuration.visibleActivity) navItem(ACTIVITY, isActive = true, onClick = {
+                    setCurrentPage(eb, portalUuid, ACTIVITY)
+                })
+                if (configuration.visibleTraces) navItem(TRACES, false, null) {
+                    navSubItems(
+                        PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, portalUuid, LATEST_TRACES) },
+                        PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, portalUuid, SLOWEST_TRACES) },
+                        PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
+                    )
                 }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION)
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
+                    setCurrentPage(eb, portalUuid, CONFIGURATION)
+                })
             }
             activityContent {
                 navBar {
@@ -143,7 +147,7 @@ class ActivityPage(
                     //calendar()
 
                     rightAlign {
-                        externalPortalButton { clickedViewAsExternalPortal(eb) }
+                        externalPortalButton { clickedViewAsExternalPortal(eb, portalUuid) }
                     }
                 }
                 areaChart {
@@ -158,7 +162,7 @@ class ActivityPage(
     }
 
     fun loadChart() {
-        println("Loading chart")
+        console.log("Loading chart")
         overviewChart = echarts.init(document.getElementById("overview_chart"))
         window.onresize = {
             console.log("Resizing overview chart")
@@ -184,11 +188,14 @@ class ActivityPage(
 
     override fun displayCard(card: BarTrendCard) {
         console.log("Displaying card. Type: ${card.meta}")
-        document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = card.header
+        setActiveTime(card.timeFrame)
+
+        document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = translate(card.header)
     }
 
     override fun updateChart(chartData: SplineChart) {
         console.log("Updating chart")
+        setActiveTime(chartData.timeFrame)
 
         val cards = listOf("throughput_average", "responsetime_average", "servicelevelagreement_average")
         for (i in cards.indices) {
@@ -198,9 +205,9 @@ class ActivityPage(
         jq("#card_" + chartData.metricType.name.toLowerCase() + "_header").addClass("spp_red_color")
         jq("#card_" + chartData.metricType.name.toLowerCase() + "_header_label").addClass("spp_red_color")
         if (chartData.metricType.name.toLowerCase() == cards[0]) {
-            tooltipMeasurement = "/min"
+            tooltipMeasurement = "/" + translate("min")
         } else if (chartData.metricType.name.toLowerCase() == cards[1]) {
-            tooltipMeasurement = "ms"
+            tooltipMeasurement = translate("ms")
         } else if (chartData.metricType.name.toLowerCase() == cards[2]) {
             tooltipMeasurement = "%"
         }
@@ -255,8 +262,6 @@ class ActivityPage(
 
     override fun updateTime(interval: QueryTimeFrame) {
         console.log("Update time: $interval")
-        currentTimeFrame = interval
-        localStorage.setItem("spp.metricTimeFrame", interval.name)
         eb.send(
             SetMetricTimeFrame,
             json(
@@ -265,54 +270,45 @@ class ActivityPage(
             )
         )
 
-        jq("#last_5_minutes_time").removeClass("active")
-        jq("#last_15_minutes_time").removeClass("active")
-        jq("#last_30_minutes_time").removeClass("active")
-        jq("#last_hour_time").removeClass("active")
-        jq("#last_3_hours_time").removeClass("active")
-
-        jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
+        setActiveTime(interval)
     }
 
     private fun clickedViewAverageThroughputChart() {
         console.log("Clicked view average throughput")
-        currentMetricType = MetricType.Throughput_Average
         eb.send(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to currentMetricType.name
+                "metricType" to MetricType.Throughput_Average.name
             )
         )
     }
 
     private fun clickedViewAverageResponseTimeChart() {
         console.log("Clicked view average response time")
-        currentMetricType = MetricType.ResponseTime_Average
         eb.send(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to currentMetricType.name
+                "metricType" to MetricType.ResponseTime_Average.name
             )
         )
     }
 
     private fun clickedViewAverageSLAChart() {
         console.log("Clicked view average SLA")
-        currentMetricType = MetricType.ServiceLevelAgreement_Average
         eb.send(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to currentMetricType.name
+                "metricType" to MetricType.ServiceLevelAgreement_Average.name
             )
         )
     }
 
     companion object {
         val series0 = json(
-            "name" to "99th percentile",
+            "name" to translate("99th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "hoverAnimation" to false,
@@ -323,7 +319,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val series1 = json(
-            "name" to "95th percentile",
+            "name" to translate("95th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "showSymbol" to false,
@@ -332,7 +328,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val series2 = json(
-            "name" to "90th percentile",
+            "name" to translate("90th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "showSymbol" to false,
@@ -341,7 +337,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val series3 = json(
-            "name" to "75th percentile",
+            "name" to translate("75th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "showSymbol" to false,
@@ -350,7 +346,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val series4 = json(
-            "name" to "50th percentile",
+            "name" to translate("50th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "showSymbol" to false,
@@ -359,7 +355,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val regressionSeries = json(
-            "name" to "Predicted Regression",
+            "name" to translate("Predicted Regression"),
             "type" to "line",
             "color" to "#000",
             "showSymbol" to true,
