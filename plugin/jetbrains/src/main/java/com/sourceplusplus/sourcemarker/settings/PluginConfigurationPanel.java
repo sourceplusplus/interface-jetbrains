@@ -1,18 +1,28 @@
 package com.sourceplusplus.sourcemarker.settings;
 
+import com.intellij.ui.IdeBorderFactory;
+
 import javax.swing.*;
 import java.util.Objects;
 
-public class PluginConfigurationDialog extends JDialog {
+import static com.sourceplusplus.sourcemarker.PluginBundle.message;
 
-    private JPanel contentPane;
+public class PluginConfigurationPanel {
+    private JPanel myWholePanel;
+    private JPanel myProjectSettingsPanel;
+    private JPanel myGlobalSettingsPanel;
     private JTextField skywalkingOapTextField;
     private JTextField rootSourcePackageTextField;
+    private JComboBox<String> skywalkingVersionComboBox;
     private SourceMarkerConfig config;
 
-    public PluginConfigurationDialog() {
-        setContentPane(contentPane);
-        setModal(true);
+    public PluginConfigurationPanel() {
+        myProjectSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("apache_skywalking_settings")));
+        myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
+    }
+
+    public JComponent getContentPane() {
+        return myWholePanel;
     }
 
     boolean isModified() {
