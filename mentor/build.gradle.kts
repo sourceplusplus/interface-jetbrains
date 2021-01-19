@@ -1,5 +1,20 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
+    id("maven-publish")
+}
+
+val pluginGroup: String by project
+val mentorVersion: String by project
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = pluginGroup
+            artifactId = "mentor"
+            version = mentorVersion
+
+            from(components["java"])
+        }
+    }
 }
 
 dependencies {
