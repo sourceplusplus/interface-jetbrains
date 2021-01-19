@@ -13,6 +13,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FindPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
@@ -57,6 +58,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
 
         vertx.eventBus().consumer(SetTraceOrderType, this@TracesDisplay::setTraceOrderType)
         vertx.eventBus().consumer<TraceResult>(ArtifactTraceUpdated) { handleArtifactTraceResult(it.body()) }
+        vertx.eventBus().consumer(FetchMoreTraces, this@TracesDisplay::fetchMoreTraces)
         vertx.eventBus().consumer(ClickedDisplayTraceStack, this@TracesDisplay::clickedDisplayTraceStack)
         vertx.eventBus().consumer(ClickedDisplayInnerTraceStack, this@TracesDisplay::clickedDisplayInnerTraceStack)
         vertx.eventBus().consumer(ClickedDisplayTraces, this@TracesDisplay::clickedDisplayTraces)
@@ -75,6 +77,18 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             TRACE_STACK -> displayTraceStack(portal)
             SPAN_INFO -> displaySpanInfo(portal)
         }
+    }
+
+    private fun fetchMoreTraces(messageHandler: Message<JsonObject>) {
+        val portalUuid = messageHandler.body().getString("portalUuid")
+        val pageNumber = messageHandler.body().getInteger("pageNumber")
+        val portal = SourcePortal.getPortal(portalUuid)!!
+        if (pageNumber == null) {
+            portal.tracesView.pageNumber++
+        } else {
+            portal.tracesView.pageNumber = pageNumber
+        }
+        vertx.eventBus().send(RefreshTraces, portal)
     }
 
     private fun clickedDisplaySpanInfo(messageHandler: Message<JsonObject>) {

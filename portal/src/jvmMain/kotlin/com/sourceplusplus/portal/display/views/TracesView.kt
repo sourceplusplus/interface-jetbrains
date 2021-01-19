@@ -26,15 +26,20 @@ class TracesView(
     var traceId: String? = null
     var traceStackPath: TraceStackPath? = null
     var spanId: Int = 0
-    private var viewTraceAmount = if (portal.configuration.external) 20 else 10
+    val viewTraceAmount = if (portal.configuration.external) 20 else 10
     var innerTraceStack = false
     var rootArtifactQualifiedName: String? = null
+    var pageNumber = 1
 
     fun cacheArtifactTraceResult(artifactTraceResult: TraceResult) {
         val currentTraceResult = traceResultCache[artifactTraceResult.orderType]
         if (currentTraceResult != null) {
             val mergedArtifactTraceResult = artifactTraceResult.mergeWith(currentTraceResult)
-            traceResultCache[mergedArtifactTraceResult.orderType] = mergedArtifactTraceResult.truncate(viewTraceAmount)
+            if (pageNumber == 1) {
+                traceResultCache[mergedArtifactTraceResult.orderType] = mergedArtifactTraceResult.truncate(viewTraceAmount)
+            } else {
+                traceResultCache[mergedArtifactTraceResult.orderType] = mergedArtifactTraceResult
+            }
         } else {
             traceResultCache[artifactTraceResult.orderType] = artifactTraceResult.truncate(viewTraceAmount)
         }

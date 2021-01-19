@@ -6,7 +6,6 @@ import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
-import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
@@ -18,13 +17,14 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import kotlinx.browser.document
@@ -70,7 +70,7 @@ class TracesPage(
                 displaySpanInfo(Json.decodeFromDynamic(message.body))
             }
         }
-        eb.send(RefreshPortal, portalUuid)
+        eb.send(FetchMoreTraces, json("portalUuid" to portalUuid, "pageNumber" to 1))
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
@@ -133,7 +133,7 @@ class TracesPage(
 
     @OptIn(ExperimentalTime::class)
     override fun displayTraces(traceResult: TraceResult) {
-        console.log("Displaying ${traceResult.total} traces - ${traceResult.orderType}")
+        console.log("Displaying ${traceResult.traces.size} traces - ${traceResult.orderType}")
         resetUI(TraceDisplayType.TRACES, traceResult.orderType)
 
         for (i in traceResult.traces.indices) {
@@ -456,6 +456,20 @@ class TracesPage(
     private fun setupUI() {
         resetUI(TraceDisplayType.TRACES)
 
+        @Suppress("UNUSED_VARIABLE") val traceScrollConfig = json(
+            "once" to false, "observeChanges" to true,
+            "onTopVisible" to {
+                if (jq("#top_trace_table")[0].rows.length >= 10) {
+                    eb.send(FetchMoreTraces, json("portalUuid" to portalUuid, "pageNumber" to 1))
+                }
+            },
+            "onBottomVisible" to {
+                if (jq("#top_trace_table")[0].rows.length >= 10) {
+                    eb.send(FetchMoreTraces, json("portalUuid" to portalUuid))
+                }
+            }
+        )
+        js("\$('#top_trace_table').visibility(traceScrollConfig)")
         js("\$('#latest_traces_header').dropdown({on: null})")
         js("\$('#trace_stack_header').dropdown({on: 'hover'})")
 
