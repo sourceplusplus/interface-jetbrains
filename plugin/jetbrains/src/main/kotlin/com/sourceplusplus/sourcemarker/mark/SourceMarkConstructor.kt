@@ -13,6 +13,7 @@ import com.sourceplusplus.protocol.advice.AdviceType
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
 import com.sourceplusplus.protocol.utils.toPrettyDuration
+import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import kotlinx.datetime.Clock
 import org.jetbrains.uast.UThrowExpression
@@ -94,14 +95,16 @@ object SourceMarkConstructor {
                 val expressionMark = inlayMark as ExpressionInlayMark
                 val prettyTimeAgo = if (expressionMark.getPsiExpresion() is UThrowExpression) {
                     {
-                        val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() + " ago"
-                        " //Last occurred $occurred       "
+                        val occurred =
+                            (Clock.System.now() - advice.occurredAt).toPrettyDuration() + " " + message("ago")
+                        " //${message("last_occurred")} $occurred       "
                     }
                 } else {
                     {
                         val exceptionType = advice.stackTrace.exceptionType.substringAfterLast(".")
-                        val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() + " ago"
-                        " //Threw $exceptionType $occurred       "
+                        val occurred =
+                            (Clock.System.now() - advice.occurredAt).toPrettyDuration() + " " + message("ago")
+                        " //${message("threw")} $exceptionType $occurred       "
                     }
                 }
 

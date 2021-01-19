@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.model.EndpointTableType
@@ -57,7 +58,7 @@ class OverviewPage(
         console.log("Rending Overview page")
         this.configuration = portalConfiguration
 
-        document.title = "Overview - SourceMarker"
+        document.title = translate("Overview - SourceMarker")
         val root: Element = document.getElementById("root")!!
         root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
@@ -144,32 +145,32 @@ class OverviewPage(
                                     httpOperation.startsWith("{GET}") -> {
                                         span {
                                             style = "font-weight: bold"
-                                            +"[GET] "
+                                            + "[${translate("GET")}] "
                                         }
                                         +httpOperation.substring(5)
                                     }
                                     httpOperation.startsWith("{PUT}") -> {
                                         span {
                                             style = "font-weight: bold"
-                                            +"[PUT] "
+                                            + "[${translate("PUT")}] "
                                         }
                                         +httpOperation.substring(5)
                                     }
                                     httpOperation.startsWith("{POST}") -> {
                                         span {
                                             style = "font-weight: bold"
-                                            +"[POST] "
+                                            + "[${translate("POST")}] "
                                         }
                                         +httpOperation.substring(6)
                                     }
                                     httpOperation.startsWith("{PATCH}") -> {
                                         span {
                                             style = "font-weight: bold"
-                                            +"[PATCH] "
+                                            + "[${translate("PATCH")}] "
                                         }
-                                        +httpOperation.substring(7)
+                                        + translate(httpOperation.substring(7))
                                     }
-                                    else -> +httpOperation
+                                    else -> + translate(httpOperation)
                                 }
                             }
                         } else {
@@ -178,7 +179,7 @@ class OverviewPage(
                     }
                     td("overview_row_padding collapsing") {
                         style = "color: #53A889; font-weight: bold"
-                        +it.endpointType.name
+                        + translate(it.endpointType.name)
                     }
                     it.artifactSummarizedMetrics.forEach {
                         val summaryValue = when (it.metricType) {

@@ -14,4 +14,5 @@ enum class TraceOrderType {
     //todo: not need to replace _TRACES?
     val id = name.replace("_TRACES", "").toLowerCase()
     val description = id.toLowerCase().capitalize()
+    val fullDescription = name.toLowerCase().split("_").joinToString(" ") { it.capitalize() }
 }

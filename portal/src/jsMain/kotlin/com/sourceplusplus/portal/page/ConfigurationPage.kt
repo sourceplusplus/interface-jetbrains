@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
@@ -51,7 +52,7 @@ class ConfigurationPage(
         console.log("Rendering Configuration page")
         this.configuration = portalConfiguration
 
-        document.title = "Configuration - SourceMarker"
+        document.title = translate("Configuration - SourceMarker")
         val root: Element = document.getElementById("root")!!
         root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
@@ -110,9 +111,9 @@ class ConfigurationPage(
         if (!artifact.config.endpointName.isBlank()) {
             jq("#artifact_endpoint").text(artifact.config.endpointName)
         } else if (!artifact.config.endpointIds.isNullOrEmpty()) {
-            jq("#artifact_endpoint").text("true")
+            jq("#artifact_endpoint").text(translate("true"))
         } else {
-            jq("#artifact_endpoint").text("false")
+            jq("#artifact_endpoint").text(translate("false"))
         }
     }
 

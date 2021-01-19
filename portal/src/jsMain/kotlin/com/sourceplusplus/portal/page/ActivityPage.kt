@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.echarts
@@ -50,7 +51,7 @@ class ActivityPage(
     private val tooltipFormatter: ((params: dynamic) -> String) = { params ->
         val time = params[0].value[0].toString()
         val measurement = params[0].value[1].toString().toDouble()
-        moment(time, "x").format("LTS") + " : " + measurement + tooltipMeasurement
+        moment(time, "x").format("LTS") + " : " + measurement + translate(tooltipMeasurement)
     }
     private val axisFormatter: ((value: dynamic) -> String) = { value ->
         moment(value.toString(), "x").format("LT")
@@ -117,7 +118,7 @@ class ActivityPage(
         console.log("Rending Activity page")
         this.configuration = portalConfiguration
 
-        document.title = "Activity - SourceMarker"
+        document.title = translate("Activity - SourceMarker")
         val root: Element = document.getElementById("root")!!
         root.addClass("overflow_y_hidden")
         root.innerHTML = ""
@@ -189,7 +190,7 @@ class ActivityPage(
         console.log("Displaying card. Type: ${card.meta}")
         setActiveTime(card.timeFrame)
 
-        document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = card.header
+        document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = translate(card.header)
     }
 
     override fun updateChart(chartData: SplineChart) {
@@ -204,9 +205,9 @@ class ActivityPage(
         jq("#card_" + chartData.metricType.name.toLowerCase() + "_header").addClass("spp_red_color")
         jq("#card_" + chartData.metricType.name.toLowerCase() + "_header_label").addClass("spp_red_color")
         if (chartData.metricType.name.toLowerCase() == cards[0]) {
-            tooltipMeasurement = "/min"
+            tooltipMeasurement = "/" + translate("min")
         } else if (chartData.metricType.name.toLowerCase() == cards[1]) {
-            tooltipMeasurement = "ms"
+            tooltipMeasurement = translate("ms")
         } else if (chartData.metricType.name.toLowerCase() == cards[2]) {
             tooltipMeasurement = "%"
         }
@@ -307,7 +308,7 @@ class ActivityPage(
 
     companion object {
         val series0 = json(
-            "name" to "99th percentile",
+            "name" to translate("99th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "hoverAnimation" to false,
@@ -318,7 +319,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val series1 = json(
-            "name" to "95th percentile",
+            "name" to translate("95th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "showSymbol" to false,
@@ -327,7 +328,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val series2 = json(
-            "name" to "90th percentile",
+            "name" to translate("90th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "showSymbol" to false,
@@ -336,7 +337,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val series3 = json(
-            "name" to "75th percentile",
+            "name" to translate("75th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "showSymbol" to false,
@@ -345,7 +346,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val series4 = json(
-            "name" to "50th percentile",
+            "name" to translate("50th percentile"),
             "type" to "line",
             "color" to "#e1483b",
             "showSymbol" to false,
@@ -354,7 +355,7 @@ class ActivityPage(
             "data" to arrayOf<Int>()
         )
         val regressionSeries = json(
-            "name" to "Predicted Regression",
+            "name" to translate("Predicted Regression"),
             "type" to "line",
             "color" to "#000",
             "showSymbol" to true,

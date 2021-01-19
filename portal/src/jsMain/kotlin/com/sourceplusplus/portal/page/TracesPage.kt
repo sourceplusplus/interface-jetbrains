@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
@@ -77,7 +78,7 @@ class TracesPage(
         console.log("Rending Traces page")
         this.configuration = portalConfiguration
 
-        document.title = "Traces - SourceMarker"
+        document.title = translate("Traces - SourceMarker")
         val root: Element = document.getElementById("root")!!
         root.removeClass("overflow_y_hidden")
         root.innerHTML = ""
@@ -212,13 +213,9 @@ class TracesPage(
         resetUI(TraceDisplayType.TRACE_STACK)
 
         if (traceStackPath.getCurrentRoot() != null) {
-            jq("#latest_traces_header_text").text("Parent Stack")
+            jq("#latest_traces_header_text").text(translate("Parent Stack"))
         } else {
-            when (traceStackPath.orderType) {
-                LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
-                SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
-                FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
-            }
+            jq("#latest_traces_header_text").text(translate(traceStackPath.orderType.fullDescription))
         }
 
         for ((segIdx, segment) in traceStackPath.traceStack.filter {
@@ -489,10 +486,8 @@ class TracesPage(
     private fun resetUI(traceDisplayType: TraceDisplayType, traceOrderType: TraceOrderType? = null) {
         when (traceDisplayType) {
             TraceDisplayType.TRACES -> {
-                when (traceOrderType) {
-                    LATEST_TRACES -> jq("#latest_traces_header_text").text("Latest Traces")
-                    SLOWEST_TRACES -> jq("#latest_traces_header_text").text("Slowest Traces")
-                    FAILED_TRACES -> jq("#latest_traces_header_text").text("Failed Traces")
+                if (traceOrderType != null) {
+                    jq("#latest_traces_header_text").text(translate(traceOrderType.fullDescription))
                 }
                 jq("#span_info_panel").css("display", "none")
                 jq("#latest_traces_header").addClass("active_sub_tab")

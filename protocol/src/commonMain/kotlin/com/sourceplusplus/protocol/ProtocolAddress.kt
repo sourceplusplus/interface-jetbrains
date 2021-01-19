@@ -23,6 +23,7 @@ object ProtocolAddress {
         const val ChangedPortalArtifact = "ChangedPortalArtifact"
         const val CanNavigateToArtifact = "CanNavigateToArtifact"
         const val NavigateToArtifact = "NavigateToArtifact"
+        const val GetPortalTranslations = "GetPortalTranslations"
 
         //Portal - Overview
         const val RefreshOverview = "RefreshOverview"

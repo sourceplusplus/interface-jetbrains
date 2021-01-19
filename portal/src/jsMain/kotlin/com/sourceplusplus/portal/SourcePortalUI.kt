@@ -9,6 +9,7 @@ import com.sourceplusplus.portal.page.TracesPage
 import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
+import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalTranslations
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
@@ -38,6 +39,11 @@ fun main() {
         console.log("Connecting portal")
         eb.onopen = {
             console.log("Portal connected")
+            eb.send(GetPortalTranslations, null) { _, message: dynamic ->
+                val portalTranslations = Json.decodeFromDynamic<Map<String, String>>(message.body)
+                console.log(portalTranslations)
+                PortalBundle.messageTranslator = PortalMessageTranslator { key -> portalTranslations[key] }
+            }
             eb.send(GetPortalConfiguration, portalUuid) { _, message: dynamic ->
                 console.log("Received portal configuration. Portal: $portalUuid")
                 val portalConfiguration = Json.decodeFromDynamic<PortalConfiguration>(message.body)
