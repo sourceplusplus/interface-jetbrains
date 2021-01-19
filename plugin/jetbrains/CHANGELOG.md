@@ -5,6 +5,7 @@
 ## [Unreleased]
 ### Added
 - Infinite scroll on traces portal ([#210](https://github.com/sourceplusplus/SourceMarker/issues/210))
+- Implement localization bundling ([#288](https://github.com/sourceplusplus/SourceMarker/issues/288))
 ### Changed
 - Single page portal ([#254](https://github.com/sourceplusplus/SourceMarker/issues/254))
 ### Upgraded
