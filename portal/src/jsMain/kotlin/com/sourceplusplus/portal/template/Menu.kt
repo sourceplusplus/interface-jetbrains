@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.template
 
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.toggleSidebar
@@ -29,10 +30,10 @@ fun FlowContent.menuItem(
     when (pageType) {
         OVERVIEW, ACTIVITY, CONFIGURATION -> apply {
             if (isActive) {
-                a(classes = "item active_tab") { +pageType.title }
+                a(classes = "item active_tab") { + translate(pageType.title) }
             } else {
                 a(classes = "item inactive_tab") {
-                    +pageType.title
+                    + translate(pageType.title)
                     if (onClick != null) onClickFunction = onClick
                 }
             }
@@ -44,7 +45,7 @@ fun FlowContent.menuItem(
             }
             div("title item $activeClass") {
                 i("dropdown icon")
-                +"Traces"
+                + translate(TRACES.title)
             }
             div("content") {
                 block?.let { it() }
@@ -59,6 +60,6 @@ fun FlowContent.subMenuItem(traceOrderType: TraceOrderType, onClick: (Event) -> 
             toggleSidebar()
             onClick.invoke(it)
         }
-        +traceOrderType.description
+        + translate(traceOrderType.description)
     }
 }

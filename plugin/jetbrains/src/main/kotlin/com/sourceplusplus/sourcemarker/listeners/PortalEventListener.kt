@@ -30,6 +30,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FindAndOpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FindPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
+import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalTranslations
 import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
@@ -48,6 +49,7 @@ import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
+import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
@@ -61,6 +63,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import java.time.ZonedDateTime
 import javax.swing.UIManager
+import kotlin.collections.HashMap
 
 /**
  * todo: description.
@@ -104,6 +107,15 @@ class PortalEventListener : CoroutineVerticle() {
             val portalUuid = it.body()
             val portal = SourcePortal.getPortal(portalUuid)!!
             it.reply(JsonObject.mapFrom(portal.configuration))
+        }
+        vertx.eventBus().consumer<String>(GetPortalTranslations) {
+            val map = HashMap<String, String>()
+            val keys = PluginBundle.resourceBundle.keys
+            while (keys.hasMoreElements()) {
+                val key = keys.nextElement()
+                map[key] = PluginBundle.resourceBundle.getString(key)
+            }
+            it.reply(JsonObject.mapFrom(map))
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(FindPortal) {
             val artifactQualifiedName = it.body()

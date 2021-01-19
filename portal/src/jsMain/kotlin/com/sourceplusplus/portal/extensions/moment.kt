@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.extensions
 
+import com.sourceplusplus.portal.PortalBundle.translate
 import kotlinx.datetime.Instant
 import moment
 import moment.Duration
@@ -12,31 +13,31 @@ fun Duration.toPrettyDuration(decimalPlaces: Int): String {
         val months = months()
         val durationDiff = subtract(months, "months")
         prettyDuration = "${months}mo " + (round((durationDiff.asWeeks().toDouble() * 10)) / 10).toFixed(decimalPlaces)
-        postText = "w ago"
+        postText = translate("w ago")
     } else if (weeks().toInt() > 0) {
         val weeks = weeks()
         val durationDiff = subtract(weeks, "weeks")
         prettyDuration = "${weeks}w " + (round((durationDiff.asDays().toDouble() * 10)) / 10).toFixed(decimalPlaces)
-        postText = "d ago"
+        postText = translate("d ago")
     } else if (days().toInt() > 0) {
         val days = days()
         val durationDiff = subtract(days, "days")
         prettyDuration = "${days}d " + (round((durationDiff.asHours().toDouble() * 10)) / 10).toFixed(decimalPlaces)
-        postText = "h ago"
+        postText = translate("h ago")
     } else if (hours().toInt() > 0) {
         val hours = hours()
         val durationDiff = subtract(hours, "hours")
         prettyDuration = "${hours}h " + (round((durationDiff.asMinutes().toDouble() * 10)) / 10).toFixed(decimalPlaces)
-        postText = "m ago"
+        postText = translate("m ago")
     } else if (minutes().toInt() > 0) {
         prettyDuration = "${minutes()}"
-        postText = "m ago"
+        postText = translate("m ago")
     } else if (seconds().toInt() > 0) {
         prettyDuration = (seconds().toString() + "")
-        postText = "s ago"
+        postText = translate("s ago")
     } else {
         prettyDuration = (round((asSeconds().toDouble() * 10)) / 10).toFixed(decimalPlaces)
-        postText = "s ago"
+        postText = translate("s ago")
     }
 
     if (prettyDuration.endsWith(".0")) {

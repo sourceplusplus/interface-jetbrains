@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.template
 
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.model.TableType
 import com.sourceplusplus.portal.model.TraceSpanInfoType
 import kotlinx.html.*
@@ -30,7 +31,7 @@ fun TagConsumer<HTMLElement>.table(
             tr {
                 for (tableType in tableTypes) {
                     th(classes = "secondary_background_color ${if (tableType.isCentered) "trace_th_center" else "trace_th"}") {
-                        +tableType.description
+                        + translate(tableType.description)
                     }
                 }
             }
@@ -48,7 +49,7 @@ fun TagConsumer<HTMLElement>.spanInfoPanel(vararg traceSpanInfoTypes: TraceSpanI
             div("ui segment span_segment_background") {
                 for (traceSpanInfoType in traceSpanInfoTypes) {
                     p {
-                        +"${traceSpanInfoType.description}:"
+                        + "${translate(traceSpanInfoType.description)}:"
                         span {
                             id = "span_info_${traceSpanInfoType.id1}"
                         }
@@ -66,8 +67,8 @@ fun TagConsumer<HTMLElement>.spanInfoPanel(vararg traceSpanInfoTypes: TraceSpanI
                     id = "span_tag_table"
                     thead {
                         tr {
-                            th { +"Tag" }
-                            th { +"Value" }
+                            th { + translate("Tag") }
+                            th { + translate("Value") }
                         }
                     }
                     tbody {
@@ -81,7 +82,7 @@ fun TagConsumer<HTMLElement>.spanInfoPanel(vararg traceSpanInfoTypes: TraceSpanI
                     id = "log_tag_table"
                     thead {
                         tr {
-                            th { +"Trace Logs" }
+                            th { + translate("Trace Logs") }
                         }
                     }
                     tbody {

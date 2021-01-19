@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.template
 
+import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.model.ArtifactConfigType
 import com.sourceplusplus.portal.model.ArtifactInfoType
 import kotlinx.html.*
@@ -29,7 +30,7 @@ fun TagConsumer<HTMLElement>.artifactConfiguration(vararg artifactConfigTypes: A
                                 id = "${artifactConfigType.id}_checkbox"
                                 type = InputType.checkBox
                             }
-                            label("secondary_background_color") { +artifactConfigType.description }
+                            label("secondary_background_color") { + translate(artifactConfigType.description) }
                         }
                     }
                 }
@@ -47,7 +48,7 @@ fun TagConsumer<HTMLElement>.artifactInformation(vararg artifactInfoTypes: Artif
                         tr {
                             td {
                                 h4("ui header secondary_background_color") {
-                                    div("content") { +artifactInfoType.description }
+                                    div("content") { + translate(artifactInfoType.description) }
                                 }
                             }
                             td("secondary_background_color") {
