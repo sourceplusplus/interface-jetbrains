@@ -201,11 +201,13 @@ class PortalEventListener : CoroutineVerticle() {
                             artifactQualifiedName = portal.viewingPortalArtifact,
                             endpointId = endpointId,
                             zonedDuration = ZonedDuration(
-                                ZonedDateTime.now().minusMinutes(15),
+                                ZonedDateTime.now().minusHours(24),
                                 ZonedDateTime.now(),
                                 SkywalkingClient.DurationStep.MINUTE
                             ),
-                            orderType = portal.tracesView.orderType
+                            orderType = portal.tracesView.orderType,
+                            pageSize = portal.tracesView.viewTraceAmount,
+                            pageNumber = portal.tracesView.pageNumber
                         ), vertx
                     )
                     vertx.eventBus().send(ArtifactTraceUpdated, traceResult)

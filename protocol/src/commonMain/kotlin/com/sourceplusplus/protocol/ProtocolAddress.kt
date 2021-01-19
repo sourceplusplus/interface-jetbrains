@@ -47,6 +47,7 @@ object ProtocolAddress {
         const val ArtifactTraceUpdated = "ArtifactTraceUpdated"
         const val QueryTraceStack = "QueryTraceStack"
         const val ClickedStackTraceElement = "ClickedStackTraceElement"
+        const val FetchMoreTraces = "FetchMoreTraces"
 
         //Portal - Configuration
         const val DisplayArtifactConfiguration = "DisplayArtifactConfiguration"
