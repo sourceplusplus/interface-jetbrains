@@ -1,8 +1,9 @@
 package com.sourceplusplus.portal.page
 
-import com.sourceplusplus.portal.PortalPage
-import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
+import com.sourceplusplus.portal.IPortalPage
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
+import com.sourceplusplus.protocol.portal.PortalConfiguration
 
 /**
  * todo: description.
@@ -10,8 +11,9 @@ import com.sourceplusplus.protocol.artifact.QueryTimeFrame
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IOverviewPage : PortalPage {
+abstract class IOverviewPage : IPortalPage() {
+    override lateinit var configuration: PortalConfiguration
 
-    fun displayEndpoints(endpointResult: EndpointResult)
-    fun updateTime(interval: QueryTimeFrame)
+    abstract fun displayEndpoints(endpointResult: EndpointResult)
+    abstract fun updateTime(interval: QueryTimeFrame)
 }

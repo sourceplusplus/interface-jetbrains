@@ -17,7 +17,7 @@ import javax.swing.JComponent
  */
 class SourceMarkerConfigurable : Configurable {
 
-    private var form: PluginConfigurationDialog? = null
+    private var form: PluginConfigurationPanel? = null
     override fun getDisplayName(): String = "SourceMarker"
 
     override fun isModified(): Boolean {
@@ -50,7 +50,7 @@ class SourceMarkerConfigurable : Configurable {
             } else {
                 SourceMarkerConfig()
             }
-            form = PluginConfigurationDialog()
+            form = PluginConfigurationPanel()
             form!!.applySourceMarkerConfig(config)
         }
         return form!!.contentPane as JComponent

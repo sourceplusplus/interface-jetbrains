@@ -3,8 +3,8 @@ package com.sourceplusplus.portal.display
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayCard
 import com.sourceplusplus.portal.extensions.updateChart
-import com.sourceplusplus.portal.model.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
@@ -50,7 +50,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
     override suspend fun start() {
         vertx.setPeriodic(5000) {
             SourcePortal.getPortals().filter {
-                it.currentTab == PageType.ACTIVITY && (it.visible || it.configuration.external)
+                it.configuration.currentPage == PageType.ACTIVITY && (it.visible || it.configuration.external)
             }.forEach {
                 vertx.eventBus().send(RefreshActivity, it)
             }
@@ -61,7 +61,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             log.info("Activity tab opened")
             val portalUuid = it.body().getString("portalUuid")
             val portal = SourcePortal.getPortal(portalUuid)!!
-            portal.currentTab = thisTab
+            portal.configuration.currentPage = thisTab
             SourcePortal.ensurePortalActive(portal)
             updateUI(portal)
 
@@ -101,7 +101,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
     }
 
     override fun updateUI(portal: SourcePortal) {
-        if (portal.currentTab != thisTab) {
+        if (portal.configuration.currentPage != thisTab) {
             return
         }
 
