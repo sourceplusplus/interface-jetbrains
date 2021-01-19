@@ -49,7 +49,7 @@ SourceMarker is a JetBrains-powered plugin which provides continuous feedback ca
 | ----------------------------- | -------------------------------------------------------------------- | ------- |
 | :mapper                       | Tracks source code artifact refactoring                              | 0.1.1   |
 | :marker                       | Used to tie visual marks & popups to source code artifacts           | 0.1.1   |
-| :mentor                       | Produces source code artifact informative/cautionary advice          | 0.1.0   |
+| :mentor                       | Produces source code artifact informative/cautionary advice          | 0.1.1   |
 | :portal                       | Used to visually display contextualized artifact data/advice         | 0.1.1   |
 | :protocol                     | Common communication data models                                     | 0.1.1   |
 
