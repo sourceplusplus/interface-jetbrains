@@ -1,0 +1,37 @@
+query queryLogs($condition: LogQueryCondition) {
+    result: queryLogs(condition: $condition) {
+        logs {
+            serviceName
+            serviceId
+            serviceInstanceName
+            serviceInstanceId
+            endpointName
+            endpointId
+            traceId
+            timestamp
+            isError
+            statusCode
+            contentType
+            content
+            tags {
+                key
+                value
+            }
+        }
+    }
+}
+
+#{
+#"condition": {
+#"metricName": "log",
+#"state": "ALL",
+#"paging": {
+#"pageSize": 10
+#},
+#"queryDuration": {
+#"start": "2021-01-18 1145",
+#"end": "2021-01-20 1145",
+#"step": "MINUTE"
+#}
+#}
+#}

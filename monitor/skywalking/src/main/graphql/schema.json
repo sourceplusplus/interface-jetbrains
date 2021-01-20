@@ -50,6 +50,14 @@
                       "name": "Duration"
                     }
                   }
+                },
+                {
+                  "name": "group",
+                  "description": "",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String"
+                  }
                 }
               ],
               "type": {
@@ -572,6 +580,34 @@
               "isDeprecated": false
             },
             {
+              "name": "listMetrics",
+              "description": "Get the list of all available metrics in the current OAP server.\nParam, regex, could be used to filter the metrics by name.",
+              "args": [
+                {
+                  "name": "regex",
+                  "description": "",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String"
+                  }
+                }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "LIST",
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "MetricDefinition"
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false
+            },
+            {
               "name": "readMetricsValue",
               "description": "Read metrics single value in the duration of required metrics",
               "args": [
@@ -602,7 +638,7 @@
                 "kind": "NON_NULL",
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "Int"
+                  "name": "Long"
                 }
               },
               "isDeprecated": false
@@ -1519,6 +1555,19 @@
               "isDeprecated": false
             },
             {
+              "name": "supportQueryLogsByKeywords",
+              "description": "Return true if the current storage implementation supports fuzzy query for logs.",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
               "name": "queryLogs",
               "description": "",
               "args": [
@@ -1689,6 +1738,25 @@
                 }
               },
               "isDeprecated": false
+            },
+            {
+              "name": "queryBrowserErrorLogs",
+              "description": "",
+              "args": [
+                {
+                  "name": "condition",
+                  "description": "",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BrowserErrorLogQueryCondition"
+                  }
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "BrowserErrorLogs"
+              },
+              "isDeprecated": false
             }
           ],
           "interfaces": []
@@ -1707,6 +1775,11 @@
           "kind": "SCALAR",
           "name": "Int",
           "description": "Built-in Int"
+        },
+        {
+          "kind": "SCALAR",
+          "name": "Long",
+          "description": "Long type"
         },
         {
           "kind": "SCALAR",
@@ -1879,6 +1952,19 @@
             },
             {
               "name": "name",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "group",
               "description": "",
               "args": [],
               "type": {
@@ -2142,11 +2228,6 @@
           "interfaces": []
         },
         {
-          "kind": "SCALAR",
-          "name": "Long",
-          "description": "Long type"
-        },
-        {
           "kind": "OBJECT",
           "name": "ClusterBrief",
           "description": "Licensed to the Apache Software Foundation (ASF) under one\nor more contributor license agreements.  See the NOTICE file\ndistributed with this work for additional information\nregarding copyright ownership.  The ASF licenses this file\nto you under the Apache License, Version 2.0 (the\n\"License\"); you may not use this file except in compliance\nwith the License.  You may obtain a copy of the License at\n\nhttp://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\nQuery the cluster brief based on the given duration",
@@ -2351,6 +2432,50 @@
                     }
                   }
                 }
+              },
+              "isDeprecated": false
+            }
+          ],
+          "interfaces": []
+        },
+        {
+          "kind": "OBJECT",
+          "name": "MetricDefinition",
+          "description": "Define the metrics provided in the OAP server.",
+          "fields": [
+            {
+              "name": "name",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "type",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "MetricsType"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "catalog",
+              "description": "Catalog includes\nSERVICE_CATALOG,SERVICE_INSTANCE_CATALOG,ENDPOINT_CATALOG,\nSERVICE_RELATION_CATALOG,SERVICE_INSTANCE_RELATION_CATALOG_NAME,ENDPOINT_RELATION_CATALOG_NAME",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
               },
               "isDeprecated": false
             }
@@ -3183,6 +3308,46 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "Boolean"
+                }
+              },
+              "isDeprecated": false
+            }
+          ],
+          "interfaces": []
+        },
+        {
+          "kind": "OBJECT",
+          "name": "BrowserErrorLogs",
+          "description": "The list of browser error log",
+          "fields": [
+            {
+              "name": "logs",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "LIST",
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "BrowserErrorLog"
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "total",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int"
                 }
               },
               "isDeprecated": false
@@ -4137,6 +4302,22 @@
                 "name": "String"
               },
               "isDeprecated": false
+            },
+            {
+              "name": "tags",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "KeyValue"
+                  }
+                }
+              },
+              "isDeprecated": false
             }
           ],
           "interfaces": []
@@ -4430,6 +4611,152 @@
         },
         {
           "kind": "OBJECT",
+          "name": "BrowserErrorLog",
+          "description": "Represent the browser error log",
+          "fields": [
+            {
+              "name": "service",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "serviceVersion",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "time",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Long"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "pagePath",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "category",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "ErrorCategory"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "grade",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "message",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "line",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "col",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "stack",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "errorUrl",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "firstReportedError",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                }
+              },
+              "isDeprecated": false
+            }
+          ],
+          "interfaces": []
+        },
+        {
+          "kind": "OBJECT",
           "name": "Ref",
           "description": "Ref represents the link between the segment and its parents.\nThe parent(ref) may not exists, which means batch process.\nThe UI should display a list, representing the other trace IDs.",
           "fields": [
@@ -4491,7 +4818,7 @@
         {
           "kind": "OBJECT",
           "name": "KeyValue",
-          "description": "",
+          "description": "String key, String value pair.",
           "fields": [
             {
               "name": "key",
@@ -5072,6 +5399,20 @@
               }
             },
             {
+              "name": "tags",
+              "description": "Map to the tags included in the traces",
+              "type": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "SpanTag"
+                  }
+                }
+              }
+            },
+            {
               "name": "paging",
               "description": "",
               "type": {
@@ -5080,6 +5421,32 @@
                   "kind": "INPUT_OBJECT",
                   "name": "Pagination"
                 }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "SpanTag",
+          "description": "",
+          "inputFields": [
+            {
+              "name": "key",
+              "description": "",
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              }
+            },
+            {
+              "name": "value",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
               }
             }
           ]
@@ -5156,7 +5523,7 @@
               }
             },
             {
-              "name": "traceId",
+              "name": "endpointName",
               "description": "",
               "type": {
                 "kind": "SCALAR",
@@ -5164,8 +5531,16 @@
               }
             },
             {
+              "name": "relatedTrace",
+              "description": "Related trace condition.\nWhen use related trace condition, duration is not required.",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "TraceScopeCondition"
+              }
+            },
+            {
               "name": "queryDuration",
-              "description": "The time range of log happened",
+              "description": "The time range of log happened\n[Required] duration is required in most query, only exception is when use relatedTrace.",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "Duration"
@@ -5183,14 +5558,6 @@
               }
             },
             {
-              "name": "stateCode",
-              "description": "",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            {
               "name": "paging",
               "description": "",
               "type": {
@@ -5199,6 +5566,116 @@
                   "kind": "INPUT_OBJECT",
                   "name": "Pagination"
                 }
+              }
+            },
+            {
+              "name": "tags",
+              "description": "",
+              "type": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "LogTag"
+                  }
+                }
+              }
+            },
+            {
+              "name": "keywordsOfContent",
+              "description": "Fuzzy query conditions for the log content.\nUse these 2 keyword related condition, when supportQueryLogsByKeywords returns TRUE.",
+              "type": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String"
+                  }
+                }
+              }
+            },
+            {
+              "name": "excludingKeywordsOfContent",
+              "description": "",
+              "type": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String"
+                  }
+                }
+              }
+            },
+            {
+              "name": "queryOrder",
+              "description": "Order by timestamp, default desc",
+              "type": {
+                "kind": "ENUM",
+                "name": "Order"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "TraceScopeCondition",
+          "description": "Trace related condition",
+          "inputFields": [
+            {
+              "name": "traceId",
+              "description": "",
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              }
+            },
+            {
+              "name": "segmentId",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            {
+              "name": "spanId",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "LogTag",
+          "description": "",
+          "inputFields": [
+            {
+              "name": "key",
+              "description": "",
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              }
+            },
+            {
+              "name": "value",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
               }
             }
           ]
@@ -5227,6 +5704,72 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "Long"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "BrowserErrorLogQueryCondition",
+          "description": "Licensed to the Apache Software Foundation (ASF) under one\nor more contributor license agreements.  See the NOTICE file\ndistributed with this work for additional information\nregarding copyright ownership.  The ASF licenses this file\nto you under the Apache License, Version 2.0 (the\n\"License\"); you may not use this file except in compliance\nwith the License.  You may obtain a copy of the License at\n\nhttp://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\nRepresent the conditions used for query BrowserErrorLogBrief",
+          "inputFields": [
+            {
+              "name": "serviceId",
+              "description": "The value of 0 means all services.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID"
+              }
+            },
+            {
+              "name": "serviceVersionId",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID"
+              }
+            },
+            {
+              "name": "pagePathId",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID"
+              }
+            },
+            {
+              "name": "pagePath",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            {
+              "name": "category",
+              "description": "",
+              "type": {
+                "kind": "ENUM",
+                "name": "ErrorCategory"
+              }
+            },
+            {
+              "name": "queryDuration",
+              "description": "The time range of browser perf data time",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "Duration"
+              }
+            },
+            {
+              "name": "paging",
+              "description": "",
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "Pagination"
                 }
               }
             }
@@ -5545,6 +6088,48 @@
         },
         {
           "kind": "ENUM",
+          "name": "ErrorCategory",
+          "description": "",
+          "enumValues": [
+            {
+              "name": "ALL",
+              "description": "",
+              "isDeprecated": false
+            },
+            {
+              "name": "AJAX",
+              "description": "",
+              "isDeprecated": false
+            },
+            {
+              "name": "RESOURCE",
+              "description": "",
+              "isDeprecated": false
+            },
+            {
+              "name": "VUE",
+              "description": "",
+              "isDeprecated": false
+            },
+            {
+              "name": "PROMISE",
+              "description": "",
+              "isDeprecated": false
+            },
+            {
+              "name": "JS",
+              "description": "",
+              "isDeprecated": false
+            },
+            {
+              "name": "UNKNOWN",
+              "description": "",
+              "isDeprecated": false
+            }
+          ]
+        },
+        {
+          "kind": "ENUM",
           "name": "TemplateType",
           "description": "Licensed to the Apache Software Foundation (ASF) under one\nor more contributor license agreements.  See the NOTICE file\ndistributed with this work for additional information\nregarding copyright ownership.  The ASF licenses this file\nto you under the Apache License, Version 2.0 (the\n\"License\"); you may not use this file except in compliance\nwith the License.  You may obtain a copy of the License at\n\nhttp://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\nDashboard Configuration provides the management capabilities for SkyWalking native UI.",
           "enumValues": [
@@ -5670,7 +6255,7 @@
               "isDeprecated": false
             },
             {
-              "name": "NONE",
+              "name": "YAML",
               "description": "",
               "isDeprecated": false
             }
