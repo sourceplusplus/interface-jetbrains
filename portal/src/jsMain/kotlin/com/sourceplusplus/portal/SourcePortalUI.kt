@@ -2,10 +2,7 @@ package com.sourceplusplus.portal
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
-import com.sourceplusplus.portal.page.ActivityPage
-import com.sourceplusplus.portal.page.ConfigurationPage
-import com.sourceplusplus.portal.page.OverviewPage
-import com.sourceplusplus.portal.page.TracesPage
+import com.sourceplusplus.portal.page.*
 import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
@@ -13,6 +10,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalTranslations
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.log.LogOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
@@ -34,6 +32,7 @@ fun main() {
         val overviewPage = OverviewPage(portalUuid, eb)
         val activityPage = ActivityPage(portalUuid, eb)
         val tracesPage = TracesPage(portalUuid, eb)
+        val logsPage = LogsPage(portalUuid, eb)
         val configurationPage = ConfigurationPage(portalUuid, eb)
 
         console.log("Connecting portal")
@@ -41,7 +40,6 @@ fun main() {
             console.log("Portal connected")
             eb.send(GetPortalTranslations, null) { _, message: dynamic ->
                 val portalTranslations = Json.decodeFromDynamic<Map<String, String>>(message.body)
-                console.log(portalTranslations)
                 PortalBundle.messageTranslator = PortalMessageTranslator { key -> portalTranslations[key] }
             }
             eb.send(GetPortalConfiguration, portalUuid) { _, message: dynamic ->
@@ -51,6 +49,7 @@ fun main() {
                     PageType.OVERVIEW -> overviewPage
                     PageType.ACTIVITY -> activityPage
                     PageType.TRACES -> tracesPage
+                    PageType.LOGS -> logsPage
                     PageType.CONFIGURATION -> configurationPage
                 }
                 document.getElementsByTagName("head")[0]!!.append {
@@ -72,6 +71,7 @@ fun main() {
                     PageType.OVERVIEW -> overviewPage
                     PageType.ACTIVITY -> activityPage
                     PageType.TRACES -> tracesPage
+                    PageType.LOGS -> logsPage
                     PageType.CONFIGURATION -> configurationPage
                 }
                 document.getElementsByTagName("head")[0]!!.append {
@@ -150,6 +150,13 @@ fun clickedTracesOrderType(eb: EventBus, portalUuid: String, traceOrderType: Tra
     eb.publish(
         ProtocolAddress.Global.SetTraceOrderType,
         json("portalUuid" to portalUuid, "traceOrderType" to traceOrderType.name)
+    )
+}
+
+fun clickedLogsOrderType(eb: EventBus, portalUuid: String, orderType: LogOrderType) {
+    eb.publish(
+        ProtocolAddress.Global.SetLogOrderType,
+        json("portalUuid" to portalUuid, "logOrderType" to orderType.name)
     )
 }
 

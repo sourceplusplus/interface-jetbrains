@@ -2,6 +2,7 @@ package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.PortalBundle.translate
+import com.sourceplusplus.portal.clickedLogsOrderType
 import com.sourceplusplus.portal.clickedTracesOrderType
 import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
@@ -23,6 +24,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PageType.*
@@ -90,14 +93,20 @@ class TracesPage(
                 if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
                     setCurrentPage(eb, portalUuid, ACTIVITY)
                 })
-                if (configuration.visibleTraces) navItem(TRACES, isActive = true, null) {
+                if (configuration.visibleTraces) navItem(TRACES, true, block = {
                     navSubItems(
                         PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, portalUuid, LATEST_TRACES) },
                         PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, portalUuid, SLOWEST_TRACES) },
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
                     )
-                }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true, onClick = {
+                })
+                if (configuration.visibleLogs) navItem(LOGS, block = {
+                    navSubItems(
+                        PortalNavSubItem(NEWEST_LOGS) { clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS) },
+                        PortalNavSubItem(OLDEST_LOGS) { clickedLogsOrderType(eb, portalUuid, OLDEST_LOGS) }
+                    )
+                })
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
                     setCurrentPage(eb, portalUuid, CONFIGURATION)
                 })
             }
