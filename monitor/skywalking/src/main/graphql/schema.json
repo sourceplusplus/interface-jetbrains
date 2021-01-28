@@ -5491,14 +5491,6 @@
           "description": "Represent the conditions used for query logs",
           "inputFields": [
             {
-              "name": "metricName",
-              "description": "Metric name of the log records",
-              "type": {
-                "kind": "SCALAR",
-                "name": "ID"
-              }
-            },
-            {
               "name": "serviceId",
               "description": "The value of 0 means all services.",
               "type": {

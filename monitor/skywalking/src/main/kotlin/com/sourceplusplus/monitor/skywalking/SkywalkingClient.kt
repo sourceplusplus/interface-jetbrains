@@ -9,6 +9,7 @@ import com.sourceplusplus.monitor.skywalking.model.GetMultipleEndpointMetrics
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
+import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
@@ -18,7 +19,7 @@ import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.*
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
+import java.io.IOException
 import java.time.ZoneOffset.ofHours
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -68,7 +69,7 @@ class SkywalkingClient(
         val response = apolloClient.query(QueryTraceQuery(traceId)).await()
         if (response.hasErrors()) {
             response.errors!!.forEach { log.error(it.message) }
-            throw RuntimeException(response.errors!![0].message)
+            throw IOException(response.errors!![0].message)
         } else {
             return response.data!!.result
         }
@@ -91,7 +92,7 @@ class SkywalkingClient(
         ).await()
         if (response.hasErrors()) {
             response.errors!!.forEach { log.error(it.message) }
-            throw RuntimeException(response.errors!![0].message)
+            throw IOException(response.errors!![0].message)
         } else {
             return response.data!!.result
         }
@@ -107,7 +108,7 @@ class SkywalkingClient(
         ).await()
         if (response.hasErrors()) {
             response.errors!!.forEach { log.error(it.message) }
-            throw RuntimeException(response.errors!![0].message)
+            throw IOException(response.errors!![0].message)
         } else {
             return response.data!!.result
         }
@@ -128,7 +129,7 @@ class SkywalkingClient(
         ).await()
         if (response.hasErrors()) {
             response.errors!!.forEach { log.error(it.message) }
-            throw RuntimeException(response.errors!![0].message)
+            throw IOException(response.errors!![0].message)
         } else {
             return response.data!!.result
         }
@@ -140,7 +141,19 @@ class SkywalkingClient(
         ).await()
         if (response.hasErrors()) {
             response.errors!!.forEach { log.error(it.message) }
-            throw RuntimeException(response.errors!![0].message)
+            throw IOException(response.errors!![0].message)
+        } else {
+            return response.data!!.result
+        }
+    }
+
+    suspend fun queryLogs(condition: LogQueryCondition): QueryLogsQuery.Result? {
+        val response = apolloClient.query(
+            QueryLogsQuery(Input.optional(condition))
+        ).await()
+        if (response.hasErrors()) {
+            response.errors!!.forEach { log.error(it.message) }
+            throw IOException(response.errors!![0].message)
         } else {
             return response.data!!.result
         }
@@ -152,7 +165,7 @@ class SkywalkingClient(
         ).await()
         if (response.hasErrors()) {
             response.errors!!.forEach { log.error(it.message) }
-            throw RuntimeException(response.errors!![0].message)
+            throw IOException(response.errors!![0].message)
         } else {
             return response.data!!.result
         }
@@ -164,7 +177,7 @@ class SkywalkingClient(
         ).await()
         if (response.hasErrors()) {
             response.errors!!.forEach { log.error(it.message) }
-            throw RuntimeException(response.errors!![0].message)
+            throw IOException(response.errors!![0].message)
         } else {
             return response.data!!.result
         }

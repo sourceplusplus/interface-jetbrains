@@ -33,6 +33,7 @@ import com.sourceplusplus.portal.backend.PortalServer
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
@@ -52,9 +53,6 @@ import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import io.vertx.kotlin.core.deployVerticleAwait
-import io.vertx.kotlin.core.http.listenAwait
-import io.vertx.kotlin.core.undeployAwait
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
@@ -90,6 +88,7 @@ object SourceMarkerPlugin {
         vertx.eventBus().registerDefaultCodec(EndpointResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(JvmStackTraceElement::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
+        vertx.eventBus().registerDefaultCodec(LogResult::class.java, LocalMessageCodec())
 
         val module = SimpleModule()
         module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
@@ -128,7 +127,7 @@ object SourceMarkerPlugin {
                 //remove non-code packages
                 basePackages = basePackages!!.filter {
                     it.qualifiedName != "asciidoc" && it.qualifiedName != "lib"
-                }.toTypedArray()
+                }.toTypedArray() //todo: probably shouldn't be necessary
 
                 //determine deepest common source package
                 if (basePackages.isNotEmpty()) {
@@ -186,13 +185,13 @@ object SourceMarkerPlugin {
             clearMarkers.complete()
         }
 
-        deploymentIds.forEach { vertx.undeployAwait(it) }
+        deploymentIds.forEach { vertx.undeploy(it).await() }
         deploymentIds.clear()
         clearMarkers.future().await()
     }
 
     private suspend fun initMonitor(config: SourceMarkerConfig) {
-        deploymentIds.add(vertx.deployVerticleAwait(SkywalkingMonitor(config.skywalkingOapUrl)))
+        deploymentIds.add(vertx.deployVerticle(SkywalkingMonitor(config.skywalkingOapUrl)).await())
     }
 
     private fun initMapper() {
@@ -237,7 +236,7 @@ object SourceMarkerPlugin {
             log.warn("Could not determine root source package. Skipped adding ActiveExceptionMentor...")
         }
 
-        deploymentIds.add(vertx.deployVerticleAwait(mentor))
+        deploymentIds.add(vertx.deployVerticle(mentor).await())
         return mentor
     }
 
@@ -253,11 +252,11 @@ object SourceMarkerPlugin {
         router.route("/eventbus/*").handler(sockJSHandler)
         val bridgePort = vertx.sharedData().getLocalMap<String, Int>("portal")
             .getOrDefault("bridge.port", 0)
-        val bridgeServer = vertx.createHttpServer().requestHandler(router).listenAwait(bridgePort, "localhost")
+        val bridgeServer = vertx.createHttpServer().requestHandler(router).listen(bridgePort, "localhost").await()
 
         //todo: load portal config (custom themes, etc)
-        deploymentIds.add(vertx.deployVerticleAwait(PortalServer(bridgeServer.actualPort())))
-        deploymentIds.add(vertx.deployVerticleAwait(PortalEventListener()))
+        deploymentIds.add(vertx.deployVerticle(PortalServer(bridgeServer.actualPort())).await())
+        deploymentIds.add(vertx.deployVerticle(PortalEventListener()).await())
     }
 
     private fun initMarker(config: SourceMarkerConfig) {
