@@ -65,6 +65,7 @@ class SourceMentor : CoroutineVerticle() {
             if (jobsWhichRequireTask.isEmpty()) continue
 
             //search still valid tasks for current task
+            var taskComplete = false
             var reusingTask = false
             val stillValidTask = stillValidTasks.find { it.task == currentTask }
             if (stillValidTask != null) {
@@ -76,27 +77,43 @@ class SourceMentor : CoroutineVerticle() {
                     jobsWhichRequireTask[0].trace("Copied cached context for task: $currentTask")
                     jobsWhichRequireTask[0].emitEvent(MentorJobEvent.CONTEXT_REUSED, currentTask)
                 } else {
-                    executeTask(jobsWhichRequireTask[0], currentTask)
+                    taskComplete = executeTask(jobsWhichRequireTask[0], currentTask)
                 }
             } else {
-                executeTask(jobsWhichRequireTask[0], currentTask)
+                taskComplete = executeTask(jobsWhichRequireTask[0], currentTask)
             }
 
-            if (!reusingTask && currentTask.asyncTask) {
+            if (taskComplete && !reusingTask && currentTask.asyncTask) {
                 currentTask.getAsyncFuture().onComplete {
                     jobsWhichRequireTask[0].trace("Executed task: $currentTask")
                     handleTaskCompletion(jobsWhichRequireTask, currentTask)
                 }
-            } else {
+            } else if (taskComplete) {
                 handleTaskCompletion(jobsWhichRequireTask, currentTask)
             }
         }
     }
 
-    private suspend fun executeTask(job: MentorJob, task: MentorTask) {
-        if (!running) return
+    private suspend fun executeTask(job: MentorJob, task: MentorTask): Boolean {
+        if (!running) return false
         job.trace("Executing task: $task")
-        task.executeTask(job)
+        try {
+            task.executeTask(job)
+        } catch (throwable: Throwable) {
+            job.error("Failed task: $task", throwable)
+            job.emitEvent(MentorJobEvent.TASK_FAILED, mapOf("task" to task, "failure" to throwable))
+
+            //reschedule complete jobs (if necessary)
+            if (job.config.repeatForever) {
+                job.resetJob()
+                job.emitEvent(MentorJobEvent.JOB_RESCHEDULED)
+                addTask(job.nextTask())
+            } else {
+                job.complete()
+                jobList.remove(job)
+            }
+            return false
+        }
         if (!task.asyncTask) {
             job.trace("Executed task: $task")
         }
@@ -113,6 +130,7 @@ class SourceMentor : CoroutineVerticle() {
                 job.trace("Removed cached task: $task")
             }
         }
+        return true
     }
 
     private fun handleTaskCompletion(

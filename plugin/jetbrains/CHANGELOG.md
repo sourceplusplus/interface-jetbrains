@@ -8,6 +8,7 @@
 - Implement localization bundling ([#288](https://github.com/sourceplusplus/SourceMarker/issues/288))
 - Implemented logging portal page
 - Implement localization bundling
+- Mentor task retry logic
 
 ### Changed
 - Single page portal ([#254](https://github.com/sourceplusplus/SourceMarker/issues/254))
