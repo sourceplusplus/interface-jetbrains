@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-query getTimeInfo{
+query getTimeInfo {
     result: getTimeInfo {
         timezone, currentTimestamp
     }
