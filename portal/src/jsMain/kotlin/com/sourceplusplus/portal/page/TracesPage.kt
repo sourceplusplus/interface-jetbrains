@@ -533,7 +533,6 @@ class TracesPage(
                 jq("#span_info_header").removeClass("active")
                     .css("visibility", "hidden")
 
-                jq("#top_trace_table").css("display", "none")
                 jq("#trace_stack_table").css("visibility", "visible")
                 jq("#traces_span").css("display", "none")
 

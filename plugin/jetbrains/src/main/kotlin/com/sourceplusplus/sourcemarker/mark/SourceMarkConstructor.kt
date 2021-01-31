@@ -66,7 +66,7 @@ object SourceMarkConstructor {
                 return gutterMark
             }
             AdviceType.ActiveExceptionAdvice -> {
-                val inlayMark = getOrCreateExpressionInlayMark(
+                val inlayMark = getOrCreateExpressionInlayMark( //todo: npe here on code changes
                     fileMarker, advice.artifact.lineNumber!!
                 )!!
                 if (!fileMarker.containsSourceMark(inlayMark)) {

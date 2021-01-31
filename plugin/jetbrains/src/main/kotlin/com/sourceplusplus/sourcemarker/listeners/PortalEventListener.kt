@@ -213,6 +213,8 @@ class PortalEventListener(
                 message.getJsonObject("stackTraceElement").toString(),
                 JvmStackTraceElement::class.java
             )
+            log.info("Clicked stack trace element: $element")
+
             val project = ProjectManager.getInstance().openProjects[0]
             ArtifactNavigator.navigateTo(project, element)
         }

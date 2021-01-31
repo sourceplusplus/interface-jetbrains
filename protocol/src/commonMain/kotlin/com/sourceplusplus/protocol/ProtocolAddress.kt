@@ -54,6 +54,8 @@ object ProtocolAddress {
         const val SetLogOrderType = "SetLogOrderType"
         const val RefreshLogs = "RefreshLogs"
         const val ArtifactLogUpdated = "ArtifactLogUpdated"
+        const val ClickedDisplayLog = "ClickedDisplayLog"
+        const val ClickedDisplayLogs = "ClickedDisplayLogs"
 
         //Portal - Configuration
         const val DisplayArtifactConfiguration = "DisplayArtifactConfiguration"
@@ -89,6 +91,10 @@ object ProtocolAddress {
 
         fun DisplayLogs(portalUuid: String): String {
             return "$portalUuid-DisplayLogs"
+        }
+
+        fun DisplayLog(portalUuid: String): String {
+            return "$portalUuid-DisplayLog"
         }
 
         fun DisplayTraceStack(portalUuid: String): String {

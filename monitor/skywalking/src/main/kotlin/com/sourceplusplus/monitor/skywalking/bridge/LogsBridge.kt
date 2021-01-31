@@ -4,6 +4,7 @@ import com.apollographql.apollo.api.Input
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.LocalMessageCodec
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
+import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.artifact.log.Log
 import com.sourceplusplus.protocol.artifact.log.LogOrderType
 import com.sourceplusplus.protocol.artifact.log.LogResult
@@ -15,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.type.LogQueryCondition
-import monitor.skywalking.protocol.type.LogState
 import monitor.skywalking.protocol.type.Pagination
 
 /**
@@ -42,7 +42,6 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                         LogQueryCondition(
                             //endpointId = Input.optional(request.endpointId),
                             queryDuration = Input.optional(request.zonedDuration.toDuration(skywalkingClient)),
-                            state = LogState.ALL,
                             paging = Pagination(pageSize = 10)
                         )
                     )
@@ -52,9 +51,16 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                                 orderType = request.orderType,
                                 timestamp = Clock.System.now(),
                                 logs = logs.logs.map {
+                                    val exceptionStr = it.tags?.find { it.key == "exception" }?.value
                                     Log(
                                         Instant.fromEpochMilliseconds(it.timestamp.toLong()),
-                                        it.content.orEmpty()
+                                        it.content.orEmpty(),
+                                        level = it.tags!!.find { it.key == "level" }?.value!!,
+                                        logger = it.tags.find { it.key == "logger" }?.value,
+                                        thread = it.tags.find { it.key == "thread" }?.value,
+                                        arguments = it.tags.filter { it.key.startsWith("argument.") }
+                                            .mapNotNull { it.value },
+                                        exception = if (exceptionStr != null) JvmStackTrace.fromString(exceptionStr) else null
                                     )
                                 })
                         )
