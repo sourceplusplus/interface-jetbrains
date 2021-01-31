@@ -4,8 +4,8 @@ import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointMetrics
 import com.sourceplusplus.monitor.skywalking.model.GetMultipleEndpointMetrics
 import io.vertx.core.Vertx
-import io.vertx.kotlin.core.eventbus.requestAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
@@ -59,8 +59,8 @@ class EndpointMetricsBridge(private val skywalkingClient: SkywalkingClient) : Co
 
         suspend fun getMetrics(request: GetEndpointMetrics, vertx: Vertx): List<GetLinearIntValuesQuery.Result> {
             return vertx.eventBus()
-                .requestAwait<List<GetLinearIntValuesQuery.Result>>(getMetricsAddress, request)
-                .body()
+                .request<List<GetLinearIntValuesQuery.Result>>(getMetricsAddress, request)
+                .await().body()
         }
 
         suspend fun getMultipleMetrics(
@@ -68,8 +68,8 @@ class EndpointMetricsBridge(private val skywalkingClient: SkywalkingClient) : Co
             vertx: Vertx
         ): List<GetMultipleLinearIntValuesQuery.Result> {
             return vertx.eventBus()
-                .requestAwait<List<GetMultipleLinearIntValuesQuery.Result>>(getMultipleMetricsAddress, request)
-                .body()
+                .request<List<GetMultipleLinearIntValuesQuery.Result>>(getMultipleMetricsAddress, request)
+                .await().body()
         }
     }
 }
