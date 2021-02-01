@@ -4,8 +4,8 @@ import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.DurationStep
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.MessageConsumer
-import io.vertx.kotlin.core.eventbus.requestAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
@@ -77,20 +77,20 @@ class ServiceInstanceBridge(private val skywalkingClient: SkywalkingClient) : Co
 
         suspend fun getCurrentServiceInstance(vertx: Vertx): GetServiceInstancesQuery.Result? {
             return vertx.eventBus()
-                .requestAwait<GetServiceInstancesQuery.Result?>(getCurrentServiceInstanceAddress, null)
-                .body()
+                .request<GetServiceInstancesQuery.Result?>(getCurrentServiceInstanceAddress, null)
+                .await().body()
         }
 
         suspend fun getActiveServiceInstances(vertx: Vertx): List<GetServiceInstancesQuery.Result> {
             return vertx.eventBus()
-                .requestAwait<List<GetServiceInstancesQuery.Result>>(getActiveServiceInstancesAddress, null)
-                .body()
+                .request<List<GetServiceInstancesQuery.Result>>(getActiveServiceInstancesAddress, null)
+                .await().body()
         }
 
         suspend fun getServiceInstances(serviceId: String, vertx: Vertx): List<GetServiceInstancesQuery.Result> {
             return vertx.eventBus()
-                .requestAwait<List<GetServiceInstancesQuery.Result>>(getServiceInstances, serviceId)
-                .body()
+                .request<List<GetServiceInstancesQuery.Result>>(getServiceInstances, serviceId)
+                .await().body()
         }
     }
 }

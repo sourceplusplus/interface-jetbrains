@@ -1,4 +1,4 @@
 jdk: openjdk11
 
 install:
-- ./gradlew build -x test install
+- ./gradlew build publishToMavenLocal -x check -x test -x compileKotlinJs

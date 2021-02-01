@@ -1,5 +1,20 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
+    id("maven-publish")
+}
+
+val pluginGroup: String by project
+val markerVersion: String by project
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = pluginGroup
+            artifactId = "marker"
+            version = markerVersion
+
+            from(components["java"])
+        }
+    }
 }
 
 repositories {
@@ -9,7 +24,7 @@ repositories {
 
 dependencies {
     val intellijVersion = "202.7660.26"
-    val kotlinVersion = "1.4.10"
+    val kotlinVersion = "1.4.21"
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:29.0-jre")

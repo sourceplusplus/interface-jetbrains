@@ -4261,26 +4261,6 @@
               "isDeprecated": false
             },
             {
-              "name": "isError",
-              "description": "",
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean"
-              },
-              "isDeprecated": false
-            },
-            {
-              "name": "statusCode",
-              "description": "",
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String"
-              },
-              "isDeprecated": false
-            },
-            {
               "name": "contentType",
               "description": "",
               "args": [],
@@ -5539,17 +5519,6 @@
               }
             },
             {
-              "name": "state",
-              "description": "",
-              "type": {
-                "kind": "NON_NULL",
-                "ofType": {
-                  "kind": "ENUM",
-                  "name": "LogState"
-                }
-              }
-            },
-            {
               "name": "paging",
               "description": "",
               "type": {
@@ -6051,28 +6020,6 @@
             },
             {
               "name": "BY_DURATION",
-              "description": "",
-              "isDeprecated": false
-            }
-          ]
-        },
-        {
-          "kind": "ENUM",
-          "name": "LogState",
-          "description": "",
-          "enumValues": [
-            {
-              "name": "ALL",
-              "description": "",
-              "isDeprecated": false
-            },
-            {
-              "name": "SUCCESS",
-              "description": "",
-              "isDeprecated": false
-            },
-            {
-              "name": "ERROR",
               "description": "",
               "isDeprecated": false
             }

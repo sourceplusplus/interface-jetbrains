@@ -107,6 +107,9 @@ class EndpointDetector {
         return promise.future()
     }
 
+    /**
+     * todo: description.
+     */
     interface EndpointNameDeterminer {
         fun determineEndpointName(uMethod: UMethod): Future<Optional<String>>
     }

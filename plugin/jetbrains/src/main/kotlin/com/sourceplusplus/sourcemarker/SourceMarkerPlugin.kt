@@ -252,6 +252,9 @@ object SourceMarkerPlugin {
         router.route("/eventbus/*").handler(sockJSHandler)
         val bridgePort = vertx.sharedData().getLocalMap<String, Int>("portal")
             .getOrDefault("bridge.port", 0)
+        if (bridgePort != 0) {
+            log.info("Starting bridge server on port: {}", bridgePort)
+        }
         val bridgeServer = vertx.createHttpServer().requestHandler(router).listen(bridgePort, "localhost").await()
 
         //todo: load portal config (custom themes, etc)

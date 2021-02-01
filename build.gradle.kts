@@ -1,12 +1,13 @@
 plugins {
     id("com.avast.gradle.docker-compose") version "0.13.4"
 
-    val kotlinVersion = "1.4.10"
+    val kotlinVersion = "1.4.21"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("multiplatform") version kotlinVersion apply false
     kotlin("js") version kotlinVersion apply false
 
     id("io.gitlab.arturbosch.detekt") version "1.14.2"
+    id("maven-publish")
 }
 
 val pluginGroup: String by project
@@ -36,6 +37,7 @@ subprojects {
         maven(url = "https://jitpack.io")
     }
 
+    apply<MavenPublishPlugin>()
     apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
     tasks {
         withType<io.gitlab.arturbosch.detekt.Detekt> {

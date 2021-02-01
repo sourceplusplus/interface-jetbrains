@@ -5,12 +5,20 @@ import com.sourceplusplus.portal.*
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
-import com.sourceplusplus.portal.model.*
+import com.sourceplusplus.portal.model.LogTableType.*
 import com.sourceplusplus.portal.template.*
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLog
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLogs
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
+import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
-import com.sourceplusplus.protocol.artifact.log.LogOrderType.*
+import com.sourceplusplus.protocol.artifact.log.Log
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.log.LogResult
+import com.sourceplusplus.protocol.artifact.log.LogViewType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
@@ -20,6 +28,7 @@ import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.dom.create
+import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.tr
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
@@ -27,6 +36,7 @@ import moment
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
+import kotlin.js.json
 
 /**
  * todo: description.
@@ -44,6 +54,9 @@ class LogsPage(
             setup = true
             eb.registerHandler(DisplayLogs(portalUuid)) { _: dynamic, message: dynamic ->
                 displayLogs(Json.decodeFromDynamic(message.body))
+            }
+            eb.registerHandler(DisplayLog(portalUuid)) { _: dynamic, message: dynamic ->
+                displayLog(Json.decodeFromDynamic(message.body))
             }
         }
         eb.send(RefreshPortal, portalUuid)
@@ -84,21 +97,34 @@ class LogsPage(
             }
             portalContent {
                 navBar {
+                    a(classes = "marginlefting ui item dropdown active_sub_tab") {
+                        id = "logs_view_header"
+                        onClickFunction = {
+                            eb.send(ClickedDisplayLogs, json("portalUuid" to portalUuid))
+                        }
+                        span {
+                            id = "logs_view_header_text"
+                            +PortalBundle.translate(LogViewType.LIVE_TAIL.description)
+                        }
+                    }
                     rightAlign {
                         externalPortalButton { clickedViewAsExternalPortal(eb, portalUuid) }
                     }
                 }
                 wideColumn {
+//                    table(
+//                        "secondary_background_color no_top_margin",
+//                        "log_pattern_table", "log_pattern_table_body",
+//                        tableTypes = arrayOf(PATTERN, LEVEL, OCCURRED)
+//                    )
                     table(
                         "secondary_background_color no_top_margin",
-                        "log_pattern_table", "log_pattern_table_body",
-                        tableTypes = arrayOf(LogTableType.PATTERN, LogTableType.OCCURRED)
-                    )
-                    table(
-                        "secondary_background_color no_top_margin hidden_full_height",
                         "log_operation_table", "log_operation_table_body",
-                        tableTypes = arrayOf(LogTableType.OPERATION, LogTableType.OCCURRED)
+                        tableTypes = arrayOf(OPERATION, LEVEL, OCCURRED)
                     )
+                    div("visibility_hidden") {
+                        id = "log_info_panel"
+                    }
                 }
             }
         }
@@ -107,46 +133,166 @@ class LogsPage(
     }
 
     fun setupUI() {
-        window.setInterval({ updateOccurredLabels() }, 2000)
+        resetUI(LogViewType.LIVE_TAIL)
+
+        @Suppress("UNUSED_VARIABLE") val logScrollConfig = json(
+            "once" to false, "observeChanges" to true,
+            "onTopVisible" to {
+                if (jq("#log_operation_table")[0].rows.length >= 10) {
+                    eb.send(FetchMoreLogs, json("portalUuid" to portalUuid, "pageNumber" to 1))
+                }
+            },
+            "onBottomVisible" to {
+                if (jq("#log_operation_table")[0].rows.length >= 10) {
+                    eb.send(FetchMoreLogs, json("portalUuid" to portalUuid))
+                }
+            }
+        )
+        js("\$('#log_operation_table').visibility(logScrollConfig)")
+
+        window.setInterval({ updateOccurredLabels(".log_time") }, 2000)
     }
 
     fun displayLogs(logResult: LogResult) {
         console.log("Displaying ${logResult.logs.size} logs")
+        resetUI(LogViewType.LIVE_TAIL)
 
-        jq("#log_pattern_table tbody tr").remove()
+        jq("#log_operation_table tbody tr").remove()
         for (i in logResult.logs.indices) {
-            val trace = logResult.logs[i]
+            val log = logResult.logs[i]
+
+            var arg = 0
+            var formattedMessage = log.content
+            while (formattedMessage.contains("{}")) {
+                formattedMessage = formattedMessage.replaceFirst(
+                    "{}",
+                    "<b class='spp_red_color'>" + log.arguments[arg++] + "</b>"
+                )
+            }
+
             val rowHtml = document.create.tr {
-                td {
-                    +trace.content
+                onClickFunction = {
+                    clickedDisplayLog(log)
                 }
 
-                val occurred = trace.timestamp.toMoment()
+                if (log.exception != null) classes += "negative"
+                td {
+                    unsafe {
+                        +formattedMessage
+                    }
+                }
+                td {
+                    classes += "collapsing"
+                    +log.level
+                }
+
+                val occurred = log.timestamp.toMoment()
                 val now = moment(moment.now())
                 val timeOccurredDuration = moment.duration(now.diff(occurred))
                 td {
                     classes = setOf("log_time", "collapsing")
-                    attributes["data-sort-value"] = trace.timestamp.toEpochMilliseconds().toString()
-                    attributes["data-value"] = trace.timestamp.toEpochMilliseconds().toString()
+                    attributes["data-sort-value"] = log.timestamp.toEpochMilliseconds().toString()
+                    attributes["data-value"] = log.timestamp.toEpochMilliseconds().toString()
                     style = "text-align: center"
                     +timeOccurredDuration.toPrettyDuration(1)
                 }
             }
-            jq("#log_pattern_table").append(rowHtml)
+            jq("#log_operation_table").append(rowHtml)
         }
 
         //force AOT update
-        updateOccurredLabels()
+        updateOccurredLabels(".log_time")
     }
 
-    private fun updateOccurredLabels() {
-        jq(".log_time").each(fun(_: Int, traceTime: HTMLElement) {
-            if (!traceTime.dataset["value"].isNullOrEmpty()) {
-                val occurred = moment(traceTime.dataset["value"]!!, "x")
-                val now = moment(moment.now())
-                val timeOccurredDuration = moment.duration(now.diff(occurred))
-                traceTime.innerText = timeOccurredDuration.toPrettyDuration(1)
+    private fun displayLog(log: Log) {
+        console.log("Displaying log")
+        resetUI(LogViewType.INDIVIDUAL_LOG)
+
+        val logInfo: Element = document.getElementById("log_info_panel")!!
+        logInfo.innerHTML = ""
+        logInfo.append {
+            div("ui segments") {
+                div("ui segment span_segment_background") {
+                    p {
+                        b { +"Message: ${log.getFormattedMessage()}" }
+                        br
+                    }
+                    p {
+                        span {
+                            +("Level: " + log.level)
+                            br
+                            +("Logger: " + log.logger)
+                            br
+                            +("Thread: " + log.thread)
+                        }
+                    }
+                }
+
+                if (log.exception != null) {
+                    br
+                    val stackTrace = log.exception!!
+                    span {
+                        h5("ui top attached header") {
+                            span("spp_red_color") { +stackTrace.exceptionType }
+                            if (stackTrace.message != null) {
+                                br
+                                +stackTrace.message!!
+                            }
+                        }
+                    }
+                    div("ui attached segment") {
+                        style = "word-break: break-word"
+
+                        for ((i, el) in stackTrace.getElements(true).withIndex()) {
+                            span {
+                                if (i > 0) br
+                                unsafe { +"&emsp;" }
+                                if (el.sourceAsLineNumber != null) {
+                                    a {
+                                        onClickFunction = {
+                                            eb.send(
+                                                ClickedStackTraceElement, json(
+                                                    "portalUuid" to portalUuid,
+                                                    "stackTraceElement" to el
+                                                )
+                                            )
+                                        }
+                                        href = "javascript:void(0);"
+                                        +el.toString(true)
+                                    }
+                                } else {
+                                    +el.toString(true)
+                                }
+                            }
+                        }
+                    }
+                }
             }
-        })
+        }
+    }
+
+    private fun clickedDisplayLog(log: Log) {
+        eb.send(ClickedDisplayLog, json("portalUuid" to portalUuid, "log" to log))
+    }
+
+    private fun resetUI(viewType: LogViewType) {
+        when (viewType) {
+            LogViewType.LIVE_TAIL -> {
+                jq("#log_operation_table").css("display", "")
+                jq("#log_info_panel").css("display", "none")
+                    .css("visibility", "hidden")
+
+                jq("#logs_view_header").addClass("active_sub_tab")
+                    .removeClass("inactive_tab")
+            }
+            LogViewType.INDIVIDUAL_LOG -> {
+                jq("#log_operation_table").css("display", "none")
+                jq("#log_info_panel").css("display", "")
+                    .css("visibility", "visible")
+
+                jq("#logs_view_header").removeClass("active_sub_tab")
+                    .addClass("inactive_tab")
+            }
+        }
     }
 }

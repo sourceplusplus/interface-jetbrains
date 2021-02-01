@@ -11,6 +11,7 @@ enum class LogTableType(
 ) : TableType {
     OPERATION(false),
     PATTERN(false),
+    LEVEL(false),
     OCCURRED(true);
 
     override val description = name.toLowerCase().capitalize()

@@ -2,6 +2,7 @@ package com.sourceplusplus.portal
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
+import com.sourceplusplus.portal.extensions.toPrettyDuration
 import com.sourceplusplus.portal.page.*
 import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
@@ -20,6 +21,8 @@ import kotlinx.html.dom.append
 import kotlinx.html.js.link
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
+import moment
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import kotlin.js.json
 
@@ -167,6 +170,17 @@ fun setActiveTime(interval: QueryTimeFrame) {
     jq("#last_hour_time").removeClass("active")
     jq("#last_3_hours_time").removeClass("active")
     jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
+}
+
+fun updateOccurredLabels(label: String) {
+    jq(label).each(fun(_: Int, traceTime: HTMLElement) {
+        if (!traceTime.dataset["value"].isNullOrEmpty()) {
+            val occurred = moment(traceTime.dataset["value"]!!, "x")
+            val now = moment(moment.now())
+            val timeOccurredDuration = moment.duration(now.diff(occurred))
+            traceTime.innerText = timeOccurredDuration.toPrettyDuration(1)
+        }
+    })
 }
 
 external fun decodeURIComponent(encodedURI: String): String
