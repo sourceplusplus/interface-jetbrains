@@ -18,18 +18,17 @@ class SourceMapperImpl(private val mapper: GitRepositoryMapper) : SourceMapper {
     override fun getMethodQualifiedName(
         methodQualifiedName: ArtifactQualifiedName,
         targetCommitId: String,
-        returnBestEffort: Boolean,
-        forward: Boolean
+        returnBestEffort: Boolean
     ): Optional<ArtifactQualifiedName> {
         val methodRenames = LogFollowCommand(
             mapper.targetRepo, LocalArtifact(
                 methodQualifiedName, mapper.cacheThing[methodQualifiedName.identifier]!!
-            ), forward, targetCommitId //todo: determine if target id is before or after (set forward)
+            ), targetCommitId
         ).call()
         val possibleName = methodRenames.lastOrNull()
         return if (possibleName != null && possibleName.artifactQualifiedName.commitId == targetCommitId) {
             Optional.of(possibleName.artifactQualifiedName)
-        } else if (returnBestEffort && methodRenames.isNotEmpty()){
+        } else if (returnBestEffort && methodRenames.isNotEmpty()) {
             Optional.of(methodRenames.last().artifactQualifiedName)
         } else {
             Optional.ofNullable(null)

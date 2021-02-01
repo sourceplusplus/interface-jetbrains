@@ -26,22 +26,26 @@ import java.util.*
 class LogFollowCommand(
     private val repository: Repository,
     private var artifact: LocalArtifact,
-    private var forward: Boolean = false,
     private var targetCommitId: String
 ) {
 
-    private var git: Git? = null
+    private var git = Git(repository)
     private var currentPath: String? = null
     private var nextStart: ObjectId? = null
+    private var forward: Boolean = true
 
     @Throws(IOException::class, MissingObjectException::class, GitAPIException::class)
     fun call(): List<LocalArtifact> {
-        val commits = ArrayList<RevCommit>()
-        git = Git(repository)
-        var start: ObjectId? = null
+        //determine direction
+        val originalStart = ObjectId.fromString(artifact.artifactQualifiedName.commitId)
+        val startCommitWalk = git.log().add(originalStart).call()
+        forward = !startCommitWalk.any { it.id.name == targetCommitId }
 
-        nextStart = ObjectId.fromString(artifact.artifactQualifiedName.commitId)
+        //follow artifact
         val artifacts = mutableListOf<LocalArtifact>()
+        val commits = ArrayList<RevCommit>()
+        var start: ObjectId? = null
+        nextStart = originalStart
         currentPath = artifact.filePath
         do {
             if (forward) {
@@ -49,7 +53,7 @@ class LogFollowCommand(
                 start = null
             }
 
-            val log = git!!.log()
+            val log = git.log()
                 .add(nextStart).add(ObjectId.fromString(targetCommitId))
                 .addPath(currentPath).call()
             for (commit in (if (forward) log.toList().asReversed() else log)) {
@@ -65,13 +69,13 @@ class LogFollowCommand(
                 }
             }
             if (start == null) return artifacts
-        } while (getRenamedPath(start as RevCommit, if (forward) commits else git!!.log().add(start).call()).also {
+        } while (getRenamedPath(start as RevCommit, if (forward) commits else git.log().add(start).call()).also {
                 if (it != null) {
                     artifacts.add(it)
                     currentPath = it.filePath
                 }
             } != null)
-        git?.close()
+        git.close()
         return artifacts
     }
 

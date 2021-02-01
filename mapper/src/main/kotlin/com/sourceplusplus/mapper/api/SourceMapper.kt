@@ -19,7 +19,6 @@ interface SourceMapper {
     fun getMethodQualifiedName(
         methodQualifiedName: ArtifactQualifiedName,
         targetCommitId: String,
-        returnBestEffort: Boolean = false,
-        forward: Boolean = true
+        returnBestEffort: Boolean = false
     ): Optional<ArtifactQualifiedName>
 }

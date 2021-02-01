@@ -411,7 +411,7 @@ class GroovyModificationTest {
         assertEquals(oldCommitId, oldName.commitId)
 
         val foundOldName = SourceMapperImpl(gitMapper)
-            .getMethodQualifiedName(newName.get(), oldCommitId, forward = false)
+            .getMethodQualifiedName(newName.get(), oldCommitId)
         assertNotNull(foundOldName)
         assertTrue(foundOldName.isPresent)
         assertEquals("GetterMethod.getStr()", foundOldName.get().identifier)
@@ -605,7 +605,7 @@ class GroovyModificationTest {
                     identifier = "GetterMethod.getStr2()",
                     commitId = secondCommitId,
                     type = ArtifactType.METHOD
-                ), oldCommitId, forward = false
+                ), oldCommitId
             )
         assertNotNull(foundOldName)
         assertTrue(foundOldName.isPresent)

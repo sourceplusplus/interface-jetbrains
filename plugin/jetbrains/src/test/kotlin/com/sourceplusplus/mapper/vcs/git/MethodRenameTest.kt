@@ -109,7 +109,7 @@ class MethodRenameTest : SourceMapperTest() {
             type = ArtifactType.METHOD
         )
         val oldName = SourceMapperImpl(gitMapper)
-            .getMethodQualifiedName(newName, oldCommitId, forward = false)
+            .getMethodQualifiedName(newName, oldCommitId)
 
         assertTrue(oldName.isPresent)
         assertEquals("GetterMethod.getStr()", oldName.get().identifier)
@@ -261,7 +261,7 @@ class MethodRenameTest : SourceMapperTest() {
             type = ArtifactType.METHOD
         )
         val oldName = SourceMapperImpl(gitMapper)
-            .getMethodQualifiedName(newName, oldCommitId, forward = false)
+            .getMethodQualifiedName(newName, oldCommitId)
 
         assertTrue(oldName.isPresent)
         assertEquals("GetterMethod.getStr()", oldName.get().identifier)
