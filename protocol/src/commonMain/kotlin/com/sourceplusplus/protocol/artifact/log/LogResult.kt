@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class LogResult(
+    val artifactQualifiedName: String? = null,
     val orderType: LogOrderType,
     @Serializable(with = Serializers.InstantKSerializer::class)
     val timestamp: Instant,

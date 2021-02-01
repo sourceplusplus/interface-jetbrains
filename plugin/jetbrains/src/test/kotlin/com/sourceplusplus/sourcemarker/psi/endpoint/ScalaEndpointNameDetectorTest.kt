@@ -1,6 +1,7 @@
-package com.sourceplusplus.sourcemarker.psi
+package com.sourceplusplus.sourcemarker.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
+import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language

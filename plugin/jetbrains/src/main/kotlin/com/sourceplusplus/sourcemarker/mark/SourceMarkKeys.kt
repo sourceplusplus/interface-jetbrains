@@ -5,6 +5,7 @@ import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
+import com.sourceplusplus.sourcemarker.psi.LoggerDetector
 
 /**
  * Used to associate custom data to [SourceMark]s.
@@ -15,5 +16,6 @@ import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 object SourceMarkKeys {
     val SOURCE_PORTAL = SourceKey<SourcePortal>("SOURCE_PORTAL")
     val ENDPOINT_DETECTOR = SourceKey<EndpointDetector>("ENDPOINT_DETECTOR")
+    val LOGGER_DETECTOR = SourceKey<LoggerDetector>("LOGGER_DETECTOR")
     val ARTIFACT_ADVICE = SourceKey<MutableList<ArtifactAdvice>>("ARTIFACT_ADVICE")
 }

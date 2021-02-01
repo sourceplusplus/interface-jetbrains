@@ -6,6 +6,7 @@ import com.sourceplusplus.portal.extensions.displayLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLogs
+import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetLogOrderType
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
@@ -44,6 +45,7 @@ class LogsDisplay : AbstractDisplay(PageType.LOGS) {
         vertx.eventBus().consumer<LogResult>(ArtifactLogUpdated) { handleArtifactLogResult(it.body()) }
         vertx.eventBus().consumer(ClickedDisplayLog, this@LogsDisplay::clickedDisplayLog)
         vertx.eventBus().consumer(ClickedDisplayLogs, this@LogsDisplay::clickedDisplayLogs)
+        vertx.eventBus().consumer(FetchMoreLogs, this@LogsDisplay::fetchMoreLogs)
         log.info("{} started", javaClass.simpleName)
     }
 
@@ -64,6 +66,20 @@ class LogsDisplay : AbstractDisplay(PageType.LOGS) {
                 //do nothing
             }
         }
+    }
+
+    private fun fetchMoreLogs(messageHandler: Message<JsonObject>) {
+        val portalUuid = messageHandler.body().getString("portalUuid")
+        val pageNumber = messageHandler.body().getInteger("pageNumber")
+        val portal = SourcePortal.getPortal(portalUuid)!!
+        if (pageNumber == null) {
+            portal.logsView.pageNumber++
+            log.info("Page number set to: ${portal.logsView.pageNumber}")
+        } else {
+            portal.logsView.pageNumber = pageNumber
+            log.info("Page number set to: ${portal.logsView.pageNumber}")
+        }
+        vertx.eventBus().send(RefreshLogs, portal)
     }
 
     private fun clickedDisplayLog(messageHandler: Message<JsonObject>) {
@@ -118,10 +134,11 @@ class LogsDisplay : AbstractDisplay(PageType.LOGS) {
     }
 
     private fun handleArtifactLogResult(artifactLogResult: LogResult) {
-        //todo: get correct portals
-        SourcePortal.getPortals().filter { it.configuration.currentPage == PageType.LOGS }.forEach {
-            it.logsView.logResult = it.logsView.logResult?.mergeWith(artifactLogResult) ?: artifactLogResult
-            it.logsView.logResult = it.logsView.logResult!!.truncate(20)
+        SourcePortal.getPortals().filter {
+            artifactLogResult.artifactQualifiedName == null ||
+                    it.viewingPortalArtifact == artifactLogResult.artifactQualifiedName
+        }.forEach {
+            it.logsView.cacheArtifactLogResult(artifactLogResult)
             updateUI(it)
         }
     }

@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.psi
+package com.sourceplusplus.sourcemarker.psi.endpoint
 
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import org.junit.After

@@ -56,6 +56,7 @@ object ProtocolAddress {
         const val ArtifactLogUpdated = "ArtifactLogUpdated"
         const val ClickedDisplayLog = "ClickedDisplayLog"
         const val ClickedDisplayLogs = "ClickedDisplayLogs"
+        const val FetchMoreLogs = "FetchMoreLogs"
 
         //Portal - Configuration
         const val DisplayArtifactConfiguration = "DisplayArtifactConfiguration"

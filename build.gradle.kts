@@ -1,7 +1,7 @@
 plugins {
     id("com.avast.gradle.docker-compose") version "0.13.4"
 
-    val kotlinVersion = "1.4.10"
+    val kotlinVersion = "1.4.21"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("multiplatform") version kotlinVersion apply false
     kotlin("js") version kotlinVersion apply false

@@ -56,6 +56,7 @@ import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
 import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
 import io.vertx.core.json.Json
@@ -265,19 +266,31 @@ class PortalEventListener(
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
                 GlobalScope.launch(vertx.dispatcher()) {
-                    val logsResult = LogsBridge.queryLogs(
+                    var logsResult = LogsBridge.queryLogs(
                         GetEndpointLogs(
                             endpointId = endpointId,
                             zonedDuration = ZonedDuration(
-                                ZonedDateTime.now().minusMinutes(15),
+                                ZonedDateTime.now().minusHours(24),
                                 ZonedDateTime.now(),
                                 SkywalkingClient.DurationStep.MINUTE
                             ),
                             orderType = portal.logsView.orderType,
-//                            pageSize = portal.tracesView.viewTraceAmount,
-//                            pageNumber = portal.tracesView.pageNumber
+                            pageSize = portal.logsView.viewLogAmount,
+                            pageNumber = portal.logsView.pageNumber
                         ), vertx
                     )
+
+                    //todo: impl method filtering in skywalking
+                    val logFormats = sourceMark.getUserData(LOGGER_DETECTOR)!!
+                        .getOrFindLoggerStatements(sourceMark).toSet()
+                    if (logFormats.isNotEmpty()) {
+                        logsResult = logsResult.copy(
+                            artifactQualifiedName = sourceMark.artifactQualifiedName,
+                            total = logsResult.logs.size,
+                            logs = logsResult.logs.filter { logFormats.contains(it.content) },
+                        )
+                    }
+
                     vertx.eventBus().send(ArtifactLogUpdated, logsResult)
                 }
             }
