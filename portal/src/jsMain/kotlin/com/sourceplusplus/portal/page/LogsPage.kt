@@ -10,6 +10,7 @@ import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
+import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
@@ -132,6 +133,23 @@ class LogsPage(
     }
 
     fun setupUI() {
+        resetUI(LogViewType.LIVE_TAIL)
+
+        @Suppress("UNUSED_VARIABLE") val logScrollConfig = json(
+            "once" to false, "observeChanges" to true,
+            "onTopVisible" to {
+                if (jq("#log_operation_table")[0].rows.length >= 10) {
+                    eb.send(FetchMoreLogs, json("portalUuid" to portalUuid, "pageNumber" to 1))
+                }
+            },
+            "onBottomVisible" to {
+                if (jq("#log_operation_table")[0].rows.length >= 10) {
+                    eb.send(FetchMoreLogs, json("portalUuid" to portalUuid))
+                }
+            }
+        )
+        js("\$('#log_operation_table').visibility(logScrollConfig)")
+
         window.setInterval({ updateOccurredLabels(".log_time") }, 2000)
     }
 

@@ -26,7 +26,7 @@ class SourcePortal(
     val overviewView: OverviewView = OverviewView()
     val activityView: ActivityView = ActivityView(this)
     val tracesView: TracesView = TracesView(this)
-    val logsView: LogsView = LogsView()
+    val logsView: LogsView = LogsView(this)
     val configurationView: ConfigurationView = ConfigurationView()
     lateinit var viewingPortalArtifact: String
     var advice: MutableList<ArtifactAdvice> = mutableListOf()

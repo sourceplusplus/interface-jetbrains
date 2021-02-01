@@ -270,13 +270,13 @@ class PortalEventListener(
                         GetEndpointLogs(
                             endpointId = endpointId,
                             zonedDuration = ZonedDuration(
-                                ZonedDateTime.now().minusMinutes(15),
+                                ZonedDateTime.now().minusHours(24),
                                 ZonedDateTime.now(),
                                 SkywalkingClient.DurationStep.MINUTE
                             ),
                             orderType = portal.logsView.orderType,
-//                            pageSize = portal.tracesView.viewTraceAmount,
-//                            pageNumber = portal.tracesView.pageNumber
+                            pageSize = portal.logsView.viewLogAmount,
+                            pageNumber = portal.logsView.pageNumber
                         ), vertx
                     )
 
