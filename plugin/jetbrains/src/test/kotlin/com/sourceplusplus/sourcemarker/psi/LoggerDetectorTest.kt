@@ -24,15 +24,30 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import java.io.File
 
 @RunWith(JUnit4::class)
 class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     override fun getProjectDescriptor(): LightProjectDescriptor {
         return object : DefaultLightProjectDescriptor() {
-            override fun getSdk(): Sdk = JavaSdk.getInstance().createJdk(
-                "jdk-1.8", "/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre"
-            )
+            override fun getSdk(): Sdk {
+                return when {
+                    File("/usr/lib/jvm/java-11-openjdk-amd64").exists() -> {
+                        JavaSdk.getInstance().createJdk(
+                            "jdk-11", "/usr/lib/jvm/java-11-openjdk-amd64", false
+                        )
+                    }
+                    File("/opt/hostedtoolcache/jdk/11.0.10/x64").exists() -> {
+                        JavaSdk.getInstance().createJdk(
+                            "jdk-11", "/opt/hostedtoolcache/jdk/11.0.10/x64", false
+                        )
+                    }
+                    else -> {
+                        throw IllegalStateException("Failed to find JDK 11")
+                    }
+                }
+            }
 
             override fun configureModule(module: Module, model: ModifiableRootModel, contentEntry: ContentEntry) {
                 super.configureModule(module, model, contentEntry)
