@@ -1,6 +1,7 @@
 package com.sourceplusplus.mapper.api
 
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import java.util.*
 
 /**
  * todo: description.
@@ -17,6 +18,8 @@ interface SourceMapper {
      */
     fun getMethodQualifiedName(
         methodQualifiedName: ArtifactQualifiedName,
-        targetCommitId: String
-    ): ArtifactQualifiedName
+        targetCommitId: String,
+        returnBestEffort: Boolean = false,
+        forward: Boolean = true
+    ): Optional<ArtifactQualifiedName>
 }
