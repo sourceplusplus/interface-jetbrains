@@ -118,8 +118,10 @@ class LogsDisplay : AbstractDisplay(PageType.LOGS) {
     }
 
     private fun handleArtifactLogResult(artifactLogResult: LogResult) {
-        //todo: get correct portals
-        SourcePortal.getPortals().filter { it.configuration.currentPage == PageType.LOGS }.forEach {
+        SourcePortal.getPortals().filter {
+            artifactLogResult.artifactQualifiedName == null ||
+                    it.viewingPortalArtifact == artifactLogResult.artifactQualifiedName
+        }.forEach {
             it.logsView.logResult = it.logsView.logResult?.mergeWith(artifactLogResult) ?: artifactLogResult
             it.logsView.logResult = it.logsView.logResult!!.truncate(20)
             updateUI(it)
