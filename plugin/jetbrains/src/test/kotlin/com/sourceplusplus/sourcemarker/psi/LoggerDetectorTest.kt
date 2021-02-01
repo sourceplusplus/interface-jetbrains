@@ -38,6 +38,11 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                             "jdk-11", "/usr/lib/jvm/java-11-openjdk-amd64", false
                         )
                     }
+                    File("/opt/java/openjdk").exists() -> {
+                        JavaSdk.getInstance().createJdk(
+                            "jdk-11", "/opt/java/openjdk", false
+                        )
+                    }
                     File("/opt/hostedtoolcache/jdk/11.0.10/x64").exists() -> {
                         JavaSdk.getInstance().createJdk(
                             "jdk-11", "/opt/hostedtoolcache/jdk/11.0.10/x64", false
