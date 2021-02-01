@@ -110,10 +110,16 @@ class PluginSqlProducerSearch : SqlProducerSearch {
         })
     }
 
+    /**
+     * todo: description.
+     */
     interface SqlSourceDeterminer {
         fun isSqlSource(query: Query, calledMethod: CalledMethod): Boolean
     }
 
+    /**
+     * todo: description.
+     */
     data class CalledMethod(
         val call: UCallExpression,
         val method: PsiMethod

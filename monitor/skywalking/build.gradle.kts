@@ -10,7 +10,7 @@ dependencies {
     implementation("com.apollographql.apollo:apollo-coroutines-support:2.4.4")
     api("com.apollographql.apollo:apollo-api:2.4.4")
 
-    val vertxVersion = "3.9.4"
+    val vertxVersion = "4.0.0"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")

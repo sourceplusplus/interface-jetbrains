@@ -10,7 +10,9 @@ import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.mark.SourceMarkConstructor
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
+import com.sourceplusplus.sourcemarker.psi.LoggerDetector
 import org.slf4j.LoggerFactory
 
 /**
@@ -24,6 +26,7 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
     companion object {
         private val log = LoggerFactory.getLogger(PluginSourceMarkEventListener::class.java)
         private val endpointDetector = EndpointDetector()
+        private val loggerDetector = LoggerDetector()
     }
 
     override fun handleEvent(event: SourceMarkEvent) {
@@ -55,6 +58,7 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
 
             if (sourceMark is MethodSourceMark) {
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
+                sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
             }
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
             event.sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!.close()

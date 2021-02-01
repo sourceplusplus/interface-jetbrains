@@ -7,8 +7,8 @@ import com.sourceplusplus.protocol.artifact.trace.Trace
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import io.vertx.core.Vertx
-import io.vertx.kotlin.core.eventbus.requestAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -67,14 +67,14 @@ class EndpointTracesBridge(private val skywalkingClient: SkywalkingClient) : Cor
 
         suspend fun getTraces(request: GetEndpointTraces, vertx: Vertx): TraceResult {
             return vertx.eventBus()
-                .requestAwait<TraceResult>(getTracesAddress, request)
-                .body()
+                .request<TraceResult>(getTracesAddress, request)
+                .await().body()
         }
 
         suspend fun getTraceStack(traceId: String, vertx: Vertx): TraceSpanStackQueryResult {
             return vertx.eventBus()
-                .requestAwait<TraceSpanStackQueryResult>(getTraceStackAddress, traceId)
-                .body()
+                .request<TraceSpanStackQueryResult>(getTraceStackAddress, traceId)
+                .await().body()
         }
     }
 }

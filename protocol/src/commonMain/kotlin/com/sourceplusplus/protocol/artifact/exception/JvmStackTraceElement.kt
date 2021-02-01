@@ -1,6 +1,7 @@
 package com.sourceplusplus.protocol.artifact.exception
 
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedClassName
+import kotlinx.serialization.Serializable
 
 /**
  * todo: description.
@@ -8,6 +9,7 @@ import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedClas
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Serializable
 data class JvmStackTraceElement(
     val method: String,
     val source: String

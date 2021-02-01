@@ -2,10 +2,8 @@ package com.sourceplusplus.portal
 
 import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.extensions.jq
-import com.sourceplusplus.portal.page.ActivityPage
-import com.sourceplusplus.portal.page.ConfigurationPage
-import com.sourceplusplus.portal.page.OverviewPage
-import com.sourceplusplus.portal.page.TracesPage
+import com.sourceplusplus.portal.extensions.toPrettyDuration
+import com.sourceplusplus.portal.page.*
 import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalConfiguration
@@ -13,6 +11,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.GetPortalTranslations
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.log.LogOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
@@ -22,6 +21,8 @@ import kotlinx.html.dom.append
 import kotlinx.html.js.link
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
+import moment
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import kotlin.js.json
 
@@ -34,6 +35,7 @@ fun main() {
         val overviewPage = OverviewPage(portalUuid, eb)
         val activityPage = ActivityPage(portalUuid, eb)
         val tracesPage = TracesPage(portalUuid, eb)
+        val logsPage = LogsPage(portalUuid, eb)
         val configurationPage = ConfigurationPage(portalUuid, eb)
 
         console.log("Connecting portal")
@@ -41,7 +43,6 @@ fun main() {
             console.log("Portal connected")
             eb.send(GetPortalTranslations, null) { _, message: dynamic ->
                 val portalTranslations = Json.decodeFromDynamic<Map<String, String>>(message.body)
-                console.log(portalTranslations)
                 PortalBundle.messageTranslator = PortalMessageTranslator { key -> portalTranslations[key] }
             }
             eb.send(GetPortalConfiguration, portalUuid) { _, message: dynamic ->
@@ -51,6 +52,7 @@ fun main() {
                     PageType.OVERVIEW -> overviewPage
                     PageType.ACTIVITY -> activityPage
                     PageType.TRACES -> tracesPage
+                    PageType.LOGS -> logsPage
                     PageType.CONFIGURATION -> configurationPage
                 }
                 document.getElementsByTagName("head")[0]!!.append {
@@ -72,6 +74,7 @@ fun main() {
                     PageType.OVERVIEW -> overviewPage
                     PageType.ACTIVITY -> activityPage
                     PageType.TRACES -> tracesPage
+                    PageType.LOGS -> logsPage
                     PageType.CONFIGURATION -> configurationPage
                 }
                 document.getElementsByTagName("head")[0]!!.append {
@@ -153,6 +156,13 @@ fun clickedTracesOrderType(eb: EventBus, portalUuid: String, traceOrderType: Tra
     )
 }
 
+fun clickedLogsOrderType(eb: EventBus, portalUuid: String, orderType: LogOrderType) {
+    eb.publish(
+        ProtocolAddress.Global.SetLogOrderType,
+        json("portalUuid" to portalUuid, "logOrderType" to orderType.name)
+    )
+}
+
 fun setActiveTime(interval: QueryTimeFrame) {
     jq("#last_5_minutes_time").removeClass("active")
     jq("#last_15_minutes_time").removeClass("active")
@@ -160,6 +170,17 @@ fun setActiveTime(interval: QueryTimeFrame) {
     jq("#last_hour_time").removeClass("active")
     jq("#last_3_hours_time").removeClass("active")
     jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
+}
+
+fun updateOccurredLabels(label: String) {
+    jq(label).each(fun(_: Int, traceTime: HTMLElement) {
+        if (!traceTime.dataset["value"].isNullOrEmpty()) {
+            val occurred = moment(traceTime.dataset["value"]!!, "x")
+            val now = moment(moment.now())
+            val timeOccurredDuration = moment.duration(now.diff(occurred))
+            traceTime.innerText = timeOccurredDuration.toPrettyDuration(1)
+        }
+    })
 }
 
 external fun decodeURIComponent(encodedURI: String): String

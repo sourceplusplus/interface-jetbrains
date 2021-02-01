@@ -1,12 +1,9 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.*
 import com.sourceplusplus.portal.PortalBundle.translate
-import com.sourceplusplus.portal.clickedTracesOrderType
-import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.model.EndpointTableType
-import com.sourceplusplus.portal.setActiveTime
-import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
@@ -16,6 +13,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
@@ -70,13 +69,19 @@ class OverviewPage(
                 if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
                     setCurrentPage(eb, portalUuid, ACTIVITY)
                 })
-                if (configuration.visibleTraces) navItem(TRACES, false, null) {
+                if (configuration.visibleTraces) navItem(TRACES, block = {
                     navSubItems(
                         PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, portalUuid, LATEST_TRACES) },
                         PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, portalUuid, SLOWEST_TRACES) },
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
                     )
-                }
+                })
+                if (configuration.visibleLogs) navItem(LOGS, block = {
+                    navSubItems(
+                        PortalNavSubItem(NEWEST_LOGS) { clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS) },
+                        PortalNavSubItem(OLDEST_LOGS) { clickedLogsOrderType(eb, portalUuid, OLDEST_LOGS) }
+                    )
+                })
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
                     setCurrentPage(eb, portalUuid, CONFIGURATION)
                 })
@@ -145,32 +150,32 @@ class OverviewPage(
                                     httpOperation.startsWith("{GET}") -> {
                                         span {
                                             style = "font-weight: bold"
-                                            + "[${translate("GET")}] "
+                                            +"[${translate("GET")}] "
                                         }
                                         +httpOperation.substring(5)
                                     }
                                     httpOperation.startsWith("{PUT}") -> {
                                         span {
                                             style = "font-weight: bold"
-                                            + "[${translate("PUT")}] "
+                                            +"[${translate("PUT")}] "
                                         }
                                         +httpOperation.substring(5)
                                     }
                                     httpOperation.startsWith("{POST}") -> {
                                         span {
                                             style = "font-weight: bold"
-                                            + "[${translate("POST")}] "
+                                            +"[${translate("POST")}] "
                                         }
                                         +httpOperation.substring(6)
                                     }
                                     httpOperation.startsWith("{PATCH}") -> {
                                         span {
                                             style = "font-weight: bold"
-                                            + "[${translate("PATCH")}] "
+                                            +"[${translate("PATCH")}] "
                                         }
-                                        + translate(httpOperation.substring(7))
+                                        +translate(httpOperation.substring(7))
                                     }
-                                    else -> + translate(httpOperation)
+                                    else -> +translate(httpOperation)
                                 }
                             }
                         } else {
@@ -179,7 +184,7 @@ class OverviewPage(
                     }
                     td("overview_row_padding collapsing") {
                         style = "color: #53A889; font-weight: bold"
-                        + translate(it.endpointType.name)
+                        +translate(it.endpointType.name)
                     }
                     it.artifactSummarizedMetrics.forEach {
                         val summaryValue = when (it.metricType) {

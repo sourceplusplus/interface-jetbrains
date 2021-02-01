@@ -1,9 +1,8 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.*
 import com.sourceplusplus.portal.PortalBundle.translate
-import com.sourceplusplus.portal.clickedTracesOrderType
-import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
@@ -11,7 +10,6 @@ import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
 import com.sourceplusplus.portal.model.TraceTableType.*
-import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
@@ -23,6 +21,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
 import com.sourceplusplus.protocol.portal.PageType.*
@@ -90,14 +90,20 @@ class TracesPage(
                 if (configuration.visibleActivity) navItem(ACTIVITY, onClick = {
                     setCurrentPage(eb, portalUuid, ACTIVITY)
                 })
-                if (configuration.visibleTraces) navItem(TRACES, isActive = true, null) {
+                if (configuration.visibleTraces) navItem(TRACES, true, block = {
                     navSubItems(
                         PortalNavSubItem(LATEST_TRACES) { clickedTracesOrderType(eb, portalUuid, LATEST_TRACES) },
                         PortalNavSubItem(SLOWEST_TRACES) { clickedTracesOrderType(eb, portalUuid, SLOWEST_TRACES) },
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
                     )
-                }
-                if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true, onClick = {
+                })
+                if (configuration.visibleLogs) navItem(LOGS, block = {
+                    navSubItems(
+                        PortalNavSubItem(NEWEST_LOGS) { clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS) },
+                        PortalNavSubItem(OLDEST_LOGS) { clickedLogsOrderType(eb, portalUuid, OLDEST_LOGS) }
+                    )
+                })
+                if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
                     setCurrentPage(eb, portalUuid, CONFIGURATION)
                 })
             }
@@ -205,7 +211,7 @@ class TracesPage(
         }
 
         //force AOT update
-        updateOccurredLabels()
+        updateOccurredLabels(".trace_time")
     }
 
     override fun displayTraceStack(traceStackPath: TraceStackPath) {
@@ -479,7 +485,7 @@ class TracesPage(
             jq(this).select()
         }
 
-        window.setInterval({ updateOccurredLabels() }, 2000)
+        window.setInterval({ updateOccurredLabels(".trace_time") }, 2000)
     }
 
     //todo: clean up
@@ -524,7 +530,6 @@ class TracesPage(
                 jq("#span_info_header").removeClass("active")
                     .css("visibility", "hidden")
 
-                jq("#top_trace_table").css("display", "none")
                 jq("#trace_stack_table").css("visibility", "visible")
                 jq("#traces_span").css("display", "none")
 
@@ -566,17 +571,6 @@ class TracesPage(
                 jq("#tag_table tr").remove()
             }
         }
-    }
-
-    private fun updateOccurredLabels() {
-        jq(".trace_time").each(fun(_: Int, traceTime: HTMLElement) {
-            if (!traceTime.dataset["value"].isNullOrEmpty()) {
-                val occurred = moment(traceTime.dataset["value"]!!, "x")
-                val now = moment(moment.now())
-                val timeOccurredDuration = moment.duration(now.diff(occurred))
-                traceTime.innerText = timeOccurredDuration.toPrettyDuration(1)
-            }
-        })
     }
 
     private fun clickedBackToTraces() {

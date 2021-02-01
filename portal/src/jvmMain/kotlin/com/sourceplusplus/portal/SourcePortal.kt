@@ -3,10 +3,7 @@ package com.sourceplusplus.portal
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
-import com.sourceplusplus.portal.display.views.ActivityView
-import com.sourceplusplus.portal.display.views.ConfigurationView
-import com.sourceplusplus.portal.display.views.OverviewView
-import com.sourceplusplus.portal.display.views.TracesView
+import com.sourceplusplus.portal.display.views.*
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import org.slf4j.LoggerFactory
@@ -29,6 +26,7 @@ class SourcePortal(
     val overviewView: OverviewView = OverviewView()
     val activityView: ActivityView = ActivityView(this)
     val tracesView: TracesView = TracesView(this)
+    val logsView: LogsView = LogsView(this)
     val configurationView: ConfigurationView = ConfigurationView()
     lateinit var viewingPortalArtifact: String
     var advice: MutableList<ArtifactAdvice> = mutableListOf()
@@ -38,6 +36,7 @@ class SourcePortal(
         this.overviewView.cloneView(portal.overviewView)
         this.activityView.cloneView(portal.activityView)
         this.tracesView.cloneView(portal.tracesView)
+        this.logsView.cloneView(portal.logsView)
         this.configurationView.cloneView(portal.configurationView)
     }
 

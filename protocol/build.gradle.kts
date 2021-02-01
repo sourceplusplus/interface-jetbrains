@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.4.10"
+    kotlin("plugin.serialization") version "1.4.21"
 }
 
 kotlin {
@@ -25,7 +25,7 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                val vertxVersion = "3.9.4"
+                val vertxVersion = "4.0.0"
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("com.google.guava:guava:29.0-jre")
                 implementation("junit:junit:4.13.1")

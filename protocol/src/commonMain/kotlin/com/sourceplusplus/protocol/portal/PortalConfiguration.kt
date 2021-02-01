@@ -16,5 +16,6 @@ data class PortalConfiguration(
     var visibleOverview: Boolean = true,
     var visibleActivity: Boolean = true,
     var visibleTraces: Boolean = true,
+    var visibleLogs: Boolean = true,
     var visibleConfiguration: Boolean = false
 )

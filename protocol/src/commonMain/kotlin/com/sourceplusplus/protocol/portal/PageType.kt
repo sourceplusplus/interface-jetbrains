@@ -14,6 +14,7 @@ enum class PageType(val icon: String) {
     OVERVIEW("icon demo-icon satellite"),
     ACTIVITY("icon demo-icon dashboard"),
     TRACES("icon demo-icon code"),
+    LOGS("icon demo-icon align left"),
     CONFIGURATION("icon configure");
 
     val title = name.toLowerCase().capitalize()

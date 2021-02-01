@@ -4,7 +4,7 @@ import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.toggleSidebar
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import com.sourceplusplus.protocol.artifact.OrderType
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
@@ -38,14 +38,14 @@ fun FlowContent.menuItem(
                 }
             }
         }
-        TRACES -> apply {
+        TRACES, LOGS -> apply {
             var activeClass = "active_tab"
             if (!isActive) {
                 activeClass = "inactive_tab"
             }
             div("title item $activeClass") {
                 i("dropdown icon")
-                + translate(TRACES.title)
+                + translate(pageType.title)
             }
             div("content") {
                 block?.let { it() }
@@ -54,12 +54,12 @@ fun FlowContent.menuItem(
     }
 }
 
-fun FlowContent.subMenuItem(traceOrderType: TraceOrderType, onClick: (Event) -> Unit) {
+fun FlowContent.subMenuItem(orderType: OrderType, onClick: (Event) -> Unit) {
     a(classes = "item sidebar_sub_text_color") {
         onClickFunction = {
             toggleSidebar()
             onClick.invoke(it)
         }
-        + translate(traceOrderType.description)
+        + translate(orderType.description)
     }
 }
