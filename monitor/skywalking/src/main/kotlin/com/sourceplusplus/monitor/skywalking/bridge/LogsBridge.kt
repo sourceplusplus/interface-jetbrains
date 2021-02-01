@@ -40,6 +40,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                     val request = it.body()
                     val logs = skywalkingClient.queryLogs(
                         LogQueryCondition(
+                            serviceId = Input.optional(request.serviceId),
                             //endpointId = Input.optional(request.endpointId),
                             queryDuration = Input.optional(request.zonedDuration.toDuration(skywalkingClient)),
                             paging = Pagination(pageSize = 10)
@@ -86,7 +87,8 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
     }
 
     data class GetEndpointLogs(
-        val endpointId: String,
+        val serviceId: String? = null,
+        val endpointId: String? = null,
         val zonedDuration: ZonedDuration,
         val orderType: LogOrderType
     )

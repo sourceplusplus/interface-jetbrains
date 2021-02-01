@@ -267,9 +267,6 @@ class PortalEventListener(
                 GlobalScope.launch(vertx.dispatcher()) {
                     val logsResult = LogsBridge.queryLogs(
                         GetEndpointLogs(
-//                            appUuid = portal.appUuid,
-//                            artifactQualifiedName = portal.viewingPortalArtifact,
-                            //todo: filter by service id
                             endpointId = endpointId,
                             zonedDuration = ZonedDuration(
                                 ZonedDateTime.now().minusMinutes(15),
