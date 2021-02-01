@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.psi.logger
+package com.sourceplusplus.sourcemarker.psi
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
@@ -14,7 +14,6 @@ import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import com.sourceplusplus.sourcemarker.psi.LoggerDetector
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
@@ -27,7 +26,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
 @RunWith(JUnit4::class)
-class LogbackDetectorTest : LightJavaCodeInsightFixtureTestCase() {
+class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     override fun getProjectDescriptor(): LightProjectDescriptor {
         return object : DefaultLightProjectDescriptor() {
@@ -81,7 +80,7 @@ class LogbackDetectorTest : LightJavaCodeInsightFixtureTestCase() {
     }
 
     @Test
-    fun `logbackTest`() {
+    fun `logbackLoggerTest`() {
         @Language("Java") val code = """
                     import ch.qos.logback.classic.Logger;
                     public class TestLogback {
