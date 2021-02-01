@@ -7,6 +7,7 @@ plugins {
     kotlin("js") version kotlinVersion apply false
 
     id("io.gitlab.arturbosch.detekt") version "1.14.2"
+    id("maven-publish")
 }
 
 val pluginGroup: String by project
@@ -36,6 +37,7 @@ subprojects {
         maven(url = "https://jitpack.io")
     }
 
+    apply<MavenPublishPlugin>()
     apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
     tasks {
         withType<io.gitlab.arturbosch.detekt.Detekt> {

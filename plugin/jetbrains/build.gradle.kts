@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij") version "0.6.3"
     id("org.jetbrains.changelog") version "0.6.2"
+    id("maven-publish")
 }
 
 // Import variables from gradle.properties file
