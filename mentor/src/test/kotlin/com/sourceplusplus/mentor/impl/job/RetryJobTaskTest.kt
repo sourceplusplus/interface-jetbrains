@@ -18,7 +18,7 @@ class RetryJobTaskTest {
     val vertx: Vertx = Vertx.vertx()
 
     @Test(timeout = 5000)
-    fun testJob() {
+    fun retryJob() {
         val testPromise = Promise.promise<Nothing>()
         val job = object : MentorJob() {
             override val vertx: Vertx = this@RetryJobTaskTest.vertx
