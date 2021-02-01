@@ -111,13 +111,13 @@ class LogsPage(
                     }
                 }
                 wideColumn {
+//                    table(
+//                        "secondary_background_color no_top_margin",
+//                        "log_pattern_table", "log_pattern_table_body",
+//                        tableTypes = arrayOf(PATTERN, LEVEL, OCCURRED)
+//                    )
                     table(
                         "secondary_background_color no_top_margin",
-                        "log_pattern_table", "log_pattern_table_body",
-                        tableTypes = arrayOf(PATTERN, LEVEL, OCCURRED)
-                    )
-                    table(
-                        "secondary_background_color no_top_margin hidden_full_height",
                         "log_operation_table", "log_operation_table_body",
                         tableTypes = arrayOf(OPERATION, LEVEL, OCCURRED)
                     )
@@ -132,14 +132,14 @@ class LogsPage(
     }
 
     fun setupUI() {
-        window.setInterval({ updateOccurredLabels() }, 2000)
+        window.setInterval({ updateOccurredLabels(".log_time") }, 2000)
     }
 
     fun displayLogs(logResult: LogResult) {
         console.log("Displaying ${logResult.logs.size} logs")
         resetUI(LogViewType.LIVE_TAIL)
 
-        jq("#log_pattern_table tbody tr").remove()
+        jq("#log_operation_table tbody tr").remove()
         for (i in logResult.logs.indices) {
             val log = logResult.logs[i]
 
@@ -179,11 +179,11 @@ class LogsPage(
                     +timeOccurredDuration.toPrettyDuration(1)
                 }
             }
-            jq("#log_pattern_table").append(rowHtml)
+            jq("#log_operation_table").append(rowHtml)
         }
 
         //force AOT update
-        updateOccurredLabels()
+        updateOccurredLabels(".log_time")
     }
 
     private fun displayLog(log: Log) {
@@ -260,8 +260,7 @@ class LogsPage(
     private fun resetUI(viewType: LogViewType) {
         when (viewType) {
             LogViewType.LIVE_TAIL -> {
-                jq("#log_pattern_table").css("display", "")
-                jq("#log_operation_table").css("display", "none")
+                jq("#log_operation_table").css("display", "")
                 jq("#log_info_panel").css("display", "none")
                     .css("visibility", "hidden")
 
@@ -269,7 +268,6 @@ class LogsPage(
                     .removeClass("inactive_tab")
             }
             LogViewType.INDIVIDUAL_LOG -> {
-                jq("#log_pattern_table").css("display", "none")
                 jq("#log_operation_table").css("display", "none")
                 jq("#log_info_panel").css("display", "")
                     .css("visibility", "visible")
@@ -278,16 +276,5 @@ class LogsPage(
                     .addClass("inactive_tab")
             }
         }
-    }
-
-    private fun updateOccurredLabels() {
-        jq(".log_time").each(fun(_: Int, traceTime: HTMLElement) {
-            if (!traceTime.dataset["value"].isNullOrEmpty()) {
-                val occurred = moment(traceTime.dataset["value"]!!, "x")
-                val now = moment(moment.now())
-                val timeOccurredDuration = moment.duration(now.diff(occurred))
-                traceTime.innerText = timeOccurredDuration.toPrettyDuration(1)
-            }
-        })
     }
 }

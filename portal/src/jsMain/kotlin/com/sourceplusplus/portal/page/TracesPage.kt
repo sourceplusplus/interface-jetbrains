@@ -1,10 +1,8 @@
 package com.sourceplusplus.portal.page
 
 import com.bfergerson.vertx3.eventbus.EventBus
+import com.sourceplusplus.portal.*
 import com.sourceplusplus.portal.PortalBundle.translate
-import com.sourceplusplus.portal.clickedLogsOrderType
-import com.sourceplusplus.portal.clickedTracesOrderType
-import com.sourceplusplus.portal.clickedViewAsExternalPortal
 import com.sourceplusplus.portal.extensions.jq
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.extensions.toPrettyDuration
@@ -12,7 +10,6 @@ import com.sourceplusplus.portal.model.TraceDisplayType
 import com.sourceplusplus.portal.model.TraceSpanInfoType.END_TIME
 import com.sourceplusplus.portal.model.TraceSpanInfoType.START_TIME
 import com.sourceplusplus.portal.model.TraceTableType.*
-import com.sourceplusplus.portal.setCurrentPage
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
@@ -214,7 +211,7 @@ class TracesPage(
         }
 
         //force AOT update
-        updateOccurredLabels()
+        updateOccurredLabels(".trace_time")
     }
 
     override fun displayTraceStack(traceStackPath: TraceStackPath) {
@@ -488,7 +485,7 @@ class TracesPage(
             jq(this).select()
         }
 
-        window.setInterval({ updateOccurredLabels() }, 2000)
+        window.setInterval({ updateOccurredLabels(".trace_time") }, 2000)
     }
 
     //todo: clean up
@@ -574,17 +571,6 @@ class TracesPage(
                 jq("#tag_table tr").remove()
             }
         }
-    }
-
-    private fun updateOccurredLabels() {
-        jq(".trace_time").each(fun(_: Int, traceTime: HTMLElement) {
-            if (!traceTime.dataset["value"].isNullOrEmpty()) {
-                val occurred = moment(traceTime.dataset["value"]!!, "x")
-                val now = moment(moment.now())
-                val timeOccurredDuration = moment.duration(now.diff(occurred))
-                traceTime.innerText = timeOccurredDuration.toPrettyDuration(1)
-            }
-        })
     }
 
     private fun clickedBackToTraces() {

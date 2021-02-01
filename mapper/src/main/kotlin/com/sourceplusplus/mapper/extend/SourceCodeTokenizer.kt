@@ -12,6 +12,9 @@ interface SourceCodeTokenizer {
 
     fun getMethods(filename: String, sourceCode: String): List<TokenizedMethod>
 
+    /**
+     * Represents a method split by language tokens.
+     */
     data class TokenizedMethod(
         val artifactQualifiedName: ArtifactQualifiedName,
         val tokens: List<String>
