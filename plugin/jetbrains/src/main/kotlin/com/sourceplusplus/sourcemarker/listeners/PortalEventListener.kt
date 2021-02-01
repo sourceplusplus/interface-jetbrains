@@ -16,11 +16,14 @@ import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.average
 import com.sourceplusplus.monitor.skywalking.bridge.EndpointMetricsBridge
 import com.sourceplusplus.monitor.skywalking.bridge.EndpointTracesBridge
+import com.sourceplusplus.monitor.skywalking.bridge.LogsBridge
+import com.sourceplusplus.monitor.skywalking.bridge.LogsBridge.GetEndpointLogs
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointMetrics
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.monitor.skywalking.toProtocol
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
@@ -35,6 +38,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
@@ -52,6 +56,7 @@ import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
 import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
 import io.vertx.core.json.Json
@@ -61,6 +66,7 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 import javax.swing.UIManager
 import kotlin.collections.HashMap
@@ -71,7 +77,13 @@ import kotlin.collections.HashMap
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PortalEventListener : CoroutineVerticle() {
+class PortalEventListener(
+    private val hostTranslations: Boolean = true
+) : CoroutineVerticle() {
+
+    companion object {
+        private val log = LoggerFactory.getLogger(PortalEventListener::class.java)
+    }
 
     private var lastDisplayedInternalPortal: SourcePortal? = null
 
@@ -91,6 +103,7 @@ class PortalEventListener : CoroutineVerticle() {
             when (portal.configuration.currentPage) {
                 PageType.OVERVIEW -> vertx.eventBus().send(RefreshOverview, portal)
                 PageType.ACTIVITY -> vertx.eventBus().send(RefreshActivity, portal)
+                PageType.LOGS -> vertx.eventBus().send(RefreshLogs, portal)
                 PageType.TRACES -> vertx.eventBus().send(RefreshTraces, portal)
                 PageType.CONFIGURATION -> TODO()
             }
@@ -105,17 +118,29 @@ class PortalEventListener : CoroutineVerticle() {
         }
         vertx.eventBus().consumer<String>(GetPortalConfiguration) {
             val portalUuid = it.body()
-            val portal = SourcePortal.getPortal(portalUuid)!!
-            it.reply(JsonObject.mapFrom(portal.configuration))
-        }
-        vertx.eventBus().consumer<String>(GetPortalTranslations) {
-            val map = HashMap<String, String>()
-            val keys = PluginBundle.resourceBundle.keys
-            while (keys.hasMoreElements()) {
-                val key = keys.nextElement()
-                map[key] = PluginBundle.resourceBundle.getString(key)
+            if (!portalUuid.isNullOrEmpty()) {
+                log.info("Getting portal configuration. Portal UUID: $portalUuid")
+                val portal = SourcePortal.getPortal(portalUuid)
+                if (portal == null) {
+                    log.error("Failed to find portal: $portalUuid")
+                    it.fail(404, "Portal $portalUuid does not exist")
+                } else {
+                    it.reply(JsonObject.mapFrom(portal.configuration))
+                }
+            } else {
+                log.error("Failed to get portal configuration. Missing portalUuid");
             }
-            it.reply(JsonObject.mapFrom(map))
+        }
+        if (hostTranslations) {
+            vertx.eventBus().consumer<String>(GetPortalTranslations) {
+                val map = HashMap<String, String>()
+                val keys = PluginBundle.resourceBundle.keys
+                while (keys.hasMoreElements()) {
+                    val key = keys.nextElement()
+                    map[key] = PluginBundle.resourceBundle.getString(key)
+                }
+                it.reply(JsonObject.mapFrom(map))
+            }
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(FindPortal) {
             val artifactQualifiedName = it.body()
@@ -168,6 +193,11 @@ class PortalEventListener : CoroutineVerticle() {
                 refreshTraces(it.body())
             }
         }
+        vertx.eventBus().consumer<SourcePortal>(RefreshLogs) {
+            GlobalScope.launch(vertx.dispatcher()) {
+                refreshLogs(it.body())
+            }
+        }
         vertx.eventBus().consumer<String>(QueryTraceStack) { handler ->
             val traceId = handler.body()
             GlobalScope.launch(vertx.dispatcher()) {
@@ -184,6 +214,8 @@ class PortalEventListener : CoroutineVerticle() {
                 message.getJsonObject("stackTraceElement").toString(),
                 JvmStackTraceElement::class.java
             )
+            log.info("Clicked stack trace element: $element")
+
             val project = ProjectManager.getInstance().openProjects[0]
             ArtifactNavigator.navigateTo(project, element)
         }
@@ -223,6 +255,43 @@ class PortalEventListener : CoroutineVerticle() {
                         ), vertx
                     )
                     vertx.eventBus().send(ArtifactTraceUpdated, traceResult)
+                }
+            }
+        }
+    }
+
+    private suspend fun refreshLogs(portal: SourcePortal) {
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+        if (sourceMark != null && sourceMark is MethodSourceMark) {
+            val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
+            if (endpointId != null) {
+                GlobalScope.launch(vertx.dispatcher()) {
+                    var logsResult = LogsBridge.queryLogs(
+                        GetEndpointLogs(
+                            endpointId = endpointId,
+                            zonedDuration = ZonedDuration(
+                                ZonedDateTime.now().minusHours(24),
+                                ZonedDateTime.now(),
+                                SkywalkingClient.DurationStep.MINUTE
+                            ),
+                            orderType = portal.logsView.orderType,
+                            pageSize = portal.logsView.viewLogAmount,
+                            pageNumber = portal.logsView.pageNumber
+                        ), vertx
+                    )
+
+                    //todo: impl method filtering in skywalking
+                    val logFormats = sourceMark.getUserData(LOGGER_DETECTOR)!!
+                        .getOrFindLoggerStatements(sourceMark).toSet()
+                    if (logFormats.isNotEmpty()) {
+                        logsResult = logsResult.copy(
+                            artifactQualifiedName = sourceMark.artifactQualifiedName,
+                            total = logsResult.logs.size,
+                            logs = logsResult.logs.filter { logFormats.contains(it.content) },
+                        )
+                    }
+
+                    vertx.eventBus().send(ArtifactLogUpdated, logsResult)
                 }
             }
         }

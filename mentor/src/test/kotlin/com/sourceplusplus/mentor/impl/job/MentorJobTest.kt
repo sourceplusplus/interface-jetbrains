@@ -8,7 +8,7 @@ import com.sourceplusplus.mentor.base.MentorTask
 import com.sourceplusplus.mentor.impl.task.monitor.GetService
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
-import io.vertx.kotlin.core.onCompleteAwait
+import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
@@ -35,10 +35,10 @@ class MentorJobTest : MentorTest() {
 
         runBlocking(vertx.dispatcher()) {
             vertx.deployVerticle(mentor)
-            testPromise.future().onCompleteAwait()
+            testPromise.future().await()
             val stopPromise = Promise.promise<Void>()
             mentor.stop(stopPromise)
-            stopPromise.future().onCompleteAwait()
+            stopPromise.future().await()
         }
     }
 

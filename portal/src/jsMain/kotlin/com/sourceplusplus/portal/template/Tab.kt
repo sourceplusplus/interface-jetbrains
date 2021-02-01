@@ -30,7 +30,7 @@ fun FlowContent.tabItem(
                 }
             }
         }
-        TRACES -> apply {
+        TRACES, LOGS -> apply {
             val activeClass = if (isActive) "active_tab" else "inactive_tab"
             div("ui dropdown item $activeClass") {
                 unsafe {
@@ -49,7 +49,7 @@ fun FlowContent.subTabItem(vararg subItems: PortalNavSubItem) {
         for (item in subItems) {
             a(classes = "item") {
                 onClickFunction = item.onClick
-                span("menu_tooltip_text") { + translate(item.traceOrderType.description) }
+                span("menu_tooltip_text") { + translate(item.orderType.description) }
             }
         }
     }

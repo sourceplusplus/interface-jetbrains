@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.4.10"
+    kotlin("plugin.serialization") version "1.4.21"
 }
 
 kotlin {
@@ -19,7 +19,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                val vertxVersion = "3.9.4"
+                val vertxVersion = "4.0.0"
                 implementation(kotlin("stdlib-jdk8"))
                 implementation(project(":protocol"))
                 implementation("org.slf4j:slf4j-api:1.7.30")

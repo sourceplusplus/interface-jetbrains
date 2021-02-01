@@ -3,8 +3,8 @@ package com.sourceplusplus.monitor.skywalking.bridge
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.LocalMessageCodec
 import io.vertx.core.Vertx
-import io.vertx.kotlin.core.eventbus.requestAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
@@ -69,8 +69,8 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
 
         suspend fun searchExactEndpoint(keyword: String, vertx: Vertx): SearchEndpointQuery.Result? {
             return vertx.eventBus()
-                .requestAwait<SearchEndpointQuery.Result?>(searchExactEndpointAddress, keyword)
-                .body()
+                .request<SearchEndpointQuery.Result?>(searchExactEndpointAddress, keyword)
+                .await().body()
         }
 
         suspend fun getEndpoints(
@@ -79,12 +79,12 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
             vertx: Vertx
         ): List<SearchEndpointQuery.Result> {
             return vertx.eventBus()
-                .requestAwait<List<SearchEndpointQuery.Result>>(
+                .request<List<SearchEndpointQuery.Result>>(
                     getEndpointsAddress, EndpointQuery(
                         serviceId = serviceId,
                         limit = limit
                     )
-                ).body()
+                ).await().body()
         }
     }
 

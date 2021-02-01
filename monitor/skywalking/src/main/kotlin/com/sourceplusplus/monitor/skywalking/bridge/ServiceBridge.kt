@@ -4,8 +4,8 @@ import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.DurationStep
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.MessageConsumer
-import io.vertx.kotlin.core.eventbus.requestAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
@@ -92,26 +92,22 @@ class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineV
 
         suspend fun getCurrentService(vertx: Vertx): GetAllServicesQuery.Result? {
             return vertx.eventBus()
-                .requestAwait<GetAllServicesQuery.Result?>(getCurrentServiceAddress, false)
-                .body()
+                .request<GetAllServicesQuery.Result?>(getCurrentServiceAddress, false).await().body()
         }
 
         suspend fun getActiveServices(vertx: Vertx): List<GetAllServicesQuery.Result> {
             return vertx.eventBus()
-                .requestAwait<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, false)
-                .body()
+                .request<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, false).await().body()
         }
 
         suspend fun getCurrentServiceAwait(vertx: Vertx): GetAllServicesQuery.Result {
             return vertx.eventBus()
-                .requestAwait<GetAllServicesQuery.Result>(getCurrentServiceAddress, true)
-                .body()
+                .request<GetAllServicesQuery.Result>(getCurrentServiceAddress, true).await().body()
         }
 
         suspend fun getActiveServicesAwait(vertx: Vertx): List<GetAllServicesQuery.Result> {
             return vertx.eventBus()
-                .requestAwait<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, true)
-                .body()
+                .request<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, true).await().body()
         }
     }
 }

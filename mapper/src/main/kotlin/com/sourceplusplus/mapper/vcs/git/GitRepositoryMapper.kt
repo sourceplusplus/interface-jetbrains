@@ -24,7 +24,6 @@ import java.util.regex.Pattern
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class GitRepositoryMapper(private val sourceCodeTokenizer: SourceCodeTokenizer) : RepositoryRewriter() {
-    //todo: remove intellij deps
 
     companion object {
         private val log = LoggerFactory.getLogger(GitRepositoryMapper::class.java)

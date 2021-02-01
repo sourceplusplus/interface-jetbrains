@@ -1,6 +1,7 @@
 package spp.example.webapp.controller;
 
-import org.apache.skywalking.apm.toolkit.trace.ActiveSpan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spp.example.webapp.model.User;
@@ -8,6 +9,8 @@ import spp.example.webapp.service.UserService;
 
 @RestController
 public class WebappController {
+
+    private static final Logger log = LoggerFactory.getLogger(WebappController.class);
 
     private final UserService userService;
 
@@ -17,21 +20,19 @@ public class WebappController {
 
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public ResponseEntity<Iterable<User>> userList() {
-        ActiveSpan.info("Getting user list");
+        log.info("Getting user list");
         return ResponseEntity.ok(userService.getUsers());
     }
 
     @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
     public ResponseEntity<User> getUser(@PathVariable long id) {
-        ActiveSpan.info(String.format("Getting user: %d", id));
+        log.info("Getting user: {}", id);
         return ResponseEntity.of(userService.getUser(id));
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.POST)
     public ResponseEntity<User> createUser(@RequestParam String firstName, @RequestParam String lastName) {
-        ActiveSpan.tag("firstName", firstName);
-        ActiveSpan.tag("lastName", lastName);
-        ActiveSpan.info(String.format("Creating user: %s %s", firstName, lastName));
+        log.info("Creating user: {} {}", firstName, lastName);
         User newUser = new User();
         newUser.setFirstname(firstName);
         newUser.setLastname(lastName);
@@ -40,11 +41,11 @@ public class WebappController {
 
     @RequestMapping(value = "/throws-exception", method = RequestMethod.GET)
     public void throwsException() {
-        ActiveSpan.error("Throwing exception");
+        log.error("Throwing exception");
         try {
             caughtException();
         } catch (Exception ex) {
-            ActiveSpan.error(ex);
+            log.error("Threw error", ex);
         }
 
         uncaughtException();

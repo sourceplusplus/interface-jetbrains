@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     val intellijVersion = "202.7660.26"
-    val kotlinVersion = "1.4.10"
+    val kotlinVersion = "1.4.21"
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:29.0-jre")

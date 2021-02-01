@@ -5,7 +5,6 @@ import com.sourceplusplus.mentor.SourceMentor
 import com.sourceplusplus.mentor.base.MentorJobEvent
 import com.sourceplusplus.mentor.impl.task.monitor.GetService
 import io.vertx.core.Promise
-import io.vertx.kotlin.core.onCompleteAwait
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
