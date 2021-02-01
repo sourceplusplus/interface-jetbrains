@@ -47,7 +47,7 @@ class LogFollowCommand(
             if (forward) {
                 commits.clear()
                 start = null
-            } //todo: make sure can't go past artifact.commitId
+            }
 
             val log = git!!.log()
                 .add(nextStart).add(ObjectId.fromString(targetCommitId))
@@ -79,16 +79,8 @@ class LogFollowCommand(
     private fun getRenamedPath(start: RevCommit, commits: Iterable<RevCommit>): LocalArtifact? {
         for (commit in commits) {
             val tw = TreeWalk(repository)
-            if (forward) {
-                tw.addTree(start.tree)
-                tw.addTree(commit.tree)
-            } else {
-//                tw.addTree(commit.tree)
-//                tw.addTree(start.tree)
-
-                tw.addTree(start.tree)
-                tw.addTree(commit.tree)
-            }
+            tw.addTree(start.tree)
+            tw.addTree(commit.tree)
             tw.isRecursive = true
 
             val rd = RenameDetector(repository)
