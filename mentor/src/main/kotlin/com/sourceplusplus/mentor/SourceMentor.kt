@@ -56,6 +56,7 @@ class SourceMentor : CoroutineVerticle() {
         running = true
         while (running) {
             log.trace("Waiting for next task...")
+            //todo: awaitBlocking has the ability to cause thread blocked exceptions
             var currentTask: MentorTask = awaitBlocking { taskQueue.take() }
             if (!running) return
             log.trace("Processing task: $currentTask")
@@ -76,6 +77,7 @@ class SourceMentor : CoroutineVerticle() {
                     jobsWhichRequireTask[0].context.copyOutputContext(stillValidTask.context, currentTask)
                     jobsWhichRequireTask[0].trace("Copied cached context for task: $currentTask")
                     jobsWhichRequireTask[0].emitEvent(MentorJobEvent.CONTEXT_REUSED, currentTask)
+                    taskComplete = true
                 } else {
                     taskComplete = executeTask(jobsWhichRequireTask[0], currentTask)
                 }
