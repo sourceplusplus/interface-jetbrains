@@ -72,7 +72,7 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
         vertx.eventBus().consumer(ClickedDisplaySpanInfo, this@TracesDisplay::clickedDisplaySpanInfo)
         vertx.eventBus().consumer(GetTraceStack, this@TracesDisplay::getTraceStack)
 
-        log.info("{} started", javaClass.simpleName)
+        super.start()
     }
 
     override fun updateUI(portal: SourcePortal) {

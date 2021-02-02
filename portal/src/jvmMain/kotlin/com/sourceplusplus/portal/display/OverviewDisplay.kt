@@ -53,6 +53,8 @@ class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
                 vertx.eventBus().send(FindAndOpenPortal, artifactQualifiedName)
             }
         }
+
+        super.start()
     }
 
     override fun updateUI(portal: SourcePortal) {

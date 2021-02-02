@@ -76,6 +76,8 @@ class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDispl
 //                }
 //            })
         }
+
+        super.start()
     }
 
     override fun updateUI(portal: SourcePortal) {

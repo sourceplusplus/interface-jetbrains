@@ -46,7 +46,8 @@ class LogsDisplay : AbstractDisplay(PageType.LOGS) {
         vertx.eventBus().consumer(ClickedDisplayLog, this@LogsDisplay::clickedDisplayLog)
         vertx.eventBus().consumer(ClickedDisplayLogs, this@LogsDisplay::clickedDisplayLogs)
         vertx.eventBus().consumer(FetchMoreLogs, this@LogsDisplay::fetchMoreLogs)
-        log.info("{} started", javaClass.simpleName)
+
+        super.start()
     }
 
     override fun updateUI(portal: SourcePortal) {
