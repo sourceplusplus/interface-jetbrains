@@ -30,7 +30,6 @@ import com.sourceplusplus.mentor.impl.job.RampDetectionMentor
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
-import com.sourceplusplus.protocol.ProtocolAddress.Global.SourceMarkerConfigUpdated
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
@@ -120,7 +119,6 @@ object SourceMarkerPlugin {
         } else {
             SourceMarkerConfig()
         }
-        vertx.eventBus().publish(SourceMarkerConfigUpdated, config)
 
         //attempt to determine root source package automatically (if necessary)
         val checkRootPackage = Promise.promise<Nothing>()

@@ -43,7 +43,6 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
-import com.sourceplusplus.protocol.ProtocolAddress.Global.SourceMarkerConfigUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
@@ -83,7 +82,7 @@ import kotlin.collections.HashMap
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PortalEventListener(
-    var markerConfig: SourceMarkerConfig,
+    private val markerConfig: SourceMarkerConfig,
     private val hostTranslations: Boolean = true
 ) : CoroutineVerticle() {
 
@@ -100,9 +99,6 @@ class PortalEventListener(
             //todo: update existing portals
         }
 
-        vertx.eventBus().consumer<SourceMarkerConfig>(SourceMarkerConfigUpdated) {
-            markerConfig = it.body()
-        }
         vertx.eventBus().consumer<Any>(RefreshPortal) {
             val portal = if (it.body() is String) {
                 SourcePortal.getPortal(it.body() as String)

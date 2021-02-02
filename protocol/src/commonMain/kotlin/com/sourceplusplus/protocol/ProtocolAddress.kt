@@ -63,8 +63,6 @@ object ProtocolAddress {
         const val DisplayArtifactConfiguration = "DisplayArtifactConfiguration"
         const val UpdateArtifactEntryMethod = "UpdateArtifactEntryMethod"
         const val UpdateArtifactAutoSubscribe = "UpdateArtifactAutoSubscribe"
-
-        const val SourceMarkerConfigUpdated = "SourceMarkerConfigUpdated"
     }
 
     @Suppress("FunctionName")
