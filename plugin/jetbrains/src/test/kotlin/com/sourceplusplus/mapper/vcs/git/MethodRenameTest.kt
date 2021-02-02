@@ -60,9 +60,9 @@ class MethodRenameTest : SourceMapperTest() {
         val newName = SourceMapperImpl(gitMapper)
             .getMethodQualifiedName(oldName, newCommitId)
 
-        assertNotNull(newName)
-        assertEquals("GetterMethod.getStr2()", newName.identifier)
-        assertEquals(newCommitId, newName.commitId)
+        assertTrue(newName.isPresent)
+        assertEquals("GetterMethod.getStr2()", newName.get().identifier)
+        assertEquals(newCommitId, newName.get().commitId)
         assertEquals("GetterMethod.getStr()", oldName.identifier)
         assertEquals(oldCommitId, oldName.commitId)
         gitMapper.sourceRepo.directory.parentFile.deleteRecursively()
@@ -111,9 +111,9 @@ class MethodRenameTest : SourceMapperTest() {
         val oldName = SourceMapperImpl(gitMapper)
             .getMethodQualifiedName(newName, oldCommitId)
 
-        assertNotNull(oldName)
-        assertEquals("GetterMethod.getStr()", oldName.identifier)
-        assertEquals(oldCommitId, oldName.commitId)
+        assertTrue(oldName.isPresent)
+        assertEquals("GetterMethod.getStr()", oldName.get().identifier)
+        assertEquals(oldCommitId, oldName.get().commitId)
         assertEquals("GetterMethod.getStr2()", newName.identifier)
         assertEquals(newCommitId, newName.commitId)
         gitMapper.sourceRepo.directory.parentFile.deleteRecursively()
@@ -178,9 +178,9 @@ class MethodRenameTest : SourceMapperTest() {
         val newName = SourceMapperImpl(gitMapper)
             .getMethodQualifiedName(oldName, newCommitId)
 
-        assertNotNull(newName)
-        assertEquals("GetterMethod.getStr2()", newName.identifier)
-        assertEquals(newCommitId, newName.commitId)
+        assertTrue(newName.isPresent)
+        assertEquals("GetterMethod.getStr2()", newName.get().identifier)
+        assertEquals(newCommitId, newName.get().commitId)
         assertEquals("GetterMethod.getStr()", oldName.identifier)
         assertEquals(oldCommitId, oldName.commitId)
 
@@ -263,9 +263,9 @@ class MethodRenameTest : SourceMapperTest() {
         val oldName = SourceMapperImpl(gitMapper)
             .getMethodQualifiedName(newName, oldCommitId)
 
-        assertNotNull(oldName)
-        assertEquals("GetterMethod.getStr()", oldName.identifier)
-        assertEquals(oldCommitId, oldName.commitId)
+        assertTrue(oldName.isPresent)
+        assertEquals("GetterMethod.getStr()", oldName.get().identifier)
+        assertEquals(oldCommitId, oldName.get().commitId)
         assertEquals("GetterMethod.getStr2()", newName.identifier)
         assertEquals(newCommitId, newName.commitId)
 

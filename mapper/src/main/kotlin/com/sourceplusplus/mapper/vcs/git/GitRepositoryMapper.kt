@@ -27,7 +27,7 @@ class GitRepositoryMapper(private val sourceCodeTokenizer: SourceCodeTokenizer) 
 
     companion object {
         private val log = LoggerFactory.getLogger(GitRepositoryMapper::class.java)
-        private val supportedFileTypes = hashSetOf("java", "groovy", "kotlin")
+        private val supportedFileTypes = hashSetOf("java", "groovy", "kt")
         val originalCommitIdPattern = Pattern.compile("<OriginalCommitID:(.+)>")!!
     }
 
@@ -39,6 +39,7 @@ class GitRepositoryMapper(private val sourceCodeTokenizer: SourceCodeTokenizer) 
     lateinit var targetRepo: Repository
     lateinit var targetSourceDirectory: File
     lateinit var targetGit: Git
+    val cacheThing = mutableMapOf<String, String>()
 
     fun initialize(sourceRepo: Repository) {
         val tempDir = File("/tmp/tmp-repo-${UUID.randomUUID()}/.git")
@@ -85,7 +86,7 @@ class GitRepositoryMapper(private val sourceCodeTokenizer: SourceCodeTokenizer) 
         if (!supportedFileTypes.contains(fileType.toLowerCase())) {
             return Entry.EMPTY //unsupported file type
         }
-        log.debug("Parsing file: ${entry.name}")
+        log.trace("Parsing file: ${entry.name}")
 
         val fileSource = String(source.readBlob(entry.id, c), StandardCharsets.UTF_8)
         val result = EntryList()
@@ -93,6 +94,7 @@ class GitRepositoryMapper(private val sourceCodeTokenizer: SourceCodeTokenizer) 
             val newId = target.writeBlob(it.tokens.joinToString("\n").toByteArray(StandardCharsets.UTF_8), c)
             val name = "${it.artifactQualifiedName.identifier}.m${fileType}"
             result.add(Entry(entry.mode, name, newId, entry.directory))
+            cacheThing[it.artifactQualifiedName.identifier] = name //todo: consider directory
         }
         return result
     }
