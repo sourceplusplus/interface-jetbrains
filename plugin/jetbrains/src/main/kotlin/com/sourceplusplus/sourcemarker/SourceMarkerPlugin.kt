@@ -184,6 +184,7 @@ object SourceMarkerPlugin {
         val clearMarkers = Promise.promise<Nothing>()
         ApplicationManager.getApplication().runReadAction {
             SourceMarker.clearAvailableSourceFileMarkers()
+            SourceMarker.clearGlobalSourceMarkEventListeners()
             clearMarkers.complete()
         }
 
