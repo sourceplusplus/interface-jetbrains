@@ -90,7 +90,6 @@ object SourceMarkerPlugin {
         vertx.eventBus().registerDefaultCodec(JvmStackTraceElement::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(LogResult::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(SourceMarkerConfig::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(TraceSpan::class.java, LocalMessageCodec())
 
         val module = SimpleModule()
