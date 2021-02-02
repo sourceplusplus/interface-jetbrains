@@ -103,6 +103,10 @@ object SourceMarker {
         return ImmutableList.copyOf(globalSourceMarkEventListeners)
     }
 
+    fun clearGlobalSourceMarkEventListeners() {
+        globalSourceMarkEventListeners.clear()
+    }
+
     fun getSourceMark(artifactQualifiedName: String, type: SourceMark.Type): SourceMark? {
         check(enabled) { "SourceMarker disabled" }
 
