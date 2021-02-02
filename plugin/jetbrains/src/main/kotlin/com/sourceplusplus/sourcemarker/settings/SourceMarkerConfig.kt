@@ -8,5 +8,6 @@ package com.sourceplusplus.sourcemarker.settings
  */
 data class SourceMarkerConfig(
     val skywalkingOapUrl: String = "http://localhost:12800/graphql",
-    var rootSourcePackage: String? = null
+    var rootSourcePackage: String? = null,
+    var autoResolveEndpointNames: Boolean = false
 )

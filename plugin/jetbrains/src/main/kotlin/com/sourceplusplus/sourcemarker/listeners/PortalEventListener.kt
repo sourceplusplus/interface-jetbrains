@@ -26,7 +26,7 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.CanNavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
@@ -43,6 +43,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
+import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
@@ -52,6 +53,7 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
@@ -59,6 +61,7 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
 import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -67,6 +70,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.time.ZonedDateTime
 import javax.swing.UIManager
 import kotlin.collections.HashMap
@@ -78,6 +82,7 @@ import kotlin.collections.HashMap
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PortalEventListener(
+    private val markerConfig: SourceMarkerConfig,
     private val hostTranslations: Boolean = true
 ) : CoroutineVerticle() {
 
@@ -254,7 +259,34 @@ class PortalEventListener(
                             pageNumber = portal.tracesView.pageNumber
                         ), vertx
                     )
-                    vertx.eventBus().send(ArtifactTraceUpdated, traceResult)
+
+                    //todo: rename {GET} to [GET] in skywalking
+                    if (markerConfig.autoResolveEndpointNames) {
+                        GlobalScope.launch(vertx.dispatcher()) {
+                            //todo: only try to auto resolve endpoint names with dynamic ids
+                            //todo: support multiple operationsNames/traceIds
+                            traceResult.traces.forEach {
+                                if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
+                                    val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
+                                    val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
+                                    if (entrySpan != null) {
+                                        val url = entrySpan.tags["url"]
+                                        val httpMethod = entrySpan.tags["http.method"]
+                                        if (url != null && httpMethod != null) {
+                                            val updatedEndpointName = "{$httpMethod}${URI(url).path}"
+                                            vertx.eventBus().send(
+                                                TraceSpanUpdated, entrySpan.copy(
+                                                    endpointName = updatedEndpointName,
+                                                    artifactQualifiedName = sourceMark.artifactQualifiedName
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
                 }
             }
         }

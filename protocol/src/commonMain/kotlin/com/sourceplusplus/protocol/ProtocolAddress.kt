@@ -45,7 +45,8 @@ object ProtocolAddress {
         const val ClickedDisplaySpanInfo = "ClickedDisplaySpanInfo"
         const val GetTraceStack = "GetTraceStack"
         const val RefreshTraces = "RefreshTraces"
-        const val ArtifactTraceUpdated = "ArtifactTraceUpdated"
+        const val ArtifactTracesUpdated = "ArtifactTracesUpdated"
+        const val TraceSpanUpdated = "TraceSpanUpdated"
         const val QueryTraceStack = "QueryTraceStack"
         const val ClickedStackTraceElement = "ClickedStackTraceElement"
         const val FetchMoreTraces = "FetchMoreTraces"
@@ -104,6 +105,10 @@ object ProtocolAddress {
 
         fun DisplaySpanInfo(portalUuid: String): String {
             return "$portalUuid-DisplaySpanInfo"
+        }
+
+        fun UpdateTraceSpan(portalUuid: String): String {
+            return "$portalUuid-UpdateTraceSpan"
         }
 
         fun DisplayArtifactConfiguration(portalUuid: String): String {

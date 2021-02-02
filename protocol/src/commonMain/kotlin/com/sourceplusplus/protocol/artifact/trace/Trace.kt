@@ -21,4 +21,15 @@ data class Trace(
     val traceIds: List<String>,
     val partial: Boolean = false,
     val segmentId: String? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Trace) return false
+        if (traceIds != other.traceIds) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return traceIds.hashCode()
+    }
+}

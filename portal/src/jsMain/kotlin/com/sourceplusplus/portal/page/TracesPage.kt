@@ -20,6 +20,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateTraceSpan
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
@@ -41,9 +42,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import moment
 import org.w3c.dom.Element
-import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
-import org.w3c.dom.get
 import kotlin.js.json
 import kotlin.time.ExperimentalTime
 
@@ -69,6 +68,9 @@ class TracesPage(
             }
             eb.registerHandler(DisplaySpanInfo(portalUuid)) { _: dynamic, message: dynamic ->
                 displaySpanInfo(Json.decodeFromDynamic(message.body))
+            }
+            eb.registerHandler(UpdateTraceSpan(portalUuid)) { _: dynamic, message: dynamic ->
+                updateTraceSpan(Json.decodeFromDynamic(message.body))
             }
         }
         eb.send(FetchMoreTraces, json("portalUuid" to portalUuid, "pageNumber" to 1))
@@ -138,6 +140,14 @@ class TracesPage(
         setupUI()
     }
 
+    fun updateTraceSpan(traceSpan: TraceSpan) {
+        console.log("Updating trace: ${traceSpan.traceId}")
+        val htmlTraceId = traceSpan.traceId.split(".").joinToString("")
+        val operationNameSpan = document.getElementById("trace-${htmlTraceId}-operation-name")
+        operationNameSpan!!.textContent = traceSpan.endpointName!!
+            .replace("<", "&lt;").replace(">", "&gt;")
+    }
+
     @OptIn(ExperimentalTime::class)
     override fun displayTraces(traceResult: TraceResult) {
         console.log("Displaying ${traceResult.traces.size} traces - ${traceResult.orderType}")
@@ -174,6 +184,7 @@ class TracesPage(
                         )
                     }
                     span {
+                        id = "trace-${htmlTraceId}-operation-name"
                         style = "vertical-align:top"
                         +operationName.replace("<", "&lt;").replace(">", "&gt;")
                     }
