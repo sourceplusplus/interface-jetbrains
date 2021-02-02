@@ -30,12 +30,14 @@ import com.sourceplusplus.mentor.impl.job.RampDetectionMentor
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
+import com.sourceplusplus.protocol.ProtocolAddress.Global.SourceMarkerConfigUpdated
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
+import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.sourcemarker.listeners.ArtifactAdviceListener
@@ -89,6 +91,8 @@ object SourceMarkerPlugin {
         vertx.eventBus().registerDefaultCodec(JvmStackTraceElement::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(LogResult::class.java, LocalMessageCodec())
+        vertx.eventBus().registerDefaultCodec(SourceMarkerConfig::class.java, LocalMessageCodec())
+        vertx.eventBus().registerDefaultCodec(TraceSpan::class.java, LocalMessageCodec())
 
         val module = SimpleModule()
         module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
@@ -116,6 +120,7 @@ object SourceMarkerPlugin {
         } else {
             SourceMarkerConfig()
         }
+        vertx.eventBus().publish(SourceMarkerConfigUpdated, config)
 
         //attempt to determine root source package automatically (if necessary)
         val checkRootPackage = Promise.promise<Nothing>()
@@ -169,7 +174,7 @@ object SourceMarkerPlugin {
                 }
 
                 if (connectedMonitor) {
-                    initPortal()
+                    initPortal(config)
                     initMarker(config)
                     initMapper()
                     initMentor(config)
@@ -240,7 +245,7 @@ object SourceMarkerPlugin {
         return mentor
     }
 
-    private suspend fun initPortal() {
+    private suspend fun initPortal(config: SourceMarkerConfig) {
         //todo: portal should be connected to event bus without bridge
         val sockJSHandler = SockJSHandler.create(vertx)
         val portalBridgeOptions = SockJSBridgeOptions()
@@ -259,7 +264,7 @@ object SourceMarkerPlugin {
 
         //todo: load portal config (custom themes, etc)
         deploymentIds.add(vertx.deployVerticle(PortalServer(bridgeServer.actualPort())).await())
-        deploymentIds.add(vertx.deployVerticle(PortalEventListener()).await())
+        deploymentIds.add(vertx.deployVerticle(PortalEventListener(config)).await())
     }
 
     private fun initMarker(config: SourceMarkerConfig) {

@@ -30,18 +30,33 @@ class TracesView(
     var innerTraceStack = false
     var rootArtifactQualifiedName: String? = null
     var pageNumber = 1
+    var resolvedEndpointNames = HashMap<String, String>() //todo: evicting cache
 
     fun cacheArtifactTraceResult(artifactTraceResult: TraceResult) {
-        val currentTraceResult = traceResultCache[artifactTraceResult.orderType]
+        var cacheResult = artifactTraceResult
+        if (resolvedEndpointNames.isNotEmpty()) {
+            cacheResult = artifactTraceResult.copy(
+                traces = artifactTraceResult.traces.map {
+                    if (resolvedEndpointNames.containsKey(it.traceIds[0])) {
+                        it.copy(operationNames = listOf(resolvedEndpointNames[it.traceIds[0]]!!))
+                    } else {
+                        it
+                    }
+                }
+            )
+        }
+
+        val currentTraceResult = traceResultCache[cacheResult.orderType]
         if (currentTraceResult != null) {
-            val mergedArtifactTraceResult = artifactTraceResult.mergeWith(currentTraceResult)
+            val mergedArtifactTraceResult = cacheResult.mergeWith(currentTraceResult)
             if (pageNumber == 1) {
-                traceResultCache[mergedArtifactTraceResult.orderType] = mergedArtifactTraceResult.truncate(viewTraceAmount)
+                traceResultCache[mergedArtifactTraceResult.orderType] =
+                    mergedArtifactTraceResult.truncate(viewTraceAmount)
             } else {
                 traceResultCache[mergedArtifactTraceResult.orderType] = mergedArtifactTraceResult
             }
         } else {
-            traceResultCache[artifactTraceResult.orderType] = artifactTraceResult.truncate(viewTraceAmount)
+            traceResultCache[cacheResult.orderType] = cacheResult.truncate(viewTraceAmount)
         }
     }
 
@@ -73,5 +88,6 @@ class TracesView(
         viewType = view.viewType
         traceId = view.traceId
         spanId = view.spanId
+        resolvedEndpointNames = HashMap(view.resolvedEndpointNames)
     }
 }
