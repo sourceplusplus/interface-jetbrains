@@ -97,7 +97,8 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             vertx.eventBus().send(ClearActivity(portal.portalUuid), null)
             vertx.eventBus().send(RefreshActivity, portal)
         }
-        log.info("{} started", javaClass.simpleName)
+
+        super.start()
     }
 
     override fun updateUI(portal: SourcePortal) {
