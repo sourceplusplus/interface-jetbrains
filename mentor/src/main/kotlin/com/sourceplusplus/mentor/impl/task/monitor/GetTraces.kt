@@ -10,6 +10,7 @@ import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
+import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import java.time.ZonedDateTime
@@ -72,7 +73,15 @@ class GetTraces(
                     finalTraceResult!!.mergeWith(traces)
                 }
             }
-            traceResult = finalTraceResult!!
+            traceResult = finalTraceResult ?: TraceResult(
+                appUuid = "null", //todo: likely not necessary
+                artifactQualifiedName = "null", //todo: likely not necessary
+                orderType = orderType,
+                start = Instant.fromEpochMilliseconds(ZonedDateTime.now().minusMinutes(15).toInstant().toEpochMilli()),
+                stop = Instant.fromEpochMilliseconds(ZonedDateTime.now().toInstant().toEpochMilli()),
+                total = 0,
+                traces = emptyList()
+            )
         } else {
             traceResult = EndpointTracesBridge.getTraces(
                 GetEndpointTraces(
