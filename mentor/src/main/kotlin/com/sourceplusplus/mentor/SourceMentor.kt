@@ -66,7 +66,7 @@ class SourceMentor : CoroutineVerticle() {
             if (jobsWhichRequireTask.isEmpty()) continue
 
             //search still valid tasks for current task
-            var taskComplete = false
+            var taskComplete = true
             var reusingTask = false
             val stillValidTask = stillValidTasks.find { it.task == currentTask }
             if (stillValidTask != null) {
@@ -77,7 +77,6 @@ class SourceMentor : CoroutineVerticle() {
                     jobsWhichRequireTask[0].context.copyOutputContext(stillValidTask.context, currentTask)
                     jobsWhichRequireTask[0].trace("Copied cached context for task: $currentTask")
                     jobsWhichRequireTask[0].emitEvent(MentorJobEvent.CONTEXT_REUSED, currentTask)
-                    taskComplete = true
                 } else {
                     taskComplete = executeTask(jobsWhichRequireTask[0], currentTask)
                 }
