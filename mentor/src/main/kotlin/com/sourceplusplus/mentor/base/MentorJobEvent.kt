@@ -8,6 +8,7 @@ package com.sourceplusplus.mentor.base
  */
 enum class MentorJobEvent {
     TASK_COMPLETE,
+    TASK_FAILED,
     JOB_COMPLETE,
     JOB_RESCHEDULED,
     CONTEXT_SHARED,
