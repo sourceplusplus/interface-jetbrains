@@ -18,5 +18,5 @@ data class PortalConfiguration(
     var visibleTraces: Boolean = true,
     var visibleLogs: Boolean = true,
     var visibleConfiguration: Boolean = false,
-    var autoResolveEndpointNames: Boolean = true
+    var autoResolveEndpointNames: Boolean = false
 )
