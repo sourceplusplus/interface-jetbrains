@@ -63,6 +63,7 @@ dependencies {
     implementation("io.dropwizard.metrics:metrics-core:4.1.15")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
     implementation("org.jooq:jooq:3.14.3")
+    implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
 }
 
 tasks {

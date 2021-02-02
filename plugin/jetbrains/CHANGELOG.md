@@ -9,6 +9,7 @@
 - Implemented logging portal page
 - Implement localization bundling
 - Mentor task retry logic
+- Anonymous error reporting ([#115](https://github.com/sourceplusplus/SourceMarker/issues/115))
 
 ### Changed
 - Single page portal ([#254](https://github.com/sourceplusplus/SourceMarker/issues/254))
