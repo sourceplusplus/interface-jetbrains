@@ -14,6 +14,7 @@ public class PluginConfigurationPanel {
     private JTextField skywalkingOapTextField;
     private JTextField rootSourcePackageTextField;
     private JComboBox<String> skywalkingVersionComboBox;
+    private JCheckBox autoResolveEndpointNamesCheckBox;
     private SourceMarkerConfig config;
 
     public PluginConfigurationPanel() {
@@ -32,13 +33,17 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(rootSourcePackageTextField.getText(), config.getRootSourcePackage())) {
             return true;
         }
+        if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {
+            return true;
+        }
         return false;
     }
 
     public SourceMarkerConfig getPluginConfig() {
         return new SourceMarkerConfig(
                 skywalkingOapTextField.getText(),
-                rootSourcePackageTextField.getText()
+                rootSourcePackageTextField.getText(),
+                autoResolveEndpointNamesCheckBox.isSelected()
         );
     }
 
@@ -46,5 +51,6 @@ public class PluginConfigurationPanel {
         this.config = config;
         skywalkingOapTextField.setText(config.getSkywalkingOapUrl());
         rootSourcePackageTextField.setText(config.getRootSourcePackage());
+        autoResolveEndpointNamesCheckBox.setSelected(config.getAutoResolveEndpointNames());
     }
 }

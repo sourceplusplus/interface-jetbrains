@@ -76,7 +76,7 @@ class StandaloneServer : LightJavaCodeInsightFixtureTestCase() {
     fun test() {
         assumeTrue((System.getenv("STANDALONE_ENABLED")?.toBooleanLenient() ?: false))
         val className = "spp.example.webapp.controller.WebappController"
-        val artifactName = "$className.userList()"
+        val artifactName = "$className.getUser(long)"
         val portalUuid = "5471535f-2a5f-4ed2-bfaf-65345c59fd7b"
         println(
             "Portal UUID: " + SourcePortal.register(

@@ -6,7 +6,8 @@ import com.sourceplusplus.portal.extensions.displayTraceStack
 import com.sourceplusplus.portal.extensions.displayTraces
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.portal.model.TraceDisplayType.*
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTraceUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.CanNavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayInnerTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplaySpanInfo
@@ -22,6 +23,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetTraceOrderType
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateTraceSpan
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType.METHOD
 import com.sourceplusplus.protocol.artifact.trace.*
@@ -29,6 +31,7 @@ import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunc
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageAndClassName
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageNames
 import io.vertx.core.eventbus.Message
+import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
 import java.util.regex.Pattern
@@ -56,14 +59,19 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
             }
         }
 
+        //plugin listeners
+        vertx.eventBus().consumer<TraceResult>(ArtifactTracesUpdated) { handleArtifactTraceResult(it.body()) }
+        vertx.eventBus().consumer<TraceSpan>(TraceSpanUpdated) { handleTraceSpanUpdated(it.body()) }
+
+        //portal listeners
         vertx.eventBus().consumer(SetTraceOrderType, this@TracesDisplay::setTraceOrderType)
-        vertx.eventBus().consumer<TraceResult>(ArtifactTraceUpdated) { handleArtifactTraceResult(it.body()) }
         vertx.eventBus().consumer(FetchMoreTraces, this@TracesDisplay::fetchMoreTraces)
         vertx.eventBus().consumer(ClickedDisplayTraceStack, this@TracesDisplay::clickedDisplayTraceStack)
         vertx.eventBus().consumer(ClickedDisplayInnerTraceStack, this@TracesDisplay::clickedDisplayInnerTraceStack)
         vertx.eventBus().consumer(ClickedDisplayTraces, this@TracesDisplay::clickedDisplayTraces)
         vertx.eventBus().consumer(ClickedDisplaySpanInfo, this@TracesDisplay::clickedDisplaySpanInfo)
         vertx.eventBus().consumer(GetTraceStack, this@TracesDisplay::getTraceStack)
+
         log.info("{} started", javaClass.simpleName)
     }
 
@@ -270,6 +278,16 @@ class TracesDisplay : AbstractDisplay(PageType.TRACES) {
                 artifactTraceResult.artifactQualifiedName
             ).toList(), artifactTraceResult
         )
+    }
+
+    private fun handleTraceSpanUpdated(traceSpan: TraceSpan) {
+        SourcePortal.getPortals(
+            "null",
+            traceSpan.artifactQualifiedName!!
+        ).toList().forEach {
+            it.tracesView.resolvedEndpointNames[traceSpan.traceId] = traceSpan.endpointName!!
+            vertx.eventBus().publish(UpdateTraceSpan(it.portalUuid), JsonObject(Json.encode(traceSpan)))
+        }
     }
 
     @OptIn(ExperimentalTime::class)
