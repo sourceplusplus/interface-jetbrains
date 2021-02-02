@@ -6,7 +6,7 @@
 ### Added
 - Infinite scroll on traces portal ([#210](https://github.com/sourceplusplus/SourceMarker/issues/210))
 - Implement localization bundling ([#288](https://github.com/sourceplusplus/SourceMarker/issues/288))
-- Implemented logging portal page
+- Implemented logging portal page ([#230](https://github.com/sourceplusplus/SourceMarker/issues/230))
 - Implement localization bundling
 - Mentor task retry logic
 - Anonymous error reporting ([#115](https://github.com/sourceplusplus/SourceMarker/issues/115))
