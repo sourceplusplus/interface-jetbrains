@@ -33,6 +33,7 @@
 - kotlinx.serialization (1.0.0 -> 1.0.1)
 - gradle-docker-compose-plugin (0.13.4 -> 0.14.0)
 - detekt (1.14.2 -> 1.15.0)
+- Apache ECharts (4.9.0 -> 5.0.1)
 
 ## [0.1.1] - 2020-12-01
 ### Fixed

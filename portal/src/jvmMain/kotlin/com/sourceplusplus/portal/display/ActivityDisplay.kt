@@ -1,11 +1,10 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.portal.extensions.displayCard
-import com.sourceplusplus.portal.extensions.updateChart
+import com.sourceplusplus.portal.extensions.displayActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import com.sourceplusplus.protocol.portal.PageType
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
@@ -14,17 +13,8 @@ import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.*
 import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
-import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
-import com.sourceplusplus.protocol.utils.toPrettyDuration
 import io.vertx.core.json.JsonObject
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.plus
 import org.slf4j.LoggerFactory
-import java.text.DecimalFormat
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Displays general source code artifact statistics.
@@ -44,7 +34,6 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
 
     companion object {
         private val log = LoggerFactory.getLogger(ActivityDisplay::class.java)
-        private val decimalFormat = DecimalFormat(".#")
     }
 
     override suspend fun start() {
@@ -69,7 +58,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             //has been called more than once; for now just do it whenever the activity tab is opened
             vertx.eventBus().send(ClearActivity(portal.portalUuid), null)
         }
-        vertx.eventBus().consumer<ArtifactMetricResult>(ArtifactMetricUpdated) {
+        vertx.eventBus().consumer<ArtifactMetricResult>(ArtifactMetricsUpdated) {
             val artifactMetricResult = it.body()
             SourcePortal.getPortals(artifactMetricResult.appUuid, artifactMetricResult.artifactQualifiedName)
                 .forEach { portal ->
@@ -94,7 +83,6 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             portal.activityView.activeChartMetric = valueOf(request.getString("metricType"))
             updateUI(portal)
 
-            vertx.eventBus().send(ClearActivity(portal.portalUuid), null)
             vertx.eventBus().send(RefreshActivity, portal)
         }
 
@@ -117,153 +105,14 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             )
         }
 
-        artifactMetricResult.artifactMetrics.forEach {
-            updateCard(portal, artifactMetricResult, it)
-            if ((it.metricType.responseTimePercentile
-                        && portal.activityView.activeChartMetric == ResponseTime_Average)
-                || it.metricType == portal.activityView.activeChartMetric
-            ) {
-                updateSplineGraph(portal, artifactMetricResult, it)
-            }
-        }
-    }
-
-    private fun updateSplineGraph(
-        portal: SourcePortal,
-        metricResult: ArtifactMetricResult,
-        artifactMetrics: ArtifactMetrics
-    ) {
-        val times = ArrayList<Instant>()
-        var current = metricResult.start
-        times.add(current)
-        while (current.toEpochMilliseconds() < metricResult.stop.toEpochMilliseconds()) {
-            if (metricResult.step == "MINUTE") {
-                current = current.plus(DateTimeUnit.Companion.MINUTE, TimeZone.UTC)
-                times.add(current)
-            } else {
-                throw UnsupportedOperationException("Invalid step: " + metricResult.step)
-            }
-        }
-
-        val finalArtifactMetrics = if (artifactMetrics.metricType == ServiceLevelAgreement_Average) {
-            artifactMetrics.copy(values = artifactMetrics.values.map { it / 100 })
-        } else {
-            artifactMetrics
-        }
-
-        val seriesIndex = when (finalArtifactMetrics.metricType) {
-            ResponseTime_99Percentile -> 0
-            ResponseTime_95Percentile -> 1
-            ResponseTime_90Percentile -> 2
-            ResponseTime_75Percentile -> 3
-            ResponseTime_50Percentile -> 4
-            else -> 0
-        }
-        val seriesData = SplineSeriesData(
-            seriesIndex = seriesIndex,
-            times = times.map { Instant.fromEpochMilliseconds(it.toEpochMilliseconds()) },
-            values = finalArtifactMetrics.values
+        vertx.eventBus().displayActivity(
+            portal.portalUuid,
+            artifactMetricResult.copy(focus = portal.activityView.activeChartMetric)
         )
-        val splineChart = SplineChart(
-            metricType = finalArtifactMetrics.metricType,
-            timeFrame = metricResult.timeFrame,
-            seriesData = Collections.singletonList(seriesData)
+        log.trace(
+            "Displayed metrics for artifact: {} - Portal: {}",
+            getShortQualifiedFunctionName(artifactMetricResult.artifactQualifiedName),
+            portal.portalUuid
         )
-        vertx.eventBus().updateChart(portal.portalUuid, splineChart)
-
-//        if (portal.advice.isNotEmpty()) {
-//            for (advice in portal.advice) {
-//                if (advice is RampDetectionAdvice) {
-//                    val regressionSeriesData = SplineSeriesData(
-//                        seriesIndex = 5,
-//                        times = times.map { it.epochSeconds }, //todo: no epochSeconds
-//                        values = times.mapIndexed { i, it ->
-//                            if (splineChart.seriesData[0].values[i] == 0.0) {
-//                                0.0
-//                            } else {
-//                                advice.regression.predict(it.toEpochMilliseconds().toDouble())
-//                            }
-//                        }
-//                    )
-//                    val regressionSplineChart = splineChart.copy(
-//                        seriesData = Collections.singletonList(regressionSeriesData)
-//                    )
-//                    vertx.eventBus().updateChart(portal.portalUuid, regressionSplineChart)
-//                }
-//            }
-//        }
-    }
-
-    private fun updateCard(portal: SourcePortal, metricResult: ArtifactMetricResult, artifactMetrics: ArtifactMetrics) {
-        val avg = artifactMetrics.values.average()
-        val percents = calculatePercents(artifactMetrics)
-
-        when (artifactMetrics.metricType) {
-            Throughput_Average -> {
-                val barTrendCard = BarTrendCard(
-                    timeFrame = metricResult.timeFrame,
-                    header = (avg / 60.0).fromPerSecondToPrettyFrequency(),
-                    meta = artifactMetrics.metricType.toString().toLowerCase(),
-                    barGraphData = percents
-                )
-                vertx.eventBus().displayCard(portal.portalUuid, barTrendCard)
-            }
-            ResponseTime_Average -> {
-                val barTrendCard = BarTrendCard(
-                    timeFrame = metricResult.timeFrame,
-                    header = avg.toInt().toPrettyDuration(),
-                    meta = artifactMetrics.metricType.toString().toLowerCase(),
-                    barGraphData = percents
-                )
-                vertx.eventBus().displayCard(portal.portalUuid, barTrendCard)
-            }
-            ServiceLevelAgreement_Average -> {
-                val barTrendCard = BarTrendCard(
-                    timeFrame = metricResult.timeFrame,
-                    header = if (avg == 0.0) {
-                        "0%"
-                    } else {
-                        decimalFormat.format(avg / 100.0).toString() + "%"
-                    },
-                    meta = artifactMetrics.metricType.toString().toLowerCase(),
-                    barGraphData = percents
-                )
-                vertx.eventBus().displayCard(portal.portalUuid, barTrendCard)
-            }
-            else -> throw UnsupportedOperationException(artifactMetrics.metricType.name)
-        }
-    }
-
-    private fun calculatePercents(artifactMetrics: ArtifactMetrics): List<Double> {
-        val metricArr = ArrayList<Double>()
-        when (artifactMetrics.values.size) {
-            60 -> {
-                for (i in artifactMetrics.values.indices) {
-                    metricArr.add(
-                        artifactMetrics.values[i] + artifactMetrics.values[i + 1] +
-                                artifactMetrics.values[i + 2] + artifactMetrics.values[i + 3]
-                    )
-                }
-            }
-            30 -> {
-                for (i in artifactMetrics.values.indices step 2) {
-                    metricArr.add(artifactMetrics.values[i] + artifactMetrics.values[i + 1])
-                }
-            }
-            else -> {
-                metricArr.addAll(artifactMetrics.values)
-            }
-        }
-
-        val percentMax = metricArr.max()!!
-        val percents = ArrayList<Double>()
-        for (i in metricArr.indices) {
-            if (percentMax == 0.0) {
-                percents.add(0.0)
-            } else {
-                percents.add((metricArr[i] / percentMax) * 100.00)
-            }
-        }
-        return percents
     }
 }

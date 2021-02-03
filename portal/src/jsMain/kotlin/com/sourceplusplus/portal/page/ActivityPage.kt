@@ -5,27 +5,30 @@ import com.sourceplusplus.portal.*
 import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.extensions.echarts
 import com.sourceplusplus.portal.extensions.jq
+import com.sourceplusplus.portal.extensions.toFixed
 import com.sourceplusplus.portal.extensions.toMoment
 import com.sourceplusplus.portal.model.ChartItemType.*
-import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayCard
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateChart
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayActivity
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
-import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
-import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
-import com.sourceplusplus.protocol.artifact.metrics.MetricType
-import com.sourceplusplus.protocol.artifact.metrics.SplineChart
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.*
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
+import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
+import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
+import com.sourceplusplus.protocol.utils.toPrettyDuration
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.dom.addClass
 import kotlinx.html.dom.append
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -58,18 +61,16 @@ class ActivityPage(
     private val overviewChartOptions by lazy {
         json(
             "grid" to json(
-                "top" to 20,
-                "bottom" to 30,
-                "left" to 55,
-                "right" to 0
+                "top" to 10,
+                "bottom" to 5,
+                "left" to 10,
+                "right" to 0,
+                "containLabel" to true
             ),
             "tooltip" to json(
                 "trigger" to "axis",
-                "formatter" to tooltipFormatter,
-                "axisPointer" to json(
-                    "animation" to false
-                )
-            ),
+                "formatter" to tooltipFormatter
+                ),
             "xAxis" to json(
                 "type" to "time",
                 "splitLine" to json(
@@ -78,11 +79,12 @@ class ActivityPage(
                 "axisLabel" to json(
                     "formatter" to axisFormatter,
                     "color" to labelColor
-                )
+                ),
+                "boundaryGap" to false
             ),
             "yAxis" to json(
                 "type" to "value",
-                "boundaryGap" to arrayOf(0, "100%"),
+                "boundaryGap" to false,
                 "splitLine" to json(
                     "show" to false
                 ),
@@ -90,7 +92,15 @@ class ActivityPage(
                     "color" to labelColor
                 )
             ),
-            "series" to arrayOf(series0, series1, series2, series3, series4, regressionSeries)
+            "series" to arrayOf(
+                series_avg,
+                series_99p,
+                series_95p,
+                series_90p,
+                series_75p,
+                series_50p,
+                regressionSeries
+            )
         )
     }
 
@@ -101,11 +111,8 @@ class ActivityPage(
             eb.registerHandler(ClearActivity(portalUuid)) { _: dynamic, _: dynamic ->
                 clearActivity()
             }
-            eb.registerHandler(DisplayCard(portalUuid)) { _: dynamic, message: dynamic ->
-                displayCard(Json.decodeFromDynamic(message.body))
-            }
-            eb.registerHandler(UpdateChart(portalUuid)) { _: dynamic, message: dynamic ->
-                updateChart(Json.decodeFromDynamic(message.body))
+            eb.registerHandler(DisplayActivity(portalUuid)) { _: dynamic, message: dynamic ->
+                displayActivity(Json.decodeFromDynamic(message.body))
             }
 
             eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
@@ -166,7 +173,7 @@ class ActivityPage(
         loadChart()
     }
 
-    fun loadChart() {
+    private fun loadChart() {
         console.log("Loading chart")
         overviewChart = echarts.init(document.getElementById("overview_chart"))
         window.onresize = {
@@ -176,14 +183,15 @@ class ActivityPage(
         overviewChart.setOption(overviewChartOptions)
     }
 
-    fun clearActivity() {
+    private fun clearActivity() {
         console.log("Clearing activity")
 
-        series0["data"] = arrayOf<Int>()
-        series1["data"] = arrayOf<Int>()
-        series2["data"] = arrayOf<Int>()
-        series3["data"] = arrayOf<Int>()
-        series4["data"] = arrayOf<Int>()
+        series_avg["data"] = arrayOf<Int>()
+        series_99p["data"] = arrayOf<Int>()
+        series_95p["data"] = arrayOf<Int>()
+        series_90p["data"] = arrayOf<Int>()
+        series_75p["data"] = arrayOf<Int>()
+        series_50p["data"] = arrayOf<Int>()
         regressionSeries["data"] = arrayOf<Int>()
 
         overviewChartOptions["series"] = emptyArray<kotlin.js.Json>()
@@ -191,78 +199,89 @@ class ActivityPage(
         overviewChart.resize()
     }
 
-    override fun displayCard(card: BarTrendCard) {
-        console.log("Displaying card. Type: ${card.meta}")
-        setActiveTime(card.timeFrame)
-
-        document.getElementById("card_${card.meta.toLowerCase()}_header")!!.textContent = translate(card.header)
-    }
-
-    override fun updateChart(chartData: SplineChart) {
+    override fun displayActivity(metricResult: ArtifactMetricResult) {
         console.log("Updating chart")
-        setActiveTime(chartData.timeFrame)
+        setActiveTime(metricResult.timeFrame)
 
         val cards = listOf("throughput_average", "responsetime_average", "servicelevelagreement_average")
         for (i in cards.indices) {
             jq("#card_" + cards[i] + "_header").removeClass("spp_red_color")
             jq("#card_" + cards[i] + "_header_label").removeClass("spp_red_color")
         }
-        jq("#card_" + chartData.metricType.name.toLowerCase() + "_header").addClass("spp_red_color")
-        jq("#card_" + chartData.metricType.name.toLowerCase() + "_header_label").addClass("spp_red_color")
-        if (chartData.metricType.name.toLowerCase() == cards[0]) {
-            tooltipMeasurement = "/" + translate("min")
-        } else if (chartData.metricType.name.toLowerCase() == cards[1]) {
-            tooltipMeasurement = translate("ms")
-        } else if (chartData.metricType.name.toLowerCase() == cards[2]) {
-            tooltipMeasurement = "%"
+        jq("#card_" + metricResult.focus.name.toLowerCase() + "_header").addClass("spp_red_color")
+        jq("#card_" + metricResult.focus.name.toLowerCase() + "_header_label").addClass("spp_red_color")
+        when {
+            metricResult.focus.name.toLowerCase() == cards[0] -> tooltipMeasurement = "/" + translate("min")
+            metricResult.focus.name.toLowerCase() == cards[1] -> tooltipMeasurement = translate("ms")
+            metricResult.focus.name.toLowerCase() == cards[2] -> tooltipMeasurement = "%"
         }
 
-        for (i in chartData.seriesData.indices) {
-            val seriesData = chartData.seriesData[i]
-            val list = mutableListOf<kotlin.js.Json>()
-            for (z in seriesData.values.indices) {
-                val value = seriesData.values[z]
-                val time = seriesData.times[z].toMoment().valueOf()
+        for (chartData in metricResult.artifactMetrics) {
+            when (chartData.metricType) {
+                Throughput_Average -> {
+                    val meta = chartData.metricType.toString().toLowerCase()
+                    document.getElementById("card_${meta}_header")!!.textContent =
+                        (chartData.values.average() / 60.0).fromPerSecondToPrettyFrequency()
+                }
+                ResponseTime_Average -> {
+                    val meta = chartData.metricType.toString().toLowerCase()
+                    document.getElementById("card_${meta}_header")!!.textContent =
+                        chartData.values.average().toInt().toPrettyDuration()
+                }
+                ServiceLevelAgreement_Average -> {
+                    val meta = chartData.metricType.toString().toLowerCase()
+                    val avg = chartData.values.average()
+                    document.getElementById("card_${meta}_header")!!.textContent =
+                        if (avg == 0.0) "0%" else (avg / 100.0).toFixed(1) + "%"
+                }
+                else -> {
+                    //ignore
+                }
+            }
 
-                list.add(
+            if (chartData.metricType == metricResult.focus) {
+                var current = metricResult.start
+                val focusedSeries = mutableListOf<kotlin.js.Json>()
+                for (i in chartData.values.indices) {
+                    val value = if (chartData.metricType == ServiceLevelAgreement_Average) {
+                        chartData.values[i] / 100 //transforms to 0%-100%
+                    } else {
+                        chartData.values[i]
+                    }
+                    focusedSeries.add(json("value" to arrayOf(current.toMoment().valueOf(), value)))
+                    if (metricResult.step == "MINUTE") {
+                        current = current.plus(DateTimeUnit.Companion.MINUTE, TimeZone.UTC)
+                    } else {
+                        throw UnsupportedOperationException("Invalid step: " + metricResult.step)
+                    }
+                }
+
+                overviewChart.setOption(
                     json(
-                        "value" to arrayOf(time, value),
-                        "itemStyle" to json(
-                            "normal" to json(
-                                "color" to symbolColor
-                            )
+                        "series" to arrayOf(
+                            series_avg,
+                            series_99p,
+                            series_95p,
+                            series_90p,
+                            series_75p,
+                            series_50p,
+                            regressionSeries
                         )
                     )
                 )
 
-                if (seriesData.seriesIndex == 0) {
-                    series0["data"] = list.toTypedArray()
-                } else if (seriesData.seriesIndex == 1) {
-                    series1["data"] = list.toTypedArray()
-                } else if (seriesData.seriesIndex == 2) {
-                    series2["data"] = list.toTypedArray()
-                } else if (seriesData.seriesIndex == 3) {
-                    series3["data"] = list.toTypedArray()
-                } else if (seriesData.seriesIndex == 4) {
-                    series4["data"] = list.toTypedArray()
-                } else if (seriesData.seriesIndex == 5) {
-                    regressionSeries["data"] = list.toTypedArray()
+                when (chartData.metricType) {
+                    Throughput_Average -> series_avg["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_Average -> series_avg["data"] = focusedSeries.toTypedArray()
+                    ServiceLevelAgreement_Average -> series_avg["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_99Percentile -> series_99p["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_95Percentile -> series_95p["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_90Percentile -> series_90p["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_75Percentile -> series_75p["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_50Percentile -> series_50p["data"] = focusedSeries.toTypedArray()
                 }
             }
         }
-
-        overviewChart.setOption(
-            json(
-                "series" to arrayOf(
-                    series0,
-                    series1,
-                    series2,
-                    series3,
-                    series4,
-                    regressionSeries
-                )
-            )
-        )
     }
 
     override fun updateTime(interval: QueryTimeFrame) {
@@ -284,7 +303,7 @@ class ActivityPage(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to MetricType.Throughput_Average.name
+                "metricType" to Throughput_Average.name
             )
         )
     }
@@ -295,7 +314,7 @@ class ActivityPage(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to MetricType.ResponseTime_Average.name
+                "metricType" to ResponseTime_Average.name
             )
         )
     }
@@ -306,57 +325,50 @@ class ActivityPage(
             SetActiveChartMetric,
             json(
                 "portalUuid" to portalUuid,
-                "metricType" to MetricType.ServiceLevelAgreement_Average.name
+                "metricType" to ServiceLevelAgreement_Average.name
             )
         )
     }
 
     companion object {
-        val series0 = json(
-            "name" to translate("99th percentile"),
+        val series_avg = json(
+            "name" to translate("Average"),
             "type" to "line",
             "color" to "#e1483b",
-            "hoverAnimation" to false,
             "symbol" to "circle",
             "symbolSize" to 8,
             "showSymbol" to true,
             "areaStyle" to {},
             "data" to arrayOf<Int>()
         )
-        val series1 = json(
+        val series_99p = json(
+            "name" to translate("99th percentile"),
+            "type" to "line",
+            "showSymbol" to false,
+            "data" to arrayOf<Int>()
+        )
+        val series_95p = json(
             "name" to translate("95th percentile"),
             "type" to "line",
-            "color" to "#e1483b",
             "showSymbol" to false,
-            "hoverAnimation" to false,
-            "areaStyle" to {},
             "data" to arrayOf<Int>()
         )
-        val series2 = json(
+        val series_90p = json(
             "name" to translate("90th percentile"),
             "type" to "line",
-            "color" to "#e1483b",
             "showSymbol" to false,
-            "hoverAnimation" to false,
-            "areaStyle" to {},
             "data" to arrayOf<Int>()
         )
-        val series3 = json(
+        val series_75p = json(
             "name" to translate("75th percentile"),
             "type" to "line",
-            "color" to "#e1483b",
             "showSymbol" to false,
-            "hoverAnimation" to false,
-            "areaStyle" to {},
             "data" to arrayOf<Int>()
         )
-        val series4 = json(
+        val series_50p = json(
             "name" to translate("50th percentile"),
             "type" to "line",
-            "color" to "#e1483b",
             "showSymbol" to false,
-            "hoverAnimation" to false,
-            "areaStyle" to {},
             "data" to arrayOf<Int>()
         )
         val regressionSeries = json(
@@ -364,10 +376,8 @@ class ActivityPage(
             "type" to "line",
             "color" to "#000",
             "showSymbol" to true,
-            "hoverAnimation" to false,
             "symbol" to "square",
             "symbolSize" to 8,
-            "areaStyle" to {},
             "data" to arrayOf<Int>()
         )
     }

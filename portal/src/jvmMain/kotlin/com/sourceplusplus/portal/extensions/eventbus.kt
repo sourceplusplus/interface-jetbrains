@@ -1,5 +1,6 @@
 package com.sourceplusplus.portal.extensions
 
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayCard
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
@@ -9,6 +10,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateChart
 import com.sourceplusplus.protocol.artifact.log.Log
 import com.sourceplusplus.protocol.artifact.log.LogResult
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
 import com.sourceplusplus.protocol.artifact.metrics.SplineChart
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
@@ -22,6 +24,10 @@ import io.vertx.core.json.JsonObject
 
 fun EventBus.updateChart(portalUuid: String, splineChart: SplineChart) {
     send(UpdateChart(portalUuid), JsonObject(Json.encode(splineChart)))
+}
+
+fun EventBus.displayActivity(portalUuid: String, metricResult: ArtifactMetricResult) {
+    send(DisplayActivity(portalUuid), JsonObject(Json.encode(metricResult)))
 }
 
 fun EventBus.displayTraces(portalUuid: String, traceResult: TraceResult) {

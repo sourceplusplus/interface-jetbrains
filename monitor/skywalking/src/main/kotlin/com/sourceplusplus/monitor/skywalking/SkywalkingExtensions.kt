@@ -8,6 +8,7 @@ import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.trace.*
 import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
+import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.QueryOrder
@@ -18,6 +19,7 @@ fun toProtocol(
     appUuid: String,
     artifactQualifiedName: String,
     timeFrame: QueryTimeFrame,
+    focus: MetricType,
     metricsRequest: GetEndpointMetrics,
     metrics: List<GetLinearIntValuesQuery.Result>
 ): ArtifactMetricResult {
@@ -25,6 +27,7 @@ fun toProtocol(
         appUuid = appUuid,
         artifactQualifiedName = artifactQualifiedName,
         timeFrame = timeFrame,
+        focus = focus,
         start = Instant.fromEpochMilliseconds(metricsRequest.zonedDuration.start.toInstant().toEpochMilli()),
         stop = Instant.fromEpochMilliseconds(metricsRequest.zonedDuration.stop.toInstant().toEpochMilli()),
         step = metricsRequest.zonedDuration.step.name,
@@ -111,4 +114,8 @@ fun TraceOrderType.toTraceState(): TraceState {
 
 fun Iterable<GetLinearIntValuesQuery.Value>.average(): Double {
     return map { (it.value as BigDecimal).toInt() }.average()
+}
+
+fun GetMultipleLinearIntValuesQuery.Value.toProtocol(): Double {
+    return (value as BigDecimal).toDouble()
 }
