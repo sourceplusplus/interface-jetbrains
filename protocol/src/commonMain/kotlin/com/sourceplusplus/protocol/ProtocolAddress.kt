@@ -79,14 +79,6 @@ object ProtocolAddress {
             return "$portalUuid-ClearActivity"
         }
 
-        fun UpdateChart(portalUuid: String): String {
-            return "$portalUuid-UpdateChart"
-        }
-
-        fun DisplayCard(portalUuid: String): String {
-            return "$portalUuid-DisplayCard"
-        }
-
         fun DisplayActivity(portalUuid: String): String {
             return "$portalUuid-DisplayActivity"
         }
