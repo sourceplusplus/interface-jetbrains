@@ -35,7 +35,7 @@ object ProtocolAddress {
         const val SetMetricTimeFrame = "SetMetricTimeFrame"
         const val SetActiveChartMetric = "SetActiveChartMetric"
         const val RefreshActivity = "RefreshActivity"
-        const val ArtifactMetricUpdated = "ArtifactMetricUpdated"
+        const val ArtifactMetricsUpdated = "ArtifactMetricUpdated"
 
         //Portal - Traces
         const val SetTraceOrderType = "SetTraceOrderType"
@@ -79,12 +79,8 @@ object ProtocolAddress {
             return "$portalUuid-ClearActivity"
         }
 
-        fun UpdateChart(portalUuid: String): String {
-            return "$portalUuid-UpdateChart"
-        }
-
-        fun DisplayCard(portalUuid: String): String {
-            return "$portalUuid-DisplayCard"
+        fun DisplayActivity(portalUuid: String): String {
+            return "$portalUuid-DisplayActivity"
         }
 
         fun DisplayTraces(portalUuid: String): String {

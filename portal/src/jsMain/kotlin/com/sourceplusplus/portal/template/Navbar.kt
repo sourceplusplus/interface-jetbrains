@@ -27,7 +27,7 @@ fun TagConsumer<HTMLElement>.timeDropdown(
                     div("item") {
                         id = "last_${timeFrame.id}_time"
                         onClickFunction = { updateTimeFrame(timeFrame) }
-                        span("menu_tooltip_text") { + translate("LAST ${timeFrame.description}") }
+                        span("menu_tooltip_text") { +translate("LAST ${timeFrame.description}") }
                     }
                 }
             }
@@ -54,7 +54,7 @@ fun TagConsumer<HTMLElement>.tracesHeader(
         onClickFunction = onClickBackToTraces
         span {
             id = "latest_traces_header_text"
-            + translate(LATEST_TRACES.description)
+            +translate(LATEST_TRACES.description)
         }
     }
     a(classes = "ui item dropdown visibility_hidden") {
@@ -62,7 +62,7 @@ fun TagConsumer<HTMLElement>.tracesHeader(
         onClickFunction = onClickBackToTraceStack
         span {
             id = "trace_stack_header_text"
-            + translate("Trace Stack")
+            +translate("Trace Stack")
         }
         div("menu") {
             id = "trace_stack_menu"
@@ -83,13 +83,13 @@ fun TagConsumer<HTMLElement>.tracesHeader(
         id = "span_info_header"
         span {
             id = "span_info_header_text"
-            + translate("Span Info")
+            +translate("Span Info")
         }
     }
 }
 
 fun TagConsumer<HTMLElement>.externalPortalButton(onClick: (Event) -> Unit) {
-    div("first_menu_button_margin align_content_center") {
+    div("last_menu_button_margin align_content_center") {
         div("ui icon basic button") {
             onClickFunction = onClick
             i("icon external link spp_red_color")
