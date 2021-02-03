@@ -4,8 +4,8 @@ import org.jetbrains.changelog.markdownToHTML
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "0.6.3"
-    id("org.jetbrains.changelog") version "0.6.2"
+    id("org.jetbrains.intellij") version "0.6.5"
+    id("org.jetbrains.changelog") version "1.0.1"
     id("maven-publish")
 }
 
@@ -51,18 +51,18 @@ dependencies {
 
     val vertxVersion = "4.0.0"
     implementation("com.github.sh5i:git-stein:v0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("io.vertx:vertx-web:$vertxVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.11.3")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.11.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3")
-    implementation("io.dropwizard.metrics:metrics-core:4.1.15")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
-    implementation("org.jooq:jooq:3.14.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+    implementation("io.dropwizard.metrics:metrics-core:4.1.17")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
+    implementation("org.jooq:jooq:3.14.6")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
 }
 

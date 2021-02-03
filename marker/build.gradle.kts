@@ -27,8 +27,8 @@ dependencies {
     val kotlinVersion = "1.4.21"
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.google.guava:guava:29.0-jre")
-    implementation("org.jetbrains:annotations:19.0.0")
+    implementation("com.google.guava:guava:30.1-jre")
+    implementation("org.jetbrains:annotations:20.1.0")
     compileOnly("org.slf4j:slf4j-api:1.7.30")
     compileOnly("org.jetbrains.intellij.deps.jcef:jcef:81.2.24-gc0b313d-chromium-81.0.4044.113")
     compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }
