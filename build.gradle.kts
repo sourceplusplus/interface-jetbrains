@@ -72,7 +72,9 @@ subprojects {
 }
 
 gradle.buildFinished {
-    project.buildDir.deleteRecursively()
+    if (!gradle!!.startParameter.taskNames.contains("jsBrowserRun")) {
+        project.buildDir.deleteRecursively()
+    }
 }
 
 tasks {
