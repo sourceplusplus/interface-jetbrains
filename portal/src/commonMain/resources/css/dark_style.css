@@ -6,6 +6,10 @@
     margin-left: 65px !important;
 }
 
+.last_menu_button_margin {
+    margin-left: 10px !important;
+}
+
 .displaynone {
     display: none !important;
 }
