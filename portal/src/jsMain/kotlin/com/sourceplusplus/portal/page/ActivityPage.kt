@@ -17,7 +17,6 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayActivity
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
-import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
@@ -145,11 +144,8 @@ class ActivityPage(
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
                     )
                 })
-                if (configuration.visibleLogs) navItem(LOGS, block = {
-                    navSubItems(
-                        PortalNavSubItem(NEWEST_LOGS) { clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS) },
-                        PortalNavSubItem(OLDEST_LOGS) { clickedLogsOrderType(eb, portalUuid, OLDEST_LOGS) }
-                    )
+                if (configuration.visibleLogs) navItem(LOGS, onClick = {
+                    clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS)
                 })
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
                     setCurrentPage(eb, portalUuid, CONFIGURATION)

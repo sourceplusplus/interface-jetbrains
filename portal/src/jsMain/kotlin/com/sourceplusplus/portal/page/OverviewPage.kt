@@ -4,7 +4,6 @@ import com.bfergerson.vertx3.eventbus.EventBus
 import com.sourceplusplus.portal.*
 import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.model.EndpointTableType
-import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
@@ -14,9 +13,9 @@ import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
-import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import com.sourceplusplus.protocol.utils.fromPerSecondToPrettyFrequency
 import com.sourceplusplus.protocol.utils.toPrettyDuration
@@ -76,11 +75,8 @@ class OverviewPage(
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
                     )
                 })
-                if (configuration.visibleLogs) navItem(LOGS, block = {
-                    navSubItems(
-                        PortalNavSubItem(NEWEST_LOGS) { clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS) },
-                        PortalNavSubItem(OLDEST_LOGS) { clickedLogsOrderType(eb, portalUuid, OLDEST_LOGS) }
-                    )
+                if (configuration.visibleLogs) navItem(LOGS, onClick = {
+                    clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS)
                 })
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
                     setCurrentPage(eb, portalUuid, CONFIGURATION)
