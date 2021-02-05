@@ -11,7 +11,6 @@ import com.sourceplusplus.portal.model.ArtifactConfigType.AUTO_SUBSCRIBE
 import com.sourceplusplus.portal.model.ArtifactConfigType.ENTRY_METHOD
 import com.sourceplusplus.portal.model.ArtifactInfoType.*
 import com.sourceplusplus.portal.setCurrentPage
-import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.template.*
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe
@@ -19,8 +18,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactEntryMet
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayArtifactConfiguration
 import com.sourceplusplus.protocol.artifact.ArtifactInformation
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
-import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
+import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.browser.document
 import kotlinx.dom.removeClass
@@ -74,11 +73,8 @@ class ConfigurationPage(
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
                     )
                 })
-                if (configuration.visibleLogs) navItem(LOGS, block = {
-                    navSubItems(
-                        PortalNavSubItem(NEWEST_LOGS) { clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS) },
-                        PortalNavSubItem(OLDEST_LOGS) { clickedLogsOrderType(eb, portalUuid, OLDEST_LOGS) }
-                    )
+                if (configuration.visibleLogs) navItem(LOGS, onClick = {
+                    clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS)
                 })
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION, isActive = true, onClick = {
                     setCurrentPage(eb, portalUuid, CONFIGURATION)

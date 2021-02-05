@@ -16,7 +16,6 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
 import com.sourceplusplus.protocol.artifact.log.Log
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
-import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.artifact.log.LogViewType
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
@@ -34,8 +33,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromDynamic
 import moment
 import org.w3c.dom.Element
-import org.w3c.dom.HTMLElement
-import org.w3c.dom.get
+import kotlin.collections.set
 import kotlin.js.json
 
 /**
@@ -85,11 +83,8 @@ class LogsPage(
                         PortalNavSubItem(FAILED_TRACES) { clickedTracesOrderType(eb, portalUuid, FAILED_TRACES) }
                     )
                 })
-                if (configuration.visibleLogs) navItem(LOGS, true, block = {
-                    navSubItems(
-                        PortalNavSubItem(NEWEST_LOGS) { clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS) },
-                        PortalNavSubItem(OLDEST_LOGS) { clickedLogsOrderType(eb, portalUuid, OLDEST_LOGS) }
-                    )
+                if (configuration.visibleLogs) navItem(LOGS, true, onClick = {
+                    clickedLogsOrderType(eb, portalUuid, NEWEST_LOGS)
                 })
                 if (configuration.visibleConfiguration) navItem(CONFIGURATION, onClick = {
                     setCurrentPage(eb, portalUuid, CONFIGURATION)
