@@ -388,8 +388,7 @@ class PortalEventListener(
     }
 
     private suspend fun refreshActivity(portal: SourcePortal) {
-        val sourceMark =
-            SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
@@ -452,6 +451,10 @@ class PortalEventListener(
 
             val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
             if (portal != lastDisplayedInternalPortal) {
+                val lastViewedPage = lastDisplayedInternalPortal?.configuration?.currentPage
+                if (lastViewedPage != null) {
+                    portal.configuration.currentPage = lastViewedPage
+                }
                 portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
                 val port = vertx.sharedData().getLocalMap<String, Int>("portal")["http.port"]!!
                 val host = "http://localhost:$port"
