@@ -12,6 +12,7 @@
 
 ### Changed
 - Single page portal ([#254](https://github.com/sourceplusplus/SourceMarker/issues/254))
+- Persist current view between internal portals ([#302](https://github.com/sourceplusplus/SourceMarker/issues/302))
 - Dynamic portal host ports
 - Refactored activity portal
 
