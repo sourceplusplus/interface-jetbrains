@@ -242,7 +242,17 @@ class ActivityPage(
                     } else {
                         chartData.values[i]
                     }
-                    focusedSeries.add(json("value" to arrayOf(current.toMoment().valueOf(), value)))
+                    focusedSeries.add(
+                        json(
+                            "value" to arrayOf(current.toMoment().valueOf(), value),
+                            "itemStyle" to json(
+                                "normal" to json(
+                                    "color" to symbolColor
+                                )
+                            )
+                        )
+                    )
+
                     if (metricResult.step == "MINUTE") {
                         current = current.plus(DateTimeUnit.Companion.MINUTE, TimeZone.UTC)
                     } else {
