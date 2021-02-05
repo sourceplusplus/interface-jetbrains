@@ -7,7 +7,12 @@ kotlin {
     jvm { }
     js {
         useCommonJs()
-        browser()
+        browser {
+            runTask {
+                sourceMaps = false
+                devtool = org.jetbrains.kotlin.gradle.targets.js.webpack.WebpackDevtool.EVAL_CHEAP_SOURCE_MAP
+            }
+        }
         binaries.executable()
     }
 
@@ -42,10 +47,10 @@ kotlin {
 
         val jsMain by getting {
             dependencies {
-                implementation(npm("echarts", "4.9.0", generateExternals = true))
-//                implementation(npm("fomantic-ui-less", "2.8.6"))
-                implementation(npm("jquery", "3.5.1", generateExternals = true))
+                implementation(npm("echarts", "5.0.1", generateExternals = false))
+                implementation(npm("jquery", "3.5.1", generateExternals = false))
                 implementation(npm("moment", "2.29.1", generateExternals = true))
+                //implementation(npm("fomantic-ui-less", "2.8.6"))
 
                 implementation(project(":protocol"))
                 implementation(kotlin("stdlib-common"))

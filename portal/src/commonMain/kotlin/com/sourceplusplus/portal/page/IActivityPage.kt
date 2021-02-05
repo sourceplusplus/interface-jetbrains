@@ -2,8 +2,7 @@ package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.IPortalPage
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.artifact.metrics.BarTrendCard
-import com.sourceplusplus.protocol.artifact.metrics.SplineChart
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 
 /**
@@ -19,7 +18,6 @@ abstract class IActivityPage : IPortalPage() {
     val labelColor by lazy { if (configuration.darkMode) "grey" else "black" }
     val symbolColor by lazy { if (configuration.darkMode) "grey" else "#182d34" }
 
-    abstract fun displayCard(card: BarTrendCard)
-    abstract fun updateChart(chartData: SplineChart)
+    abstract fun displayActivity(metricResult: ArtifactMetricResult)
     abstract fun updateTime(interval: QueryTimeFrame)
 }

@@ -24,8 +24,7 @@ import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
 import com.sourceplusplus.monitor.skywalking.toProtocol
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
-import com.sourceplusplus.protocol.portal.PageType
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricUpdated
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.CanNavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
@@ -54,6 +53,7 @@ import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
@@ -73,7 +73,6 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.ZonedDateTime
 import javax.swing.UIManager
-import kotlin.collections.HashMap
 
 /**
  * todo: description.
@@ -408,12 +407,40 @@ class PortalEventListener(
                     portal.appUuid,
                     portal.viewingPortalArtifact,
                     portal.activityView.timeFrame,
+                    portal.activityView.activeChartMetric,
                     metricsRequest,
                     metrics
                 )
 
                 val finalArtifactMetrics = metricResult.artifactMetrics.toMutableList()
-                vertx.eventBus().send(ArtifactMetricUpdated, metricResult.copy(artifactMetrics = finalArtifactMetrics))
+//                val multipleMetricsRequest = GetMultipleEndpointMetrics(
+//                    "endpoint_percentile",
+//                    endpointId,
+//                    5,
+//                    ZonedDuration(
+//                        ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
+//                        ZonedDateTime.now(),
+//                        SkywalkingClient.DurationStep.MINUTE
+//                    )
+//                )
+//                val multiMetrics = EndpointMetricsBridge.getMultipleMetrics(multipleMetricsRequest, vertx)
+//                multiMetrics.forEachIndexed { i, it ->
+//                    finalArtifactMetrics.add(
+//                        ArtifactMetrics(
+//                            metricType = when (i) {
+//                                0 -> MetricType.ResponseTime_50Percentile
+//                                1 -> MetricType.ResponseTime_75Percentile
+//                                2 -> MetricType.ResponseTime_90Percentile
+//                                3 -> MetricType.ResponseTime_95Percentile
+//                                4 -> MetricType.ResponseTime_99Percentile
+//                                else -> throw IllegalStateException()
+//                            },
+//                            values = it.values.map { it.toProtocol() }
+//                        )
+//                    )
+//                }
+
+                vertx.eventBus().send(ArtifactMetricsUpdated, metricResult.copy(artifactMetrics = finalArtifactMetrics))
             }
         }
     }
