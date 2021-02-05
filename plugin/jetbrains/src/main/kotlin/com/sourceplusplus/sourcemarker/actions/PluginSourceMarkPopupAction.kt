@@ -17,7 +17,7 @@ class PluginSourceMarkPopupAction : SourceMarkPopupAction() {
 
     //todo: create event on perform popup action instead of this
     override fun performPopupAction(sourceMark: SourceMark, editor: Editor) {
-        SourceMarkerPlugin.vertx.eventBus().send(OpenPortal, sourceMark.getUserData(SOURCE_PORTAL)!!)
+        SourceMarkerPlugin.vertx.eventBus().publish(OpenPortal, sourceMark.getUserData(SOURCE_PORTAL)!!)
         super.performPopupAction(sourceMark, editor)
     }
 }
