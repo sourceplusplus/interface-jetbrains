@@ -116,6 +116,22 @@ Clicking on an individual trace will display the direct children traces. If thos
 
 #### Span Info
 
-Clicking on an individual trace span will display the span information. This include data like span tags, logs, and exceptions.
+Clicking on an individual trace span will display the span information. This includes data like span tags, logs, and exceptions.
 
 ![](../.github/media/screenshots/span_info.gif)
+
+
+
+### Logs
+
+The Logs view is used to view live logs related to a given source code artifact.
+
+![](../.github/media/screenshots/logging.gif)
+
+
+
+The Logs view requires the following custom [Agent Configuration](https://github.com/apache/skywalking/blob/master/docs/en/setup/service-agent/java-agent/README.md#table-of-agent-configuration-properties):
+
+```properties
+plugin.toolkit.log.transmit_formatted=false
+```
