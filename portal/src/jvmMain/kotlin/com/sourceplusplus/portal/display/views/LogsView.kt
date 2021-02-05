@@ -8,7 +8,7 @@ import com.sourceplusplus.protocol.artifact.log.LogViewType
 /**
  * Holds the current view for the Logs portal tab.
  *
- * @since 0.1.2
+ * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class LogsView(

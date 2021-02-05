@@ -20,7 +20,7 @@ import java.util.*
 /**
  * todo: description.
  *
- * @since 0.1.2
+ * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class LogFollowCommand(

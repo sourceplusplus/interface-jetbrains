@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 /**
  * Detects the presence of log statements within methods and saves log patterns.
  *
- * @since 0.1.2
+ * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class LoggerDetector {
