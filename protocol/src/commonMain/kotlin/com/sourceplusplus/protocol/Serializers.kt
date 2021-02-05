@@ -52,7 +52,7 @@ class Serializers {
     /**
      * Used to serialize/deserialize [PageType] classes.
      *
-     * @since 0.1.2
+     * @since 0.2.0
      */
     class PageTypeSerializer : KSerializer<PageType> {
 
