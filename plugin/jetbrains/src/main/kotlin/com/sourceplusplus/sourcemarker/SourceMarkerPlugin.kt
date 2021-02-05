@@ -48,6 +48,7 @@ import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
+import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.ext.bridge.PermittedOptions
@@ -111,10 +112,15 @@ object SourceMarkerPlugin {
 
         val projectSettings = PropertiesComponent.getInstance(project)
         val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
-            Json.decodeValue(
-                projectSettings.getValue("sourcemarker_plugin_config"),
-                SourceMarkerConfig::class.java
-            )
+            try {
+                Json.decodeValue(
+                    projectSettings.getValue("sourcemarker_plugin_config"),
+                    SourceMarkerConfig::class.java
+                )
+            } catch (ex: DecodeException) {
+                log.warn("Failed to decode SourceMarker configuration", ex)
+                SourceMarkerConfig()
+            }
         } else {
             SourceMarkerConfig()
         }
