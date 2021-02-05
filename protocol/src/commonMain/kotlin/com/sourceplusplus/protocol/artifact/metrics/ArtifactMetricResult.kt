@@ -16,6 +16,7 @@ data class ArtifactMetricResult(
     val appUuid: String,
     val artifactQualifiedName: String,
     val timeFrame: QueryTimeFrame,
+    val focus: MetricType,
     @Serializable(with = Serializers.InstantKSerializer::class)
     val start: Instant,
     @Serializable(with = Serializers.InstantKSerializer::class)
