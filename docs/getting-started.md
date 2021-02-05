@@ -34,7 +34,13 @@ The SourceMarker configuration settings can be found at: <kbd>Settings</kbd> > <
 
 ![](../.github/media/screenshots/plugin_configuration.png)
 
-The primary configuration is the location of the Apache SkyWalking OAP (Observability Analysis Platform). This setting is configured on a per-project basis and allows SourceMarker to gather production runtime information which it uses to augment source code. SourceMarker should also be provided with the root source package of your project. This setting can typically be automatically detected but if not can be manually input. This setting is primarily used to ensure any source code analysis is only performed on relevant source code.
+#### Apache SkyWalking Settings
+
+The primary configuration is the location of the Apache SkyWalking OAP (Observability Analysis Platform). This setting is configured on a per-project basis and allows SourceMarker to gather production runtime information which it uses to augment source code.
+
+#### Plugin Settings
+
+SourceMarker should also be provided with the root source package of your project. This setting can typically be automatically detected but if not can be manually input. This setting is primarily used to ensure any source code analysis is only performed on relevant source code.
 
 
 
