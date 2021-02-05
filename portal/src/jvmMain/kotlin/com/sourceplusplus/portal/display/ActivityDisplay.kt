@@ -54,6 +54,7 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
             SourcePortal.ensurePortalActive(portal)
             updateUI(portal)
 
+            //todo: can likely remove with #301 impl
             //for some reason clearing (resizing) the activity chart is necessary once SourceMarkerPlugin.init()
             //has been called more than once; for now just do it whenever the activity tab is opened
             vertx.eventBus().send(ClearActivity(portal.portalUuid), null)
