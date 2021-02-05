@@ -4,14 +4,14 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
-import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.artifact.metrics.*
-import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
+import com.sourceplusplus.protocol.artifact.metrics.MetricType.valueOf
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
@@ -70,9 +70,8 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
         vertx.eventBus().consumer<JsonObject>(SetMetricTimeFrame) {
             val request = JsonObject.mapFrom(it.body())
             val portal = SourcePortal.getPortal(request.getString("portalUuid"))!!
-            val view = portal.activityView
-            view.timeFrame = QueryTimeFrame.valueOf(request.getString("metricTimeFrame").toUpperCase())
-            log.info("Activity time frame set to: " + view.timeFrame)
+            portal.activityView.timeFrame = QueryTimeFrame.valueOf(request.getString("metricTimeFrame").toUpperCase())
+            log.info("Activity time frame set to: " + portal.activityView.timeFrame)
             updateUI(portal)
 
             vertx.eventBus().send(RefreshActivity, portal)
@@ -108,11 +107,6 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
         vertx.eventBus().displayActivity(
             portal.portalUuid,
             artifactMetricResult.copy(focus = portal.activityView.activeChartMetric)
-        )
-        log.trace(
-            "Displayed metrics for artifact: {} - Portal: {}",
-            getShortQualifiedFunctionName(artifactMetricResult.artifactQualifiedName),
-            portal.portalUuid
         )
     }
 }

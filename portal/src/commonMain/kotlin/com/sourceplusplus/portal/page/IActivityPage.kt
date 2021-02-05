@@ -19,5 +19,4 @@ abstract class IActivityPage : IPortalPage() {
     val symbolColor by lazy { if (configuration.darkMode) "grey" else "#182d34" }
 
     abstract fun displayActivity(metricResult: ArtifactMetricResult)
-    abstract fun updateTime(interval: QueryTimeFrame)
 }

@@ -16,7 +16,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayActivity
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.artifact.log.LogOrderType.*
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
+import com.sourceplusplus.protocol.artifact.log.LogOrderType.OLDEST_LOGS
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
@@ -70,7 +71,7 @@ class ActivityPage(
             "tooltip" to json(
                 "trigger" to "axis",
                 "formatter" to tooltipFormatter
-                ),
+            ),
             "xAxis" to json(
                 "type" to "time",
                 "splitLine" to json(
@@ -103,6 +104,7 @@ class ActivityPage(
             )
         )
     }
+    private var currentTimeFrame: QueryTimeFrame? = null
 
     @ExperimentalSerializationApi
     override fun setupEventbus() {
@@ -155,7 +157,12 @@ class ActivityPage(
             }
             activityContent {
                 navBar {
-                    timeDropdown(*QueryTimeFrame.values()) { updateTime(it) }
+                    timeDropdown(*QueryTimeFrame.values()) {
+                        eb.send(
+                            SetMetricTimeFrame,
+                            json("portalUuid" to portalUuid, "metricTimeFrame" to it.name)
+                        )
+                    }
                     //calendar()
 
                     rightAlign {
@@ -186,14 +193,6 @@ class ActivityPage(
     private fun clearActivity() {
         console.log("Clearing activity")
 
-        series_avg["data"] = arrayOf<Int>()
-        series_99p["data"] = arrayOf<Int>()
-        series_95p["data"] = arrayOf<Int>()
-        series_90p["data"] = arrayOf<Int>()
-        series_75p["data"] = arrayOf<Int>()
-        series_50p["data"] = arrayOf<Int>()
-        regressionSeries["data"] = arrayOf<Int>()
-
         overviewChartOptions["series"] = emptyArray<kotlin.js.Json>()
         overviewChart.setOption(overviewChartOptions)
         overviewChart.resize()
@@ -201,7 +200,10 @@ class ActivityPage(
 
     override fun displayActivity(metricResult: ArtifactMetricResult) {
         console.log("Updating chart")
-        setActiveTime(metricResult.timeFrame)
+        if (currentTimeFrame != metricResult.timeFrame) {
+            currentTimeFrame = metricResult.timeFrame
+            setActiveTime(metricResult.timeFrame)
+        }
 
         val cards = listOf("throughput_average", "responsetime_average", "servicelevelagreement_average")
         for (i in cards.indices) {
@@ -235,7 +237,7 @@ class ActivityPage(
                         if (avg == 0.0) "0%" else (avg / 100.0).toFixed(1) + "%"
                 }
                 else -> {
-                    //ignore
+                    console.log("Ignoring unknown metric type: ${chartData.metricType}")
                 }
             }
 
@@ -256,6 +258,17 @@ class ActivityPage(
                     }
                 }
 
+                when (chartData.metricType) {
+                    Throughput_Average -> series_avg["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_Average -> series_avg["data"] = focusedSeries.toTypedArray()
+                    ServiceLevelAgreement_Average -> series_avg["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_99Percentile -> series_99p["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_95Percentile -> series_95p["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_90Percentile -> series_90p["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_75Percentile -> series_75p["data"] = focusedSeries.toTypedArray()
+                    ResponseTime_50Percentile -> series_50p["data"] = focusedSeries.toTypedArray()
+                }
+
                 overviewChart.setOption(
                     json(
                         "series" to arrayOf(
@@ -269,32 +282,8 @@ class ActivityPage(
                         )
                     )
                 )
-
-                when (chartData.metricType) {
-                    Throughput_Average -> series_avg["data"] = focusedSeries.toTypedArray()
-                    ResponseTime_Average -> series_avg["data"] = focusedSeries.toTypedArray()
-                    ServiceLevelAgreement_Average -> series_avg["data"] = focusedSeries.toTypedArray()
-                    ResponseTime_99Percentile -> series_99p["data"] = focusedSeries.toTypedArray()
-                    ResponseTime_95Percentile -> series_95p["data"] = focusedSeries.toTypedArray()
-                    ResponseTime_90Percentile -> series_90p["data"] = focusedSeries.toTypedArray()
-                    ResponseTime_75Percentile -> series_75p["data"] = focusedSeries.toTypedArray()
-                    ResponseTime_50Percentile -> series_50p["data"] = focusedSeries.toTypedArray()
-                }
             }
         }
-    }
-
-    override fun updateTime(interval: QueryTimeFrame) {
-        console.log("Update time: $interval")
-        eb.send(
-            SetMetricTimeFrame,
-            json(
-                "portalUuid" to portalUuid,
-                "metricTimeFrame" to interval.name
-            )
-        )
-
-        setActiveTime(interval)
     }
 
     private fun clickedViewAverageThroughputChart() {
