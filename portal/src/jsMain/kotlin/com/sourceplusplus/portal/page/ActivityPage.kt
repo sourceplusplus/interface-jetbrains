@@ -103,7 +103,6 @@ class ActivityPage(
             )
         )
     }
-    private var currentTimeFrame: QueryTimeFrame? = null
 
     @ExperimentalSerializationApi
     override fun setupEventbus() {
@@ -196,10 +195,7 @@ class ActivityPage(
 
     override fun displayActivity(metricResult: ArtifactMetricResult) {
         console.log("Updating chart")
-        if (currentTimeFrame != metricResult.timeFrame) {
-            currentTimeFrame = metricResult.timeFrame
-            setActiveTime(metricResult.timeFrame)
-        }
+        setActiveTime(metricResult.timeFrame)
 
         val cards = listOf("throughput_average", "responsetime_average", "servicelevelagreement_average")
         for (i in cards.indices) {

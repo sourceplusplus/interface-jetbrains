@@ -164,7 +164,6 @@ fun clickedLogsOrderType(eb: EventBus, portalUuid: String, orderType: LogOrderTy
 }
 
 fun setActiveTime(interval: QueryTimeFrame) {
-    console.log("Active time set to: $interval")
     jq("#last_5_minutes_time").removeClass("active")
     jq("#last_15_minutes_time").removeClass("active")
     jq("#last_30_minutes_time").removeClass("active")
