@@ -1,6 +1,6 @@
 # Introduction
 
-SourceMarker is a JetBrains-powered plugin which provides continuous feedback capabilities via integration with [Apache SkyWalking](https://github.com/apache/skywalking). SourceMarker increases software development productivity via the Feedback-Driven Development (FDD) approach, a methodology of combining IDE and APM technology to create tighter feedback loops. As operating software in the cloud becomes easier, the process of building and operating software tends to be more aligned. This trend makes it increasingly necessary for programming environments to not just support development-centric activities, but operation-centric activities as well. Traditionally, software developers create software inside of their IDEs, yet operate and monitor that software via dashboards and reports provided by their APMs. By combining these two technologies, software developers can intuitively explore multiple dimensions of their software without the context switches normally created by switching back and forth from source code to graphs, reports, and websites.
+SourceMarker (alpha) is a JetBrains-powered plugin which provides continuous feedback capabilities via integration with [Apache SkyWalking](https://github.com/apache/skywalking). SourceMarker increases software development productivity via the Feedback-Driven Development (FDD) approach, a methodology of combining IDE and APM technology to create tighter feedback loops. As operating software in the cloud becomes easier, the process of building and operating software tends to be more aligned. This trend makes it increasingly necessary for programming environments to not just support development-centric activities, but operation-centric activities as well. Traditionally, software developers create software inside of their IDEs, yet operate and monitor that software via dashboards and reports provided by their APMs. By combining these two technologies, software developers can intuitively explore multiple dimensions of their software without the context switches normally created by switching back and forth from source code to graphs, reports, and websites.
 
 ## Requirements
 
@@ -34,7 +34,13 @@ The SourceMarker configuration settings can be found at: <kbd>Settings</kbd> > <
 
 ![](../.github/media/screenshots/plugin_configuration.png)
 
-The primary configuration is the location of the Apache SkyWalking OAP (Observability Analysis Platform). This setting is configured on a per-project basis and allows SourceMarker to gather production runtime information which it uses to augment source code. SourceMarker should also be provided with the root source package of your project. This setting can typically be automatically detected but if not can be manually input. This setting is primarily used to ensure any source code analysis is only performed on relevant source code.
+#### Apache SkyWalking Settings
+
+The primary configuration is the location of the Apache SkyWalking OAP (Observability Analysis Platform). This setting is configured on a per-project basis and allows SourceMarker to gather production runtime information which it uses to augment source code.
+
+#### Plugin Settings
+
+SourceMarker should also be provided with the root source package of your project. This setting can typically be automatically detected but if not can be manually input. This setting is primarily used to ensure any source code analysis is only performed on relevant source code.
 
 
 
