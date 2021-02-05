@@ -1,11 +1,13 @@
 package com.sourceplusplus.portal.template
 
 import com.sourceplusplus.portal.PortalBundle.translate
-import com.sourceplusplus.protocol.portal.PageType
-import com.sourceplusplus.protocol.portal.PageType.*
 import com.sourceplusplus.portal.toggleSidebar
 import com.sourceplusplus.protocol.artifact.OrderType
-import kotlinx.html.*
+import com.sourceplusplus.protocol.portal.PageType
+import kotlinx.html.FlowContent
+import kotlinx.html.a
+import kotlinx.html.div
+import kotlinx.html.i
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
 
@@ -27,28 +29,25 @@ fun FlowContent.menuItem(
     onClick: ((Event) -> Unit)?,
     block: (FlowContent.() -> Unit)? = null
 ) {
-    when (pageType) {
-        OVERVIEW, ACTIVITY, CONFIGURATION -> apply {
-            if (isActive) {
-                a(classes = "item active_tab") { + translate(pageType.title) }
-            } else {
-                a(classes = "item inactive_tab") {
-                    + translate(pageType.title)
-                    if (onClick != null) onClickFunction = onClick
-                }
-            }
+    if (pageType.hasChildren) {
+        var activeClass = "active_tab"
+        if (!isActive) {
+            activeClass = "inactive_tab"
         }
-        TRACES, LOGS -> apply {
-            var activeClass = "active_tab"
-            if (!isActive) {
-                activeClass = "inactive_tab"
-            }
-            div("title item $activeClass") {
-                i("dropdown icon")
-                + translate(pageType.title)
-            }
-            div("content") {
-                block?.let { it() }
+        div("title item $activeClass") {
+            i("dropdown icon")
+            +translate(pageType.title)
+        }
+        div("content") {
+            block?.let { it() }
+        }
+    } else {
+        if (isActive) {
+            a(classes = "item active_tab") { +translate(pageType.title) }
+        } else {
+            a(classes = "item inactive_tab") {
+                +translate(pageType.title)
+                if (onClick != null) onClickFunction = onClick
             }
         }
     }
@@ -60,6 +59,6 @@ fun FlowContent.subMenuItem(orderType: OrderType, onClick: (Event) -> Unit) {
             toggleSidebar()
             onClick.invoke(it)
         }
-        + translate(orderType.description)
+        +translate(orderType.description)
     }
 }
