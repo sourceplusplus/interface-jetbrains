@@ -1,1 +1,1 @@
-FROM apache/skywalking-oap-server:8.3.0-es7
+FROM apache/skywalking-oap-server:8.4.0-es7
