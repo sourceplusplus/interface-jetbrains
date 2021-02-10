@@ -17,7 +17,7 @@
 - Refactored activity portal
 
 ### Upgraded
-- Apache SkyWalking (8.2.0 -> 8.3.0)
+- Apache SkyWalking (8.2.0 -> 8.4.0)
 - Vert.x (3.9.4 -> 4.0.0)
 - Kotlin (1.4.10 -> 1.4.21)
 - JGit (5.9.0.202009080501-r -> 5.10.0.202012080955-r)
