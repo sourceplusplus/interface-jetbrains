@@ -5,7 +5,7 @@ plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij") version "0.6.5"
-    id("org.jetbrains.changelog") version "1.0.1"
+    id("org.jetbrains.changelog") version "1.1.1"
     id("maven-publish")
 }
 
@@ -18,6 +18,7 @@ val pluginUntilBuild: String by project
 
 val platformType: String by project
 val platformVersion: String by project
+val platformPlugins: String by project
 val platformDownloadSources: String by project
 
 group = pluginGroup
@@ -30,7 +31,7 @@ intellij {
     downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
 
-    setPlugins("java", "Groovy", "Kotlin")
+    setPlugins(*platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toTypedArray())
 }
 tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
 tasks.getByName<JavaExec>("runIde") {
