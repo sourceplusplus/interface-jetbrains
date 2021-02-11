@@ -29,7 +29,7 @@ kotlin {
                 implementation(project(":protocol"))
                 implementation("org.slf4j:slf4j-api:1.7.30")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2-native-mt")
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-web:$vertxVersion")
                 implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
