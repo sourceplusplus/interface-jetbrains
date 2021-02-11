@@ -49,7 +49,7 @@ dependencies {
     implementation(project(":protocol"))
     implementation(project(":portal"))
 
-    val vertxVersion = "4.0.0"
+    val vertxVersion = "4.0.2"
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
     implementation("io.vertx:vertx-core:$vertxVersion")
