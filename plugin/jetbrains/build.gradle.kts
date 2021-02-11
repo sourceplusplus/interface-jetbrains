@@ -50,7 +50,7 @@ dependencies {
     implementation(project(":protocol"))
     implementation(project(":portal"))
 
-    val vertxVersion = "4.0.0"
+    val vertxVersion = "4.0.2"
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
     implementation("io.vertx:vertx-core:$vertxVersion")
@@ -63,7 +63,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
     implementation("io.dropwizard.metrics:metrics-core:4.1.17")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
-    implementation("org.jooq:jooq:3.14.6")
+    implementation("org.jooq:jooq:3.14.7")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
 }
 
