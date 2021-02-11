@@ -65,7 +65,7 @@ class StandaloneServer : LightJavaCodeInsightFixtureTestCase() {
                     "src/test/testData/spp-example-web-app/lib/",
                     "spring-web-5.2.2.RELEASE.jar",
                     "spring-data-commons-2.2.3.RELEASE.jar",
-                    "apm-toolkit-trace-8.3.0.jar",
+                    "apm-toolkit-trace-8.4.0.jar",
                     "slf4j-api-1.7.29.jar"
                 )
             }
