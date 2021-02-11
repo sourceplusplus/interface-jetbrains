@@ -25,7 +25,7 @@ dependencies {
     implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("org.jooq:jooq:3.14.6")
 
-    val vertxVersion = "4.0.0"
+    val vertxVersion = "4.0.2"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
