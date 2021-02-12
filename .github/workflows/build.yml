@@ -157,8 +157,13 @@ jobs:
     name: Verify
     needs: build
     runs-on: ubuntu-latest
-    container: gradle:jdk11
     steps:
+    
+      # Setup Java 1.8 environment for the next steps
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
 
       # Check out current repository
       - name: Fetch Sources
