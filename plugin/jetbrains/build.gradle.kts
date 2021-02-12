@@ -39,9 +39,9 @@ tasks.getByName<JavaExec>("runIde") {
     systemProperty("sourcemarker.debug.capture_logs", true)
 }
 
-//changelog {
-//    version = pluginVersion
-//}
+changelog {
+    version = pluginVersion
+}
 
 repositories {
     maven(url = "https://jitpack.io") { name = "jitpack" }
