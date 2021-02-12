@@ -15,6 +15,7 @@ val pluginName: String by project
 val pluginVersion: String by project
 val pluginSinceBuild: String by project
 val pluginUntilBuild: String by project
+val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
 val platformVersion: String by project
@@ -37,6 +38,10 @@ tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out ho
 tasks.getByName<JavaExec>("runIde") {
     systemProperty("sourcemarker.debug.capture_logs", true)
 }
+
+//changelog {
+//    version = pluginVersion
+//}
 
 repositories {
     maven(url = "https://jitpack.io") { name = "jitpack" }
@@ -100,6 +105,9 @@ tasks {
         dependsOn("patchChangelog")
         token(System.getenv("PUBLISH_TOKEN"))
         channels(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
+    }
+    runPluginVerifier {
+        ideVersions(pluginVerifierIdeVersions)
     }
 
     //todo: should be a way to just add implementation() to dependencies
