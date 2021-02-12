@@ -15,9 +15,11 @@ val pluginName: String by project
 val pluginVersion: String by project
 val pluginSinceBuild: String by project
 val pluginUntilBuild: String by project
+val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
 val platformVersion: String by project
+val platformPlugins: String by project
 val platformDownloadSources: String by project
 
 group = pluginGroup
@@ -30,11 +32,15 @@ intellij {
     downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
 
-    setPlugins("java", "Groovy", "Kotlin")
+    setPlugins(*platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toTypedArray())
 }
 tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
 tasks.getByName<JavaExec>("runIde") {
     systemProperty("sourcemarker.debug.capture_logs", true)
+}
+
+changelog {
+    version = pluginVersion
 }
 
 repositories {
@@ -99,6 +105,9 @@ tasks {
         dependsOn("patchChangelog")
         token(System.getenv("PUBLISH_TOKEN"))
         channels(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
+    }
+    runPluginVerifier {
+        ideVersions(pluginVerifierIdeVersions)
     }
 
     //todo: should be a way to just add implementation() to dependencies
