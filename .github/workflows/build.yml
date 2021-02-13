@@ -247,6 +247,11 @@ jobs:
         with:
           name: plugin-artifact
 
+      - run: pwd
+      - run: ls
+      - run: ls ./plugin-artifact
+      - run: pwd ./plugin-artifact
+
       # Upload artifact as a release asset
       - name: Upload Release Asset
         id: upload-release-asset
