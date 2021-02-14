@@ -30,3 +30,9 @@ dependencies {
     testImplementation("junit:junit:4.13.1")
     testImplementation("org.slf4j:slf4j-log4j12:1.7.30")
 }
+
+tasks {
+    test {
+        maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+    }
+}

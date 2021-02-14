@@ -10,23 +10,17 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.Constants
 import org.intellij.lang.annotations.Language
 import org.junit.Assert.*
-import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 class GroovyModificationTest {
 
-    @Before
-    fun setup() {
-        if (File("/tmp/git-repo").exists()) {
-            File("/tmp/git-repo").deleteRecursively()
-        }
-    }
-
     @Test
     fun singleModifiedFile() {
+        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
         val first = AtomicBoolean()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {
@@ -55,7 +49,7 @@ class GroovyModificationTest {
             }
         }
 
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Groovy") val code = """
                 class GetterMethod {
                     private String str
@@ -82,7 +76,7 @@ class GroovyModificationTest {
         }
 
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
         val oldCommitId = gitMapper.targetRepo.resolve("$newCommitId^1").name
@@ -107,6 +101,7 @@ class GroovyModificationTest {
 
     @Test
     fun twoModifiedFiles() {
+        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
         val first = AtomicBoolean()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {
@@ -149,7 +144,7 @@ class GroovyModificationTest {
             }
         }
 
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Groovy") val code = """
                 class GetterMethod {
                     void getStr() {
@@ -180,7 +175,7 @@ class GroovyModificationTest {
         }
 
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
         val oldCommitId = gitMapper.targetRepo.resolve("$newCommitId^1").name
@@ -217,6 +212,7 @@ class GroovyModificationTest {
 
     @Test
     fun oneModifiedAndOneDeletedFile() {
+        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
         val first = AtomicBoolean()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {
@@ -252,7 +248,7 @@ class GroovyModificationTest {
             }
         }
 
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Groovy") val code = """
                 class GetterMethod {
                     void getStr() {
@@ -280,7 +276,7 @@ class GroovyModificationTest {
         }
 
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
         val oldCommitId = gitMapper.targetRepo.resolve("$newCommitId^1").name
@@ -315,6 +311,7 @@ class GroovyModificationTest {
 
     @Test
     fun methodRenamedTwice() {
+        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
         val getCount = AtomicInteger()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {
@@ -353,7 +350,7 @@ class GroovyModificationTest {
             }
         }
 
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Groovy") var code = """
                 class GetterMethod {
                     private String str
@@ -392,7 +389,7 @@ class GroovyModificationTest {
         }
 
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
         val oldCommitId = gitMapper.targetRepo.resolve("$newCommitId~2").name
@@ -424,6 +421,7 @@ class GroovyModificationTest {
 
     @Test
     fun methodRenamedThenDeleted() {
+        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
         val getCount = AtomicInteger()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {
@@ -454,7 +452,7 @@ class GroovyModificationTest {
             }
         }
 
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Groovy") var code = """
                 class GetterMethod {
                     private String str
@@ -490,7 +488,7 @@ class GroovyModificationTest {
         }
 
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
         val oldCommitId = gitMapper.targetRepo.resolve("$newCommitId~2").name
@@ -513,6 +511,7 @@ class GroovyModificationTest {
 
     @Test
     fun methodRenamedThenDeleted_getBestEffort() {
+        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
         val getCount = AtomicInteger()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {
@@ -543,7 +542,7 @@ class GroovyModificationTest {
             }
         }
 
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Groovy") var code = """
                 class GetterMethod {
                     private String str
@@ -579,7 +578,7 @@ class GroovyModificationTest {
         }
 
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
         val secondCommitId = gitMapper.targetRepo.resolve("$newCommitId~1").name
