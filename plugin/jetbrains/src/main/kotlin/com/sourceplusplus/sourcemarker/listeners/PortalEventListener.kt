@@ -58,9 +58,9 @@ import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
-import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
 import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
+import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -118,6 +118,8 @@ class PortalEventListener(
             val portal = SourcePortal.getPortal(portalUuid)!!
             portal.configuration.currentPage = pageType
             it.reply(JsonObject.mapFrom(portal.configuration))
+            log.info("Set portal ${portal.portalUuid} page type to $pageType")
+
             vertx.eventBus().send(RefreshPortal, portal)
         }
         vertx.eventBus().consumer<String>(GetPortalConfiguration) {
@@ -294,45 +296,44 @@ class PortalEventListener(
     private suspend fun refreshLogs(portal: SourcePortal) {
         val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null && sourceMark is MethodSourceMark) {
-            val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
-            if (endpointId != null) {
-                GlobalScope.launch(vertx.dispatcher()) {
-                    var logsResult = LogsBridge.queryLogs(
-                        GetEndpointLogs(
-                            endpointId = endpointId,
-                            zonedDuration = ZonedDuration(
-                                ZonedDateTime.now().minusHours(24),
-                                ZonedDateTime.now(),
-                                SkywalkingClient.DurationStep.MINUTE
-                            ),
-                            orderType = portal.logsView.orderType,
-                            pageSize = portal.logsView.viewLogAmount,
-                            pageNumber = portal.logsView.pageNumber
-                        ), vertx
-                    )
+            GlobalScope.launch(vertx.dispatcher()) {
+                val logsResult = LogsBridge.queryLogs(
+                    GetEndpointLogs(
+                        endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark),
+                        zonedDuration = ZonedDuration(
+                            ZonedDateTime.now().minusMinutes(15), //todo: method filtering in skywalking
+                            ZonedDateTime.now(),
+                            SkywalkingClient.DurationStep.MINUTE
+                        ),
+                        orderType = portal.logsView.orderType,
+                        pageSize = portal.logsView.viewLogAmount * 2, //todo: method filtering in skywalking
+                        pageNumber = portal.logsView.pageNumber
+                    ), vertx
+                )
 
-                    //todo: impl method filtering in skywalking
-                    val logFormats = sourceMark.getUserData(LOGGER_DETECTOR)!!
-                        .getOrFindLoggerStatements(sourceMark).toSet()
-                    if (logFormats.isNotEmpty()) {
-                        logsResult = logsResult.copy(
-                            artifactQualifiedName = sourceMark.artifactQualifiedName,
-                            total = logsResult.logs.size,
-                            logs = logsResult.logs.filter { logFormats.contains(it.content) },
+                //todo: impl method filtering in skywalking
+                for ((content, logs) in logsResult.logs.groupBy { it.content }) {
+                    val logMark = SourceMarkSearch.findSourceMark(content)
+                    if (logMark != null) {
+                        vertx.eventBus().send(
+                            ArtifactLogUpdated, logsResult.copy(
+                                artifactQualifiedName = logMark.artifactQualifiedName,
+                                total = logs.size,
+                                logs = logs,
+                            )
                         )
+                    } else {
+                        log.warn("Unknown log pattern: $content")
                     }
-
-                    vertx.eventBus().send(ArtifactLogUpdated, logsResult)
                 }
             }
         }
     }
 
     private suspend fun refreshOverview(fileMarker: SourceFileMarker, portal: SourcePortal) {
-        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
-            .filter {
-                it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
-            }
+        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>().filter {
+            it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
+        }
 
         val fetchMetricTypes = listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
         val requestDuration = ZonedDuration(

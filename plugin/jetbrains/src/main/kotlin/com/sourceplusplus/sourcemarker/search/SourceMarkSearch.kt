@@ -24,6 +24,14 @@ object SourceMarkSearch {
         }
     }
 
+    suspend fun findSourceMark(logPattern: String): MethodSourceMark? {
+        return SourceMarker.getSourceMarks()
+            .filterIsInstance<MethodSourceMark>()
+            .firstOrNull {
+                it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!.getOrFindLoggerStatements(it).contains(logPattern)
+            }
+    }
+
     private suspend fun findEndpointSourceMark(artifact: ArtifactQualifiedName): MethodSourceMark? {
         val operationName = artifact.identifier
         return SourceMarker.getSourceMarks()

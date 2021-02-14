@@ -33,7 +33,7 @@ class LogsDisplay : AbstractDisplay(PageType.LOGS) {
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(5000) {
+        vertx.setPeriodic(1000) {
             SourcePortal.getPortals().filter {
                 it.configuration.currentPage == PageType.LOGS && (it.visible || it.configuration.external)
             }.forEach {

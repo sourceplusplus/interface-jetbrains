@@ -74,7 +74,11 @@ class LoggerDetector {
                     if (methodName != null && LOGGER_METHODS.contains(methodName)) {
                         val resolvedMethod = expression.resolveMethod()
                         if (resolvedMethod != null && LOGGER_CLASSES.contains(resolvedMethod.containingClass?.qualifiedName.orEmpty())) {
-                            loggerStatements.add(expression.argumentList.expressions[0].stringValue()!!)
+                            if (expression.argumentList.expressions.firstOrNull()?.stringValue() != null) {
+                                loggerStatements.add(expression.argumentList.expressions.first().stringValue()!!)
+                            } else {
+                                log.warn("No log template argument available for expression: $expression")
+                            }
                         }
                     }
                 }
