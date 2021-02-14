@@ -40,5 +40,7 @@ tasks {
         dependsOn(":downloadSkywalking", ":composeUp")
         rootProject.tasks.findByName("composeUp")!!.mustRunAfter("downloadSkywalking")
         finalizedBy(":composeDown")
+
+        maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
     }
 }
