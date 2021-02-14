@@ -10,6 +10,7 @@ import io.vertx.ext.web.handler.ResponseTimeHandler
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import org.slf4j.LoggerFactory
+import java.io.InputStream
 import java.nio.charset.Charset
 
 /**
@@ -40,13 +41,12 @@ class PortalServer(private val bridgePort: Int) : CoroutineVerticle() {
 
         // Static handler
         router.get("/*").handler {
-            var fileStream = PortalServer::class.java.classLoader.getResourceAsStream(it.request().path())
-            if (fileStream == null) fileStream = PortalServer::class.java.getResourceAsStream(it.request().path())
-
+            log.trace("Request: " + it.request().path() + " - Params: " + it.request().params())
+            var fileStream: InputStream?
             val response = it.response().setStatusCode(200)
-            if (it.request().path() == "/" || it.request().path().endsWith(".html")) {
-                fileStream = PortalServer::class.java.classLoader.getResourceAsStream("/index.html")
-                if (fileStream == null) fileStream = PortalServer::class.java.getResourceAsStream("/index.html")
+            if (it.request().path() == "/") {
+                fileStream = PortalServer::class.java.classLoader.getResourceAsStream("index.html")
+                if (fileStream == null) fileStream = PortalServer::class.java.getResourceAsStream("index.html")
                 response.end(
                     Buffer.buffer(
                         Unpooled.copiedBuffer(ByteStreams.toByteArray(fileStream!!)).toString(Charset.defaultCharset())
@@ -54,10 +54,18 @@ class PortalServer(private val bridgePort: Int) : CoroutineVerticle() {
                     )
                 )
             } else if (it.request().path().endsWith(".js")) {
+                fileStream = PortalServer::class.java.classLoader.getResourceAsStream(it.request().path().substring(1))
+                if (fileStream == null) fileStream =
+                    PortalServer::class.java.getResourceAsStream(it.request().path().substring(1))
                 response.putHeader("Content-Type", "text/javascript")
                     .end(Buffer.buffer(Unpooled.copiedBuffer(ByteStreams.toByteArray(fileStream!!))))
-            } else if (fileStream != null) {
-                response.end(Buffer.buffer(Unpooled.copiedBuffer(ByteStreams.toByteArray(fileStream))))
+            } else {
+                fileStream = PortalServer::class.java.classLoader.getResourceAsStream(it.request().path().substring(1))
+                if (fileStream == null) fileStream =
+                    PortalServer::class.java.getResourceAsStream(it.request().path().substring(1))
+                if (fileStream != null) {
+                    response.end(Buffer.buffer(Unpooled.copiedBuffer(ByteStreams.toByteArray(fileStream))))
+                }
             }
 
             if (!response.ended()) {
