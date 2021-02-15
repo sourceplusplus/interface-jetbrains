@@ -1,5 +1,6 @@
 package com.sourceplusplus.protocol.portal
 
+import com.sourceplusplus.protocol.artifact.ArtifactType
 import kotlinx.serialization.Serializable
 
 /**
@@ -18,5 +19,16 @@ data class PortalConfiguration(
     var visibleTraces: Boolean = true,
     var visibleLogs: Boolean = true,
     var visibleConfiguration: Boolean = false,
-    var autoResolveEndpointNames: Boolean = false
-)
+    var autoResolveEndpointNames: Boolean = false,
+    var artifactType: ArtifactType? = null //todo: allow multiple types? (endpoint + method)
+) {
+    fun isViewable(pageType: PageType): Boolean {
+        return when (pageType) {
+            PageType.OVERVIEW -> visibleOverview
+            PageType.ACTIVITY -> visibleActivity
+            PageType.TRACES -> visibleTraces
+            PageType.LOGS -> visibleLogs
+            PageType.CONFIGURATION -> visibleConfiguration
+        }
+    }
+}

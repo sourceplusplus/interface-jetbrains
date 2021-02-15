@@ -64,6 +64,9 @@ class CalculateLinearRegression(
         task: MentorTask
     ): Boolean = false
 
+    /**
+     * todo: description.
+     */
     class ApacheSimpleRegression(private val sr: SimpleRegression) : RampDetectionAdvice.SimpleRegression {
         override val n get() = sr.n
         override val intercept get() = sr.intercept

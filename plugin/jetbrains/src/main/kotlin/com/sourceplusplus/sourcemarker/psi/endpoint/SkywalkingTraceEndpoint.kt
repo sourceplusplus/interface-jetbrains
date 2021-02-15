@@ -2,6 +2,7 @@ package com.sourceplusplus.sourcemarker.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
+import com.sourceplusplus.sourcemarker.psi.EndpointDetector.DetectedEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
@@ -18,8 +19,8 @@ class SkywalkingTraceEndpoint : EndpointDetector.EndpointNameDeterminer {
 
     private val skywalkingTraceAnnotation = "org.apache.skywalking.apm.toolkit.trace.Trace"
 
-    override fun determineEndpointName(uMethod: UMethod): Future<Optional<String>> {
-        val promise = Promise.promise<Optional<String>>()
+    override fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
+        val promise = Promise.promise<Optional<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             val annotation = uMethod.findAnnotation(skywalkingTraceAnnotation)
             if (annotation != null) {
@@ -30,9 +31,13 @@ class SkywalkingTraceEndpoint : EndpointDetector.EndpointNameDeterminer {
                     operationNameExpr?.evaluate()
                 } as String?
                 if (value == null || value == "") {
-                    promise.complete(Optional.of("${uMethod.containingClass!!.qualifiedName}.${uMethod.name}"))
+                    promise.complete(
+                        Optional.of(
+                            DetectedEndpoint("${uMethod.containingClass!!.qualifiedName}.${uMethod.name}", true)
+                        )
+                    )
                 } else {
-                    promise.complete(Optional.of(value))
+                    promise.complete(Optional.of(DetectedEndpoint(value, true)))
                 }
             }
 

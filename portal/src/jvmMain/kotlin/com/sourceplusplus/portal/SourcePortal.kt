@@ -44,7 +44,7 @@ class SourcePortal(
         log.info("Closed portal: $portalUuid - Artifact: $viewingPortalArtifact")
         portalMap.invalidate(portalUuid)
         //todo: de-register portal consumers
-        log.info("Active portals: " + portalMap.size())
+        log.debug("Active portals: " + portalMap.size())
     }
 
     fun createExternalPortal(): SourcePortal {
@@ -145,10 +145,10 @@ class SourcePortal(
 
             portalMap.put(portalUuid, portal)
             log.info(
-                "Registered SourceMarker Portal. Portal UUID: {} - App UUID: {} - Artifact: {}",
-                portalUuid, appUuid, artifactQualifiedName
+                "Registered SourceMarker Portal. Portal UUID: {} - Artifact: {}",
+                portalUuid, artifactQualifiedName
             )
-            log.info("Active portals: " + portalMap.size())
+            log.debug("Active portals: " + portalMap.size())
             return portalUuid
         }
 

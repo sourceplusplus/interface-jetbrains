@@ -15,9 +15,9 @@ import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.SOURCE_RED
 import kotlinx.datetime.Clock
 import org.jetbrains.uast.UThrowExpression
-import java.awt.Color
 
 /**
  * Sets up the appropriate [SourceMark] display configuration based on [AdviceType].
@@ -27,7 +27,6 @@ import java.awt.Color
  */
 object SourceMarkConstructor {
 
-    private val SOURCE_RED = Color(225, 72, 59)
     private val ADVICE_TIMER = SourceKey<Long>("ADVICE_TIMER")
 
     fun tearDownSourceMark(sourceMark: SourceMark) {

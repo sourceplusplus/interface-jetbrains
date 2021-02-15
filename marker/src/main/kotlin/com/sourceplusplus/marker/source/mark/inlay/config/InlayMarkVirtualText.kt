@@ -15,6 +15,7 @@ import javax.swing.Icon
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 open class InlayMarkVirtualText {
 
     internal var inlayMark: InlayMark? = null

@@ -6,7 +6,6 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.util.indexing.FileBasedIndex
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
@@ -80,7 +79,7 @@ object ArtifactSearch {
                                 runBlocking {
                                     val endpointName =
                                         endpointDetector.determineEndpointName(element.toUElementOfType()!!).await()
-                                    if (endpointName.isPresent && endpointName.get() == artifact.identifier) {
+                                    if (endpointName.isPresent && endpointName.get().name == artifact.identifier) {
                                         promise.complete(Optional.of(element))
                                         keepSearching = false
                                     } else {

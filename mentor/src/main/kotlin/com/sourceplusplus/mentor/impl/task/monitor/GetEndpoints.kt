@@ -32,6 +32,9 @@ class GetEndpoints(
         job.context.put(ENDPOINT_IDS, endpoints.map { it.id })
     }
 
+    /**
+     * todo: description.
+     */
     data class BackoffConfig(
         val config: HashMap<String, Int> = HashMap()
     )

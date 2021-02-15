@@ -1,6 +1,7 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.portal.PageType
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.slf4j.LoggerFactory
@@ -18,6 +19,14 @@ abstract class AbstractDisplay(val thisTab: PageType) : CoroutineVerticle() {
     }
 
     override suspend fun start() {
+        vertx.eventBus().consumer<Any>(RefreshPortal) {
+            val portal = if (it.body() is String) {
+                SourcePortal.getPortal(it.body() as String)
+            } else {
+                it.body() as SourcePortal
+            }!!
+            updateUI(portal)
+        }
         log.info("{} started", javaClass.simpleName)
     }
 

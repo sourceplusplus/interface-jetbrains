@@ -184,6 +184,14 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         } as ExpressionSourceMark?
     }
 
+    open fun getMethodSourceMarks(): List<MethodSourceMark> {
+        return sourceMarks.filterIsInstance<MethodSourceMark>()
+    }
+
+    open fun getClassSourceMarks(): List<ClassSourceMark> {
+        return sourceMarks.filterIsInstance<ClassSourceMark>()
+    }
+
     open fun getMethodExpressionSourceMark(methodSourceMark: MethodSourceMark): List<ExpressionSourceMark> {
         return sourceMarks.filterIsInstance<ExpressionSourceMark>().filter {
             it.valid && it.psiExpression.getContainingUMethod() == methodSourceMark.psiMethod
