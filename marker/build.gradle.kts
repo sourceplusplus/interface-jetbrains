@@ -52,5 +52,5 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:util-rt:$intellijVersion") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion") { isTransitive = false }
-    testImplementation("junit:junit:4.13.1")
+    testImplementation("junit:junit:4.13.2")
 }

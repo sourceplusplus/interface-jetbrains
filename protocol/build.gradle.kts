@@ -28,7 +28,7 @@ kotlin {
                 val vertxVersion = "4.0.2"
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("com.google.guava:guava:30.1-jre")
-                implementation("junit:junit:4.13.1")
+                implementation("junit:junit:4.13.2")
                 implementation(project(":protocol"))
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1")
