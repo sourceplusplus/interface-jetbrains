@@ -31,7 +31,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
-    testImplementation("junit:junit:4.13.1")
+    testImplementation("junit:junit:4.13.2")
     testImplementation(project(":monitor:skywalking"))
 }
 
