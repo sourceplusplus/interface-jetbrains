@@ -24,11 +24,29 @@ SourceMarker (alpha) is a JetBrains-powered plugin which provides continuous fee
 
 ## Demonstration
 
-[![](.github/media/misc/SM-v0.2.1-Screencast.gif)](https://youtu.be/ALDCtz4BJ9g)
+<table>
+  <tr>
+      <td width="33%" align="center"><b>Logging (Promo)</b></td>
+      <td width="33%" align="center"><b>Tracing (Promo)</b></td>
+      <td width="33%" align="center"><b>Alerting (Promo)</b></td>
+  </tr>
+  <tr>
+     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Logging.gif"/></a></td>
+     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Tracing.gif"/></a></td>
+     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Alerting.gif"/></a></td>
+  </tr>
+</table>
 
-- [ApacheCon @Home | SourceMarker - Continuous Feedback for Developers](https://youtu.be/l8H9ckk_0NY)
-- [Promo (Alpha)](https://youtu.be/Un_d3nlOGRA)
-- [Screencast (0.2.1-alpha)](https://youtu.be/ALDCtz4BJ9g)
+<table>
+  <tr>
+      <td width="50%" align="center"><b>Talk</b></td>
+      <td width="50%" align="center"><b>Screencast</b></td>
+  </tr>
+  <tr>
+     <td><a href="https://youtu.be/l8H9ckk_0NY"><img src=".github/media/misc/SM-CFD_Software.jpg"/></a></td>
+     <td><a href="https://youtu.be/ALDCtz4BJ9g"><img src=".github/media/misc/SM-v0.2.1-Screencast.gif"/></a></td>
+  </tr>
+</table>
 
 ## Installation
 
