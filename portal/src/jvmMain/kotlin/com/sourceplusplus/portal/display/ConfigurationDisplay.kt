@@ -13,7 +13,10 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ConfigurationDisplay(private val pluginAvailable: Boolean) : AbstractDisplay(PageType.CONFIGURATION) {
+class ConfigurationDisplay(
+    private val refreshIntervalMs: Int,
+    private val pluginAvailable: Boolean
+) : AbstractDisplay(PageType.CONFIGURATION) {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConfigurationDisplay::class.java)

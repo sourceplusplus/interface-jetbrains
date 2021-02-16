@@ -23,6 +23,7 @@ import kotlin.collections.HashMap
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 abstract class ExpressionSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiExpression: UExpression,

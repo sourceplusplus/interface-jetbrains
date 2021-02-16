@@ -1,7 +1,6 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FindAndOpenPortal
@@ -10,6 +9,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetOverviewTimeFrame
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.portal.PageType
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
@@ -20,14 +20,14 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class OverviewDisplay : AbstractDisplay(PageType.OVERVIEW) {
+class OverviewDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.OVERVIEW) {
 
     companion object {
         private val log = LoggerFactory.getLogger(OverviewDisplay::class.java)
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(5000) {
+        vertx.setPeriodic(refreshIntervalMs.toLong()) {
             SourcePortal.getPortals().filter {
                 it.configuration.currentPage == PageType.OVERVIEW && (it.visible || it.configuration.external)
             }.forEach {

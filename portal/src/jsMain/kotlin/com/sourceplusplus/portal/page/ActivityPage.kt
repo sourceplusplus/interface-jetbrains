@@ -117,7 +117,7 @@ class ActivityPage(
 
             eb.publish(ActivityTabOpened, json("portalUuid" to portalUuid))
         }
-        eb.send(RefreshPortal, portalUuid)
+        eb.publish(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {

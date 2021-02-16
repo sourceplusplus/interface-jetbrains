@@ -21,6 +21,7 @@ import java.time.ZonedDateTime
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 class GetTraces(
     private val byServiceId: ContextKey<GetAllServicesQuery.Result>,
     private val byServiceInstanceId: ContextKey<GetServiceInstancesQuery.Result>? = null,

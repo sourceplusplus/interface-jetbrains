@@ -24,6 +24,23 @@ object SourceMarkSearch {
         }
     }
 
+    suspend fun findSourceMark(logPattern: String): MethodSourceMark? {
+        return SourceMarker.getSourceMarks()
+            .filterIsInstance<MethodSourceMark>()
+            .firstOrNull {
+                it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!.getOrFindLoggerStatements(it).contains(logPattern)
+            }
+    }
+
+    suspend fun findInheritedSourceMarks(logPattern: String): List<SourceMark> {
+        val rootMark = findSourceMark(logPattern)
+        return if (rootMark != null) {
+            listOf(rootMark, rootMark.sourceFileMarker.getClassSourceMarks()[0])
+        } else {
+            emptyList()
+        }
+    }
+
     private suspend fun findEndpointSourceMark(artifact: ArtifactQualifiedName): MethodSourceMark? {
         val operationName = artifact.identifier
         return SourceMarker.getSourceMarks()
@@ -34,13 +51,10 @@ object SourceMarkSearch {
     }
 
     private fun findExpressionAdvice(artifact: ArtifactQualifiedName): ExpressionSourceMark? {
-        val qualifiedClassName = artifact.identifier
-            .substring(0, artifact.identifier.lastIndexOf("."))
+        val qualifiedClassName = artifact.identifier.substring(0, artifact.identifier.lastIndexOf("."))
         val fileMarker = SourceMarker.getSourceFileMarker(qualifiedClassName)
         return if (fileMarker != null) {
-            fileMarker.getSourceMarks().find {
-                it.lineNumber == artifact.lineNumber!!
-            } as ExpressionSourceMark?
+            fileMarker.getSourceMarks().find { it.lineNumber == artifact.lineNumber!! } as ExpressionSourceMark?
         } else {
             null
         }

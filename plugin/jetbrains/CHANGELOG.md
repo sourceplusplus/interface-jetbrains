@@ -3,6 +3,8 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+
+## [0.2.0] - 2020-12-02
 ### Added
 - Infinite scroll on traces portal ([#210](https://github.com/sourceplusplus/SourceMarker/issues/210))
 - Implement localization bundling ([#288](https://github.com/sourceplusplus/SourceMarker/issues/288))

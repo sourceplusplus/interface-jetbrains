@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     companion object {
@@ -182,6 +183,14 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         return sourceMarks.find {
             it is ExpressionSourceMark && it.valid && it.psiExpression.sourcePsi === psiElement && it.type == type
         } as ExpressionSourceMark?
+    }
+
+    open fun getMethodSourceMarks(): List<MethodSourceMark> {
+        return sourceMarks.filterIsInstance<MethodSourceMark>()
+    }
+
+    open fun getClassSourceMarks(): List<ClassSourceMark> {
+        return sourceMarks.filterIsInstance<ClassSourceMark>()
     }
 
     open fun getMethodExpressionSourceMark(methodSourceMark: MethodSourceMark): List<ExpressionSourceMark> {

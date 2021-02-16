@@ -22,6 +22,11 @@
         <codeInsight.inlayProvider language="JAVA"
                                    implementationClass="com.sourceplusplus.marker.plugin.SourceInlayProvider"/>
         <errorHandler implementation="com.sourceplusplus.sourcemarker.reporting.GitHubErrorReporter"/>
+
+        <projectService
+                serviceImplementation="com.sourceplusplus.sourcemarker.console.SourceMarkerConsoleService"/>
+        <toolWindow id="SourceMarker Console"
+                    factoryClass="com.sourceplusplus.sourcemarker.console.SourceMarkerToolWindowFactory"/>
     </extensions>
 
     <projectListeners>

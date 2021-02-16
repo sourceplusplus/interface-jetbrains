@@ -15,6 +15,7 @@ import monitor.skywalking.protocol.metadata.SearchEndpointQuery
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 class EndpointBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
 
     override suspend fun start() {
@@ -62,6 +63,12 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
         }
     }
 
+    /**
+     * todo: description.
+     *
+     * @since 0.1.0
+     * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+     */
     companion object {
         private const val rootAddress = "monitor.skywalking.endpoint"
         private const val searchExactEndpointAddress = "$rootAddress.searchExactEndpoint"
@@ -88,6 +95,12 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
         }
     }
 
+    /**
+     * todo: description.
+     *
+     * @since 0.1.0
+     * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+     */
     data class EndpointQuery(
         val serviceId: String? = null,
         val limit: Int

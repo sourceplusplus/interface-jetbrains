@@ -47,7 +47,7 @@ class ConfigurationPage(
                 updateArtifactConfigurationTable(Json.decodeFromDynamic(message.body))
             }
         }
-        eb.send(RefreshPortal, portalUuid)
+        eb.publish(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {

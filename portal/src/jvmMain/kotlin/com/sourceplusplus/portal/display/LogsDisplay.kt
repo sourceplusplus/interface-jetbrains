@@ -26,14 +26,14 @@ import org.slf4j.LoggerFactory
  * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LogsDisplay : AbstractDisplay(PageType.LOGS) {
+class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.LOGS) {
 
     companion object {
         private val log = LoggerFactory.getLogger(LogsDisplay::class.java)
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(5000) {
+        vertx.setPeriodic(refreshIntervalMs.toLong()) {
             SourcePortal.getPortals().filter {
                 it.configuration.currentPage == PageType.LOGS && (it.visible || it.configuration.external)
             }.forEach {
@@ -75,10 +75,10 @@ class LogsDisplay : AbstractDisplay(PageType.LOGS) {
         val portal = SourcePortal.getPortal(portalUuid)!!
         if (pageNumber == null) {
             portal.logsView.pageNumber++
-            log.info("Page number set to: ${portal.logsView.pageNumber}")
+            log.debug("Page number set to: ${portal.logsView.pageNumber}")
         } else {
             portal.logsView.pageNumber = pageNumber
-            log.info("Page number set to: ${portal.logsView.pageNumber}")
+            log.debug("Page number set to: ${portal.logsView.pageNumber}")
         }
         vertx.eventBus().send(RefreshLogs, portal)
     }
@@ -136,8 +136,7 @@ class LogsDisplay : AbstractDisplay(PageType.LOGS) {
 
     private fun handleArtifactLogResult(artifactLogResult: LogResult) {
         SourcePortal.getPortals().filter {
-            artifactLogResult.artifactQualifiedName == null ||
-                    it.viewingPortalArtifact == artifactLogResult.artifactQualifiedName
+            artifactLogResult.artifactQualifiedName?.equals(it.viewingPortalArtifact) == true
         }.forEach {
             it.logsView.cacheArtifactLogResult(artifactLogResult)
             updateUI(it)

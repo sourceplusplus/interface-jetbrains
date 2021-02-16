@@ -4,15 +4,15 @@ import com.intellij.AbstractBundle
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
+@NonNls
+private const val BUNDLE = "messages.PluginBundle"
+
 /**
  * todo: description.
  *
  * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@NonNls
-private const val BUNDLE = "messages.PluginBundle"
-
 object PluginBundle : AbstractBundle(BUNDLE) {
 
     @Suppress("SpreadOperator")

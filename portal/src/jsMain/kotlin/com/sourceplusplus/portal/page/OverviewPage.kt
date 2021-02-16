@@ -49,7 +49,7 @@ class OverviewPage(
                 displayEndpoints(Json.decodeFromDynamic(message.body))
             }
         }
-        eb.send(RefreshPortal, portalUuid)
+        eb.publish(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
@@ -170,6 +170,13 @@ class OverviewPage(
                                             +"[${translate("PATCH")}] "
                                         }
                                         +translate(httpOperation.substring(7))
+                                    }
+                                    httpOperation.startsWith("{DELETE}") -> {
+                                        span {
+                                            style = "font-weight: bold"
+                                            +"[${translate("DELETE")}] "
+                                        }
+                                        +httpOperation.substring(8)
                                     }
                                     else -> +translate(httpOperation)
                                 }

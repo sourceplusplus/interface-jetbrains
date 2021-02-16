@@ -29,10 +29,13 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.*
+import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.SwingUtilities
 import kotlin.collections.ArrayList
@@ -118,8 +121,9 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         if (removeFromMarker) {
             check(sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false))
         }
-        triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_REMOVED))
-        clearEventListeners()
+        triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_REMOVED)) {
+            clearEventListeners()
+        }
     }
 
     fun <T> getUserData(key: SourceKey<T>): T?
@@ -128,8 +132,11 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun clearEventListeners()
     fun getEventListeners(): List<SourceMarkEventListener>
     fun addEventListener(listener: SourceMarkEventListener)
-    fun triggerEvent(event: SourceMarkEvent) {
-        getEventListeners().forEach { it.handleEvent(event) }
+    fun triggerEvent(event: SourceMarkEvent, listen: (() -> Unit)? = null) {
+        GlobalScope.launch {
+            getEventListeners().forEach { it.handleEvent(event) }
+            listen?.invoke()
+        }
     }
 
     fun closePopup() {

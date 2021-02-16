@@ -19,18 +19,18 @@ import java.nio.charset.Charset
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PortalServer(private val bridgePort: Int) : CoroutineVerticle() {
+class PortalServer(private val bridgePort: Int, private val refreshIntervalMs: Int) : CoroutineVerticle() {
 
     companion object {
         private val log = LoggerFactory.getLogger(PortalServer::class.java)
     }
 
     override suspend fun start() {
-        vertx.deployVerticle(OverviewDisplay()).await()
-        vertx.deployVerticle(ActivityDisplay()).await()
-        vertx.deployVerticle(TracesDisplay()).await()
-        vertx.deployVerticle(LogsDisplay()).await()
-        vertx.deployVerticle(ConfigurationDisplay(false)).await() //todo: dynamic
+        vertx.deployVerticle(OverviewDisplay(refreshIntervalMs)).await()
+        vertx.deployVerticle(ActivityDisplay(refreshIntervalMs)).await()
+        vertx.deployVerticle(TracesDisplay(refreshIntervalMs)).await()
+        vertx.deployVerticle(LogsDisplay(refreshIntervalMs)).await()
+        vertx.deployVerticle(ConfigurationDisplay(refreshIntervalMs, false)).await() //todo: dynamic
         vertx.deployVerticle(PortalViewTracker()).await()
 
         val router = Router.router(vertx)
