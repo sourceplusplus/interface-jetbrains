@@ -108,7 +108,7 @@
                   <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Refresh Interval (ms)"/>
+                  <text resource-bundle="messages/PluginBundle" key="refresh_interval_ms"/>
                 </properties>
               </component>
               <component id="77432" class="javax.swing.JCheckBox" binding="consoleCheckBox">
@@ -117,8 +117,8 @@
                 </constraints>
                 <properties>
                   <selected value="false"/>
-                  <text value="Debug Console Enabled"/>
-                  <toolTipText value="View internal SourceMarker logs"/>
+                  <text resource-bundle="messages/PluginBundle" key="debug_console"/>
+                  <toolTipText resource-bundle="messages/PluginBundle" key="debug_console_tooltip"/>
                 </properties>
               </component>
               <component id="841cc" class="javax.swing.JCheckBox" binding="autoResolveEndpointNamesCheckBox" default-binding="true">
