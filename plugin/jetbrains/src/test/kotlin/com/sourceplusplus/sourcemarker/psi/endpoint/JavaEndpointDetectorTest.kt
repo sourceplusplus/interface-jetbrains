@@ -29,7 +29,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             runBlocking {
                 val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
-                assertEquals("{GET}/doGet", result.get())
+                assertEquals("{GET}/doGet", result.get().name)
             }
         }
     }
@@ -52,7 +52,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             runBlocking {
                 val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
-                assertEquals("{GET}/doGet", result.get())
+                assertEquals("{GET}/doGet", result.get().name)
             }
         }
     }
@@ -75,7 +75,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             runBlocking {
                 val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
-                assertEquals("doGet", result.get())
+                assertEquals("doGet", result.get().name)
             }
         }
     }
@@ -98,7 +98,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             runBlocking {
                 val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
-                assertEquals("TestController.doGet", result.get())
+                assertEquals("TestController.doGet", result.get().name)
             }
         }
     }
