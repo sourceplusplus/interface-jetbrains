@@ -178,6 +178,9 @@ class LogsPage(
                 }
                 td {
                     classes += "collapsing"
+                    if (log.level == "WARN" || log.level == "ERROR" || log.level == "FATAL") {
+                        classes += "spp_red_color"
+                    }
                     +log.level
                 }
 
