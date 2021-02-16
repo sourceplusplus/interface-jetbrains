@@ -82,6 +82,7 @@ import javax.swing.UIManager
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 class PortalEventListener(
     private val markerConfig: SourceMarkerConfig,
     private val hostTranslations: Boolean = true

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 object SourceMarker {
 
     @Volatile

@@ -27,6 +27,7 @@ import java.util.*
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 object SourceMarkerUtils {
 
     private val log = LoggerFactory.getLogger(SourceMarkerUtils::class.java)

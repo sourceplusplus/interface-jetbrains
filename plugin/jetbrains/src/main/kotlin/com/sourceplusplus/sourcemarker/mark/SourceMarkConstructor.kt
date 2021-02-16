@@ -88,22 +88,23 @@ object SourceMarkConstructor {
         gutterMark.sourceFileMarker.refresh()
     }
 
+    @Suppress("MagicNumber")
     private fun attachAdvice(inlayMark: InlayMark, advice: ArtifactAdvice) {
         when (advice) {
             is ActiveExceptionAdvice -> {
                 val expressionMark = inlayMark as ExpressionInlayMark
                 val prettyTimeAgo = if (expressionMark.getPsiExpresion() is UThrowExpression) {
                     {
-                        val occurred =
-                            (Clock.System.now() - advice.occurredAt).toPrettyDuration() + " " + message("ago")
-                        " //${message("last_occurred")} $occurred       "
+                        val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() +
+                                " " + message("ago")
+                        " //${message("last_occurred")} $occurred "
                     }
                 } else {
                     {
                         val exceptionType = advice.stackTrace.exceptionType.substringAfterLast(".")
-                        val occurred =
-                            (Clock.System.now() - advice.occurredAt).toPrettyDuration() + " " + message("ago")
-                        " //${message("threw")} $exceptionType $occurred       "
+                        val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() +
+                                " " + message("ago")
+                        " //${message("threw")} $exceptionType $occurred "
                     }
                 }
 

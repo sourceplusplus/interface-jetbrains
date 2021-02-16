@@ -24,7 +24,6 @@ class SourceMarkerConsoleService(project: Project) {
     init {
         //redirect loggers to console
         Logger.getLogger("com.sourceplusplus").addAppender(object : AppenderSkeleton() {
-            @Override
             override fun append(loggingEvent: LoggingEvent) {
                 val message = loggingEvent.message
                 if (loggingEvent.level.isGreaterOrEqual(Level.WARN)) {
@@ -53,14 +52,8 @@ class SourceMarkerConsoleService(project: Project) {
                 }
             }
 
-            @Override
-            override fun close() {
-            }
-
-            @Override
-            override fun requiresLayout(): Boolean {
-                return false
-            }
+            override fun close() = Unit
+            override fun requiresLayout(): Boolean = false
         })
         Disposer.register(project, consoleView)
     }

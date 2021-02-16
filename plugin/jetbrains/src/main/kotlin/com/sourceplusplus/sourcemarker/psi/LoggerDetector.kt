@@ -72,8 +72,8 @@ class LoggerDetector {
                 override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
                     val methodName = expression.methodExpression.referenceName
                     if (methodName != null && LOGGER_METHODS.contains(methodName)) {
-                        val resolvedMethod = expression.resolveMethod()
-                        if (resolvedMethod != null && LOGGER_CLASSES.contains(resolvedMethod.containingClass?.qualifiedName.orEmpty())) {
+                        val resolvedMethod = expression.resolveMethod() ?: return
+                        if (LOGGER_CLASSES.contains(resolvedMethod.containingClass?.qualifiedName.orEmpty())) {
                             if (expression.argumentList.expressions.firstOrNull()?.stringValue() != null) {
                                 loggerStatements.add(expression.argumentList.expressions.first().stringValue()!!)
                             } else {

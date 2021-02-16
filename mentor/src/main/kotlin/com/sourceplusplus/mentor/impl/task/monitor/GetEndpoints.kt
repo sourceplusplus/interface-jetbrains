@@ -12,6 +12,7 @@ import monitor.skywalking.protocol.metadata.GetAllServicesQuery
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 class GetEndpoints(
     private val byContext: ContextKey<GetAllServicesQuery.Result>,
     private val backoffConfig: BackoffConfig? = null

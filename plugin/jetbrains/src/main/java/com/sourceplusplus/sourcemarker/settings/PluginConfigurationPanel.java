@@ -15,17 +15,17 @@ public class PluginConfigurationPanel {
     private JTextField rootSourcePackageTextField;
     private JComboBox<String> skywalkingVersionComboBox;
     private JCheckBox autoResolveEndpointNamesCheckBox;
-    private JSpinner spinner1;
+    private JSpinner portalRefreshSpinner;
     private JCheckBox consoleCheckBox;
     private SourceMarkerConfig config;
-    private final SpinnerNumberModel numberModel;
+    private final SpinnerNumberModel portalRefreshModel;
 
     public PluginConfigurationPanel() {
         myProjectSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("apache_skywalking_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
-        numberModel = new SpinnerNumberModel();
-        numberModel.setMinimum(0);
-        spinner1.setModel(numberModel);
+        portalRefreshModel = new SpinnerNumberModel();
+        portalRefreshModel.setMinimum(0);
+        portalRefreshSpinner.setModel(portalRefreshModel);
     }
 
     public JComponent getContentPane() {
@@ -42,7 +42,7 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {
             return true;
         }
-        if (!Objects.equals(numberModel.getNumber().intValue(), config.getPortalRefreshIntervalMs())) {
+        if (!Objects.equals(portalRefreshModel.getNumber().intValue(), config.getPortalRefreshIntervalMs())) {
             return true;
         }
         if (!Objects.equals(consoleCheckBox.isSelected(), config.getPluginConsoleEnabled())) {
@@ -57,7 +57,7 @@ public class PluginConfigurationPanel {
                 rootSourcePackageTextField.getText(),
                 autoResolveEndpointNamesCheckBox.isSelected(),
                 true, consoleCheckBox.isSelected(),
-                numberModel.getNumber().intValue()
+                portalRefreshModel.getNumber().intValue()
         );
     }
 
@@ -67,6 +67,6 @@ public class PluginConfigurationPanel {
         rootSourcePackageTextField.setText(config.getRootSourcePackage());
         autoResolveEndpointNamesCheckBox.setSelected(config.getAutoResolveEndpointNames());
         consoleCheckBox.setSelected(config.getPluginConsoleEnabled());
-        numberModel.setValue(config.getPortalRefreshIntervalMs());
+        portalRefreshModel.setValue(config.getPortalRefreshIntervalMs());
     }
 }
