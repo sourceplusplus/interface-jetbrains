@@ -24,7 +24,7 @@ SourceMarker (alpha) is a JetBrains-powered plugin which provides continuous fee
 
 ## Demonstration
 
-[![](https://img.youtube.com/vi/ALDCtz4BJ9g/maxresdefault.jpg)](https://youtu.be/ALDCtz4BJ9g)
+[![](.github/media/misc/SM-v0.2.1-Screencast.gif)](https://youtu.be/ALDCtz4BJ9g)
 
 
 ## Installation
