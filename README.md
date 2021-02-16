@@ -22,6 +22,14 @@ SourceMarker (alpha) is a JetBrains-powered plugin which provides continuous fee
 - Performance anti-pattern detection
   - [The Ramp](mentor/src/main/kotlin/com/sourceplusplus/mentor/impl/job/RampDetectionMentor.kt)
 
+## Demonstration
+
+[![](.github/media/misc/SM-v0.2.1-Screencast.gif)](https://youtu.be/ALDCtz4BJ9g)
+
+- [ApacheCon @Home | SourceMarker - Continuous Feedback for Developers](https://youtu.be/l8H9ckk_0NY)
+- [Promo (Alpha)](https://youtu.be/Un_d3nlOGRA)
+- [Screencast (0.2.1-alpha)](https://youtu.be/ALDCtz4BJ9g)
+
 ## Installation
 
 - Using IDE built-in plugin system:
