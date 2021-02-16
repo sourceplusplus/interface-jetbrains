@@ -30,14 +30,14 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
+class ActivityDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.ACTIVITY) {
 
     companion object {
         private val log = LoggerFactory.getLogger(ActivityDisplay::class.java)
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(5000) {
+        vertx.setPeriodic(refreshIntervalMs.toLong()) {
             SourcePortal.getPortals().filter {
                 it.configuration.currentPage == PageType.ACTIVITY && (it.visible || it.configuration.external)
             }.forEach {
@@ -97,9 +97,8 @@ class ActivityDisplay : AbstractDisplay(PageType.ACTIVITY) {
         val artifactMetricResult = portal.activityView.metricResult ?: return
         if (log.isTraceEnabled) {
             log.trace(
-                "Artifact metrics updated. Portal uuid: {} - App uuid: {} - Artifact qualified name: {} - Time frame: {}",
+                "Artifact metrics updated. Portal uuid: {} - Artifact qualified name: {} - Time frame: {}",
                 portal.portalUuid,
-                artifactMetricResult.appUuid,
                 getShortQualifiedFunctionName(artifactMetricResult.artifactQualifiedName),
                 artifactMetricResult.timeFrame
             )

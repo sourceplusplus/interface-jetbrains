@@ -27,6 +27,7 @@ import org.w3c.dom.get
 import kotlin.js.json
 
 fun main() {
+    console.log("SourcePortalUI init")
     jq().ready {
         val queryParams = getQueryMap()
         val portalUuid = queryParams.getOrElse("portalUuid", { "null" })

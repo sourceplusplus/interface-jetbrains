@@ -17,6 +17,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraceSta
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedStackTraceElement
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
@@ -72,6 +73,7 @@ class TracesPage(
                 updateTraceSpan(Json.decodeFromDynamic(message.body))
             }
         }
+        eb.publish(RefreshPortal, portalUuid)
         eb.send(FetchMoreTraces, json("portalUuid" to portalUuid, "pageNumber" to 1))
     }
 

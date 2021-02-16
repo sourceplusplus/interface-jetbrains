@@ -23,6 +23,7 @@ import kotlin.collections.HashMap
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 abstract class ClassSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiClass: UClass,

@@ -9,6 +9,7 @@ import com.intellij.psi.PsiNameIdentifierOwner
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
@@ -58,10 +59,11 @@ import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
-import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
 import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
+import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -80,6 +82,7 @@ import javax.swing.UIManager
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 class PortalEventListener(
     private val markerConfig: SourceMarkerConfig,
     private val hostTranslations: Boolean = true
@@ -118,7 +121,9 @@ class PortalEventListener(
             val portal = SourcePortal.getPortal(portalUuid)!!
             portal.configuration.currentPage = pageType
             it.reply(JsonObject.mapFrom(portal.configuration))
-            vertx.eventBus().send(RefreshPortal, portal)
+            log.info("Set portal ${portal.portalUuid} page type to $pageType")
+
+            vertx.eventBus().publish(RefreshPortal, portal)
         }
         vertx.eventBus().consumer<String>(GetPortalConfiguration) {
             val portalUuid = it.body()
@@ -127,7 +132,7 @@ class PortalEventListener(
                 val portal = SourcePortal.getPortal(portalUuid)
                 if (portal == null) {
                     log.error("Failed to find portal: $portalUuid")
-                    it.fail(404, "Portal $portalUuid does not exist")
+                    it.fail(NOT_FOUND.code(), "Portal $portalUuid does not exist")
                 } else {
                     it.reply(JsonObject.mapFrom(portal.configuration))
                 }
@@ -292,47 +297,43 @@ class PortalEventListener(
     }
 
     private suspend fun refreshLogs(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
-        if (sourceMark != null && sourceMark is MethodSourceMark) {
-            val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
-            if (endpointId != null) {
-                GlobalScope.launch(vertx.dispatcher()) {
-                    var logsResult = LogsBridge.queryLogs(
-                        GetEndpointLogs(
-                            endpointId = endpointId,
-                            zonedDuration = ZonedDuration(
-                                ZonedDateTime.now().minusHours(24),
-                                ZonedDateTime.now(),
-                                SkywalkingClient.DurationStep.MINUTE
-                            ),
-                            orderType = portal.logsView.orderType,
-                            pageSize = portal.logsView.viewLogAmount,
-                            pageNumber = portal.logsView.pageNumber
-                        ), vertx
-                    )
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER) ?: return
+        GlobalScope.launch(vertx.dispatcher()) {
+            val logsResult = LogsBridge.queryLogs(
+                GetEndpointLogs(
+                    endpointId = if (sourceMark is MethodSourceMark) {
+                        sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
+                    } else null,
+                    zonedDuration = ZonedDuration(
+                        ZonedDateTime.now().minusMinutes(15), //todo: method filtering in skywalking
+                        ZonedDateTime.now(),
+                        SkywalkingClient.DurationStep.MINUTE
+                    ),
+                    orderType = portal.logsView.orderType,
+                    pageSize = portal.logsView.viewLogAmount * 25, //todo: method filtering in skywalking
+                    pageNumber = portal.logsView.pageNumber
+                ), vertx
+            )
 
-                    //todo: impl method filtering in skywalking
-                    val logFormats = sourceMark.getUserData(LOGGER_DETECTOR)!!
-                        .getOrFindLoggerStatements(sourceMark).toSet()
-                    if (logFormats.isNotEmpty()) {
-                        logsResult = logsResult.copy(
-                            artifactQualifiedName = sourceMark.artifactQualifiedName,
-                            total = logsResult.logs.size,
-                            logs = logsResult.logs.filter { logFormats.contains(it.content) },
+            //todo: impl method filtering in skywalking
+            for ((content, logs) in logsResult.logs.groupBy { it.content }) {
+                SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                    vertx.eventBus().send(
+                        ArtifactLogUpdated, logsResult.copy(
+                            artifactQualifiedName = it.artifactQualifiedName,
+                            total = logs.size,
+                            logs = logs,
                         )
-                    }
-
-                    vertx.eventBus().send(ArtifactLogUpdated, logsResult)
+                    )
                 }
             }
         }
     }
 
     private suspend fun refreshOverview(fileMarker: SourceFileMarker, portal: SourcePortal) {
-        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
-            .filter {
-                it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
-            }
+        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>().filter {
+            it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
+        }
 
         val fetchMetricTypes = listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
         val requestDuration = ZonedDuration(
@@ -447,15 +448,41 @@ class PortalEventListener(
     private fun openPortal(portal: SourcePortal) {
         val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null) {
-            ApplicationManager.getApplication().invokeLater(sourceMark::displayPopup)
-
             val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
             if (portal != lastDisplayedInternalPortal) {
+                val externalEndpoint = sourceMark.getUserData(ENDPOINT_DETECTOR)?.isExternalEndpoint(sourceMark) == true
+                if (externalEndpoint) {
+                    portal.configuration.visibleActivity = true
+                    portal.configuration.visibleTraces = true
+                    portal.configuration.visibleLogs = true //todo: can hide based on if there is logs
+                } else {
+                    //non-endpoint artifact; hide activity/traces till manually shown
+                    portal.configuration.visibleActivity = false
+                    portal.configuration.visibleTraces = portal.tracesView.innerTraceStack
+
+                    //default to logs if method
+                    if (sourceMark is MethodSourceMark && !portal.configuration.visibleTraces) {
+                        portal.configuration.currentPage = PageType.LOGS
+                    }
+
+                    //hide overview if class and no child endpoints and default to logs
+                    if (sourceMark is ClassSourceMark) {
+                        val hasChildEndpoints = sourceMark.sourceFileMarker.getSourceMarks().firstOrNull {
+                            it.getUserData(ENDPOINT_DETECTOR)?.getEndpointId(it) != null
+                        } != null
+                        portal.configuration.visibleOverview = hasChildEndpoints
+                        if (!hasChildEndpoints) {
+                            portal.configuration.currentPage = PageType.LOGS
+                        }
+                    }
+                }
+
                 val lastViewedPage = lastDisplayedInternalPortal?.configuration?.currentPage
-                if (lastViewedPage != null) {
+                if (lastViewedPage != null && portal.configuration.isViewable(lastViewedPage)) {
                     portal.configuration.currentPage = lastViewedPage
                 }
                 portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
+
                 val port = vertx.sharedData().getLocalMap<String, Int>("portal")["http.port"]!!
                 val host = "http://localhost:$port"
                 val currentUrl = "$host/?portalUuid=${portal.portalUuid}"
@@ -469,6 +496,8 @@ class PortalEventListener(
                 }
                 lastDisplayedInternalPortal = portal
             }
+
+            ApplicationManager.getApplication().invokeLater(sourceMark::displayPopup)
         }
     }
 

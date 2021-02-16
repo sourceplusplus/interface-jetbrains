@@ -61,6 +61,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
+import java.awt.Color
 import java.awt.Dimension
 import java.util.*
 
@@ -72,6 +73,8 @@ import java.util.*
  */
 @Suppress("MagicNumber")
 object SourceMarkerPlugin {
+
+    val SOURCE_RED = Color(225, 72, 59)
 
     private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
     private val deploymentIds = mutableListOf<String>()
@@ -267,7 +270,9 @@ object SourceMarkerPlugin {
         val bridgeServer = vertx.createHttpServer().requestHandler(router).listen(bridgePort, "localhost").await()
 
         //todo: load portal config (custom themes, etc)
-        deploymentIds.add(vertx.deployVerticle(PortalServer(bridgeServer.actualPort())).await())
+        deploymentIds.add(
+            vertx.deployVerticle(PortalServer(bridgeServer.actualPort(), config.portalRefreshIntervalMs)).await()
+        )
         deploymentIds.add(vertx.deployVerticle(PortalEventListener(config)).await())
     }
 

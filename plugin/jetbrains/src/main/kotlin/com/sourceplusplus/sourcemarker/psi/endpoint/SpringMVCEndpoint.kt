@@ -3,6 +3,7 @@ package com.sourceplusplus.sourcemarker.psi.endpoint
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
+import com.sourceplusplus.sourcemarker.psi.EndpointDetector.DetectedEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUReferenceExpression
@@ -32,8 +33,8 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
         "org.springframework.web.bind.annotation.PatchMapping"
     )
 
-    override fun determineEndpointName(uMethod: UMethod): Future<Optional<String>> {
-        val promise = Promise.promise<Optional<String>>()
+    override fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
+        val promise = Promise.promise<Optional<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             for (annotationName in qualifiedNameSet) {
                 val annotation = uMethod.findAnnotation(annotationName)
@@ -58,7 +59,10 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
         return promise.future()
     }
 
-    private fun handleJavaOrGroovyAnnotation(annotation: UAnnotation, annotationName: String): Optional<String> {
+    private fun handleJavaOrGroovyAnnotation(
+        annotation: UAnnotation,
+        annotationName: String
+    ): Optional<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
             val endpointNameExpr = annotation.attributeValues.find { it.name == "value" }!!.expression
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
@@ -68,7 +72,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             } else {
                 (methodExpr as GrUReferenceExpression).resolvedName.toString()
             }
-            return Optional.of("{$method}$value")
+            return Optional.of(DetectedEndpoint("{$method}$value", false))
         } else {
             val endpointNameExpr = annotation.attributeValues.find { it.name == "name" }!!
             val value = if (endpointNameExpr is UInjectionHost) {
@@ -78,11 +82,11 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             } as String
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
-            return Optional.of("{$method}$value")
+            return Optional.of(DetectedEndpoint("{$method}$value", false))
         }
     }
 
-    private fun handleKotlinAnnotation(annotation: UAnnotation, annotationName: String): Optional<String> {
+    private fun handleKotlinAnnotation(annotation: UAnnotation, annotationName: String): Optional<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
             val endpointNameExpr = annotation.attributeValues.find { it.name == "value" }!!.expression
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
@@ -94,7 +98,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             val method = ((methodExpr as KotlinUCollectionLiteralExpression)
                 .valueArguments[0] as KotlinUQualifiedReferenceExpression)
                 .selector.asSourceString()
-            return Optional.of("{$method}$value")
+            return Optional.of(DetectedEndpoint("{$method}$value", false))
         } else {
             val valueExpr = annotation.findAttributeValue("value")!!
             val value = if (valueExpr is KotlinUCollectionLiteralExpression) {
@@ -104,7 +108,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
-            return Optional.of("{$method}$value")
+            return Optional.of(DetectedEndpoint("{$method}$value", false))
         }
     }
 }

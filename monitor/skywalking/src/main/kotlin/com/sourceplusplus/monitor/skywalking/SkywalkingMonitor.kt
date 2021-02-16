@@ -26,6 +26,7 @@ class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
         log.info("Successfully setup Apache SkyWalking monitor")
     }
 
+    @Suppress("MagicNumber")
     private suspend fun setup() {
         log.debug("Apache SkyWalking server: $serverUrl")
         val client = ApolloClient.builder()

@@ -57,7 +57,7 @@ class LogsPage(
                 displayLog(Json.decodeFromDynamic(message.body))
             }
         }
-        eb.send(RefreshPortal, portalUuid)
+        eb.publish(RefreshPortal, portalUuid)
     }
 
     override fun renderPage(portalConfiguration: PortalConfiguration) {
@@ -178,6 +178,9 @@ class LogsPage(
                 }
                 td {
                     classes += "collapsing"
+                    if (log.level == "WARN" || log.level == "ERROR" || log.level == "FATAL") {
+                        classes += "spp_red_color"
+                    }
                     +log.level
                 }
 

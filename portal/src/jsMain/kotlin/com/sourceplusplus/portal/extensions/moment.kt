@@ -36,7 +36,7 @@ fun Duration.toPrettyDuration(decimalPlaces: Int): String {
         prettyDuration = (seconds().toString() + "")
         postText = translate("s ago")
     } else {
-        prettyDuration = (round((asSeconds().toDouble() * 10)) / 10).toFixed(decimalPlaces)
+        prettyDuration = "1"
         postText = translate("s ago")
     }
 

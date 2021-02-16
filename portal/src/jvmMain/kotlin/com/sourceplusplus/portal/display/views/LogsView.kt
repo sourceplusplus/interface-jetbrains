@@ -22,9 +22,11 @@ class LogsView(
     var pageNumber = 1
 
     fun cacheArtifactLogResult(artifactTraceResult: LogResult) {
-        logResult = logResult?.mergeWith(artifactTraceResult) ?: artifactTraceResult
-        if (pageNumber == 1) {
-            logResult = logResult!!.truncate(20)
+        val mergedLogResult = logResult?.mergeWith(artifactTraceResult) ?: artifactTraceResult
+        logResult = if (pageNumber == 1) {
+            mergedLogResult.truncate(viewLogAmount)
+        } else {
+            mergedLogResult
         }
     }
 

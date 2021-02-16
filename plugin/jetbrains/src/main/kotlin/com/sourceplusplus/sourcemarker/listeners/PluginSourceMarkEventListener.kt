@@ -6,13 +6,18 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
 import com.sourceplusplus.sourcemarker.mark.SourceMarkConstructor
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 /**
@@ -51,13 +56,21 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
                 sourcePortal.configuration.currentPage = PageType.OVERVIEW
                 sourcePortal.configuration.visibleActivity = false
                 sourcePortal.configuration.visibleTraces = false
+                sourcePortal.configuration.artifactType = ArtifactType.CLASS
             } else {
                 //method-based portals don't have overview page
                 sourcePortal.configuration.visibleOverview = false
+                sourcePortal.configuration.artifactType = ArtifactType.METHOD
             }
 
             if (sourceMark is MethodSourceMark) {
+                //setup endpoint detector and attempt detection
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
+                GlobalScope.launch(vertx.dispatcher()) {
+                    endpointDetector.getOrFindEndpointId(sourceMark)
+                }
+
+                //setup logger detector
                 sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
             }
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {

@@ -24,6 +24,7 @@ import monitor.skywalking.protocol.type.Pagination
  * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
 
     override suspend fun start() {
@@ -74,6 +75,12 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
         }
     }
 
+    /**
+     * todo: description.
+     *
+     * @since 0.1.0
+     * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+     */
     companion object {
         private const val rootAddress = "monitor.skywalking.endpoint.logs"
         private const val queryEndpointLogsAddress = "$rootAddress.queryEndpointLogs"
@@ -85,6 +92,13 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
         }
     }
 
+    /**
+     * todo: description.
+     *
+     * @since 0.1.0
+     * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+     */
+    @Suppress("MagicNumber")
     data class GetEndpointLogs(
         val serviceId: String? = null,
         val endpointId: String? = null,

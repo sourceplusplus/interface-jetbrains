@@ -1,6 +1,7 @@
 package com.sourceplusplus.sourcemarker.psi
 
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.monitor.skywalking.bridge.EndpointBridge
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
@@ -28,6 +29,7 @@ class EndpointDetector {
         private val log = LoggerFactory.getLogger(EndpointDetector::class.java)
         private val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
         private val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
+        private val ENDPOINT_INTERNAL = SourceKey<Boolean>("ENDPOINT_INTERNAL")
     }
 
     private val detectorSet = setOf(
@@ -35,25 +37,41 @@ class EndpointDetector {
         SpringMVCEndpoint()
     )
 
-    suspend fun getOrFindEndpointId(sourceMark: MethodSourceMark): String? {
+    fun getEndpointName(sourceMark: SourceMark): String? {
+        return sourceMark.getUserData(ENDPOINT_NAME)
+    }
+
+    fun getEndpointId(sourceMark: SourceMark): String? {
+        return sourceMark.getUserData(ENDPOINT_ID)
+    }
+
+    fun isExternalEndpoint(sourceMark: SourceMark): Boolean {
+        return sourceMark.getUserData(ENDPOINT_INTERNAL) == false
+    }
+
+    suspend fun getOrFindEndpointId(sourceMark: SourceMark): String? {
         val cachedEndpointId = sourceMark.getUserData(ENDPOINT_ID)
         return if (cachedEndpointId != null) {
             log.trace("Found cached endpoint id: $cachedEndpointId")
             cachedEndpointId
-        } else {
+        } else if (sourceMark is MethodSourceMark) {
             getOrFindEndpoint(sourceMark)
             sourceMark.getUserData(ENDPOINT_ID)
+        } else {
+            null
         }
     }
 
-    suspend fun getOrFindEndpointName(sourceMark: MethodSourceMark): String? {
+    suspend fun getOrFindEndpointName(sourceMark: SourceMark): String? {
         val cachedEndpointName = sourceMark.getUserData(ENDPOINT_NAME)
         return if (cachedEndpointName != null) {
             log.trace("Found cached endpoint name: $cachedEndpointName")
             cachedEndpointName
-        } else {
+        } else if (sourceMark is MethodSourceMark) {
             getOrFindEndpoint(sourceMark)
             sourceMark.getUserData(ENDPOINT_NAME)
+        } else {
+            null
         }
     }
 
@@ -61,12 +79,13 @@ class EndpointDetector {
         if (sourceMark.getUserData(ENDPOINT_NAME) == null || sourceMark.getUserData(ENDPOINT_ID) == null) {
             if (sourceMark.getUserData(ENDPOINT_NAME) == null) {
                 log.trace("Determining endpoint name")
-                val endpointName = determineEndpointName(sourceMark).await().orElse(null)
-                if (endpointName != null) {
-                    log.debug("Detected endpoint name: $endpointName")
-                    sourceMark.putUserData(ENDPOINT_NAME, endpointName)
+                val detectedEndpoint = determineEndpointName(sourceMark).await().orElse(null)
+                if (detectedEndpoint != null) {
+                    log.debug("Detected endpoint name: ${detectedEndpoint.name}")
+                    sourceMark.putUserData(ENDPOINT_NAME, detectedEndpoint.name)
+                    sourceMark.putUserData(ENDPOINT_INTERNAL, detectedEndpoint.internal)
 
-                    determineEndpointId(endpointName, sourceMark)
+                    determineEndpointId(detectedEndpoint.name, sourceMark)
                 } else {
                     log.trace("Could not find endpoint name for: ${sourceMark.artifactQualifiedName}")
                 }
@@ -87,17 +106,17 @@ class EndpointDetector {
         }
     }
 
-    private fun determineEndpointName(sourceMark: MethodSourceMark): Future<Optional<String>> {
+    private fun determineEndpointName(sourceMark: MethodSourceMark): Future<Optional<DetectedEndpoint>> {
         return determineEndpointName(sourceMark.getPsiMethod())
     }
 
-    fun determineEndpointName(uMethod: UMethod): Future<Optional<String>> {
-        val promise = Promise.promise<Optional<String>>()
+    fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
+        val promise = Promise.promise<Optional<DetectedEndpoint>>()
         GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
             detectorSet.forEach {
                 try {
-                    val endpointName = it.determineEndpointName(uMethod).await()
-                    if (endpointName.isPresent) promise.complete(endpointName)
+                    val detectedEndpoint = it.determineEndpointName(uMethod).await()
+                    if (detectedEndpoint.isPresent) promise.complete(detectedEndpoint)
                 } catch (throwable: Throwable) {
                     promise.fail(throwable)
                 }
@@ -110,7 +129,15 @@ class EndpointDetector {
     /**
      * todo: description.
      */
+    data class DetectedEndpoint(
+        val name: String,
+        val internal: Boolean
+    )
+
+    /**
+     * todo: description.
+     */
     interface EndpointNameDeterminer {
-        fun determineEndpointName(uMethod: UMethod): Future<Optional<String>>
+        fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>>
     }
 }

@@ -66,10 +66,12 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.30")
     implementation("io.dropwizard.metrics:metrics-core:4.1.17")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
     implementation("org.jooq:jooq:3.14.7")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
+    implementation("org.apache.commons:commons-lang3:3.11")
 }
 
 tasks {
