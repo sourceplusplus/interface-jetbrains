@@ -18,6 +18,7 @@ import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.SOURCE_RED
 import kotlinx.datetime.Clock
 import org.jetbrains.uast.UThrowExpression
+import org.slf4j.LoggerFactory
 
 /**
  * Sets up the appropriate [SourceMark] display configuration based on [AdviceType].
@@ -27,6 +28,7 @@ import org.jetbrains.uast.UThrowExpression
  */
 object SourceMarkConstructor {
 
+    private val log = LoggerFactory.getLogger(SourceMarkConstructor::class.java)
     private val ADVICE_TIMER = SourceKey<Long>("ADVICE_TIMER")
 
     fun tearDownSourceMark(sourceMark: SourceMark) {
@@ -52,27 +54,33 @@ object SourceMarkConstructor {
         artifactAdvice.clear()
     }
 
-    fun getOrSetupSourceMark(fileMarker: SourceFileMarker, advice: ArtifactAdvice): SourceMark {
+    fun getOrSetupSourceMark(fileMarker: SourceFileMarker, advice: ArtifactAdvice): SourceMark? {
         when (advice.type) {
             AdviceType.RampDetectionAdvice -> {
-                val gutterMark = getOrCreateExpressionGutterMark(
-                    fileMarker, advice.artifact.lineNumber!!
-                )!!
-                if (!fileMarker.containsSourceMark(gutterMark)) {
-                    attachAdvice(gutterMark, advice)
-                    gutterMark.apply()
+                val gutterMark = getOrCreateExpressionGutterMark(fileMarker, advice.artifact.lineNumber!!)
+                return if (gutterMark.isPresent) {
+                    if (!fileMarker.containsSourceMark(gutterMark.get())) {
+                        attachAdvice(gutterMark.get(), advice)
+                        gutterMark.get().apply()
+                    }
+                    gutterMark.get()
+                } else {
+                    log.warn("No detected expression at line {}. Gutter mark ignored", advice.artifact.lineNumber!!)
+                    null
                 }
-                return gutterMark
             }
             AdviceType.ActiveExceptionAdvice -> {
-                val inlayMark = getOrCreateExpressionInlayMark( //todo: npe here on code changes
-                    fileMarker, advice.artifact.lineNumber!!
-                )!!
-                if (!fileMarker.containsSourceMark(inlayMark)) {
-                    attachAdvice(inlayMark, advice)
-                    inlayMark.apply()
+                val inlayMark = getOrCreateExpressionInlayMark(fileMarker, advice.artifact.lineNumber!!)
+                return if (inlayMark.isPresent) {
+                    if (!fileMarker.containsSourceMark(inlayMark.get())) {
+                        attachAdvice(inlayMark.get(), advice)
+                        inlayMark.get().apply()
+                    }
+                    inlayMark.get()
+                } else {
+                    log.warn("No detected expression at line {}. Inlay mark ignored", advice.artifact.lineNumber!!)
+                    null
                 }
-                return inlayMark
             }
         }
     }

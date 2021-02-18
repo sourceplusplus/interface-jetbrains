@@ -71,7 +71,9 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
         val fileMarker = SourceMarker.getSourceFileMarker(qualifiedClassName)
         if (fileMarker != null) {
             val sourceMark = SourceMarkConstructor.getOrSetupSourceMark(fileMarker, advice)
-            addAdviceData(sourceMark, advice)
+            if (sourceMark != null) {
+                addAdviceData(sourceMark, advice)
+            }
         } else {
             pendingAdvice.add(advice)
         }

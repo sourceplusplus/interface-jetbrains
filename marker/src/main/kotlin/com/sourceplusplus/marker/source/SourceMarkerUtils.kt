@@ -59,11 +59,11 @@ object SourceMarkerUtils {
         fileMarker: SourceFileMarker,
         lineNumber: Int,
         autoApply: Boolean = false
-    ): ExpressionInlayMark? {
+    ): Optional<ExpressionInlayMark> {
         val element = getElementAtLine(fileMarker.psiFile, lineNumber)
         return if (element is PsiStatement) {
-            getOrCreateExpressionInlayMark(fileMarker, element, autoApply = autoApply)
-        } else null
+            Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply = autoApply))
+        } else Optional.empty()
     }
 
     /**
@@ -138,11 +138,11 @@ object SourceMarkerUtils {
         fileMarker: SourceFileMarker,
         lineNumber: Int,
         autoApply: Boolean = false
-    ): ExpressionGutterMark? {
+    ): Optional<ExpressionGutterMark> {
         val element = getElementAtLine(fileMarker.psiFile, lineNumber)
         return if (element is PsiStatement) {
-            getOrCreateExpressionGutterMark(fileMarker, element, autoApply = autoApply)
-        } else null
+            Optional.ofNullable(getOrCreateExpressionGutterMark(fileMarker, element, autoApply = autoApply))
+        } else Optional.empty()
     }
 
     /**
