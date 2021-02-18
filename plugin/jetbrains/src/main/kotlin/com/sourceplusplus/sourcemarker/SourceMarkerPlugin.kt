@@ -23,10 +23,6 @@ import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
 import com.sourceplusplus.marker.source.mark.api.filter.CreateSourceMarkFilter
 import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfiguration
-import com.sourceplusplus.mentor.SourceMentor
-import com.sourceplusplus.mentor.base.MentorJobConfig
-import com.sourceplusplus.mentor.impl.job.ActiveExceptionMentor
-import com.sourceplusplus.mentor.impl.job.RampDetectionMentor
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
@@ -183,7 +179,7 @@ object SourceMarkerPlugin {
                     initPortal(config)
                     initMarker(config)
                     initMapper()
-                    initMentor(config)
+                    //initMentor(config)
                 }
             }
         }
@@ -214,43 +210,14 @@ object SourceMarkerPlugin {
      * Schedules long running, generic, and low-priority mentor jobs.
      * High-priority, specific, and short running mentor jobs are executed during source code navigation.
      */
-    private suspend fun initMentor(config: SourceMarkerConfig): SourceMentor {
-        val mentor = SourceMentor()
-        val mentorAdviceListener = ArtifactAdviceListener()
-        SourceMarker.addGlobalSourceMarkEventListener(mentorAdviceListener)
-        mentor.addAdviceListener(mentorAdviceListener)
-
-        //configure and add long running low-priority mentor jobs
-        mentor.addJobs(
-            RampDetectionMentor(
-                vertx, PluginSqlProducerSearch()
-            ).withConfig(
-                MentorJobConfig(
-                    repeatForever = true,
-                    repeatDelay = 30_000
-                    //todo: configurable schedule
-                )
-            )
-        )
-        if (config.rootSourcePackage != null) {
-            mentor.addJob(
-                ActiveExceptionMentor(
-                    vertx, config.rootSourcePackage!!
-                ).withConfig(
-                    MentorJobConfig(
-                        repeatForever = true,
-                        repeatDelay = 30_000
-                        //todo: configurable schedule
-                    )
-                )
-            )
-        } else {
-            log.warn("Could not determine root source package. Skipped adding ActiveExceptionMentor...")
-        }
-
-        deploymentIds.add(vertx.deployVerticle(mentor).await())
-        return mentor
-    }
+//    private suspend fun initMentor(config: SourceMarkerConfig): SourceMentor {
+////        val mentor = SourceMentor()
+////        val mentorAdviceListener = ArtifactAdviceListener()
+////        SourceMarker.addGlobalSourceMarkEventListener(mentorAdviceListener)
+////        mentor.addAdviceListener(mentorAdviceListener)
+////        deploymentIds.add(vertx.deployVerticle(mentor).await())
+//        return mentor
+//    }
 
     private suspend fun initPortal(config: SourceMarkerConfig) {
         //todo: portal should be connected to event bus without bridge

@@ -15,12 +15,16 @@ import javax.swing.Icon
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object GutterMarkIcons {
-    private val exclamationTriangle = IconLoader.getIcon(
+    val exclamationTriangle = IconLoader.getIcon(
         "/icons/exclamation-triangle.svg",
         PluginSourceMarkEventListener::class.java
     )
-    private val performanceRamp = IconLoader.getIcon(
+    val performanceRamp = IconLoader.getIcon(
         "/icons/sort-amount-up.svg",
+        PluginSourceMarkEventListener::class.java
+    )
+    val activeException = IconLoader.getIcon(
+        "/icons/map-marker-exclamation.svg",
         PluginSourceMarkEventListener::class.java
     )
 
