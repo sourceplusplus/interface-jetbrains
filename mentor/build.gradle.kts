@@ -1,6 +1,7 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("maven-publish")
+    id("kotlin-kapt")
 }
 
 val pluginGroup: String by project
@@ -31,4 +32,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
     testImplementation("junit:junit:4.13.2")
+
+    implementation("io.vertx:vertx-codegen:$vertxVersion")
+    kapt("io.vertx:vertx-codegen:$vertxVersion:processor")
 }
