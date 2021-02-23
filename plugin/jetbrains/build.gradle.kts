@@ -4,7 +4,7 @@ import org.jetbrains.changelog.markdownToHTML
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "0.7.1"
+    id("org.jetbrains.intellij") version "0.7.2"
     id("org.jetbrains.changelog") version "1.1.2"
     id("maven-publish")
 }
