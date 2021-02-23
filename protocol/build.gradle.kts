@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version "1.4.30"
     kotlin("kapt")
+    id("java")
 }
 
 kotlin {
@@ -30,6 +31,7 @@ kotlin {
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
             }
+            kotlin.srcDirs(kotlin.srcDirs, "$buildDir/generated/source/kapt/main")
         }
         val jvmTest by getting {
             dependencies {
@@ -53,4 +55,57 @@ kotlin {
 
 dependencies {
     "kapt"("io.vertx:vertx-codegen:4.0.2:processor")
+}
+
+tasks {
+    configure<SourceSetContainer> {
+        named("main") {
+            java.srcDir("$buildDir/generated/source/kapt/main")
+
+            dependencies {
+                val vertxVersion = "4.0.2"
+                implementation("io.vertx:vertx-core:$vertxVersion")
+                implementation("io.vertx:vertx-codegen:$vertxVersion")
+                compileOnly(project(":protocol"))
+            }
+        }
+    }
+
+    register("renameFinalJar") {
+        doFirst {
+            file("$buildDir/libs/protocol-jvm.jar").delete()
+            file("$buildDir/libs/protocol-jvm-final.jar")
+                .renameTo(file("$buildDir/libs/protocol-jvm.jar"))
+        }
+    }
+    register<Jar>("makeExternalJar") {
+        dependsOn(":protocol:doRename", ":protocol:doUpdate", ":protocol:jar")
+        from(zipTree("$buildDir/libs/protocol.jar"))
+        from(zipTree("$buildDir/libs/protocol-jvm.jar"))
+        archiveBaseName.set("protocol-jvm-final")
+    }
+    register("doRename") {
+        doFirst {
+            file("$projectDir/src/commonMain")
+                .renameTo(file("$projectDir/src/jvmMain"))
+        }
+    }
+    register("doUpdate") {
+        mustRunAfter(":protocol:doRename")
+        doLast {
+            File("${projectDir}/src/jvmMain/kotlin/com/sourceplusplus/protocol").walkTopDown()
+                .forEach {
+                    if (it.isDirectory) return@forEach
+                    if (it.readText().contains("enum class")) return@forEach
+                    if (!it.readText().contains("@Serializable\n")) return@forEach
+                    it.writeText(
+                        it.readText().replace(
+                            "@Serializable\n",
+                            "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n"
+                        ).replace("    val ", "    var ")
+                    )
+                }
+        }
+    }
+    getByName("jar").mustRunAfter("doUpdate")
 }
