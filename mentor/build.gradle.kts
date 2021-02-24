@@ -36,3 +36,9 @@ dependencies {
     implementation("io.vertx:vertx-codegen:$vertxVersion")
     kapt("io.vertx:vertx-codegen:$vertxVersion:processor")
 }
+
+tasks.register<Copy>("setupJsonMappers") {
+    from(file("$projectDir/src/main/resources/META-INF/vertx/json-mappers.properties"))
+    into(file("$buildDir/tmp/kapt3/src/main/resources/META-INF/vertx"))
+}
+tasks.getByName("compileKotlin").dependsOn("setupJsonMappers")

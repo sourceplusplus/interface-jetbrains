@@ -1,8 +1,6 @@
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version "1.4.30"
-    kotlin("kapt")
-    id("java")
 }
 
 kotlin {
@@ -29,9 +27,11 @@ kotlin {
             dependencies {
                 val vertxVersion = "4.0.2"
                 implementation("io.vertx:vertx-core:$vertxVersion")
-                implementation("io.vertx:vertx-codegen:$vertxVersion")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.1")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
             }
-            kotlin.srcDirs(kotlin.srcDirs, "$buildDir/generated/source/kapt/main")
         }
         val jvmTest by getting {
             dependencies {
@@ -52,99 +52,3 @@ kotlin {
         }
     }
 }
-
-dependencies {
-    "kapt"("io.vertx:vertx-codegen:4.0.2:processor")
-}
-
-tasks {
-    configure<SourceSetContainer> {
-        named("main") {
-            java.srcDir("$buildDir/generated/source/kapt/main")
-
-            dependencies {
-                val vertxVersion = "4.0.2"
-                implementation("io.vertx:vertx-core:$vertxVersion")
-                implementation("io.vertx:vertx-codegen:$vertxVersion")
-                compileOnly(project(":protocol"))
-            }
-        }
-    }
-
-    register("makeExternalJar") {
-        dependsOn("mergeJars")
-        doFirst {
-            file("$buildDir/libs/protocol-jvm.jar").delete()
-            file("$buildDir/libs/protocol-jvm-final.jar")
-                .renameTo(file("$buildDir/libs/protocol-jvm.jar"))
-        }
-    }
-    register<Jar>("mergeJars") {
-        dependsOn(":protocol:doRename", ":protocol:doUpdate", ":protocol:jar")
-        from(zipTree("$buildDir/libs/protocol.jar"))
-        from(zipTree("$buildDir/libs/protocol-jvm.jar"))
-        archiveBaseName.set("protocol-jvm-final")
-    }
-    register("doRename") {
-        doFirst {
-            file("$projectDir/src/commonMain")
-                .renameTo(file("$projectDir/src/jvmMain"))
-        }
-    }
-    register("doUpdate") {
-        mustRunAfter(":protocol:doRename")
-        doLast {
-            File("${projectDir}/src/jvmMain/kotlin/com/sourceplusplus/protocol").walkTopDown()
-                .forEach {
-                    if (it.isDirectory) return@forEach
-                    if (it.readText().contains("enum class")) return@forEach
-                    if (!it.readText().contains("@Serializable\n")) return@forEach
-
-                    val filename = it.nameWithoutExtension
-                    var source = it.readText()
-                        .replace(
-                            "val sourceAsFilename: String?\n",
-                            "var sourceAsFilename: String? = null\n        set\n"
-                        )
-                        .replace(
-                            "val sourceAsLineNumber: Int?\n",
-                            "var sourceAsLineNumber: Int? = null\n        set\n"
-                        )
-                        .replace(
-                            "@Serializable\n",
-                            "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n"
-                        ).replace("    val ", "    var ")
-                    if (filename == "ArtifactQualifiedName") {
-                        source = source
-                            .replace("var identifier: String", "var identifier: String? = null")
-                            .replace("var commitId: String", "var commitId: String? = null")
-                            .replace("var type: ArtifactType", "var type: ArtifactType? = null")
-                        source = source.substring(0, source.length - 2) +
-                                "\n    constructor(jsonObject: io.vertx.core.json.JsonObject) : this() {\n" +
-                                "        ${filename}Converter.fromJson(jsonObject, this)\n" +
-                                "    }\n\n" +
-                                "    fun toJson(): io.vertx.core.json.JsonObject {\n" +
-                                "        val json = io.vertx.core.json.JsonObject()\n" +
-                                "        ${filename}Converter.toJson(this, json)\n" +
-                                "        return json\n" +
-                                "    }\n" +
-                                "}"
-                    }
-//                    else {
-//                        source += "{\n    constructor(jsonObject: io.vertx.core.json.JsonObject) : this() {\n" +
-//                                "        ${filename}Converter.fromJson(jsonObject, this)\n" +
-//                                "    }\n\n" +
-//                                "    fun toJson(): io.vertx.core.json.JsonObject {\n" +
-//                                "        val json = io.vertx.core.json.JsonObject()\n" +
-//                                "        ${filename}Converter.toJson(this, json)\n" +
-//                                "        return json\n" +
-//                                "    }\n" +
-//                                "}"
-//                    }
-                    it.writeText(source)
-                }
-        }
-    }
-    getByName("jar").mustRunAfter("doUpdate")
-}
-//./gradlew :protocol:build && ./gradlew :protocol:makeExternalJar && rm -rf protocol/src/jvmMain && git checkout -- protocol/src
