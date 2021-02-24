@@ -1,7 +1,7 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("maven-publish")
-    id("kotlin-kapt")
+    kotlin("kapt")
 }
 
 val pluginGroup: String by project
@@ -35,6 +35,7 @@ dependencies {
 
     implementation("io.vertx:vertx-codegen:$vertxVersion")
     kapt("io.vertx:vertx-codegen:$vertxVersion:processor")
+    annotationProcessor("io.vertx:vertx-service-proxy:$vertxVersion")
 }
 
 tasks.register<Copy>("setupJsonMappers") {

@@ -62,6 +62,9 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("io.vertx:vertx-web:$vertxVersion")
+    implementation("io.vertx:vertx-service-discovery:$vertxVersion")
+    implementation("io.vertx:vertx-service-proxy:$vertxVersion")
+    implementation("io.vertx:vertx-tcp-eventbus-bridge:$vertxVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.1")
@@ -127,3 +130,6 @@ tasks {
         }
     }
 }
+
+sourceSets.main.get().java.srcDirs(sourceSets.main.get().java.srcDirs, "/home/brandon/IdeaProjects/SourceMarker/protocol/build/generated/source/kapt/main")
+
