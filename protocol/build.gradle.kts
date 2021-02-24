@@ -71,14 +71,15 @@ tasks {
         }
     }
 
-    register("renameFinalJar") {
+    register("makeExternalJar") {
+        dependsOn("mergeJars")
         doFirst {
             file("$buildDir/libs/protocol-jvm.jar").delete()
             file("$buildDir/libs/protocol-jvm-final.jar")
                 .renameTo(file("$buildDir/libs/protocol-jvm.jar"))
         }
     }
-    register<Jar>("makeExternalJar") {
+    register<Jar>("mergeJars") {
         dependsOn(":protocol:doRename", ":protocol:doUpdate", ":protocol:jar")
         from(zipTree("$buildDir/libs/protocol.jar"))
         from(zipTree("$buildDir/libs/protocol-jvm.jar"))
@@ -103,6 +104,30 @@ tasks {
                             "@Serializable\n",
                             "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n"
                         ).replace("    val ", "    var ")
+                    )
+                }
+        }
+    }
+    register("revertRename") {
+        doFirst {
+            file("$projectDir/src/jvmMain")
+                .renameTo(file("$projectDir/src/commonMain"))
+        }
+    }
+    register("revertUpdate") {
+        mustRunAfter(":protocol:revertRename")
+        dependsOn(":protocol:revertRename")
+        doLast {
+            File("${projectDir}/src/commonMain/kotlin/com/sourceplusplus/protocol").walkTopDown()
+                .forEach {
+                    if (it.isDirectory) return@forEach
+                    if (it.readText().contains("enum class")) return@forEach
+                    if (!it.readText().contains("@Serializable\n")) return@forEach
+                    it.writeText(
+                        it.readText().replace(
+                            "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n",
+                            "@Serializable\n"
+                        ).replace("    var ", "    val ")
                     )
                 }
         }
