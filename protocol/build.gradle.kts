@@ -79,6 +79,7 @@ tasks {
     }
 
     register("makeExternalJar") {
+        mustRunAfter("jar")
         dependsOn("mergeJars")
         doFirst {
             file("$buildDir/libs/protocol-jvm.jar").delete()
@@ -87,7 +88,7 @@ tasks {
         }
     }
     register<Jar>("mergeJars") {
-        dependsOn(":protocol:doRename", ":protocol:doUpdate", ":protocol:jar")
+        dependsOn("jar")
         from(zipTree("$buildDir/libs/protocol.jar"))
         from(zipTree("$buildDir/libs/protocol-jvm.jar"))
         archiveBaseName.set("protocol-jvm-final")
@@ -99,4 +100,4 @@ tasks.register<Copy>("setupJsonMappers") {
     into(file("$buildDir/tmp/kapt3/src/main/resources/META-INF/vertx"))
 }
 tasks.getByName("compileKotlinJvm").dependsOn("setupJsonMappers")
-tasks.getByName("build").dependsOn("jar")
+tasks.getByName("build").dependsOn("makeExternalJar")
