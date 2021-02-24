@@ -99,23 +99,52 @@ tasks {
                     if (it.isDirectory) return@forEach
                     if (it.readText().contains("enum class")) return@forEach
                     if (!it.readText().contains("@Serializable\n")) return@forEach
-                    it.writeText(
-                        it.readText()
-                            .replace(
-                                "val sourceAsFilename: String?\n",
-                                "var sourceAsFilename: String? = null\n        set\n"
-                            )
-                            .replace(
-                                "val sourceAsLineNumber: Int?\n",
-                                "var sourceAsLineNumber: Int? = null\n        set\n"
-                            )
-                            .replace(
-                                "@Serializable\n",
-                                "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n"
-                            ).replace("    val ", "    var ")
-                    )
+
+                    val filename = it.nameWithoutExtension
+                    var source = it.readText()
+                        .replace(
+                            "val sourceAsFilename: String?\n",
+                            "var sourceAsFilename: String? = null\n        set\n"
+                        )
+                        .replace(
+                            "val sourceAsLineNumber: Int?\n",
+                            "var sourceAsLineNumber: Int? = null\n        set\n"
+                        )
+                        .replace(
+                            "@Serializable\n",
+                            "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n"
+                        ).replace("    val ", "    var ")
+                    if (filename == "ArtifactQualifiedName") {
+                        source = source
+                            .replace("var identifier: String", "var identifier: String? = null")
+                            .replace("var commitId: String", "var commitId: String? = null")
+                            .replace("var type: ArtifactType", "var type: ArtifactType? = null")
+                        source = source.substring(0, source.length - 2) +
+                                "\n    constructor(jsonObject: io.vertx.core.json.JsonObject) : this() {\n" +
+                                "        ${filename}Converter.fromJson(jsonObject, this)\n" +
+                                "    }\n\n" +
+                                "    fun toJson(): io.vertx.core.json.JsonObject {\n" +
+                                "        val json = io.vertx.core.json.JsonObject()\n" +
+                                "        ${filename}Converter.toJson(this, json)\n" +
+                                "        return json\n" +
+                                "    }\n" +
+                                "}"
+                    }
+//                    else {
+//                        source += "{\n    constructor(jsonObject: io.vertx.core.json.JsonObject) : this() {\n" +
+//                                "        ${filename}Converter.fromJson(jsonObject, this)\n" +
+//                                "    }\n\n" +
+//                                "    fun toJson(): io.vertx.core.json.JsonObject {\n" +
+//                                "        val json = io.vertx.core.json.JsonObject()\n" +
+//                                "        ${filename}Converter.toJson(this, json)\n" +
+//                                "        return json\n" +
+//                                "    }\n" +
+//                                "}"
+//                    }
+                    it.writeText(source)
                 }
         }
     }
     getByName("jar").mustRunAfter("doUpdate")
 }
+//./gradlew :protocol:build && ./gradlew :protocol:makeExternalJar && rm -rf protocol/src/jvmMain && git checkout -- protocol/src
