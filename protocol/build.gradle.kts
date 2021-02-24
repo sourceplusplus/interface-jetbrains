@@ -100,34 +100,19 @@ tasks {
                     if (it.readText().contains("enum class")) return@forEach
                     if (!it.readText().contains("@Serializable\n")) return@forEach
                     it.writeText(
-                        it.readText().replace(
-                            "@Serializable\n",
-                            "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n"
-                        ).replace("    val ", "    var ")
-                    )
-                }
-        }
-    }
-    register("revertRename") {
-        doFirst {
-            file("$projectDir/src/jvmMain")
-                .renameTo(file("$projectDir/src/commonMain"))
-        }
-    }
-    register("revertUpdate") {
-        mustRunAfter(":protocol:revertRename")
-        dependsOn(":protocol:revertRename")
-        doLast {
-            File("${projectDir}/src/commonMain/kotlin/com/sourceplusplus/protocol").walkTopDown()
-                .forEach {
-                    if (it.isDirectory) return@forEach
-                    if (it.readText().contains("enum class")) return@forEach
-                    if (!it.readText().contains("@Serializable\n")) return@forEach
-                    it.writeText(
-                        it.readText().replace(
-                            "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n",
-                            "@Serializable\n"
-                        ).replace("    var ", "    val ")
+                        it.readText()
+                            .replace(
+                                "val sourceAsFilename: String?\n",
+                                "var sourceAsFilename: String? = null\n        set\n"
+                            )
+                            .replace(
+                                "val sourceAsLineNumber: Int?\n",
+                                "var sourceAsLineNumber: Int? = null\n        set\n"
+                            )
+                            .replace(
+                                "@Serializable\n",
+                                "@io.vertx.codegen.annotations.DataObject(generateConverter = true) @Serializable\n"
+                            ).replace("    val ", "    var ")
                     )
                 }
         }
