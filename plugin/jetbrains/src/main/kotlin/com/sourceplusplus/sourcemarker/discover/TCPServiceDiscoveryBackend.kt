@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.discover
 
+import com.sourceplusplus.protocol.SourcePlusPlusServices.LOG_COUNT_INDICATOR
 import io.vertx.core.*
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
@@ -41,21 +42,9 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 replyHandlers.remove(frame.getString("address"))!!.invoke(frame.getJsonObject("body"))
             }
             socket.handler(parser)
-            FrameHelper.sendFrame(
-                BridgeEventType.REGISTER.name.toLowerCase(),
-                ServiceDiscoveryOptions.DEFAULT_ANNOUNCE_ADDRESS,
-                null,
-                socket
-            )
-            FrameHelper.sendFrame(
-                BridgeEventType.REGISTER.name.toLowerCase(),
-                ServiceDiscoveryOptions.DEFAULT_USAGE_ADDRESS,
-                null,
-                socket
-            )
             FrameHelper.sendFrame(BridgeEventType.REGISTER.name.toLowerCase(), "get-records", null, socket)
-            FrameHelper.sendFrame(BridgeEventType.REGISTER.name.toLowerCase(), "logging.address", null, socket)
-            vertx.eventBus().consumer<JsonObject>("logging.address") { resultHandler ->
+            FrameHelper.sendFrame(BridgeEventType.REGISTER.name.toLowerCase(), LOG_COUNT_INDICATOR, null, socket)
+            vertx.eventBus().consumer<JsonObject>(LOG_COUNT_INDICATOR) { resultHandler ->
                 val replyAddress = UUID.randomUUID().toString()
                 replyHandlers[replyAddress] = {
                     resultHandler.reply(it.getValue("value"))
@@ -66,16 +55,10 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 }
                 FrameHelper.sendFrame(
                     BridgeEventType.SEND.name.toLowerCase(),
-                    "logging.address",
-                    replyAddress,
-                    headers,
-                    true,
-                    resultHandler.body(),
-                    socket
+                    LOG_COUNT_INDICATOR, replyAddress, headers, true, resultHandler.body(), socket
                 )
             }
-            FrameHelper.sendFrame(BridgeEventType.REGISTER.name.toLowerCase(), "hello", null, socket)
-            setupPromise.tryComplete()
+            setupPromise.complete()
         }
     }
 

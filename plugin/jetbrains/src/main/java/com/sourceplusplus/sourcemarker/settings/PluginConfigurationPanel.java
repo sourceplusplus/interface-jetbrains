@@ -57,7 +57,8 @@ public class PluginConfigurationPanel {
                 rootSourcePackageTextField.getText(),
                 autoResolveEndpointNamesCheckBox.isSelected(),
                 true, consoleCheckBox.isSelected(),
-                portalRefreshModel.getNumber().intValue()
+                portalRefreshModel.getNumber().intValue(),
+                true
         );
     }
 
