@@ -4,7 +4,7 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.search.searches.OverridingMethodsSearch
 import com.sourceplusplus.marker.source.SourceMarkerUtils
-import com.sourceplusplus.mentor.extend.SqlProducerSearch
+import com.sourceplusplus.protocol.mentor.extend.SqlProducerSearch
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin

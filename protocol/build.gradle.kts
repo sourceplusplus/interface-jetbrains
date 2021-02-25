@@ -35,6 +35,7 @@ kotlin {
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.1")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+                implementation("org.jooq:jooq:3.14.7")
             }
             //kotlin.srcDirs(kotlin.srcDirs, "$buildDir/generated/source/kapt/main")
         }

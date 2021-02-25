@@ -50,7 +50,6 @@ repositories {
 dependencies {
     implementation(project(":mapper"))
     implementation(project(":marker"))
-    implementation(project(":mentor"))
     implementation(project(":monitor:skywalking"))
     implementation(project(":protocol"))
     implementation(project(":portal"))
