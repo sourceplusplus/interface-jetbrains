@@ -1,6 +1,7 @@
 package com.sourceplusplus.sourcemarker.discover
 
-import com.sourceplusplus.protocol.SourcePlusPlusServices.LOG_COUNT_INDICATOR
+import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
+import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOG_COUNT_INDICATOR
 import io.vertx.core.*
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
@@ -11,7 +12,6 @@ import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.servicediscovery.Record
-import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
+    private lateinit var vertx: Vertx
     private lateinit var client: NetClient
     private lateinit var socket: NetSocket
     private val setupPromise = Promise.promise<Void>()
@@ -33,6 +34,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     private val replyHandlers = ConcurrentHashMap<String, (JsonObject) -> Unit>()
 
     override fun init(vertx: Vertx, config: JsonObject) {
+        this.vertx = vertx
+
         GlobalScope.launch(vertx.dispatcher()) {
             client = vertx.createNetClient()
             socket = client.connect(5455, "localhost").await()
@@ -42,23 +45,34 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 replyHandlers.remove(frame.getString("address"))!!.invoke(frame.getJsonObject("body"))
             }
             socket.handler(parser)
-            FrameHelper.sendFrame(BridgeEventType.REGISTER.name.toLowerCase(), "get-records", null, socket)
-            FrameHelper.sendFrame(BridgeEventType.REGISTER.name.toLowerCase(), LOG_COUNT_INDICATOR, null, socket)
-            vertx.eventBus().consumer<JsonObject>(LOG_COUNT_INDICATOR) { resultHandler ->
-                val replyAddress = UUID.randomUUID().toString()
-                replyHandlers[replyAddress] = {
-                    resultHandler.reply(it.getValue("value"))
-                }
-                val headers = JsonObject()
-                for ((key, value) in resultHandler.headers().entries()) {
-                    headers.put(key, value)
-                }
-                FrameHelper.sendFrame(
-                    BridgeEventType.SEND.name.toLowerCase(),
-                    LOG_COUNT_INDICATOR, replyAddress, headers, true, resultHandler.body(), socket
-                )
-            }
+
+            setupHandler(vertx, "get-records")
+            setupHandler(vertx, LOCAL_TRACING)
+            setupHandler(vertx, LOG_COUNT_INDICATOR)
+
             setupPromise.complete()
+        }
+    }
+
+    private fun setupHandler(vertx: Vertx, address: String) {
+        FrameHelper.sendFrame(BridgeEventType.REGISTER.name.toLowerCase(), address, null, socket)
+        vertx.eventBus().consumer<JsonObject>(address) { resultHandler ->
+            val replyAddress = UUID.randomUUID().toString()
+            replyHandlers[replyAddress] = {
+                if (it.map.keys.size == 1 && it.containsKey("value")) {
+                    resultHandler.reply(it.getValue("value"))
+                } else {
+                    resultHandler.reply(it)
+                }
+            }
+            val headers = JsonObject()
+            for ((key, value) in resultHandler.headers().entries()) {
+                headers.put(key, value)
+            }
+            FrameHelper.sendFrame(
+                BridgeEventType.SEND.name.toLowerCase(),
+                address, replyAddress, headers, true, resultHandler.body(), socket
+            )
         }
     }
 
@@ -80,20 +94,14 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
     override fun getRecords(resultHandler: Handler<AsyncResult<MutableList<Record>>>) {
         setupFuture.onComplete {
-            val replyAddress = UUID.randomUUID().toString()
-            replyHandlers[replyAddress] = {
-                resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it))))
+            vertx.eventBus().request<JsonObject>("get-records", null) {
+                resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it.result().body()))))
             }
-            FrameHelper.sendFrame(
-                BridgeEventType.SEND.name.toLowerCase(),
-                "get-records",
-                replyAddress,
-                null,
-                socket
-            )
         }
         if (setupFuture.isComplete) {
-            TODO()
+            vertx.eventBus().request<JsonObject>("get-records", null) {
+                resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it.result().body()))))
+            }
         }
     }
 

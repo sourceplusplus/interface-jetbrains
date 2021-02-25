@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
@@ -37,5 +38,15 @@ object ProtocolMarshaller {
     @JvmStatic
     fun deserializeArtifactQualifiedName(value: JsonObject): ArtifactQualifiedName {
         return value.mapTo(ArtifactQualifiedName::class.java)
+    }
+
+    @JvmStatic
+    fun serializeTraceResult(value: TraceResult): JsonObject {
+        return JsonObject(Json.encode(value))
+    }
+
+    @JvmStatic
+    fun deserializeTraceResult(value: JsonObject): TraceResult {
+        return value.mapTo(TraceResult::class.java)
     }
 }

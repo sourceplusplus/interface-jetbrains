@@ -27,6 +27,8 @@ import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.log.LogResult
@@ -35,7 +37,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
-import com.sourceplusplus.protocol.service.LogCountIndicatorService
+import com.sourceplusplus.protocol.service.alerting.LocalTracingService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
@@ -201,15 +203,22 @@ object SourceMarkerPlugin {
             )
         )
 
-        EventBusService.getProxy(discovery, LogCountIndicatorService::class.java) {
+        EventBusService.getProxy(discovery, LocalTracingService::class.java) {
             if (it.succeeded()) {
-                log.info("Log count indicator available")
-                val loggingService = it.result()
-                loggingService.getOccurredCount1("test") {
-                    println("getOccurredCount1: $it")
+                log.info("Local tracing available")
+                val localTracing = it.result()
+                localTracing.getTraceResult(
+                    ArtifactQualifiedName(
+                        identifier = "id",
+                        commitId = "commitId",
+                        type = ArtifactType.METHOD
+                    ),
+                    QueryTimeFrame.LAST_15_MINUTES
+                ) {
+                    println("here")
                 }
             } else {
-                log.warn("Log count indicator unavailable")
+                log.warn("Local tracing unavailable")
             }
         }
     }

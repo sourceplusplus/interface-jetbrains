@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.service
+package com.sourceplusplus.protocol.service.logging
 
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import io.vertx.codegen.annotations.ProxyGen
