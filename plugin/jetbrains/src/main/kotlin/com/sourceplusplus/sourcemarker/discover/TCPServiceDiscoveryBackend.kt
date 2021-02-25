@@ -3,6 +3,7 @@ package com.sourceplusplus.sourcemarker.discover
 import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
 import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOG_COUNT_INDICATOR
 import io.vertx.core.*
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
 import io.vertx.core.net.NetSocket
@@ -94,8 +95,12 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
     override fun getRecords(resultHandler: Handler<AsyncResult<MutableList<Record>>>) {
         setupFuture.onComplete {
-            vertx.eventBus().request<JsonObject>("get-records", null) {
-                resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it.result().body()))))
+            vertx.eventBus().request<JsonArray>("get-records", null) {
+                val records = mutableListOf<Record>()
+                it.result().body().forEach { record ->
+                    records.add(Record(record as JsonObject))
+                }
+                resultHandler.handle(Future.succeededFuture(records))
             }
         }
         if (setupFuture.isComplete) {
