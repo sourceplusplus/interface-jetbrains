@@ -11,6 +11,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
+import kotlinx.datetime.Instant
 
 object ProtocolMarshaller {
     init {
@@ -48,5 +49,15 @@ object ProtocolMarshaller {
     @JvmStatic
     fun deserializeTraceResult(value: JsonObject): TraceResult {
         return value.mapTo(TraceResult::class.java)
+    }
+
+    @JvmStatic
+    fun serializeInstant(value: Instant): String {
+        return value.toEpochMilliseconds().toString()
+    }
+
+    @JvmStatic
+    fun deserializeInstant(value: String): Instant {
+        return Instant.fromEpochMilliseconds(value.toLong())
     }
 }
