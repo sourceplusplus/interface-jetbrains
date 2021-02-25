@@ -35,11 +35,10 @@ import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
-import com.sourceplusplus.protocol.service.LogCountIndicatorServiceVertxEBProxy
+import com.sourceplusplus.protocol.service.LogCountIndicatorService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
-import io.vertx.core.AsyncResult
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
@@ -54,6 +53,10 @@ import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
+import io.vertx.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscoveryOptions
+import io.vertx.servicediscovery.impl.DiscoveryImpl
+import io.vertx.servicediscovery.types.EventBusService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -182,55 +185,31 @@ object SourceMarkerPlugin {
                     initMapper()
                     //initMentor(config)
 
-//                    val discovery = ServiceDiscovery.create(vertx)
-//                    vertx.eventBus().consumer<JsonObject>(ServiceDiscoveryOptions.DEFAULT_ANNOUNCE_ADDRESS) {
-//                        val record = Record(it.body())
-//                        if (record.status == Status.UP && record.name == "logging-service") {
-//                            log.info("Logging service available")
-//                            loggingService = discovery.getReference(record).get<LoggingService>()
-//                        } else if (record.status == Status.UP && record.name == "logging-plugin") {
-//                            log.info("Logging plugin available")
-//                            loggingPlugin = discovery.getReference(record).get<LoggingPlugin>()
-//
-//                            vertx.setPeriodic(1000) {
-//                                loggingPlugin!!.getPatternOccurredCounts {
-//                                    if (it.succeeded()) {
-//                                        log.info("WOOT!: " + it.result())
-//                                    } else {
-//                                        it.cause().printStackTrace()
-//                                    }
-//                                }
-//                            }
-//                        } else {
-//                            log.warn("Unknown: $record")
-//                        }
-//                    }
-//                    EventBusService.getProxy(discovery, LoggingService::class.java) { ar: AsyncResult<LoggingService> ->
-//                        if (ar.succeeded()) {
-//                            log.info("Logging service already available")
-//                            loggingService = ar.result()
-//                        }
-//                    }
-//                    EventBusService.getProxy(discovery, LoggingPlugin::class.java) { ar: AsyncResult<LoggingPlugin> ->
-//                        if (ar.succeeded()) {
-//                            log.info("Logging plugin already available")
-//                            loggingPlugin = ar.result()
-//
-//                            vertx.setPeriodic(1000) {
-//                                loggingPlugin!!.getPatternOccurredCounts {
-//                                    if (it.succeeded()) {
-//                                        log.info("WOOT!: " + it.result())
-//                                    } else {
-//                                        it.cause().printStackTrace()
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//
-//                    val t = LogCountIndicatorServiceVertxEBProxy(vertx, "test")
-//                    println(t)
+                    if (config.sourcePlusPlusEnabled) {
+                        initSourcePlusPlus()
+                    }
                 }
+            }
+        }
+    }
+
+    private fun initSourcePlusPlus() {
+        val discovery: ServiceDiscovery = DiscoveryImpl(
+            vertx,
+            ServiceDiscoveryOptions().setBackendConfiguration(
+                JsonObject().put("backend-name", "tcp-service-discovery")
+            )
+        )
+
+        EventBusService.getProxy(discovery, LogCountIndicatorService::class.java) {
+            if (it.succeeded()) {
+                log.info("Log count indicator available")
+                val loggingService = it.result()
+                loggingService.getOccurredCount1("test") {
+                    println("getOccurredCount1: $it")
+                }
+            } else {
+                log.warn("Log count indicator unavailable")
             }
         }
     }

@@ -12,5 +12,6 @@ data class SourceMarkerConfig(
     var autoResolveEndpointNames: Boolean = false,
     var localMentorEnabled: Boolean = true,
     var pluginConsoleEnabled: Boolean = false,
-    var portalRefreshIntervalMs: Int = 5000
+    var portalRefreshIntervalMs: Int = 5000,
+    var sourcePlusPlusEnabled: Boolean = true
 )
