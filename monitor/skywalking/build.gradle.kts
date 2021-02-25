@@ -6,7 +6,7 @@ plugins {
 dependencies {
     implementation(project(":protocol"))
     implementation("org.slf4j:slf4j-api:1.7.30")
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.3")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.4")
     implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.3")
     api("com.apollographql.apollo:apollo-api:2.5.3")
 
