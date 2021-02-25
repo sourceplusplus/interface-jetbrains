@@ -73,6 +73,7 @@ tasks {
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
                 implementation("io.vertx:vertx-service-proxy:$vertxVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
                 compileOnly(project(":protocol"))
             }
         }

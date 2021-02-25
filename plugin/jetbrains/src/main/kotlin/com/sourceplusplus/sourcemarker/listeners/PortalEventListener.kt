@@ -45,16 +45,15 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
-import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
@@ -67,13 +66,16 @@ import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
+import io.vertx.core.Promise
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.ZonedDateTime
@@ -267,36 +269,61 @@ class PortalEventListener(
                         ), vertx
                     )
 
-                    //todo: rename {GET} to [GET] in skywalking
-                    if (markerConfig.autoResolveEndpointNames) {
-                        GlobalScope.launch(vertx.dispatcher()) {
-                            //todo: only try to auto resolve endpoint names with dynamic ids
-                            //todo: support multiple operationsNames/traceIds
-                            traceResult.traces.forEach {
-                                if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
-                                    val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
-                                    val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
-                                    if (entrySpan != null) {
-                                        val url = entrySpan.tags["url"]
-                                        val httpMethod = entrySpan.tags["http.method"]
-                                        if (url != null && httpMethod != null) {
-                                            val updatedEndpointName = "{$httpMethod}${URI(url).path}"
-                                            vertx.eventBus().send(
-                                                TraceSpanUpdated, entrySpan.copy(
-                                                    endpointName = updatedEndpointName,
-                                                    artifactQualifiedName = sourceMark.artifactQualifiedName
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
+                    handleTraceResult(traceResult, portal, sourceMark)
+                }
+            } else if (SourceMarkerPlugin.localTracing != null) {
+                GlobalScope.launch(vertx.dispatcher()) {
+                    val promise = Promise.promise<TraceResult>()
+                    SourceMarkerPlugin.localTracing!!.getTraceResult(
+                        artifactQualifiedName = ArtifactQualifiedName(
+                            identifier = portal.viewingPortalArtifact,
+                            commitId = "null",
+                            type = ArtifactType.METHOD
+                        ),
+                        start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
+                        stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
+                        orderType = portal.tracesView.orderType,
+                        pageSize = portal.tracesView.viewTraceAmount,
+                        pageNumber = portal.tracesView.pageNumber,
+                        promise
+                    )
+
+                    val traceResult = promise.future().await()
+                    println(traceResult)
+                    handleTraceResult(traceResult, portal, sourceMark)
                 }
             }
         }
+    }
+
+    private fun handleTraceResult(traceResult: TraceResult, portal: SourcePortal, sourceMark: MethodSourceMark) {
+        //todo: rename {GET} to [GET] in skywalking
+        if (markerConfig.autoResolveEndpointNames) {
+            GlobalScope.launch(vertx.dispatcher()) {
+                //todo: only try to auto resolve endpoint names with dynamic ids
+                //todo: support multiple operationsNames/traceIds
+                traceResult.traces.forEach {
+                    if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
+                        val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
+                        val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
+                        if (entrySpan != null) {
+                            val url = entrySpan.tags["url"]
+                            val httpMethod = entrySpan.tags["http.method"]
+                            if (url != null && httpMethod != null) {
+                                val updatedEndpointName = "{$httpMethod}${URI(url).path}"
+                                vertx.eventBus().send(
+                                    TraceSpanUpdated, entrySpan.copy(
+                                        endpointName = updatedEndpointName,
+                                        artifactQualifiedName = sourceMark.artifactQualifiedName
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
     }
 
     private suspend fun refreshLogs(portal: SourcePortal) {
@@ -453,26 +480,13 @@ class PortalEventListener(
         if (sourceMark != null) {
             val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
             if (portal != lastDisplayedInternalPortal) {
-                val localTracingAvailable = vertx.sharedData()
-                    .getLocalMap<String, Boolean>("sm.services")[LOCAL_TRACING] == true
-                log.info("Local tracing available: $localTracingAvailable")
-                if (localTracingAvailable) {
-                    SourceMarkerPlugin.localTracing.getTraceResult(
-                        ArtifactQualifiedName(
-                            identifier = sourceMark.artifactQualifiedName,
-                            commitId = "commitId",
-                            type = ArtifactType.METHOD
-                        ), QueryTimeFrame.LAST_15_MINUTES
-                    ) {
-                        println("got local trace result")
-                    }
-                }
-
                 val externalEndpoint = sourceMark.getUserData(ENDPOINT_DETECTOR)?.isExternalEndpoint(sourceMark) == true
                 if (externalEndpoint) {
                     portal.configuration.visibleActivity = true
                     portal.configuration.visibleTraces = true
                     portal.configuration.visibleLogs = true //todo: can hide based on if there is logs
+                } else if (SourceMarkerPlugin.localTracing != null) {
+                    portal.configuration.visibleTraces = true
                 } else {
                     //non-endpoint artifact; hide activity/traces till manually shown
                     portal.configuration.visibleActivity = false

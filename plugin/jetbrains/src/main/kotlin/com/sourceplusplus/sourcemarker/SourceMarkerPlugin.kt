@@ -26,10 +26,7 @@ import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfigurati
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
-import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.log.LogResult
@@ -196,7 +193,7 @@ object SourceMarkerPlugin {
         }
     }
 
-    lateinit var localTracing: LocalTracingService
+    var localTracing: LocalTracingService? = null
     private fun initSourcePlusPlus() {
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
@@ -206,21 +203,9 @@ object SourceMarkerPlugin {
         )
 
         EventBusService.getProxy(discovery, LocalTracingService::class.java) {
-            vertx.sharedData().getLocalMap<String, Boolean>("sm.services")[LOCAL_TRACING] = it.succeeded()
-
             if (it.succeeded()) {
                 log.info("Local tracing available")
                 localTracing = it.result()
-                localTracing.getTraceResult(
-                    ArtifactQualifiedName(
-                        identifier = "id",
-                        commitId = "commitId",
-                        type = ArtifactType.METHOD
-                    ),
-                    QueryTimeFrame.LAST_15_MINUTES
-                ) {
-                    log.info("Got local trace result: $it")
-                }
             } else {
                 log.warn("Local tracing unavailable")
             }
