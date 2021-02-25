@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.service.alerting
+package com.sourceplusplus.protocol.service.tracing
 
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame

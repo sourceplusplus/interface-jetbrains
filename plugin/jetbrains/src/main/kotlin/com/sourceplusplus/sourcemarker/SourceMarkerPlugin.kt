@@ -26,6 +26,7 @@ import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfigurati
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
+import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
@@ -37,7 +38,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
-import com.sourceplusplus.protocol.service.alerting.LocalTracingService
+import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
@@ -195,6 +196,7 @@ object SourceMarkerPlugin {
         }
     }
 
+    lateinit var localTracing: LocalTracingService
     private fun initSourcePlusPlus() {
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
@@ -204,9 +206,11 @@ object SourceMarkerPlugin {
         )
 
         EventBusService.getProxy(discovery, LocalTracingService::class.java) {
+            vertx.sharedData().getLocalMap<String, Boolean>("sm.services")[LOCAL_TRACING] = it.succeeded()
+
             if (it.succeeded()) {
                 log.info("Local tracing available")
-                val localTracing = it.result()
+                localTracing = it.result()
                 localTracing.getTraceResult(
                     ArtifactQualifiedName(
                         identifier = "id",
@@ -215,7 +219,7 @@ object SourceMarkerPlugin {
                     ),
                     QueryTimeFrame.LAST_15_MINUTES
                 ) {
-                    println("here")
+                    log.info("Got local trace result: $it")
                 }
             } else {
                 log.warn("Local tracing unavailable")

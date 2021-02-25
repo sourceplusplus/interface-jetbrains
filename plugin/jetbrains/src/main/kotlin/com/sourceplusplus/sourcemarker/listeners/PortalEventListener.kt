@@ -45,8 +45,10 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
+import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
@@ -57,6 +59,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
@@ -450,6 +453,21 @@ class PortalEventListener(
         if (sourceMark != null) {
             val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
             if (portal != lastDisplayedInternalPortal) {
+                val localTracingAvailable = vertx.sharedData()
+                    .getLocalMap<String, Boolean>("sm.services")[LOCAL_TRACING] == true
+                log.info("Local tracing available: $localTracingAvailable")
+                if (localTracingAvailable) {
+                    SourceMarkerPlugin.localTracing.getTraceResult(
+                        ArtifactQualifiedName(
+                            identifier = sourceMark.artifactQualifiedName,
+                            commitId = "commitId",
+                            type = ArtifactType.METHOD
+                        ), QueryTimeFrame.LAST_15_MINUTES
+                    ) {
+                        println("got local trace result")
+                    }
+                }
+
                 val externalEndpoint = sourceMark.getUserData(ENDPOINT_DETECTOR)?.isExternalEndpoint(sourceMark) == true
                 if (externalEndpoint) {
                     portal.configuration.visibleActivity = true
