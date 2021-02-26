@@ -66,11 +66,9 @@ import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
-import io.vertx.core.Promise
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -272,25 +270,24 @@ class PortalEventListener(
                     handleTraceResult(traceResult, portal, sourceMark)
                 }
             } else if (SourceMarkerPlugin.localTracing != null) {
-                GlobalScope.launch(vertx.dispatcher()) {
-                    val promise = Promise.promise<TraceResult>()
-                    SourceMarkerPlugin.localTracing!!.getTraceResult(
-                        artifactQualifiedName = ArtifactQualifiedName(
-                            identifier = portal.viewingPortalArtifact,
-                            commitId = "null",
-                            type = ArtifactType.METHOD
-                        ),
-                        start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
-                        stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
-                        orderType = portal.tracesView.orderType,
-                        pageSize = portal.tracesView.viewTraceAmount,
-                        pageNumber = portal.tracesView.pageNumber,
-                        promise
-                    )
-
-                    val traceResult = promise.future().await()
-                    println(traceResult)
-                    handleTraceResult(traceResult, portal, sourceMark)
+                SourceMarkerPlugin.localTracing!!.getTraceResult(
+                    artifactQualifiedName = ArtifactQualifiedName(
+                        identifier = portal.viewingPortalArtifact,
+                        commitId = "null",
+                        type = ArtifactType.METHOD
+                    ),
+                    start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
+                    stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
+                    orderType = portal.tracesView.orderType,
+                    pageSize = portal.tracesView.viewTraceAmount,
+                    pageNumber = portal.tracesView.pageNumber,
+                ) {
+                    if (it.succeeded()) {
+                        handleTraceResult(it.result(), portal, sourceMark)
+                    } else {
+                        it.cause().printStackTrace()
+                        log.error("Failed to get local trace results", it.cause())
+                    }
                 }
             }
         }

@@ -1,8 +1,10 @@
 package com.sourceplusplus.sourcemarker.discover
 
 import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
-import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOG_COUNT_INDICATOR
 import io.vertx.core.*
+import io.vertx.core.eventbus.impl.EventBusImpl
+import io.vertx.core.eventbus.impl.MessageImpl
+import io.vertx.core.http.impl.headers.HeadersMultiMap
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
@@ -16,6 +18,7 @@ import io.vertx.servicediscovery.Record
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -26,6 +29,10 @@ import java.util.concurrent.ConcurrentHashMap
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
+
+    companion object {
+        private val log = LoggerFactory.getLogger(TCPServiceDiscoveryBackend::class.java)
+    }
 
     private lateinit var vertx: Vertx
     private lateinit var client: NetClient
@@ -42,31 +49,46 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             socket = client.connect(5455, "localhost").await()
             val parser = FrameParser { parse: AsyncResult<JsonObject> ->
                 val frame = parse.result()
-                assert(frame.getBoolean("send"))
-                replyHandlers.remove(frame.getString("address"))!!.invoke(frame.getJsonObject("body"))
+                if (replyHandlers.containsKey(frame.getString("address"))) {
+                    replyHandlers.remove(frame.getString("address"))!!.invoke(frame.getJsonObject("body"))
+                } else if (frame.containsKey("headers")) {
+                    val headers = frame.getJsonObject("headers")
+                    if (headers.containsKey("sm.reply")) {
+                        replyHandlers.remove(headers.getString("sm.reply"))!!.invoke(frame.getJsonObject("body"))
+                    }
+                }
             }
             socket.handler(parser)
 
             setupHandler(vertx, "get-records")
             setupHandler(vertx, LOCAL_TRACING)
-            setupHandler(vertx, LOG_COUNT_INDICATOR)
+            //setupHandler(vertx, LOG_COUNT_INDICATOR)
 
             setupPromise.complete()
         }
     }
 
     private fun setupHandler(vertx: Vertx, address: String) {
-        FrameHelper.sendFrame(BridgeEventType.REGISTER.name.toLowerCase(), address, null, socket)
         vertx.eventBus().consumer<JsonObject>(address) { resultHandler ->
             val replyAddress = UUID.randomUUID().toString()
             replyHandlers[replyAddress] = {
                 if (it.map.keys.size == 1 && it.containsKey("value")) {
                     resultHandler.reply(it.getValue("value"))
                 } else {
-                    resultHandler.reply(it)
+                    val message = MessageImpl(
+                        address,
+                        HeadersMultiMap.httpHeaders(),
+                        it,
+                        (resultHandler as MessageImpl<JsonObject, JsonObject>).codec(),
+                        true,
+                        vertx.eventBus() as EventBusImpl
+                    )
+                    message.setReplyAddress(resultHandler.replyAddress())
+                    message.reply(it)
                 }
             }
             val headers = JsonObject()
+            headers.put("sm.reply", replyAddress)
             for ((key, value) in resultHandler.headers().entries()) {
                 headers.put(key, value)
             }
