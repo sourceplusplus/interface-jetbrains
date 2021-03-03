@@ -12,11 +12,18 @@ import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.util.PsiNavigateUtil
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
+import com.sourceplusplus.sourcemarker.search.ArtifactSearch
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
+import org.slf4j.LoggerFactory
 
 /**
  * todo: description.
@@ -25,6 +32,8 @@ import org.jetbrains.uast.toUElement
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object ArtifactNavigator {
+
+    private val log = LoggerFactory.getLogger(ArtifactNavigator::class.java)
 
     //todo: remove method from method names and support navigating to classes?
 
@@ -41,8 +50,21 @@ object ArtifactNavigator {
     }
 
     fun navigateTo(project: Project, artifactQualifiedName: ArtifactQualifiedName) {
-        ApplicationManager.getApplication().invokeLater {
-            navigateToMethod(project, artifactQualifiedName.identifier)
+        if (artifactQualifiedName.type == ArtifactType.ENDPOINT) {
+            GlobalScope.launch(vertx.dispatcher()) {
+                val artifactPsi = ArtifactSearch.findArtifact(artifactQualifiedName)
+                if (artifactPsi != null) {
+                    ApplicationManager.getApplication().invokeLater {
+                        PsiNavigateUtil.navigate(artifactPsi)
+                    }
+                } else {
+                    log.warn("Could not find artifact: {}", artifactQualifiedName)
+                }
+            }
+        } else {
+            ApplicationManager.getApplication().invokeLater {
+                navigateToMethod(project, artifactQualifiedName.identifier)
+            }
         }
     }
 

@@ -267,33 +267,35 @@ class PortalEventListener(
                         ), vertx
                     )
 
-                    handleTraceResult(traceResult, portal, sourceMark)
+                    handleTraceResult(traceResult, portal, portal.viewingPortalArtifact)
                 }
-            } else if (SourceMarkerPlugin.localTracing != null) {
-                SourceMarkerPlugin.localTracing!!.getTraceResult(
-                    artifactQualifiedName = ArtifactQualifiedName(
-                        identifier = portal.viewingPortalArtifact,
-                        commitId = "null",
-                        type = ArtifactType.METHOD
-                    ),
-                    start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
-                    stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
-                    orderType = portal.tracesView.orderType,
-                    pageSize = portal.tracesView.viewTraceAmount,
-                    pageNumber = portal.tracesView.pageNumber,
-                ) {
-                    if (it.succeeded()) {
-                        handleTraceResult(it.result(), portal, sourceMark)
-                    } else {
-                        it.cause().printStackTrace()
-                        log.error("Failed to get local trace results", it.cause())
-                    }
+            }
+        }
+        if (SourceMarkerPlugin.localTracing != null) {
+            portal.tracesView.localTracing = true
+            SourceMarkerPlugin.localTracing!!.getTraceResult(
+                artifactQualifiedName = ArtifactQualifiedName(
+                    identifier = portal.viewingPortalArtifact,
+                    commitId = "null",
+                    type = ArtifactType.METHOD
+                ),
+                start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
+                stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
+                orderType = portal.tracesView.orderType,
+                pageSize = portal.tracesView.viewTraceAmount,
+                pageNumber = portal.tracesView.pageNumber,
+            ) {
+                if (it.succeeded()) {
+                    handleTraceResult(it.result(), portal, portal.viewingPortalArtifact)
+                } else {
+                    it.cause().printStackTrace()
+                    log.error("Failed to get local trace results", it.cause())
                 }
             }
         }
     }
 
-    private fun handleTraceResult(traceResult: TraceResult, portal: SourcePortal, sourceMark: MethodSourceMark) {
+    private fun handleTraceResult(traceResult: TraceResult, portal: SourcePortal, artifactQualifiedName: String) {
         //todo: rename {GET} to [GET] in skywalking
         if (markerConfig.autoResolveEndpointNames) {
             GlobalScope.launch(vertx.dispatcher()) {
@@ -311,7 +313,7 @@ class PortalEventListener(
                                 vertx.eventBus().send(
                                     TraceSpanUpdated, entrySpan.copy(
                                         endpointName = updatedEndpointName,
-                                        artifactQualifiedName = sourceMark.artifactQualifiedName
+                                        artifactQualifiedName = artifactQualifiedName
                                     )
                                 )
                             }
@@ -324,7 +326,7 @@ class PortalEventListener(
     }
 
     private suspend fun refreshLogs(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER) ?: return
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         GlobalScope.launch(vertx.dispatcher()) {
             val logsResult = LogsBridge.queryLogs(
                 GetEndpointLogs(
