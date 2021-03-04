@@ -6,11 +6,9 @@ Source code is the specification that describes what can eventually be experienc
 
 This disparity between the software developer and software user perspectives is the same as that of the theoretical vs empirical sciences. The theoretical sciences (aka theory-building) and empirical sciences (aka theory-testing) represent two halves of the research cycle that perpetually iterates between theory and observations. Both perspectives are critical for the advancement of science, and naturally, a complete researcher is one who can traverse the entire research cycle.
 
-![](../../.github/media/misc/Scientific_Research.png)
-
 Similarly, software development continuously iterates between theory-building via source code and theory-testing via software utilization. In scientific research, elegant theories are not valuable if they do not correlate with reality and mountains of data are equally useless if they do not contribute to meaningful theories. This is identical to the balance between software development and software operation. Source code is not valuable if it is not computable, and software is equally useless if it does not work.
 
-![](../../.github/media/misc/Software_Development.png)
+![](../../.github/media/misc/SM-Research-vs-Development.jpg)
 
 Despite this intrinsic and complementary cycle, today’s software monitoring solutions still gather empirical data and display software operation as time series graphs inside dashboards and other abstractions. These abstractions, while useful, are primarily suitable for operations engineers. Software developers, which contemplate software through the perspective of source code, must continuously convert these abstractions to utilize them during software development. Given an ongoing trend of software development is the blurring boundaries between building and operating software, this is problematic. The solution then involves creating modern programming environments that equally support theoretical and empirical perspectives of software development.
 
