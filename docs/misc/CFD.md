@@ -16,7 +16,7 @@ Despite this intrinsic and complementary cycle, today’s software monitoring so
 
 [SourceMarker](https://sourcemarker.dev) is an open-source continuous feedback IDE plugin built on top of Apache SkyWalking, a popular open-source APM system with monitoring, tracing, and diagnosing capabilities for distributed software systems. SkyWalking, a truly holistic system, provides the means for automatically producing, storing, and querying software operation metrics. It requires little to no code changes to implement and is lightweight enough to be used in production. By itself, SkyWalking is a formidable force in the realm of continuous monitoring technology.
 
-SourceMarker, leveraging the continuous monitoring functionality provided by SkyWalking, creates continuous feedback technology by automatically linking software operation metrics to source code and displaying feedback directly inside of IDE. While currently only supporting JetBrains-based IDEs and JVM-based programming languages, SourceMarker, and indeed SkyWalking, may be extended to support any number of programming languages and IDEs.
+SourceMarker, leveraging the continuous monitoring functionality provided by SkyWalking, creates continuous feedback technology by automatically linking software operation metrics to source code and displaying feedback directly inside of IDE. While currently only supporting JetBrains-based IDEs and JVM-based programming languages, SourceMarker may easily be extended to support any number of programming languages and IDEs.
 
 ![](../../.github/media/misc/SM_IDE-APM.gif)
 
