@@ -9,7 +9,7 @@
 ## Description
 
 <!-- Plugin description -->
-SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedback-Driven Development approach, SourceMarker combines IDE and APM technology ([requirements](https://github.com/sourceplusplus/SourceMarker/blob/master/docs/getting-started.md#requirements)) to facilitate continuous feedback for software developers. By combining IDE and APM technology, SourceMarker is able to create tighter feedback loops, increase access to production operational metrics, and reduce cognitive the load necessary to comprehend those metrics. SourceMarker aims to provide the framework for the dissemination of production software operational metrics and advice.
+SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedback-Driven Development approach, SourceMarker combines IDE and APM technology ([requirements](https://github.com/sourceplusplus/SourceMarker/blob/master/docs/getting-started.md#requirements)) to facilitate continuous feedback for software developers. By combining IDE and APM technology, SourceMarker is able to create tighter feedback loops, increase access to production operational metrics, and reduce the cognitive load necessary to comprehend those metrics. SourceMarker aims to provide the framework for the dissemination of software operational metrics and advice.
 <!-- Plugin description end -->
 
 ## Features
