@@ -20,9 +20,11 @@ on:
     - master
     paths-ignore:
       - "**.md"
+      - ".github/media/**"
   pull_request:
     paths-ignore:
       - "**.md"
+      - ".github/media/**"
 
 jobs:
 
