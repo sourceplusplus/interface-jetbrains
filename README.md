@@ -31,9 +31,9 @@ SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedbac
       <td width="33%" align="center"><b>Alerting (Promo)</b></td>
   </tr>
   <tr>
-     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Logging.gif"/></a></td>
-     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Tracing.gif"/></a></td>
-     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Alerting.gif"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=_ppLhaPjbJ4"><img src=".github/media/misc/SM_Logging.gif"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=_ppLhaPjbJ4"><img src=".github/media/misc/SM_Tracing.gif"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=_ppLhaPjbJ4"><img src=".github/media/misc/SM_Alerting.gif"/></a></td>
   </tr>
 </table>
 
@@ -43,8 +43,8 @@ SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedbac
       <td width="50%" align="center"><b>Screencast</b></td>
   </tr>
   <tr>
-     <td><a href="https://youtu.be/l8H9ckk_0NY"><img src=".github/media/misc/SM-CFD_Software.jpg"/></a></td>
-     <td><a href="https://youtu.be/ALDCtz4BJ9g"><img src=".github/media/misc/SM-v0.2.1-Screencast.gif"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=1vuNoQDuZVo"><img src=".github/media/misc/SM-CFD_Software.jpg"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=L-16gznzUF8"><img src=".github/media/misc/SM-v0.2.1-Screencast.gif"/></a></td>
   </tr>
 </table>
 
