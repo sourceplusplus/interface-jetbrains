@@ -1,4 +1,4 @@
-![](.github/media/SM.svg)
+![](.github/media/SM.png)
 
 ![Build](https://github.com/sourceplusplus/SourceMarker/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/15407-sourcemarker.svg)](https://plugins.jetbrains.com/plugin/15407-sourcemarker)
