@@ -1,6 +1,6 @@
 package com.sourceplusplus.protocol.service.logging
 
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.log.LogCountSummary
 import io.vertx.codegen.annotations.ProxyGen
 import io.vertx.codegen.annotations.VertxGen
 import io.vertx.core.AsyncResult
@@ -9,6 +9,5 @@ import io.vertx.core.Handler
 @ProxyGen
 @VertxGen
 interface LogCountIndicatorService {
-    fun getOccurredCount1(logPattern: String, handler: Handler<AsyncResult<Int>>)
-    fun getOccurredCount2(artifactQualifiedName: ArtifactQualifiedName, handler: Handler<AsyncResult<List<Int>>>)
+    fun getLogCountSummary(handler: Handler<AsyncResult<LogCountSummary>>)
 }
