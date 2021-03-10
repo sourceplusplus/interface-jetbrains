@@ -61,8 +61,8 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("io.vertx:vertx-web:$vertxVersion")
-//    implementation("io.vertx:vertx-service-discovery:$vertxVersion")
-    implementation(files("/home/brandon/IdeaProjects/SourceMarker/plugin/jetbrains/vertx-service-discovery-4.0.3-SNAPSHOT.jar"))
+    //implementation("io.vertx:vertx-service-discovery:$vertxVersion")
+    implementation(files(".ext/vertx-service-discovery-4.0.3-SNAPSHOT.jar"))
     implementation("io.vertx:vertx-service-proxy:$vertxVersion")
     implementation("io.vertx:vertx-tcp-eventbus-bridge:$vertxVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1")
@@ -131,5 +131,4 @@ tasks {
     }
 }
 
-sourceSets.main.get().java.srcDirs(sourceSets.main.get().java.srcDirs, "/home/brandon/IdeaProjects/SourceMarker/protocol/build/generated/source/kapt/main")
-
+//sourceSets.main.get().java.srcDirs(sourceSets.main.get().java.srcDirs, "../protocol/build/generated/source/kapt/main")
