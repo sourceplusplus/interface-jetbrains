@@ -71,7 +71,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                         it.fail(500, "todo")
                     }
                 } else {
-                    it.fail(404, "Apache SkyWalking Current service unavailable")
+                    it.fail(404, "Apache SkyWalking current service unavailable")
                 }
             }
         }
@@ -88,7 +88,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
         private const val queryEndpointLogsAddress = "$rootAddress.queryEndpointLogs"
 
         suspend fun queryLogs(query: GetEndpointLogs, vertx: Vertx): AsyncResult<LogResult> {
-            return try {
+            return try { //todo: follow this pattern in the other bridge helper methods
                 val value = vertx.eventBus()
                     .request<LogResult>(queryEndpointLogsAddress, query)
                     .await()
