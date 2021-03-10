@@ -1,14 +1,14 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("com.apollographql.apollo").version("2.5.3")
+    id("com.apollographql.apollo").version("2.5.4")
 }
 
 dependencies {
     implementation(project(":protocol"))
     implementation("org.slf4j:slf4j-api:1.7.30")
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.3")
-    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.3")
-    api("com.apollographql.apollo:apollo-api:2.5.3")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.4")
+    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.4")
+    api("com.apollographql.apollo:apollo-api:2.5.4")
 
     val vertxVersion = "4.0.2"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
@@ -16,7 +16,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
-    implementation("io.dropwizard.metrics:metrics-core:4.1.17")
+    implementation("io.dropwizard.metrics:metrics-core:4.1.18")
 }
 
 apollo {

@@ -1,4 +1,4 @@
-![](.github/media/SM.svg)
+![](.github/media/SM.png)
 
 ![Build](https://github.com/sourceplusplus/SourceMarker/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/15407-sourcemarker.svg)](https://plugins.jetbrains.com/plugin/15407-sourcemarker)
@@ -9,7 +9,7 @@
 ## Description
 
 <!-- Plugin description -->
-SourceMarker (alpha) is a JetBrains-powered plugin which provides continuous feedback capabilities via integration with [Apache SkyWalking](https://github.com/apache/skywalking). SourceMarker increases software development productivity via the Feedback-Driven Development (FDD) approach, a methodology of combining IDE and APM technology to create tighter feedback loops.
+SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedback-Driven Development approach, SourceMarker combines IDE and APM technology ([requirements](https://github.com/sourceplusplus/SourceMarker/blob/master/docs/getting-started.md#requirements)) to facilitate continuous feedback for software developers. By combining IDE and APM technology, SourceMarker is able to create tighter feedback loops, increase access to production operational metrics, and reduce the cognitive load necessary to comprehend those metrics. SourceMarker aims to provide the framework for the dissemination of software operational metrics and advice.
 <!-- Plugin description end -->
 
 ## Features
@@ -29,9 +29,9 @@ SourceMarker (alpha) is a JetBrains-powered plugin which provides continuous fee
       <td width="33%" align="center"><b>Alerting (Promo)</b></td>
   </tr>
   <tr>
-     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Logging.gif"/></a></td>
-     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Tracing.gif"/></a></td>
-     <td><a href="https://youtu.be/Un_d3nlOGRA"><img src=".github/media/misc/SM_Alerting.gif"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=_ppLhaPjbJ4"><img src=".github/media/misc/SM_Logging.gif"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=_ppLhaPjbJ4"><img src=".github/media/misc/SM_Tracing.gif"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=_ppLhaPjbJ4"><img src=".github/media/misc/SM_Alerting.gif"/></a></td>
   </tr>
 </table>
 
@@ -41,8 +41,8 @@ SourceMarker (alpha) is a JetBrains-powered plugin which provides continuous fee
       <td width="50%" align="center"><b>Screencast</b></td>
   </tr>
   <tr>
-     <td><a href="https://youtu.be/l8H9ckk_0NY"><img src=".github/media/misc/SM-CFD_Software.jpg"/></a></td>
-     <td><a href="https://youtu.be/ALDCtz4BJ9g"><img src=".github/media/misc/SM-v0.2.1-Screencast.gif"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=1vuNoQDuZVo"><img src=".github/media/misc/SM-CFD_Software.jpg"/></a></td>
+     <td><a href="https://www.youtube.com/watch?v=L-16gznzUF8"><img src=".github/media/misc/SM-v0.2.1-Screencast.gif"/></a></td>
   </tr>
 </table>
 
