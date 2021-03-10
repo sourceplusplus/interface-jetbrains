@@ -4,8 +4,9 @@ import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
-import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PluginSourceMarkEventListener : SourceMarkEventListener {
+class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
 
     companion object {
         private val log = LoggerFactory.getLogger(PluginSourceMarkEventListener::class.java)
@@ -51,6 +52,12 @@ class PluginSourceMarkEventListener : SourceMarkEventListener {
                 SourcePortal.register("null", sourceMark.artifactQualifiedName, false) //todo: appUuid
             )
             sourceMark.putUserData(SourceMarkKeys.SOURCE_PORTAL, sourcePortal!!)
+            sourceMark.addEventListener {
+                if (it.eventCode == SourceMarkEventCode.PORTAL_OPENING) {
+                    vertx.eventBus().publish(OpenPortal, sourcePortal)
+                }
+            }
+
             if (sourceMark is ClassSourceMark) {
                 //class-based portals only have overview page
                 sourcePortal.configuration.currentPage = PageType.OVERVIEW

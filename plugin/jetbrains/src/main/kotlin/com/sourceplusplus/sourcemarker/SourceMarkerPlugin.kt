@@ -35,9 +35,11 @@ import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
+import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
+import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -194,6 +196,7 @@ object SourceMarkerPlugin {
     }
 
     var localTracing: LocalTracingService? = null
+    var logCountIndicator: LogCountIndicatorService? = null
     private fun initSourcePlusPlus() {
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
@@ -208,6 +211,16 @@ object SourceMarkerPlugin {
                 localTracing = it.result()
             } else {
                 log.warn("Local tracing unavailable")
+            }
+        }
+        EventBusService.getProxy(discovery, LogCountIndicatorService::class.java) {
+            if (it.succeeded()) {
+                log.info("Log count indicator available")
+                logCountIndicator = it.result()
+
+                vertx.deployVerticle(LogCountIndicators())
+            } else {
+                log.warn("Log count indicator unavailable")
             }
         }
     }

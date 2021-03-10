@@ -9,6 +9,12 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import kotlinx.datetime.Instant
 
+/**
+ * todo: description.
+ *
+ * @since 0.2.1
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 @ProxyGen
 @VertxGen
 interface LocalTracingService {

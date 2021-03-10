@@ -12,6 +12,7 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.jetbrains.kotlin.idea.refactoring.getLineNumber
 import org.jetbrains.plugins.groovy.lang.psi.impl.stringValue
 import org.jetbrains.uast.UMethod
 import org.slf4j.LoggerFactory
@@ -26,7 +27,7 @@ class LoggerDetector {
 
     companion object {
         private val log = LoggerFactory.getLogger(LoggerDetector::class.java)
-        private val LOGGER_STATEMENTS = SourceKey<List<String>>("LOGGER_STATEMENTS")
+        private val LOGGER_STATEMENTS = SourceKey<List<DetectedLogger>>("LOGGER_STATEMENTS")
 
         private val LOGGER_CLASSES = setOf(
             "org.apache.logging.log4j.spi.AbstractLogger",
@@ -38,7 +39,7 @@ class LoggerDetector {
         )
     }
 
-    suspend fun getOrFindLoggerStatements(sourceMark: MethodSourceMark): List<String> {
+    suspend fun getOrFindLoggerStatements(sourceMark: MethodSourceMark): List<DetectedLogger> {
         val loggerStatements = sourceMark.getUserData(LOGGER_STATEMENTS)
         return if (loggerStatements != null) {
             log.trace("Found logger statements: $loggerStatements")
@@ -50,10 +51,10 @@ class LoggerDetector {
         }
     }
 
-    fun getOrFindLoggerStatements(uMethod: UMethod): Future<List<String>> {
-        val promise = Promise.promise<List<String>>()
+    fun getOrFindLoggerStatements(uMethod: UMethod): Future<List<DetectedLogger>> {
+        val promise = Promise.promise<List<DetectedLogger>>()
         GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
-            val loggerStatements = mutableListOf<String>()
+            val loggerStatements = mutableListOf<DetectedLogger>()
             try {
                 loggerStatements.addAll(determineLoggerStatements(uMethod).await())
             } catch (throwable: Throwable) {
@@ -64,9 +65,9 @@ class LoggerDetector {
         return promise.future()
     }
 
-    private fun determineLoggerStatements(uMethod: UMethod): Future<List<String>> {
-        val promise = Promise.promise<List<String>>()
-        val loggerStatements = mutableListOf<String>()
+    private fun determineLoggerStatements(uMethod: UMethod): Future<List<DetectedLogger>> {
+        val promise = Promise.promise<List<DetectedLogger>>()
+        val loggerStatements = mutableListOf<DetectedLogger>()
         ApplicationManager.getApplication().runReadAction {
             uMethod.javaPsi.accept(object : JavaRecursiveElementVisitor() {
                 override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
@@ -75,7 +76,11 @@ class LoggerDetector {
                         val resolvedMethod = expression.resolveMethod() ?: return
                         if (LOGGER_CLASSES.contains(resolvedMethod.containingClass?.qualifiedName.orEmpty())) {
                             if (expression.argumentList.expressions.firstOrNull()?.stringValue() != null) {
-                                loggerStatements.add(expression.argumentList.expressions.first().stringValue()!!)
+                                val logTemplate = expression.argumentList.expressions.first().stringValue()!!
+                                loggerStatements.add(
+                                    DetectedLogger(logTemplate, methodName, expression.getLineNumber() + 1)
+                                )
+                                log.debug("Found log statement: $logTemplate")
                             } else {
                                 log.warn("No log template argument available for expression: $expression")
                             }
@@ -87,4 +92,10 @@ class LoggerDetector {
         }
         return promise.future()
     }
+
+    data class DetectedLogger(
+        val logPattern: String,
+        val level: String,
+        val lineLocation: Int
+    )
 }

@@ -1,6 +1,7 @@
 package com.sourceplusplus.sourcemarker.discover
 
 import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
+import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOG_COUNT_INDICATOR
 import io.vertx.core.*
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * todo: description.
@@ -50,7 +52,13 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             val parser = FrameParser { parse: AsyncResult<JsonObject> ->
                 val frame = parse.result()
                 if (replyHandlers.containsKey(frame.getString("address"))) {
-                    replyHandlers.remove(frame.getString("address"))!!.invoke(frame.getJsonObject("body"))
+                    if (frame.getString("type") == "err") {
+                        val err = JsonObject().put("error", true)
+                            .put("rawFailure", JsonObject(frame.getString("rawFailure")))
+                        replyHandlers.remove(frame.getString("address"))!!.invoke(err)
+                    } else {
+                        replyHandlers.remove(frame.getString("address"))!!.invoke(frame.getJsonObject("body"))
+                    }
                 } else if (frame.containsKey("headers")) {
                     val headers = frame.getJsonObject("headers")
                     if (headers.containsKey("sm.reply")) {
@@ -62,7 +70,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
             setupHandler(vertx, "get-records")
             setupHandler(vertx, LOCAL_TRACING)
-            //setupHandler(vertx, LOG_COUNT_INDICATOR)
+            setupHandler(vertx, LOG_COUNT_INDICATOR)
 
             setupPromise.complete()
         }
@@ -74,6 +82,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             replyHandlers[replyAddress] = {
                 if (it.map.keys.size == 1 && it.containsKey("value")) {
                     resultHandler.reply(it.getValue("value"))
+                } else if (it.map.keys.size == 2 && it.containsKey("error")) {
+                    resultHandler.fail(500, it.getString("rawFailure"))
                 } else {
                     val message = MessageImpl(
                         address,
@@ -116,18 +126,20 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     }
 
     override fun getRecords(resultHandler: Handler<AsyncResult<MutableList<Record>>>) {
-        setupFuture.onComplete {
-            vertx.eventBus().request<JsonArray>("get-records", null) {
-                val records = mutableListOf<Record>()
-                it.result().body().forEach { record ->
-                    records.add(Record(record as JsonObject))
-                }
-                resultHandler.handle(Future.succeededFuture(records))
-            }
-        }
+        //todo: cache getRecords() result and return to any calls that happen in the same second
         if (setupFuture.isComplete) {
             vertx.eventBus().request<JsonObject>("get-records", null) {
                 resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it.result().body()))))
+            }
+        } else {
+            setupFuture.onComplete {
+                vertx.eventBus().request<JsonArray>("get-records", null) {
+                    val records = mutableListOf<Record>()
+                    it.result().body().forEach { record ->
+                        records.add(Record(record as JsonObject))
+                    }
+                    resultHandler.handle(Future.succeededFuture(records))
+                }
             }
         }
     }

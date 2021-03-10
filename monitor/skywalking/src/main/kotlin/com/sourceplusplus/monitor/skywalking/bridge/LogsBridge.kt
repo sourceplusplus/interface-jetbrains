@@ -8,6 +8,8 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.artifact.log.Log
 import com.sourceplusplus.protocol.artifact.log.LogOrderType
 import com.sourceplusplus.protocol.artifact.log.LogResult
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
@@ -69,7 +71,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                         it.fail(500, "todo")
                     }
                 } else {
-                    it.fail(500, "todo")
+                    it.fail(404, "Apache SkyWalking Current service unavailable")
                 }
             }
         }
@@ -85,10 +87,15 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
         private const val rootAddress = "monitor.skywalking.endpoint.logs"
         private const val queryEndpointLogsAddress = "$rootAddress.queryEndpointLogs"
 
-        suspend fun queryLogs(query: GetEndpointLogs, vertx: Vertx): LogResult {
-            return vertx.eventBus()
-                .request<LogResult>(queryEndpointLogsAddress, query)
-                .await().body()
+        suspend fun queryLogs(query: GetEndpointLogs, vertx: Vertx): AsyncResult<LogResult> {
+            return try {
+                val value = vertx.eventBus()
+                    .request<LogResult>(queryEndpointLogsAddress, query)
+                    .await()
+                Future.succeededFuture(value.body())
+            } catch (throwable: Throwable) {
+                Future.failedFuture(throwable)
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.mentor.extend
+package com.sourceplusplus.protocol.extend
 
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import org.jooq.Query

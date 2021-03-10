@@ -45,6 +45,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
+import com.sourceplusplus.protocol.ProtocolErrors.ServiceUnavailable
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
@@ -66,6 +67,7 @@ import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
+import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -288,8 +290,14 @@ class PortalEventListener(
                 if (it.succeeded()) {
                     handleTraceResult(it.result(), portal, portal.viewingPortalArtifact)
                 } else {
-                    it.cause().printStackTrace()
-                    log.error("Failed to get local trace results", it.cause())
+                    val rawFailure = JsonObject(it.cause().message)
+                    val debugInfo = rawFailure.getJsonObject("debugInfo")
+                    if (debugInfo.getString("type") == ServiceUnavailable.name) {
+                        log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+                    } else {
+                        it.cause().printStackTrace()
+                        log.error("Failed to get local trace results", it.cause())
+                    }
                 }
             }
         }
@@ -343,17 +351,25 @@ class PortalEventListener(
                     pageNumber = portal.logsView.pageNumber
                 ), vertx
             )
-
-            //todo: impl method filtering in skywalking
-            for ((content, logs) in logsResult.logs.groupBy { it.content }) {
-                SourceMarkSearch.findInheritedSourceMarks(content).forEach {
-                    vertx.eventBus().send(
-                        ArtifactLogUpdated, logsResult.copy(
-                            artifactQualifiedName = it.artifactQualifiedName,
-                            total = logs.size,
-                            logs = logs,
+            if (logsResult.succeeded()) {
+                //todo: impl method filtering in skywalking
+                for ((content, logs) in logsResult.result().logs.groupBy { it.content }) {
+                    SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                        vertx.eventBus().send(
+                            ArtifactLogUpdated, logsResult.result().copy(
+                                artifactQualifiedName = it.artifactQualifiedName,
+                                total = logs.size,
+                                logs = logs,
+                            )
                         )
-                    )
+                    }
+                }
+            } else {
+                val replyException = logsResult.cause() as ReplyException
+                if (replyException.failureCode() == 404) {
+                    log.warn("Failed to fetch logs. Service(s) unavailable")
+                } else {
+                    log.error("Failed to fetch logs", logsResult.cause())
                 }
             }
         }
