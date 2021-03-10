@@ -128,7 +128,7 @@ object SourceMarkConstructor {
                 //todo: shouldn't be creating gutter mark here
                 val gutterMark = getOrCreateExpressionGutterMark(
                     inlayMark.sourceFileMarker, advice.artifact.lineNumber!!
-                )!!
+                ).get()
                 if (!gutterMark.sourceFileMarker.containsSourceMark(gutterMark)) {
                     gutterMark.configuration.icon = GutterMarkIcons.activeException
                     gutterMark.apply()

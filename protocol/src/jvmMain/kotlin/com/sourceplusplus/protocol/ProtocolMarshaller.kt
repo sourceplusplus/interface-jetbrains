@@ -14,6 +14,12 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
 import kotlinx.datetime.Instant
 
+/**
+ * todo: description.
+ *
+ * @since 0.2.1
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 object ProtocolMarshaller {
     init {
         try {

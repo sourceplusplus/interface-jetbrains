@@ -93,6 +93,12 @@ class LoggerDetector {
         return promise.future()
     }
 
+    /**
+     * todo: description.
+     *
+     * @since 0.2.1
+     * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+     */
     data class DetectedLogger(
         val logPattern: String,
         val level: String,

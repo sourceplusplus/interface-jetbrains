@@ -46,7 +46,7 @@ class LogCountIndicators : CoroutineVerticle() {
                                         val logIndicator = SourceMarkerUtils.getOrCreateExpressionGutterMark(
                                             methodMark.sourceFileMarker,
                                             logger.lineLocation
-                                        )!!
+                                        ).get()
                                         if (!methodMark.sourceFileMarker.containsSourceMark(logIndicator)) {
                                             logIndicator.configuration.icon =
                                                 GutterMarkIcons.getNumericGutterMarkIcon(
