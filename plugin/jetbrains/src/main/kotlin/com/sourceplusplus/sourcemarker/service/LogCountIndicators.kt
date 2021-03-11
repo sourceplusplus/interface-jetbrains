@@ -29,6 +29,7 @@ class LogCountIndicators : CoroutineVerticle() {
     }
 
     override suspend fun start() {
+        log.info("Log count indicators started")
         vertx.setPeriodic(5000) {
             if (Logging.logCountIndicator != null) {
                 Logging.logCountIndicator!!.getLogCountSummary {

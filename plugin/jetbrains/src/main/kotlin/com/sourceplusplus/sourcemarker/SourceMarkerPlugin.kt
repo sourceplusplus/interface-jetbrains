@@ -187,16 +187,13 @@ object SourceMarkerPlugin {
                     initPortal(config)
                     initMarker(config)
                     initMapper()
-
-                    if (config.sourcePlusPlusEnabled) {
-                        initSourcePlusPlus()
-                    }
                 }
+                discoverAvailableServices()
             }
         }
     }
 
-    private fun initSourcePlusPlus() {
+    private fun discoverAvailableServices() {
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
             ServiceDiscoveryOptions().setBackendConfiguration(

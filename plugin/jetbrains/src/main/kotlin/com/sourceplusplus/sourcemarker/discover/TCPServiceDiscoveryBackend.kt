@@ -46,8 +46,15 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         this.vertx = vertx
 
         GlobalScope.launch(vertx.dispatcher()) {
-            client = vertx.createNetClient()
-            socket = client.connect(5455, "localhost").await()
+            try {
+                client = vertx.createNetClient()
+                socket = client.connect(5455, "localhost").await()
+            } catch (throwable: Throwable) {
+                log.warn("Failed to connect to service discovery server", throwable)
+                setupPromise.fail(throwable)
+                return@launch
+            }
+
             val parser = FrameParser { parse: AsyncResult<JsonObject> ->
                 val frame = parse.result()
                 if (replyHandlers.containsKey(frame.getString("address"))) {
@@ -127,17 +134,25 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     override fun getRecords(resultHandler: Handler<AsyncResult<MutableList<Record>>>) {
         //todo: cache getRecords() result and return to any calls that happen in the same second
         if (setupFuture.isComplete) {
-            vertx.eventBus().request<JsonObject>("get-records", null) {
-                resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it.result().body()))))
+            if (setupFuture.succeeded()) {
+                vertx.eventBus().request<JsonObject>("get-records", null) {
+                    resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it.result().body()))))
+                }
+            } else {
+                resultHandler.handle(Future.failedFuture(setupFuture.cause()))
             }
         } else {
             setupFuture.onComplete {
-                vertx.eventBus().request<JsonArray>("get-records", null) {
-                    val records = mutableListOf<Record>()
-                    it.result().body().forEach { record ->
-                        records.add(Record(record as JsonObject))
+                if (it.succeeded()) {
+                    vertx.eventBus().request<JsonArray>("get-records", null) {
+                        val records = mutableListOf<Record>()
+                        it.result().body().forEach { record ->
+                            records.add(Record(record as JsonObject))
+                        }
+                        resultHandler.handle(Future.succeededFuture(records))
                     }
-                    resultHandler.handle(Future.succeededFuture(records))
+                } else {
+                    resultHandler.handle(Future.failedFuture(it.cause()))
                 }
             }
         }
