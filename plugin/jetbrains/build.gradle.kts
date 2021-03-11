@@ -131,4 +131,4 @@ tasks {
     }
 }
 
-//sourceSets.main.get().java.srcDirs(sourceSets.main.get().java.srcDirs, "../protocol/build/generated/source/kapt/main")
+sourceSets.main.get().java.srcDirs(sourceSets.main.get().java.srcDirs, "$rootDir/protocol/build/generated/source/kapt/main")
