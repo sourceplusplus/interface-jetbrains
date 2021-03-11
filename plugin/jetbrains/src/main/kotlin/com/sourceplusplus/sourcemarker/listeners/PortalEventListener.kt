@@ -46,6 +46,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import com.sourceplusplus.protocol.ProtocolErrors.ServiceUnavailable
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
@@ -273,9 +274,9 @@ class PortalEventListener(
                 }
             }
         }
-        if (SourceMarkerPlugin.localTracing != null) {
+        if (Tracing.localTracing != null) {
             portal.tracesView.localTracing = true
-            SourceMarkerPlugin.localTracing!!.getTraceResult(
+            Tracing.localTracing!!.getTraceResult(
                 artifactQualifiedName = ArtifactQualifiedName(
                     identifier = portal.viewingPortalArtifact,
                     commitId = "null",
@@ -500,7 +501,7 @@ class PortalEventListener(
                     portal.configuration.visibleActivity = true
                     portal.configuration.visibleTraces = true
                     portal.configuration.visibleLogs = true //todo: can hide based on if there is logs
-                } else if (SourceMarkerPlugin.localTracing != null) {
+                } else if (Tracing.localTracing != null) {
                     portal.configuration.visibleTraces = true
                 } else {
                     //non-endpoint artifact; hide activity/traces till manually shown

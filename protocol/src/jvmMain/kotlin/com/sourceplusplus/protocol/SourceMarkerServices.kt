@@ -1,5 +1,8 @@
 package com.sourceplusplus.protocol
 
+import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
+import com.sourceplusplus.protocol.service.tracing.LocalTracingService
+
 /**
  * todo: description.
  *
@@ -7,11 +10,27 @@ package com.sourceplusplus.protocol
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkerServices {
-    const val TRACING_SERVICES = "sm.tracing.service"
-    const val LOGGING_SERVICES = "sm.logging.service"
+
+    const val TRACING = "sm.tracing.service"
+    const val LOGGING = "sm.logging.service"
+
+    object Instance {
+        object Tracing {
+            var localTracing: LocalTracingService? = null
+        }
+
+        object Logging {
+            var logCountIndicator: LogCountIndicatorService? = null
+        }
+    }
 
     object Provider {
-        const val LOG_COUNT_INDICATOR = "$LOGGING_SERVICES.log-count-indicator"
-        const val LOCAL_TRACING = "$TRACING_SERVICES.local-tracing"
+        object Tracing {
+            const val LOCAL_TRACING = "$TRACING.local-tracing"
+        }
+
+        object Logging {
+            const val LOG_COUNT_INDICATOR = "$LOGGING.log-count-indicator"
+        }
     }
 }

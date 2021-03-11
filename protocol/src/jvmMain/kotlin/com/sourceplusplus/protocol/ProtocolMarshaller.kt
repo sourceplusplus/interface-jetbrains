@@ -23,11 +23,7 @@ import kotlinx.datetime.Instant
 object ProtocolMarshaller {
     init {
         try {
-//                val module = SimpleModule()
-//                module.addSerializer(Instant::class.java, Serializers.KotlinInstantSerializer())
-//                module.addDeserializer(Instant::class.java, Serializers.KotlinInstantDeserializer())
-//                DatabindCodec.mapper().registerModule(module)
-
+            //todo: verify if this init is needed
             DatabindCodec.mapper().registerModule(GuavaModule())
             DatabindCodec.mapper().registerModule(Jdk8Module())
             DatabindCodec.mapper().registerModule(JavaTimeModule())

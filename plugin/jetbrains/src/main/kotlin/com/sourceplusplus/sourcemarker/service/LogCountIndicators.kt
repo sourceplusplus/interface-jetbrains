@@ -3,7 +3,7 @@ package com.sourceplusplus.sourcemarker.service
 import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.protocol.ProtocolErrors
-import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Logging
 import com.sourceplusplus.sourcemarker.mark.GutterMarkIcons
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
@@ -30,8 +30,8 @@ class LogCountIndicators : CoroutineVerticle() {
 
     override suspend fun start() {
         vertx.setPeriodic(5000) {
-            if (SourceMarkerPlugin.logCountIndicator != null) {
-                SourceMarkerPlugin.logCountIndicator!!.getLogCountSummary {
+            if (Logging.logCountIndicator != null) {
+                Logging.logCountIndicator!!.getLogCountSummary {
                     if (it.succeeded()) {
                         GlobalScope.launch(vertx.dispatcher()) {
                             val logCounts = it.result().logCounts

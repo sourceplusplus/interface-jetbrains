@@ -26,6 +26,8 @@ import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfigurati
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Logging
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
@@ -185,7 +187,6 @@ object SourceMarkerPlugin {
                     initPortal(config)
                     initMarker(config)
                     initMapper()
-                    //initMentor(config)
 
                     if (config.sourcePlusPlusEnabled) {
                         initSourcePlusPlus()
@@ -195,8 +196,6 @@ object SourceMarkerPlugin {
         }
     }
 
-    var localTracing: LocalTracingService? = null
-    var logCountIndicator: LogCountIndicatorService? = null
     private fun initSourcePlusPlus() {
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
@@ -208,7 +207,7 @@ object SourceMarkerPlugin {
         EventBusService.getProxy(discovery, LocalTracingService::class.java) {
             if (it.succeeded()) {
                 log.info("Local tracing available")
-                localTracing = it.result()
+                Tracing.localTracing = it.result()
             } else {
                 log.warn("Local tracing unavailable")
             }
@@ -216,7 +215,7 @@ object SourceMarkerPlugin {
         EventBusService.getProxy(discovery, LogCountIndicatorService::class.java) {
             if (it.succeeded()) {
                 log.info("Log count indicator available")
-                logCountIndicator = it.result()
+                Logging.logCountIndicator = it.result()
 
                 vertx.deployVerticle(LogCountIndicators())
             } else {

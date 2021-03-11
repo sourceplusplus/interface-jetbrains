@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.discover
 
-import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOCAL_TRACING
-import com.sourceplusplus.protocol.SourceMarkerServices.Provider.LOG_COUNT_INDICATOR
+import com.sourceplusplus.protocol.SourceMarkerServices.Provider.Logging
+import com.sourceplusplus.protocol.SourceMarkerServices.Provider.Tracing
 import io.vertx.core.*
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
@@ -22,7 +22,6 @@ import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * todo: description.
@@ -69,8 +68,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             socket.handler(parser)
 
             setupHandler(vertx, "get-records")
-            setupHandler(vertx, LOCAL_TRACING)
-            setupHandler(vertx, LOG_COUNT_INDICATOR)
+            setupHandler(vertx, Tracing.LOCAL_TRACING)
+            setupHandler(vertx, Logging.LOG_COUNT_INDICATOR)
 
             setupPromise.complete()
         }
