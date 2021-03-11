@@ -5,6 +5,8 @@ plugins {
     id("java")
 }
 
+val vertxVersion = ext.get("vertxVersion")
+
 kotlin {
     jvm { }
     js {
@@ -27,7 +29,6 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                val vertxVersion = "4.0.2"
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
                 implementation("io.vertx:vertx-service-proxy:$vertxVersion")
@@ -40,7 +41,6 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                val vertxVersion = "4.0.2"
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("com.google.guava:guava:30.1-jre")
                 implementation("junit:junit:4.13.2")
@@ -59,7 +59,6 @@ kotlin {
 }
 
 dependencies {
-    val vertxVersion = "4.0.2"
     "kapt"("io.vertx:vertx-codegen:$vertxVersion:processor")
 }
 
@@ -69,7 +68,6 @@ tasks {
             java.srcDir("$buildDir/generated/source/kapt/main")
 
             dependencies {
-                val vertxVersion = "4.0.2"
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
                 implementation("io.vertx:vertx-service-proxy:$vertxVersion")
