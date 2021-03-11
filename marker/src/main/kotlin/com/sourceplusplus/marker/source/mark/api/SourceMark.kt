@@ -26,6 +26,7 @@ import com.sourceplusplus.marker.source.mark.api.config.SourceMarkConfiguration
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
@@ -35,10 +36,8 @@ import org.slf4j.LoggerFactory
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.*
-import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.SwingUtilities
-import kotlin.collections.ArrayList
 import kotlin.concurrent.schedule
 
 /**
@@ -133,8 +132,18 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun getEventListeners(): List<SourceMarkEventListener>
     fun addEventListener(listener: SourceMarkEventListener)
     fun triggerEvent(event: SourceMarkEvent, listen: (() -> Unit)? = null) {
+        //sync listeners
+        getEventListeners()
+            .filterIsInstance<SynchronousSourceMarkEventListener>()
+            .forEach { it.handleEvent(event) }
+
+        //async listeners
         GlobalScope.launch {
-            getEventListeners().forEach { it.handleEvent(event) }
+            getEventListeners().forEach {
+                if (it !is SynchronousSourceMarkEventListener) {
+                    it.handleEvent(event)
+                }
+            }
             listen?.invoke()
         }
     }

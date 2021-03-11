@@ -125,6 +125,7 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
             runBlocking {
                 val result = LoggerDetector().getOrFindLoggerStatements(uFile.classes[0].methods[0]).await()
+                    .map { it.logPattern }
                 assertEquals(5, result.size)
                 assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
             }

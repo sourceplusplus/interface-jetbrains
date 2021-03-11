@@ -4,12 +4,12 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.search.searches.OverridingMethodsSearch
 import com.sourceplusplus.marker.source.SourceMarkerUtils
-import com.sourceplusplus.mentor.extend.SqlProducerSearch
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
+import com.sourceplusplus.protocol.extend.SqlProducerSearch
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
-import com.sourceplusplus.sourcemarker.search.ArtifactSearch
 import com.sourceplusplus.sourcemarker.psi.sqlsource.SpringDataSqlSource
+import com.sourceplusplus.sourcemarker.search.ArtifactSearch
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher

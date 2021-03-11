@@ -20,7 +20,7 @@ data class TraceResult(
     val start: Instant,
     @Serializable(with = Serializers.InstantKSerializer::class)
     val stop: Instant,
-    val step: String? = null,
+    val step: String,
     val traces: List<Trace>,
     val total: Int
 ) {

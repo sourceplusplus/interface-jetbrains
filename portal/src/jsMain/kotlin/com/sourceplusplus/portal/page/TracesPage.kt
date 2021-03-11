@@ -227,7 +227,7 @@ class TracesPage(
         console.log("Displaying trace stack")
         resetUI(TraceDisplayType.TRACE_STACK)
 
-        if (traceStackPath.getCurrentRoot() != null) {
+        if (!traceStackPath.localTracing && traceStackPath.getCurrentRoot() != null) {
             jq("#latest_traces_header_text").text(translate("Parent Stack"))
         } else {
             jq("#latest_traces_header_text").text(translate(traceStackPath.orderType.fullDescription))

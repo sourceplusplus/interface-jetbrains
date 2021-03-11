@@ -4,9 +4,7 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayTraceSpan
 import com.sourceplusplus.portal.extensions.displayTraceStack
 import com.sourceplusplus.portal.extensions.displayTraces
-import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.portal.model.TraceDisplayType.*
-import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.CanNavigateToArtifact
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayInnerTraceStack
@@ -22,11 +20,14 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.QueryTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetTraceOrderType
+import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateTraceSpan
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import com.sourceplusplus.protocol.artifact.ArtifactType.ENDPOINT
 import com.sourceplusplus.protocol.artifact.ArtifactType.METHOD
 import com.sourceplusplus.protocol.artifact.trace.*
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageAndClassName
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.removePackageNames
@@ -120,23 +121,35 @@ class TracesDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageTy
         if (representation.traceStackPath?.getCurrentRoot() != null) {
             representation.viewType = TRACE_STACK
             representation.traceStackPath!!.removeLastRoot()
-
-            if (!portal.configuration.external) {
-                //navigating back to parent stack
-                val artifactQualifiedName = ArtifactQualifiedName(
-                    representation.traceStackPath!!.getCurrentRoot()?.artifactQualifiedName
-                        ?: representation.rootArtifactQualifiedName!!, "", METHOD
-                )
-
-                vertx.eventBus().send(ClosePortal, portal)
-                vertx.eventBus().send(NavigateToArtifact, artifactQualifiedName)
-                vertx.eventBus().request<SourcePortal?>(FindPortal, artifactQualifiedName) {
-                    val navPortal = it.result().body()!!
-                    navPortal.configuration.currentPage = PageType.TRACES
-                    vertx.eventBus().send(OpenPortal, navPortal)
-                }
-            } else {
+            if (representation.localTracing && representation.traceStackPath!!.path.size == 1) {
+                //go back to traces
+                representation.viewType = TRACES
                 updateUI(portal)
+            } else {
+                if (!portal.configuration.external) {
+                    //navigating back to parent stack
+                    val qualifiedName = representation.traceStackPath!!.getCurrentRoot()?.artifactQualifiedName
+                        ?: representation.rootArtifactQualifiedName
+                    val artifactQualifiedName = if (qualifiedName != null) {
+                        ArtifactQualifiedName(qualifiedName, "", METHOD)
+                    } else {
+                        ArtifactQualifiedName(
+                            representation.traceStackPath!!.getCurrentRoot()!!.endpointName!!,
+                            "",
+                            ENDPOINT
+                        )
+                    }
+
+                    vertx.eventBus().send(ClosePortal, portal)
+                    vertx.eventBus().send(NavigateToArtifact, artifactQualifiedName)
+                    vertx.eventBus().request<SourcePortal?>(FindPortal, artifactQualifiedName) {
+                        val navPortal = it.result().body()!!
+                        navPortal.configuration.currentPage = PageType.TRACES
+                        vertx.eventBus().send(OpenPortal, navPortal)
+                    }
+                } else {
+                    updateUI(portal)
+                }
             }
         } else {
             updateUI(portal)
@@ -161,8 +174,15 @@ class TracesDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageTy
                     portal.tracesView.viewType = TRACE_STACK
                     portal.tracesView.traceStack = it.result().body()
                     portal.tracesView.traceStackPath =
-                        TraceStackPath(it.result().body(), orderType = portal.tracesView.orderType)
+                        TraceStackPath(
+                            it.result().body(),
+                            orderType = portal.tracesView.orderType,
+                            localTracing = portal.tracesView.localTracing
+                        )
                     portal.tracesView.traceId = request.getString("traceId")
+                    if (portal.tracesView.localTracing) {
+                        portal.tracesView.traceStackPath!!.autoFollow(portal.viewingPortalArtifact)
+                    }
                     updateUI(portal)
                 }
             }

@@ -31,6 +31,7 @@ class TracesView(
     var rootArtifactQualifiedName: String? = null
     var pageNumber = 1
     var resolvedEndpointNames = HashMap<String, String>() //todo: evicting cache
+    var localTracing: Boolean = false
 
     fun cacheArtifactTraceResult(artifactTraceResult: TraceResult) {
         var cacheResult = artifactTraceResult

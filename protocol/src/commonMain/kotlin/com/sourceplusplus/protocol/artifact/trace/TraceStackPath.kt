@@ -12,7 +12,8 @@ import kotlinx.serialization.Serializable
 data class TraceStackPath(
     val traceStack: TraceStack,
     val path: List<TraceSpan> = mutableListOf(),
-    val orderType: TraceOrderType
+    val orderType: TraceOrderType,
+    val localTracing: Boolean = false
 ) {
 
     fun getCurrentSegment(): TraceStack.Segment? {
@@ -32,5 +33,21 @@ data class TraceStackPath(
 
     fun removeLastRoot() {
         (path as MutableList).removeLast()
+    }
+
+    fun autoFollow(artifactQualifiedName: String) {
+        val shortestPath = mutableListOf<TraceSpan>()
+        val startSpan = traceStack.traceSpans.find { it.endpointName == artifactQualifiedName }!!
+        var currentSpan = startSpan
+        while (currentSpan.spanId != 0 || currentSpan.parentSpanId != -1) {
+            val prevSpan = traceStack.getSegment(currentSpan.segmentId).getTraceSpan(currentSpan.spanId - 1)
+            shortestPath.add(prevSpan)
+            currentSpan = prevSpan
+        }
+        shortestPath.add(startSpan)
+
+        shortestPath.forEach {
+            follow(it.segmentId, it.spanId)
+        }
     }
 }

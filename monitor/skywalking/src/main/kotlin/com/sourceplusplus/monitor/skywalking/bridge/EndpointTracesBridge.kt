@@ -38,6 +38,7 @@ class EndpointTracesBridge(private val skywalkingClient: SkywalkingClient) : Cor
                         orderType = request.orderType,
                         start = Instant.fromEpochMilliseconds(request.zonedDuration.start.toInstant().toEpochMilli()),
                         stop = Instant.fromEpochMilliseconds(request.zonedDuration.start.toInstant().toEpochMilli()),
+                        step = request.zonedDuration.step.name.toLowerCase(),
                         total = traceStack.size,
                         traces = traceStack
                     )

@@ -10,6 +10,8 @@ import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -64,6 +66,8 @@ open class SourceMarkPopupAction : AnAction() {
     }
 
     open fun performPopupAction(sourceMark: SourceMark, editor: Editor) {
-        sourceMark.displayPopup(editor)
+        sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.PORTAL_OPENING)) {
+            sourceMark.displayPopup(editor)
+        }
     }
 }
