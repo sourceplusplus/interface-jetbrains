@@ -3,6 +3,8 @@ plugins {
     kotlin("plugin.serialization") version "1.4.31"
 }
 
+val vertxVersion = ext.get("vertxVersion")
+
 kotlin {
     jvm { }
     js {
@@ -24,7 +26,6 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                val vertxVersion = "4.0.2"
                 implementation(kotlin("stdlib-jdk8"))
                 implementation(project(":protocol"))
                 implementation("org.slf4j:slf4j-api:1.7.30")

@@ -30,6 +30,10 @@ repositories {
 }
 
 subprojects {
+    ext {
+        set("vertxVersion", "4.0.2")
+    }
+
     repositories {
         mavenCentral()
         jcenter()
