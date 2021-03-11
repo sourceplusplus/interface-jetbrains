@@ -52,7 +52,7 @@ kotlin {
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.3")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.10.3")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3")
-                implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.30")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.31")
             }
         }
     }
