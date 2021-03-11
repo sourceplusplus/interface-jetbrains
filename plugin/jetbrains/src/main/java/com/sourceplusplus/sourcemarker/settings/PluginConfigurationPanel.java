@@ -58,7 +58,7 @@ public class PluginConfigurationPanel {
                 autoResolveEndpointNamesCheckBox.isSelected(),
                 true, consoleCheckBox.isSelected(),
                 portalRefreshModel.getNumber().intValue(),
-                true
+                false
         );
     }
 
