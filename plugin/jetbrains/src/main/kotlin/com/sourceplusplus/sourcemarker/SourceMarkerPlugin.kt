@@ -23,13 +23,11 @@ import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
 import com.sourceplusplus.marker.source.mark.api.filter.CreateSourceMarkFilter
 import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfiguration
-import com.sourceplusplus.mentor.SourceMentor
-import com.sourceplusplus.mentor.base.MentorJobConfig
-import com.sourceplusplus.mentor.impl.job.ActiveExceptionMentor
-import com.sourceplusplus.mentor.impl.job.RampDetectionMentor
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Logging
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
@@ -39,10 +37,11 @@ import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
-import com.sourceplusplus.sourcemarker.listeners.ArtifactAdviceListener
+import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
+import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
-import com.sourceplusplus.sourcemarker.psi.PluginSqlProducerSearch
+import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -50,6 +49,7 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
@@ -57,6 +57,10 @@ import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
+import io.vertx.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscoveryOptions
+import io.vertx.servicediscovery.impl.DiscoveryImpl
+import io.vertx.servicediscovery.types.EventBusService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -183,8 +187,36 @@ object SourceMarkerPlugin {
                     initPortal(config)
                     initMarker(config)
                     initMapper()
-                    initMentor(config)
                 }
+                discoverAvailableServices()
+            }
+        }
+    }
+
+    private fun discoverAvailableServices() {
+        val discovery: ServiceDiscovery = DiscoveryImpl(
+            vertx,
+            ServiceDiscoveryOptions().setBackendConfiguration(
+                JsonObject().put("backend-name", "tcp-service-discovery")
+            )
+        )
+
+        EventBusService.getProxy(discovery, LocalTracingService::class.java) {
+            if (it.succeeded()) {
+                log.info("Local tracing available")
+                Tracing.localTracing = it.result()
+            } else {
+                log.warn("Local tracing unavailable")
+            }
+        }
+        EventBusService.getProxy(discovery, LogCountIndicatorService::class.java) {
+            if (it.succeeded()) {
+                log.info("Log count indicator available")
+                Logging.logCountIndicator = it.result()
+
+                vertx.deployVerticle(LogCountIndicators())
+            } else {
+                log.warn("Log count indicator unavailable")
             }
         }
     }
@@ -208,48 +240,6 @@ object SourceMarkerPlugin {
 
     private fun initMapper() {
         //todo: this
-    }
-
-    /**
-     * Schedules long running, generic, and low-priority mentor jobs.
-     * High-priority, specific, and short running mentor jobs are executed during source code navigation.
-     */
-    private suspend fun initMentor(config: SourceMarkerConfig): SourceMentor {
-        val mentor = SourceMentor()
-        val mentorAdviceListener = ArtifactAdviceListener()
-        SourceMarker.addGlobalSourceMarkEventListener(mentorAdviceListener)
-        mentor.addAdviceListener(mentorAdviceListener)
-
-        //configure and add long running low-priority mentor jobs
-        mentor.addJobs(
-            RampDetectionMentor(
-                vertx, PluginSqlProducerSearch()
-            ).withConfig(
-                MentorJobConfig(
-                    repeatForever = true,
-                    repeatDelay = 30_000
-                    //todo: configurable schedule
-                )
-            )
-        )
-        if (config.rootSourcePackage != null) {
-            mentor.addJob(
-                ActiveExceptionMentor(
-                    vertx, config.rootSourcePackage!!
-                ).withConfig(
-                    MentorJobConfig(
-                        repeatForever = true,
-                        repeatDelay = 30_000
-                        //todo: configurable schedule
-                    )
-                )
-            )
-        } else {
-            log.warn("Could not determine root source package. Skipped adding ActiveExceptionMentor...")
-        }
-
-        deploymentIds.add(vertx.deployVerticle(mentor).await())
-        return mentor
     }
 
     private suspend fun initPortal(config: SourceMarkerConfig) {

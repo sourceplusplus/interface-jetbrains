@@ -28,7 +28,8 @@ object SourceMarkSearch {
         return SourceMarker.getSourceMarks()
             .filterIsInstance<MethodSourceMark>()
             .firstOrNull {
-                it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!.getOrFindLoggerStatements(it).contains(logPattern)
+                it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!.getOrFindLoggerStatements(it)
+                    .map { it.logPattern }.contains(logPattern)
             }
     }
 

@@ -23,3 +23,7 @@ style:
     active: false
   WildcardImport:
     active: false
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false

@@ -45,6 +45,8 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
+import com.sourceplusplus.protocol.ProtocolErrors.ServiceUnavailable
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
@@ -53,10 +55,12 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
@@ -64,6 +68,7 @@ import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
+import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -71,6 +76,7 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.ZonedDateTime
@@ -264,40 +270,72 @@ class PortalEventListener(
                         ), vertx
                     )
 
-                    //todo: rename {GET} to [GET] in skywalking
-                    if (markerConfig.autoResolveEndpointNames) {
-                        GlobalScope.launch(vertx.dispatcher()) {
-                            //todo: only try to auto resolve endpoint names with dynamic ids
-                            //todo: support multiple operationsNames/traceIds
-                            traceResult.traces.forEach {
-                                if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
-                                    val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
-                                    val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
-                                    if (entrySpan != null) {
-                                        val url = entrySpan.tags["url"]
-                                        val httpMethod = entrySpan.tags["http.method"]
-                                        if (url != null && httpMethod != null) {
-                                            val updatedEndpointName = "{$httpMethod}${URI(url).path}"
-                                            vertx.eventBus().send(
-                                                TraceSpanUpdated, entrySpan.copy(
-                                                    endpointName = updatedEndpointName,
-                                                    artifactQualifiedName = sourceMark.artifactQualifiedName
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    handleTraceResult(traceResult, portal, portal.viewingPortalArtifact)
+                }
+            }
+        }
+        if (Tracing.localTracing != null) {
+            portal.tracesView.localTracing = true
+            Tracing.localTracing!!.getTraceResult(
+                artifactQualifiedName = ArtifactQualifiedName(
+                    identifier = portal.viewingPortalArtifact,
+                    commitId = "null",
+                    type = ArtifactType.METHOD
+                ),
+                start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
+                stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
+                orderType = portal.tracesView.orderType,
+                pageSize = portal.tracesView.viewTraceAmount,
+                pageNumber = portal.tracesView.pageNumber,
+            ) {
+                if (it.succeeded()) {
+                    handleTraceResult(it.result(), portal, portal.viewingPortalArtifact)
+                } else {
+                    val rawFailure = JsonObject(it.cause().message)
+                    val debugInfo = rawFailure.getJsonObject("debugInfo")
+                    if (debugInfo.getString("type") == ServiceUnavailable.name) {
+                        log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+                    } else {
+                        it.cause().printStackTrace()
+                        log.error("Failed to get local trace results", it.cause())
                     }
-                    vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
                 }
             }
         }
     }
 
+    private fun handleTraceResult(traceResult: TraceResult, portal: SourcePortal, artifactQualifiedName: String) {
+        //todo: rename {GET} to [GET] in skywalking
+        if (markerConfig.autoResolveEndpointNames) {
+            GlobalScope.launch(vertx.dispatcher()) {
+                //todo: only try to auto resolve endpoint names with dynamic ids
+                //todo: support multiple operationsNames/traceIds
+                traceResult.traces.forEach {
+                    if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
+                        val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
+                        val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
+                        if (entrySpan != null) {
+                            val url = entrySpan.tags["url"]
+                            val httpMethod = entrySpan.tags["http.method"]
+                            if (url != null && httpMethod != null) {
+                                val updatedEndpointName = "{$httpMethod}${URI(url).path}"
+                                vertx.eventBus().send(
+                                    TraceSpanUpdated, entrySpan.copy(
+                                        endpointName = updatedEndpointName,
+                                        artifactQualifiedName = artifactQualifiedName
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
+    }
+
     private suspend fun refreshLogs(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER) ?: return
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         GlobalScope.launch(vertx.dispatcher()) {
             val logsResult = LogsBridge.queryLogs(
                 GetEndpointLogs(
@@ -314,17 +352,25 @@ class PortalEventListener(
                     pageNumber = portal.logsView.pageNumber
                 ), vertx
             )
-
-            //todo: impl method filtering in skywalking
-            for ((content, logs) in logsResult.logs.groupBy { it.content }) {
-                SourceMarkSearch.findInheritedSourceMarks(content).forEach {
-                    vertx.eventBus().send(
-                        ArtifactLogUpdated, logsResult.copy(
-                            artifactQualifiedName = it.artifactQualifiedName,
-                            total = logs.size,
-                            logs = logs,
+            if (logsResult.succeeded()) {
+                //todo: impl method filtering in skywalking
+                for ((content, logs) in logsResult.result().logs.groupBy { it.content }) {
+                    SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                        vertx.eventBus().send(
+                            ArtifactLogUpdated, logsResult.result().copy(
+                                artifactQualifiedName = it.artifactQualifiedName,
+                                total = logs.size,
+                                logs = logs,
+                            )
                         )
-                    )
+                    }
+                }
+            } else {
+                val replyException = logsResult.cause() as ReplyException
+                if (replyException.failureCode() == 404) {
+                    log.warn("Failed to fetch logs. Service(s) unavailable")
+                } else {
+                    log.error("Failed to fetch logs", logsResult.cause())
                 }
             }
         }
@@ -455,6 +501,8 @@ class PortalEventListener(
                     portal.configuration.visibleActivity = true
                     portal.configuration.visibleTraces = true
                     portal.configuration.visibleLogs = true //todo: can hide based on if there is logs
+                } else if (Tracing.localTracing != null) {
+                    portal.configuration.visibleTraces = true
                 } else {
                     //non-endpoint artifact; hide activity/traces till manually shown
                     portal.configuration.visibleActivity = false

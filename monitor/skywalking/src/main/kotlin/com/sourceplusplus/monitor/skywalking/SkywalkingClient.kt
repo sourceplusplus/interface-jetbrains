@@ -168,7 +168,7 @@ class SkywalkingClient(
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
-                return response.data!!.result
+                return response.data!!.result //todo: change return type if this can never be null
             }
         }
     }

@@ -19,8 +19,6 @@ SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedbac
 - Database access metrics
 - Integrated distributed trace mapping
 - Active exception correlation/tracking
-- Operational Advice
-  - [The Ramp](mentor/src/main/kotlin/com/sourceplusplus/mentor/impl/job/RampDetectionMentor.kt)
 
 ## Demonstration
 
@@ -75,7 +73,6 @@ SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedbac
 | ----------------------------- | -------------------------------------------------------------------- | ------- |
 | :mapper                       | Tracks source code artifact refactoring                              | 0.2.0   |
 | :marker                       | Used to tie visual marks & popups to source code artifacts           | 0.2.0   |
-| :mentor                       | Produces source code artifact informative/cautionary advice          | 0.2.0   |
 | :portal                       | Used to visually display contextualized artifact data/advice         | 0.2.0   |
 | :protocol                     | Common communication data models                                     | 0.2.0   |
 
