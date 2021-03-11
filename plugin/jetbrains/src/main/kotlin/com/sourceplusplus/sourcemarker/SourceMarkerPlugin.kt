@@ -245,19 +245,6 @@ object SourceMarkerPlugin {
         //todo: this
     }
 
-    /**
-     * Schedules long running, generic, and low-priority mentor jobs.
-     * High-priority, specific, and short running mentor jobs are executed during source code navigation.
-     */
-//    private suspend fun initMentor(config: SourceMarkerConfig): SourceMentor {
-////        val mentor = SourceMentor()
-////        val mentorAdviceListener = ArtifactAdviceListener()
-////        SourceMarker.addGlobalSourceMarkEventListener(mentorAdviceListener)
-////        mentor.addAdviceListener(mentorAdviceListener)
-////        deploymentIds.add(vertx.deployVerticle(mentor).await())
-//        return mentor
-//    }
-
     private suspend fun initPortal(config: SourceMarkerConfig) {
         //todo: portal should be connected to event bus without bridge
         val sockJSHandler = SockJSHandler.create(vertx)
