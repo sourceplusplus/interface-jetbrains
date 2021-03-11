@@ -24,7 +24,7 @@ repositories {
 dependencies {
     implementation(project(":protocol"))
     implementation("com.github.sh5i:git-stein:v0.5.0")
-    implementation("org.apache.commons:commons-lang3:3.11")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r")
     implementation("com.google.guava:guava:30.1-jre")
     testImplementation("junit:junit:4.13.2")
