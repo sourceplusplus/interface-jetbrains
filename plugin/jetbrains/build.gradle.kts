@@ -74,7 +74,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
     implementation("org.jooq:jooq:3.14.7")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
-    implementation("org.apache.commons:commons-lang3:3.11")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
 }
 
 tasks {
