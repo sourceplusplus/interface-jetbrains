@@ -26,7 +26,7 @@ dependencies {
     val intellijVersion = "202.7660.26"
     val kotlinVersion = "1.4.31"
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:30.1-jre")
     implementation("org.jetbrains:annotations:20.1.0")
