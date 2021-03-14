@@ -45,6 +45,7 @@ import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
+import io.vertx.core.VertxOptions
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
 import io.vertx.core.json.DecodeException
@@ -82,12 +83,19 @@ object SourceMarkerPlugin {
 
     private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
     private val deploymentIds = mutableListOf<String>()
-    val vertx: Vertx = Vertx.vertx()
+    val vertx: Vertx
 
     /**
      * Setup Vert.x EventBus for communication between plugin modules.
      */
     init {
+        val options = if (System.getProperty("sourcemarker.debug.unblocked_threads", "false")!!.toBoolean()) {
+            log.info("Removed blocked thread checker")
+            VertxOptions().setBlockedThreadCheckInterval(Long.MAX_VALUE)
+        } else {
+            VertxOptions()
+        }
+        vertx = Vertx.vertx(options)
         log.debug("Registering SourceMarker protocol codecs")
         vertx.eventBus().registerDefaultCodec(SourcePortal::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(ArtifactMetricResult::class.java, LocalMessageCodec())
