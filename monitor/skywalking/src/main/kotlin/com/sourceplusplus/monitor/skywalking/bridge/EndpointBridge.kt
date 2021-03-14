@@ -31,7 +31,7 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                     ServiceBridge.getCurrentService(vertx)
                 } catch (throwable: Throwable) {
                     throwable.printStackTrace()
-                    it.fail(500, throwable.message)
+                    it.fail(404, "Apache SkyWalking current service unavailable")
                     return@launch
                 }
 
@@ -56,7 +56,7 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                     ServiceBridge.getCurrentService(vertx)
                 } catch (throwable: Throwable) {
                     throwable.printStackTrace()
-                    it.fail(500, throwable.message)
+                    it.fail(404, "Apache SkyWalking current service unavailable")
                     return@launch
                 }
 
