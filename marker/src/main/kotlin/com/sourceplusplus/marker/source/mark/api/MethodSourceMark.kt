@@ -39,7 +39,7 @@ abstract class MethodSourceMark(
     override val valid: Boolean; get() {
         return try {
             psiMethod.isPsiValid && artifactQualifiedName == SourceMarkerUtils.getFullyQualifiedName(psiMethod)
-        } catch (ex: PsiInvalidElementAccessException) {
+        } catch (ignore: PsiInvalidElementAccessException) {
             false
         }
     }
