@@ -39,7 +39,7 @@ abstract class ClassSourceMark(
     override val valid: Boolean; get() {
         return try {
             psiClass.isPsiValid && artifactQualifiedName == psiClass.qualifiedName!!
-        } catch (ex: PsiInvalidElementAccessException) {
+        } catch (ignore: PsiInvalidElementAccessException) {
             false
         }
     }

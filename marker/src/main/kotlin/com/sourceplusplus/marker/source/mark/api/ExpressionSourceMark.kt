@@ -39,7 +39,7 @@ abstract class ExpressionSourceMark(
     override val valid: Boolean; get() {
         return try {
             psiExpression.isPsiValid && artifactQualifiedName == SourceMarkerUtils.getFullyQualifiedName(psiExpression)
-        } catch (ex: PsiInvalidElementAccessException) {
+        } catch (ignore: PsiInvalidElementAccessException) {
             false
         }
     }
