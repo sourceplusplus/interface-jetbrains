@@ -12,10 +12,6 @@ import org.slf4j.LoggerFactory
  */
 interface InlayMark : SourceMark {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(InlayMark::class.java)
-    }
-
     override val type: SourceMark.Type
         get() = SourceMark.Type.INLAY
     override val configuration: InlayMarkConfiguration

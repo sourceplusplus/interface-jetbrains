@@ -6,7 +6,7 @@ build:
 
 comments:
   UndocumentedPublicClass:
-    active: true
+    active: false #todo: turned off as it's scanning generated code
 
 formatting:
   Indentation:
