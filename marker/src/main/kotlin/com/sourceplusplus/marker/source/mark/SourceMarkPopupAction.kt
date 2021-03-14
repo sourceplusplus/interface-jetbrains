@@ -38,7 +38,7 @@ open class SourceMarkPopupAction : AnAction() {
             if (fileMarker != null) {
                 sourceMark = fileMarker.getSourceMarks().find {
                     if (it is ClassSourceMark) {
-                        classSourceMark = it
+                        classSourceMark = it //todo: probably doesn't handle inner classes well
                         false
                     } else if (it is MethodSourceMark) {
                         if (it.configuration.activateOnKeyboardShortcut) {
