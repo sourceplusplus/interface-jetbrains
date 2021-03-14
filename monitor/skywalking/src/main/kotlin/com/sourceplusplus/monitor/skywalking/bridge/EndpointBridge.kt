@@ -27,17 +27,20 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
 
         vertx.eventBus().localConsumer<String>(searchExactEndpointAddress) {
             launch(vertx.dispatcher()) {
-                val service = ServiceBridge.getCurrentService(vertx)
-                if (service != null) {
-                    val endpointName = it.body()
-                    val endpoints = skywalkingClient.searchEndpoint(endpointName, service.id, 10)
-                    if (endpoints.isNotEmpty()) {
-                        val exactEndpoint = endpoints.find { it.name == endpointName }
-                        if (exactEndpoint != null) {
-                            it.reply(exactEndpoint)
-                        } else {
-                            it.reply(null)
-                        }
+                val service = try {
+                    ServiceBridge.getCurrentService(vertx)
+                } catch (throwable: Throwable) {
+                    throwable.printStackTrace()
+                    it.fail(500, throwable.message)
+                    return@launch
+                }
+
+                val endpointName = it.body()
+                val endpoints = skywalkingClient.searchEndpoint(endpointName, service.id, 10)
+                if (endpoints.isNotEmpty()) {
+                    val exactEndpoint = endpoints.find { it.name == endpointName }
+                    if (exactEndpoint != null) {
+                        it.reply(exactEndpoint)
                     } else {
                         it.reply(null)
                     }
@@ -49,16 +52,19 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
 
         vertx.eventBus().localConsumer<EndpointQuery>(getEndpointsAddress) {
             launch(vertx.dispatcher()) {
-                val service = ServiceBridge.getCurrentService(vertx)
-                if (service != null) {
-                    val endpointQuery = it.body()
-                    val endpoints = skywalkingClient.searchEndpoint(
-                        "", endpointQuery.serviceId ?: service.id, endpointQuery.limit
-                    )
-                    it.reply(endpoints)
-                } else {
-                    it.reply(null)
+                val service = try {
+                    ServiceBridge.getCurrentService(vertx)
+                } catch (throwable: Throwable) {
+                    throwable.printStackTrace()
+                    it.fail(500, throwable.message)
+                    return@launch
                 }
+
+                val endpointQuery = it.body()
+                val endpoints = skywalkingClient.searchEndpoint(
+                    "", endpointQuery.serviceId ?: service.id, endpointQuery.limit
+                )
+                it.reply(endpoints)
             }
         }
     }

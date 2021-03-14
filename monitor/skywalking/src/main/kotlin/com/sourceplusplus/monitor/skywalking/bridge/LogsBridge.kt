@@ -38,40 +38,35 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
 
         vertx.eventBus().localConsumer<GetEndpointLogs>(queryEndpointLogsAddress) {
             launch(vertx.dispatcher()) {
-                val service = ServiceBridge.getCurrentService(vertx)
-                if (service != null) {
-                    val request = it.body()
-                    val logs = skywalkingClient.queryLogs(
-                        LogQueryCondition(
-                            serviceId = Input.optional(request.serviceId),
-                            queryDuration = Input.optional(request.zonedDuration.toDuration(skywalkingClient)),
-                            paging = Pagination(Input.optional(request.pageNumber), request.pageSize)
-                        )
+                val request = it.body()
+                val logs = skywalkingClient.queryLogs(
+                    LogQueryCondition(
+                        serviceId = Input.optional(request.serviceId),
+                        queryDuration = Input.optional(request.zonedDuration.toDuration(skywalkingClient)),
+                        paging = Pagination(Input.optional(request.pageNumber), request.pageSize)
                     )
-                    if (logs != null) {
-                        it.reply(
-                            LogResult(
-                                orderType = request.orderType,
-                                timestamp = Clock.System.now(),
-                                logs = logs.logs.map {
-                                    val exceptionStr = it.tags?.find { it.key == "exception" }?.value
-                                    Log(
-                                        Instant.fromEpochMilliseconds(it.timestamp.toLong()),
-                                        it.content.orEmpty(),
-                                        level = it.tags!!.find { it.key == "level" }?.value!!,
-                                        logger = it.tags.find { it.key == "logger" }?.value,
-                                        thread = it.tags.find { it.key == "thread" }?.value,
-                                        arguments = it.tags.filter { it.key.startsWith("argument.") }
-                                            .mapNotNull { it.value },
-                                        exception = if (exceptionStr != null) JvmStackTrace.fromString(exceptionStr) else null
-                                    )
-                                })
-                        )
-                    } else {
-                        it.fail(500, "todo")
-                    }
+                )
+                if (logs != null) {
+                    it.reply(
+                        LogResult(
+                            orderType = request.orderType,
+                            timestamp = Clock.System.now(),
+                            logs = logs.logs.map {
+                                val exceptionStr = it.tags?.find { it.key == "exception" }?.value
+                                Log(
+                                    Instant.fromEpochMilliseconds(it.timestamp.toLong()),
+                                    it.content.orEmpty(),
+                                    level = it.tags!!.find { it.key == "level" }?.value!!,
+                                    logger = it.tags.find { it.key == "logger" }?.value,
+                                    thread = it.tags.find { it.key == "thread" }?.value,
+                                    arguments = it.tags.filter { it.key.startsWith("argument.") }
+                                        .mapNotNull { it.value },
+                                    exception = if (exceptionStr != null) JvmStackTrace.fromString(exceptionStr) else null
+                                )
+                            })
+                    )
                 } else {
-                    it.fail(404, "Apache SkyWalking current service unavailable")
+                    it.fail(500, "todo")
                 }
             }
         }

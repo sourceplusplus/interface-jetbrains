@@ -91,22 +91,12 @@ class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineV
             return vertx.eventBus().localConsumer(activeServicesUpdatedAddress)
         }
 
-        suspend fun getCurrentService(vertx: Vertx): GetAllServicesQuery.Result? {
-            return vertx.eventBus()
-                .request<GetAllServicesQuery.Result?>(getCurrentServiceAddress, false).await().body()
-        }
-
-        suspend fun getActiveServices(vertx: Vertx): List<GetAllServicesQuery.Result> {
-            return vertx.eventBus()
-                .request<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, false).await().body()
-        }
-
-        suspend fun getCurrentServiceAwait(vertx: Vertx): GetAllServicesQuery.Result {
+        suspend fun getCurrentService(vertx: Vertx): GetAllServicesQuery.Result {
             return vertx.eventBus()
                 .request<GetAllServicesQuery.Result>(getCurrentServiceAddress, true).await().body()
         }
 
-        suspend fun getActiveServicesAwait(vertx: Vertx): List<GetAllServicesQuery.Result> {
+        suspend fun getActiveServices(vertx: Vertx): List<GetAllServicesQuery.Result> {
             return vertx.eventBus()
                 .request<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, true).await().body()
         }
