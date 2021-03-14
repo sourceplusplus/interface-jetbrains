@@ -38,7 +38,7 @@ object SourceMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getElementAtLine(file: PsiFile, line: Int): PsiElement? {
+    fun getElementAtLine(file: PsiFile, line: Int): PsiElement {
         val document: Document = PsiDocumentManager.getInstance(file.project).getDocument(file)!!
         val offset = document.getLineStartOffset(line - 1)
         var element: PsiElement = file.viewProvider.findElementAt(offset)!!
@@ -503,7 +503,7 @@ object SourceMarkerUtils {
                 } else {
                     qualifiedType.qualifiedName
                 }
-                for (i in 0 until arrayDimensions) {
+                repeat(arrayDimensions) {
                     methodParams += "[]"
                 }
             } else {

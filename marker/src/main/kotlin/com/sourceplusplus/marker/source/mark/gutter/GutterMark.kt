@@ -12,10 +12,6 @@ import org.slf4j.LoggerFactory
  */
 interface GutterMark : SourceMark {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(GutterMark::class.java)
-    }
-
     override val type: SourceMark.Type
         get() = SourceMark.Type.GUTTER
     override val configuration: GutterMarkConfiguration

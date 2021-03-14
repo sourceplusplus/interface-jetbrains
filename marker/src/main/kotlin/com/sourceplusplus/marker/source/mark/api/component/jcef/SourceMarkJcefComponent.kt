@@ -23,7 +23,6 @@ class SourceMarkJcefComponent(
 ) : SourceMarkComponent {
 
     companion object {
-        private val log = LoggerFactory.getLogger(SourceMarkJcefComponent::class.java)
         private val client: JBCefClient by lazy { JBCefApp.getInstance().createClient() }
 
         init {
