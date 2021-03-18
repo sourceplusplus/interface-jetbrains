@@ -31,7 +31,7 @@ repositories {
 
 subprojects {
     ext {
-        set("vertxVersion", "4.0.2")
+        set("vertxVersion", "4.0.3")
     }
 
     repositories {
