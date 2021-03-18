@@ -3,6 +3,35 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+### Added
+- Synchronous/asynchronous source mark event listeners
+- Portal opening event
+- Ability to configure portal refresh interval
+- Added debug console (hidden by default)
+
+### Changed
+- Fixed issue with determining active service (#285)
+- More intuitive portal default views
+
+### Removed
+- Local mentor module
+
+### Upgraded
+- Kotlin (1.4.30 -> 1.4.31)
+- Vert.x (4.0.2 -> 4.0.3)
+- gradle-docker-compose-plugin (0.14.0 -> 0.14.1)
+- detekt (1.15.0 -> 1.16.0)
+- JGit (5.10.0.202012080955-r -> 5.11.0.202103091610-r)
+- Apache Commons Lang (3.11 -> 3.12.0)
+- JUnit (4.13.1 -> 4.13.2)
+- Apollo Android (2.5.3 -> 2.5.4)
+- Dropwizard Metrics (4.1.17 -> 4.1.18)
+- JetBrains IntelliJ plugin (0.6.5 -> 0.7.2)
+- JetBrains changelog plugin (1.1.1 -> 1.1.2)
+- kotlinx.coroutines (1.4.2 -> 1.4.3-native-mt)
+- jOOQ (3.14.7 -> 3.14.8)
+- Jackson (2.12.1 -> 2.12.2)
+- kotlinx.serialization (1.0.1 -> 1.1.0)
 
 ## [0.2.0] - 2020-12-02
 ### Added
