@@ -32,6 +32,7 @@
 - jOOQ (3.14.7 -> 3.14.8)
 - Jackson (2.12.1 -> 2.12.2)
 - kotlinx.serialization (1.0.1 -> 1.1.0)
+- Guava (30.1-jre -> 30.1.1-jre)
 
 ## [0.2.0] - 2020-12-02
 ### Added

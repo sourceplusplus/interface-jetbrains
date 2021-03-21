@@ -35,7 +35,7 @@ kotlin {
                 implementation("io.vertx:vertx-web:$vertxVersion")
                 implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
                 implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-                implementation("com.google.guava:guava:30.1-jre")
+                implementation("com.google.guava:guava:30.1.1-jre")
             }
         }
         val jvmTest by getting {
