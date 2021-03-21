@@ -28,7 +28,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.google.guava:guava:30.1-jre")
+    implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.jetbrains:annotations:20.1.0")
     compileOnly("org.slf4j:slf4j-api:1.7.30")
     compileOnly("org.jetbrains.intellij.deps.jcef:jcef:87.1.13-g481a82a-chromium-87.0.4280.141-api-1.2")
