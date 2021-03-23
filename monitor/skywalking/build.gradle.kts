@@ -1,6 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("com.apollographql.apollo").version("2.5.4")
+    id("com.apollographql.apollo").version("2.5.5")
 }
 
 val vertxVersion = ext.get("vertxVersion")
@@ -8,9 +8,9 @@ val vertxVersion = ext.get("vertxVersion")
 dependencies {
     implementation(project(":protocol"))
     implementation("org.slf4j:slf4j-api:1.7.30")
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.4")
-    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.4")
-    api("com.apollographql.apollo:apollo-api:2.5.4")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.5")
+    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.5")
+    api("com.apollographql.apollo:apollo-api:2.5.5")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
     implementation("io.vertx:vertx-core:$vertxVersion")
