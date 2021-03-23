@@ -11,9 +11,9 @@
 
 ### Fixed
 - Portal popup race condition ([#350](https://github.com/sourceplusplus/SourceMarker/issues/350))
+- Issue with determining active service ([#285](https://github.com/sourceplusplus/SourceMarker/issues/285))
 
 ### Changed
-- Fixed issue with determining active service (#285)
 - More intuitive portal default views
 
 ### Removed
