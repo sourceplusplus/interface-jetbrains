@@ -24,7 +24,7 @@
 - JGit (5.10.0.202012080955-r -> 5.11.0.202103091610-r)
 - Apache Commons Lang (3.11 -> 3.12.0)
 - JUnit (4.13.1 -> 4.13.2)
-- Apollo Android (2.5.3 -> 2.5.4)
+- Apollo Android (2.5.3 -> 2.5.5)
 - Dropwizard Metrics (4.1.17 -> 4.1.18)
 - JetBrains IntelliJ plugin (0.6.5 -> 0.7.2)
 - JetBrains changelog plugin (1.1.1 -> 1.1.2)
