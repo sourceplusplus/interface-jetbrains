@@ -9,6 +9,9 @@
 - Ability to configure portal refresh interval
 - Added debug console (hidden by default)
 
+### Fixed
+- Portal popup race condition ([#350](https://github.com/sourceplusplus/SourceMarker/issues/350))
+
 ### Changed
 - Fixed issue with determining active service (#285)
 - More intuitive portal default views
