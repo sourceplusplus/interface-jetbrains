@@ -17,7 +17,7 @@
 - Local mentor module
 
 ### Upgraded
-- Kotlin (1.4.30 -> 1.4.31)
+- Kotlin (1.4.30 -> 1.4.32)
 - Vert.x (4.0.2 -> 4.0.3)
 - gradle-docker-compose-plugin (0.14.0 -> 0.14.1)
 - detekt (1.15.0 -> 1.16.0)

@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.4.31"
+    kotlin("plugin.serialization") version "1.4.32"
     kotlin("kapt")
     id("java")
 }
@@ -52,7 +52,7 @@ kotlin {
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
-                implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.31")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
             }
         }
     }
