@@ -54,6 +54,52 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             runBlocking {
                 val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
+                assertEquals("{GET}/", result.get())
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVCEndpoint GetMapping method_path`() {
+        @Language("Scala") val code = """
+                    import org.springframework.web.bind.annotation._
+                    class TestController {
+                        @GetMapping(path = "/doGet")
+                        def doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.scala", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(1, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/doGet", result.get())
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVCEndpoint GetMapping method_value`() {
+        @Language("Scala") val code = """
+                    import org.springframework.web.bind.annotation._
+                    class TestController {
+                        @GetMapping(value = "/doGet")
+                        def doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.scala", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(1, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
                 assertEquals("{GET}/doGet", result.get())
             }
         }

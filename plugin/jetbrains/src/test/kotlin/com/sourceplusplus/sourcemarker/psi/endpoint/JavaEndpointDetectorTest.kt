@@ -52,6 +52,52 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             runBlocking {
                 val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
+                assertEquals("{GET}/", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC GetMapping method_value`() {
+        @Language("Java") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping;
+                    public class TestController {
+                        @GetMapping(value = "/doGet")
+                        public void doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(1, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/doGet", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC GetMapping method_path`() {
+        @Language("Java") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping;
+                    public class TestController {
+                        @GetMapping(path = "/doGet")
+                        public void doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(1, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
                 assertEquals("{GET}/doGet", result.get().name)
             }
         }

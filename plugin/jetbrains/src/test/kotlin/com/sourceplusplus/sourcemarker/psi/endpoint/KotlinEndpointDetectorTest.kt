@@ -58,6 +58,75 @@ class KotlinEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     @Test
+    fun `SpringMVC GetMapping method_value`() {
+        @Language("Kt") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping
+                    class TestController {
+                        @GetMapping(value = "/doGet")
+                        fun doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.kt", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(2, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/doGet", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC GetMapping method_path`() {
+        @Language("Kt") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping
+                    class TestController {
+                        @GetMapping(path = "/doGet")
+                        fun doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.kt", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(2, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/doGet", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC GetMapping method_name`() {
+        @Language("Kt") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping
+                    class TestController {
+                        @GetMapping(name = "/doGet")
+                        fun doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.kt", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(2, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/", result.get().name)
+            }
+        }
+    }
+
+    @Test
     fun `SkyWalking Trace with operation name`() {
         @Language("Kt") val code = """
                     import org.apache.skywalking.apm.toolkit.trace.Trace

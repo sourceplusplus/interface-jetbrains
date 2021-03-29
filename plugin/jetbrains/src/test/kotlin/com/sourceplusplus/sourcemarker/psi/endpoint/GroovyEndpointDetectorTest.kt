@@ -52,6 +52,52 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
             runBlocking {
                 val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
+                assertEquals("{GET}/", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC GetMapping method_path`() {
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping
+                    class TestController {
+                        @GetMapping(path = "/doGet")
+                        void doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(1, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/doGet", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC GetMapping method_value`() {
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping
+                    class TestController {
+                        @GetMapping(value = "/doGet")
+                        void doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(1, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
                 assertEquals("{GET}/doGet", result.get().name)
             }
         }
