@@ -64,7 +64,9 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
         annotationName: String
     ): Optional<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
-            val endpointNameExpr = annotation.attributeValues.find { it.name == "value" }!!.expression
+            var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
+            if (endpointNameExpr == null) endpointNameExpr =
+                annotation.attributeValues.find { it.name == "path" }!!.expression
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
             val value = (endpointNameExpr as UInjectionHost).evaluateToString()
             val method = if (methodExpr is UQualifiedReferenceExpression) {
@@ -74,11 +76,14 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
             return Optional.of(DetectedEndpoint("{$method}$value", false))
         } else {
-            val endpointNameExpr = annotation.attributeValues.find { it.name == "name" }!!
+            var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }
+            if (endpointNameExpr == null) endpointNameExpr = annotation.attributeValues.find { it.name == "path" }
             val value = if (endpointNameExpr is UInjectionHost) {
                 endpointNameExpr.evaluateToString()
-            } else {
+            } else if (endpointNameExpr != null) {
                 endpointNameExpr.evaluate()
+            } else {
+                "/"
             } as String
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
@@ -100,11 +105,14 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                 .selector.asSourceString()
             return Optional.of(DetectedEndpoint("{$method}$value", false))
         } else {
-            val valueExpr = annotation.findAttributeValue("value")!!
+            var valueExpr = annotation.findAttributeValue("value")
+            if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
             val value = if (valueExpr is KotlinUCollectionLiteralExpression) {
                 valueExpr.valueArguments[0].evaluate()
-            } else {
+            } else if (valueExpr != null) {
                 valueExpr.evaluate()
+            } else {
+                "/"
             }
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
