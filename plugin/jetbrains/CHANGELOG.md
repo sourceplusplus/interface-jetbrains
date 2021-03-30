@@ -3,6 +3,8 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+
+## [0.2.1] - 2020-03-23
 ### Added
 - Synchronous/asynchronous source mark event listeners
 - Portal opening event
