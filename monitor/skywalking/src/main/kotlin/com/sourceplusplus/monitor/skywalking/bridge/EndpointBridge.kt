@@ -30,7 +30,6 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                 val service = try {
                     ServiceBridge.getCurrentService(vertx)
                 } catch (throwable: Throwable) {
-                    throwable.printStackTrace()
                     it.fail(404, "Apache SkyWalking current service unavailable")
                     return@launch
                 }

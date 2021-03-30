@@ -50,7 +50,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 client = vertx.createNetClient()
                 socket = client.connect(5455, "localhost").await()
             } catch (throwable: Throwable) {
-                log.warn("Failed to connect to service discovery server", throwable)
+                log.warn("Failed to connect to service discovery server")
                 setupPromise.fail(throwable)
                 return@launch
             }
