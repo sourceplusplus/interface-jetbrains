@@ -2,6 +2,7 @@ package com.sourceplusplus.protocol
 
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
+import com.sourceplusplus.protocol.service.tracing.ProductionDebuggerService
 
 /**
  * todo: description.
@@ -17,6 +18,7 @@ object SourceMarkerServices {
     object Instance {
         object Tracing {
             var localTracing: LocalTracingService? = null
+            var productionDebugger: ProductionDebuggerService? = null
         }
 
         object Logging {
@@ -27,6 +29,7 @@ object SourceMarkerServices {
     object Provider {
         object Tracing {
             const val LOCAL_TRACING = "$TRACING.local-tracing"
+            const val PRODUCTION_DEBUGGER = "$TRACING.local-tracing"
         }
 
         object Logging {
