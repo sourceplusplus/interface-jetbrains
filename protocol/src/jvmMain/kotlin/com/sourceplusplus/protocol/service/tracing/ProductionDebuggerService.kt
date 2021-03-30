@@ -16,7 +16,7 @@ import io.vertx.core.Handler
 @ProxyGen
 @VertxGen
 interface ProductionDebuggerService {
-    fun addBreakpoint(breakpoint: Breakpoint, handler: Handler<AsyncResult<Boolean>>)
+    fun addBreakpoint(breakpoint: Breakpoint, handler: Handler<AsyncResult<Breakpoint>>)
     fun removeBreakpoint(breakpoint: Breakpoint, handler: Handler<AsyncResult<Boolean>>)
     fun removeBreakpoints(location: Location, handler: Handler<AsyncResult<List<Breakpoint>>>)
     fun getBreakpoints(handler: Handler<AsyncResult<List<Breakpoint>>>)
