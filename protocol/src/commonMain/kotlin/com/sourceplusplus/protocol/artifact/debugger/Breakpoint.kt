@@ -8,6 +8,6 @@ package com.sourceplusplus.protocol.artifact.debugger
  */
 data class Breakpoint(
     val location: Location,
-    val condition: Any,
+    val condition: Any? = null,
     val id: String? = null
 )
