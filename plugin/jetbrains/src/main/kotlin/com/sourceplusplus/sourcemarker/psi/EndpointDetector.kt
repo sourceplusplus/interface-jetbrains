@@ -9,6 +9,8 @@ import com.sourceplusplus.sourcemarker.psi.endpoint.SkywalkingTraceEndpoint
 import com.sourceplusplus.sourcemarker.psi.endpoint.SpringMVCEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import io.vertx.core.eventbus.ReplyException
+import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
@@ -97,12 +99,20 @@ class EndpointDetector {
 
     private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodSourceMark) {
         log.trace("Determining endpoint id")
-        val endpoint = EndpointBridge.searchExactEndpoint(endpointName, SourceMarkerPlugin.vertx)
-        if (endpoint != null) {
-            sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
-            log.debug("Detected endpoint id: ${endpoint.id}")
-        } else {
-            log.debug("Could not find endpoint id for: $endpointName")
+        try {
+            val endpoint = EndpointBridge.searchExactEndpoint(endpointName, SourceMarkerPlugin.vertx)
+            if (endpoint != null) {
+                sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
+                log.debug("Detected endpoint id: ${endpoint.id}")
+            } else {
+                log.debug("Could not find endpoint id for: $endpointName")
+            }
+        } catch (ex: ReplyException) {
+            if (ex.failureType() == ReplyFailure.TIMEOUT) {
+                log.debug("Timed out looking for endpoint id for: $endpointName")
+            } else {
+                throw ex;
+            }
         }
     }
 
