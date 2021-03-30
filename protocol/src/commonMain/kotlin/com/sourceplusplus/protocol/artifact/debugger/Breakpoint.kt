@@ -7,7 +7,7 @@ package com.sourceplusplus.protocol.artifact.debugger
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class Breakpoint(
-    val id: String,
     val location: Location,
     val condition: Any,
+    val id: String? = null
 )
