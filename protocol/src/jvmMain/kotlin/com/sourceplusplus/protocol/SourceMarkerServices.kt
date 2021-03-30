@@ -29,7 +29,7 @@ object SourceMarkerServices {
     object Provider {
         object Tracing {
             const val LOCAL_TRACING = "$TRACING.local-tracing"
-            const val PRODUCTION_DEBUGGER = "$TRACING.local-tracing"
+            const val PRODUCTION_DEBUGGER = "$TRACING.production-debugger"
         }
 
         object Logging {
