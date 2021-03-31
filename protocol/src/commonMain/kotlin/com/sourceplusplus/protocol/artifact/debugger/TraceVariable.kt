@@ -1,5 +1,6 @@
 package com.sourceplusplus.protocol.artifact.debugger
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,7 +10,7 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class Location(
-    val source: String,
-    val line: Int
+data class TraceVariable(
+    var name: String,
+    @Contextual var value: Any
 )

@@ -9,8 +9,7 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class Breakpoint(
-    val location: Location,
-    val condition: String? = null,
-    val id: String? = null
+data class TraceStackFrame(
+    val location: SourceLocation,
+    val variables: List<TraceVariable>
 )

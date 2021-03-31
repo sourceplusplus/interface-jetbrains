@@ -7,8 +7,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.debugger.Breakpoint
-import com.sourceplusplus.protocol.artifact.debugger.Location
+import com.sourceplusplus.protocol.artifact.debugger.LiveBreakpoint
+import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
 import com.sourceplusplus.protocol.artifact.log.LogCountSummary
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import io.vertx.core.json.Json
@@ -77,22 +77,22 @@ object ProtocolMarshaller {
     }
 
     @JvmStatic
-    fun serializeBreakpoint(value: Breakpoint): JsonObject {
+    fun serializeBreakpoint(value: LiveBreakpoint): JsonObject {
         return JsonObject(Json.encode(value))
     }
 
     @JvmStatic
-    fun deserializeBreakpoint(value: JsonObject): Breakpoint {
-        return value.mapTo(Breakpoint::class.java)
+    fun deserializeBreakpoint(value: JsonObject): LiveBreakpoint {
+        return value.mapTo(LiveBreakpoint::class.java)
     }
 
     @JvmStatic
-    fun serializeLocation(value: Location): JsonObject {
+    fun serializeLocation(value: SourceLocation): JsonObject {
         return JsonObject(Json.encode(value))
     }
 
     @JvmStatic
-    fun deserializeLocation(value: JsonObject): Location {
-        return value.mapTo(Location::class.java)
+    fun deserializeLocation(value: JsonObject): SourceLocation {
+        return value.mapTo(SourceLocation::class.java)
     }
 }

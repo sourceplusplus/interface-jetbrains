@@ -39,6 +39,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
+import com.sourceplusplus.protocol.service.tracing.ProductionDebuggerService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
@@ -225,6 +226,14 @@ object SourceMarkerPlugin {
                 vertx.deployVerticle(LogCountIndicators())
             } else {
                 log.warn("Log count indicator unavailable")
+            }
+        }
+        EventBusService.getProxy(discovery, ProductionDebuggerService::class.java) {
+            if (it.succeeded()) {
+                log.info("Production debugger available")
+                Tracing.productionDebugger = it.result()
+            } else {
+                log.warn("Production debugger unavailable")
             }
         }
     }
