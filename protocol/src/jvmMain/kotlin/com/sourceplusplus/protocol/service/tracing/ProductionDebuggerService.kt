@@ -18,6 +18,6 @@ import io.vertx.core.Handler
 interface ProductionDebuggerService {
     fun addBreakpoint(breakpoint: LiveBreakpoint, handler: Handler<AsyncResult<LiveBreakpoint>>)
     fun removeBreakpoint(breakpoint: LiveBreakpoint, handler: Handler<AsyncResult<Boolean>>)
-    fun removeBreakpoints(location: SourceLocation, handler: Handler<AsyncResult<List<LiveBreakpoint>>>)
+    fun removeBreakpoints(location: SourceLocation, handler: Handler<AsyncResult<Boolean>>)
     fun getBreakpoints(handler: Handler<AsyncResult<List<LiveBreakpoint>>>)
 }
