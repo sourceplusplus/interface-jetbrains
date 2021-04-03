@@ -60,7 +60,6 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
-import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
@@ -272,32 +271,31 @@ class PortalEventListener(
 
                     handleTraceResult(traceResult, portal, portal.viewingPortalArtifact)
                 }
-            }
-        }
-        if (Tracing.localTracing != null) {
-            portal.tracesView.localTracing = true
-            Tracing.localTracing!!.getTraceResult(
-                artifactQualifiedName = ArtifactQualifiedName(
-                    identifier = portal.viewingPortalArtifact,
-                    commitId = "null",
-                    type = ArtifactType.METHOD
-                ),
-                start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
-                stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
-                orderType = portal.tracesView.orderType,
-                pageSize = portal.tracesView.viewTraceAmount,
-                pageNumber = portal.tracesView.pageNumber,
-            ) {
-                if (it.succeeded()) {
-                    handleTraceResult(it.result(), portal, portal.viewingPortalArtifact)
-                } else {
-                    val rawFailure = JsonObject(it.cause().message)
-                    val debugInfo = rawFailure.getJsonObject("debugInfo")
-                    if (debugInfo.getString("type") == ServiceUnavailable.name) {
-                        log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+            } else if (Tracing.localTracing != null) {
+                portal.tracesView.localTracing = true
+                Tracing.localTracing!!.getTraceResult(
+                    artifactQualifiedName = ArtifactQualifiedName(
+                        identifier = portal.viewingPortalArtifact,
+                        commitId = "null",
+                        type = ArtifactType.METHOD
+                    ),
+                    start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
+                    stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
+                    orderType = portal.tracesView.orderType,
+                    pageSize = portal.tracesView.viewTraceAmount,
+                    pageNumber = portal.tracesView.pageNumber,
+                ) {
+                    if (it.succeeded()) {
+                        handleTraceResult(it.result(), portal, portal.viewingPortalArtifact)
                     } else {
-                        it.cause().printStackTrace()
-                        log.error("Failed to get local trace results", it.cause())
+                        val rawFailure = JsonObject(it.cause().message)
+                        val debugInfo = rawFailure.getJsonObject("debugInfo")
+                        if (debugInfo.getString("type") == ServiceUnavailable.name) {
+                            log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+                        } else {
+                            it.cause().printStackTrace()
+                            log.error("Failed to get local trace results", it.cause())
+                        }
                     }
                 }
             }
