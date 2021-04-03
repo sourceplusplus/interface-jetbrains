@@ -37,17 +37,19 @@ data class TraceStackPath(
 
     fun autoFollow(artifactQualifiedName: String) {
         val shortestPath = mutableListOf<TraceSpan>()
-        val startSpan = traceStack.traceSpans.find { it.endpointName == artifactQualifiedName }!!
-        var currentSpan = startSpan
-        while (currentSpan.spanId != 0 || currentSpan.parentSpanId != -1) {
-            val prevSpan = traceStack.getSegment(currentSpan.segmentId).getTraceSpan(currentSpan.spanId - 1)
-            shortestPath.add(prevSpan)
-            currentSpan = prevSpan
-        }
-        shortestPath.add(startSpan)
+        val startSpan = traceStack.traceSpans.find { it.endpointName == artifactQualifiedName }
+        if (startSpan != null) {
+            var currentSpan: TraceSpan = startSpan
+            while (currentSpan.spanId != 0 || currentSpan.parentSpanId != -1) {
+                val prevSpan = traceStack.getSegment(currentSpan.segmentId).getTraceSpan(currentSpan.spanId - 1)
+                shortestPath.add(prevSpan)
+                currentSpan = prevSpan
+            }
+            shortestPath.add(startSpan)
 
-        shortestPath.forEach {
-            follow(it.segmentId, it.spanId)
+            shortestPath.forEach {
+                follow(it.segmentId, it.spanId)
+            }
         }
     }
 }
