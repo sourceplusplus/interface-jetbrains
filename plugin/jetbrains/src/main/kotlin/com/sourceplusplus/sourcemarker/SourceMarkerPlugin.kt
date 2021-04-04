@@ -43,6 +43,7 @@ import com.sourceplusplus.protocol.service.tracing.ProductionDebuggerService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
+import com.sourceplusplus.sourcemarker.service.ProductionBreakpointListener
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -232,6 +233,8 @@ object SourceMarkerPlugin {
             if (it.succeeded()) {
                 log.info("Production debugger available")
                 Tracing.productionDebugger = it.result()
+
+                vertx.deployVerticle(ProductionBreakpointListener())
             } else {
                 log.warn("Production debugger unavailable")
             }
