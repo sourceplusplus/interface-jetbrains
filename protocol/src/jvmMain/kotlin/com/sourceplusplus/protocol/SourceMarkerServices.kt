@@ -30,6 +30,10 @@ object SourceMarkerServices {
         object Tracing {
             const val LOCAL_TRACING = "$TRACING.local-tracing"
             const val PRODUCTION_DEBUGGER = "$TRACING.production-debugger"
+
+            object Event {
+                const val BREAKPOINT_HIT = "$TRACING.event.breakpoint-hit"
+            }
         }
 
         object Logging {

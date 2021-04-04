@@ -11,5 +11,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TraceStackFrame(
     val location: SourceLocation,
+    val traceId: String,
     val variables: List<TraceVariable>
 )
