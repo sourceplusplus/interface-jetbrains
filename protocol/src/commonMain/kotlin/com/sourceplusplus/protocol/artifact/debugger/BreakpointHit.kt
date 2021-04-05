@@ -11,6 +11,7 @@ import kotlinx.datetime.Instant
  */
 data class BreakpointHit(
     val breakpointId: String,
+    val traceId: String,
     val occurredAt: Instant,
     val host: String,
     val application: String,
