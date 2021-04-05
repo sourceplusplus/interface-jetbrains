@@ -1,5 +1,8 @@
 package com.sourceplusplus.protocol.artifact.debugger
 
+import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import kotlinx.datetime.Instant
+
 /**
  * todo: description.
  *
@@ -8,5 +11,8 @@ package com.sourceplusplus.protocol.artifact.debugger
  */
 data class BreakpointHit(
     val breakpointId: String,
-    val traceStack: TraceStackFrame
+    val occurredAt: Instant,
+    val host: String,
+    val application: String,
+    val stackTrace: JvmStackTrace
 )

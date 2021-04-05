@@ -14,4 +14,11 @@ data class SourceLocation(
     val line: Int,
     val commitId: String? = null,
     val fileChecksum: String? = null
-)
+) : Comparable<SourceLocation> {
+
+    override fun compareTo(other: SourceLocation): Int {
+        val sourceCompare = source.compareTo(other.source)
+        if (sourceCompare != 0) return sourceCompare
+        return line.compareTo(other.line)
+    }
+}

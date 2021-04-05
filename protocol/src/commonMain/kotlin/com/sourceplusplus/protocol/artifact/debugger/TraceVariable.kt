@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class TraceVariable(
-    var name: String,
-    @Contextual var value: Any
+    val name: String,
+    @Contextual val value: Any,
+    val lineNumber: Int = -1
 )
