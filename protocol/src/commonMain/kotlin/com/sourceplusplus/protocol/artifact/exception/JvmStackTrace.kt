@@ -30,7 +30,7 @@ class JvmStackTrace(
                     var x = i
                     while (x++ < reversedElements.size) {
                         val tillEl = reversedElements[x]
-                        if (tillEl.sourceAsLineNumber != null) {
+                        if (tillEl.sourceAsLineNumber() != null) {
                             //copy over source line number
                             finalElements[finalElements.size - 1] = needsUpdateEl.copy(source = tillEl.source)
                             skipTo = x + 1
