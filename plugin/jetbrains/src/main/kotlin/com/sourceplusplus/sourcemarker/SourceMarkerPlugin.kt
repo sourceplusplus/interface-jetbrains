@@ -232,7 +232,7 @@ object SourceMarkerPlugin {
         }
         EventBusService.getProxy(discovery, HindsightDebuggerService::class.java) {
             if (it.succeeded()) {
-                log.info("Production debugger available")
+                log.info("Hindsight debugger available")
                 Tracing.hindsightDebugger = it.result()
 
                 ApplicationManager.getApplication().invokeLater {

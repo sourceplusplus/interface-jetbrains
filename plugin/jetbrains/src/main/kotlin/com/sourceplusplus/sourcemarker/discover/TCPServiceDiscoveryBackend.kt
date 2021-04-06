@@ -83,7 +83,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
             setupHandler(vertx, "get-records")
             setupHandler(vertx, Tracing.LOCAL_TRACING)
-            setupHandler(vertx, Tracing.PRODUCTION_DEBUGGER)
+            setupHandler(vertx, Tracing.HINDSIGHT_DEBUGGER)
             setupHandler(vertx, Logging.LOG_COUNT_INDICATOR)
 
             setupPromise.complete()

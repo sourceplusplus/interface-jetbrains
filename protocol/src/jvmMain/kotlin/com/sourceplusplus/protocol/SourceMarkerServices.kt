@@ -29,7 +29,7 @@ object SourceMarkerServices {
     object Provider {
         object Tracing {
             const val LOCAL_TRACING = "$TRACING.local-tracing"
-            const val PRODUCTION_DEBUGGER = "$TRACING.production-debugger"
+            const val HINDSIGHT_DEBUGGER = "$TRACING.hindsight-debugger"
 
             object Event {
                 const val BREAKPOINT_HIT = "$TRACING.event.breakpoint-hit"
