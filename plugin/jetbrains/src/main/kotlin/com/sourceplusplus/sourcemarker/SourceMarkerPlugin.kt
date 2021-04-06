@@ -17,6 +17,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.search.ProjectScope
+import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
@@ -44,7 +45,7 @@ import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowServ
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
-import com.sourceplusplus.sourcemarker.service.HindsightBreakpointListener
+import com.sourceplusplus.sourcemarker.service.HindsightManager
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -238,7 +239,9 @@ object SourceMarkerPlugin {
                 ApplicationManager.getApplication().invokeLater {
                     BreakpointHitWindowService.getInstance(project).showEventsWindow()
                 }
-                vertx.deployVerticle(HindsightBreakpointListener())
+                val breakpointListener = HindsightManager()
+                vertx.deployVerticle(breakpointListener)
+                project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
             } else {
                 log.warn("Hindsight debugger unavailable")
             }

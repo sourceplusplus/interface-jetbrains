@@ -7,6 +7,7 @@ import com.intellij.ide.highlighter.JavaClassFileType
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Ref
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
@@ -17,6 +18,7 @@ import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.breakpoints.XBreakpoint
 import com.intellij.xdebugger.breakpoints.XLineBreakpointType
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
+import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import javax.swing.Icon
 
@@ -33,7 +35,7 @@ class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointPropertie
     override fun canPutAt(file: VirtualFile, line: Int, project: Project): Boolean {
         if (Tracing.hindsightDebugger == null) return false
         return canPutAtElement(file, line, project) { element: PsiElement, _: Document ->
-            element !is PsiMethod
+            element !is PsiMethod && element !is PsiField
         }
     }
 
@@ -46,7 +48,12 @@ class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointPropertie
     }
 
     override fun createBreakpointProperties(file: VirtualFile, line: Int): HindsightBreakpointProperties {
-        return HindsightBreakpointProperties()
+        val props = HindsightBreakpointProperties()
+        val psiFile: PsiClassOwner =
+            (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0]).findFile(file) as PsiClassOwner?)!!
+        val qualifiedName = psiFile.classes[0].qualifiedName!!
+        props.setLocation(SourceLocation(qualifiedName, line + 1))
+        return props
     }
 
     override fun createJavaBreakpoint(
@@ -105,6 +112,10 @@ class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointPropertie
             }
             return res.get()
         }
+        return false
+    }
+
+    override fun isSuspendThreadSupported(): Boolean {
         return false
     }
 }
