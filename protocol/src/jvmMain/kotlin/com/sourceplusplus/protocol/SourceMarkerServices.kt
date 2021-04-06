@@ -2,7 +2,7 @@ package com.sourceplusplus.protocol
 
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
-import com.sourceplusplus.protocol.service.tracing.ProductionDebuggerService
+import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
 
 /**
  * todo: description.
@@ -18,7 +18,7 @@ object SourceMarkerServices {
     object Instance {
         object Tracing {
             var localTracing: LocalTracingService? = null
-            var productionDebugger: ProductionDebuggerService? = null
+            var hindsightDebugger: HindsightDebuggerService? = null
         }
 
         object Logging {

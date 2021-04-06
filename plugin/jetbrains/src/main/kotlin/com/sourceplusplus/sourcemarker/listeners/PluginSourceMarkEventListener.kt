@@ -36,6 +36,10 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
     }
 
     override fun handleEvent(event: SourceMarkEvent) {
+        if (log.isTraceEnabled) {
+            log.trace("Handling event: $event")
+        }
+
         if (event.eventCode == SourceMarkEventCode.PORTAL_OPENED) {
             val sourceMark = event.sourceMark
             val sourcePortal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!

@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @since 0.2.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
     companion object {

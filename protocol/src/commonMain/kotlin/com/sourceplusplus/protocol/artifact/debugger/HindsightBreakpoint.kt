@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class LiveBreakpoint(
+data class HindsightBreakpoint(
     val location: SourceLocation,
     val condition: String? = null,
     val expiresAt: Long? = null,

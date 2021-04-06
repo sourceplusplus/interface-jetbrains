@@ -39,11 +39,12 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
-import com.sourceplusplus.protocol.service.tracing.ProductionDebuggerService
+import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
+import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
-import com.sourceplusplus.sourcemarker.service.ProductionBreakpointListener
+import com.sourceplusplus.sourcemarker.service.HindsightBreakpointListener
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -198,12 +199,12 @@ object SourceMarkerPlugin {
                     initMarker(config)
                     initMapper()
                 }
-                discoverAvailableServices()
+                discoverAvailableServices(project)
             }
         }
     }
 
-    private fun discoverAvailableServices() {
+    private fun discoverAvailableServices(project: Project) {
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
             ServiceDiscoveryOptions().setBackendConfiguration(
@@ -229,14 +230,17 @@ object SourceMarkerPlugin {
                 log.warn("Log count indicator unavailable")
             }
         }
-        EventBusService.getProxy(discovery, ProductionDebuggerService::class.java) {
+        EventBusService.getProxy(discovery, HindsightDebuggerService::class.java) {
             if (it.succeeded()) {
                 log.info("Production debugger available")
-                Tracing.productionDebugger = it.result()
+                Tracing.hindsightDebugger = it.result()
 
-                vertx.deployVerticle(ProductionBreakpointListener())
+                ApplicationManager.getApplication().invokeLater {
+                    BreakpointHitWindowService.getInstance(project).showEventsWindow()
+                }
+                vertx.deployVerticle(HindsightBreakpointListener())
             } else {
-                log.warn("Production debugger unavailable")
+                log.warn("Hindsight debugger unavailable")
             }
         }
     }

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.debugger.BreakpointHit
-import com.sourceplusplus.protocol.artifact.debugger.LiveBreakpoint
+import com.sourceplusplus.protocol.artifact.debugger.HindsightBreakpoint
 import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
 import com.sourceplusplus.protocol.artifact.log.LogCountSummary
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
@@ -82,13 +82,13 @@ object ProtocolMarshaller {
     }
 
     @JvmStatic
-    fun serializeLiveBreakpoint(value: LiveBreakpoint): JsonObject {
+    fun serializeHindsightBreakpoint(value: HindsightBreakpoint): JsonObject {
         return JsonObject(Json.encode(value))
     }
 
     @JvmStatic
-    fun deserializeLiveBreakpoint(value: JsonObject): LiveBreakpoint {
-        return value.mapTo(LiveBreakpoint::class.java)
+    fun deserializeHindsightBreakpoint(value: JsonObject): HindsightBreakpoint {
+        return value.mapTo(HindsightBreakpoint::class.java)
     }
 
     @JvmStatic

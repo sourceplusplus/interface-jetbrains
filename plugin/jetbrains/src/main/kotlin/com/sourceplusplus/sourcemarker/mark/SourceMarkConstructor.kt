@@ -14,6 +14,7 @@ import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.PluginBundle.message
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.SOURCE_RED
 import kotlinx.datetime.Clock
@@ -91,7 +92,7 @@ object SourceMarkConstructor {
     }
 
     private fun attachAdvice(gutterMark: GutterMark, advice: ArtifactAdvice) {
-        gutterMark.configuration.icon = GutterMarkIcons.getGutterMarkIcon(advice)
+        gutterMark.configuration.icon = SourceMarkerIcons.getGutterMarkIcon(advice)
         gutterMark.setVisible(true)
         gutterMark.sourceFileMarker.refresh()
     }
@@ -130,7 +131,7 @@ object SourceMarkConstructor {
                     inlayMark.sourceFileMarker, advice.artifact.lineNumber!!
                 ).get()
                 if (!gutterMark.sourceFileMarker.containsSourceMark(gutterMark)) {
-                    gutterMark.configuration.icon = GutterMarkIcons.activeException
+                    gutterMark.configuration.icon = SourceMarkerIcons.activeException
                     gutterMark.apply()
                 }
             }
