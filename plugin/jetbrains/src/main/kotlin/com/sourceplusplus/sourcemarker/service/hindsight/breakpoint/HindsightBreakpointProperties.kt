@@ -27,8 +27,8 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
     }
 
     @Attribute("location")
-    fun getLocation(): SourceLocation {
-        return location!!
+    fun getLocation(): SourceLocation? {
+        return location
     }
 
     @Attribute("location")

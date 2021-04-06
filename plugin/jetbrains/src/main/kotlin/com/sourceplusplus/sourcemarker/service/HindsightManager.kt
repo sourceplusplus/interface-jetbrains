@@ -65,7 +65,7 @@ class HindsightManager : CoroutineVerticle(),
     }
 
     override fun breakpointAdded(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
-        Tracing.hindsightDebugger!!.addBreakpoint(HindsightBreakpoint(breakpoint.properties.getLocation())) {
+        Tracing.hindsightDebugger!!.addBreakpoint(HindsightBreakpoint(breakpoint.properties.getLocation()!!)) {
             if (it.succeeded()) {
                 breakpoint.properties.setActive(true)
                 breakpoint.properties.setBreakpointId(it.result().id!!)
@@ -88,8 +88,13 @@ class HindsightManager : CoroutineVerticle(),
     }
 
     override fun breakpointRemoved(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
+        if (!breakpoint.properties.getActive()) {
+            log.debug("Ignored removing inactive breakpoint")
+            return
+        }
+
         Tracing.hindsightDebugger!!.removeBreakpoint(
-            HindsightBreakpoint(breakpoint.properties.getLocation(), id = breakpoint.properties.getBreakpointId())
+            HindsightBreakpoint(breakpoint.properties.getLocation()!!, id = breakpoint.properties.getBreakpointId())
         ) {
             if (it.succeeded()) {
                 breakpoint.properties.setActive(false)
@@ -113,7 +118,7 @@ class HindsightManager : CoroutineVerticle(),
 
     override fun breakpointChanged(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
         Tracing.hindsightDebugger!!.removeBreakpoint(
-            HindsightBreakpoint(breakpoint.properties.getLocation(), id = breakpoint.properties.getBreakpointId())
+            HindsightBreakpoint(breakpoint.properties.getLocation()!!, id = breakpoint.properties.getBreakpointId())
         ) {
             if (it.succeeded()) {
                 ApplicationManager.getApplication().runReadAction {
@@ -124,7 +129,7 @@ class HindsightManager : CoroutineVerticle(),
 
                     //todo: only copies location atm
                     breakpoint.properties.setLocation(SourceLocation(qualifiedName, breakpoint.line + 1))
-                    Tracing.hindsightDebugger!!.addBreakpoint(HindsightBreakpoint(breakpoint.properties.getLocation())) {
+                    Tracing.hindsightDebugger!!.addBreakpoint(HindsightBreakpoint(breakpoint.properties.getLocation()!!)) {
                         if (it.succeeded()) {
                             breakpoint.properties.setActive(true)
                             breakpoint.properties.setBreakpointId(it.result().id!!)
