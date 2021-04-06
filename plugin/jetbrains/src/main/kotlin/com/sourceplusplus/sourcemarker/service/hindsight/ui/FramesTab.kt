@@ -11,6 +11,7 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import com.sourceplusplus.sourcemarker.service.hindsight.DebugStackFrameListener
 import com.sourceplusplus.sourcemarker.service.hindsight.StackFrameManager
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import java.awt.BorderLayout
 import javax.swing.JList
 import javax.swing.JPanel
@@ -23,7 +24,10 @@ import javax.swing.event.ListSelectionEvent
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class FramesTab(private val tab: BreakpointHitWindow) : DebugStackFrameListener, Disposable {
+class FramesTab(
+    private val tab: BreakpointHitWindow,
+    private val config: SourceMarkerConfig
+) : DebugStackFrameListener, Disposable {
 
     val component: JPanel = JPanel(BorderLayout())
     private val stackFrameList: JList<JvmStackTraceElement>
@@ -51,7 +55,9 @@ class FramesTab(private val tab: BreakpointHitWindow) : DebugStackFrameListener,
                 b1: Boolean
             ) {
                 this.icon = AllIcons.Debugger.Frame
-                if (frame.method.startsWith("spp.example") && frame.sourceAsLineNumber() != null) { //todo: dynamic
+                if (config.rootSourcePackage != null && frame.method.startsWith(config.rootSourcePackage!!) &&
+                    frame.sourceAsLineNumber() != null
+                ) {
                     this.append(frame.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES)
                 } else {
                     this.append(frame.toString(), SimpleTextAttributes.GRAY_ATTRIBUTES)

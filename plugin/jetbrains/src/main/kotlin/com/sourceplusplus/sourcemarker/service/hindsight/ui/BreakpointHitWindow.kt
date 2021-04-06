@@ -3,8 +3,10 @@ package com.sourceplusplus.sourcemarker.service.hindsight.ui
 import com.intellij.execution.ui.RunnerLayoutUi
 import com.intellij.execution.ui.layout.PlaceInGrid
 import com.intellij.icons.AllIcons
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.content.Content
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
@@ -14,6 +16,8 @@ import com.sourceplusplus.sourcemarker.service.hindsight.HindsightConstants
 import com.sourceplusplus.sourcemarker.service.hindsight.DebugStackFrameListener
 import com.sourceplusplus.sourcemarker.service.hindsight.ExecutionPointManager
 import com.sourceplusplus.sourcemarker.service.hindsight.StackFrameManager
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import io.vertx.core.json.Json
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
 
@@ -50,7 +54,16 @@ class BreakpointHitWindow(project: Project, executionPointHighlighter: Execution
     }
 
     private fun addFramesTab() {
-        val framesTab = FramesTab(this)
+        val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
+        val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
+            Json.decodeValue(
+                projectSettings.getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
+        } else {
+            SourceMarkerConfig()
+        }
+        val framesTab = FramesTab(this, config)
         val content = layoutUi.createContent(
             HindsightConstants.HINDSIGHT_RECORDER_STACK_FRAMES, framesTab.component, "Frames",
             AllIcons.Debugger.Frame, null
