@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class HindsightBreakpoint(
-    val location: SourceLocation? = null,
+    val location: SourceLocation,
     val condition: String? = null,
     val expiresAt: Long? = null,
     val hitLimit: Int = 1,
