@@ -14,6 +14,7 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
 
     private var active: Boolean = false
     private var location: SourceLocation? = null
+    private var breakpointId: String? = null
 
     @Attribute("active")
     fun getActive(): Boolean {
@@ -33,6 +34,16 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
     @Attribute("location")
     fun setLocation(location: SourceLocation) {
         this.location = location
+    }
+
+    @Attribute("breakpointId")
+    fun getBreakpointId(): String {
+        return breakpointId!!
+    }
+
+    @Attribute("breakpointId")
+    fun setBreakpointId(breakpointId: String) {
+        this.breakpointId = breakpointId
     }
 
     override fun getState(): HindsightBreakpointProperties? {
