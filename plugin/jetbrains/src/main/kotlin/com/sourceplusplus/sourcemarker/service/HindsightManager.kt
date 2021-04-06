@@ -116,18 +116,21 @@ class HindsightManager : CoroutineVerticle(),
             HindsightBreakpoint(breakpoint.properties.getLocation(), id = breakpoint.properties.getBreakpointId())
         ) {
             if (it.succeeded()) {
-                //todo: only copies location atm
-                val virtualFile = VirtualFileManager.getInstance().findFileByUrl(breakpoint.fileUrl)!!
-                val psiFile: PsiClassOwner = (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0])
-                    .findFile(virtualFile) as PsiClassOwner?)!!
-                val qualifiedName = psiFile.classes[0].qualifiedName!!
-                breakpoint.properties.setLocation(SourceLocation(qualifiedName, breakpoint.line + 1))
-                Tracing.hindsightDebugger!!.addBreakpoint(HindsightBreakpoint(breakpoint.properties.getLocation())) {
-                    if (it.succeeded()) {
-                        breakpoint.properties.setActive(true)
-                        breakpoint.properties.setBreakpointId(it.result().id!!)
-                    } else {
-                        notifyError(it.cause() as ReplyException)
+                ApplicationManager.getApplication().runReadAction {
+                    val virtualFile = VirtualFileManager.getInstance().findFileByUrl(breakpoint.fileUrl)!!
+                    val psiFile: PsiClassOwner = (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0])
+                        .findFile(virtualFile) as PsiClassOwner?)!!
+                    val qualifiedName = psiFile.classes[0].qualifiedName!!
+
+                    //todo: only copies location atm
+                    breakpoint.properties.setLocation(SourceLocation(qualifiedName, breakpoint.line + 1))
+                    Tracing.hindsightDebugger!!.addBreakpoint(HindsightBreakpoint(breakpoint.properties.getLocation())) {
+                        if (it.succeeded()) {
+                            breakpoint.properties.setActive(true)
+                            breakpoint.properties.setBreakpointId(it.result().id!!)
+                        } else {
+                            notifyError(it.cause() as ReplyException)
+                        }
                     }
                 }
             } else {

@@ -37,8 +37,8 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
     }
 
     @Attribute("breakpointId")
-    fun getBreakpointId(): String {
-        return breakpointId!!
+    fun getBreakpointId(): String? {
+        return breakpointId
     }
 
     @Attribute("breakpointId")
