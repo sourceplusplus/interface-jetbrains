@@ -84,7 +84,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
     }
 
     fun addBreakpointHit(hit: BreakpointHit) {
-        eventsWindow.eventsTab.model.addRow(hit)
+        eventsWindow.eventsTab.model.insertRow(0, hit)
     }
 
     fun showBreakpointHit(hit: BreakpointHit) {
