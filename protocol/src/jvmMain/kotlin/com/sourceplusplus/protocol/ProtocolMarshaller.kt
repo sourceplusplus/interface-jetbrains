@@ -82,22 +82,22 @@ object ProtocolMarshaller {
     }
 
     @JvmStatic
-    fun serializeBreakpoint(value: LiveBreakpoint): JsonObject {
+    fun serializeLiveBreakpoint(value: LiveBreakpoint): JsonObject {
         return JsonObject(Json.encode(value))
     }
 
     @JvmStatic
-    fun deserializeBreakpoint(value: JsonObject): LiveBreakpoint {
+    fun deserializeLiveBreakpoint(value: JsonObject): LiveBreakpoint {
         return value.mapTo(LiveBreakpoint::class.java)
     }
 
     @JvmStatic
-    fun serializeLocation(value: SourceLocation): JsonObject {
+    fun serializeSourceLocation(value: SourceLocation): JsonObject {
         return JsonObject(Json.encode(value))
     }
 
     @JvmStatic
-    fun deserializeLocation(value: JsonObject): SourceLocation {
+    fun deserializeSourceLocation(value: JsonObject): SourceLocation {
         return value.mapTo(SourceLocation::class.java)
     }
 
