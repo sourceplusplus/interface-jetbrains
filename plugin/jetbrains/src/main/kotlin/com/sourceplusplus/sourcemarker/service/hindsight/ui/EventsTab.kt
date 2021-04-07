@@ -28,13 +28,16 @@ class EventsTab : Disposable {
 
     val component: JPanel = JPanel(BorderLayout())
     val model: ListTableModel<BreakpointHit> = ListTableModel<BreakpointHit>(
-        BreakpointHitColumnInfo("Time"),
-        BreakpointHitColumnInfo("Host Name"),
-        BreakpointHitColumnInfo("Application Name"),
-        BreakpointHitColumnInfo("Class Name"),
-        BreakpointHitColumnInfo("Method Name"),
-        BreakpointHitColumnInfo("Line No"),
-        BreakpointHitColumnInfo("Trace Integration")
+        arrayOf(
+            BreakpointHitColumnInfo("Time"),
+            BreakpointHitColumnInfo("Host Name"),
+            BreakpointHitColumnInfo("Application Name"),
+            BreakpointHitColumnInfo("Class Name"),
+            BreakpointHitColumnInfo("Method Name"),
+            BreakpointHitColumnInfo("Line No"),
+            BreakpointHitColumnInfo("Trace Integration")
+        ),
+        ArrayList(), 0, SortOrder.DESCENDING
     )
 
     init {
@@ -46,10 +49,11 @@ class EventsTab : Disposable {
             override fun mousePressed(mouseEvent: MouseEvent) {
                 val point: Point = mouseEvent.point
                 val row = table.rowAtPoint(point)
-                if (mouseEvent.clickCount == 2 && row != -1) {
+                if (mouseEvent.clickCount == 2 && row >= 0) {
                     ApplicationManager.getApplication().invokeLater {
                         val project = ProjectManager.getInstance().openProjects[0]
-                        BreakpointHitWindowService.getInstance(project).showBreakpointHit(model.getItem(row))
+                        BreakpointHitWindowService.getInstance(project)
+                            .showBreakpointHit(model.getItem(table.convertRowIndexToModel(row)))
                     }
                 }
             }

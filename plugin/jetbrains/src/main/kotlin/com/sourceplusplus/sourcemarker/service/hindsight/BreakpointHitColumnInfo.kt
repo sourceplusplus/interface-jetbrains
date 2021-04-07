@@ -43,7 +43,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<BreakpointHit, String>(
     override fun getComparator(): Comparator<BreakpointHit>? {
         return when (name) {
             "Time" -> Comparator { t: BreakpointHit, t2: BreakpointHit ->
-                t2.occurredAt.compareTo(t.occurredAt)
+                t.occurredAt.compareTo(t2.occurredAt) //todo: could add line number too
             }
             "Class Name" -> Comparator { t: BreakpointHit, t2: BreakpointHit ->
                 t.stackTrace.first().qualifiedClassName().compareTo(t2.stackTrace.first().qualifiedClassName())
