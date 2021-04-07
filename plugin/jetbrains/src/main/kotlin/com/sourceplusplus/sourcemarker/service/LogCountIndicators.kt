@@ -68,6 +68,7 @@ class LogCountIndicators : CoroutineVerticle() {
                             }
                         }
                     } else {
+                        //todo: use circuit breaker
                         val replyException = it.cause() as ReplyException
                         if (replyException.failureType() == ReplyFailure.TIMEOUT) {
                             log.warn("Timed out getting log count summary")
