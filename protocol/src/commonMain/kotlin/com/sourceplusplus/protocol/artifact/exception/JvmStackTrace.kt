@@ -14,7 +14,7 @@ class JvmStackTrace(
     var message: String?,
     val elements: MutableList<JvmStackTraceElement>,
     val causedBy: JvmStackTrace? = null
-) {
+) : Iterable<JvmStackTraceElement> {
 
     fun getElements(hideApacheSkywalking: Boolean): List<JvmStackTraceElement> {
         if (hideApacheSkywalking) {
@@ -30,7 +30,7 @@ class JvmStackTrace(
                     var x = i
                     while (x++ < reversedElements.size) {
                         val tillEl = reversedElements[x]
-                        if (tillEl.sourceAsLineNumber != null) {
+                        if (tillEl.sourceAsLineNumber() != null) {
                             //copy over source line number
                             finalElements[finalElements.size - 1] = needsUpdateEl.copy(source = tillEl.source)
                             skipTo = x + 1
@@ -77,6 +77,10 @@ class JvmStackTrace(
             }
             return JvmStackTrace(exceptionClass, message, elements)
         }
+    }
+
+    override fun iterator(): Iterator<JvmStackTraceElement> {
+        return elements.iterator()
     }
 
     override fun toString(): String {

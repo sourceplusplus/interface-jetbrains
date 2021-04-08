@@ -14,6 +14,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
+import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import com.sourceplusplus.protocol.artifact.log.Log
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
 import com.sourceplusplus.protocol.artifact.log.LogResult
@@ -245,7 +246,7 @@ class LogsPage(
                             span {
                                 if (i > 0) br
                                 unsafe { +"&emsp;" }
-                                if (el.sourceAsLineNumber != null) {
+                                if (el.sourceAsLineNumber() != null) {
                                     a {
                                         onClickFunction = {
                                             eb.send(

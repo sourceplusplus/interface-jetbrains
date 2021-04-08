@@ -111,7 +111,7 @@ class EndpointDetector {
             if (ex.failureType() == ReplyFailure.TIMEOUT) {
                 log.debug("Timed out looking for endpoint id for: $endpointName")
             } else {
-                throw ex;
+                throw ex
             }
         }
     }
