@@ -28,14 +28,14 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<BreakpointHit, String>(
 
     override fun getColumnClass(): Class<*> {
         return when (name) {
-            "Trace Integration" -> Icon::class.java
+            "Hindsight Data" -> Icon::class.java
             else -> super.getColumnClass()
         }
     }
 
     override fun getCustomizedRenderer(o: BreakpointHit, renderer: TableCellRenderer): TableCellRenderer {
         return when (name) {
-            "Trace Integration" -> IconTableCellRenderer.create(SourceMarkerIcons.EYE_ICON)
+            "Hindsight Data" -> IconTableCellRenderer.create(SourceMarkerIcons.EYE_ICON)
             else -> super.getCustomizedRenderer(o, renderer)
         }
     }
@@ -63,7 +63,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<BreakpointHit, String>(
             "Class Name" -> item.stackTrace.first().shortQualifiedClassName()
             "Method Name" -> item.stackTrace.first().methodName()
             "Line No" -> item.stackTrace.first().sourceAsLineNumber()!!.toString()
-            "Trace Integration" -> "View Frames/Variables"
+            "Hindsight Data" -> "View Frames/Variables"
             else -> item.toString()
         }
     }

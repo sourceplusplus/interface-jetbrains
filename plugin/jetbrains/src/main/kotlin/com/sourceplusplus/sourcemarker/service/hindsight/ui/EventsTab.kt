@@ -35,7 +35,7 @@ class EventsTab : Disposable {
             BreakpointHitColumnInfo("Class Name"),
             BreakpointHitColumnInfo("Method Name"),
             BreakpointHitColumnInfo("Line No"),
-            BreakpointHitColumnInfo("Trace Integration")
+            BreakpointHitColumnInfo("Hindsight Data")
         ),
         ArrayList(), 0, SortOrder.DESCENDING
     )
