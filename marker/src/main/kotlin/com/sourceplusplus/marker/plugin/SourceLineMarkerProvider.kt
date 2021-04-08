@@ -7,8 +7,8 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment.CENTER
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
-import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
@@ -53,7 +53,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                 }
             }
             return LineMarkerInfo(
-                element,
+                getFirstLeaf(element),
                 element.textRange,
                 gutterMark.configuration.icon,
                 null,
@@ -85,7 +85,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                 }
             }
             return LineMarkerInfo(
-                element,
+                getFirstLeaf(element),
                 element.textRange,
                 gutterMark.configuration.icon,
                 null,
@@ -104,7 +104,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                     }
                 }
                 return LineMarkerInfo(
-                    element,
+                    getFirstLeaf(element),
                     element.textRange,
                     gutterMark.configuration.icon,
                     null,
@@ -128,6 +128,14 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         elements.stream().map { it.containingFile }.distinct().forEach {
             SourceMarker.getSourceFileMarker(it)?.removeInvalidSourceMarks()
         }
+    }
+
+    private fun getFirstLeaf(element: PsiElement): PsiElement {
+        var e = element
+        while (e.children.isNotEmpty()) {
+            e = e.firstChild
+        }
+        return e
     }
 
     /**

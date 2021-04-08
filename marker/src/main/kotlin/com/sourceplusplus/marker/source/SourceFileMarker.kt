@@ -125,6 +125,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     ): Boolean {
         if (overrideFilter || sourceMark.canApply()) {
             log.trace("Applying source mark for artifact: $sourceMark")
+            //todo: pre apply event
             if (sourceMarks.add(sourceMark)) {
                 when (sourceMark) {
                     is ClassGutterMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(

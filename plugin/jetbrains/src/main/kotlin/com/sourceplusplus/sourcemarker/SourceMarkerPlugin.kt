@@ -17,6 +17,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.search.ProjectScope
+import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
@@ -39,9 +40,12 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
+import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
+import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
+import com.sourceplusplus.sourcemarker.service.HindsightManager
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -196,12 +200,12 @@ object SourceMarkerPlugin {
                     initMarker(config)
                     initMapper()
                 }
-                discoverAvailableServices()
+                discoverAvailableServices(project)
             }
         }
     }
 
-    private fun discoverAvailableServices() {
+    private fun discoverAvailableServices(project: Project) {
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
             ServiceDiscoveryOptions().setBackendConfiguration(
@@ -225,6 +229,21 @@ object SourceMarkerPlugin {
                 vertx.deployVerticle(LogCountIndicators())
             } else {
                 log.warn("Log count indicator unavailable")
+            }
+        }
+        EventBusService.getProxy(discovery, HindsightDebuggerService::class.java) {
+            if (it.succeeded()) {
+                log.info("Hindsight debugger available")
+                Tracing.hindsightDebugger = it.result()
+
+                ApplicationManager.getApplication().invokeLater {
+                    BreakpointHitWindowService.getInstance(project).showEventsWindow()
+                }
+                val breakpointListener = HindsightManager()
+                vertx.deployVerticle(breakpointListener)
+                project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
+            } else {
+                log.warn("Hindsight debugger unavailable")
             }
         }
     }

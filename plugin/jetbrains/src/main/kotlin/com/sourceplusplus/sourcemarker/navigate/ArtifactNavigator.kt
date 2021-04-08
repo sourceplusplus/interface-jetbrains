@@ -14,6 +14,8 @@ import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.protocol.artifact.exception.sourceAsFilename
+import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
 import com.sourceplusplus.sourcemarker.search.ArtifactSearch
 import io.vertx.core.Promise
@@ -39,11 +41,11 @@ object ArtifactNavigator {
 
     fun navigateTo(project: Project, element: JvmStackTraceElement) {
         ApplicationManager.getApplication().invokeLater {
-            val foundFiles = getFilesByName(project, element.sourceAsFilename!!, allScope(project))
+            val foundFiles = getFilesByName(project, element.sourceAsFilename()!!, allScope(project))
             if (foundFiles.isNotEmpty()) {
                 val file = foundFiles[0]
                 val document: Document = PsiDocumentManager.getInstance(file.project).getDocument(file)!!
-                val offset = document.getLineStartOffset(element.sourceAsLineNumber!! - 1)
+                val offset = document.getLineStartOffset(element.sourceAsLineNumber()!! - 1)
                 PsiNavigationSupport.getInstance().createNavigatable(project, file.virtualFile, offset).navigate(true)
             }
         }

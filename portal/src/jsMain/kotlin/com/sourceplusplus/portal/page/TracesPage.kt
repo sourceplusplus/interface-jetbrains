@@ -23,6 +23,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateTraceSpan
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
 import com.sourceplusplus.protocol.artifact.trace.*
 import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.*
@@ -432,7 +433,7 @@ class TracesPage(
                     logData.appendChild(document.create.span {
                         if (i > 0) br
                         unsafe { +"&emsp;" }
-                        if (el.sourceAsLineNumber != null) {
+                        if (el.sourceAsLineNumber() != null) {
                             a {
                                 onClickFunction = {
                                     eb.send(
