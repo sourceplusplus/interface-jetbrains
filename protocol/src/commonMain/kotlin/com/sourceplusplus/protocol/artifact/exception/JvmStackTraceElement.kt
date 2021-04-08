@@ -58,5 +58,9 @@ fun JvmStackTraceElement.shortQualifiedClassName(): String {
 }
 
 fun JvmStackTraceElement.methodName(): String {
-    return method.substring(method.lastIndexOf(".") + 1)
+    return if (method.contains("$")) {
+        method.substring(method.lastIndexOf(".") + 1).substringBefore("$")
+    } else {
+        method.substring(method.lastIndexOf(".") + 1)
+    }
 }
