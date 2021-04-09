@@ -1,5 +1,5 @@
 plugins {
-    id("com.avast.gradle.docker-compose") version "0.14.2"
+    id("com.avast.gradle.docker-compose") version "0.14.3"
 
     val kotlinVersion = "1.4.30"
     kotlin("jvm") version kotlinVersion apply false
