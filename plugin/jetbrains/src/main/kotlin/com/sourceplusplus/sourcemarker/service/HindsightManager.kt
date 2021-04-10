@@ -12,14 +12,14 @@ import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.sourceplusplus.protocol.ProtocolErrors
-import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
+import com.sourceplusplus.protocol.SourceMarkerServices.Provide
 import com.sourceplusplus.protocol.artifact.debugger.BreakpointHit
 import com.sourceplusplus.protocol.artifact.debugger.HindsightBreakpoint
 import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointProperties
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
@@ -45,7 +45,7 @@ class HindsightManager : CoroutineVerticle(),
 
     override suspend fun start() {
         log.debug("HindsightManager started")
-        vertx.eventBus().consumer<JsonObject>("local." + SourceMarkerServices.Provider.Tracing.Event.BREAKPOINT_HIT) {
+        vertx.eventBus().consumer<JsonObject>("local." + Provide.Tracing.HINDSIGHT_BREAKPOINT_SUBSCRIBER) {
             log.info("Received breakpoint hit")
 
             val bpHit = Json.decodeValue(it.body().toString(), BreakpointHit::class.java)
@@ -58,7 +58,7 @@ class HindsightManager : CoroutineVerticle(),
         //register listener
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            SourceMarkerServices.Provider.Tracing.Event.BREAKPOINT_HIT,
+            Provide.Tracing.HINDSIGHT_BREAKPOINT_SUBSCRIBER,
             JsonObject(),
             TCPServiceDiscoveryBackend.socket
         )
