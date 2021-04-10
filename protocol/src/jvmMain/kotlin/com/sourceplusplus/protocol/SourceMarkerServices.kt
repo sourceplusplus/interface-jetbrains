@@ -1,8 +1,11 @@
 package com.sourceplusplus.protocol
 
+import com.sourceplusplus.protocol.SourceMarkerServices.Namespace.LOGGING
+import com.sourceplusplus.protocol.SourceMarkerServices.Namespace.TRACING
+import com.sourceplusplus.protocol.SourceMarkerServices.Utilize.Tracing.HINDSIGHT_DEBUGGER
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
-import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
+import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 
 /**
  * todo: description.
@@ -11,9 +14,6 @@ import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkerServices {
-
-    const val TRACING = "sm.tracing.service"
-    const val LOGGING = "sm.logging.service"
 
     object Instance {
         object Tracing {
@@ -26,18 +26,26 @@ object SourceMarkerServices {
         }
     }
 
-    object Provider {
+    object Namespace {
+        const val TRACING = "sm.tracing"
+        const val LOGGING = "sm.logging"
+        const val ALERTING = "sm.alerting"
+    }
+
+    object Utilize {
         object Tracing {
             const val LOCAL_TRACING = "$TRACING.local-tracing"
             const val HINDSIGHT_DEBUGGER = "$TRACING.hindsight-debugger"
-
-            object Event {
-                const val BREAKPOINT_HIT = "$TRACING.event.breakpoint-hit"
-            }
         }
 
         object Logging {
             const val LOG_COUNT_INDICATOR = "$LOGGING.log-count-indicator"
+        }
+    }
+
+    object Provide {
+        object Tracing {
+            const val HINDSIGHT_BREAKPOINT_SUBSCRIBER = "$HINDSIGHT_DEBUGGER.hindsight-breakpoint-subscriber"
         }
     }
 }

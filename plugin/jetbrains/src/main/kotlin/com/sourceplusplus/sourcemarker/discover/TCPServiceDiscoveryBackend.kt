@@ -1,18 +1,14 @@
 package com.sourceplusplus.sourcemarker.discover
 
-import com.sourceplusplus.protocol.SourceMarkerServices.Provider.Logging
-import com.sourceplusplus.protocol.SourceMarkerServices.Provider.Tracing
+import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import io.vertx.core.*
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
 import io.vertx.core.http.impl.headers.HeadersMultiMap
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
-import io.vertx.core.net.NetClientOptions
 import io.vertx.core.net.NetSocket
-import io.vertx.core.net.PemTrustOptions
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
@@ -82,9 +78,9 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             socket.handler(parser)
 
             setupHandler(vertx, "get-records")
-            setupHandler(vertx, Tracing.LOCAL_TRACING)
-            setupHandler(vertx, Tracing.HINDSIGHT_DEBUGGER)
-            setupHandler(vertx, Logging.LOG_COUNT_INDICATOR)
+            setupHandler(vertx, Utilize.Tracing.LOCAL_TRACING)
+            setupHandler(vertx, Utilize.Tracing.HINDSIGHT_DEBUGGER)
+            setupHandler(vertx, Utilize.Logging.LOG_COUNT_INDICATOR)
 
             setupPromise.complete()
         }
