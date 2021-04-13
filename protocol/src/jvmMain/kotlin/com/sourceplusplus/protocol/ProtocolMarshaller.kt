@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.debugger.BreakpointHit
+import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
 import com.sourceplusplus.protocol.artifact.debugger.HindsightBreakpoint
 import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
 import com.sourceplusplus.protocol.artifact.log.LogCountSummary

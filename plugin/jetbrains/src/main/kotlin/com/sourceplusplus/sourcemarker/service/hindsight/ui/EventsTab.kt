@@ -7,7 +7,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
-import com.sourceplusplus.protocol.artifact.debugger.BreakpointHit
+import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitColumnInfo
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
