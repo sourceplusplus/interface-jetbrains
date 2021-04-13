@@ -2,7 +2,7 @@ package com.sourceplusplus.sourcemarker.service.hindsight
 
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.table.IconTableCellRenderer
-import com.sourceplusplus.protocol.artifact.debugger.BreakpointHit
+import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
 import com.sourceplusplus.protocol.artifact.exception.methodName
 import com.sourceplusplus.protocol.artifact.exception.qualifiedClassName
 import com.sourceplusplus.protocol.artifact.exception.shortQualifiedClassName

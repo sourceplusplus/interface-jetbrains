@@ -13,7 +13,7 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import com.sourceplusplus.protocol.artifact.debugger.BreakpointHit
+import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
 import com.sourceplusplus.sourcemarker.service.hindsight.ui.BreakpointHitWindow
 import com.sourceplusplus.sourcemarker.service.hindsight.ui.EventsWindow
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
