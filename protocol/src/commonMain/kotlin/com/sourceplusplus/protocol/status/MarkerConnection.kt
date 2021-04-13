@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class MarkerConnection(
-    var pluginId: String? = null,
-    var connectionTime: Long = 0,
+    var markerId: String,
+    var connectionTime: Long,
     var hardwareId: String? = null
 )
