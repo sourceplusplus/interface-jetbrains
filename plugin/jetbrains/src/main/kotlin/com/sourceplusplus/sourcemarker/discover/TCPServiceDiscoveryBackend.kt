@@ -1,6 +1,8 @@
 package com.sourceplusplus.sourcemarker.discover
 
+import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
+import com.sourceplusplus.protocol.status.MarkerConnection
 import io.vertx.core.*
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
@@ -19,8 +21,14 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.net.NetworkInterface
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.experimental.and
+import kotlin.experimental.or
 
 /**
  * todo: description.
@@ -77,10 +85,44 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             }
             socket.handler(parser)
 
-            setupHandler(vertx, "get-records")
-            setupHandler(vertx, Utilize.Tracing.LOCAL_TRACING)
-            setupHandler(vertx, Utilize.Tracing.HINDSIGHT_DEBUGGER)
-            setupHandler(vertx, Utilize.Logging.LOG_COUNT_INDICATOR)
+            vertx.executeBlocking<Any> {
+                var hardwareId: String? = null
+                try {
+                    //optional mac-address identification
+                    val sb = StringBuilder()
+                    val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+                    while (networkInterfaces.hasMoreElements()) {
+                        val ni = networkInterfaces.nextElement()
+                        val hardwareAddress = ni.hardwareAddress
+                        if (hardwareAddress != null) {
+                            val hexadecimalFormat =
+                                arrayOfNulls<String>(hardwareAddress.size)
+                            for (i in hardwareAddress.indices) {
+                                hexadecimalFormat[i] = String.format("%02X", hardwareAddress[i])
+                            }
+                            sb.append(java.lang.String.join("-", *hexadecimalFormat))
+                        }
+                    }
+                    hardwareId = md5(sb.toString())
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
+
+                //send marker connected status
+                val pc = MarkerConnection(
+                    UUID.randomUUID().toString(), System.currentTimeMillis(), hardwareId
+                )
+                FrameHelper.sendFrame(
+                    BridgeEventType.PUBLISH.name.toLowerCase(),
+                    SourceMarkerServices.Status.MARKER_CONNECTED,
+                    JsonObject.mapFrom(pc), socket
+                )
+
+                setupHandler(vertx, "get-records")
+                setupHandler(vertx, Utilize.Tracing.LOCAL_TRACING)
+                setupHandler(vertx, Utilize.Tracing.HINDSIGHT_DEBUGGER)
+                setupHandler(vertx, Utilize.Logging.LOG_COUNT_INDICATOR)
+            }
 
             setupPromise.complete()
         }
@@ -167,4 +209,18 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     }
 
     override fun name() = "tcp-service-discovery"
+
+    private fun md5(md5: String): String? {
+        try {
+            val md = MessageDigest.getInstance("MD5")
+            val array = md.digest(md5.toByteArray(StandardCharsets.UTF_8))
+            val sb = java.lang.StringBuilder()
+            for (b in array) {
+                sb.append(Integer.toHexString((b and 0xFF.toByte() or 0x100.toByte()).toInt()), 1, 3)
+            }
+            return sb.toString()
+        } catch (ignored: NoSuchAlgorithmException) {
+        }
+        return null
+    }
 }

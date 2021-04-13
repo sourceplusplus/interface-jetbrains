@@ -32,6 +32,10 @@ object SourceMarkerServices {
         const val ALERTING = "sm.alerting"
     }
 
+    object Status {
+        const val MARKER_CONNECTED = "sm.status.marker-connected"
+    }
+
     object Utilize {
         object Tracing {
             const val LOCAL_TRACING = "$TRACING.local-tracing"
