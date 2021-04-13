@@ -14,7 +14,6 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.sourceplusplus.protocol.ProtocolErrors
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
-import com.sourceplusplus.protocol.artifact.debugger.BreakpointHit
 import com.sourceplusplus.protocol.artifact.debugger.HindsightBreakpoint
 import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
 import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
