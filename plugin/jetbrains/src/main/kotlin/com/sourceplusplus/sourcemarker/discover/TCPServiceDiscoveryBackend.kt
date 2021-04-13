@@ -122,9 +122,9 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 setupHandler(vertx, Utilize.Tracing.LOCAL_TRACING)
                 setupHandler(vertx, Utilize.Tracing.HINDSIGHT_DEBUGGER)
                 setupHandler(vertx, Utilize.Logging.LOG_COUNT_INDICATOR)
-            }
 
-            setupPromise.complete()
+                setupPromise.complete()
+            }
         }
     }
 
