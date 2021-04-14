@@ -1,5 +1,8 @@
 package com.sourceplusplus.sourcemarker.service.hindsight
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.ServiceManager
@@ -12,11 +15,16 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
+import com.intellij.xdebugger.XDebuggerManager
+import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
+import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointRemoved
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointProperties
 import com.sourceplusplus.sourcemarker.service.hindsight.ui.BreakpointHitWindow
 import com.sourceplusplus.sourcemarker.service.hindsight.ui.EventsWindow
-import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import org.slf4j.LoggerFactory
 
 /**
  * todo: description.
@@ -28,6 +36,8 @@ import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 class BreakpointHitWindowService(private val project: Project) : Disposable {
 
     companion object {
+        private val log = LoggerFactory.getLogger(BreakpointHitWindowService::class.java)
+
         fun getInstance(project: Project): BreakpointHitWindowService {
             return ServiceManager.getService(project, BreakpointHitWindowService::class.java)
         }
@@ -81,6 +91,37 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         content.setDisposer(eventsWindow)
         content.isCloseable = false
         contentManager!!.addContent(content)
+    }
+
+    fun processRemoveBreakpoint(bpr: BreakpointRemoved) {
+        XDebuggerManager.getInstance(project).breakpointManager.allBreakpoints.forEach {
+            if (it.type.id == "hindsight-breakpoint") {
+                val props = (it.properties as HindsightBreakpointProperties)
+                if (bpr.breakpointId == props.getBreakpointId()) {
+                    props.setFinished(true)
+                    props.setActive(false)
+
+                    if (bpr.cause == null) {
+                        XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
+                            it as XLineBreakpoint<*>, SourceMarkerIcons.GREEN_EYE_ICON, null
+                        )
+                    } else if (bpr.cause != null) {
+                        XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
+                            it as XLineBreakpoint<*>, SourceMarkerIcons.EYE_SLASH_ICON, null
+                        )
+
+                        log.warn("Breakpoint failed: " + bpr.cause!!.message)
+                        Notifications.Bus.notify(
+                            Notification(
+                                "SourceMarker", "Hindsight Breakpoint Failed",
+                                "Breakpoint failed: " + bpr.cause!!.message,
+                                NotificationType.ERROR
+                            )
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun addBreakpointHit(hit: BreakpointHit) {

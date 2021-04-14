@@ -1,14 +1,18 @@
 package com.sourceplusplus.sourcemarker.service
 
+import com.intellij.debugger.engine.evaluation.TextWithImportsImpl
+import com.intellij.debugger.impl.DebuggerUtilsEx
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiManager
 import com.intellij.xdebugger.XDebuggerManager
+import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.sourceplusplus.protocol.ProtocolErrors
@@ -16,9 +20,13 @@ import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
 import com.sourceplusplus.protocol.artifact.debugger.HindsightBreakpoint
 import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
+import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointEvent
+import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointEventType
 import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
+import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointRemoved
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointConditionParser
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointProperties
 import io.vertx.core.eventbus.ReplyException
@@ -36,22 +44,34 @@ import org.slf4j.LoggerFactory
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class HindsightManager : CoroutineVerticle(),
+class HindsightManager(private val project: Project) : CoroutineVerticle(),
     XBreakpointListener<XLineBreakpoint<HindsightBreakpointProperties>> {
 
     companion object {
-        private val log = LoggerFactory.getLogger(LogCountIndicators::class.java)
+        private val log = LoggerFactory.getLogger(HindsightManager::class.java)
     }
 
     override suspend fun start() {
         log.debug("HindsightManager started")
         vertx.eventBus().consumer<JsonObject>("local." + Provide.Tracing.HINDSIGHT_BREAKPOINT_SUBSCRIBER) {
-            log.info("Received breakpoint hit")
+            log.info("Received breakpoint event")
 
-            val bpHit = Json.decodeValue(it.body().toString(), BreakpointHit::class.java)
-            ApplicationManager.getApplication().invokeLater {
-                val project = ProjectManager.getInstance().openProjects[0]
-                BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
+            val bpEvent = Json.decodeValue(it.body().toString(), BreakpointEvent::class.java)
+            when (bpEvent.eventType) {
+                BreakpointEventType.HIT -> {
+                    val bpHit = Json.decodeValue(bpEvent.data, BreakpointHit::class.java)
+                    ApplicationManager.getApplication().invokeLater {
+                        val project = ProjectManager.getInstance().openProjects[0]
+                        BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
+                    }
+                }
+                BreakpointEventType.REMOVED -> {
+                    val bpRemoved = Json.decodeValue(bpEvent.data, BreakpointRemoved::class.java)
+                    ApplicationManager.getApplication().invokeLater {
+                        val project = ProjectManager.getInstance().openProjects[0]
+                        BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
+                    }
+                }
             }
         }
 
@@ -65,12 +85,33 @@ class HindsightManager : CoroutineVerticle(),
     }
 
     override fun breakpointAdded(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
-        Tracing.hindsightDebugger!!.addBreakpoint(HindsightBreakpoint(breakpoint.properties.getLocation()!!)) {
+        if (breakpoint.type.id != "hindsight-breakpoint") {
+            return
+        }
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl(breakpoint.fileUrl)!!
+
+        if (breakpoint.conditionExpression != null) {
+            val context = XDebuggerUtil.getInstance().findContextElement(
+                virtualFile, breakpoint.sourcePosition!!.offset, project, false
+            )
+            val text = TextWithImportsImpl.fromXExpression(breakpoint.conditionExpression)
+            val codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context)
+                .createCodeFragment(text, context, project)
+            val hindsightCondition = BreakpointConditionParser.toHindsightConditional(codeFragment)
+            breakpoint.properties.setHindsightCondition(hindsightCondition)
+        }
+
+        Tracing.hindsightDebugger!!.addBreakpoint(
+            HindsightBreakpoint(
+                breakpoint.properties.getLocation()!!,
+                condition = breakpoint.properties.getHindsightCondition()
+            )
+        ) {
             if (it.succeeded()) {
+                breakpoint.properties.setFinished(false)
                 breakpoint.properties.setActive(true)
                 breakpoint.properties.setBreakpointId(it.result().id!!)
 
-                val project = ProjectManager.getInstance().openProjects[0]
                 XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
                     breakpoint, SourceMarkerIcons.EYE_ICON, null
                 )
@@ -78,8 +119,8 @@ class HindsightManager : CoroutineVerticle(),
                 log.error("Failed to add hindsight breakpoint", it.cause())
                 notifyError(it.cause() as ReplyException)
 
+                breakpoint.properties.setFinished(false)
                 breakpoint.properties.setActive(false)
-                val project = ProjectManager.getInstance().openProjects[0]
                 XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
                     breakpoint, SourceMarkerIcons.EYE_SLASH_ICON, null
                 )
@@ -88,15 +129,21 @@ class HindsightManager : CoroutineVerticle(),
     }
 
     override fun breakpointRemoved(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
-        if (!breakpoint.properties.getActive()) {
+        if (breakpoint.type.id != "hindsight-breakpoint") {
+            return
+        } else if (!breakpoint.properties.getActive()) {
             log.debug("Ignored removing inactive breakpoint")
             return
         }
 
         Tracing.hindsightDebugger!!.removeBreakpoint(
-            HindsightBreakpoint(breakpoint.properties.getLocation()!!, id = breakpoint.properties.getBreakpointId())
+            HindsightBreakpoint(
+                breakpoint.properties.getLocation()!!,
+                id = breakpoint.properties.getBreakpointId()
+            )
         ) {
             if (it.succeeded()) {
+                breakpoint.properties.setFinished(false)
                 breakpoint.properties.setActive(false)
 
                 val project = ProjectManager.getInstance().openProjects[0]
@@ -107,6 +154,7 @@ class HindsightManager : CoroutineVerticle(),
                 log.error("Failed to add hindsight breakpoint", it.cause())
                 notifyError(it.cause() as ReplyException)
 
+                breakpoint.properties.setFinished(false)
                 breakpoint.properties.setActive(false)
                 val project = ProjectManager.getInstance().openProjects[0]
                 XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
@@ -117,22 +165,51 @@ class HindsightManager : CoroutineVerticle(),
     }
 
     override fun breakpointChanged(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
+        if (breakpoint.type.id != "hindsight-breakpoint") {
+            return
+        }
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl(breakpoint.fileUrl)!!
+
+        if (breakpoint.conditionExpression != null) {
+            val context = XDebuggerUtil.getInstance().findContextElement(
+                virtualFile, breakpoint.sourcePosition!!.offset, project, false
+            )
+            val text = TextWithImportsImpl.fromXExpression(breakpoint.conditionExpression)
+            val codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context)
+                .createCodeFragment(text, context, project)
+            val hindsightCondition = BreakpointConditionParser.toHindsightConditional(codeFragment)
+            breakpoint.properties.setHindsightCondition(hindsightCondition)
+        }
+
         Tracing.hindsightDebugger!!.removeBreakpoint(
-            HindsightBreakpoint(breakpoint.properties.getLocation()!!, id = breakpoint.properties.getBreakpointId())
+            HindsightBreakpoint(
+                breakpoint.properties.getLocation()!!,
+                id = breakpoint.properties.getBreakpointId()
+            )
         ) {
             if (it.succeeded()) {
                 ApplicationManager.getApplication().runReadAction {
-                    val virtualFile = VirtualFileManager.getInstance().findFileByUrl(breakpoint.fileUrl)!!
                     val psiFile: PsiClassOwner = (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0])
                         .findFile(virtualFile) as PsiClassOwner?)!!
                     val qualifiedName = psiFile.classes[0].qualifiedName!!
 
-                    //todo: only copies location atm
+                    //only need to copy over location
                     breakpoint.properties.setLocation(SourceLocation(qualifiedName, breakpoint.line + 1))
-                    Tracing.hindsightDebugger!!.addBreakpoint(HindsightBreakpoint(breakpoint.properties.getLocation()!!)) {
+
+                    Tracing.hindsightDebugger!!.addBreakpoint(
+                        HindsightBreakpoint(
+                            breakpoint.properties.getLocation()!!,
+                            condition = breakpoint.properties.getHindsightCondition()
+                        )
+                    ) {
                         if (it.succeeded()) {
+                            breakpoint.properties.setFinished(false)
                             breakpoint.properties.setActive(true)
                             breakpoint.properties.setBreakpointId(it.result().id!!)
+
+                            XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
+                                breakpoint, SourceMarkerIcons.EYE_ICON, null
+                            )
                         } else {
                             notifyError(it.cause() as ReplyException)
                         }

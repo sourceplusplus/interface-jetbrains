@@ -39,13 +39,13 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
-import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
+import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
-import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.service.HindsightManager
+import com.sourceplusplus.sourcemarker.service.LogCountIndicators
+import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -239,7 +239,7 @@ object SourceMarkerPlugin {
                 ApplicationManager.getApplication().invokeLater {
                     BreakpointHitWindowService.getInstance(project).showEventsWindow()
                 }
-                val breakpointListener = HindsightManager()
+                val breakpointListener = HindsightManager(project)
                 vertx.deployVerticle(breakpointListener)
                 project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
             } else {
