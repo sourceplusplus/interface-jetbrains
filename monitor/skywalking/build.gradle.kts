@@ -8,7 +8,7 @@ val vertxVersion = ext.get("vertxVersion")
 dependencies {
     implementation(project(":protocol"))
     implementation("org.slf4j:slf4j-api:1.7.30")
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.5")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.6")
     implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.5")
     api("com.apollographql.apollo:apollo-api:2.5.5")
 
