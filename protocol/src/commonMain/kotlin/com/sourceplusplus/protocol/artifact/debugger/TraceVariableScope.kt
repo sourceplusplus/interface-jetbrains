@@ -1,6 +1,5 @@
 package com.sourceplusplus.protocol.artifact.debugger
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,9 +9,8 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class TraceVariable(
-    val name: String,
-    @Contextual val value: Any,
-    val lineNumber: Int = -1,
-    val scope: TraceVariableScope? = null
-)
+enum class TraceVariableScope {
+    LOCAL_VARIABLE,
+    INSTANCE_FIELD,
+    STATIC_FIELD
+}
