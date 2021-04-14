@@ -25,6 +25,7 @@ object SourceMarkerIcons {
     val EYE_ICON = IconLoader.getIcon("/icons/eye.svg")
     val GREY_EYE_ICON = IconLoader.getIcon("/icons/eye-grey.svg")
     val GREEN_EYE_ICON = IconLoader.getIcon("/icons/eye-green.svg")
+    val YELLOW_EYE_ICON = IconLoader.getIcon("/icons/eye-yellow.svg")
     val EYE_SLASH_ICON = IconLoader.getIcon("/icons/eye-slash.svg")
 
     fun getGutterMarkIcon(advice: ArtifactAdvice): Icon? {

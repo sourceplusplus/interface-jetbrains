@@ -6,6 +6,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -13,8 +14,10 @@ import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiManager
 import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.XDebuggerUtil
+import com.intellij.xdebugger.breakpoints.SuspendPolicy
 import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
+import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
 import com.sourceplusplus.protocol.ProtocolErrors
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
@@ -26,6 +29,7 @@ import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
 import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointRemoved
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointTriggerListener
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointConditionParser
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointProperties
@@ -37,6 +41,7 @@ import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.slf4j.LoggerFactory
+import javax.swing.Icon
 
 /**
  * todo: description.
@@ -53,6 +58,8 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
 
     override suspend fun start() {
         log.debug("HindsightManager started")
+        EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
+
         vertx.eventBus().consumer<JsonObject>("local." + Provide.Tracing.HINDSIGHT_BREAKPOINT_SUBSCRIBER) {
             log.info("Received breakpoint event")
 
@@ -87,6 +94,12 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
     override fun breakpointAdded(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
         if (breakpoint.type.id != "hindsight-breakpoint") {
             return
+        } else if (!breakpoint.properties.getSuspend()) {
+            log.debug("Ignoring un-suspended breakpoint")
+            val setIconMethod = XBreakpointBase::class.java.getDeclaredMethod("setIcon", Icon::class.java)
+            setIconMethod.isAccessible = true
+            setIconMethod.invoke(breakpoint, SourceMarkerIcons.YELLOW_EYE_ICON)
+            return //don't publish breakpoint till it suspends
         }
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl(breakpoint.fileUrl)!!
 
@@ -131,8 +144,8 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
     override fun breakpointRemoved(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
         if (breakpoint.type.id != "hindsight-breakpoint") {
             return
-        } else if (!breakpoint.properties.getActive()) {
-            log.debug("Ignored removing inactive breakpoint")
+        } else if (breakpoint.properties.getBreakpointId() == null) {
+            log.debug("Ignored removing un-published breakpoint")
             return
         }
 
@@ -146,10 +159,16 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
                 breakpoint.properties.setFinished(false)
                 breakpoint.properties.setActive(false)
 
-                val project = ProjectManager.getInstance().openProjects[0]
-                XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                    breakpoint, SourceMarkerIcons.EYE_SLASH_ICON, null
-                )
+                if (breakpoint.properties.getSuspend()) {
+                    val project = ProjectManager.getInstance().openProjects[0]
+                    XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
+                        breakpoint, SourceMarkerIcons.EYE_SLASH_ICON, null
+                    )
+                } else {
+                    val setIconMethod = XBreakpointBase::class.java.getDeclaredMethod("setIcon", Icon::class.java)
+                    setIconMethod.isAccessible = true
+                    setIconMethod.invoke(breakpoint, SourceMarkerIcons.YELLOW_EYE_ICON)
+                }
             } else {
                 log.error("Failed to add hindsight breakpoint", it.cause())
                 notifyError(it.cause() as ReplyException)
@@ -166,6 +185,23 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
 
     override fun breakpointChanged(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
         if (breakpoint.type.id != "hindsight-breakpoint") {
+            return
+        } else if (!breakpoint.properties.getSuspend() && breakpoint.properties.getBreakpointId() == null
+            && breakpoint.suspendPolicy == SuspendPolicy.NONE
+        ) {
+            log.debug("Ignored changing un-published breakpoint")
+            val setIconMethod = XBreakpointBase::class.java.getDeclaredMethod("setIcon", Icon::class.java)
+            setIconMethod.isAccessible = true
+            setIconMethod.invoke(breakpoint, SourceMarkerIcons.YELLOW_EYE_ICON)
+            return
+        } else if (breakpoint.properties.getBreakpointId() == null) {
+            log.debug("Breakpoint changed from un-suspended to suspended")
+            breakpoint.properties.setSuspend(true)
+            breakpointAdded(breakpoint) //redirect changed event to added event
+            return
+        } else if (breakpoint.suspendPolicy == SuspendPolicy.NONE) {
+            breakpoint.properties.setSuspend(false)
+            breakpointRemoved(breakpoint)
             return
         }
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl(breakpoint.fileUrl)!!

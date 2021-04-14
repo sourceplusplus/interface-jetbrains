@@ -23,6 +23,7 @@ import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointTriggerListener
 import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider
 import org.jetbrains.java.debugger.breakpoints.JavaBreakpointFiltersPanel
 import javax.swing.Icon
@@ -65,10 +66,11 @@ class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointPropertie
 
     override fun createBreakpointProperties(file: VirtualFile, line: Int): HindsightBreakpointProperties {
         val props = HindsightBreakpointProperties()
-        val psiFile: PsiClassOwner =
-            (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0]).findFile(file) as PsiClassOwner?)!!
+        val psiFile =
+            (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0]).findFile(file) as PsiClassOwner)
         val qualifiedName = psiFile.classes[0].qualifiedName!!
         props.setLocation(SourceLocation(qualifiedName, line + 1))
+        props.setSuspend(!BreakpointTriggerListener.shiftHeld)
         return props
     }
 
