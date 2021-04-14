@@ -92,12 +92,11 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         val ni = networkInterfaces.nextElement()
                         val hardwareAddress = ni.hardwareAddress
                         if (hardwareAddress != null) {
-                            val hexadecimalFormat =
-                                arrayOfNulls<String>(hardwareAddress.size)
+                            val hexadecimalFormat = mutableListOf<String>()
                             for (i in hardwareAddress.indices) {
-                                hexadecimalFormat[i] = String.format("%02X", hardwareAddress[i])
+                                hexadecimalFormat.add(String.format(Locale.ENGLISH, "%02X", hardwareAddress[i]))
                             }
-                            sb.append(java.lang.String.join("-", *hexadecimalFormat))
+                            sb.append(java.lang.String.join("-", hexadecimalFormat))
                         }
                     }
                     hardwareId = md5(sb.toString())
