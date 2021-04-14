@@ -21,14 +21,11 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.math.BigInteger
 import java.net.NetworkInterface
-import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.experimental.and
-import kotlin.experimental.or
 
 /**
  * todo: description.
@@ -210,17 +207,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
     override fun name() = "tcp-service-discovery"
 
-    private fun md5(md5: String): String? {
-        try {
-            val md = MessageDigest.getInstance("MD5")
-            val array = md.digest(md5.toByteArray(StandardCharsets.UTF_8))
-            val sb = java.lang.StringBuilder()
-            for (b in array) {
-                sb.append(Integer.toHexString((b and 0xFF.toByte() or 0x100.toByte()).toInt()), 1, 3)
-            }
-            return sb.toString()
-        } catch (ignored: NoSuchAlgorithmException) {
-        }
-        return null
+    private fun md5(input: String): String {
+        val md = MessageDigest.getInstance("MD5")
+        return BigInteger(1, md.digest(input.toByteArray())).toString(16).padStart(32, '0')
     }
 }

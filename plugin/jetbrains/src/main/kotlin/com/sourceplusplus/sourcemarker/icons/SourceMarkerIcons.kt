@@ -24,6 +24,7 @@ object SourceMarkerIcons {
     val activeException = IconLoader.getIcon("/icons/map-marker-exclamation.svg")
     val EYE_ICON = IconLoader.getIcon("/icons/eye.svg")
     val GREY_EYE_ICON = IconLoader.getIcon("/icons/eye-grey.svg")
+    val GREEN_EYE_ICON = IconLoader.getIcon("/icons/eye-green.svg")
     val EYE_SLASH_ICON = IconLoader.getIcon("/icons/eye-slash.svg")
 
     fun getGutterMarkIcon(advice: ArtifactAdvice): Icon? {

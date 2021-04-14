@@ -16,10 +16,15 @@ import com.intellij.util.DocumentUtil
 import com.intellij.util.PairFunction
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.breakpoints.XBreakpoint
+import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.breakpoints.XLineBreakpointType
+import com.intellij.xdebugger.breakpoints.ui.XBreakpointCustomPropertiesPanel
+import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
 import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider
+import org.jetbrains.java.debugger.breakpoints.JavaBreakpointFiltersPanel
 import javax.swing.Icon
 
 /**
@@ -31,6 +36,17 @@ import javax.swing.Icon
 class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointProperties>(
     "hindsight-breakpoint", "Hindsight Breakpoint"
 ), JavaBreakpointType<HindsightBreakpointProperties> {
+
+    override fun createCustomRightPropertiesPanel(project: Project):
+            XBreakpointCustomPropertiesPanel<XLineBreakpoint<HindsightBreakpointProperties>> {
+        return JavaBreakpointFiltersPanel(project)
+    }
+
+    override fun getEditorsProvider(
+        breakpoint: XLineBreakpoint<HindsightBreakpointProperties>, project: Project
+    ): XDebuggerEditorsProvider {
+        return JavaDebuggerEditorsProvider()
+    }
 
     override fun canPutAt(file: VirtualFile, line: Int, project: Project): Boolean {
         if (Tracing.hindsightDebugger == null) return false

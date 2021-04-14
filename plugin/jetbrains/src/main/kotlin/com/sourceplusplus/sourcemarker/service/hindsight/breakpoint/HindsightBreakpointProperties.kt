@@ -13,8 +13,10 @@ import org.jetbrains.java.debugger.breakpoints.properties.JavaBreakpointProperti
 class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpointProperties>() {
 
     private var active: Boolean = false
+    private var finished: Boolean = false
     private var location: SourceLocation? = null
     private var breakpointId: String? = null
+    private var hindsightCondition: String? = null
 
     @Attribute("active")
     fun getActive(): Boolean {
@@ -24,6 +26,16 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
     @Attribute("active")
     fun setActive(active: Boolean) {
         this.active = active
+    }
+
+    @Attribute("finished")
+    fun getFinished(): Boolean {
+        return finished
+    }
+
+    @Attribute("finished")
+    fun setFinished(finished: Boolean) {
+        this.finished = finished
     }
 
     @Attribute("location")
@@ -44,6 +56,16 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
     @Attribute("breakpointId")
     fun setBreakpointId(breakpointId: String) {
         this.breakpointId = breakpointId
+    }
+
+    @Attribute("hindsightCondition")
+    fun getHindsightCondition(): String? {
+        return hindsightCondition
+    }
+
+    @Attribute("hindsightCondition")
+    fun setHindsightCondition(hindsightCondition: String) {
+        this.hindsightCondition = hindsightCondition
     }
 
     override fun getState(): HindsightBreakpointProperties? {

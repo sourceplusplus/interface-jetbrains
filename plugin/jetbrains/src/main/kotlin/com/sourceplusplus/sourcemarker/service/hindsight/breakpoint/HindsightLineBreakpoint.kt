@@ -45,10 +45,10 @@ class HindsightLineBreakpoint(project: Project, xBreakpoint: XBreakpoint<Hindsig
 
     private fun determineIcon(): Icon {
         val properties = xBreakpoint.properties
-        return if (properties.getActive()) {
-            SourceMarkerIcons.EYE_ICON
-        } else {
-            SourceMarkerIcons.GREY_EYE_ICON
+        return when {
+            properties.getFinished() -> SourceMarkerIcons.GREEN_EYE_ICON
+            properties.getActive() -> SourceMarkerIcons.EYE_ICON
+            else -> SourceMarkerIcons.GREY_EYE_ICON
         }
     }
 }
