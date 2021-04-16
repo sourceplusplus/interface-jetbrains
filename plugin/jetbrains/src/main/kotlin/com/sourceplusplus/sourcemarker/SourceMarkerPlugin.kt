@@ -84,6 +84,7 @@ import java.util.*
 object SourceMarkerPlugin {
 
     val SOURCE_RED = Color(225, 72, 59)
+    val INSTANCE_ID = UUID.randomUUID().toString()
 
     private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
     private val deploymentIds = mutableListOf<String>()

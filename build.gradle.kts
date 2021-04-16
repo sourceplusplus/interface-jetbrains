@@ -75,12 +75,6 @@ subprojects {
     }
 }
 
-gradle.buildFinished {
-    if (!gradle!!.startParameter.taskNames.contains("jsBrowserRun")) {
-        project.buildDir.deleteRecursively()
-    }
-}
-
 tasks {
     register("downloadSkywalking") {
         doLast {

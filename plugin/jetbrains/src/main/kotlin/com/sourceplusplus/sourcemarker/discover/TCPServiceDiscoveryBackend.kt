@@ -3,6 +3,7 @@ package com.sourceplusplus.sourcemarker.discover
 import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import com.sourceplusplus.protocol.status.MarkerConnection
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.core.*
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
@@ -104,22 +105,31 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                     ex.printStackTrace()
                 }
 
-                //send marker connected status
-                val pc = MarkerConnection(
-                    UUID.randomUUID().toString(), System.currentTimeMillis(), hardwareId
-                )
-                FrameHelper.sendFrame(
-                    BridgeEventType.PUBLISH.name.toLowerCase(),
-                    SourceMarkerServices.Status.MARKER_CONNECTED,
-                    JsonObject.mapFrom(pc), socket
-                )
-
                 setupHandler(vertx, "get-records")
                 setupHandler(vertx, Utilize.Tracing.LOCAL_TRACING)
                 setupHandler(vertx, Utilize.Tracing.HINDSIGHT_DEBUGGER)
                 setupHandler(vertx, Utilize.Logging.LOG_COUNT_INDICATOR)
 
-                setupPromise.complete()
+                //setup connection
+                val pc = MarkerConnection(
+                    SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis(), hardwareId
+                )
+                val replyAddress = UUID.randomUUID().toString()
+                replyHandlers[replyAddress] = {
+                    if (it.getBoolean("success")) {
+                        setupPromise.complete()
+                    } else {
+                        log.error("Service discovery connection failed. Reason: " + it.getString("failure_reason"))
+                        setupPromise.fail(it.getString("failure_reason"))
+                    }
+                }
+                val headers = JsonObject()
+                headers.put("sm.reply", replyAddress)
+                FrameHelper.sendFrame(
+                    BridgeEventType.PUBLISH.name.toLowerCase(),
+                    SourceMarkerServices.Status.MARKER_CONNECTED,
+                    replyAddress, headers, true, JsonObject.mapFrom(pc), socket
+                )
             }
         }
     }
