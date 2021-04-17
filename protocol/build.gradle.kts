@@ -98,5 +98,11 @@ tasks.register<Copy>("setupJsonMappers") {
     from(file("$projectDir/src/jvmMain/resources/META-INF/vertx/json-mappers.properties"))
     into(file("$buildDir/tmp/kapt3/src/main/resources/META-INF/vertx"))
 }
-tasks.getByName("compileKotlinJvm").dependsOn("setupJsonMappers")
+tasks.getByName<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileKotlinJvm") {
+    kotlinOptions {
+        javaParameters = true
+    }
+    dependsOn("setupJsonMappers")
+}
+
 tasks.getByName("build").dependsOn("makeExternalJar")
