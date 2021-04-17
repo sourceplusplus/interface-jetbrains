@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version "1.4.32"
     kotlin("kapt")
+    id("org.jetbrains.kotlin.plugin.noarg") version "1.4.32"
     id("java")
 }
 
@@ -106,3 +107,7 @@ tasks.getByName<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileKotlinJ
 }
 
 tasks.getByName("build").dependsOn("makeExternalJar")
+
+configure<org.jetbrains.kotlin.noarg.gradle.NoArgExtension> {
+    annotation("kotlinx.serialization.Serializable")
+}
