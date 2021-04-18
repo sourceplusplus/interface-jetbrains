@@ -1,5 +1,6 @@
 package com.sourceplusplus.monitor.skywalking.bridge
 
+import com.apollographql.apollo.api.BigDecimal
 import com.apollographql.apollo.api.Input
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.LocalMessageCodec
@@ -53,8 +54,13 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                             timestamp = Clock.System.now(),
                             logs = logs.logs.map {
                                 val exceptionStr = it.tags?.find { it.key == "exception" }?.value
+                                val epoch = if (it.timestamp is String) {
+                                    it.timestamp.toString().toLong()
+                                } else {
+                                    (it.timestamp as BigDecimal).toLong()
+                                }
                                 Log(
-                                    Instant.fromEpochMilliseconds(it.timestamp.toLong()),
+                                    Instant.fromEpochMilliseconds(epoch),
                                     it.content.orEmpty(),
                                     level = it.tags!!.find { it.key == "level" }?.value!!,
                                     logger = it.tags.find { it.key == "logger" }?.value,

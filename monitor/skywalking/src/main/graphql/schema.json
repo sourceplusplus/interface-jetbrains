@@ -1757,6 +1757,25 @@
                 "name": "BrowserErrorLogs"
               },
               "isDeprecated": false
+            },
+            {
+              "name": "queryEvents",
+              "description": "",
+              "args": [
+                {
+                  "name": "condition",
+                  "description": "",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "EventQueryCondition"
+                  }
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Events"
+              },
+              "isDeprecated": false
             }
           ],
           "interfaces": []
@@ -3357,6 +3376,46 @@
         },
         {
           "kind": "OBJECT",
+          "name": "Events",
+          "description": "",
+          "fields": [
+            {
+              "name": "events",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "LIST",
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "Event"
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "total",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              "isDeprecated": false
+            }
+          ],
+          "interfaces": []
+        },
+        {
+          "kind": "OBJECT",
           "name": "ProfileTaskCreationResult",
           "description": "Profile task create result",
           "fields": [
@@ -4255,7 +4314,7 @@
                 "kind": "NON_NULL",
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "String"
+                  "name": "Long"
                 }
               },
               "isDeprecated": false
@@ -4737,6 +4796,115 @@
         },
         {
           "kind": "OBJECT",
+          "name": "Event",
+          "description": "",
+          "fields": [
+            {
+              "name": "uuid",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "source",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Source"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "name",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "type",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "EventType"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "message",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "parameters",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "KeyValue"
+                  }
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "startTime",
+              "description": "The start time (in milliseconds) of the event, measured between the current time and midnight, January 1, 1970 UTC.\nThis field may be 0 if the user didn't report it or the `start` event is lost due to network issues.",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Long"
+                }
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "endTime",
+              "description": "The end time (in milliseconds) of the event, measured between the current time and midnight, January 1, 1970 UTC. Empty or 0 if the event have not finished yet.\nThis field may be 0 if the user didn't report it or the `end` event is lost due to network issues.",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Long"
+              },
+              "isDeprecated": false
+            }
+          ],
+          "interfaces": []
+        },
+        {
+          "kind": "OBJECT",
           "name": "Ref",
           "description": "Ref represents the link between the segment and its parents.\nThe parent(ref) may not exists, which means batch process.\nThe UI should display a list, representing the other trace IDs.",
           "fields": [
@@ -4943,6 +5111,44 @@
                   "kind": "SCALAR",
                   "name": "Int"
                 }
+              },
+              "isDeprecated": false
+            }
+          ],
+          "interfaces": []
+        },
+        {
+          "kind": "OBJECT",
+          "name": "Source",
+          "description": "",
+          "fields": [
+            {
+              "name": "service",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "serviceInstance",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              },
+              "isDeprecated": false
+            },
+            {
+              "name": "endpoint",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
               },
               "isDeprecated": false
             }
@@ -5738,6 +5944,100 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "EventQueryCondition",
+          "description": "",
+          "inputFields": [
+            {
+              "name": "uuid",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            {
+              "name": "source",
+              "description": "",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "SourceInput"
+              }
+            },
+            {
+              "name": "name",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            {
+              "name": "type",
+              "description": "",
+              "type": {
+                "kind": "ENUM",
+                "name": "EventType"
+              }
+            },
+            {
+              "name": "time",
+              "description": "",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "Duration"
+              }
+            },
+            {
+              "name": "order",
+              "description": "",
+              "type": {
+                "kind": "ENUM",
+                "name": "Order"
+              }
+            },
+            {
+              "name": "size",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "SourceInput",
+          "description": "",
+          "inputFields": [
+            {
+              "name": "service",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            {
+              "name": "serviceInstance",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            {
+              "name": "endpoint",
+              "description": "",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "ProfileTaskCreationRequest",
           "description": "Licensed to the Apache Software Foundation (ASF) under one\nor more contributor license agreements.  See the NOTICE file\ndistributed with this work for additional information\nregarding copyright ownership.  The ASF licenses this file\nto you under the Apache License, Version 2.0 (the\n\"License\"); you may not use this file except in compliance\nwith the License.  You may obtain a copy of the License at\n\nhttp://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\nProfile task create need data",
           "inputFields": [
@@ -6062,6 +6362,23 @@
             },
             {
               "name": "UNKNOWN",
+              "description": "",
+              "isDeprecated": false
+            }
+          ]
+        },
+        {
+          "kind": "ENUM",
+          "name": "EventType",
+          "description": "",
+          "enumValues": [
+            {
+              "name": "Normal",
+              "description": "",
+              "isDeprecated": false
+            },
+            {
+              "name": "Error",
               "description": "",
               "isDeprecated": false
             }

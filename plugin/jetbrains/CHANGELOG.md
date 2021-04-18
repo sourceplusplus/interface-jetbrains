@@ -6,6 +6,9 @@
 ### Fixed
 - Issue determining endpoint name ([#358](https://github.com/sourceplusplus/SourceMarker/issues/358))
 
+### Upgraded
+- Apache SkyWalking (8.4.0 -> 8.5.0)
+
 ## [0.2.1] - 2020-03-23
 ### Added
 - Synchronous/asynchronous source mark event listeners
