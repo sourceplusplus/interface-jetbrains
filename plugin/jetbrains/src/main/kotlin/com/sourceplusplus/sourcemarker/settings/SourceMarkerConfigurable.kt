@@ -4,6 +4,7 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
+import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.core.json.Json
 import kotlinx.coroutines.runBlocking
@@ -18,7 +19,7 @@ import javax.swing.JComponent
 class SourceMarkerConfigurable : Configurable {
 
     private var form: PluginConfigurationPanel? = null
-    override fun getDisplayName(): String = "SourceMarker"
+    override fun getDisplayName(): String = message("plugin_name")
 
     override fun isModified(): Boolean {
         val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
