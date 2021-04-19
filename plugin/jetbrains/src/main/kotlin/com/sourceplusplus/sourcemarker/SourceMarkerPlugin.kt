@@ -41,6 +41,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
+import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.service.HindsightManager
@@ -52,6 +53,9 @@ import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
+import io.vertx.core.http.HttpClientOptions
+import io.vertx.core.http.HttpMethod
+import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -180,19 +184,33 @@ object SourceMarkerPlugin {
             GlobalScope.launch(vertx.dispatcher()) {
                 var connectedMonitor = false
                 try {
+                    initServices(config)
                     initMonitor(config)
                     connectedMonitor = true
                 } catch (throwable: Throwable) {
                     //todo: if first time bring up config panel automatically instead of notification
-                    Notifications.Bus.notify(
-                        Notification(
-                            "SourceMarker", "Connection Failed",
-                            "SourceMarker failed to connect to Apache SkyWalking. " +
-                                    "Please ensure Apache SkyWalking is running and the correct configuration " +
-                                    "is set at: Settings -> Tools -> SourceMarker",
-                            NotificationType.ERROR
+                    val pluginName = message("plugin_name")
+                    if (throwable.message == "HTTP 401 Unauthorized") {
+                        Notifications.Bus.notify(
+                            Notification(
+                                pluginName, "Connection Unauthorized",
+                                "Failed to authenticate with $pluginName. " +
+                                        "Please ensure the correct configuration " +
+                                        "is set at: Settings -> Tools -> $pluginName",
+                                NotificationType.ERROR
+                            )
                         )
-                    )
+                    } else {
+                        Notifications.Bus.notify(
+                            Notification(
+                                pluginName, "Connection Failed",
+                                "$pluginName failed to connect to Apache SkyWalking. " +
+                                        "Please ensure Apache SkyWalking is running and the correct configuration " +
+                                        "is set at: Settings -> Tools -> $pluginName",
+                                NotificationType.ERROR
+                            )
+                        )
+                    }
                     log.error("Connection failed", throwable)
                 }
 
@@ -262,8 +280,36 @@ object SourceMarkerPlugin {
         clearMarkers.future().await()
     }
 
+    private suspend fun initServices(config: SourceMarkerConfig) {
+        if (!config.serviceHost.isNullOrBlank()) {
+            try {
+                val req = vertx.createHttpClient(
+                    HttpClientOptions()
+                        .setTrustAll(true).setVerifyHost(false) //todo: remove when possible
+                ).request(
+                    RequestOptions()
+                        .setSsl(true)
+                        .setHost(config.serviceHostNormalized!!)
+                        .setPort(config.servicePortNormalized!!)
+                        .setURI("/api/new-token")
+                ).await()
+                req.end().await()
+                val resp = req.response().await()
+                val body = resp.body().await().toString()
+                config.serviceToken = body
+            } catch (ex: Throwable) {
+                log.error("Failed to initialize services", ex)
+            }
+        }
+    }
+
     private suspend fun initMonitor(config: SourceMarkerConfig) {
-        deploymentIds.add(vertx.deployVerticle(SkywalkingMonitor(config.skywalkingOapUrl)).await())
+        var skywalkingHost = config.skywalkingOapUrl
+        if (!config.serviceHost.isNullOrBlank()) {
+            skywalkingHost = "https://${config.serviceHostNormalized}:${config.servicePortNormalized}" +
+                    "/graphql/skywalking"
+        }
+        deploymentIds.add(vertx.deployVerticle(SkywalkingMonitor(skywalkingHost, config.serviceToken)).await())
     }
 
     private fun initMapper() {

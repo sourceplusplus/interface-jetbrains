@@ -6,7 +6,12 @@ import com.sourceplusplus.monitor.skywalking.bridge.*
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
+import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /**
  * todo: description.
@@ -14,7 +19,10 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
+class SkywalkingMonitor(
+    private val serverUrl: String,
+    private val jwtToken: String? = null
+) : CoroutineVerticle() {
 
     companion object {
         private val log = LoggerFactory.getLogger(SkywalkingMonitor::class.java)
@@ -29,9 +37,22 @@ class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
     @Suppress("MagicNumber")
     private suspend fun setup() {
         log.debug("Apache SkyWalking server: $serverUrl")
-        val client = ApolloClient.builder()
-            .serverUrl(serverUrl)
-            .build()
+        val client = if (jwtToken == null) {
+            ApolloClient.builder()
+                .serverUrl(serverUrl)
+                .build()
+        } else {
+            ApolloClient.builder()
+                .serverUrl(serverUrl)
+                .okHttpClient(getUnsafeOkHttpClient().newBuilder().addInterceptor { chain ->
+                    chain.proceed(
+                        chain.request().newBuilder()
+                            .header("Authorization", "Bearer $jwtToken")
+                            .build()
+                    )
+                }.build())
+                .build()
+        }
 
         val response = client.query(GetTimeInfoQuery()).await()
         if (response.hasErrors()) {
@@ -48,5 +69,20 @@ class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
             vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
             vertx.deployVerticle(LogsBridge(skywalkingClient)).await()
         }
+    }
+
+    //todo: remove when possible
+    private fun getUnsafeOkHttpClient(): OkHttpClient {
+        val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) = Unit
+            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) = Unit
+            override fun getAcceptedIssuers() = arrayOf<X509Certificate>()
+        })
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, trustAllCerts, java.security.SecureRandom())
+        val sslSocketFactory = sslContext.socketFactory
+        return OkHttpClient.Builder()
+            .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+            .hostnameVerifier { _, _ -> true }.build()
     }
 }

@@ -12,5 +12,30 @@ data class SourceMarkerConfig(
     var autoResolveEndpointNames: Boolean = false,
     var localMentorEnabled: Boolean = true,
     var pluginConsoleEnabled: Boolean = false,
-    var portalRefreshIntervalMs: Int = 5000
-)
+    var portalRefreshIntervalMs: Int = 5000,
+    var serviceHost: String? = null,
+    var serviceCertificate: String? = null,
+    var serviceToken: String? = null
+) {
+    val serviceHostNormalized: String?
+        get() {
+            if (serviceHost == null) return null
+            var serviceHost = serviceHost!!
+                .substringAfter("https://").substringAfter("http://")
+            if (serviceHost.contains(":")) {
+                serviceHost = serviceHost.split(":")[0]
+                    .substringAfter("https://").substringAfter("http://")
+            }
+            return serviceHost
+        }
+
+    val servicePortNormalized: Int?
+        get() {
+            if (serviceHost == null) return null
+            var servicePort = 5454
+            if (serviceHost!!.contains(":")) {
+                servicePort = serviceHost!!.split(":")[1].toInt()
+            }
+            return servicePort
+        }
+}

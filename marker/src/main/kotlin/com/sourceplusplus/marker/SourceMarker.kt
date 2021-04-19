@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory
 @Suppress("TooManyFunctions")
 object SourceMarker {
 
+    var PLUGIN_NAME = "SourceMarker"
+
     @Volatile
     var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()

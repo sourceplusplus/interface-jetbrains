@@ -1,0 +1,8 @@
+{
+  "plugin_name": "SourceMarker",
+  "plugin_id": "com.sourceplusplus.sourcemarker",
+  "visible_settings": {
+    "apache_skywalking": true,
+    "service_discovery": false
+  }
+}

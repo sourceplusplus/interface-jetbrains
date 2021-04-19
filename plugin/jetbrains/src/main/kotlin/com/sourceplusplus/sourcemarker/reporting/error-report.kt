@@ -225,6 +225,7 @@ private fun getKeyValuePairs(
     appInfo: ApplicationInfoEx,
     namesInfo: ApplicationNamesInfo
 ): MutableMap<String, String> {
+    //todo: probably need to change with PLUGIN_NAME
     PluginManagerCore.getPlugin(PluginId.findId("com.sourceplusplus.sourcemarker"))?.run {
         if (error.pluginName.isBlank()) error.pluginName = name
         if (error.pluginVersion.isBlank()) error.pluginVersion = version

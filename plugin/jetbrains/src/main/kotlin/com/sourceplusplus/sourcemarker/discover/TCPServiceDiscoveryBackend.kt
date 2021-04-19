@@ -1,17 +1,24 @@
 package com.sourceplusplus.sourcemarker.discover
 
+import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.project.ProjectManager
 import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import com.sourceplusplus.protocol.status.MarkerConnection
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.*
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
 import io.vertx.core.http.impl.headers.HeadersMultiMap
+import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
+import io.vertx.core.net.NetClientOptions
 import io.vertx.core.net.NetSocket
+import io.vertx.core.net.PemTrustOptions
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
@@ -53,8 +60,39 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
         GlobalScope.launch(vertx.dispatcher()) {
             try {
-                client = vertx.createNetClient()
-                socket = client.connect(5455, "localhost").await()
+                val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
+                val pluginConfig = Json.decodeValue(
+                    projectSettings.getValue("sourcemarker_plugin_config"), SourceMarkerConfig::class.java
+                )
+                if (pluginConfig.serviceHost.isNullOrBlank()) {
+                    log.warn("Service discovery disabled")
+                    return@launch
+                }
+
+                var serviceHost = pluginConfig.serviceHost!!
+                    .substringAfter("https://").substringAfter("http://")
+                var servicePort = 5455
+                if (pluginConfig.serviceHost!!.contains(":")) {
+                    serviceHost = pluginConfig.serviceHost!!.split(":")[0]
+                        .substringAfter("https://").substringAfter("http://")
+                    servicePort = pluginConfig.serviceHost!!.split(":")[1].toInt()
+                }
+                client = if (!pluginConfig.serviceCertificate.isNullOrBlank()) {
+                    var certStr = pluginConfig.serviceCertificate!!
+                    if (!certStr.startsWith("-----BEGIN CERTIFICATE-----")) {
+                        certStr = "-----BEGIN CERTIFICATE-----$certStr"
+                    }
+                    if (!certStr.endsWith("-----END CERTIFICATE-----")) {
+                        certStr = "$certStr-----END CERTIFICATE-----"
+                    }
+                    val options = NetClientOptions()
+                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                        .setSsl(true).setPemTrustOptions(PemTrustOptions().addCertValue(Buffer.buffer(certStr)))
+                    vertx.createNetClient(options)
+                } else {
+                    vertx.createNetClient()
+                }
+                socket = client.connect(servicePort, serviceHost).await()
             } catch (throwable: Throwable) {
                 log.warn("Failed to connect to service discovery server")
                 setupPromise.fail(throwable)
