@@ -62,9 +62,9 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
         vertx.eventBus().consumer<JsonObject>("local." + Provide.Tracing.HINDSIGHT_BREAKPOINT_SUBSCRIBER) {
-            log.info("Received breakpoint event")
-
             val bpEvent = Json.decodeValue(it.body().toString(), BreakpointEvent::class.java)
+            log.info("Received breakpoint event. Type: {}", bpEvent.eventType)
+
             when (bpEvent.eventType) {
                 BreakpointEventType.HIT -> {
                     val bpHit = Json.decodeValue(bpEvent.data, BreakpointHit::class.java)

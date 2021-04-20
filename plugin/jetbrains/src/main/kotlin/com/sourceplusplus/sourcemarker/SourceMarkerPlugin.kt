@@ -54,7 +54,6 @@ import io.vertx.core.VertxOptions
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
 import io.vertx.core.http.HttpClientOptions
-import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
@@ -98,6 +97,7 @@ object SourceMarkerPlugin {
      * Setup Vert.x EventBus for communication between plugin modules.
      */
     init {
+        SourceMarker.enabled = false
         val options = if (System.getProperty("sourcemarker.debug.unblocked_threads", "false")!!.toBoolean()) {
             log.info("Removed blocked thread checker")
             VertxOptions().setBlockedThreadCheckInterval(Long.MAX_VALUE)
@@ -270,8 +270,10 @@ object SourceMarkerPlugin {
     private suspend fun restartIfNecessary() {
         val clearMarkers = Promise.promise<Nothing>()
         ApplicationManager.getApplication().runReadAction {
-            SourceMarker.clearAvailableSourceFileMarkers()
-            SourceMarker.clearGlobalSourceMarkEventListeners()
+            if (SourceMarker.enabled) {
+                SourceMarker.clearAvailableSourceFileMarkers()
+                SourceMarker.clearGlobalSourceMarkEventListeners()
+            }
             clearMarkers.complete()
         }
 
@@ -374,6 +376,7 @@ object SourceMarkerPlugin {
         } else {
             log.warn("Could not determine root source package. Skipped adding create source mark filter...")
         }
+        SourceMarker.enabled = true
     }
 
     /**
