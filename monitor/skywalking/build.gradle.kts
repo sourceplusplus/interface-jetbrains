@@ -18,6 +18,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
     implementation("io.dropwizard.metrics:metrics-core:4.1.19")
+    implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 }
 
 apollo {

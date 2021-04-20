@@ -4,5 +4,6 @@
   "visible_settings": {
     "apache_skywalking": true,
     "service_discovery": false
-  }
+  },
+  "certificate_pin": null
 }

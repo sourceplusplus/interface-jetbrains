@@ -8,6 +8,8 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -75,6 +77,7 @@ import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.Dimension
+import java.io.IOException
 import java.util.*
 
 /**
@@ -311,7 +314,22 @@ object SourceMarkerPlugin {
             skywalkingHost = "https://${config.serviceHostNormalized}:${config.servicePortNormalized}" +
                     "/graphql/skywalking"
         }
-        deploymentIds.add(vertx.deployVerticle(SkywalkingMonitor(skywalkingHost, config.serviceToken)).await())
+
+        val hardcodedConfig: JsonObject = try {
+            JsonObject(
+                Resources.toString(
+                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                )
+            )
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+        val certificatePin = hardcodedConfig.getString("certificate_pin")
+        deploymentIds.add(
+            vertx.deployVerticle(
+                SkywalkingMonitor(skywalkingHost, config.serviceToken, certificatePin)
+            ).await()
+        )
     }
 
     private fun initMapper() {
