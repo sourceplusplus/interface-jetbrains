@@ -76,6 +76,7 @@ dependencies {
     implementation("org.jooq:jooq:3.14.8")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
     implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 }
 
 tasks {

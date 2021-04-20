@@ -50,6 +50,7 @@ import com.sourceplusplus.sourcemarker.service.HindsightManager
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import eu.geekplace.javapinning.JavaPinning
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
@@ -61,6 +62,7 @@ import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
+import io.vertx.core.net.TrustOptions
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
@@ -288,10 +290,25 @@ object SourceMarkerPlugin {
     private suspend fun initServices(config: SourceMarkerConfig) {
         if (!config.serviceHost.isNullOrBlank()) {
             try {
-                val req = vertx.createHttpClient(
+                val hardcodedConfig: JsonObject = try {
+                    JsonObject(
+                        Resources.toString(
+                            Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                        )
+                    )
+                } catch (e: IOException) {
+                    throw RuntimeException(e)
+                }
+                val certificatePin = hardcodedConfig.getString("certificate_pin")
+                val httpClientOptions = if (certificatePin.isNullOrBlank()) {
                     HttpClientOptions()
-                        .setTrustAll(true).setVerifyHost(false) //todo: remove when possible
-                ).request(
+                        .setTrustAll(true).setVerifyHost(false)
+                } else {
+                    HttpClientOptions()
+                        .setTrustOptions(TrustOptions.wrap(JavaPinning.trustManagerForPin(certificatePin)))
+                        .setVerifyHost(false)
+                }
+                val req = vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
                         .setSsl(true)
                         .setHost(config.serviceHostNormalized!!)
