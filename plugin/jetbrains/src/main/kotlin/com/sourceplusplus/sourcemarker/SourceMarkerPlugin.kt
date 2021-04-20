@@ -312,7 +312,7 @@ object SourceMarkerPlugin {
                     RequestOptions()
                         .setSsl(true)
                         .setHost(config.serviceHostNormalized!!)
-                        .setPort(config.servicePortNormalized!!)
+                        .setPort(config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!)
                         .setURI("/api/new-token")
                 ).await()
                 req.end().await()
@@ -328,7 +328,17 @@ object SourceMarkerPlugin {
     private suspend fun initMonitor(config: SourceMarkerConfig) {
         var skywalkingHost = config.skywalkingOapUrl
         if (!config.serviceHost.isNullOrBlank()) {
-            skywalkingHost = "https://${config.serviceHostNormalized}:${config.servicePortNormalized}" +
+            val hardcodedConfig: JsonObject = try {
+                JsonObject(
+                    Resources.toString(
+                        Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                    )
+                )
+            } catch (e: IOException) {
+                throw RuntimeException(e)
+            }
+            skywalkingHost = "https://${config.serviceHostNormalized}:" +
+                    "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}" +
                     "/graphql/skywalking"
         }
 

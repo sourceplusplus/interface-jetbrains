@@ -29,13 +29,11 @@ data class SourceMarkerConfig(
             return serviceHost
         }
 
-    val servicePortNormalized: Int?
-        get() {
-            if (serviceHost == null) return null
-            var servicePort = 5454
-            if (serviceHost!!.contains(":")) {
-                servicePort = serviceHost!!.split(":")[1].toInt()
-            }
-            return servicePort
+    fun getServicePortNormalized(defaultServicePort: Int): Int? {
+        if (serviceHost == null) return null
+        if (serviceHost!!.contains(":")) {
+            return serviceHost!!.split(":")[1].toInt()
         }
+        return defaultServicePort
+    }
 }
