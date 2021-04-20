@@ -27,6 +27,8 @@ style:
 exceptions:
   TooGenericExceptionCaught:
     active: false
+  TooGenericExceptionThrown:
+    active: false
 
 empty-blocks:
   EmptyFunctionBlock:
