@@ -5,5 +5,7 @@
     "apache_skywalking": true,
     "service_discovery": false
   },
-  "certificate_pin": null
+  "certificate_pin": null,
+  "service_port": 5454,
+  "tcp_service_port": 5455
 }

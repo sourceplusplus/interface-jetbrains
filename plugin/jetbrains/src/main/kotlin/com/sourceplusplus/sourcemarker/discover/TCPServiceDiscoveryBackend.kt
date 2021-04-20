@@ -1,5 +1,7 @@
 package com.sourceplusplus.sourcemarker.discover
 
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.ProjectManager
 import com.sourceplusplus.protocol.SourceMarkerServices
@@ -29,6 +31,7 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.math.BigInteger
 import java.net.NetworkInterface
 import java.security.MessageDigest
@@ -54,6 +57,15 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     private val setupPromise = Promise.promise<Void>()
     private val setupFuture = setupPromise.future()
     private val replyHandlers = ConcurrentHashMap<String, (JsonObject) -> Unit>()
+    private val hardcodedConfig: JsonObject = try {
+        JsonObject(
+            Resources.toString(
+                Resources.getResource(SourceMarkerPlugin::class.java, "/plugin-configuration.json"), Charsets.UTF_8
+            )
+        )
+    } catch (e: IOException) {
+        throw RuntimeException(e)
+    }
 
     override fun init(vertx: Vertx, config: JsonObject) {
         this.vertx = vertx
@@ -71,7 +83,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
                 var serviceHost = pluginConfig.serviceHost!!
                     .substringAfter("https://").substringAfter("http://")
-                var servicePort = 5455
+                var servicePort = hardcodedConfig.getInteger("tcp_service_port")
                 if (pluginConfig.serviceHost!!.contains(":")) {
                     serviceHost = pluginConfig.serviceHost!!.split(":")[0]
                         .substringAfter("https://").substringAfter("http://")
