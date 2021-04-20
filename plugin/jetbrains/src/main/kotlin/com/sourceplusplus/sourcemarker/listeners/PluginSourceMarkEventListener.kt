@@ -48,7 +48,7 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
             val sourceMark = event.sourceMark
             val sourcePortal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
             sourcePortal.visible = false
-        } else if (event.eventCode == SourceMarkEventCode.MARK_ADDED) {
+        } else if (event.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
             val sourceMark = event.sourceMark
 
             //register portal for source mark
