@@ -5,6 +5,7 @@
     "apache_skywalking": true,
     "service_discovery": false
   },
+  "token_uri": null,
   "certificate_pin": null,
   "service_port": null,
   "tcp_service_port": null

@@ -50,7 +50,10 @@ import com.sourceplusplus.sourcemarker.service.HindsightManager
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import com.sourceplusplus.sourcemarker.settings.getServicePortNormalized
+import com.sourceplusplus.sourcemarker.settings.serviceHostNormalized
 import eu.geekplace.javapinning.JavaPinning
+import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
@@ -148,6 +151,7 @@ object SourceMarkerPlugin {
                 )
             } catch (ex: DecodeException) {
                 log.warn("Failed to decode SourceMarker configuration", ex)
+                projectSettings.unsetValue("sourcemarker_plugin_config")
                 SourceMarkerConfig()
             }
         } else {
@@ -299,21 +303,35 @@ object SourceMarkerPlugin {
                 } catch (e: IOException) {
                     throw RuntimeException(e)
                 }
-                val certificatePin = hardcodedConfig.getString("certificate_pin")
-                val httpClientOptions = if (certificatePin.isNullOrBlank()) {
+
+                val certificatePins = mutableListOf<String>()
+                certificatePins.addAll(config.certificatePins)
+                val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+                if (!hardcodedPin.isNullOrBlank()) {
+                    certificatePins.add(hardcodedPin)
+                }
+                val httpClientOptions = if (certificatePins.isEmpty()) {
                     HttpClientOptions()
                         .setTrustAll(true).setVerifyHost(false)
                 } else {
                     HttpClientOptions()
-                        .setTrustOptions(TrustOptions.wrap(JavaPinning.trustManagerForPin(certificatePin)))
+                        .setTrustOptions(
+                            TrustOptions.wrap(
+                                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                            )
+                        )
                         .setVerifyHost(false)
                 }
+
+                var uri = hardcodedConfig.getString("token_uri")
+                uri += "?client_id=" + config.clientId
+                uri += "&client_secret=" + config.clientSecret
                 val req = vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
                         .setSsl(true)
                         .setHost(config.serviceHostNormalized!!)
                         .setPort(config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!)
-                        .setURI("/api/new-token")
+                        .setURI(uri)
                 ).await()
                 req.end().await()
                 val resp = req.response().await()
@@ -351,10 +369,17 @@ object SourceMarkerPlugin {
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-        val certificatePin = hardcodedConfig.getString("certificate_pin")
+
+        val certificatePins = mutableListOf<String>()
+        certificatePins.addAll(config.certificatePins)
+        val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+        if (!hardcodedPin.isNullOrBlank()) {
+            certificatePins.add(hardcodedPin)
+        }
+
         deploymentIds.add(
             vertx.deployVerticle(
-                SkywalkingMonitor(skywalkingHost, config.serviceToken, certificatePin)
+                SkywalkingMonitor(skywalkingHost, config.serviceToken, certificatePins)
             ).await()
         )
     }
