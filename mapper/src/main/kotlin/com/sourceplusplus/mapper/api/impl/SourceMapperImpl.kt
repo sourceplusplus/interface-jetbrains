@@ -26,10 +26,10 @@ class SourceMapperImpl(private val mapper: GitRepositoryMapper) : SourceMapper {
             ), targetCommitId
         ).call()
         val possibleName = methodRenames.lastOrNull()
-        return if (possibleName != null && possibleName.artifactQualifiedName.commitId == targetCommitId) {
+        return if (possibleName != null
+            && (possibleName.artifactQualifiedName.commitId == targetCommitId || returnBestEffort)
+        ) {
             Optional.of(possibleName.artifactQualifiedName)
-        } else if (returnBestEffort && methodRenames.isNotEmpty()) {
-            Optional.of(methodRenames.last().artifactQualifiedName)
         } else {
             Optional.ofNullable(null)
         }
