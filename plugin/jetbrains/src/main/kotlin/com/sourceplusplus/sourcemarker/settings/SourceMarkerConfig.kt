@@ -14,7 +14,6 @@ data class SourceMarkerConfig(
     var pluginConsoleEnabled: Boolean = false,
     var portalRefreshIntervalMs: Int = 5000,
     var serviceHost: String? = null,
-    var clientId: String? = null,
     var clientSecret: String? = null,
     var certificatePins: List<String> = emptyList(),
     var serviceToken: String? = null

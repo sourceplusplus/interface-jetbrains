@@ -34,7 +34,6 @@ public class PluginConfigurationPanel {
     private JCheckBox consoleCheckBox;
     private JPanel myServiceSettingsPanel;
     private JTextField serviceHostTextField;
-    private JTextField clientIdTextField;
     private JTextField clientSecretTextField;
     private JPanel testPanel;
     private SourceMarkerConfig config;
@@ -89,9 +88,6 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(serviceHostTextField.getText(), config.getServiceHost())) {
             return true;
         }
-        if (!Objects.equals(clientIdTextField.getText(), config.getClientId())) {
-            return true;
-        }
         if (!Objects.equals(clientSecretTextField.getText(), config.getClientSecret())) {
             return true;
         }
@@ -109,7 +105,6 @@ public class PluginConfigurationPanel {
                 true, consoleCheckBox.isSelected(),
                 portalRefreshModel.getNumber().intValue(),
                 serviceHostTextField.getText(),
-                clientIdTextField.getText(),
                 clientSecretTextField.getText(),
                 new ArrayList<>(Collections.list(myCertificatePins.listModel.elements())),
                 null
@@ -124,7 +119,6 @@ public class PluginConfigurationPanel {
         consoleCheckBox.setSelected(config.getPluginConsoleEnabled());
         portalRefreshModel.setValue(config.getPortalRefreshIntervalMs());
         serviceHostTextField.setText(config.getServiceHost());
-        clientIdTextField.setText(config.getClientId());
         clientSecretTextField.setText(config.getClientSecret());
 
         myCertificatePins = new CertificatePinPanel();
@@ -153,8 +147,8 @@ public class PluginConfigurationPanel {
             JScrollPane scrollPane = new JBScrollPane(myList);
             add(scrollPane, BorderLayout.CENTER);
 
-            scrollPane.setPreferredSize(new Dimension(100, 200));
-            scrollPane.setMaximumSize(new Dimension(100, 200));
+            scrollPane.setPreferredSize(new Dimension(100, 150));
+            scrollPane.setMaximumSize(new Dimension(100, 150));
         }
 
         void select(String pattern) {
