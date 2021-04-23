@@ -9,8 +9,9 @@ import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import com.sourceplusplus.protocol.status.MarkerConnection
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import eu.geekplace.javapinning.JavaPinning
+import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
 import io.vertx.core.http.impl.headers.HeadersMultiMap
@@ -20,7 +21,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
 import io.vertx.core.net.NetClientOptions
 import io.vertx.core.net.NetSocket
-import io.vertx.core.net.PemTrustOptions
+import io.vertx.core.net.TrustOptions
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
@@ -89,17 +90,22 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         .substringAfter("https://").substringAfter("http://")
                     servicePort = pluginConfig.serviceHost!!.split(":")[1].toInt()
                 }
-                client = if (!pluginConfig.serviceCertificate.isNullOrBlank()) {
-                    var certStr = pluginConfig.serviceCertificate!!
-                    if (!certStr.startsWith("-----BEGIN CERTIFICATE-----")) {
-                        certStr = "-----BEGIN CERTIFICATE-----$certStr"
-                    }
-                    if (!certStr.endsWith("-----END CERTIFICATE-----")) {
-                        certStr = "$certStr-----END CERTIFICATE-----"
-                    }
+                val certificatePins = mutableListOf<String>()
+                certificatePins.addAll(pluginConfig.certificatePins)
+                val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+                if (!hardcodedPin.isNullOrBlank()) {
+                    certificatePins.add(hardcodedPin)
+                }
+
+                client = if (certificatePins.isNotEmpty()) {
                     val options = NetClientOptions()
                         .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
-                        .setSsl(true).setPemTrustOptions(PemTrustOptions().addCertValue(Buffer.buffer(certStr)))
+                        .setSsl(true)
+                        .setTrustOptions(
+                            TrustOptions.wrap(
+                                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                            )
+                        )
                     vertx.createNetClient(options)
                 } else {
                     vertx.createNetClient()

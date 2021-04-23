@@ -4,6 +4,7 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
 import com.sourceplusplus.monitor.skywalking.bridge.*
 import eu.geekplace.javapinning.JavaPinning
+import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory
 class SkywalkingMonitor(
     private val serverUrl: String,
     private val jwtToken: String? = null,
-    private val certificatePin: String? = null
+    private val certificatePins: List<String> = emptyList()
 ) : CoroutineVerticle() {
 
     companion object {
@@ -49,10 +50,10 @@ class SkywalkingMonitor(
                             .build()
                     )
                 }
-            if (!certificatePin.isNullOrBlank()) {
+            if (certificatePins.isNotEmpty()) {
                 httpBuilder = httpBuilder.sslSocketFactory(
-                    JavaPinning.forPin(certificatePin).socketFactory,
-                    JavaPinning.trustManagerForPin(certificatePin)
+                    JavaPinning.forPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") }).socketFactory,
+                    JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
                 )
             }
             ApolloClient.builder()
