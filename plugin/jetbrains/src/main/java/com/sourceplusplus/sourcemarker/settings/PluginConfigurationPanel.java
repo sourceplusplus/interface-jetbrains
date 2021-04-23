@@ -34,7 +34,7 @@ public class PluginConfigurationPanel {
     private JCheckBox consoleCheckBox;
     private JPanel myServiceSettingsPanel;
     private JTextField serviceHostTextField;
-    private JTextField clientSecretTextField;
+    private JTextField accessTokenTextField;
     private JPanel testPanel;
     private SourceMarkerConfig config;
     private final SpinnerNumberModel portalRefreshModel;
@@ -88,7 +88,7 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(serviceHostTextField.getText(), config.getServiceHost())) {
             return true;
         }
-        if (!Objects.equals(clientSecretTextField.getText(), config.getClientSecret())) {
+        if (!Objects.equals(accessTokenTextField.getText(), config.getAccessToken())) {
             return true;
         }
         if (!Arrays.equals(myCertificatePins.listModel.toArray(), config.getCertificatePins().toArray())) {
@@ -105,7 +105,7 @@ public class PluginConfigurationPanel {
                 true, consoleCheckBox.isSelected(),
                 portalRefreshModel.getNumber().intValue(),
                 serviceHostTextField.getText(),
-                clientSecretTextField.getText(),
+                accessTokenTextField.getText(),
                 new ArrayList<>(Collections.list(myCertificatePins.listModel.elements())),
                 null
         );
@@ -119,7 +119,7 @@ public class PluginConfigurationPanel {
         consoleCheckBox.setSelected(config.getPluginConsoleEnabled());
         portalRefreshModel.setValue(config.getPortalRefreshIntervalMs());
         serviceHostTextField.setText(config.getServiceHost());
-        clientSecretTextField.setText(config.getClientSecret());
+        accessTokenTextField.setText(config.getAccessToken());
 
         myCertificatePins = new CertificatePinPanel();
         myCertificatePins.listModel.addAll(config.getCertificatePins());

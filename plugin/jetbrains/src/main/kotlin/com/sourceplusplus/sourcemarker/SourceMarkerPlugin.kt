@@ -323,7 +323,7 @@ object SourceMarkerPlugin {
                         .setVerifyHost(false)
                 }
 
-                val tokenUri = hardcodedConfig.getString("token_uri") + "?client_secret=" + config.clientSecret
+                val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=" + config.accessToken
                 val req = vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
                         .setSsl(true)

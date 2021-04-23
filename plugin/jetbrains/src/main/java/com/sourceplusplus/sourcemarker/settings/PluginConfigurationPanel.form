@@ -167,10 +167,10 @@
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Client Secret"/>
+                  <text resource-bundle="messages/PluginBundle" key="access_token"/>
                 </properties>
               </component>
-              <component id="a2d9" class="javax.swing.JTextField" binding="clientSecretTextField">
+              <component id="a2d9" class="javax.swing.JTextField" binding="accessTokenTextField">
                 <constraints>
                   <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
