@@ -323,15 +323,13 @@ object SourceMarkerPlugin {
                         .setVerifyHost(false)
                 }
 
-                var uri = hardcodedConfig.getString("token_uri")
-                uri += "?client_id=" + config.clientId
-                uri += "&client_secret=" + config.clientSecret
+                val tokenUri = hardcodedConfig.getString("token_uri") + "?client_secret=" + config.clientSecret
                 val req = vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
                         .setSsl(true)
                         .setHost(config.serviceHostNormalized!!)
                         .setPort(config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!)
-                        .setURI(uri)
+                        .setURI(tokenUri)
                 ).await()
                 req.end().await()
                 val resp = req.response().await()
