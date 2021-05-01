@@ -333,8 +333,21 @@ object SourceMarkerPlugin {
                 ).await()
                 req.end().await()
                 val resp = req.response().await()
-                val body = resp.body().await().toString()
-                config.serviceToken = body
+                if (resp.statusCode() == 200) {
+                    val body = resp.body().await().toString()
+                    config.serviceToken = body
+                } else {
+                    config.serviceToken = null
+
+                    log.error("Invalid access token")
+                    Notifications.Bus.notify(
+                        Notification(
+                            message("plugin_name"), "Invalid Access Token",
+                            "Failed to validate access token",
+                            NotificationType.ERROR
+                        )
+                    )
+                }
             } catch (ex: Throwable) {
                 log.error("Failed to initialize services", ex)
             }
