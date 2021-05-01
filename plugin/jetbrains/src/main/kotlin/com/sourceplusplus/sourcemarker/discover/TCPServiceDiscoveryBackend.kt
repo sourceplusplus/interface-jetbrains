@@ -107,8 +107,15 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                             )
                         )
                     vertx.createNetClient(options)
+                } else if (servicePort == 443 || pluginConfig.serviceHost!!.startsWith("https://")) {
+                    val options = NetClientOptions()
+                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                        .setSsl(true)
+                    vertx.createNetClient(options)
                 } else {
-                    vertx.createNetClient()
+                    val options = NetClientOptions()
+                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                    vertx.createNetClient(options)
                 }
                 socket = client.connect(servicePort, serviceHost).await()
             } catch (throwable: Throwable) {

@@ -36,7 +36,7 @@ class SkywalkingMonitor(
     @Suppress("MagicNumber")
     private suspend fun setup() {
         log.debug("Apache SkyWalking server: $serverUrl")
-        val client = if (jwtToken == null) {
+        val client = if (jwtToken.isNullOrEmpty()) {
             ApolloClient.builder()
                 .serverUrl(serverUrl)
                 .build()
