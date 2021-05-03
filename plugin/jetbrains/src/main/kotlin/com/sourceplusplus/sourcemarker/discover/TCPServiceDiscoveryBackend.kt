@@ -9,6 +9,7 @@ import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import com.sourceplusplus.protocol.status.MarkerConnection
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import com.sourceplusplus.sourcemarker.settings.isSsl
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
@@ -85,11 +86,11 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 var serviceHost = pluginConfig.serviceHost!!
                     .substringAfter("https://").substringAfter("http://")
                 var servicePort = hardcodedConfig.getInteger("tcp_service_port")
-                if (pluginConfig.serviceHost!!.contains(":")) {
-                    serviceHost = pluginConfig.serviceHost!!.split(":")[0]
-                        .substringAfter("https://").substringAfter("http://")
-                    servicePort = pluginConfig.serviceHost!!.split(":")[1].toInt()
+                if (serviceHost.contains(":")) {
+                    servicePort = serviceHost.split(":")[1].toInt()
+                    serviceHost = serviceHost.split(":")[0]
                 }
+
                 val certificatePins = mutableListOf<String>()
                 certificatePins.addAll(pluginConfig.certificatePins)
                 val hardcodedPin = hardcodedConfig.getString("certificate_pin")
@@ -100,21 +101,17 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 client = if (certificatePins.isNotEmpty()) {
                     val options = NetClientOptions()
                         .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
-                        .setSsl(true)
+                        .setSsl(pluginConfig.isSsl())
                         .setTrustOptions(
                             TrustOptions.wrap(
                                 JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
                             )
                         )
                     vertx.createNetClient(options)
-                } else if (servicePort == 443 || pluginConfig.serviceHost!!.startsWith("https://")) {
-                    val options = NetClientOptions()
-                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
-                        .setSsl(true)
-                    vertx.createNetClient(options)
                 } else {
                     val options = NetClientOptions()
                         .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                        .setSsl(pluginConfig.isSsl())
                     vertx.createNetClient(options)
                 }
                 socket = client.connect(servicePort, serviceHost).await()
