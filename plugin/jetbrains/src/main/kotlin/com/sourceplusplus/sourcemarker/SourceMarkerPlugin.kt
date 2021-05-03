@@ -51,6 +51,7 @@ import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import com.sourceplusplus.sourcemarker.settings.getServicePortNormalized
+import com.sourceplusplus.sourcemarker.settings.isSsl
 import com.sourceplusplus.sourcemarker.settings.serviceHostNormalized
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
@@ -304,16 +305,14 @@ object SourceMarkerPlugin {
                     throw RuntimeException(e)
                 }
 
+                val servicePort = config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!
                 val certificatePins = mutableListOf<String>()
                 certificatePins.addAll(config.certificatePins)
                 val hardcodedPin = hardcodedConfig.getString("certificate_pin")
                 if (!hardcodedPin.isNullOrBlank()) {
                     certificatePins.add(hardcodedPin)
                 }
-                val httpClientOptions = if (certificatePins.isEmpty()) {
-                    HttpClientOptions()
-                        .setTrustAll(true).setVerifyHost(false)
-                } else {
+                val httpClientOptions = if (certificatePins.isNotEmpty()) {
                     HttpClientOptions()
                         .setTrustOptions(
                             TrustOptions.wrap(
@@ -321,14 +320,16 @@ object SourceMarkerPlugin {
                             )
                         )
                         .setVerifyHost(false)
+                } else {
+                    HttpClientOptions()
                 }
 
                 val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=" + config.accessToken
                 val req = vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
-                        .setSsl(true)
+                        .setSsl(config.isSsl())
                         .setHost(config.serviceHostNormalized!!)
-                        .setPort(config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!)
+                        .setPort(servicePort)
                         .setURI(tokenUri)
                 ).await()
                 req.end().await()
@@ -366,7 +367,8 @@ object SourceMarkerPlugin {
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }
-            skywalkingHost = "https://${config.serviceHostNormalized}:" +
+            val scheme = if (config.isSsl()) "https" else "http"
+            skywalkingHost = "$scheme://${config.serviceHostNormalized}:" +
                     "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}" +
                     "/graphql/skywalking"
         }

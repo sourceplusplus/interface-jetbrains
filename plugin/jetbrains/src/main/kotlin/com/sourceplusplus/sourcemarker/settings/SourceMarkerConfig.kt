@@ -33,8 +33,13 @@ val SourceMarkerConfig.serviceHostNormalized: String?
 
 fun SourceMarkerConfig.getServicePortNormalized(defaultServicePort: Int?): Int? {
     if (serviceHost == null) return null
-    if (serviceHost!!.contains(":")) {
-        return serviceHost!!.split(":")[1].toInt()
+    val hostStr = serviceHost!!.substringAfter("https://").substringAfter("http://")
+    if (hostStr.contains(":")) {
+        return hostStr.split(":")[1].toInt()
     }
     return defaultServicePort
+}
+
+fun SourceMarkerConfig.isSsl(): Boolean {
+    return getServicePortNormalized(null) == 443 || serviceHost?.startsWith("https://") == true
 }
