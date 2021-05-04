@@ -85,9 +85,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
                 var serviceHost = pluginConfig.serviceHost!!
                     .substringAfter("https://").substringAfter("http://")
-                var servicePort = hardcodedConfig.getInteger("tcp_service_port")
+                val servicePort = hardcodedConfig.getInteger("tcp_service_port")
                 if (serviceHost.contains(":")) {
-                    servicePort = serviceHost.split(":")[1].toInt()
                     serviceHost = serviceHost.split(":")[0]
                 }
 
