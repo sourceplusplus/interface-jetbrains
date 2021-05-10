@@ -4,6 +4,7 @@ plugins {
 }
 
 val vertxVersion = ext.get("vertxVersion")
+val kotlinVersion = ext.get("kotlinVersion")
 
 dependencies {
     implementation(project(":protocol"))
@@ -12,12 +13,13 @@ dependencies {
     implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.6")
     api("com.apollographql.apollo:apollo-api:2.5.6")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion-RC-native-mt")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
     implementation("io.dropwizard.metrics:metrics-core:4.1.21")
+    implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 }
 
 apollo {

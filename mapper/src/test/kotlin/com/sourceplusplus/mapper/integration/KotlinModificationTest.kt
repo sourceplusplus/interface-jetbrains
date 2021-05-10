@@ -13,13 +13,14 @@ import org.junit.Assert.*
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class KotlinModificationTest {
 
     @Test
     fun singleModifiedFile() {
-        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
         val first = AtomicBoolean()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {
@@ -100,7 +101,7 @@ class KotlinModificationTest {
 
     @Test
     fun twoModifiedFiles() {
-        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
         val first = AtomicBoolean()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {
@@ -211,7 +212,7 @@ class KotlinModificationTest {
 
     @Test
     fun oneModifiedAndOneDeletedFile() {
-        val tmpRepo = Files.createTempDirectory("test-" + System.currentTimeMillis()).toFile()
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
         val first = AtomicBoolean()
         val sourceCodeTokenizer = object : SourceCodeTokenizer {
             override fun getMethods(filename: String, sourceCode: String): List<SourceCodeTokenizer.TokenizedMethod> {

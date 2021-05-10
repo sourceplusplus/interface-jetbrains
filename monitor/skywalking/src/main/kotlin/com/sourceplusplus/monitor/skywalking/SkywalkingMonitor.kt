@@ -3,9 +3,12 @@ package com.sourceplusplus.monitor.skywalking
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
 import com.sourceplusplus.monitor.skywalking.bridge.*
+import eu.geekplace.javapinning.JavaPinning
+import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
+import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
 
 /**
@@ -14,7 +17,11 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
+class SkywalkingMonitor(
+    private val serverUrl: String,
+    private val jwtToken: String? = null,
+    private val certificatePins: List<String> = emptyList()
+) : CoroutineVerticle() {
 
     companion object {
         private val log = LoggerFactory.getLogger(SkywalkingMonitor::class.java)
@@ -29,9 +36,31 @@ class SkywalkingMonitor(private val serverUrl: String) : CoroutineVerticle() {
     @Suppress("MagicNumber")
     private suspend fun setup() {
         log.debug("Apache SkyWalking server: $serverUrl")
-        val client = ApolloClient.builder()
-            .serverUrl(serverUrl)
-            .build()
+        val client = if (jwtToken.isNullOrEmpty()) {
+            ApolloClient.builder()
+                .serverUrl(serverUrl)
+                .build()
+        } else {
+            var httpBuilder = OkHttpClient().newBuilder()
+                .hostnameVerifier { _, _ -> true }
+                .addInterceptor { chain ->
+                    chain.proceed(
+                        chain.request().newBuilder()
+                            .header("Authorization", "Bearer $jwtToken")
+                            .build()
+                    )
+                }
+            if (certificatePins.isNotEmpty()) {
+                httpBuilder = httpBuilder.sslSocketFactory(
+                    JavaPinning.forPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") }).socketFactory,
+                    JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                )
+            }
+            ApolloClient.builder()
+                .serverUrl(serverUrl)
+                .okHttpClient(httpBuilder.build())
+                .build()
+        }
 
         val response = client.query(GetTimeInfoQuery()).await()
         if (response.hasErrors()) {

@@ -94,6 +94,8 @@ abstract class ClassSourceMark(
         }
     }
 
+    override fun hasUserData(): Boolean = userData.isNotEmpty()
+
     fun getPsiClass(): UClass {
         return psiClass
     }

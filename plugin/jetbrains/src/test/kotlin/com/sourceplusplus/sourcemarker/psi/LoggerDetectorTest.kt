@@ -19,8 +19,6 @@ import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -61,7 +59,6 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
         }
     }
 
-    @Before
     public override fun setUp() {
         super.setUp()
 
@@ -94,13 +91,8 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
         )
     }
 
-    @After
-    public override fun tearDown() {
-        super.tearDown()
-    }
-
     @Test
-    fun `logbackLoggerTest`() {
+    fun logbackLoggerTest() {
         @Language("Java") val code = """
                     import ch.qos.logback.classic.Logger;
                     public class TestLogback {

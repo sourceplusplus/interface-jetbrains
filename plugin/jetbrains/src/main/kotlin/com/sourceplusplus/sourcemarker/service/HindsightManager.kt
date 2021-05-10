@@ -27,11 +27,12 @@ import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointEvent
 import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointEventType
 import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
 import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointRemoved
+import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointTriggerListener
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointConditionParser
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
+import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointTriggerListener
 import com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointProperties
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
@@ -61,9 +62,9 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
         vertx.eventBus().consumer<JsonObject>("local." + Provide.Tracing.HINDSIGHT_BREAKPOINT_SUBSCRIBER) {
-            log.info("Received breakpoint event")
-
             val bpEvent = Json.decodeValue(it.body().toString(), BreakpointEvent::class.java)
+            log.info("Received breakpoint event. Type: {}", bpEvent.eventType)
+
             when (bpEvent.eventType) {
                 BreakpointEventType.HIT -> {
                     val bpHit = Json.decodeValue(bpEvent.data, BreakpointHit::class.java)
@@ -262,7 +263,7 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
             log.error("Timed out removing hindsight breakpoint")
             Notifications.Bus.notify(
                 Notification(
-                    "SourceMarker", "Hindsight Breakpoint Failed",
+                    message("plugin_name"), "Hindsight Breakpoint Failed",
                     "Timed out removing hindsight breakpoint",
                     NotificationType.ERROR
                 )
@@ -274,7 +275,7 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
                 log.warn("Unable to connect to service: " + debugInfo.getString("name"))
                 Notifications.Bus.notify(
                     Notification(
-                        "SourceMarker", "Hindsight Breakpoint Failed",
+                        message("plugin_name"), "Hindsight Breakpoint Failed",
                         "Unable to connect to service: " + debugInfo.getString("name"),
                         NotificationType.ERROR
                     )
@@ -284,7 +285,7 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
                 log.error("Failed to add hindsight breakpoint", replyException)
                 Notifications.Bus.notify(
                     Notification(
-                        "SourceMarker", "Hindsight Breakpoint Failed",
+                        message("plugin_name"), "Hindsight Breakpoint Failed",
                         "Failed to add hindsight breakpoint",
                         NotificationType.ERROR
                     )

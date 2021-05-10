@@ -1,5 +1,7 @@
 package com.sourceplusplus.sourcemarker.reporting
 
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
 import com.intellij.diagnostic.AbstractMessage
 import com.intellij.diagnostic.ReportMessages
 import com.intellij.ide.DataManager
@@ -26,12 +28,15 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
 import com.intellij.util.io.decodeBase64
 import com.sourceplusplus.sourcemarker.PluginBundle
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import io.vertx.core.json.JsonObject
 import org.eclipse.egit.github.core.Issue
 import org.eclipse.egit.github.core.Label
 import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
 import java.awt.Component
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.*
@@ -235,7 +240,16 @@ private fun getKeyValuePairs(
     appInfo: ApplicationInfoEx,
     namesInfo: ApplicationNamesInfo
 ): MutableMap<String, String> {
-    PluginManagerCore.getPlugin(PluginId.findId("com.sourceplusplus.sourcemarker"))?.run {
+    val hardcodedConfig: JsonObject = try {
+        JsonObject(
+            Resources.toString(
+                Resources.getResource(SourceMarkerPlugin::class.java, "/plugin-configuration.json"), Charsets.UTF_8
+            )
+        )
+    } catch (e: IOException) {
+        throw RuntimeException(e)
+    }
+    PluginManagerCore.getPlugin(PluginId.findId(hardcodedConfig.getString("plugin_id")))?.run {
         if (error.pluginName.isBlank()) error.pluginName = name
         if (error.pluginVersion.isBlank()) error.pluginVersion = version
     }

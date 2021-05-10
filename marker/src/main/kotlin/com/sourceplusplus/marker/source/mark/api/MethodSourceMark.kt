@@ -5,8 +5,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.psi.PsiNameIdentifierOwner
-import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
@@ -14,8 +14,6 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import org.jetbrains.uast.UMethod
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 /**
  * Represents a [SourceMark] associated to a method artifact.
@@ -94,6 +92,8 @@ abstract class MethodSourceMark(
             userData.remove(key)
         }
     }
+
+    override fun hasUserData(): Boolean = userData.isNotEmpty()
 
     fun getPsiMethod(): UMethod {
         return psiMethod
