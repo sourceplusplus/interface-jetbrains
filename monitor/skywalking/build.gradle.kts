@@ -12,7 +12,7 @@ dependencies {
     implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.6")
     api("com.apollographql.apollo:apollo-api:2.5.6")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC-native-mt")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
