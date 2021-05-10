@@ -4,8 +4,6 @@ import com.google.common.base.Charsets
 import com.google.common.io.Resources
 import com.intellij.diagnostic.AbstractMessage
 import com.intellij.diagnostic.ReportMessages
-import com.intellij.diagnostic.AbstractMessage
-import com.intellij.diagnostic.ReportMessages
 import com.intellij.ide.DataManager
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.ide.plugins.PluginUtil
@@ -35,15 +33,10 @@ import io.vertx.core.json.JsonObject
 import org.eclipse.egit.github.core.Issue
 import org.eclipse.egit.github.core.Label
 import org.eclipse.egit.github.core.RepositoryId
-import org.eclipse.egit.github.core.Issue
-import org.eclipse.egit.github.core.Label
-import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
 import java.awt.Component
 import java.io.IOException
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.*
