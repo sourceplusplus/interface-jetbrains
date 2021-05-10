@@ -23,10 +23,10 @@ repositories {
 }
 
 dependencies {
-    val intellijVersion = "202.7660.26"
+    val intellijVersion = "211.7142.45"
     val kotlinVersion = "1.5.0"
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC-native-mt")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.jetbrains:annotations:20.1.0")
@@ -43,6 +43,7 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:lang:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:lang-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:project-model:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.platform:code-style:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.groovy:groovy-psi:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:uast:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-indexing:$intellijVersion") { isTransitive = false }
