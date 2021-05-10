@@ -57,7 +57,7 @@ dependencies {
     implementation(project(":portal"))
 
     implementation("com.github.sh5i:git-stein:v0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC-native-mt")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
