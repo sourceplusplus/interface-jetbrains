@@ -1,17 +1,28 @@
 package com.sourceplusplus.sourcemarker.discover
 
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
+import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.project.ProjectManager
 import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import com.sourceplusplus.protocol.status.MarkerConnection
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import com.sourceplusplus.sourcemarker.settings.isSsl
+import eu.geekplace.javapinning.JavaPinning
+import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
 import io.vertx.core.http.impl.headers.HeadersMultiMap
+import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
+import io.vertx.core.net.NetClientOptions
 import io.vertx.core.net.NetSocket
+import io.vertx.core.net.TrustOptions
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
@@ -22,6 +33,7 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.math.BigInteger
 import java.net.NetworkInterface
 import java.security.MessageDigest
@@ -47,14 +59,61 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     private val setupPromise = Promise.promise<Void>()
     private val setupFuture = setupPromise.future()
     private val replyHandlers = ConcurrentHashMap<String, (JsonObject) -> Unit>()
+    private val hardcodedConfig: JsonObject = try {
+        JsonObject(
+            Resources.toString(
+                Resources.getResource(SourceMarkerPlugin::class.java, "/plugin-configuration.json"), Charsets.UTF_8
+            )
+        )
+    } catch (e: IOException) {
+        throw RuntimeException(e)
+    }
 
     override fun init(vertx: Vertx, config: JsonObject) {
         this.vertx = vertx
 
         GlobalScope.launch(vertx.dispatcher()) {
             try {
-                client = vertx.createNetClient()
-                socket = client.connect(5455, "localhost").await()
+                val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
+                val pluginConfig = Json.decodeValue(
+                    projectSettings.getValue("sourcemarker_plugin_config"), SourceMarkerConfig::class.java
+                )
+                if (pluginConfig.serviceHost.isNullOrBlank()) {
+                    log.warn("Service discovery disabled")
+                    return@launch
+                }
+
+                var serviceHost = pluginConfig.serviceHost!!
+                    .substringAfter("https://").substringAfter("http://")
+                val servicePort = hardcodedConfig.getInteger("tcp_service_port")
+                if (serviceHost.contains(":")) {
+                    serviceHost = serviceHost.split(":")[0]
+                }
+
+                val certificatePins = mutableListOf<String>()
+                certificatePins.addAll(pluginConfig.certificatePins)
+                val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+                if (!hardcodedPin.isNullOrBlank()) {
+                    certificatePins.add(hardcodedPin)
+                }
+
+                client = if (certificatePins.isNotEmpty()) {
+                    val options = NetClientOptions()
+                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                        .setSsl(pluginConfig.isSsl())
+                        .setTrustOptions(
+                            TrustOptions.wrap(
+                                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                            )
+                        )
+                    vertx.createNetClient(options)
+                } else {
+                    val options = NetClientOptions()
+                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                        .setSsl(pluginConfig.isSsl())
+                    vertx.createNetClient(options)
+                }
+                socket = client.connect(servicePort, serviceHost).await()
             } catch (throwable: Throwable) {
                 log.warn("Failed to connect to service discovery server")
                 setupPromise.fail(throwable)

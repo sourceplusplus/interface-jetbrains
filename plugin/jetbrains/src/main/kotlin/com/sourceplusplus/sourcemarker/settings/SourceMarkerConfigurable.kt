@@ -4,9 +4,12 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
+import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 import javax.swing.JComponent
 
 /**
@@ -17,8 +20,9 @@ import javax.swing.JComponent
  */
 class SourceMarkerConfigurable : Configurable {
 
+    private val log = LoggerFactory.getLogger(SourceMarkerConfigurable::class.java)
     private var form: PluginConfigurationPanel? = null
-    override fun getDisplayName(): String = "SourceMarker"
+    override fun getDisplayName(): String = message("plugin_name")
 
     override fun isModified(): Boolean {
         val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
@@ -43,10 +47,16 @@ class SourceMarkerConfigurable : Configurable {
         if (form == null) {
             val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
             val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
-                Json.decodeValue(
-                    projectSettings.getValue("sourcemarker_plugin_config"),
-                    SourceMarkerConfig::class.java
-                )
+                try {
+                    Json.decodeValue(
+                        projectSettings.getValue("sourcemarker_plugin_config"),
+                        SourceMarkerConfig::class.java
+                    )
+                } catch (ex: DecodeException) {
+                    log.warn("Failed to decode SourceMarker configuration", ex)
+                    projectSettings.unsetValue("sourcemarker_plugin_config")
+                    SourceMarkerConfig()
+                }
             } else {
                 SourceMarkerConfig()
             }

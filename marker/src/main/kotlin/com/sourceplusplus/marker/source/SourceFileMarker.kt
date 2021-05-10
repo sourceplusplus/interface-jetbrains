@@ -11,6 +11,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.sourceplusplus.marker.source.mark.api.*
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
@@ -125,7 +127,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     ): Boolean {
         if (overrideFilter || sourceMark.canApply()) {
             log.trace("Applying source mark for artifact: $sourceMark")
-            //todo: pre apply event
+            sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.MARK_BEFORE_ADDED))
             if (sourceMarks.add(sourceMark)) {
                 when (sourceMark) {
                     is ClassGutterMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
