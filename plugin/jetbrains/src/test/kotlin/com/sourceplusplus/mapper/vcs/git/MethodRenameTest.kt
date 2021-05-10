@@ -16,12 +16,15 @@ import org.eclipse.jgit.transport.URIish
 import org.intellij.lang.annotations.Language
 import org.junit.Test
 import java.io.File
+import java.nio.file.Files
+import java.util.*
 
 class MethodRenameTest : SourceMapperTest() {
 
     @Test
     fun `java get original method name`() {
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Java") val code = """
                 public class GetterMethod {
                     private String str;
@@ -48,7 +51,7 @@ class MethodRenameTest : SourceMapperTest() {
         }
 
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
         val oldCommitId = gitMapper.targetRepo.resolve("$newCommitId^1").name
@@ -72,7 +75,8 @@ class MethodRenameTest : SourceMapperTest() {
 
     @Test
     fun `java get updated method name`() {
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Java") val code = """
                 public class GetterMethod {
                     private String str;
@@ -99,7 +103,7 @@ class MethodRenameTest : SourceMapperTest() {
         }
 
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         val newCommitId = gitMapper.targetRepo.resolve(Constants.HEAD).name
         val oldCommitId = gitMapper.targetRepo.resolve("$newCommitId^1").name
@@ -123,8 +127,9 @@ class MethodRenameTest : SourceMapperTest() {
 
     @Test
     fun `java get reinitialize original method name`() {
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        val git = Git.init().setDirectory(File("/tmp/git-repo")).call()
+        val git = Git.init().setDirectory(tmpRepo).call()
         @Language("Java") val code = """
             public class GetterMethod {
                 private String str;
@@ -137,7 +142,7 @@ class MethodRenameTest : SourceMapperTest() {
         git.add().addFilepattern(".").call()
         val initialCommit = git.commit().setMessage("Initial commit").call()
 
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         @Language("Java") val renamedCode = """
             public class GetterMethod {
@@ -208,8 +213,9 @@ class MethodRenameTest : SourceMapperTest() {
 
     @Test
     fun `java get reinitialize updated method name`() {
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
-        val git = Git.init().setDirectory(File("/tmp/git-repo")).call()
+        val git = Git.init().setDirectory(tmpRepo).call()
         @Language("Java") val code = """
             public class GetterMethod {
                 private String str;
@@ -222,7 +228,7 @@ class MethodRenameTest : SourceMapperTest() {
         git.add().addFilepattern(".").call()
         val initialCommit = git.commit().setMessage("Initial commit").call()
 
-        gitMapper.initialize(FileRepository("/tmp/git-repo/.git"))
+        gitMapper.initialize(FileRepository(File(tmpRepo, ".git")))
 
         @Language("Java") val renamedCode = """
             public class GetterMethod {
