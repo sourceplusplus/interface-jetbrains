@@ -4,6 +4,8 @@ import com.google.common.base.Charsets
 import com.google.common.io.Resources
 import com.intellij.diagnostic.AbstractMessage
 import com.intellij.diagnostic.ReportMessages
+import com.intellij.diagnostic.AbstractMessage
+import com.intellij.diagnostic.ReportMessages
 import com.intellij.ide.DataManager
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.ide.plugins.PluginUtil
@@ -33,10 +35,15 @@ import io.vertx.core.json.JsonObject
 import org.eclipse.egit.github.core.Issue
 import org.eclipse.egit.github.core.Label
 import org.eclipse.egit.github.core.RepositoryId
+import org.eclipse.egit.github.core.Issue
+import org.eclipse.egit.github.core.Label
+import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
 import java.awt.Component
 import java.io.IOException
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.*
@@ -126,20 +133,20 @@ private object AnonymousFeedback {
 class GitHubErrorReporter : ErrorReportSubmitter() {
     override fun getReportActionText() = PluginBundle.message("report.error.to.plugin.vendor")
     override fun submit(
-        events: Array<IdeaLoggingEvent>,
-        info: String?,
-        parent: Component,
-        consumer: Consumer<SubmittedReportInfo>
+        events: Array<out IdeaLoggingEvent>,
+        additionalInfo: String?,
+        parentComponent: Component,
+        consumer: Consumer<in SubmittedReportInfo>
     ): Boolean {
         // TODO improve
         val event = events.firstOrNull { it.throwable != null } ?: return false
-        return doSubmit(event, parent, consumer, info)
+        return doSubmit(event, parentComponent, consumer, additionalInfo)
     }
 
     private fun doSubmit(
         event: IdeaLoggingEvent,
         parent: Component,
-        callback: Consumer<SubmittedReportInfo>,
+        callback: Consumer<in SubmittedReportInfo>,
         description: String?
     ): Boolean {
         val dataContext = DataManager.getInstance().getDataContext(parent)
@@ -176,7 +183,7 @@ class GitHubErrorReporter : ErrorReportSubmitter() {
     }
 
     internal class CallbackWithNotification(
-        private val consumer: Consumer<SubmittedReportInfo>,
+        private val consumer: Consumer<in SubmittedReportInfo>,
         private val project: Project?
     ) : Consumer<SubmittedReportInfo> {
         override fun consume(reportInfo: SubmittedReportInfo) {
