@@ -4,6 +4,7 @@ plugins {
 }
 
 val vertxVersion = ext.get("vertxVersion")
+val kotlinVersion = ext.get("kotlinVersion")
 
 kotlin {
     jvm {
@@ -34,7 +35,7 @@ kotlin {
                 implementation(project(":protocol"))
                 implementation("org.slf4j:slf4j-api:1.7.30")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC-native-mt")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion-RC-native-mt")
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-web:$vertxVersion")
                 implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
@@ -62,7 +63,7 @@ kotlin {
                 implementation(kotlin("stdlib-js"))
                 implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.7.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
                 implementation("com.github.bfergerson:kotlin-vertx3-eventbus-bridge:bacec93ae1")
             }
         }

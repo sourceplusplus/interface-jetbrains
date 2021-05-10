@@ -3,8 +3,10 @@ plugins {
     id("maven-publish")
 }
 
+val kotlinVersion = ext.get("kotlinVersion")
 val pluginGroup: String by project
 val markerVersion: String by project
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
@@ -24,9 +26,8 @@ repositories {
 
 dependencies {
     val intellijVersion = "211.7142.45"
-    val kotlinVersion = "1.5.0"
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion-RC-native-mt")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.jetbrains:annotations:20.1.0")

@@ -1,12 +1,14 @@
 plugins {
+    val kotlinVersion = "1.5.0"
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.5.0"
+    kotlin("plugin.serialization") version kotlinVersion
     kotlin("kapt")
-    id("org.jetbrains.kotlin.plugin.noarg") version "1.5.0"
+    id("org.jetbrains.kotlin.plugin.noarg") version kotlinVersion
     id("java")
 }
 
 val vertxVersion = ext.get("vertxVersion")
+val kotlinVersion = ext.get("kotlinVersion")
 
 kotlin {
     jvm { }
@@ -19,7 +21,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
             }
         }
         val commonTest by getting {
@@ -53,7 +55,7 @@ kotlin {
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
-                implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.0")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
             }
         }
     }
