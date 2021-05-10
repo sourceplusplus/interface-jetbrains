@@ -10,6 +10,7 @@ plugins {
 }
 
 val vertxVersion = ext.get("vertxVersion")
+val kotlinVersion = ext.get("kotlinVersion")
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
@@ -57,7 +58,7 @@ dependencies {
     implementation(project(":portal"))
 
     implementation("com.github.sh5i:git-stein:v0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion-RC-native-mt")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
@@ -70,7 +71,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("io.dropwizard.metrics:metrics-core:4.1.21")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
     implementation("org.jooq:jooq:3.14.9")
