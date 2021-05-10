@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    val intellijVersion = "202.7660.26"
+    val intellijVersion = "211.7142.45"
     val kotlinVersion = "1.5.0"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
