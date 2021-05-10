@@ -6,7 +6,11 @@ plugins {
 val vertxVersion = ext.get("vertxVersion")
 
 kotlin {
-    jvm { }
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+    }
     js {
         useCommonJs()
         browser {
