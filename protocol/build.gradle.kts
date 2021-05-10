@@ -2,7 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version "1.4.32"
     kotlin("kapt")
-    id("org.jetbrains.kotlin.plugin.noarg") version "1.4.32"
+    id("org.jetbrains.kotlin.plugin.noarg") version "1.5.0"
     id("java")
 }
 
