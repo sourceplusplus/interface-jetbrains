@@ -4,7 +4,7 @@ import org.jetbrains.changelog.markdownToHTML
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "0.7.2"
+    id("org.jetbrains.intellij") version "0.7.3"
     id("org.jetbrains.changelog") version "1.1.2"
     id("maven-publish")
 }
@@ -71,7 +71,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
-    implementation("io.dropwizard.metrics:metrics-core:4.1.19")
+    implementation("io.dropwizard.metrics:metrics-core:4.1.21")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
     implementation("org.jooq:jooq:3.14.9")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
