@@ -1,5 +1,6 @@
 package com.sourceplusplus.mapper.vcs.git
 
+import com.sourceplusplus.mapper.api.impl.SourceMapperImpl
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.LocalArtifact
@@ -14,8 +15,8 @@ import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.TreeWalk
+import org.slf4j.LoggerFactory
 import java.io.IOException
-import java.util.*
 
 /**
  * todo: description.
@@ -29,6 +30,10 @@ class LogFollowCommand(
     private var targetCommitId: String
 ) {
 
+    companion object {
+        private val log = LoggerFactory.getLogger(SourceMapperImpl::class.java)
+    }
+
     private var git = Git(repository)
     private var currentPath: String? = null
     private var nextStart: ObjectId? = null
@@ -36,10 +41,16 @@ class LogFollowCommand(
 
     @Throws(IOException::class, MissingObjectException::class, GitAPIException::class)
     fun call(): List<LocalArtifact> {
+        log.info(
+            "Executing log follow command. Repository: {} - Artifact: {} - Target commit id: {}",
+            repository, artifact, targetCommitId
+        )
+
         //determine direction
         val originalStart = ObjectId.fromString(artifact.artifactQualifiedName.commitId)
         val startCommitWalk = git.log().add(originalStart).call()
         forward = !startCommitWalk.any { it.id.name == targetCommitId }
+        log.debug("Forward: {}", forward)
 
         //follow artifact
         val artifacts = mutableListOf<LocalArtifact>()
@@ -53,10 +64,12 @@ class LogFollowCommand(
                 start = null
             }
 
-            val log = git.log()
+            val logCommits = git.log()
                 .add(nextStart).add(ObjectId.fromString(targetCommitId))
-                .addPath(currentPath).call()
-            for (commit in (if (forward) log.toList().asReversed() else log)) {
+                .addPath(currentPath).call().toList()
+            log.info("Found commits: {}", logCommits.joinToString())
+
+            for (commit in (if (forward) logCommits.asReversed() else logCommits)) {
                 if (commits.contains(commit)) {
                     start = null
                 } else {
