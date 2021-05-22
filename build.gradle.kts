@@ -1,7 +1,7 @@
 plugins {
     id("com.avast.gradle.docker-compose") version "0.14.3"
 
-    val kotlinVersion = "1.4.30"
+    val kotlinVersion = "1.5.0"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("multiplatform") version kotlinVersion apply false
     kotlin("js") version kotlinVersion apply false
@@ -32,6 +32,7 @@ repositories {
 subprojects {
     ext {
         set("vertxVersion", "4.0.3")
+        set("kotlinVersion", "1.5.0")
     }
 
     repositories {

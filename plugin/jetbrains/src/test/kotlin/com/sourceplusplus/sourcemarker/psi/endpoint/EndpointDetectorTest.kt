@@ -9,7 +9,6 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
-    @Before
     public override fun setUp() {
         super.setUp()
 
@@ -95,10 +94,5 @@ abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                     "    String operationName() default \"\";\n" +
                     "}\n"
         )
-    }
-
-    @After
-    public override fun tearDown() {
-        super.tearDown()
     }
 }

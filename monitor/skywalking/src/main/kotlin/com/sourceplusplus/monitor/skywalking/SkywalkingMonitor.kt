@@ -3,6 +3,8 @@ package com.sourceplusplus.monitor.skywalking
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
 import com.sourceplusplus.monitor.skywalking.bridge.*
+import eu.geekplace.javapinning.JavaPinning
+import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
@@ -21,7 +23,8 @@ import javax.net.ssl.X509TrustManager
  */
 class SkywalkingMonitor(
     private val serverUrl: String,
-    private val jwtToken: String? = null
+    private val jwtToken: String? = null,
+    private val certificatePins: List<String> = emptyList()
 ) : CoroutineVerticle() {
 
     companion object {
@@ -37,20 +40,29 @@ class SkywalkingMonitor(
     @Suppress("MagicNumber")
     private suspend fun setup() {
         log.debug("Apache SkyWalking server: $serverUrl")
-        val client = if (jwtToken == null) {
+        val client = if (jwtToken.isNullOrEmpty()) {
             ApolloClient.builder()
                 .serverUrl(serverUrl)
                 .build()
         } else {
-            ApolloClient.builder()
-                .serverUrl(serverUrl)
-                .okHttpClient(getUnsafeOkHttpClient().newBuilder().addInterceptor { chain ->
+            var httpBuilder = OkHttpClient().newBuilder()
+                .hostnameVerifier { _, _ -> true }
+                .addInterceptor { chain ->
                     chain.proceed(
                         chain.request().newBuilder()
                             .header("Authorization", "Bearer $jwtToken")
                             .build()
                     )
-                }.build())
+                }
+            if (certificatePins.isNotEmpty()) {
+                httpBuilder = httpBuilder.sslSocketFactory(
+                    JavaPinning.forPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") }).socketFactory,
+                    JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                )
+            }
+            ApolloClient.builder()
+                .serverUrl(serverUrl)
+                .okHttpClient(httpBuilder.build())
                 .build()
         }
 
