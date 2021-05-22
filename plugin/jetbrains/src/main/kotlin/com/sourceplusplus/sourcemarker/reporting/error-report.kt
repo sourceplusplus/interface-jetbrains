@@ -1,6 +1,9 @@
 package com.sourceplusplus.sourcemarker.reporting
 
-import com.intellij.diagnostic.*
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
+import com.intellij.diagnostic.AbstractMessage
+import com.intellij.diagnostic.ReportMessages
 import com.intellij.ide.DataManager
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.ide.plugins.PluginUtil
@@ -10,20 +13,32 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.application.ex.ApplicationInfoEx
-import com.intellij.openapi.diagnostic.*
+import com.intellij.openapi.diagnostic.Attachment
+import com.intellij.openapi.diagnostic.ErrorReportSubmitter
+import com.intellij.openapi.diagnostic.IdeaLoggingEvent
+import com.intellij.openapi.diagnostic.SubmittedReportInfo
 import com.intellij.openapi.diagnostic.SubmittedReportInfo.SubmissionStatus
 import com.intellij.openapi.extensions.PluginId
-import com.intellij.openapi.progress.*
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
 import com.intellij.util.io.decodeBase64
 import com.sourceplusplus.sourcemarker.PluginBundle
-import org.eclipse.egit.github.core.*
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import io.vertx.core.json.JsonObject
+import org.eclipse.egit.github.core.Issue
+import org.eclipse.egit.github.core.Label
+import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
 import java.awt.Component
-import java.io.*
+import java.io.IOException
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.util.*
 
 /**
@@ -111,20 +126,20 @@ private object AnonymousFeedback {
 class GitHubErrorReporter : ErrorReportSubmitter() {
     override fun getReportActionText() = PluginBundle.message("report.error.to.plugin.vendor")
     override fun submit(
-        events: Array<IdeaLoggingEvent>,
-        info: String?,
-        parent: Component,
-        consumer: Consumer<SubmittedReportInfo>
+        events: Array<out IdeaLoggingEvent>,
+        additionalInfo: String?,
+        parentComponent: Component,
+        consumer: Consumer<in SubmittedReportInfo>
     ): Boolean {
         // TODO improve
         val event = events.firstOrNull { it.throwable != null } ?: return false
-        return doSubmit(event, parent, consumer, info)
+        return doSubmit(event, parentComponent, consumer, additionalInfo)
     }
 
     private fun doSubmit(
         event: IdeaLoggingEvent,
         parent: Component,
-        callback: Consumer<SubmittedReportInfo>,
+        callback: Consumer<in SubmittedReportInfo>,
         description: String?
     ): Boolean {
         val dataContext = DataManager.getInstance().getDataContext(parent)
@@ -161,7 +176,7 @@ class GitHubErrorReporter : ErrorReportSubmitter() {
     }
 
     internal class CallbackWithNotification(
-        private val consumer: Consumer<SubmittedReportInfo>,
+        private val consumer: Consumer<in SubmittedReportInfo>,
         private val project: Project?
     ) : Consumer<SubmittedReportInfo> {
         override fun consume(reportInfo: SubmittedReportInfo) {
@@ -225,8 +240,16 @@ private fun getKeyValuePairs(
     appInfo: ApplicationInfoEx,
     namesInfo: ApplicationNamesInfo
 ): MutableMap<String, String> {
-    //todo: probably need to change with PLUGIN_NAME
-    PluginManagerCore.getPlugin(PluginId.findId("com.sourceplusplus.sourcemarker"))?.run {
+    val hardcodedConfig: JsonObject = try {
+        JsonObject(
+            Resources.toString(
+                Resources.getResource(SourceMarkerPlugin::class.java, "/plugin-configuration.json"), Charsets.UTF_8
+            )
+        )
+    } catch (e: IOException) {
+        throw RuntimeException(e)
+    }
+    PluginManagerCore.getPlugin(PluginId.findId(hardcodedConfig.getString("plugin_id")))?.run {
         if (error.pluginName.isBlank()) error.pluginName = name
         if (error.pluginVersion.isBlank()) error.pluginVersion = version
     }

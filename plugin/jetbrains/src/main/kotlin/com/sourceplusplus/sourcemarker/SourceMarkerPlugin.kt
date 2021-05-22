@@ -8,6 +8,8 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -48,6 +50,11 @@ import com.sourceplusplus.sourcemarker.service.HindsightManager
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import com.sourceplusplus.sourcemarker.settings.getServicePortNormalized
+import com.sourceplusplus.sourcemarker.settings.isSsl
+import com.sourceplusplus.sourcemarker.settings.serviceHostNormalized
+import eu.geekplace.javapinning.JavaPinning
+import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
@@ -59,6 +66,7 @@ import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
+import io.vertx.core.net.TrustOptions
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
@@ -75,6 +83,7 @@ import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.Dimension
+import java.io.IOException
 import java.util.*
 
 /**
@@ -143,6 +152,7 @@ object SourceMarkerPlugin {
                 )
             } catch (ex: DecodeException) {
                 log.warn("Failed to decode SourceMarker configuration", ex)
+                projectSettings.unsetValue("sourcemarker_plugin_config")
                 SourceMarkerConfig()
             }
         } else {
@@ -285,20 +295,60 @@ object SourceMarkerPlugin {
     private suspend fun initServices(config: SourceMarkerConfig) {
         if (!config.serviceHost.isNullOrBlank()) {
             try {
-                val req = vertx.createHttpClient(
+                val hardcodedConfig: JsonObject = try {
+                    JsonObject(
+                        Resources.toString(
+                            Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                        )
+                    )
+                } catch (e: IOException) {
+                    throw RuntimeException(e)
+                }
+
+                val servicePort = config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!
+                val certificatePins = mutableListOf<String>()
+                certificatePins.addAll(config.certificatePins)
+                val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+                if (!hardcodedPin.isNullOrBlank()) {
+                    certificatePins.add(hardcodedPin)
+                }
+                val httpClientOptions = if (certificatePins.isNotEmpty()) {
                     HttpClientOptions()
-                        .setTrustAll(true).setVerifyHost(false) //todo: remove when possible
-                ).request(
+                        .setTrustOptions(
+                            TrustOptions.wrap(
+                                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                            )
+                        )
+                        .setVerifyHost(false)
+                } else {
+                    HttpClientOptions()
+                }
+
+                val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=" + config.accessToken
+                val req = vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
-                        .setSsl(true)
+                        .setSsl(config.isSsl())
                         .setHost(config.serviceHostNormalized!!)
-                        .setPort(config.servicePortNormalized!!)
-                        .setURI("/api/new-token")
+                        .setPort(servicePort)
+                        .setURI(tokenUri)
                 ).await()
                 req.end().await()
                 val resp = req.response().await()
-                val body = resp.body().await().toString()
-                config.serviceToken = body
+                if (resp.statusCode() == 200) {
+                    val body = resp.body().await().toString()
+                    config.serviceToken = body
+                } else {
+                    config.serviceToken = null
+
+                    log.error("Invalid access token")
+                    Notifications.Bus.notify(
+                        Notification(
+                            message("plugin_name"), "Invalid Access Token",
+                            "Failed to validate access token",
+                            NotificationType.ERROR
+                        )
+                    )
+                }
             } catch (ex: Throwable) {
                 log.error("Failed to initialize services", ex)
             }
@@ -308,10 +358,43 @@ object SourceMarkerPlugin {
     private suspend fun initMonitor(config: SourceMarkerConfig) {
         var skywalkingHost = config.skywalkingOapUrl
         if (!config.serviceHost.isNullOrBlank()) {
-            skywalkingHost = "https://${config.serviceHostNormalized}:${config.servicePortNormalized}" +
+            val hardcodedConfig: JsonObject = try {
+                JsonObject(
+                    Resources.toString(
+                        Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                    )
+                )
+            } catch (e: IOException) {
+                throw RuntimeException(e)
+            }
+            val scheme = if (config.isSsl()) "https" else "http"
+            skywalkingHost = "$scheme://${config.serviceHostNormalized}:" +
+                    "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}" +
                     "/graphql/skywalking"
         }
-        deploymentIds.add(vertx.deployVerticle(SkywalkingMonitor(skywalkingHost, config.serviceToken)).await())
+
+        val hardcodedConfig: JsonObject = try {
+            JsonObject(
+                Resources.toString(
+                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                )
+            )
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+
+        val certificatePins = mutableListOf<String>()
+        certificatePins.addAll(config.certificatePins)
+        val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+        if (!hardcodedPin.isNullOrBlank()) {
+            certificatePins.add(hardcodedPin)
+        }
+
+        deploymentIds.add(
+            vertx.deployVerticle(
+                SkywalkingMonitor(skywalkingHost, config.serviceToken, certificatePins)
+            ).await()
+        )
     }
 
     private fun initMapper() {

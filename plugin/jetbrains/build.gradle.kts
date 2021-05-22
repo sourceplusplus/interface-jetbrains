@@ -4,12 +4,13 @@ import org.jetbrains.changelog.markdownToHTML
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "0.7.2"
+    id("org.jetbrains.intellij") version "0.7.3"
     id("org.jetbrains.changelog") version "1.1.2"
     id("maven-publish")
 }
 
 val vertxVersion = ext.get("vertxVersion")
+val kotlinVersion = ext.get("kotlinVersion")
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
@@ -57,7 +58,7 @@ dependencies {
     implementation(project(":portal"))
 
     implementation("com.github.sh5i:git-stein:v0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion-RC-native-mt")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
@@ -70,12 +71,13 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
-    implementation("io.dropwizard.metrics:metrics-core:4.1.19")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
-    implementation("org.jooq:jooq:3.14.8")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    implementation("io.dropwizard.metrics:metrics-core:4.1.21")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
+    implementation("org.jooq:jooq:3.14.9")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
     implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 }
 
 tasks {

@@ -7,12 +7,15 @@ import org.intellij.lang.annotations.Language
 import org.junit.Ignore
 import org.junit.Test
 import java.io.File
+import java.nio.file.Files
+import java.util.*
 
 class GitRepositoryMapperTest : SourceMapperTest() {
 
     @Test
     fun `tokenized java getter method`() {
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Java") val code = """
                 public class GetterMethod {
                     private String str;
@@ -26,7 +29,7 @@ class GitRepositoryMapperTest : SourceMapperTest() {
             git.commit().setMessage("Initial commit").call()
         }
 
-        val fileRepo = FileRepository("/tmp/git-repo/.git")
+        val fileRepo = FileRepository(File(tmpRepo, ".git"))
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         gitMapper.initialize(fileRepo)
 
@@ -53,7 +56,8 @@ class GitRepositoryMapperTest : SourceMapperTest() {
 
     @Test
     fun `tokenized groovy getter method`() {
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             @Language("Groovy") val code = """
                 class GetterMethod {
                     private String str
@@ -67,7 +71,7 @@ class GitRepositoryMapperTest : SourceMapperTest() {
             git.commit().setMessage("Initial commit").call()
         }
 
-        val fileRepo = FileRepository("/tmp/git-repo/.git")
+        val fileRepo = FileRepository(File(tmpRepo, ".git"))
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         gitMapper.initialize(fileRepo)
 
@@ -131,7 +135,8 @@ class GitRepositoryMapperTest : SourceMapperTest() {
     @Ignore
     @Test
     fun `tokenized scala getter method`() {
-        Git.init().setDirectory(File("/tmp/git-repo")).call().use { git ->
+        val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()
+        Git.init().setDirectory(tmpRepo).call().use { git ->
             //todo: @Language("Scala") doesn't work
             @Language("Scala") val code = """
                 class GetterMethod {
@@ -147,7 +152,7 @@ class GitRepositoryMapperTest : SourceMapperTest() {
             git.commit().setMessage("Initial commit").call()
         }
 
-        val fileRepo = FileRepository("/tmp/git-repo/.git")
+        val fileRepo = FileRepository(File(tmpRepo, ".git"))
         val gitMapper = GitRepositoryMapper(sourceCodeTokenizer)
         gitMapper.initialize(fileRepo)
 

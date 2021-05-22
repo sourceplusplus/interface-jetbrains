@@ -1,11 +1,19 @@
 package com.sourceplusplus.sourcemarker.discover
 
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
+import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.ProjectManager
 import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import com.sourceplusplus.protocol.status.MarkerConnection
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
+import com.sourceplusplus.sourcemarker.settings.isSsl
+import eu.geekplace.javapinning.JavaPinning
+import eu.geekplace.javapinning.pin.Pin
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.*
 import io.vertx.core.buffer.Buffer
@@ -18,6 +26,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
 import io.vertx.core.net.NetClientOptions
 import io.vertx.core.net.NetSocket
+import io.vertx.core.net.TrustOptions
 import io.vertx.core.net.PemTrustOptions
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
@@ -29,6 +38,7 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.math.BigInteger
 import java.net.NetworkInterface
 import java.security.MessageDigest
@@ -54,6 +64,15 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     private val setupPromise = Promise.promise<Void>()
     private val setupFuture = setupPromise.future()
     private val replyHandlers = ConcurrentHashMap<String, (JsonObject) -> Unit>()
+    private val hardcodedConfig: JsonObject = try {
+        JsonObject(
+            Resources.toString(
+                Resources.getResource(SourceMarkerPlugin::class.java, "/plugin-configuration.json"), Charsets.UTF_8
+            )
+        )
+    } catch (e: IOException) {
+        throw RuntimeException(e)
+    }
 
     override fun init(vertx: Vertx, config: JsonObject) {
         this.vertx = vertx
@@ -71,26 +90,33 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
                 var serviceHost = pluginConfig.serviceHost!!
                     .substringAfter("https://").substringAfter("http://")
-                var servicePort = 5455
-                if (pluginConfig.serviceHost!!.contains(":")) {
-                    serviceHost = pluginConfig.serviceHost!!.split(":")[0]
-                        .substringAfter("https://").substringAfter("http://")
-                    servicePort = pluginConfig.serviceHost!!.split(":")[1].toInt()
+                val servicePort = hardcodedConfig.getInteger("tcp_service_port")
+                if (serviceHost.contains(":")) {
+                    serviceHost = serviceHost.split(":")[0]
                 }
-                client = if (!pluginConfig.serviceCertificate.isNullOrBlank()) {
-                    var certStr = pluginConfig.serviceCertificate!!
-                    if (!certStr.startsWith("-----BEGIN CERTIFICATE-----")) {
-                        certStr = "-----BEGIN CERTIFICATE-----$certStr"
-                    }
-                    if (!certStr.endsWith("-----END CERTIFICATE-----")) {
-                        certStr = "$certStr-----END CERTIFICATE-----"
-                    }
+
+                val certificatePins = mutableListOf<String>()
+                certificatePins.addAll(pluginConfig.certificatePins)
+                val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+                if (!hardcodedPin.isNullOrBlank()) {
+                    certificatePins.add(hardcodedPin)
+                }
+
+                client = if (certificatePins.isNotEmpty()) {
                     val options = NetClientOptions()
                         .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
-                        .setSsl(true).setPemTrustOptions(PemTrustOptions().addCertValue(Buffer.buffer(certStr)))
+                        .setSsl(pluginConfig.isSsl())
+                        .setTrustOptions(
+                            TrustOptions.wrap(
+                                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                            )
+                        )
                     vertx.createNetClient(options)
                 } else {
-                    vertx.createNetClient()
+                    val options = NetClientOptions()
+                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                        .setSsl(pluginConfig.isSsl())
+                    vertx.createNetClient(options)
                 }
                 socket = client.connect(servicePort, serviceHost).await()
             } catch (throwable: Throwable) {

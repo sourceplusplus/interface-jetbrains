@@ -1,12 +1,14 @@
 plugins {
+    val kotlinVersion = "1.5.0"
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.4.32"
+    kotlin("plugin.serialization") version kotlinVersion
     kotlin("kapt")
-    id("org.jetbrains.kotlin.plugin.noarg") version "1.4.32"
+    id("org.jetbrains.kotlin.plugin.noarg") version kotlinVersion
     id("java")
 }
 
 val vertxVersion = ext.get("vertxVersion")
+val kotlinVersion = ext.get("kotlinVersion")
 
 kotlin {
     jvm { }
@@ -18,7 +20,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
             }
         }
@@ -37,7 +39,7 @@ kotlin {
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
-                implementation("org.jooq:jooq:3.14.8")
+                implementation("org.jooq:jooq:3.14.9")
             }
         }
         val jvmTest by getting {
@@ -53,7 +55,7 @@ kotlin {
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
-                implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
             }
         }
     }
@@ -72,7 +74,7 @@ tasks {
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
                 implementation("io.vertx:vertx-service-proxy:$vertxVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
                 compileOnly(project(":protocol"))
             }
         }

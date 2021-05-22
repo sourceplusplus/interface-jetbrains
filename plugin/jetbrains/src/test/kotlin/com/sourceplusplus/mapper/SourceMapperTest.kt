@@ -54,9 +54,5 @@ abstract class SourceMapperTest : LightPlatformCodeInsightFixture4TestCase() {
                 return result
             }
         }
-
-        if (File("/tmp/git-repo").exists()) {
-            File("/tmp/git-repo").deleteRecursively()
-        }
     }
 }
