@@ -7,7 +7,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitColumnInfo
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
@@ -27,7 +27,7 @@ import java.awt.event.MouseEvent
 class EventsTab : Disposable {
 
     val component: JPanel = JPanel(BorderLayout())
-    val model: ListTableModel<BreakpointHit> = ListTableModel<BreakpointHit>(
+    val model: ListTableModel<LiveBreakpointHit> = ListTableModel<LiveBreakpointHit>(
         arrayOf(
             BreakpointHitColumnInfo("Time"),
             BreakpointHitColumnInfo("Host Name"),

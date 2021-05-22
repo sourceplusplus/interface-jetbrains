@@ -5,7 +5,7 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.ui.JBColor
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
-import com.sourceplusplus.protocol.artifact.debugger.TraceVariable
+import com.sourceplusplus.protocol.instrument.LiveVariable
 import io.vertx.core.json.JsonObject
 import java.awt.Color
 import kotlin.streams.toList
@@ -17,7 +17,7 @@ import kotlin.streams.toList
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class VariableSimpleNode(private val variable: TraceVariable, private val root: Boolean) : SimpleNode() {
+class VariableSimpleNode(private val variable: LiveVariable, private val root: Boolean) : SimpleNode() {
 
     private var jsonObject: JsonObject? = null
     private var clazz: String? = null
@@ -46,7 +46,7 @@ class VariableSimpleNode(private val variable: TraceVariable, private val root: 
             if (root) {
                 val data = jsonObject!!.getJsonObject("encoded")
                 return data.stream().map {
-                    VariableSimpleNode(TraceVariable(it.key, it.value), false)
+                    VariableSimpleNode(LiveVariable(it.key, it.value), false)
                 }.toList().toTypedArray()
             } else {
                 emptyArray()

@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.artifact.debugger
+package com.sourceplusplus.protocol.instrument
 
 import kotlinx.serialization.Serializable
 
@@ -9,8 +9,7 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-enum class TraceVariableScope {
-    LOCAL_VARIABLE,
-    INSTANCE_FIELD,
-    STATIC_FIELD
-}
+data class LiveInstrumentEvent(
+    val eventType: LiveInstrumentEventType,
+    val data: String
+)

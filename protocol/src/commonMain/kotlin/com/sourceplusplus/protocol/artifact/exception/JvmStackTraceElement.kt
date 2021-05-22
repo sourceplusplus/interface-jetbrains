@@ -1,6 +1,6 @@
 package com.sourceplusplus.protocol.artifact.exception
 
-import com.sourceplusplus.protocol.artifact.debugger.TraceVariable
+import com.sourceplusplus.protocol.instrument.LiveVariable
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedClassName
 import kotlinx.serialization.Serializable
 
@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 data class JvmStackTraceElement(
     val method: String,
     val source: String,
-    val variables: MutableList<TraceVariable> = mutableListOf()
+    val variables: MutableList<LiveVariable> = mutableListOf()
 ) {
     override fun toString(): String = toString(false)
 

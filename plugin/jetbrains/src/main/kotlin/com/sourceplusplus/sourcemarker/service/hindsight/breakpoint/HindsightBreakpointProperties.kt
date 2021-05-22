@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.service.hindsight.breakpoint
 
 import com.intellij.util.xml.Attribute
-import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
+import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import org.jetbrains.java.debugger.breakpoints.properties.JavaBreakpointProperties
 
 /**
@@ -15,7 +15,7 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
     private var suspend: Boolean = false
     private var active: Boolean = false
     private var finished: Boolean = false
-    private var location: SourceLocation? = null
+    private var location: LiveSourceLocation? = null
     private var breakpointId: String? = null
     private var hindsightCondition: String? = null
 
@@ -50,12 +50,12 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
     }
 
     @Attribute("location")
-    fun getLocation(): SourceLocation? {
+    fun getLocation(): LiveSourceLocation? {
         return location
     }
 
     @Attribute("location")
-    fun setLocation(location: SourceLocation) {
+    fun setLocation(location: LiveSourceLocation) {
         this.location = location
     }
 

@@ -19,14 +19,14 @@ import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
 import com.sourceplusplus.protocol.ProtocolErrors
-import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
-import com.sourceplusplus.protocol.artifact.debugger.HindsightBreakpoint
-import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointEvent
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointEventType
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointRemoved
+import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
+import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
+import com.sourceplusplus.protocol.instrument.LiveSourceLocation
+import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
@@ -61,32 +61,33 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
         log.debug("HindsightManager started")
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
-        vertx.eventBus().consumer<JsonObject>("local." + Provide.Tracing.HINDSIGHT_BREAKPOINT_SUBSCRIBER) {
-            val bpEvent = Json.decodeValue(it.body().toString(), BreakpointEvent::class.java)
-            log.info("Received breakpoint event. Type: {}", bpEvent.eventType)
+        vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_INSTRUMENT_SUBSCRIBER) {
+            val liveEvent = Json.decodeValue(it.body().toString(), LiveInstrumentEvent::class.java)
+            log.info("Received breakpoint event. Type: {}", liveEvent.eventType)
 
-            when (bpEvent.eventType) {
-                BreakpointEventType.HIT -> {
-                    val bpHit = Json.decodeValue(bpEvent.data, BreakpointHit::class.java)
+            when (liveEvent.eventType) {
+                LiveInstrumentEventType.BREAKPOINT_HIT -> {
+                    val bpHit = Json.decodeValue(liveEvent.data, LiveBreakpointHit::class.java)
                     ApplicationManager.getApplication().invokeLater {
                         val project = ProjectManager.getInstance().openProjects[0]
                         BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
                     }
                 }
-                BreakpointEventType.REMOVED -> {
-                    val bpRemoved = Json.decodeValue(bpEvent.data, BreakpointRemoved::class.java)
+                LiveInstrumentEventType.BREAKPOINT_REMOVED -> {
+                    val bpRemoved = Json.decodeValue(liveEvent.data, LiveBreakpointRemoved::class.java)
                     ApplicationManager.getApplication().invokeLater {
                         val project = ProjectManager.getInstance().openProjects[0]
                         BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
                     }
                 }
+                else -> TODO("Live event type: ${liveEvent.eventType}")
             }
         }
 
         //register listener
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            Provide.Tracing.HINDSIGHT_BREAKPOINT_SUBSCRIBER,
+            Provide.LIVE_INSTRUMENT_SUBSCRIBER,
             JsonObject(),
             TCPServiceDiscoveryBackend.socket
         )
@@ -115,8 +116,8 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
             breakpoint.properties.setHindsightCondition(hindsightCondition)
         }
 
-        Tracing.hindsightDebugger!!.addBreakpoint(
-            HindsightBreakpoint(
+        Instance.liveInstrument!!.addLiveInstrument(
+            LiveBreakpoint(
                 breakpoint.properties.getLocation()!!,
                 condition = breakpoint.properties.getHindsightCondition()
             )
@@ -150,8 +151,8 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
             return
         }
 
-        Tracing.hindsightDebugger!!.removeBreakpoint(
-            HindsightBreakpoint(
+        Instance.liveInstrument!!.removeLiveInstrument(
+            LiveBreakpoint(
                 breakpoint.properties.getLocation()!!,
                 id = breakpoint.properties.getBreakpointId()
             )
@@ -218,8 +219,8 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
             breakpoint.properties.setHindsightCondition(hindsightCondition)
         }
 
-        Tracing.hindsightDebugger!!.removeBreakpoint(
-            HindsightBreakpoint(
+        Instance.liveInstrument!!.removeLiveInstrument(
+            LiveBreakpoint(
                 breakpoint.properties.getLocation()!!,
                 id = breakpoint.properties.getBreakpointId()
             )
@@ -231,10 +232,10 @@ class HindsightManager(private val project: Project) : CoroutineVerticle(),
                     val qualifiedName = psiFile.classes[0].qualifiedName!!
 
                     //only need to copy over location
-                    breakpoint.properties.setLocation(SourceLocation(qualifiedName, breakpoint.line + 1))
+                    breakpoint.properties.setLocation(LiveSourceLocation(qualifiedName, breakpoint.line + 1))
 
-                    Tracing.hindsightDebugger!!.addBreakpoint(
-                        HindsightBreakpoint(
+                    Instance.liveInstrument!!.addLiveInstrument(
+                        LiveBreakpoint(
                             breakpoint.properties.getLocation()!!,
                             condition = breakpoint.properties.getHindsightCondition()
                         )

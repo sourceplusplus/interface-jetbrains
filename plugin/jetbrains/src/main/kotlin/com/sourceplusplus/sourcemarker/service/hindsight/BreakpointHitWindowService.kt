@@ -18,8 +18,8 @@ import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointRemoved
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointProperties
 import com.sourceplusplus.sourcemarker.service.hindsight.ui.BreakpointHitWindow
@@ -93,7 +93,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         contentManager!!.addContent(content)
     }
 
-    fun processRemoveBreakpoint(bpr: BreakpointRemoved) {
+    fun processRemoveBreakpoint(bpr: LiveBreakpointRemoved) {
         XDebuggerManager.getInstance(project).breakpointManager.allBreakpoints.forEach {
             if (it.type.id == "hindsight-breakpoint") {
                 val props = (it.properties as HindsightBreakpointProperties)
@@ -124,7 +124,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
     }
 
-    fun addBreakpointHit(hit: BreakpointHit) {
+    fun addBreakpointHit(hit: LiveBreakpointHit) {
         eventsWindow.eventsTab.model.insertRow(0, hit)
         val max = 1000
         if (eventsWindow.eventsTab.model.items.size > max) {
@@ -132,7 +132,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
     }
 
-    fun showBreakpointHit(hit: BreakpointHit) {
+    fun showBreakpointHit(hit: LiveBreakpointHit) {
         removeExecutionShower()
         breakpointWindow = BreakpointHitWindow(project, executionPointHighlighter)
         breakpointWindow.showFrames(hit.stackTrace, hit.stackTrace.first())

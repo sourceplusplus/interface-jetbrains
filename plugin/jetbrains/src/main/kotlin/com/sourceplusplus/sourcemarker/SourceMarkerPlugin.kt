@@ -29,8 +29,7 @@ import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfigurati
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
-import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Logging
-import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
@@ -40,8 +39,8 @@ import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
+import com.sourceplusplus.protocol.service.live.LiveInstrumentService
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
-import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
@@ -245,7 +244,7 @@ object SourceMarkerPlugin {
         EventBusService.getProxy(discovery, LocalTracingService::class.java) {
             if (it.succeeded()) {
                 log.info("Local tracing available")
-                Tracing.localTracing = it.result()
+                Instance.localTracing = it.result()
             } else {
                 log.warn("Local tracing unavailable")
             }
@@ -253,17 +252,17 @@ object SourceMarkerPlugin {
         EventBusService.getProxy(discovery, LogCountIndicatorService::class.java) {
             if (it.succeeded()) {
                 log.info("Log count indicator available")
-                Logging.logCountIndicator = it.result()
+                Instance.logCountIndicator = it.result()
 
                 vertx.deployVerticle(LogCountIndicators())
             } else {
                 log.warn("Log count indicator unavailable")
             }
         }
-        EventBusService.getProxy(discovery, HindsightDebuggerService::class.java) {
+        EventBusService.getProxy(discovery, LiveInstrumentService::class.java) {
             if (it.succeeded()) {
-                log.info("Hindsight debugger available")
-                Tracing.hindsightDebugger = it.result()
+                log.info("Live instruments available")
+                Instance.liveInstrument = it.result()
 
                 ApplicationManager.getApplication().invokeLater {
                     BreakpointHitWindowService.getInstance(project).showEventsWindow()
@@ -272,7 +271,7 @@ object SourceMarkerPlugin {
                 vertx.deployVerticle(breakpointListener)
                 project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
             } else {
-                log.warn("Hindsight debugger unavailable")
+                log.warn("Live instruments unavailable")
             }
         }
     }

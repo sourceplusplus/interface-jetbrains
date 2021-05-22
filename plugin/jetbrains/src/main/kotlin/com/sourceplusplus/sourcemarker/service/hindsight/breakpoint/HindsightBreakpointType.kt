@@ -20,8 +20,8 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.breakpoints.XLineBreakpointType
 import com.intellij.xdebugger.breakpoints.ui.XBreakpointCustomPropertiesPanel
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
-import com.sourceplusplus.protocol.SourceMarkerServices.Instance.Tracing
-import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
+import com.sourceplusplus.protocol.SourceMarkerServices.Instance
+import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointTriggerListener
 import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider
@@ -50,7 +50,7 @@ class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointPropertie
     }
 
     override fun canPutAt(file: VirtualFile, line: Int, project: Project): Boolean {
-        if (Tracing.hindsightDebugger == null) return false
+        if (Instance.liveInstrument == null) return false
         return canPutAtElement(file, line, project) { element: PsiElement, _: Document ->
             element !is PsiMethod && element !is PsiField
         }
@@ -69,7 +69,7 @@ class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointPropertie
         val psiFile =
             (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0]).findFile(file) as PsiClassOwner)
         val qualifiedName = psiFile.classes[0].qualifiedName!!
-        props.setLocation(SourceLocation(qualifiedName, line + 1))
+        props.setLocation(LiveSourceLocation(qualifiedName, line + 1))
         props.setSuspend(!BreakpointTriggerListener.shiftHeld)
         return props
     }

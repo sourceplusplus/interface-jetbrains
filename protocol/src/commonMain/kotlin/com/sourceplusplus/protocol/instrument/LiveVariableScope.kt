@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.artifact.debugger.event
+package com.sourceplusplus.protocol.instrument
 
 import kotlinx.serialization.Serializable
 
@@ -9,7 +9,8 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-enum class BreakpointEventType {
-    HIT,
-    REMOVED
+enum class LiveVariableScope {
+    LOCAL_VARIABLE,
+    INSTANCE_FIELD,
+    STATIC_FIELD
 }

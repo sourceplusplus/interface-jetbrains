@@ -165,9 +165,9 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 }
 
                 setupHandler(vertx, "get-records")
-                setupHandler(vertx, Utilize.Tracing.LOCAL_TRACING)
-                setupHandler(vertx, Utilize.Tracing.HINDSIGHT_DEBUGGER)
-                setupHandler(vertx, Utilize.Logging.LOG_COUNT_INDICATOR)
+                setupHandler(vertx, Utilize.LIVE_INSTRUMENT)
+                setupHandler(vertx, Utilize.LOCAL_TRACING)
+                setupHandler(vertx, Utilize.LOG_COUNT_INDICATOR)
 
                 //setup connection
                 val pc = MarkerConnection(

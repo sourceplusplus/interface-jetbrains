@@ -1,7 +1,8 @@
-package com.sourceplusplus.protocol.artifact.debugger.event
+package com.sourceplusplus.protocol.instrument.breakpoint.event
 
 import com.sourceplusplus.protocol.Serializers
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -12,7 +13,7 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class BreakpointHit(
+data class LiveBreakpointHit(
     val breakpointId: String,
     val traceId: String,
     @Serializable(with = Serializers.InstantKSerializer::class)
@@ -20,4 +21,6 @@ data class BreakpointHit(
     val host: String,
     val application: String,
     val stackTrace: JvmStackTrace
-)
+) {
+    val eventType: LiveInstrumentEventType = LiveInstrumentEventType.BREAKPOINT_HIT
+}

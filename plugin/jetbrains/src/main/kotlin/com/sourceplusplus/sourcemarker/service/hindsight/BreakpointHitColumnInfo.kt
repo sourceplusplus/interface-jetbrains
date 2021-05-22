@@ -2,7 +2,7 @@ package com.sourceplusplus.sourcemarker.service.hindsight
 
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.table.IconTableCellRenderer
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.artifact.exception.methodName
 import com.sourceplusplus.protocol.artifact.exception.qualifiedClassName
 import com.sourceplusplus.protocol.artifact.exception.shortQualifiedClassName
@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class BreakpointHitColumnInfo(name: String) : ColumnInfo<BreakpointHit, String>(name) {
+class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, String>(name) {
 
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S").withZone(ZoneId.systemDefault())
 
@@ -33,29 +33,29 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<BreakpointHit, String>(
         }
     }
 
-    override fun getCustomizedRenderer(o: BreakpointHit, renderer: TableCellRenderer): TableCellRenderer {
+    override fun getCustomizedRenderer(o: LiveBreakpointHit, renderer: TableCellRenderer): TableCellRenderer {
         return when (name) {
             "Hindsight Data" -> IconTableCellRenderer.create(SourceMarkerIcons.EYE_ICON)
             else -> super.getCustomizedRenderer(o, renderer)
         }
     }
 
-    override fun getComparator(): Comparator<BreakpointHit>? {
+    override fun getComparator(): Comparator<LiveBreakpointHit>? {
         return when (name) {
-            "Time" -> Comparator { t: BreakpointHit, t2: BreakpointHit ->
+            "Time" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.occurredAt.compareTo(t2.occurredAt) //todo: could add line number too
             }
-            "Class Name" -> Comparator { t: BreakpointHit, t2: BreakpointHit ->
+            "Class Name" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.stackTrace.first().qualifiedClassName().compareTo(t2.stackTrace.first().qualifiedClassName())
             }
-            "Line No" -> Comparator { t: BreakpointHit, t2: BreakpointHit ->
+            "Line No" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.stackTrace.first().sourceAsLineNumber()!!.compareTo(t2.stackTrace.first().sourceAsLineNumber()!!)
             }
             else -> null
         }
     }
 
-    override fun valueOf(item: BreakpointHit): String {
+    override fun valueOf(item: LiveBreakpointHit): String {
         return when (name) {
             "Time" -> formatter.format(item.occurredAt.toJavaInstant())
             "Host Name" -> item.host
