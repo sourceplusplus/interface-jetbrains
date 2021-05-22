@@ -13,6 +13,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class LiveLog(
+    val logFormat: String,
+    val logArguments: List<String> = emptyList(),
     override val location: LiveSourceLocation,
     override val condition: String? = null,
     override val expiresAt: Long? = null,
