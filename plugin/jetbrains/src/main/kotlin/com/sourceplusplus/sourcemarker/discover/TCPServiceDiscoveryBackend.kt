@@ -4,8 +4,6 @@ import com.google.common.base.Charsets
 import com.google.common.io.Resources
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.ide.util.PropertiesComponent
-import com.intellij.openapi.project.ProjectManager
 import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import com.sourceplusplus.protocol.status.MarkerConnection
@@ -14,9 +12,7 @@ import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import com.sourceplusplus.sourcemarker.settings.isSsl
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
-import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.*
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.impl.EventBusImpl
 import io.vertx.core.eventbus.impl.MessageImpl
 import io.vertx.core.http.impl.headers.HeadersMultiMap
@@ -27,7 +23,6 @@ import io.vertx.core.net.NetClient
 import io.vertx.core.net.NetClientOptions
 import io.vertx.core.net.NetSocket
 import io.vertx.core.net.TrustOptions
-import io.vertx.core.net.PemTrustOptions
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
