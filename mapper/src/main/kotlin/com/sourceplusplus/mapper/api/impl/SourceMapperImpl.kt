@@ -5,6 +5,7 @@ import com.sourceplusplus.mapper.vcs.git.GitRepositoryMapper
 import com.sourceplusplus.mapper.vcs.git.LogFollowCommand
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.LocalArtifact
+import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
@@ -15,21 +16,29 @@ import java.util.*
  */
 class SourceMapperImpl(private val mapper: GitRepositoryMapper) : SourceMapper {
 
+    companion object {
+        private val log = LoggerFactory.getLogger(SourceMapperImpl::class.java)
+    }
+
     override fun getMethodQualifiedName(
         methodQualifiedName: ArtifactQualifiedName,
         targetCommitId: String,
         returnBestEffort: Boolean
     ): Optional<ArtifactQualifiedName> {
+        log.debug(
+            "Getting method qualified name: {} - Target commit id: {} - Best effort: {}",
+            methodQualifiedName, targetCommitId, returnBestEffort
+        )
         val methodRenames = LogFollowCommand(
             mapper.targetRepo, LocalArtifact(
                 methodQualifiedName, mapper.cacheThing[methodQualifiedName.identifier]!!
             ), targetCommitId
         ).call()
+        log.info("Method renames: {}", methodRenames.joinToString())
+
         val possibleName = methodRenames.lastOrNull()
-        return if (possibleName != null
-            && (possibleName.artifactQualifiedName.commitId == targetCommitId || returnBestEffort)
-        ) {
-            Optional.of(possibleName.artifactQualifiedName)
+        return if (possibleName?.artifactQualifiedName?.commitId == targetCommitId || returnBestEffort) {
+            Optional.ofNullable(possibleName?.artifactQualifiedName)
         } else {
             Optional.ofNullable(null)
         }
