@@ -7,5 +7,5 @@ abstract class LiveInstrument {
     abstract val hitLimit: Int
     abstract val id: String?
     abstract val type: LiveInstrumentType
-    open var applyImmediately: Boolean = true
+    open var applyImmediately: Boolean = false
 }
