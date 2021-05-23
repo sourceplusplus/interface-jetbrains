@@ -1,6 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("com.apollographql.apollo").version("2.5.6")
+    id("com.apollographql.apollo").version("2.5.7")
 }
 
 val vertxVersion = ext.get("vertxVersion")
