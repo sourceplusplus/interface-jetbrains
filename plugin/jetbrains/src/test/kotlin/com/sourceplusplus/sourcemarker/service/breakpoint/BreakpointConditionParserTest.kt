@@ -40,7 +40,7 @@ class BreakpointConditionParserTest : LightPlatformCodeInsightFixture4TestCase()
             .createCodeFragment(expressionText, context, project)
         assertEquals(
             "staticFields[staticVar] == 1 && fields[instanceVar] == 2 && localVariables[localVar] == 3",
-            BreakpointConditionParser.toHindsightConditional(codeFragment)
+            BreakpointConditionParser.toBreakpointConditional(codeFragment)
         )
     }
 }

@@ -111,14 +111,14 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             val text = TextWithImportsImpl.fromXExpression(breakpoint.conditionExpression)
             val codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context)
                 .createCodeFragment(text, context, project)
-            val hindsightCondition = BreakpointConditionParser.toHindsightConditional(codeFragment)
-            breakpoint.properties.setHindsightCondition(hindsightCondition)
+            val breakpointCondition = BreakpointConditionParser.toBreakpointConditional(codeFragment)
+            breakpoint.properties.setBreakpointCondition(breakpointCondition)
         }
 
         Instance.liveInstrument!!.addLiveInstrument(
             LiveBreakpoint(
                 breakpoint.properties.getLocation()!!,
-                condition = breakpoint.properties.getHindsightCondition()
+                condition = breakpoint.properties.getBreakpointCondition()
             )
         ) {
             if (it.succeeded()) {
@@ -214,8 +214,8 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             val text = TextWithImportsImpl.fromXExpression(breakpoint.conditionExpression)
             val codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context)
                 .createCodeFragment(text, context, project)
-            val hindsightCondition = BreakpointConditionParser.toHindsightConditional(codeFragment)
-            breakpoint.properties.setHindsightCondition(hindsightCondition)
+            val breakpointCondition = BreakpointConditionParser.toBreakpointConditional(codeFragment)
+            breakpoint.properties.setBreakpointCondition(breakpointCondition)
         }
 
         Instance.liveInstrument!!.removeLiveInstrument(
@@ -236,7 +236,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                     Instance.liveInstrument!!.addLiveInstrument(
                         LiveBreakpoint(
                             breakpoint.properties.getLocation()!!,
-                            condition = breakpoint.properties.getHindsightCondition()
+                            condition = breakpoint.properties.getBreakpointCondition()
                         )
                     ) {
                         if (it.succeeded()) {

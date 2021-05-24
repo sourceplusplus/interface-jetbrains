@@ -17,7 +17,7 @@ class LiveBreakpointProperties : JavaBreakpointProperties<LiveBreakpointProperti
     private var finished: Boolean = false
     private var location: LiveSourceLocation? = null
     private var breakpointId: String? = null
-    private var hindsightCondition: String? = null
+    private var breakpointCondition: String? = null
 
     @Attribute("suspend")
     fun getSuspend(): Boolean {
@@ -69,14 +69,14 @@ class LiveBreakpointProperties : JavaBreakpointProperties<LiveBreakpointProperti
         this.breakpointId = breakpointId
     }
 
-    @Attribute("hindsightCondition")
-    fun getHindsightCondition(): String? {
-        return hindsightCondition
+    @Attribute("breakpointCondition")
+    fun getBreakpointCondition(): String? {
+        return breakpointCondition
     }
 
-    @Attribute("hindsightCondition")
-    fun setHindsightCondition(hindsightCondition: String) {
-        this.hindsightCondition = hindsightCondition
+    @Attribute("breakpointCondition")
+    fun setBreakpointCondition(breakpointCondition: String) {
+        this.breakpointCondition = breakpointCondition
     }
 
     override fun getState(): LiveBreakpointProperties? {
@@ -91,6 +91,6 @@ class LiveBreakpointProperties : JavaBreakpointProperties<LiveBreakpointProperti
         finished = state.finished
         location = state.location
         breakpointId = state.breakpointId
-        hindsightCondition = state.hindsightCondition
+        breakpointCondition = state.breakpointCondition
     }
 }

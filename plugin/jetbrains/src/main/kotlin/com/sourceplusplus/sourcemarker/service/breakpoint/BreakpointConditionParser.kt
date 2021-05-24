@@ -13,7 +13,7 @@ object BreakpointConditionParser {
 
     private val log = LoggerFactory.getLogger(BreakpointConditionParser::class.java)
 
-    fun toHindsightConditional(codeFragment: JavaCodeFragment): String {
+    fun toBreakpointConditional(codeFragment: JavaCodeFragment): String {
         var expression = codeFragment.text
         val identifiers = mutableListOf<PsiReferenceExpression>()
         codeFragment.accept(object : PsiRecursiveElementVisitor() {
