@@ -30,10 +30,10 @@ import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRem
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointConditionParser
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointTriggerListener
-import com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointProperties
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointConditionParser
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
+import com.sourceplusplus.sourcemarker.service.breakpoint.model.HindsightBreakpointProperties
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
@@ -50,15 +50,15 @@ import javax.swing.Icon
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class HindsightManager(private val project: Project) : CoroutineVerticle(),
+class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
     XBreakpointListener<XLineBreakpoint<HindsightBreakpointProperties>> {
 
     companion object {
-        private val log = LoggerFactory.getLogger(HindsightManager::class.java)
+        private val log = LoggerFactory.getLogger(LiveBreakpointManager::class.java)
     }
 
     override suspend fun start() {
-        log.debug("HindsightManager started")
+        log.debug("LiveBreakpointManager started")
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
         vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_INSTRUMENT_SUBSCRIBER) {

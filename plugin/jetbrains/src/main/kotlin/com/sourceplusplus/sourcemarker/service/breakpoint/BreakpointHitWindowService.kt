@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight
+package com.sourceplusplus.sourcemarker.service.breakpoint
 
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -21,9 +21,9 @@ import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
-import com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointProperties
-import com.sourceplusplus.sourcemarker.service.hindsight.ui.BreakpointHitWindow
-import com.sourceplusplus.sourcemarker.service.hindsight.ui.EventsWindow
+import com.sourceplusplus.sourcemarker.service.breakpoint.model.HindsightBreakpointProperties
+import com.sourceplusplus.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
+import com.sourceplusplus.sourcemarker.service.breakpoint.ui.EventsWindow
 import org.slf4j.LoggerFactory
 
 /**

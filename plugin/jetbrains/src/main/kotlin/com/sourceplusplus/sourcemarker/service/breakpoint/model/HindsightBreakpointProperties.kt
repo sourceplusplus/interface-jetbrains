@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.breakpoint
+package com.sourceplusplus.sourcemarker.service.breakpoint.model
 
 import com.intellij.util.xml.Attribute
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation

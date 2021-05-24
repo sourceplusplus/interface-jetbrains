@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.tree
+package com.sourceplusplus.sourcemarker.service.breakpoint.tree
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.projectView.PresentationData

@@ -1,13 +1,13 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.ui
+package com.sourceplusplus.sourcemarker.service.breakpoint.ui
 
 import com.intellij.openapi.Disposable
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.tree.AsyncTreeModel
 import com.intellij.ui.tree.StructureTreeModel
 import com.intellij.ui.treeStructure.Tree
-import com.sourceplusplus.sourcemarker.service.hindsight.DebugStackFrameListener
-import com.sourceplusplus.sourcemarker.service.hindsight.StackFrameManager
-import com.sourceplusplus.sourcemarker.service.hindsight.tree.VariableSimpleTreeStructure
+import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
+import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
+import com.sourceplusplus.sourcemarker.service.breakpoint.tree.VariableSimpleTreeStructure
 import java.awt.BorderLayout
 import javax.swing.JPanel
 import javax.swing.JTree

@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.painter
+package com.sourceplusplus.sourcemarker.service.breakpoint.painter
 
 import com.intellij.openapi.editor.EditorLinePainter
 import com.intellij.openapi.editor.LineExtensionInfo
@@ -9,7 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.Gray
 import com.intellij.ui.JBColor
 import com.intellij.xdebugger.ui.DebuggerColors
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import java.awt.Color
 import java.awt.Font
 import java.util.*

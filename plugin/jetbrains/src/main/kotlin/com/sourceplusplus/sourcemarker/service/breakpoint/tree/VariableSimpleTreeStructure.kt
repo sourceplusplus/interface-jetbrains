@@ -1,7 +1,7 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.tree
+package com.sourceplusplus.sourcemarker.service.breakpoint.tree
 
 import com.intellij.ui.treeStructure.SimpleTreeStructure
-import com.sourceplusplus.sourcemarker.service.hindsight.StackFrameManager
+import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
 
 /**
  * todo: description.

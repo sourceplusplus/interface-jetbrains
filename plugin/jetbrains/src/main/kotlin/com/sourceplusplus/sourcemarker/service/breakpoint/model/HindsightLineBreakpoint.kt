@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.breakpoint
+package com.sourceplusplus.sourcemarker.service.breakpoint.model
 
 import com.intellij.debugger.ui.breakpoints.LineBreakpoint
 import com.intellij.openapi.project.Project

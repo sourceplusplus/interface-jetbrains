@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.ui
+package com.sourceplusplus.sourcemarker.service.breakpoint.ui
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
@@ -9,8 +9,8 @@ import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
-import com.sourceplusplus.sourcemarker.service.hindsight.DebugStackFrameListener
-import com.sourceplusplus.sourcemarker.service.hindsight.StackFrameManager
+import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
+import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import java.awt.BorderLayout
 import javax.swing.JList

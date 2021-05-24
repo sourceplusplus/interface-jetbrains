@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.ui
+package com.sourceplusplus.sourcemarker.service.breakpoint.ui
 
 import com.intellij.execution.ui.RunnerLayoutUi
 import com.intellij.execution.ui.layout.PlaceInGrid
@@ -6,9 +6,9 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
-import com.sourceplusplus.sourcemarker.service.hindsight.HindsightConstants
-import com.sourceplusplus.sourcemarker.service.hindsight.DebugStackFrameListener
-import com.sourceplusplus.sourcemarker.service.hindsight.StackFrameManager
+import com.sourceplusplus.sourcemarker.service.breakpoint.HindsightConstants
+import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
+import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
 

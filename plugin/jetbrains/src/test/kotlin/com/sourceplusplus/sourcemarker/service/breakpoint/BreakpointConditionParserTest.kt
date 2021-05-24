@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight
+package com.sourceplusplus.sourcemarker.service.breakpoint
 
 import com.intellij.debugger.engine.evaluation.TextWithImportsImpl
 import com.intellij.debugger.impl.DebuggerUtilsEx

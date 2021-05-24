@@ -90,7 +90,11 @@ object ProtocolMarshaller {
 
     @JvmStatic
     fun deserializeLiveInstrument(value: JsonObject): LiveInstrument {
-        return value.mapTo(LiveInstrument::class.java)
+        return if (value.getString("type") == "BREAKPOINT") {
+            value.mapTo(LiveBreakpoint::class.java)
+        } else {
+            value.mapTo(LiveLog::class.java)
+        }
     }
 
     @JvmStatic

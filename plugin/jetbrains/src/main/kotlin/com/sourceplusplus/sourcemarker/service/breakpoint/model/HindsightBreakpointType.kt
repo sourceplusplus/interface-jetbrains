@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.breakpoint
+package com.sourceplusplus.sourcemarker.service.breakpoint.model
 
 import com.intellij.debugger.engine.DebuggerUtils
 import com.intellij.debugger.ui.breakpoints.Breakpoint
@@ -23,7 +23,7 @@ import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointTriggerListener
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider
 import org.jetbrains.java.debugger.breakpoints.JavaBreakpointFiltersPanel
 import javax.swing.Icon

@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.ui
+package com.sourceplusplus.sourcemarker.service.breakpoint.ui
 
 import com.intellij.execution.ui.RunnerLayoutUi
 import com.intellij.execution.ui.layout.PlaceInGrid
@@ -12,10 +12,10 @@ import com.intellij.ui.content.Content
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
-import com.sourceplusplus.sourcemarker.service.hindsight.DebugStackFrameListener
-import com.sourceplusplus.sourcemarker.service.hindsight.ExecutionPointManager
-import com.sourceplusplus.sourcemarker.service.hindsight.HindsightConstants
-import com.sourceplusplus.sourcemarker.service.hindsight.StackFrameManager
+import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
+import com.sourceplusplus.sourcemarker.service.breakpoint.ExecutionPointManager
+import com.sourceplusplus.sourcemarker.service.breakpoint.HindsightConstants
+import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.json.Json
 import java.util.concurrent.CopyOnWriteArrayList

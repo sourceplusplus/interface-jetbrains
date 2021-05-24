@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight
+package com.sourceplusplus.sourcemarker.service.breakpoint
 
 import com.intellij.psi.*
 import org.slf4j.LoggerFactory

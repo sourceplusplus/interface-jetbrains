@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.hindsight.ui
+package com.sourceplusplus.sourcemarker.service.breakpoint.ui
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
@@ -8,8 +8,8 @@ import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitColumnInfo
-import com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitColumnInfo
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import java.awt.BorderLayout
 import java.awt.Point
