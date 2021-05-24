@@ -10,7 +10,7 @@ import org.jetbrains.java.debugger.breakpoints.properties.JavaBreakpointProperti
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpointProperties>() {
+class LiveBreakpointProperties : JavaBreakpointProperties<LiveBreakpointProperties>() {
 
     private var suspend: Boolean = false
     private var active: Boolean = false
@@ -79,11 +79,11 @@ class HindsightBreakpointProperties : JavaBreakpointProperties<HindsightBreakpoi
         this.hindsightCondition = hindsightCondition
     }
 
-    override fun getState(): HindsightBreakpointProperties? {
+    override fun getState(): LiveBreakpointProperties? {
         return super.getState()
     }
 
-    override fun loadState(state: HindsightBreakpointProperties) {
+    override fun loadState(state: LiveBreakpointProperties) {
         super.loadState(state)
 
         suspend = state.suspend

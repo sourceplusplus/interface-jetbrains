@@ -33,7 +33,7 @@ import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointConditionParser
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
-import com.sourceplusplus.sourcemarker.service.breakpoint.model.HindsightBreakpointProperties
+import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
@@ -51,7 +51,7 @@ import javax.swing.Icon
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
-    XBreakpointListener<XLineBreakpoint<HindsightBreakpointProperties>> {
+    XBreakpointListener<XLineBreakpoint<LiveBreakpointProperties>> {
 
     companion object {
         private val log = LoggerFactory.getLogger(LiveBreakpointManager::class.java)
@@ -80,7 +80,6 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                         BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
                     }
                 }
-                else -> TODO("Live event type: ${liveEvent.eventType}")
             }
         }
 
@@ -93,14 +92,14 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
         )
     }
 
-    override fun breakpointAdded(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
-        if (breakpoint.type.id != "hindsight-breakpoint") {
+    override fun breakpointAdded(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
+        if (breakpoint.type.id != "live-breakpoint") {
             return
         } else if (!breakpoint.properties.getSuspend()) {
             log.debug("Ignoring un-suspended breakpoint")
             val setIconMethod = XBreakpointBase::class.java.getDeclaredMethod("setIcon", Icon::class.java)
             setIconMethod.isAccessible = true
-            setIconMethod.invoke(breakpoint, SourceMarkerIcons.YELLOW_EYE_ICON)
+            setIconMethod.invoke(breakpoint, SourceMarkerIcons.LIVE_BREAKPOINT_PENDING_ICON)
             return //don't publish breakpoint till it suspends
         }
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl(breakpoint.fileUrl)!!
@@ -128,23 +127,23 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                 breakpoint.properties.setBreakpointId(it.result().id!!)
 
                 XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                    breakpoint, SourceMarkerIcons.EYE_ICON, null
+                    breakpoint, SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON, null
                 )
             } else {
-                log.error("Failed to add hindsight breakpoint", it.cause())
+                log.error("Failed to add live breakpoint", it.cause())
                 notifyError(it.cause() as ReplyException)
 
                 breakpoint.properties.setFinished(false)
                 breakpoint.properties.setActive(false)
                 XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                    breakpoint, SourceMarkerIcons.EYE_SLASH_ICON, null
+                    breakpoint, SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON, null
                 )
             }
         }
     }
 
-    override fun breakpointRemoved(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
-        if (breakpoint.type.id != "hindsight-breakpoint") {
+    override fun breakpointRemoved(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
+        if (breakpoint.type.id != "live-breakpoint") {
             return
         } else if (breakpoint.properties.getBreakpointId() == null) {
             log.debug("Ignored removing un-published breakpoint")
@@ -164,29 +163,29 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                 if (breakpoint.properties.getSuspend()) {
                     val project = ProjectManager.getInstance().openProjects[0]
                     XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                        breakpoint, SourceMarkerIcons.EYE_SLASH_ICON, null
+                        breakpoint, SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON, null
                     )
                 } else {
                     val setIconMethod = XBreakpointBase::class.java.getDeclaredMethod("setIcon", Icon::class.java)
                     setIconMethod.isAccessible = true
-                    setIconMethod.invoke(breakpoint, SourceMarkerIcons.YELLOW_EYE_ICON)
+                    setIconMethod.invoke(breakpoint, SourceMarkerIcons.LIVE_BREAKPOINT_PENDING_ICON)
                 }
             } else {
-                log.error("Failed to add hindsight breakpoint", it.cause())
+                log.error("Failed to add live breakpoint", it.cause())
                 notifyError(it.cause() as ReplyException)
 
                 breakpoint.properties.setFinished(false)
                 breakpoint.properties.setActive(false)
                 val project = ProjectManager.getInstance().openProjects[0]
                 XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                    breakpoint, SourceMarkerIcons.EYE_SLASH_ICON, null
+                    breakpoint, SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON, null
                 )
             }
         }
     }
 
-    override fun breakpointChanged(breakpoint: XLineBreakpoint<HindsightBreakpointProperties>) {
-        if (breakpoint.type.id != "hindsight-breakpoint") {
+    override fun breakpointChanged(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
+        if (breakpoint.type.id != "live-breakpoint") {
             return
         } else if (!breakpoint.properties.getSuspend() && breakpoint.properties.getBreakpointId() == null
             && breakpoint.suspendPolicy == SuspendPolicy.NONE
@@ -194,7 +193,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             log.debug("Ignored changing un-published breakpoint")
             val setIconMethod = XBreakpointBase::class.java.getDeclaredMethod("setIcon", Icon::class.java)
             setIconMethod.isAccessible = true
-            setIconMethod.invoke(breakpoint, SourceMarkerIcons.YELLOW_EYE_ICON)
+            setIconMethod.invoke(breakpoint, SourceMarkerIcons.LIVE_BREAKPOINT_PENDING_ICON)
             return
         } else if (breakpoint.properties.getBreakpointId() == null) {
             log.debug("Breakpoint changed from un-suspended to suspended")
@@ -246,7 +245,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                             breakpoint.properties.setBreakpointId(it.result().id!!)
 
                             XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                                breakpoint, SourceMarkerIcons.EYE_ICON, null
+                                breakpoint, SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON, null
                             )
                         } else {
                             notifyError(it.cause() as ReplyException)
@@ -261,11 +260,11 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
 
     private fun notifyError(replyException: ReplyException) {
         if (replyException.failureType() == ReplyFailure.TIMEOUT) {
-            log.error("Timed out removing hindsight breakpoint")
+            log.error("Timed out removing live breakpoint")
             Notifications.Bus.notify(
                 Notification(
-                    message("plugin_name"), "Hindsight Breakpoint Failed",
-                    "Timed out removing hindsight breakpoint",
+                    message("plugin_name"), "Live Breakpoint Failed",
+                    "Timed out removing live breakpoint",
                     NotificationType.ERROR
                 )
             )
@@ -276,18 +275,18 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                 log.warn("Unable to connect to service: " + debugInfo.getString("name"))
                 Notifications.Bus.notify(
                     Notification(
-                        message("plugin_name"), "Hindsight Breakpoint Failed",
+                        message("plugin_name"), "Live Breakpoint Failed",
                         "Unable to connect to service: " + debugInfo.getString("name"),
                         NotificationType.ERROR
                     )
                 )
             } else {
                 replyException.printStackTrace()
-                log.error("Failed to add hindsight breakpoint", replyException)
+                log.error("Failed to add live breakpoint", replyException)
                 Notifications.Bus.notify(
                     Notification(
-                        message("plugin_name"), "Hindsight Breakpoint Failed",
-                        "Failed to add hindsight breakpoint",
+                        message("plugin_name"), "Live Breakpoint Failed",
+                        "Failed to add live breakpoint",
                         NotificationType.ERROR
                     )
                 )

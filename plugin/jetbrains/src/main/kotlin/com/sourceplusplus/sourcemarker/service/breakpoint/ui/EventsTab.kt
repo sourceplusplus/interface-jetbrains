@@ -35,7 +35,7 @@ class EventsTab : Disposable {
             BreakpointHitColumnInfo("Class Name"),
             BreakpointHitColumnInfo("Method Name"),
             BreakpointHitColumnInfo("Line No"),
-            BreakpointHitColumnInfo("Hindsight Data")
+            BreakpointHitColumnInfo("Breakpoint Data")
         ),
         ArrayList(), 0, SortOrder.DESCENDING
     )
@@ -44,7 +44,7 @@ class EventsTab : Disposable {
         val table = JBTable(model)
         table.isStriped = true
         table.setShowColumns(true)
-        table.setDefaultRenderer(Icon::class.java, IconTableCellRenderer.create(SourceMarkerIcons.EYE_ICON))
+        table.setDefaultRenderer(Icon::class.java, IconTableCellRenderer.create(SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON))
         table.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(mouseEvent: MouseEvent) {
                 val point: Point = mouseEvent.point

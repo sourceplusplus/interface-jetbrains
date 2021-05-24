@@ -34,17 +34,17 @@ import javax.swing.Icon
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointProperties>(
-    "hindsight-breakpoint", "Hindsight Breakpoint"
-), JavaBreakpointType<HindsightBreakpointProperties> {
+class LiveBreakpointType : XLineBreakpointType<LiveBreakpointProperties>(
+    "live-breakpoint", "Live Breakpoint"
+), JavaBreakpointType<LiveBreakpointProperties> {
 
     override fun createCustomRightPropertiesPanel(project: Project):
-            XBreakpointCustomPropertiesPanel<XLineBreakpoint<HindsightBreakpointProperties>> {
+            XBreakpointCustomPropertiesPanel<XLineBreakpoint<LiveBreakpointProperties>> {
         return JavaBreakpointFiltersPanel(project)
     }
 
     override fun getEditorsProvider(
-        breakpoint: XLineBreakpoint<HindsightBreakpointProperties>, project: Project
+        breakpoint: XLineBreakpoint<LiveBreakpointProperties>, project: Project
     ): XDebuggerEditorsProvider {
         return JavaDebuggerEditorsProvider()
     }
@@ -57,15 +57,15 @@ class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointPropertie
     }
 
     override fun getEnabledIcon(): Icon {
-        return SourceMarkerIcons.EYE_ICON
+        return SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
     }
 
     override fun getDisabledIcon(): Icon {
-        return SourceMarkerIcons.EYE_SLASH_ICON
+        return SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON
     }
 
-    override fun createBreakpointProperties(file: VirtualFile, line: Int): HindsightBreakpointProperties {
-        val props = HindsightBreakpointProperties()
+    override fun createBreakpointProperties(file: VirtualFile, line: Int): LiveBreakpointProperties {
+        val props = LiveBreakpointProperties()
         val psiFile =
             (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0]).findFile(file) as PsiClassOwner)
         val qualifiedName = psiFile.classes[0].qualifiedName!!
@@ -75,9 +75,9 @@ class HindsightBreakpointType : XLineBreakpointType<HindsightBreakpointPropertie
     }
 
     override fun createJavaBreakpoint(
-        project: Project, breakpoint: XBreakpoint<HindsightBreakpointProperties>
-    ): Breakpoint<HindsightBreakpointProperties> {
-        return HindsightLineBreakpoint(project, breakpoint)
+        project: Project, breakpoint: XBreakpoint<LiveBreakpointProperties>
+    ): Breakpoint<LiveBreakpointProperties> {
+        return LiveLineBreakpoint(project, breakpoint)
     }
 
     private fun canPutAtElement(

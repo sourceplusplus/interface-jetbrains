@@ -14,7 +14,7 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.ExecutionPointManager
-import com.sourceplusplus.sourcemarker.service.breakpoint.HindsightConstants
+import com.sourceplusplus.sourcemarker.service.breakpoint.LiveBreakpointConstants
 import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.json.Json
@@ -39,9 +39,9 @@ class BreakpointHitWindow(project: Project, executionPointHighlighter: Execution
     init {
         listeners = CopyOnWriteArrayList()
         layoutUi = RunnerLayoutUi.Factory.getInstance(project).create(
-            HindsightConstants.HINDSIGHT_RUNNER,
-            HindsightConstants.HINDSIGHT_RUNNER,
-            HindsightConstants.HINDSIGHT_RUNNER,
+            LiveBreakpointConstants.LIVE_RUNNER,
+            LiveBreakpointConstants.LIVE_RUNNER,
+            LiveBreakpointConstants.LIVE_RUNNER,
             this
         )
         layoutComponent = layoutUi.component
@@ -60,7 +60,7 @@ class BreakpointHitWindow(project: Project, executionPointHighlighter: Execution
         )
         val framesTab = FramesTab(this, config)
         val content = layoutUi.createContent(
-            HindsightConstants.HINDSIGHT_RECORDER_STACK_FRAMES, framesTab.component, "Frames",
+            LiveBreakpointConstants.LIVE_RECORDER_STACK_FRAMES, framesTab.component, "Frames",
             AllIcons.Debugger.Frame, null
         )
         content.isCloseable = false
@@ -72,7 +72,7 @@ class BreakpointHitWindow(project: Project, executionPointHighlighter: Execution
     private fun addVariableTab() {
         val variableTab = VariableTab()
         val content = layoutUi.createContent(
-            HindsightConstants.HINDSIGHT_RECORDER_VARIABLES, variableTab.component, "Variables",
+            LiveBreakpointConstants.LIVE_RECORDER_VARIABLES, variableTab.component, "Variables",
             AllIcons.Debugger.VariablesTab, null
         )
         content.isCloseable = false

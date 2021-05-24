@@ -6,7 +6,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
-import com.sourceplusplus.sourcemarker.service.breakpoint.HindsightConstants
+import com.sourceplusplus.sourcemarker.service.breakpoint.LiveBreakpointConstants
 import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
 import java.util.concurrent.CopyOnWriteArrayList
@@ -28,7 +28,7 @@ class EventsWindow(project: Project) : Disposable {
     private fun addEventsTab() {
         eventsTab = EventsTab()
         val content = layoutUi.createContent(
-            HindsightConstants.HINDSIGHT_RECORDER_STACK_FRAMES, eventsTab.component, "Events",
+            LiveBreakpointConstants.LIVE_RECORDER_STACK_FRAMES, eventsTab.component, "Events",
             AllIcons.Debugger.Console, null
         )
         content.isCloseable = false
@@ -44,9 +44,9 @@ class EventsWindow(project: Project) : Disposable {
     init {
         listeners = CopyOnWriteArrayList()
         layoutUi = RunnerLayoutUi.Factory.getInstance(project).create(
-            HindsightConstants.HINDSIGHT_RUNNER,
-            HindsightConstants.HINDSIGHT_RUNNER,
-            HindsightConstants.HINDSIGHT_RUNNER,
+            LiveBreakpointConstants.LIVE_RUNNER,
+            LiveBreakpointConstants.LIVE_RUNNER,
+            LiveBreakpointConstants.LIVE_RUNNER,
             this
         )
         addEventsTab()

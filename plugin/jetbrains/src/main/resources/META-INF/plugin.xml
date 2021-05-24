@@ -11,9 +11,9 @@
     <depends optional="true" config-file="withKotlin.xml">org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="com.sourceplusplus.sourcemarker.service.hindsight.BreakpointHitWindowService"/>
-        <xdebugger.breakpointType implementation="com.sourceplusplus.sourcemarker.service.hindsight.breakpoint.HindsightBreakpointType"/>
-        <editor.linePainter implementation="com.sourceplusplus.sourcemarker.service.hindsight.painter.VariableEditorLinePainter"/>
+        <projectService serviceImplementation="com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService"/>
+        <xdebugger.breakpointType implementation="com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointType"/>
+        <editor.linePainter implementation="com.sourceplusplus.sourcemarker.service.breakpoint.painter.VariableEditorLinePainter"/>
         <applicationConfigurable
                 instance="com.sourceplusplus.sourcemarker.settings.SourceMarkerConfigurable"
                 groupId="tools"

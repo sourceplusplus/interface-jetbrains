@@ -2,19 +2,17 @@ package com.sourceplusplus.sourcemarker.service.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.table.IconTableCellRenderer
-import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.artifact.exception.methodName
 import com.sourceplusplus.protocol.artifact.exception.qualifiedClassName
 import com.sourceplusplus.protocol.artifact.exception.shortQualifiedClassName
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import kotlinx.datetime.toJavaInstant
-import java.util.Comparator
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.swing.Icon
 import javax.swing.table.TableCellRenderer
-import java.time.ZoneId
-
-import java.time.format.DateTimeFormatter
 
 /**
  * todo: description.
@@ -28,14 +26,14 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, Stri
 
     override fun getColumnClass(): Class<*> {
         return when (name) {
-            "Hindsight Data" -> Icon::class.java
+            "Breakpoint Data" -> Icon::class.java
             else -> super.getColumnClass()
         }
     }
 
     override fun getCustomizedRenderer(o: LiveBreakpointHit, renderer: TableCellRenderer): TableCellRenderer {
         return when (name) {
-            "Hindsight Data" -> IconTableCellRenderer.create(SourceMarkerIcons.EYE_ICON)
+            "Breakpoint Data" -> IconTableCellRenderer.create(SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON)
             else -> super.getCustomizedRenderer(o, renderer)
         }
     }
@@ -63,7 +61,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, Stri
             "Class Name" -> item.stackTrace.first().shortQualifiedClassName()
             "Method Name" -> item.stackTrace.first().methodName()
             "Line No" -> item.stackTrace.first().sourceAsLineNumber()!!.toString()
-            "Hindsight Data" -> "View Frames/Variables"
+            "Breakpoint Data" -> "View Frames/Variables"
             else -> item.toString()
         }
     }

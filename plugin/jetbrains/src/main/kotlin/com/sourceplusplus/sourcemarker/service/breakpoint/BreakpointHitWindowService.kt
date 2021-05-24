@@ -21,7 +21,7 @@ import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
-import com.sourceplusplus.sourcemarker.service.breakpoint.model.HindsightBreakpointProperties
+import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
 import com.sourceplusplus.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
 import com.sourceplusplus.sourcemarker.service.breakpoint.ui.EventsWindow
 import org.slf4j.LoggerFactory
@@ -52,14 +52,14 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
     init {
         try {
             _toolWindow = ToolWindowManager.getInstance(project) //2019.3+
-                .registerToolWindow(HindsightConstants.HINDSIGHT_NAME, true, ToolWindowAnchor.BOTTOM, this, true)
-            _toolWindow!!.setIcon(SourceMarkerIcons.GREY_EYE_ICON)
+                .registerToolWindow(LiveBreakpointConstants.LIVE_BREAKPOINT_NAME, true, ToolWindowAnchor.BOTTOM, this, true)
+            _toolWindow!!.setIcon(SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON)
         } catch (ignored: Throwable) {
             _toolWindow = ToolWindowManager.getInstance(project) //2020+
                 .registerToolWindow(
                     RegisterToolWindowTask.closable(
-                        HindsightConstants.HINDSIGHT_NAME,
-                        SourceMarkerIcons.GREY_EYE_ICON
+                        LiveBreakpointConstants.LIVE_BREAKPOINT_NAME,
+                        SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
                     )
                 )
         }
@@ -95,25 +95,25 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
 
     fun processRemoveBreakpoint(bpr: LiveBreakpointRemoved) {
         XDebuggerManager.getInstance(project).breakpointManager.allBreakpoints.forEach {
-            if (it.type.id == "hindsight-breakpoint") {
-                val props = (it.properties as HindsightBreakpointProperties)
+            if (it.type.id == "live-breakpoint") {
+                val props = (it.properties as LiveBreakpointProperties)
                 if (bpr.breakpointId == props.getBreakpointId()) {
                     props.setFinished(true)
                     props.setActive(false)
 
                     if (bpr.cause == null) {
                         XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                            it as XLineBreakpoint<*>, SourceMarkerIcons.GREEN_EYE_ICON, null
+                            it as XLineBreakpoint<*>, SourceMarkerIcons.LIVE_BREAKPOINT_COMPLETE_ICON, null
                         )
                     } else if (bpr.cause != null) {
                         XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                            it as XLineBreakpoint<*>, SourceMarkerIcons.EYE_SLASH_ICON, null
+                            it as XLineBreakpoint<*>, SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON, null
                         )
 
                         log.warn("Breakpoint failed: " + bpr.cause!!.message)
                         Notifications.Bus.notify(
                             Notification(
-                                "SourceMarker", "Hindsight Breakpoint Failed",
+                                "SourceMarker", "Live Breakpoint Failed",
                                 "Breakpoint failed: " + bpr.cause!!.message,
                                 NotificationType.ERROR
                             )

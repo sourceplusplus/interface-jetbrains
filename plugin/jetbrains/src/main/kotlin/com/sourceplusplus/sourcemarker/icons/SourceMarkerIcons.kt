@@ -22,11 +22,11 @@ object SourceMarkerIcons {
     val exclamationTriangle = IconLoader.getIcon("/icons/exclamation-triangle.svg")
     val performanceRamp = IconLoader.getIcon("/icons/sort-amount-up.svg")
     val activeException = IconLoader.getIcon("/icons/map-marker-exclamation.svg")
-    val EYE_ICON = IconLoader.getIcon("/icons/eye.svg")
-    val GREY_EYE_ICON = IconLoader.getIcon("/icons/eye-grey.svg")
-    val GREEN_EYE_ICON = IconLoader.getIcon("/icons/eye-green.svg")
-    val YELLOW_EYE_ICON = IconLoader.getIcon("/icons/eye-yellow.svg")
-    val EYE_SLASH_ICON = IconLoader.getIcon("/icons/eye-slash.svg")
+    val LIVE_BREAKPOINT_ACTIVE_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-active.svg")
+    val LIVE_BREAKPOINT_DISABLED_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-disabled.svg")
+    val LIVE_BREAKPOINT_COMPLETE_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-complete.svg")
+    val LIVE_BREAKPOINT_PENDING_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-pending.svg")
+    val LIVE_BREAKPOINT_ERROR_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-error.svg")
 
     fun getGutterMarkIcon(advice: ArtifactAdvice): Icon? {
         return when (advice) {

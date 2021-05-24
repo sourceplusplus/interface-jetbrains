@@ -12,8 +12,8 @@ import javax.swing.Icon
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class HindsightLineBreakpoint(project: Project, xBreakpoint: XBreakpoint<HindsightBreakpointProperties>) :
-    LineBreakpoint<HindsightBreakpointProperties>(project, xBreakpoint) {
+class LiveLineBreakpoint(project: Project, xBreakpoint: XBreakpoint<LiveBreakpointProperties>) :
+    LineBreakpoint<LiveBreakpointProperties>(project, xBreakpoint) {
 
     override fun getIcon(): Icon {
         return determineIcon()
@@ -46,10 +46,10 @@ class HindsightLineBreakpoint(project: Project, xBreakpoint: XBreakpoint<Hindsig
     private fun determineIcon(): Icon {
         val properties = xBreakpoint.properties
         return when {
-            !properties.getSuspend() -> SourceMarkerIcons.YELLOW_EYE_ICON
-            properties.getFinished() -> SourceMarkerIcons.GREEN_EYE_ICON
-            properties.getActive() -> SourceMarkerIcons.EYE_ICON
-            else -> SourceMarkerIcons.GREY_EYE_ICON
+            !properties.getSuspend() -> SourceMarkerIcons.LIVE_BREAKPOINT_PENDING_ICON
+            properties.getFinished() -> SourceMarkerIcons.LIVE_BREAKPOINT_COMPLETE_ICON
+            properties.getActive() -> SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
+            else -> SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
         }
     }
 }
