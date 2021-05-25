@@ -149,8 +149,8 @@ public class PluginConfigurationPanel {
             JScrollPane scrollPane = new JBScrollPane(myList);
             add(scrollPane, BorderLayout.CENTER);
 
-            scrollPane.setPreferredSize(new Dimension(100, 150));
-            scrollPane.setMaximumSize(new Dimension(100, 150));
+            scrollPane.setPreferredSize(new Dimension(100, 0));
+            scrollPane.setMaximumSize(new Dimension(100, 0));
         }
 
         void select(String pattern) {
