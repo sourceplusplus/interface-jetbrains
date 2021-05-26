@@ -150,12 +150,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             return
         }
 
-        Instance.liveInstrument!!.removeLiveInstrument(
-            LiveBreakpoint(
-                breakpoint.properties.getLocation()!!,
-                id = breakpoint.properties.getBreakpointId()
-            )
-        ) {
+        Instance.liveInstrument!!.removeLiveInstrument(breakpoint.properties.getBreakpointId()!!) {
             if (it.succeeded()) {
                 breakpoint.properties.setFinished(false)
                 breakpoint.properties.setActive(false)
@@ -218,12 +213,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             breakpoint.properties.setBreakpointCondition(breakpointCondition)
         }
 
-        Instance.liveInstrument!!.removeLiveInstrument(
-            LiveBreakpoint(
-                breakpoint.properties.getLocation()!!,
-                id = breakpoint.properties.getBreakpointId()
-            )
-        ) {
+        Instance.liveInstrument!!.removeLiveInstrument(breakpoint.properties.getBreakpointId()!!) {
             if (it.succeeded()) {
                 ApplicationManager.getApplication().runReadAction {
                     val psiFile: PsiClassOwner = (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0])
