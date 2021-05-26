@@ -19,8 +19,8 @@ import io.vertx.core.Handler
 @VertxGen
 interface LiveInstrumentService {
     fun addLiveInstrument(instrument: LiveInstrument, handler: Handler<AsyncResult<LiveInstrument>>)
-    fun removeLiveInstrument(id: String, handler: Handler<AsyncResult<Boolean>>)
-    fun removeLiveInstruments(location: LiveSourceLocation, handler: Handler<AsyncResult<Boolean>>)
+    fun removeLiveInstrument(id: String, handler: Handler<AsyncResult<LiveInstrument>>)
+    fun removeLiveInstruments(location: LiveSourceLocation, handler: Handler<AsyncResult<List<LiveInstrument>>>)
     fun getLiveInstruments(handler: Handler<AsyncResult<List<LiveInstrument>>>)
     fun getLiveBreakpoints(handler: Handler<AsyncResult<List<LiveBreakpoint>>>)
     fun getLiveLogs(handler: Handler<AsyncResult<List<LiveLog>>>)
