@@ -85,15 +85,19 @@ object ProtocolMarshaller {
 
     @JvmStatic
     fun serializeLiveInstrument(value: LiveInstrument): JsonObject {
-        return JsonObject(Json.encode(value))
+        val valueObject = JsonObject(Json.encode(value))
+        valueObject.put("type", value.type.name)
+        return valueObject
     }
 
     @JvmStatic
     fun deserializeLiveInstrument(value: JsonObject): LiveInstrument {
         return if (value.getString("type") == "BREAKPOINT") {
             value.mapTo(LiveBreakpoint::class.java)
-        } else {
+        } else if (value.getString("type") == "LOG") {
             value.mapTo(LiveLog::class.java)
+        } else {
+            throw UnsupportedOperationException("Live instrument type: " + value.getString("type"))
         }
     }
 
