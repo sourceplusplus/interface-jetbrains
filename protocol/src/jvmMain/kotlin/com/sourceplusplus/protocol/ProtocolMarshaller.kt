@@ -10,6 +10,7 @@ import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.log.LogCountSummary
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.instrument.LiveInstrument
+import com.sourceplusplus.protocol.instrument.LiveInstrumentType
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
@@ -86,7 +87,12 @@ object ProtocolMarshaller {
     @JvmStatic
     fun serializeLiveInstrument(value: LiveInstrument): JsonObject {
         val valueObject = JsonObject(Json.encode(value))
-        valueObject.put("type", value.type.name)
+        //force persistence of "type" as graalvm's native-image drops it for some reason
+        when (value) {
+            is LiveBreakpoint -> valueObject.put("type", LiveInstrumentType.BREAKPOINT.name)
+            is LiveLog -> valueObject.put("type", LiveInstrumentType.LOG.name)
+            else -> throw UnsupportedOperationException("Live instrument: $value")
+        }
         return valueObject
     }
 
