@@ -10,6 +10,7 @@ import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.log.LogCountSummary
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.instrument.LiveInstrument
+import com.sourceplusplus.protocol.instrument.LiveInstrumentBatch
 import com.sourceplusplus.protocol.instrument.LiveInstrumentType
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
@@ -135,6 +136,16 @@ object ProtocolMarshaller {
     @JvmStatic
     fun deserializeLiveSourceLocation(value: JsonObject): LiveSourceLocation {
         return value.mapTo(LiveSourceLocation::class.java)
+    }
+
+    @JvmStatic
+    fun serializeLiveInstrumentBatch(value: LiveInstrumentBatch): JsonObject {
+        return JsonObject(Json.encode(value))
+    }
+
+    @JvmStatic
+    fun deserializeLiveInstrumentBatch(value: JsonObject): LiveInstrumentBatch {
+        return value.mapTo(LiveInstrumentBatch::class.java)
     }
 
     @JvmStatic

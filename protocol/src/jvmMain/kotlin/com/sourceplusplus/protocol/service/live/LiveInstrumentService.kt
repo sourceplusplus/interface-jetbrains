@@ -1,6 +1,7 @@
 package com.sourceplusplus.protocol.service.live
 
 import com.sourceplusplus.protocol.instrument.LiveInstrument
+import com.sourceplusplus.protocol.instrument.LiveInstrumentBatch
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.log.LiveLog
@@ -19,7 +20,7 @@ import io.vertx.core.Handler
 @VertxGen
 interface LiveInstrumentService {
     fun addLiveInstrument(instrument: LiveInstrument, handler: Handler<AsyncResult<LiveInstrument>>)
-    fun addLiveInstruments(instruments: List<LiveInstrument>, handler: Handler<AsyncResult<List<LiveInstrument>>>)
+    fun addLiveInstruments(instruments: LiveInstrumentBatch, handler: Handler<AsyncResult<List<LiveInstrument>>>)
     fun removeLiveInstrument(id: String, handler: Handler<AsyncResult<LiveInstrument?>>)
     fun removeLiveInstruments(location: LiveSourceLocation, handler: Handler<AsyncResult<List<LiveInstrument>>>)
     fun getLiveInstruments(handler: Handler<AsyncResult<List<LiveInstrument>>>)
