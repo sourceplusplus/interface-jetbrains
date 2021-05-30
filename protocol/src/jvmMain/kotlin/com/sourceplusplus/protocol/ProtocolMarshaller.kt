@@ -145,7 +145,12 @@ object ProtocolMarshaller {
 
     @JvmStatic
     fun deserializeLiveInstrumentBatch(value: JsonObject): LiveInstrumentBatch {
-        return value.mapTo(LiveInstrumentBatch::class.java)
+        val rawInstruments = value.getJsonArray("instruments")
+        val typedInstruments = mutableListOf<LiveInstrument>()
+        for (i in rawInstruments.list.indices) {
+            typedInstruments.add(deserializeLiveInstrument(rawInstruments.getJsonObject(i)))
+        }
+        return LiveInstrumentBatch(typedInstruments)
     }
 
     @JvmStatic
