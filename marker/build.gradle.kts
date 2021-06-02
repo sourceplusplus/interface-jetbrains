@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    val intellijVersion = "211.7142.45"
+    val intellijVersion = "211.7442.40"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion-RC-native-mt")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
