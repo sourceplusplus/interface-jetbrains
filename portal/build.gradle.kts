@@ -35,7 +35,7 @@ kotlin {
                 implementation(project(":protocol"))
                 implementation("org.slf4j:slf4j-api:1.7.30")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion-RC-native-mt")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-web:$vertxVersion")
                 implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
@@ -45,9 +45,9 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
             }
         }
 

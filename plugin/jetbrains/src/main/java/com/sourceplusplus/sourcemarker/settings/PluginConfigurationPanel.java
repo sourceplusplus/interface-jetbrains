@@ -2,6 +2,7 @@ package com.sourceplusplus.sourcemarker.settings;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.Messages;
@@ -136,8 +137,9 @@ public class PluginConfigurationPanel {
             myList.setBorder(JBUI.Borders.empty());
 
             ToolbarDecorator decorator = ToolbarDecorator.createDecorator(myList)
+                    .setToolbarPosition(ActionToolbarPosition.RIGHT)
                     .setScrollPaneBorder(JBUI.Borders.empty())
-                    .setPanelBorder(JBUI.Borders.customLine(JBColor.border(), 1, 1, 0, 1))
+                    .setPanelBorder(JBUI.Borders.empty())
                     .setAddAction(__ -> editCertificatePin(null))
                     .setEditAction(__ -> editCertificatePin())
                     .setRemoveAction(__ -> removeCertificatePin())
@@ -147,8 +149,8 @@ public class PluginConfigurationPanel {
             JScrollPane scrollPane = new JBScrollPane(myList);
             add(scrollPane, BorderLayout.CENTER);
 
-            scrollPane.setPreferredSize(new Dimension(100, 150));
-            scrollPane.setMaximumSize(new Dimension(100, 150));
+            scrollPane.setPreferredSize(new Dimension(100, 0));
+            scrollPane.setMaximumSize(new Dimension(100, 0));
         }
 
         void select(String pattern) {

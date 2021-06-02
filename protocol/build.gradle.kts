@@ -35,10 +35,10 @@ kotlin {
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
                 implementation("io.vertx:vertx-service-proxy:$vertxVersion")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
                 implementation("org.jooq:jooq:3.14.11")
             }
         }
@@ -48,13 +48,12 @@ kotlin {
                 implementation("com.google.guava:guava:30.1.1-jre")
                 implementation("junit:junit:4.13.2")
                 implementation(project(":protocol"))
-                //todo: shouldn't be 2.10.3
-                implementation("com.fasterxml.jackson.core:jackson-core:2.12.2")
-                implementation("com.fasterxml.jackson.core:jackson-databind:2.12.2")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
+                implementation("com.fasterxml.jackson.core:jackson-core:2.12.3")
+                implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
             }
         }

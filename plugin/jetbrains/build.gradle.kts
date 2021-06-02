@@ -57,7 +57,7 @@ dependencies {
     implementation(project(":portal"))
 
     implementation("com.github.sh5i:git-stein:v0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion-RC-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
@@ -66,10 +66,10 @@ dependencies {
     implementation(files(".ext/vertx-service-discovery-4.0.3-SNAPSHOT.jar"))
     implementation("io.vertx:vertx-service-proxy:$vertxVersion")
     implementation("io.vertx:vertx-tcp-eventbus-bridge:$vertxVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("io.dropwizard.metrics:metrics-core:4.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
@@ -108,7 +108,7 @@ tasks {
         channels.set(listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first()))
     }
     runPluginVerifier {
-        ideVersions.set(listOf(pluginVerifierIdeVersions))
+        ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })
     }
 
     //todo: should be a way to just add implementation() to dependencies
