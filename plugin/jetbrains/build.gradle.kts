@@ -108,7 +108,7 @@ tasks {
         channels.set(listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first()))
     }
     runPluginVerifier {
-        ideVersions.set(listOf(pluginVerifierIdeVersions))
+        ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })
     }
 
     //todo: should be a way to just add implementation() to dependencies
