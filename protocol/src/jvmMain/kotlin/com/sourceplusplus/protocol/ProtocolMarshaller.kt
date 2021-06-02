@@ -7,11 +7,15 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.debugger.event.BreakpointHit
-import com.sourceplusplus.protocol.artifact.debugger.HindsightBreakpoint
-import com.sourceplusplus.protocol.artifact.debugger.SourceLocation
 import com.sourceplusplus.protocol.artifact.log.LogCountSummary
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
+import com.sourceplusplus.protocol.instrument.LiveInstrument
+import com.sourceplusplus.protocol.instrument.LiveInstrumentBatch
+import com.sourceplusplus.protocol.instrument.LiveInstrumentType
+import com.sourceplusplus.protocol.instrument.LiveSourceLocation
+import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import com.sourceplusplus.protocol.instrument.log.LiveLog
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
@@ -82,28 +86,76 @@ object ProtocolMarshaller {
     }
 
     @JvmStatic
-    fun serializeHindsightBreakpoint(value: HindsightBreakpoint): JsonObject {
+    fun serializeLiveInstrument(value: LiveInstrument): JsonObject {
+        val valueObject = JsonObject(Json.encode(value))
+        //force persistence of "type" as graalvm's native-image drops it for some reason
+        when (value) {
+            is LiveBreakpoint -> valueObject.put("type", LiveInstrumentType.BREAKPOINT.name)
+            is LiveLog -> valueObject.put("type", LiveInstrumentType.LOG.name)
+            else -> throw UnsupportedOperationException("Live instrument: $value")
+        }
+        return valueObject
+    }
+
+    @JvmStatic
+    fun deserializeLiveInstrument(value: JsonObject): LiveInstrument {
+        return if (value.getString("type") == "BREAKPOINT") {
+            value.mapTo(LiveBreakpoint::class.java)
+        } else if (value.getString("type") == "LOG") {
+            value.mapTo(LiveLog::class.java)
+        } else {
+            throw UnsupportedOperationException("Live instrument type: " + value.getString("type"))
+        }
+    }
+
+    @JvmStatic
+    fun serializeLiveBreakpoint(value: LiveBreakpoint): JsonObject {
         return JsonObject(Json.encode(value))
     }
 
     @JvmStatic
-    fun deserializeHindsightBreakpoint(value: JsonObject): HindsightBreakpoint {
-        return value.mapTo(HindsightBreakpoint::class.java)
+    fun deserializeLiveBreakpoint(value: JsonObject): LiveBreakpoint {
+        return value.mapTo(LiveBreakpoint::class.java)
     }
 
     @JvmStatic
-    fun serializeSourceLocation(value: SourceLocation): JsonObject {
+    fun serializeLiveLog(value: LiveLog): JsonObject {
         return JsonObject(Json.encode(value))
     }
 
     @JvmStatic
-    fun deserializeSourceLocation(value: JsonObject): SourceLocation {
-        return value.mapTo(SourceLocation::class.java)
+    fun deserializeLiveLog(value: JsonObject): LiveLog {
+        return value.mapTo(LiveLog::class.java)
+    }
+
+    @JvmStatic
+    fun serializeLiveSourceLocation(value: LiveSourceLocation): JsonObject {
+        return JsonObject(Json.encode(value))
+    }
+
+    @JvmStatic
+    fun deserializeLiveSourceLocation(value: JsonObject): LiveSourceLocation {
+        return value.mapTo(LiveSourceLocation::class.java)
+    }
+
+    @JvmStatic
+    fun serializeLiveInstrumentBatch(value: LiveInstrumentBatch): JsonObject {
+        return JsonObject(Json.encode(value))
+    }
+
+    @JvmStatic
+    fun deserializeLiveInstrumentBatch(value: JsonObject): LiveInstrumentBatch {
+        val rawInstruments = value.getJsonArray("instruments")
+        val typedInstruments = mutableListOf<LiveInstrument>()
+        for (i in rawInstruments.list.indices) {
+            typedInstruments.add(deserializeLiveInstrument(rawInstruments.getJsonObject(i)))
+        }
+        return LiveInstrumentBatch(typedInstruments)
     }
 
     @JvmStatic
     fun setupCodecs(vertx: Vertx) {
-        vertx.eventBus().registerDefaultCodec(BreakpointHit::class.java, ProtocolMessageCodec())
+        vertx.eventBus().registerDefaultCodec(LiveBreakpointHit::class.java, ProtocolMessageCodec())
     }
 
     class ProtocolMessageCodec<T> : MessageCodec<T, T> {

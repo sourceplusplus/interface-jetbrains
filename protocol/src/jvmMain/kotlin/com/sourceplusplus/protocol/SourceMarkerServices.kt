@@ -1,10 +1,8 @@
 package com.sourceplusplus.protocol
 
-import com.sourceplusplus.protocol.SourceMarkerServices.Namespace.LOGGING
-import com.sourceplusplus.protocol.SourceMarkerServices.Namespace.TRACING
-import com.sourceplusplus.protocol.SourceMarkerServices.Utilize.Tracing.HINDSIGHT_DEBUGGER
+import com.sourceplusplus.protocol.SourceMarkerServices.Utilize.LIVE_INSTRUMENT
+import com.sourceplusplus.protocol.service.live.LiveInstrumentService
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
-import com.sourceplusplus.protocol.service.tracing.HindsightDebuggerService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 
 /**
@@ -16,20 +14,9 @@ import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 object SourceMarkerServices {
 
     object Instance {
-        object Tracing {
-            var localTracing: LocalTracingService? = null
-            var hindsightDebugger: HindsightDebuggerService? = null
-        }
-
-        object Logging {
-            var logCountIndicator: LogCountIndicatorService? = null
-        }
-    }
-
-    object Namespace {
-        const val TRACING = "sm.tracing"
-        const val LOGGING = "sm.logging"
-        const val ALERTING = "sm.alerting"
+        var liveInstrument: LiveInstrumentService? = null
+        var localTracing: LocalTracingService? = null
+        var logCountIndicator: LogCountIndicatorService? = null
     }
 
     object Status {
@@ -37,19 +24,12 @@ object SourceMarkerServices {
     }
 
     object Utilize {
-        object Tracing {
-            const val LOCAL_TRACING = "$TRACING.local-tracing"
-            const val HINDSIGHT_DEBUGGER = "$TRACING.hindsight-debugger"
-        }
-
-        object Logging {
-            const val LOG_COUNT_INDICATOR = "$LOGGING.log-count-indicator"
-        }
+        const val LIVE_INSTRUMENT = "sm.service.live-instrument"
+        const val LOCAL_TRACING = "sm.service.local-tracing"
+        const val LOG_COUNT_INDICATOR = "sm.service.log-count-indicator"
     }
 
     object Provide {
-        object Tracing {
-            const val HINDSIGHT_BREAKPOINT_SUBSCRIBER = "$HINDSIGHT_DEBUGGER.hindsight-breakpoint-subscriber"
-        }
+        const val LIVE_INSTRUMENT_SUBSCRIBER = "$LIVE_INSTRUMENT.subscriber"
     }
 }
