@@ -14,11 +14,13 @@ import org.eclipse.jgit.revwalk.RevSort
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.transport.URIish
 import org.intellij.lang.annotations.Language
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
 import java.util.*
 
+@Ignore
 class MethodRenameTest : SourceMapperTest() {
 
     @Test
