@@ -1,14 +1,15 @@
 package com.sourceplusplus.sourcemarker.service.breakpoint.tree
 
 import com.intellij.icons.AllIcons
+import com.intellij.ide.highlighter.JavaHighlightingColors
 import com.intellij.ide.projectView.PresentationData
-import com.intellij.ui.JBColor
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
+import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
+import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
 import com.sourceplusplus.protocol.instrument.LiveVariable
-import io.vertx.core.json.JsonObject
-import java.awt.Color
-import kotlin.streams.toList
+import com.sourceplusplus.protocol.instrument.LiveVariableScope
+import org.apache.commons.lang3.EnumUtils
 
 /**
  * todo: description.
@@ -17,17 +18,7 @@ import kotlin.streams.toList
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class VariableSimpleNode(private val variable: LiveVariable, private val root: Boolean) : SimpleNode() {
-
-    private var jsonObject: JsonObject? = null
-    private var clazz: String? = null
-
-    init {
-        if (root) {
-            jsonObject = JsonObject(variable.value.toString())
-            clazz = jsonObject!!.getString("encoded-class")!!
-        }
-    }
+class VariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
 
     private val primitives = setOf(
         "java.lang.String",
@@ -40,48 +31,105 @@ class VariableSimpleNode(private val variable: LiveVariable, private val root: B
         "java.lang.Float",
         "java.lang.Double"
     )
+    private val numerals = setOf(
+        "java.lang.Byte",
+        "java.lang.Short",
+        "java.lang.Integer",
+        "java.lang.Long",
+        "java.lang.Float",
+        "java.lang.Double"
+    )
+    private val gsonPrimitives = setOf(
+        "java.math.BigInteger",
+        "java.lang.Date"
+    )
+    private val scheme = DebuggerUIUtil.getColorScheme(null)
 
     override fun getChildren(): Array<SimpleNode> {
-        return try {
-            if (root) {
-                val data = jsonObject!!.getJsonObject("encoded")
-                return data.stream().map {
-                    VariableSimpleNode(LiveVariable(it.key, it.value), false)
-                }.toList().toTypedArray()
-            } else {
-                emptyArray()
-            }
-        } catch (ignored: Throwable) {
+        return if (variable.value is List<*>) {
+            (variable.value as List<Map<*, *>>).map {
+                VariableSimpleNode(
+                    LiveVariable(
+                        name = it["name"] as String,
+                        value = it["value"] as Any,
+                        lineNumber = it["lineNumber"] as Int,
+                        scope = EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
+                        liveClazz = it["liveClazz"] as String?,
+                        liveIdentity = it["liveIdentity"] as String?
+                    )
+                )
+            }.toList().toTypedArray()
+        } else {
             emptyArray()
         }
     }
 
     override fun update(presentation: PresentationData) {
-        presentation.addText(
-            variable.name + " = ", SimpleTextAttributes(
-                SimpleTextAttributes.STYLE_PLAIN,
-                JBColor(Color(255, 141, 129), Color(255, 141, 129))
-            )
-        )
+        presentation.addText(variable.name + " = ", XDebuggerUIConstants.VALUE_NAME_ATTRIBUTES)
 
-        if (clazz != null && primitives.contains(clazz)) {
-            presentation.addText(jsonObject!!.getString("encoded"), SimpleTextAttributes.REGULAR_ATTRIBUTES)
-            presentation.setIcon(AllIcons.Debugger.Db_primitive)
-        } else if (clazz != null) {
-            if (clazz == "java.lang.Class") {
-                presentation.addText(jsonObject!!.getString("encoded"), SimpleTextAttributes.GRAYED_ATTRIBUTES)
+        if (variable.liveClazz != null && primitives.contains(variable.liveClazz)) {
+            if (variable.liveClazz == "java.lang.Boolean") {
+                presentation.addText(
+                    variable.value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES
+                )
+            } else if (variable.liveClazz == "java.lang.Character") {
+                presentation.addText(
+                    "'" + variable.value + "' " + (variable.value as String).toCharArray()[0].toInt(),
+                    SimpleTextAttributes.REGULAR_ATTRIBUTES
+                )
+            } else if (variable.liveClazz == "java.lang.String") {
+                presentation.addText(
+                    "\"" + variable.value + "\"",
+                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.STRING))
+                )
+            } else if (numerals.contains(variable.liveClazz)) {
+                presentation.addText(
+                    variable.value.toString(),
+                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.NUMBER))
+                )
+            }
+            presentation.setIcon(AllIcons.Debugger.Db_primitive) //AllIcons.Nodes.Parameter
+        } else if (variable.liveClazz != null) {
+            if (variable.liveClazz == "java.lang.Class") {
+                presentation.addText(
+                    "{ " + variable.value.toString().substringAfterLast(".") + " }",
+                    SimpleTextAttributes.GRAYED_ATTRIBUTES
+                )
                 presentation.setIcon(AllIcons.Debugger.Value)
+            } else if (gsonPrimitives.contains(variable.liveClazz)) {
+                val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
+                val identity = variable.liveIdentity
+                presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+                presentation.addText(" \"" + variable.value + "\"", SimpleTextAttributes.REGULAR_ATTRIBUTES)
+                presentation.setIcon(AllIcons.Debugger.Db_primitive)
             } else {
-                presentation.addText("{$clazz}", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+                val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
+                val identity = variable.liveIdentity
+                presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+
                 presentation.setIcon(AllIcons.Debugger.Value)
             }
         } else {
-            presentation.addText(variable.value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES)
+            if (variable.value is Number) {
+                presentation.addText(
+                    variable.value.toString(),
+                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.NUMBER))
+                )
+            } else {
+                presentation.addText(
+                    "\"" + variable.value + "\"",
+                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.STRING))
+                )
+            }
             presentation.setIcon(AllIcons.Debugger.Db_primitive)
         }
 
-        if (clazz != null && primitives.contains(clazz)) {
-            presentation.tooltip = jsonObject!!.getString("encoded")
+        if (variable.liveClazz != null && primitives.contains(variable.liveClazz)) {
+            if (variable.value is String) {
+                presentation.tooltip = variable.value as String
+            } else {
+                presentation.tooltip = variable.value.toString()
+            }
         }
     }
 }

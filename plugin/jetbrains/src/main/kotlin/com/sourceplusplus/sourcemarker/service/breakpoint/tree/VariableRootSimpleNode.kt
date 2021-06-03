@@ -26,10 +26,16 @@ class VariableRootSimpleNode : SimpleNode() {
             val simpleNodeMap: MutableMap<String, VariableSimpleNode> = LinkedHashMap()
             vars.forEach {
                 if (it.name.isNotEmpty()) {
-                    simpleNodeMap[it.name] = VariableSimpleNode(it, true)
+                    simpleNodeMap[it.name] = VariableSimpleNode(it)
                 }
             }
-            simpleNodeMap.values.toTypedArray()
+            simpleNodeMap.values.sortedWith { p0, p1 ->
+                when {
+                    p0.variable.name == "this" -> -1
+                    p1.variable.name == "this" -> 1
+                    else -> 0
+                }
+            }.toTypedArray()
         }
     }
 }
