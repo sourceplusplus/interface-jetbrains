@@ -14,5 +14,7 @@ data class LiveVariable(
     val name: String,
     @Contextual val value: Any,
     val lineNumber: Int = -1,
-    val scope: LiveVariableScope? = null
+    val scope: LiveVariableScope? = null,
+    val liveClazz: String? = null,
+    val liveIdentity: String? = null
 )
