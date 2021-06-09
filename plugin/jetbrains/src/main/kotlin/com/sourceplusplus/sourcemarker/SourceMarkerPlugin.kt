@@ -355,23 +355,6 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initMonitor(config: SourceMarkerConfig) {
-        var skywalkingHost = config.skywalkingOapUrl
-        if (!config.serviceHost.isNullOrBlank()) {
-            val hardcodedConfig: JsonObject = try {
-                JsonObject(
-                    Resources.toString(
-                        Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
-                    )
-                )
-            } catch (e: IOException) {
-                throw RuntimeException(e)
-            }
-            val scheme = if (config.isSsl()) "https" else "http"
-            skywalkingHost = "$scheme://${config.serviceHostNormalized}:" +
-                    "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}" +
-                    "/graphql/skywalking"
-        }
-
         val hardcodedConfig: JsonObject = try {
             JsonObject(
                 Resources.toString(
@@ -380,6 +363,16 @@ object SourceMarkerPlugin {
             )
         } catch (e: IOException) {
             throw RuntimeException(e)
+        }
+
+        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
+            .getBoolean("service_discovery")
+        var skywalkingHost = config.skywalkingOapUrl
+        if (serviceDiscoveryEnabled && !config.serviceHost.isNullOrBlank()) {
+            val scheme = if (config.isSsl()) "https" else "http"
+            skywalkingHost = "$scheme://${config.serviceHostNormalized}:" +
+                    "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}" +
+                    "/graphql/skywalking"
         }
 
         val certificatePins = mutableListOf<String>()
