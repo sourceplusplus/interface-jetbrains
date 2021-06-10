@@ -74,11 +74,13 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
         GlobalScope.launch(vertx.dispatcher()) {
             try {
+                val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
+                    .getBoolean("service_discovery")
                 val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
                 val pluginConfig = Json.decodeValue(
                     projectSettings.getValue("sourcemarker_plugin_config"), SourceMarkerConfig::class.java
                 )
-                if (pluginConfig.serviceHost.isNullOrBlank()) {
+                if (!serviceDiscoveryEnabled || pluginConfig.serviceHost.isNullOrBlank()) {
                     log.warn("Service discovery disabled")
                     return@launch
                 }
