@@ -292,64 +292,62 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initServices(config: SourceMarkerConfig) {
-        if (!config.serviceHost.isNullOrBlank()) {
-            try {
-                val hardcodedConfig: JsonObject = try {
-                    JsonObject(
-                        Resources.toString(
-                            Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+        val hardcodedConfig: JsonObject = try {
+            JsonObject(
+                Resources.toString(
+                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                )
+            )
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+
+        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
+            .getBoolean("service_discovery")
+        if (serviceDiscoveryEnabled && !config.serviceHost.isNullOrBlank()) {
+            val servicePort = config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!
+            val certificatePins = mutableListOf<String>()
+            certificatePins.addAll(config.certificatePins)
+            val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+            if (!hardcodedPin.isNullOrBlank()) {
+                certificatePins.add(hardcodedPin)
+            }
+            val httpClientOptions = if (certificatePins.isNotEmpty()) {
+                HttpClientOptions()
+                    .setTrustOptions(
+                        TrustOptions.wrap(
+                            JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
                         )
                     )
-                } catch (e: IOException) {
-                    throw RuntimeException(e)
-                }
+                    .setVerifyHost(false)
+            } else {
+                HttpClientOptions()
+            }
 
-                val servicePort = config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!
-                val certificatePins = mutableListOf<String>()
-                certificatePins.addAll(config.certificatePins)
-                val hardcodedPin = hardcodedConfig.getString("certificate_pin")
-                if (!hardcodedPin.isNullOrBlank()) {
-                    certificatePins.add(hardcodedPin)
-                }
-                val httpClientOptions = if (certificatePins.isNotEmpty()) {
-                    HttpClientOptions()
-                        .setTrustOptions(
-                            TrustOptions.wrap(
-                                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
-                            )
-                        )
-                        .setVerifyHost(false)
-                } else {
-                    HttpClientOptions()
-                }
+            val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=" + config.accessToken
+            val req = vertx.createHttpClient(httpClientOptions).request(
+                RequestOptions()
+                    .setSsl(config.isSsl())
+                    .setHost(config.serviceHostNormalized!!)
+                    .setPort(servicePort)
+                    .setURI(tokenUri)
+            ).await()
+            req.end().await()
+            val resp = req.response().await()
+            if (resp.statusCode() == 200) {
+                val body = resp.body().await().toString()
+                config.serviceToken = body
+            } else {
+                config.serviceToken = null
 
-                val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=" + config.accessToken
-                val req = vertx.createHttpClient(httpClientOptions).request(
-                    RequestOptions()
-                        .setSsl(config.isSsl())
-                        .setHost(config.serviceHostNormalized!!)
-                        .setPort(servicePort)
-                        .setURI(tokenUri)
-                ).await()
-                req.end().await()
-                val resp = req.response().await()
-                if (resp.statusCode() == 200) {
-                    val body = resp.body().await().toString()
-                    config.serviceToken = body
-                } else {
-                    config.serviceToken = null
-
-                    log.error("Invalid access token")
-                    Notifications.Bus.notify(
-                        Notification(
-                            message("plugin_name"), "Invalid Access Token",
-                            "Failed to validate access token",
-                            NotificationType.ERROR
-                        )
+                log.error("Invalid access token")
+                Notifications.Bus.notify(
+                    Notification(
+                        message("plugin_name"), "Invalid Access Token",
+                        "Failed to validate access token",
+                        NotificationType.ERROR
                     )
-                }
-            } catch (ex: Throwable) {
-                log.error("Failed to initialize services", ex)
+                )
             }
         }
     }
