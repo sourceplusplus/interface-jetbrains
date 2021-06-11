@@ -45,8 +45,6 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
-import com.sourceplusplus.protocol.ProtocolErrors.ServiceUnavailable
-import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
@@ -58,6 +56,7 @@ import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
+import com.sourceplusplus.protocol.error.AccessDenied
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import com.sourceplusplus.sourcemarker.PluginBundle
@@ -69,6 +68,7 @@ import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import io.vertx.core.eventbus.ReplyException
+import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -289,13 +289,17 @@ class PortalEventListener(
                     if (it.succeeded()) {
                         handleTraceResult(it.result(), portal, portal.viewingPortalArtifact)
                     } else {
-                        val rawFailure = JsonObject(it.cause().message)
-                        val debugInfo = rawFailure.getJsonObject("debugInfo")
-                        if (debugInfo.getString("type") == ServiceUnavailable.name) {
-                            log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+                        val replyException = it.cause() as ReplyException
+                        if (replyException.failureType() == ReplyFailure.TIMEOUT) {
+                            log.warn("Timed out getting local trace results")
                         } else {
-                            it.cause().printStackTrace()
-                            log.error("Failed to get local trace results", it.cause())
+                            val actualException = replyException.cause!!
+                            if (actualException is AccessDenied) {
+                                log.error("Access denied. Reason: " + actualException.reason)
+                            } else {
+                                it.cause().printStackTrace()
+                                log.error("Failed to get local trace results", it.cause())
+                            }
                         }
                     }
                 }
