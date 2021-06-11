@@ -40,7 +40,6 @@ class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineV
             }
         }
 
-
         //async accessors
         vertx.eventBus().localConsumer<Boolean>(getCurrentServiceAddress) { msg ->
             if (msg.body() && currentService == null) {
