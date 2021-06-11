@@ -3,11 +3,14 @@ package com.sourceplusplus.monitor.skywalking.bridge
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.LocalMessageCodec
 import io.vertx.core.Vertx
+import io.vertx.core.eventbus.ReplyException
+import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
+import org.slf4j.LoggerFactory
 
 /**
  * todo: description.
@@ -29,6 +32,16 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
             launch(vertx.dispatcher()) {
                 val service = try {
                     ServiceBridge.getCurrentService(vertx)
+                } catch (ex: ReplyException) {
+                    if (ex.failureType() == ReplyFailure.TIMEOUT) {
+                        log.debug("Timed out looking for current service")
+                        it.reply(null)
+                        return@launch
+                    } else {
+                        ex.printStackTrace()
+                        it.fail(500, ex.message)
+                        return@launch
+                    }
                 } catch (throwable: Throwable) {
                     it.fail(404, "Apache SkyWalking current service unavailable")
                     return@launch
@@ -53,6 +66,16 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
             launch(vertx.dispatcher()) {
                 val service = try {
                     ServiceBridge.getCurrentService(vertx)
+                } catch (ex: ReplyException) {
+                    if (ex.failureType() == ReplyFailure.TIMEOUT) {
+                        log.debug("Timed out looking for current service")
+                        it.reply(null)
+                        return@launch
+                    } else {
+                        ex.printStackTrace()
+                        it.fail(500, ex.message)
+                        return@launch
+                    }
                 } catch (throwable: Throwable) {
                     throwable.printStackTrace()
                     it.fail(404, "Apache SkyWalking current service unavailable")
@@ -75,6 +98,7 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
      * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
      */
     companion object {
+        private val log = LoggerFactory.getLogger(EndpointBridge::class.java)
         private const val rootAddress = "monitor.skywalking.endpoint"
         private const val searchExactEndpointAddress = "$rootAddress.searchExactEndpoint"
         private const val getEndpointsAddress = "$rootAddress.getEndpoints"
