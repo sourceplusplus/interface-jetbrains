@@ -18,9 +18,9 @@ import com.intellij.xdebugger.breakpoints.SuspendPolicy
 import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
-import com.sourceplusplus.protocol.ProtocolErrors
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
+import com.sourceplusplus.protocol.error.AccessDenied
 import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
 import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
@@ -88,7 +88,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             BridgeEventType.REGISTER.name.toLowerCase(),
             Provide.LIVE_INSTRUMENT_SUBSCRIBER,
             JsonObject(),
-            TCPServiceDiscoveryBackend.socket
+            TCPServiceDiscoveryBackend.socket!!
         )
     }
 
@@ -144,6 +144,9 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
 
     override fun breakpointRemoved(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
         if (breakpoint.type.id != "live-breakpoint") {
+            return
+        } else if (breakpoint.properties == null) {
+            log.warn("Ignored removing breakpoint without properties")
             return
         } else if (breakpoint.properties.getBreakpointId() == null) {
             log.debug("Ignored removing un-published breakpoint")
@@ -259,14 +262,13 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                 )
             )
         } else {
-            val rawFailure = JsonObject(replyException.message)
-            val debugInfo = rawFailure.getJsonObject("debugInfo")
-            if (debugInfo.getString("type") == ProtocolErrors.ServiceUnavailable.name) {
-                log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+            val actualException = replyException.cause!!
+            if (actualException is AccessDenied) {
+                log.error("Access denied. Reason: " + actualException.reason)
                 Notifications.Bus.notify(
                     Notification(
                         message("plugin_name"), "Live Breakpoint Failed",
-                        "Unable to connect to service: " + debugInfo.getString("name"),
+                        "Access denied. Reason: " + actualException.reason,
                         NotificationType.ERROR
                     )
                 )
@@ -276,7 +278,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                 Notifications.Bus.notify(
                     Notification(
                         message("plugin_name"), "Live Breakpoint Failed",
-                        "Failed to add live breakpoint",
+                        "Failed to add/remove live breakpoint",
                         NotificationType.ERROR
                     )
                 )

@@ -13,9 +13,7 @@ import com.sourceplusplus.sourcemarker.settings.isSsl
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
-import io.vertx.core.eventbus.impl.EventBusImpl
-import io.vertx.core.eventbus.impl.MessageImpl
-import io.vertx.core.http.impl.headers.HeadersMultiMap
+import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -38,7 +36,6 @@ import java.math.BigInteger
 import java.net.NetworkInterface
 import java.security.MessageDigest
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * todo: description.
@@ -51,14 +48,13 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
     companion object {
         private val log = LoggerFactory.getLogger(TCPServiceDiscoveryBackend::class.java)
-        lateinit var socket: NetSocket
+        var socket: NetSocket? = null
     }
 
     private lateinit var vertx: Vertx
     private lateinit var client: NetClient
     private val setupPromise = Promise.promise<Void>()
     private val setupFuture = setupPromise.future()
-    private val replyHandlers = ConcurrentHashMap<String, (JsonObject) -> Unit>()
     private val hardcodedConfig: JsonObject = try {
         JsonObject(
             Resources.toString(
@@ -121,28 +117,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 setupPromise.fail(throwable)
                 return@launch
             }
-
-            val parser = FrameParser { parse: AsyncResult<JsonObject> ->
-                val frame = parse.result()
-                if (replyHandlers.containsKey(frame.getString("address"))) {
-                    if (frame.getString("type") == "err") {
-                        val err = JsonObject().put("error", true)
-                            .put("rawFailure", JsonObject(frame.getString("rawFailure")))
-                        replyHandlers.remove(frame.getString("address"))!!.invoke(err)
-                    } else {
-                        replyHandlers.remove(frame.getString("address"))!!.invoke(frame.getJsonObject("body"))
-                    }
-                } else if (frame.containsKey("headers")) {
-                    val headers = frame.getJsonObject("headers")
-                    if (headers.containsKey("sm.reply")) {
-                        replyHandlers.remove(headers.getString("sm.reply"))!!.invoke(frame.getJsonObject("body"))
-                    } else {
-                        //resend locally
-                        vertx.eventBus().send("local." + frame.getString("address"), frame.getJsonObject("body"))
-                    }
-                }
-            }
-            socket.handler(parser)
+            socket!!.handler(FrameParser(TCPServiceFrameParser(vertx)))
 
             vertx.executeBlocking<Any> {
                 var hardwareId: String? = null
@@ -172,58 +147,43 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 setupHandler(vertx, Utilize.LOG_COUNT_INDICATOR)
 
                 //setup connection
-                val pc = MarkerConnection(
-                    SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis(), hardwareId
-                )
                 val replyAddress = UUID.randomUUID().toString()
-                replyHandlers[replyAddress] = {
-                    if (it.getBoolean("success")) {
+                val pc = MarkerConnection(SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis(), hardwareId)
+                val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer("local.$replyAddress")
+
+                val promise = Promise.promise<Void>()
+                consumer.handler {
+                    //todo: handle false
+                    if (it.body() == true) {
+                        promise.complete()
+                        consumer.unregister()
                         setupPromise.complete()
-                    } else {
-                        log.error("Service discovery connection failed. Reason: " + it.getString("failure_reason"))
-                        setupPromise.fail(it.getString("failure_reason"))
                     }
                 }
                 val headers = JsonObject()
-                headers.put("sm.reply", replyAddress)
                 FrameHelper.sendFrame(
-                    BridgeEventType.PUBLISH.name.toLowerCase(),
+                    BridgeEventType.SEND.name.toLowerCase(),
                     SourceMarkerServices.Status.MARKER_CONNECTED,
-                    replyAddress, headers, true, JsonObject.mapFrom(pc), socket
+                    replyAddress, headers, true, JsonObject.mapFrom(pc), socket!!
                 )
             }
         }
     }
 
     private fun setupHandler(vertx: Vertx, address: String) {
-        vertx.eventBus().localConsumer<JsonObject>(address) { resultHandler ->
+        vertx.eventBus().localConsumer<JsonObject>(address) { resp ->
             val replyAddress = UUID.randomUUID().toString()
-            replyHandlers[replyAddress] = {
-                if (it.map.keys.size == 1 && it.containsKey("value")) {
-                    resultHandler.reply(it.getValue("value"))
-                } else if (it.map.keys.size == 2 && it.containsKey("error")) {
-                    resultHandler.fail(500, it.getString("rawFailure"))
-                } else {
-                    val message = MessageImpl(
-                        address,
-                        HeadersMultiMap.httpHeaders(),
-                        it,
-                        (resultHandler as MessageImpl<JsonObject, JsonObject>).codec(),
-                        true,
-                        vertx.eventBus() as EventBusImpl
-                    )
-                    message.setReplyAddress(resultHandler.replyAddress())
-                    message.reply(it)
-                }
+            val tempConsumer = vertx.eventBus().localConsumer<Any>("local.$replyAddress")
+            tempConsumer.handler {
+                resp.reply(it.body())
+                tempConsumer.unregister()
             }
+
             val headers = JsonObject()
-            headers.put("sm.reply", replyAddress)
-            for ((key, value) in resultHandler.headers().entries()) {
-                headers.put(key, value)
-            }
+            resp.headers().entries().forEach { headers.put(it.key, it.value) }
             FrameHelper.sendFrame(
                 BridgeEventType.SEND.name.toLowerCase(),
-                address, replyAddress, headers, true, resultHandler.body(), socket
+                address, replyAddress, headers, true, resp.body(), socket!!
             )
         }
     }
@@ -245,7 +205,6 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     }
 
     override fun getRecords(resultHandler: Handler<AsyncResult<MutableList<Record>>>) {
-        //todo: cache getRecords() result and return to any calls that happen in the same second
         if (setupFuture.isComplete) {
             if (setupFuture.succeeded()) {
                 vertx.eventBus().request<JsonObject>("get-records", null) {
