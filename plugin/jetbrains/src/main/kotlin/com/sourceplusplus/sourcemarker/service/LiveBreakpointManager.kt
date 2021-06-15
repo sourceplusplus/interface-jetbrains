@@ -15,9 +15,11 @@ import com.intellij.psi.PsiManager
 import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.breakpoints.SuspendPolicy
+import com.intellij.xdebugger.breakpoints.XBreakpoint
 import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
+import com.intellij.xdebugger.impl.breakpoints.XLineBreakpointImpl
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
 import com.sourceplusplus.protocol.error.AccessDenied
@@ -90,6 +92,41 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             JsonObject(),
             TCPServiceDiscoveryBackend.socket!!
         )
+
+        //add/remove active/inactive breakpoints
+        ApplicationManager.getApplication().runReadAction {
+            val manager = XDebuggerManager.getInstance(project).breakpointManager
+            val liveBreakpoints = manager.allBreakpoints.filter { it.type.id == "live-breakpoint" }
+            val bpIds = liveBreakpoints.map {
+                (it.properties as LiveBreakpointProperties?)?.getBreakpointId()
+            }.filterNotNull()
+
+            if (bpIds.isEmpty()) {
+                removeInvalidBreakpoints(liveBreakpoints, emptySet())
+            } else {
+                Instance.liveInstrument!!.getLiveInstrumentsByIds(bpIds) {
+                    if (it.succeeded()) {
+                        removeInvalidBreakpoints(liveBreakpoints, it.result().map { it.id!! }.toSet())
+                    } else {
+                        log.error("Failed to get live instruments by ids", it.cause())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun removeInvalidBreakpoints(liveBreakpoints: List<XBreakpoint<*>>, validInstrumentIds: Set<String>) {
+        ApplicationManager.getApplication().invokeLater {
+            liveBreakpoints.forEach {
+                val bp = it as XLineBreakpointImpl<LiveBreakpointProperties>
+                val bpProps = it.properties
+                if (bpProps?.getBreakpointId() == null) {
+                    bp.dispose()
+                } else if (bpProps.getBreakpointId() !in validInstrumentIds) {
+                    breakpointRemoved(bp)
+                }
+            }
+        }
     }
 
     override fun breakpointAdded(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
@@ -184,6 +221,9 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
 
     override fun breakpointChanged(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
         if (breakpoint.type.id != "live-breakpoint") {
+            return
+        } else if (breakpoint.properties == null) {
+            log.warn("Ignored changing breakpoint without properties")
             return
         } else if (!breakpoint.properties.getSuspend() && breakpoint.properties.getBreakpointId() == null
             && breakpoint.suspendPolicy == SuspendPolicy.NONE
