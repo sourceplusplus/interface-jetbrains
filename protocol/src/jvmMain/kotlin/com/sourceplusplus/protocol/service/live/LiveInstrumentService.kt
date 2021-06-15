@@ -23,6 +23,8 @@ interface LiveInstrumentService {
     fun addLiveInstruments(batch: LiveInstrumentBatch, handler: Handler<AsyncResult<List<LiveInstrument>>>)
     fun removeLiveInstrument(id: String, handler: Handler<AsyncResult<LiveInstrument?>>)
     fun removeLiveInstruments(location: LiveSourceLocation, handler: Handler<AsyncResult<List<LiveInstrument>>>)
+    fun getLiveInstrumentById(id: String, handler: Handler<AsyncResult<LiveInstrument?>>)
+    fun getLiveInstrumentsByIds(id: List<String>, handler: Handler<AsyncResult<List<LiveInstrument>>>)
     fun getLiveInstruments(handler: Handler<AsyncResult<List<LiveInstrument>>>)
     fun getLiveBreakpoints(handler: Handler<AsyncResult<List<LiveBreakpoint>>>)
     fun getLiveLogs(handler: Handler<AsyncResult<List<LiveLog>>>)
