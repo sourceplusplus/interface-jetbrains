@@ -14,10 +14,7 @@ import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiManager
 import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.XDebuggerUtil
-import com.intellij.xdebugger.breakpoints.SuspendPolicy
-import com.intellij.xdebugger.breakpoints.XBreakpoint
-import com.intellij.xdebugger.breakpoints.XBreakpointListener
-import com.intellij.xdebugger.breakpoints.XLineBreakpoint
+import com.intellij.xdebugger.breakpoints.*
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
 import com.intellij.xdebugger.impl.breakpoints.XLineBreakpointImpl
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
@@ -102,11 +99,11 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             }.filterNotNull()
 
             if (bpIds.isEmpty()) {
-                removeInvalidBreakpoints(liveBreakpoints, emptySet())
+                removeInvalidBreakpoints(manager, liveBreakpoints, emptySet())
             } else {
                 Instance.liveInstrument!!.getLiveInstrumentsByIds(bpIds) {
                     if (it.succeeded()) {
-                        removeInvalidBreakpoints(liveBreakpoints, it.result().map { it.id!! }.toSet())
+                        removeInvalidBreakpoints(manager, liveBreakpoints, it.result().map { it.id!! }.toSet())
                     } else {
                         log.error("Failed to get live instruments by ids", it.cause())
                     }
@@ -115,13 +112,16 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
         }
     }
 
-    private fun removeInvalidBreakpoints(liveBreakpoints: List<XBreakpoint<*>>, validInstrumentIds: Set<String>) {
+    private fun removeInvalidBreakpoints(
+        manager: XBreakpointManager, liveBreakpoints: List<XBreakpoint<*>>, validInstrumentIds: Set<String>
+    ) {
         ApplicationManager.getApplication().invokeLater {
             liveBreakpoints.forEach {
                 val bp = it as XLineBreakpointImpl<LiveBreakpointProperties>
                 val bpProps = it.properties
                 if (bpProps?.getBreakpointId() == null) {
                     bp.dispose()
+                    manager.removeBreakpoint(bp)
                 } else if (bpProps.getBreakpointId() !in validInstrumentIds) {
                     breakpointRemoved(bp)
                 }
