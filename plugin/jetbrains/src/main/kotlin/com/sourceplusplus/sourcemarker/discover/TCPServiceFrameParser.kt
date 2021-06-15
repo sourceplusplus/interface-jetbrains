@@ -27,11 +27,10 @@ class TCPServiceFrameParser(val vertx: Vertx) : Handler<AsyncResult<JsonObject>>
 
     override fun handle(event: AsyncResult<JsonObject>) {
         val frame = event.result()
-        log.info("Received frame: {}", frame)
+        log.trace("Received frame: {}", frame)
 
         //todo: revisit this || after fixing below todo
         if ("message" == frame.getString("type") || "send" == frame.getString("type")) {
-            log.debug("Parsing frame: {}", frame)
             if (frame.getString("replyAddress") != null) {
                 val deliveryOptions = DeliveryOptions()
                 frame.getJsonObject("headers").fieldNames().forEach {
