@@ -12,6 +12,7 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.idea.refactoring.getLineNumber
 import org.jetbrains.plugins.groovy.lang.psi.impl.stringValue
 import org.jetbrains.uast.UMethod
@@ -37,6 +38,14 @@ class LoggerDetector {
         private val LOGGER_METHODS = setOf(
             "trace", "debug", "info", "warn", "error"
         )
+    }
+
+    fun addLiveLog(sourceMark: MethodSourceMark, logPattern: String, lineLocation: Int) {
+        runBlocking {
+            getOrFindLoggerStatements(sourceMark)
+        }
+        val loggerStatements = sourceMark.getUserData(LOGGER_STATEMENTS)!! as MutableList
+        loggerStatements.add(DetectedLogger(logPattern, "live", lineLocation))
     }
 
     suspend fun getOrFindLoggerStatements(sourceMark: MethodSourceMark): List<DetectedLogger> {

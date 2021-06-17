@@ -90,6 +90,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             TCPServiceDiscoveryBackend.socket!!
         )
 
+        //todo: should run this logic on plugin shutdown as well
         //add/remove active/inactive breakpoints
         ApplicationManager.getApplication().runReadAction {
             val manager = XDebuggerManager.getInstance(project).breakpointManager
