@@ -17,4 +17,5 @@ abstract class LiveInstrument {
     abstract val id: String?
     abstract val type: LiveInstrumentType
     open var applyImmediately: Boolean = false
+    open var pending: Boolean = false
 }
