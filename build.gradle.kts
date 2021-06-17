@@ -32,7 +32,7 @@ repositories {
 subprojects {
     ext {
         set("vertxVersion", "4.0.3")
-        set("kotlinVersion", "1.5.10")
+        set("kotlinVersion", "1.5.0")
     }
 
     repositories {
