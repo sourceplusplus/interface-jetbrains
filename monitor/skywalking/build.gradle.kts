@@ -18,7 +18,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
-    implementation("io.dropwizard.metrics:metrics-core:4.2.0")
+    implementation("io.dropwizard.metrics:metrics-core:4.2.1")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 }
 
