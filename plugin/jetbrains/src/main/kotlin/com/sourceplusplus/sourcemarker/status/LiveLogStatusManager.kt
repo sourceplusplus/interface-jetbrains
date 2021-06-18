@@ -17,7 +17,7 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.log.LiveLog
-import com.sourceplusplus.sourcemarker.EditorComponentInlaysManager
+import com.sourceplusplus.sourcemarker.inlay.EditorComponentInlaysManager
 import java.awt.BorderLayout
 import java.awt.event.ComponentEvent
 import java.util.concurrent.CopyOnWriteArrayList
