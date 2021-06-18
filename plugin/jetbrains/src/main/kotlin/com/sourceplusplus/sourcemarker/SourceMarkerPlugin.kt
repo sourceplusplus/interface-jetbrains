@@ -55,6 +55,7 @@ import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import com.sourceplusplus.sourcemarker.settings.getServicePortNormalized
 import com.sourceplusplus.sourcemarker.settings.isSsl
 import com.sourceplusplus.sourcemarker.settings.serviceHostNormalized
+import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.Promise
@@ -233,12 +234,12 @@ object SourceMarkerPlugin {
                     log.error("Connection failed. Reason: {}", throwable.message)
                 }
 
+                discoverAvailableServices(config, project)
                 if (connectedMonitor) {
                     initPortal(config)
                     initMarker(config, project)
                     initMapper()
                 }
-                discoverAvailableServices(config, project)
             }
         }
     }
@@ -282,6 +283,8 @@ object SourceMarkerPlugin {
         //live instrument
         if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_INSTRUMENT }) {
             log.info("Live instruments available")
+            SourceMarker.addGlobalSourceMarkEventListener(LiveLogStatusManager)
+
             Instance.liveInstrument = ServiceProxyBuilder(vertx)
                 .setToken(config.serviceToken!!)
                 .setAddress(SourceMarkerServices.Utilize.LIVE_INSTRUMENT)

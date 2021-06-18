@@ -33,6 +33,7 @@ import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointConditionPar
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
+import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
@@ -109,6 +110,15 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                         log.error("Failed to get live instruments by ids", it.cause())
                     }
                 }
+            }
+        }
+
+        //show live log status bars
+        Instance.liveInstrument!!.getLiveLogs {
+            if (it.succeeded()) {
+                LiveLogStatusManager.addActiveLiveLogs(it.result())
+            } else {
+                log.error("Failed to get live logs", it.cause())
             }
         }
     }

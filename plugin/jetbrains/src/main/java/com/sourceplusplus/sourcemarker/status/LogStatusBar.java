@@ -28,19 +28,45 @@ public class LogStatusBar extends JPanel {
     private boolean editMode;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, MethodSourceMark methodSourceMark) {
+        this(sourceLocation, methodSourceMark, null);
+    }
+
+    public LogStatusBar(LiveSourceLocation sourceLocation, MethodSourceMark methodSourceMark, LiveLog liveLog) {
         this.sourceLocation = sourceLocation;
         this.methodSourceMark = methodSourceMark;
 
         initComponents();
         setupComponents();
 
-//        //---- label3 ----
-        JLabel label3 = new JLabel();
+        if (liveLog != null) {
+            //---- label3 ----
+            JLabel label3 = new JLabel();
+            label3.setText("5:45:22pm");
+            label3.setFont(new Font("Roboto Light", Font.BOLD, 15));
+            label3.setIcon(IconLoader.getIcon("/icons/clock.svg"));
+            label3.setIconTextGap(8);
+            add(label3, "cell 1 0,gapx null 10");
+
+            //---- separator1 ----
+            JSeparator separator1 = new JSeparator();
+            separator1.setOrientation(SwingConstants.VERTICAL);
+            separator1.setPreferredSize(new Dimension(3, 20));
+            separator1.setMinimumSize(new Dimension(3, 20));
+            separator1.setMaximumSize(new Dimension(3, 20));
+            add(separator1, "cell 1 0,gapx 10 10");
+
+            textField1.setText(liveLog.getLogFormat()); //todo: log message
+
+            LoggerDetector detector = methodSourceMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR());
+            detector.addLiveLog(methodSourceMark, liveLog.getLogFormat(), sourceLocation.getLine());
+        } else {
+            //        //---- label3 ----
+            JLabel label3 = new JLabel();
 //        label3.setText("5:45:22pm");
 //        label3.setFont(new Font("Roboto Light", Font.BOLD, 15));
 //        label3.setIcon(IconLoader.getIcon("/icons/clock.svg"));
 //        label3.setIconTextGap(8);
-        add(label3, "cell 1 0,gapx null 10");
+            add(label3, "cell 1 0,gapx null 10");
 //
 //        //---- separator1 ----
 //        JSeparator separator1 = new JSeparator();
@@ -50,11 +76,12 @@ public class LogStatusBar extends JPanel {
 //        separator1.setMaximumSize(new Dimension(3, 20));
 //        add(separator1, "cell 1 0,gapx 10 10");
 
-        //edit mode
-        editMode = true;
-        textField1.setBorder(new LineBorder(new Color(64, 64, 64), 1, true));
-        textField1.setBackground(Color.decode("#252525"));
-        textField1.setEditable(true);
+            //edit mode
+            editMode = true;
+            textField1.setBorder(new LineBorder(new Color(64, 64, 64), 1, true));
+            textField1.setBackground(Color.decode("#252525"));
+            textField1.setEditable(true);
+        }
     }
 
     public void focus() {
