@@ -1,7 +1,9 @@
 package com.sourceplusplus.sourcemarker.status;
 
+import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.util.Ref;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
@@ -10,6 +12,7 @@ import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -24,6 +27,8 @@ public class LogStatusBar extends JPanel {
 
     private final LiveSourceLocation sourceLocation;
     private final MethodSourceMark methodSourceMark;
+    private LiveLog liveLog;
+    private Ref<Inlay> inlayRef;
     private boolean textFieldFocused = false;
     private boolean editMode;
 
@@ -34,6 +39,7 @@ public class LogStatusBar extends JPanel {
     public LogStatusBar(LiveSourceLocation sourceLocation, MethodSourceMark methodSourceMark, LiveLog liveLog) {
         this.sourceLocation = sourceLocation;
         this.methodSourceMark = methodSourceMark;
+        this.liveLog = liveLog;
 
         initComponents();
         setupComponents();
@@ -84,6 +90,10 @@ public class LogStatusBar extends JPanel {
         }
     }
 
+    public void setInlayRef(@NotNull Ref<Inlay> inlayRef) {
+        this.inlayRef = inlayRef;
+    }
+
     public void focus() {
         textField1.grabFocus();
         textField1.requestFocusInWindow();
@@ -131,6 +141,7 @@ public class LogStatusBar extends JPanel {
                                 SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
                         );
                         detector.addLiveLog(methodSourceMark, logPattern, sourceLocation.getLine());
+                        liveLog = (LiveLog) it.result();
                     } else {
                         it.cause().printStackTrace();
                     }
@@ -226,6 +237,19 @@ public class LogStatusBar extends JPanel {
             }
         });
         addRecursiveMouseListener(label6, new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                inlayRef.get().dispose();
+
+                if (liveLog != null) {
+                    Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
+                        if (it.failed()) {
+                            it.cause().printStackTrace();
+                        }
+                    });
+                }
+            }
+
             @Override
             public void mousePressed(MouseEvent e) {
                 label6.setIcon(IconLoader.getIcon("/icons/closeIconPressed.svg"));

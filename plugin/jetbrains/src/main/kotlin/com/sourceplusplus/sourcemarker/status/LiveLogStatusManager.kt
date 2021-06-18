@@ -68,19 +68,19 @@ object LiveLogStatusManager : SourceMarkEventListener {
 
         val wrapperPanel = JPanel()
         wrapperPanel.layout = BorderLayout()
-        val mainPanel = LogStatusBar(
+        val statusBar = LogStatusBar(
             LiveSourceLocation(qualifiedClassName, lineNumber + 1),
             getMethodSourceMark(editor, fileMarker, lineNumber)
         )//test2.ActivityBar(editor as EditorImpl?, wrapperPanel)
-        wrapperPanel.add(mainPanel)
-//        mainPanel.setInlayRef(inlayRef)
+        wrapperPanel.add(statusBar)
+        statusBar.setInlayRef(inlayRef)
 
         val inlay = manager.insertAfter(lineNumber - 1, wrapperPanel)
         inlayRef.set(inlay)
         val viewport = (editor as? EditorImpl)?.scrollPane?.viewport
         viewport?.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
         if (focus) {
-            mainPanel.focus()
+            statusBar.focus()
         }
     }
 
@@ -100,7 +100,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
                 methodSourceMark, liveLog
             )
             wrapperPanel.add(statusBar)
-//        mainPanel.setInlayRef(inlayRef)
+            statusBar.setInlayRef(inlayRef)
 
             val inlay = manager.insertAfter(liveLog.location.line - 2, wrapperPanel)
             inlayRef.set(inlay)
