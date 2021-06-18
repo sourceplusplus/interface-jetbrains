@@ -130,7 +130,11 @@ public class LogStatusBar extends JPanel {
                         null,
                         null,
                         Integer.MAX_VALUE,
-                        null
+                        null,
+                        false,
+                        false,
+                        false,
+                        1000
                 );
                 instrumentService.addLiveInstrument(log, it -> {
                     if (it.succeeded()) {
