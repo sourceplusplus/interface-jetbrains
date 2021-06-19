@@ -111,8 +111,16 @@ object LiveLogStatusManager : SourceMarkEventListener {
         }
     }
 
+    fun addActiveLiveLog(liveLog: LiveLog) {
+        activeStatusBars.add(liveLog)
+    }
+
     fun addActiveLiveLogs(liveLogs: List<LiveLog>) {
         activeStatusBars.addAll(liveLogs)
+    }
+
+    fun removeActiveLiveLog(liveLog: LiveLog) {
+        activeStatusBars.remove(liveLog)
     }
 
     private fun getMethodSourceMark(editor: Editor, fileMarker: SourceFileMarker, line: Int): MethodSourceMark? {

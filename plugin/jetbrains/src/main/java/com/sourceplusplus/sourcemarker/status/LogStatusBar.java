@@ -140,6 +140,7 @@ public class LogStatusBar extends JPanel {
                         );
                         detector.addLiveLog(methodSourceMark, logPattern, sourceLocation.getLine());
                         liveLog = (LiveLog) it.result();
+                        LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
 
                         //focus back to IDE
                         IdeFocusManager.getInstance(editor.getProject())
@@ -256,7 +257,9 @@ public class LogStatusBar extends JPanel {
 
                 if (liveLog != null) {
                     Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
-                        if (it.failed()) {
+                        if (it.succeeded()) {
+                            LiveLogStatusManager.INSTANCE.removeActiveLiveLog(liveLog);
+                        } else {
                             it.cause().printStackTrace();
                         }
                     });
