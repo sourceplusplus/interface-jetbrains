@@ -1,9 +1,11 @@
 package com.sourceplusplus.sourcemarker.status;
 
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.Ref;
+import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
@@ -25,6 +27,7 @@ import static com.sourceplusplus.protocol.SourceMarkerServices.Instance;
 
 public class LogStatusBar extends JPanel {
 
+    private Editor editor;
     private final LiveSourceLocation sourceLocation;
     private final MethodSourceMark methodSourceMark;
     private LiveLog liveLog;
@@ -94,6 +97,10 @@ public class LogStatusBar extends JPanel {
         this.inlayRef = inlayRef;
     }
 
+    public void setEditor(Editor editor) {
+        this.editor = editor;
+    }
+
     public void focus() {
         textField1.grabFocus();
         textField1.requestFocusInWindow();
@@ -146,6 +153,10 @@ public class LogStatusBar extends JPanel {
                         );
                         detector.addLiveLog(methodSourceMark, logPattern, sourceLocation.getLine());
                         liveLog = (LiveLog) it.result();
+
+                        //focus back to IDE
+                        IdeFocusManager.getInstance(editor.getProject())
+                                .requestFocusInProject(editor.getContentComponent(), editor.getProject());
                     } else {
                         it.cause().printStackTrace();
                     }

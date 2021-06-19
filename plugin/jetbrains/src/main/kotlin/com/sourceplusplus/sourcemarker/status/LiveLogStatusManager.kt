@@ -74,6 +74,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
         )//test2.ActivityBar(editor as EditorImpl?, wrapperPanel)
         wrapperPanel.add(statusBar)
         statusBar.setInlayRef(inlayRef)
+        statusBar.setEditor(editor)
 
         val inlay = manager.insertAfter(lineNumber - 1, wrapperPanel)
         inlayRef.set(inlay)
@@ -101,6 +102,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
             )
             wrapperPanel.add(statusBar)
             statusBar.setInlayRef(inlayRef)
+            statusBar.setEditor(editor)
 
             val inlay = manager.insertAfter(liveLog.location.line - 2, wrapperPanel)
             inlayRef.set(inlay)
