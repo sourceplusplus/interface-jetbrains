@@ -69,21 +69,8 @@ public class LogStatusBar extends JPanel {
             LoggerDetector detector = methodSourceMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR());
             detector.addLiveLog(methodSourceMark, liveLog.getLogFormat(), sourceLocation.getLine());
         } else {
-            //        //---- label3 ----
             JLabel label3 = new JLabel();
-//        label3.setText("5:45:22pm");
-//        label3.setFont(new Font("Roboto Light", Font.BOLD, 15));
-//        label3.setIcon(IconLoader.getIcon("/icons/clock.svg"));
-//        label3.setIconTextGap(8);
             add(label3, "cell 1 0,gapx null 10");
-//
-//        //---- separator1 ----
-//        JSeparator separator1 = new JSeparator();
-//        separator1.setOrientation(SwingConstants.VERTICAL);
-//        separator1.setPreferredSize(new Dimension(3, 20));
-//        separator1.setMinimumSize(new Dimension(3, 20));
-//        separator1.setMaximumSize(new Dimension(3, 20));
-//        add(separator1, "cell 1 0,gapx 10 10");
 
             //edit mode
             editMode = true;
@@ -163,7 +150,14 @@ public class LogStatusBar extends JPanel {
                 });
             }
         });
-
+        textField1.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
+                    inlayRef.get().dispose();
+                }
+            }
+        });
         textField1.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -172,7 +166,11 @@ public class LogStatusBar extends JPanel {
 
             @Override
             public void focusLost(FocusEvent e) {
-                if (!editMode) {
+                if (editMode) {
+                    if (textField1.getText().equals("")) {
+                        inlayRef.get().dispose();
+                    }
+                } else {
                     textField1.setBorder(null);
                     textField1.setBackground(Color.decode("#2B2B2B"));
                     textField1.setEditable(false);
