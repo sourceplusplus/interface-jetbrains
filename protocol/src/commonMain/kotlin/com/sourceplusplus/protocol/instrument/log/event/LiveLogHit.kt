@@ -17,8 +17,8 @@ data class LiveLogHit(
     val logId: String,
     @Serializable(with = Serializers.InstantKSerializer::class)
     val occurredAt: Instant,
-    val host: String,
-    val application: String,
+    val serviceInstance: String,
+    val service: String,
     val logResult: LogResult
 ) {
     val eventType: LiveInstrumentEventType = LiveInstrumentEventType.LOG_HIT
