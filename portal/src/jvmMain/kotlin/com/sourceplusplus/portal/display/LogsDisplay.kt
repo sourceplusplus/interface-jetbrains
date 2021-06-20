@@ -143,7 +143,7 @@ class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType
 
     private fun handleArtifactLogResult(artifactLogResult: LogResult) {
         SourcePortal.getPortals().filter {
-            it.viewingPortalArtifact.startsWith(artifactLogResult.artifactQualifiedName!!)
+            it.viewingPortalArtifact == artifactLogResult.artifactQualifiedName!!
         }.forEach {
             it.logsView.cacheArtifactLogResult(artifactLogResult)
             updateUI(it)
