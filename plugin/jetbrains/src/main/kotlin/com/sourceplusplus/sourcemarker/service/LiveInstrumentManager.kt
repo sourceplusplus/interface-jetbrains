@@ -17,6 +17,8 @@ import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.breakpoints.*
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
 import com.intellij.xdebugger.impl.breakpoints.XLineBreakpointImpl
+import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
 import com.sourceplusplus.protocol.error.AccessDenied
@@ -26,9 +28,12 @@ import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
+import com.sourceplusplus.protocol.instrument.log.event.LiveLogHit
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointConditionParser
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
@@ -50,15 +55,15 @@ import javax.swing.Icon
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
+class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
     XBreakpointListener<XLineBreakpoint<LiveBreakpointProperties>> {
 
     companion object {
-        private val log = LoggerFactory.getLogger(LiveBreakpointManager::class.java)
+        private val log = LoggerFactory.getLogger(LiveInstrumentManager::class.java)
     }
 
     override suspend fun start() {
-        log.debug("LiveBreakpointManager started")
+        log.debug("LiveInstrumentManager started")
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
         vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_INSTRUMENT_SUBSCRIBER) {
@@ -66,6 +71,24 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             log.info("Received breakpoint event. Type: {}", liveEvent.eventType)
 
             when (liveEvent.eventType) {
+                LiveInstrumentEventType.LOG_HIT -> {
+                    if (!SourceMarker.enabled) {
+                        log.debug("SourceMarker disabled. Ignored log hit")
+                        return@consumer
+                    }
+
+                    val logHit = Json.decodeValue(liveEvent.data, LiveLogHit::class.java)
+                    val hitMark = SourceMarkSearch.findByLogId(logHit.logId)
+                    if (hitMark != null) {
+                        val portal = hitMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                        vertx.eventBus().send(
+                            ArtifactLogUpdated,
+                            logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
+                        )
+                    } else {
+                        log.debug("Could not find source mark. Ignored log hit.")
+                    }
+                }
                 LiveInstrumentEventType.BREAKPOINT_HIT -> {
                     val bpHit = Json.decodeValue(liveEvent.data, LiveBreakpointHit::class.java)
                     ApplicationManager.getApplication().invokeLater {

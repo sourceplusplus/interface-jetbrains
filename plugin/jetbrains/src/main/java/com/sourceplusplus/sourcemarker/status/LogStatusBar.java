@@ -236,6 +236,7 @@ public class LogStatusBar extends JPanel {
                     );
                     instrumentService.addLiveInstrument(log, it -> {
                         if (it.succeeded()) {
+                            inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
                             editMode = false;
                             removeActiveDecorations();
 

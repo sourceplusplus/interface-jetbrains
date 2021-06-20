@@ -16,6 +16,13 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
  */
 object SourceMarkSearch {
 
+    fun findByLogId(logId: String): SourceMark? {
+        return SourceMarker.getSourceMarks()
+            .firstOrNull {
+                it.getUserData(SourceMarkKeys.LOG_ID) == logId
+            }
+    }
+
     suspend fun findSourceMark(artifact: ArtifactQualifiedName): SourceMark? {
         return when (artifact.type) {
             ArtifactType.ENDPOINT -> findEndpointSourceMark(artifact)

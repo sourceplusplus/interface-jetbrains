@@ -19,6 +19,7 @@ import com.sourceplusplus.protocol.instrument.log.LiveLog
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
 import java.time.Instant
@@ -118,6 +119,8 @@ object LiveLogStatusManager : SourceMarkEventListener {
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
+                    inlayMark.putUserData(LOG_ID, liveLog.id)
+
                     val wrapperPanel = JPanel()
                     wrapperPanel.layout = BorderLayout()
 

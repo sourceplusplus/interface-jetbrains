@@ -48,7 +48,7 @@ import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
-import com.sourceplusplus.sourcemarker.service.LiveBreakpointManager
+import com.sourceplusplus.sourcemarker.service.LiveInstrumentManager
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
@@ -292,7 +292,7 @@ object SourceMarkerPlugin {
             ApplicationManager.getApplication().invokeLater {
                 BreakpointHitWindowService.getInstance(project).showEventsWindow()
             }
-            val breakpointListener = LiveBreakpointManager(project)
+            val breakpointListener = LiveInstrumentManager(project)
             GlobalScope.launch(vertx.dispatcher()) {
                 deploymentIds.add(vertx.deployVerticle(breakpointListener).await())
             }
