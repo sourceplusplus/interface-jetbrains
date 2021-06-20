@@ -114,7 +114,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                     } else {
                         val provider = SourceInlayComponentProvider.from(editor)
                         val inlay = provider.insertAfter(
-                            lineNumber - 1,
+                            lineNumber - 2,
                             configuration.componentProvider.getComponent(this).getComponent()
                         )
                         configuration.inlayRef = Ref.create()
@@ -135,7 +135,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         dispose(true)
     }
 
-    fun dispose(removeFromMarker: Boolean = true) {
+    fun dispose(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
         if (this is InlayMark) {
             configuration.inlayRef?.get()?.dispose()
             configuration.inlayRef = null
@@ -143,7 +143,11 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         closePopup()
 
         if (removeFromMarker) {
-            check(sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false))
+            if (assertRemoval) {
+                check(sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false))
+            } else {
+                sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false)
+            }
         }
         triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_REMOVED)) {
             clearEventListeners()

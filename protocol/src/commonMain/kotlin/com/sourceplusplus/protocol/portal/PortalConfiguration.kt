@@ -21,7 +21,7 @@ data class PortalConfiguration(
     var visibleConfiguration: Boolean = false,
     var autoResolveEndpointNames: Boolean = false,
     var artifactType: ArtifactType? = null, //todo: allow multiple types? (endpoint + method)
-    var statusBar: Boolean = false //todo: impl
+    var statusBar: Boolean = false
 ) {
     fun isViewable(pageType: PageType): Boolean {
         return when (pageType) {

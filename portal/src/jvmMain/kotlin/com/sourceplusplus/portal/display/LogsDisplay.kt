@@ -9,6 +9,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetLogOrderType
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.log.Log
 import com.sourceplusplus.protocol.artifact.log.LogOrderType
@@ -35,7 +36,8 @@ class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType
     override suspend fun start() {
         vertx.setPeriodic(refreshIntervalMs.toLong()) {
             SourcePortal.getPortals().filter {
-                it.configuration.currentPage == PageType.LOGS && (it.visible || it.configuration.external)
+                it.configuration.currentPage == PageType.LOGS &&
+                        (it.visible || it.configuration.external || it.configuration.statusBar)
             }.forEach {
                 vertx.eventBus().send(RefreshLogs, it)
             }
@@ -59,7 +61,12 @@ class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType
             LogViewType.LIVE_TAIL -> {
                 val logResult = portal.logsView.logResult
                 if (logResult != null) {
-                    vertx.eventBus().displayLogs(portal.portalUuid, logResult)
+                    if (portal.configuration.statusBar) {
+                        //status bars don't need to be fully json encoded
+                        vertx.eventBus().send(DisplayLogs(portal.portalUuid), logResult)
+                    } else {
+                        vertx.eventBus().displayLogs(portal.portalUuid, logResult)
+                    }
                     log.debug("Displayed logs for artifact. Log size: {}", logResult.logs.size)
                 }
             }
@@ -136,7 +143,8 @@ class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType
 
     private fun handleArtifactLogResult(artifactLogResult: LogResult) {
         SourcePortal.getPortals().filter {
-            artifactLogResult.artifactQualifiedName?.equals(it.viewingPortalArtifact) == true
+            artifactLogResult.artifactQualifiedName != null && //todo: can that even be null?
+                    it.viewingPortalArtifact.startsWith(artifactLogResult.artifactQualifiedName!!)
         }.forEach {
             it.logsView.cacheArtifactLogResult(artifactLogResult)
             updateUI(it)

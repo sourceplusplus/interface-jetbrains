@@ -12,11 +12,16 @@ import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
+import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.log.LiveLog
+import com.sourceplusplus.protocol.portal.PageType
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
+import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -76,7 +81,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
 
                 val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
                 val statusBar = LogStatusBar(
-                    LiveSourceLocation(qualifiedClassName, lineNumber + 1),
+                    LiveSourceLocation(qualifiedClassName, lineNumber),
                     inlayMark
                 )
                 wrapperPanel.add(statusBar)
@@ -116,8 +121,20 @@ object LiveLogStatusManager : SourceMarkEventListener {
                     }
                     inlayMark.apply()
 
+                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                    sourcePortal.configuration.currentPage = PageType.LOGS
+                    sourcePortal.configuration.statusBar = true
+
                     val detector = inlayMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
                     detector.addLiveLog(editor, inlayMark, liveLog.logFormat, liveLog.location.line)
+
+                    SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
+                        val latestLog = it.body().logs.first()
+                        statusBar.setLatestLog(
+                            Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()),
+                            latestLog.getFormattedMessage()
+                        )
+                    }
                 }
             } else {
                 log.warn("No detected expression at line {}. Inlay mark ignored", liveLog.location.line)

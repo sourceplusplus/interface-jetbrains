@@ -77,10 +77,10 @@ abstract class MethodSourceMark(
         apply(configuration.componentProvider.getComponent(this), addToMarker)
     }
 
-    override fun dispose(removeFromMarker: Boolean) {
+    override fun dispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
         psiMethod.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
         psiMethod.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
-        super.dispose(removeFromMarker)
+        super.dispose(removeFromMarker, assertRemoval)
     }
 
     private val userData = HashMap<Any, Any>()

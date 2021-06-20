@@ -17,6 +17,9 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -27,6 +30,8 @@ import static com.sourceplusplus.protocol.SourceMarkerServices.Instance;
 
 public class LogStatusBar extends JPanel {
 
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
+            .withZone(ZoneId.systemDefault());
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("(\\$[a-zA-Z0-9_]+)");
     private Editor editor;
     private final LiveSourceLocation sourceLocation;
@@ -34,6 +39,7 @@ public class LogStatusBar extends JPanel {
     private LiveLog liveLog;
     private boolean textFieldFocused = false;
     private boolean editMode;
+    private JLabel label3 = new JLabel();
 
     public LogStatusBar(LiveSourceLocation sourceLocation, InlayMark inlayMark) {
         this(sourceLocation, inlayMark, null, null);
@@ -50,8 +56,7 @@ public class LogStatusBar extends JPanel {
 
         if (liveLog != null) {
             //---- label3 ----
-            JLabel label3 = new JLabel();
-            label3.setText("5:45:22pm");
+            label3.setText("");
             label3.setFont(new Font("Roboto Light", Font.BOLD, 15));
             label3.setIcon(IconLoader.getIcon("/icons/clock.svg"));
             label3.setIconTextGap(8);
@@ -64,8 +69,6 @@ public class LogStatusBar extends JPanel {
             separator1.setMinimumSize(new Dimension(3, 20));
             separator1.setMaximumSize(new Dimension(3, 20));
             add(separator1, "cell 1 0,gapx 10 10");
-
-            textField1.setText(liveLog.getLogFormat()); //todo: log message
         } else {
             JLabel label3 = new JLabel();
             add(label3, "cell 1 0,gapx null 10");
@@ -75,6 +78,16 @@ public class LogStatusBar extends JPanel {
             textField1.setBorder(new LineBorder(new Color(64, 64, 64), 1, true));
             textField1.setBackground(Color.decode("#252525"));
             textField1.setEditable(true);
+        }
+    }
+
+    public void setLatestLog(Instant time, String logMessage) {
+        String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
+        if (!label3.getText().equals(formattedTime) || !textField1.getText().equals(logMessage)) {
+            SwingUtilities.invokeLater(() -> {
+                label3.setText(formattedTime);
+                textField1.setText(logMessage);
+            });
         }
     }
 
@@ -158,7 +171,7 @@ public class LogStatusBar extends JPanel {
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
-                    inlayMark.dispose();
+                    inlayMark.dispose(true, false);
                 }
             }
         });
@@ -172,7 +185,7 @@ public class LogStatusBar extends JPanel {
             public void focusLost(FocusEvent e) {
                 if (editMode) {
                     if (textField1.getText().equals("")) {
-                        inlayMark.dispose();
+                        inlayMark.dispose(true, false);
                     }
                 } else {
                     textField1.setBorder(null);
@@ -256,7 +269,7 @@ public class LogStatusBar extends JPanel {
         addRecursiveMouseListener(label6, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                inlayMark.dispose();
+                inlayMark.dispose(true, false);
 
                 if (liveLog != null) {
                     Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
