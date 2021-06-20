@@ -55,20 +55,7 @@ public class LogStatusBar extends JPanel {
         setupComponents();
 
         if (liveLog != null) {
-            //---- label3 ----
-            label3.setText("");
-            label3.setFont(new Font("Roboto Light", Font.BOLD, 15));
-            label3.setIcon(IconLoader.getIcon("/icons/clock.svg"));
-            label3.setIconTextGap(8);
-            add(label3, "cell 1 0,gapx null 10");
-
-            //---- separator1 ----
-            JSeparator separator1 = new JSeparator();
-            separator1.setOrientation(SwingConstants.VERTICAL);
-            separator1.setPreferredSize(new Dimension(3, 20));
-            separator1.setMinimumSize(new Dimension(3, 20));
-            separator1.setMaximumSize(new Dimension(3, 20));
-            add(separator1, "cell 1 0,gapx 10 10");
+            addTimeField();
         } else {
             JLabel label3 = new JLabel();
             add(label3, "cell 1 0,gapx null 10");
@@ -98,6 +85,23 @@ public class LogStatusBar extends JPanel {
     public void focus() {
         textField1.grabFocus();
         textField1.requestFocusInWindow();
+    }
+
+    private void addTimeField() {
+        //---- label3 ----
+        label3.setText("");
+        label3.setFont(new Font("Roboto Light", Font.BOLD, 15));
+        label3.setIcon(IconLoader.getIcon("/icons/clock.svg"));
+        label3.setIconTextGap(8);
+        add(label3, "cell 1 0,gapx null 10");
+
+        //---- separator1 ----
+        JSeparator separator1 = new JSeparator();
+        separator1.setOrientation(SwingConstants.VERTICAL);
+        separator1.setPreferredSize(new Dimension(3, 20));
+        separator1.setMinimumSize(new Dimension(3, 20));
+        separator1.setMaximumSize(new Dimension(3, 20));
+        add(separator1, "cell 1 0,gapx 10 10");
     }
 
     private void removeActiveDecorations() {
@@ -157,6 +161,8 @@ public class LogStatusBar extends JPanel {
                         detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
                         liveLog = (LiveLog) it.result();
                         LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
+
+                        addTimeField();
 
                         //focus back to IDE
                         IdeFocusManager.getInstance(editor.getProject())

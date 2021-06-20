@@ -64,7 +64,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
         }
     }
 
-    fun showStatusBar(editor: Editor, lineNumber: Int, focus: Boolean = true) {
+    fun showStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
@@ -93,9 +93,19 @@ object LiveLogStatusManager : SourceMarkEventListener {
                 }
                 inlayMark.apply()
 
-                if (focus) {
-                    statusBar.focus()
+                val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                sourcePortal.configuration.currentPage = PageType.LOGS
+                sourcePortal.configuration.statusBar = true
+
+                SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
+                    val latestLog = it.body().logs.first()
+                    statusBar.setLatestLog(
+                        Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()),
+                        latestLog.getFormattedMessage()
+                    )
                 }
+
+                statusBar.focus()
             }
         } else {
             log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
