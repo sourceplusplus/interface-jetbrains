@@ -84,7 +84,7 @@ abstract class ExpressionSourceMark(
 
     override fun hasUserData(): Boolean = userData.isNotEmpty()
 
-    fun getPsiExpresion(): UExpression {
+    fun getPsiExpression(): UExpression {
         return psiExpression
     }
 

@@ -116,6 +116,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
         //show live log status bars
         Instance.liveInstrument!!.getLiveLogs {
             if (it.succeeded()) {
+                log.info("Found {} active live logs", it.result().size)
                 LiveLogStatusManager.addActiveLiveLogs(it.result())
             } else {
                 log.error("Failed to get live logs", it.cause())

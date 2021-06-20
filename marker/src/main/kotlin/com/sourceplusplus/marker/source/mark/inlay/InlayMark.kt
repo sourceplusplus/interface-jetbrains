@@ -2,7 +2,6 @@ package com.sourceplusplus.marker.source.mark.inlay
 
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
-import org.slf4j.LoggerFactory
 
 /**
  * A [SourceMark] which adds visualizations inside source code text.

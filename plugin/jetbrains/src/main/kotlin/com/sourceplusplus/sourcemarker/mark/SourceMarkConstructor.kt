@@ -102,7 +102,7 @@ object SourceMarkConstructor {
         when (advice) {
             is ActiveExceptionAdvice -> {
                 val expressionMark = inlayMark as ExpressionInlayMark
-                val prettyTimeAgo = if (expressionMark.getPsiExpresion() is UThrowExpression) {
+                val prettyTimeAgo = if (expressionMark.getPsiExpression() is UThrowExpression) {
                     {
                         val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() +
                                 " " + message("ago")

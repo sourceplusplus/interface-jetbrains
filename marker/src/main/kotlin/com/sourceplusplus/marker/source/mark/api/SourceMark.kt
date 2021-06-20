@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
+import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.Balloon
@@ -13,13 +14,15 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
 import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
 import com.sourceplusplus.marker.SourceMarker
-import com.sourceplusplus.marker.plugin.SourceInlayProvider
+import com.sourceplusplus.marker.plugin.SourceInlayComponentProvider
+import com.sourceplusplus.marker.plugin.SourceInlayHintProvider
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.config.SourceMarkConfiguration
@@ -33,6 +36,7 @@ import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.awt.event.ComponentEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.*
@@ -103,8 +107,25 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                     setVisible(false)
                 }
             } else if (this is InlayMark) {
-                ApplicationManager.getApplication().invokeLater {
-                    InlayHintsPassFactory.forceHintsUpdateOnNextPass()
+                if (configuration.showComponentInlay) {
+                    val editor = FileEditorManager.getInstance(project).selectedTextEditor
+                    if (editor == null) {
+                        TODO()
+                    } else {
+                        val provider = SourceInlayComponentProvider.from(editor)
+                        val inlay = provider.insertAfter(
+                            lineNumber - 1,
+                            configuration.componentProvider.getComponent(this).getComponent()
+                        )
+                        configuration.inlayRef = Ref.create()
+                        configuration.inlayRef!!.set(inlay)
+                        val viewport = (editor as? EditorImpl)?.scrollPane?.viewport
+                        viewport?.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
+                    }
+                } else {
+                    ApplicationManager.getApplication().invokeLater {
+                        InlayHintsPassFactory.forceHintsUpdateOnNextPass()
+                    }
                 }
             }
         }
@@ -115,6 +136,10 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     }
 
     fun dispose(removeFromMarker: Boolean = true) {
+        if (this is InlayMark) {
+            configuration.inlayRef?.get()?.dispose()
+            configuration.inlayRef = null
+        }
         closePopup()
 
         if (removeFromMarker) {
@@ -290,7 +315,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             return //todo: piggy backed on above hack; needed for when navigating from different files
         } else if (e.oldRectangle.location == e.newRectangle.location) {
             return //no change in location
-        } else if (System.currentTimeMillis() - SourceInlayProvider.latestInlayMarkAddedAt <= 200) {
+        } else if (System.currentTimeMillis() - SourceInlayHintProvider.latestInlayMarkAddedAt <= 200) {
             return //new inlay mark triggered event
         }
 

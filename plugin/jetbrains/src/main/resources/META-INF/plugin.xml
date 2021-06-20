@@ -25,7 +25,7 @@
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$JavaDescriptor"/>
         <codeInsight.inlayProvider language="JAVA"
-                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayProvider"/>
+                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayHintProvider"/>
         <errorHandler implementation="com.sourceplusplus.sourcemarker.reporting.GitHubErrorReporter"/>
 
         <projectService

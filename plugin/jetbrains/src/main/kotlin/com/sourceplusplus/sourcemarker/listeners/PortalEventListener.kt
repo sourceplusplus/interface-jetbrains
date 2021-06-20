@@ -338,6 +338,7 @@ class PortalEventListener(
     }
 
     private suspend fun refreshLogs(portal: SourcePortal) {
+        if (log.isTraceEnabled) log.trace("Refreshing logs. Portal: {}", portal.portalUuid)
         val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         GlobalScope.launch(vertx.dispatcher()) {
             val logsResult = LogsBridge.queryLogs(

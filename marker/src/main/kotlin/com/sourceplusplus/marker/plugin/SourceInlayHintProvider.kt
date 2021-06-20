@@ -48,7 +48,7 @@ import javax.swing.JPanel
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("UnstableApiUsage")
-open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
+open class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
         @Volatile

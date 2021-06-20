@@ -1,20 +1,17 @@
 package com.sourceplusplus.sourcemarker.status;
 
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.util.ui.UIUtil;
-import com.sourceplusplus.marker.source.mark.api.MethodSourceMark;
+import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
 import net.miginfocom.swing.MigLayout;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -22,27 +19,31 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.sourceplusplus.protocol.SourceMarkerServices.Instance;
 
 public class LogStatusBar extends JPanel {
 
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("(\\$[a-zA-Z0-9_]+)");
     private Editor editor;
     private final LiveSourceLocation sourceLocation;
-    private final MethodSourceMark methodSourceMark;
+    private final InlayMark inlayMark;
     private LiveLog liveLog;
-    private Ref<Inlay> inlayRef;
     private boolean textFieldFocused = false;
     private boolean editMode;
 
-    public LogStatusBar(LiveSourceLocation sourceLocation, MethodSourceMark methodSourceMark) {
-        this(sourceLocation, methodSourceMark, null);
+    public LogStatusBar(LiveSourceLocation sourceLocation, InlayMark inlayMark) {
+        this(sourceLocation, inlayMark, null, null);
     }
 
-    public LogStatusBar(LiveSourceLocation sourceLocation, MethodSourceMark methodSourceMark, LiveLog liveLog) {
+    public LogStatusBar(LiveSourceLocation sourceLocation, InlayMark inlayMark, LiveLog liveLog, Editor editor) {
         this.sourceLocation = sourceLocation;
-        this.methodSourceMark = methodSourceMark;
+        this.inlayMark = inlayMark;
         this.liveLog = liveLog;
+        this.editor = editor;
 
         initComponents();
         setupComponents();
@@ -65,9 +66,6 @@ public class LogStatusBar extends JPanel {
             add(separator1, "cell 1 0,gapx 10 10");
 
             textField1.setText(liveLog.getLogFormat()); //todo: log message
-
-            LoggerDetector detector = methodSourceMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR());
-            detector.addLiveLog(methodSourceMark, liveLog.getLogFormat(), sourceLocation.getLine());
         } else {
             JLabel label3 = new JLabel();
             add(label3, "cell 1 0,gapx null 10");
@@ -78,10 +76,6 @@ public class LogStatusBar extends JPanel {
             textField1.setBackground(Color.decode("#252525"));
             textField1.setEditable(true);
         }
-    }
-
-    public void setInlayRef(@NotNull Ref<Inlay> inlayRef) {
-        this.inlayRef = inlayRef;
     }
 
     public void setEditor(Editor editor) {
@@ -116,10 +110,19 @@ public class LogStatusBar extends JPanel {
                 }
 
                 String logPattern = textField1.getText();
+                ArrayList<String> varMatches = new ArrayList<>();
+                Matcher m = VARIABLE_PATTERN.matcher(logPattern);
+                while (m.find()) {
+                    String var = m.group();
+                    logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+                    varMatches.add(var);
+                }
+                final String finalLogPattern = logPattern;
+
                 LiveInstrumentService instrumentService = Objects.requireNonNull(Instance.INSTANCE.getLiveInstrument());
                 LiveLog log = new LiveLog(
-                        logPattern,
-                        new ArrayList<>(),
+                        finalLogPattern,
+                        varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
                         sourceLocation,
                         null,
                         null,
@@ -135,10 +138,10 @@ public class LogStatusBar extends JPanel {
                         editMode = false;
                         removeActiveDecorations();
 
-                        LoggerDetector detector = methodSourceMark.getUserData(
+                        LoggerDetector detector = inlayMark.getUserData(
                                 SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
                         );
-                        detector.addLiveLog(methodSourceMark, logPattern, sourceLocation.getLine());
+                        detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
                         liveLog = (LiveLog) it.result();
                         LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
 
@@ -155,7 +158,7 @@ public class LogStatusBar extends JPanel {
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
-                    inlayRef.get().dispose();
+                    inlayMark.dispose();
                 }
             }
         });
@@ -169,7 +172,7 @@ public class LogStatusBar extends JPanel {
             public void focusLost(FocusEvent e) {
                 if (editMode) {
                     if (textField1.getText().equals("")) {
-                        inlayRef.get().dispose();
+                        inlayMark.dispose();
                     }
                 } else {
                     textField1.setBorder(null);
@@ -253,7 +256,7 @@ public class LogStatusBar extends JPanel {
         addRecursiveMouseListener(label6, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                inlayRef.get().dispose();
+                inlayMark.dispose();
 
                 if (liveLog != null) {
                     Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {

@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.inlay
+package com.sourceplusplus.marker.plugin
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
@@ -28,7 +28,7 @@ import kotlin.math.min
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class EditorComponentInlaysManager(val editor: EditorImpl) : Disposable {
+class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
 
     private val managedInlays = mutableMapOf<ComponentWrapper, Disposable>()
     private val editorWidthWatcher = EditorTextWidthWatcher()
@@ -145,13 +145,13 @@ class EditorComponentInlaysManager(val editor: EditorImpl) : Disposable {
     }
 
     companion object {
-        val INLAYS_KEY: Key<EditorComponentInlaysManager> = Key.create("EditorComponentInlaysManager")
+        val INLAYS_KEY: Key<SourceInlayComponentProvider> = Key.create("SourceInlayComponentProvider")
 
-        fun from(editor: Editor): EditorComponentInlaysManager {
+        fun from(editor: Editor): SourceInlayComponentProvider {
             return synchronized(editor) {
                 val manager = editor.getUserData(INLAYS_KEY)
                 if (manager == null) {
-                    val newManager = EditorComponentInlaysManager(editor as EditorImpl)
+                    val newManager = SourceInlayComponentProvider(editor as EditorImpl)
                     editor.putUserData(INLAYS_KEY, newManager)
                     newManager
                 } else manager
