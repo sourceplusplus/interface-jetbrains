@@ -2,25 +2,23 @@ package com.sourceplusplus.sourcemarker.status
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.Inlay
-import com.intellij.openapi.editor.LogicalPosition
-import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Ref
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
+import com.sourceplusplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.log.LiveLog
-import com.sourceplusplus.sourcemarker.inlay.EditorComponentInlaysManager
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
-import java.awt.event.ComponentEvent
 import java.util.concurrent.CopyOnWriteArrayList
+import javax.swing.JComponent
 import javax.swing.JPanel
 
 /**
@@ -31,12 +29,16 @@ import javax.swing.JPanel
  */
 object LiveLogStatusManager : SourceMarkEventListener {
 
+    private val log = LoggerFactory.getLogger(LiveLogStatusManager::class.java)
     private val activeStatusBars = CopyOnWriteArrayList<LiveLog>()
 
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
             SourceMarkEventCode.MARK_ADDED -> {
                 if (event.sourceMark !is MethodSourceMark) return
+                //todo: shouldn't need to wait for method mark added to add inlay marks
+                //  should have events that just mean a method is visible
+
                 ApplicationManager.getApplication().runReadAction {
                     val methodSourceMark = event.sourceMark as MethodSourceMark
                     val qualifiedClassName = methodSourceMark.sourceFileMarker.getClassQualifiedNames()[0]
@@ -49,7 +51,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
 
                     activeStatusBars.forEach {
                         if (qualifiedClassName == it.location.source && it.location.line in startLine..endLine) {
-                            showStatusBar(methodSourceMark.project, it, methodSourceMark)
+                            showStatusBar(it, event.sourceMark.sourceFileMarker)
                         }
                     }
                 }
@@ -58,56 +60,68 @@ object LiveLogStatusManager : SourceMarkEventListener {
     }
 
     fun showStatusBar(editor: Editor, lineNumber: Int, focus: Boolean = true) {
-        val project = editor.project!!
-        val manager = EditorComponentInlaysManager.from(editor)
-        val inlayRef = Ref<Inlay<*>>()
+        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
+            .getUserData(SourceFileMarker.KEY)
+        if (fileMarker == null) {
+            log.warn("Could not find file marker for file: {}", editor.document)
+            return
+        }
 
-        val fileMarker = PsiDocumentManager.getInstance(project).getPsiFile(editor.document)!!
-            .getUserData(SourceFileMarker.KEY)!!
-        val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
+        val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
+        if (findInlayMark.isPresent) {
+            val inlayMark = findInlayMark.get()
+            if (!fileMarker.containsSourceMark(inlayMark)) {
+                val wrapperPanel = JPanel()
+                wrapperPanel.layout = BorderLayout()
 
-        val wrapperPanel = JPanel()
-        wrapperPanel.layout = BorderLayout()
-        val statusBar = LogStatusBar(
-            LiveSourceLocation(qualifiedClassName, lineNumber + 1),
-            getMethodSourceMark(editor, fileMarker, lineNumber)
-        )//test2.ActivityBar(editor as EditorImpl?, wrapperPanel)
-        wrapperPanel.add(statusBar)
-        statusBar.setInlayRef(inlayRef)
-        statusBar.setEditor(editor)
+                val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
+                val statusBar = LogStatusBar(
+                    LiveSourceLocation(qualifiedClassName, lineNumber + 1),
+                    inlayMark
+                )
+                wrapperPanel.add(statusBar)
+                statusBar.setEditor(editor)
 
-        val inlay = manager.insertAfter(lineNumber - 1, wrapperPanel)
-        inlayRef.set(inlay)
-        val viewport = (editor as? EditorImpl)?.scrollPane?.viewport
-        viewport?.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
-        if (focus) {
-            statusBar.focus()
+                inlayMark.configuration.showComponentInlay = true
+                inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                    override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+                }
+                inlayMark.apply()
+
+                if (focus) {
+                    statusBar.focus()
+                }
+            }
+        } else {
+            log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
         }
     }
 
-    fun showStatusBar(project: Project, liveLog: LiveLog, methodSourceMark: MethodSourceMark) {
+    fun showStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
-            val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
-            val manager = EditorComponentInlaysManager.from(editor)
-            val inlayRef = Ref<Inlay<*>>()
+            val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
+            val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
+            if (findInlayMark.isPresent) {
+                val inlayMark = findInlayMark.get()
+                if (!fileMarker.containsSourceMark(inlayMark)) {
+                    val wrapperPanel = JPanel()
+                    wrapperPanel.layout = BorderLayout()
 
-            val fileMarker = methodSourceMark.sourceFileMarker
-            val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
+                    val statusBar = LogStatusBar(liveLog.location, inlayMark, liveLog, editor)
+                    wrapperPanel.add(statusBar)
 
-            val wrapperPanel = JPanel()
-            wrapperPanel.layout = BorderLayout()
-            val statusBar = LogStatusBar(
-                LiveSourceLocation(qualifiedClassName, liveLog.location.line),
-                methodSourceMark, liveLog
-            )
-            wrapperPanel.add(statusBar)
-            statusBar.setInlayRef(inlayRef)
-            statusBar.setEditor(editor)
+                    inlayMark.configuration.showComponentInlay = true
+                    inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                        override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+                    }
+                    inlayMark.apply()
 
-            val inlay = manager.insertAfter(liveLog.location.line - 2, wrapperPanel)
-            inlayRef.set(inlay)
-            val viewport = (editor as? EditorImpl)?.scrollPane?.viewport
-            viewport?.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
+                    val detector = inlayMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                    detector.addLiveLog(editor, inlayMark, liveLog.logFormat, liveLog.location.line)
+                }
+            } else {
+                log.warn("No detected expression at line {}. Inlay mark ignored", liveLog.location.line)
+            }
         }
     }
 
@@ -121,24 +135,5 @@ object LiveLogStatusManager : SourceMarkEventListener {
 
     fun removeActiveLiveLog(liveLog: LiveLog) {
         activeStatusBars.remove(liveLog)
-    }
-
-    private fun getMethodSourceMark(editor: Editor, fileMarker: SourceFileMarker, line: Int): MethodSourceMark? {
-        return fileMarker.getSourceMarks().find {
-            if (it is MethodSourceMark) {
-                if (it.configuration.activateOnKeyboardShortcut) {
-                    //+1 on end offset so match is made even right after method end
-                    val incTextRange = TextRange(
-                        it.getPsiMethod().sourcePsi!!.textRange.startOffset,
-                        it.getPsiMethod().sourcePsi!!.textRange.endOffset + 1
-                    )
-                    incTextRange.contains(editor.logicalPositionToOffset(LogicalPosition(line - 1, 0)))
-                } else {
-                    false
-                }
-            } else {
-                false
-            }
-        } as MethodSourceMark?
     }
 }
