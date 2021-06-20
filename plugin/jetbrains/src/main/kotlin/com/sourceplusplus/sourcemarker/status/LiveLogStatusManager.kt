@@ -100,8 +100,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
                 SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
                     val latestLog = it.body().logs.first()
                     statusBar.setLatestLog(
-                        Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()),
-                        latestLog.getFormattedMessage()
+                        Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog
                     )
                 }
 
@@ -141,8 +140,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
                     SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
                         val latestLog = it.body().logs.first()
                         statusBar.setLatestLog(
-                            Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()),
-                            latestLog.getFormattedMessage()
+                            Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog
                         )
                     }
                 }

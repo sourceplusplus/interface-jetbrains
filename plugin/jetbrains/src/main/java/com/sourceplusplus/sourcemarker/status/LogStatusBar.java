@@ -6,6 +6,7 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
@@ -15,6 +16,9 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
@@ -68,12 +72,29 @@ public class LogStatusBar extends JPanel {
         }
     }
 
-    public void setLatestLog(Instant time, String logMessage) {
+    public void setLatestLog(Instant time, Log latestLog) {
+        if (textFieldFocused) {
+            return; //ignore as they're likely updating text
+        }
+
         String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
-        if (!label3.getText().equals(formattedTime) || !textField1.getText().equals(logMessage)) {
+        String formattedMessage = latestLog.getFormattedMessage();
+        if (!label3.getText().equals(formattedTime) || !textField1.getText().equals(formattedMessage)) {
             SwingUtilities.invokeLater(() -> {
                 label3.setText(formattedTime);
-                textField1.setText(logMessage);
+                textField1.setText(formattedMessage);
+
+                textField1.getStyledDocument().setCharacterAttributes(
+                        0, formattedMessage.length(), textField1.getStyle("default"), true);
+
+                int minIndex = 0;
+                for (String var : latestLog.getArguments()) {
+                    int varIndex = formattedMessage.indexOf(var, minIndex);
+                    minIndex = varIndex;
+
+                    textField1.getStyledDocument().setCharacterAttributes(varIndex, var.length(),
+                            textField1.getStyle("numbers"), true);
+                }
             });
         }
     }
@@ -117,7 +138,66 @@ public class LogStatusBar extends JPanel {
         }
     }
 
+    private void addDefaultStyle(JTextPane pn) {
+        Style style = pn.addStyle("default", null);
+    }
+
+    private void addNumberStyle(JTextPane pn) {
+        Style style = pn.addStyle("numbers", null);
+        StyleConstants.setForeground(style, Color.decode("#e1483b"));
+    }
+
     private void setupComponents() {
+        addDefaultStyle(textField1);
+        addNumberStyle(textField1);
+        ((AbstractDocument) textField1.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+                    throws BadLocationException {
+                fb.insertString(offset, string.replaceAll("\\n", ""), attr);
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attr)
+                    throws BadLocationException {
+                fb.insertString(offset, string.replaceAll("\\n", ""), attr);
+            }
+        });
+        textField1.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent documentEvent) {
+                if (textFieldFocused) {
+                    applyStyle();
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent documentEvent) {
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent documentEvent) {
+            }
+
+            public void applyStyle() {
+                SwingUtilities.invokeLater(() -> {
+                    String text = textField1.getText();
+                    textField1.getStyledDocument().setCharacterAttributes(
+                            0, text.length(), textField1.getStyle("default"), true);
+
+                    int minIndex = 0;
+                    Matcher m = VARIABLE_PATTERN.matcher(text);
+                    while (m.find()) {
+                        String var = m.group();
+                        int varIndex = text.indexOf(var, minIndex);
+                        minIndex = varIndex;
+
+                        textField1.getStyledDocument().setCharacterAttributes(varIndex, var.length(),
+                                textField1.getStyle("numbers"), true);
+                    }
+                });
+            }
+        });
         textField1.getDocument().putProperty("filterNewlines", Boolean.TRUE);
         textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
         textField1.addKeyListener(new KeyAdapter() {
@@ -352,7 +432,7 @@ public class LogStatusBar extends JPanel {
         label1 = new JLabel();
         label2 = new JLabel();
         label4 = new JLabel();
-        textField1 = new JTextField();
+        textField1 = new JTextPane();
         panel2 = new JPanel();
         label8 = new JLabel();
         label7 = new JLabel();
@@ -408,6 +488,7 @@ public class LogStatusBar extends JPanel {
         add(label4, "cell 2 0");
 
         //---- textField1 ----
+        textField1.setMinimumSize(new Dimension(0, 0));
         textField1.setBackground(new Color(43, 43, 43));
         textField1.setBorder(null);
         textField1.setEditable(false);
@@ -450,7 +531,7 @@ public class LogStatusBar extends JPanel {
     private JLabel label1;
     private JLabel label2;
     private JLabel label4;
-    private JTextField textField1;
+    private JTextPane textField1;
     private JPanel panel2;
     private JLabel label8;
     private JLabel label7;
