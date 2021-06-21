@@ -68,7 +68,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
 
         vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_INSTRUMENT_SUBSCRIBER) {
             val liveEvent = Json.decodeValue(it.body().toString(), LiveInstrumentEvent::class.java)
-            log.info("Received breakpoint event. Type: {}", liveEvent.eventType)
+            log.debug("Received instrument event. Type: {}", liveEvent.eventType)
 
             when (liveEvent.eventType) {
                 LiveInstrumentEventType.LOG_HIT -> {
