@@ -2,15 +2,13 @@ package com.sourceplusplus.sourcemarker.psi
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.LogicalPosition
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.JavaRecursiveElementVisitor
 import com.intellij.psi.PsiMethodCallExpression
-import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
@@ -45,29 +43,12 @@ class LoggerDetector {
         )
     }
 
-    private fun getMethodSourceMark(editor: Editor, fileMarker: SourceFileMarker, line: Int): MethodSourceMark? {
-        return fileMarker.getSourceMarks().find {
-            if (it is MethodSourceMark) {
-                if (it.configuration.activateOnKeyboardShortcut) {
-                    //+1 on end offset so match is made even right after method end
-                    val incTextRange = TextRange(
-                        it.getPsiMethod().sourcePsi!!.textRange.startOffset,
-                        it.getPsiMethod().sourcePsi!!.textRange.endOffset + 1
-                    )
-                    incTextRange.contains(editor.logicalPositionToOffset(LogicalPosition(line - 1, 0)))
-                } else {
-                    false
-                }
-            } else {
-                false
-            }
-        } as MethodSourceMark?
-    }
-
     fun addLiveLog(editor: Editor, inlayMark: InlayMark, logPattern: String, lineLocation: Int) {
         //todo: better way to handle logger detector with inlay marks
         ApplicationManager.getApplication().runReadAction {
-            val methodSourceMark = getMethodSourceMark(editor, inlayMark.sourceFileMarker, lineLocation)!!
+            val methodSourceMark = SourceMarkSearch.findMethodSourceMark(
+                editor, inlayMark.sourceFileMarker, lineLocation
+            )!!
             runBlocking {
                 getOrFindLoggerStatements(methodSourceMark)
             }

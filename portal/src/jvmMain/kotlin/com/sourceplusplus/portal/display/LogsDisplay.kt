@@ -2,7 +2,6 @@ package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayLog
-import com.sourceplusplus.portal.extensions.displayLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLogs
@@ -66,12 +65,7 @@ class LogsDisplay(private val refreshIntervalMs: Int, private val pullMode: Bool
             LogViewType.LIVE_TAIL -> {
                 val logResult = portal.logsView.logResult
                 if (logResult != null) {
-                    if (portal.configuration.statusBar) {
-                        //status bars don't need to be fully json encoded
-                        vertx.eventBus().send(DisplayLogs(portal.portalUuid), logResult)
-                    } else {
-                        vertx.eventBus().displayLogs(portal.portalUuid, logResult)
-                    }
+                    vertx.eventBus().send(DisplayLogs(portal.portalUuid), logResult)
                     log.debug("Displayed logs for artifact. Log size: {}", logResult.logs.size)
                 }
             }

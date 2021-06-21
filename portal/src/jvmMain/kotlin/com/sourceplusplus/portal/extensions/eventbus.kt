@@ -26,10 +26,6 @@ fun EventBus.displayTraces(portalUuid: String, traceResult: TraceResult) {
     send(DisplayTraces(portalUuid), JsonObject(Json.encode(traceResult)))
 }
 
-fun EventBus.displayLogs(portalUuid: String, logResult: LogResult) {
-    send(DisplayLogs(portalUuid), JsonObject(Json.encode(logResult)))
-}
-
 fun EventBus.displayLog(portalUuid: String, log: Log) {
     send(DisplayLog(portalUuid), JsonObject(Json.encode(log)))
 }

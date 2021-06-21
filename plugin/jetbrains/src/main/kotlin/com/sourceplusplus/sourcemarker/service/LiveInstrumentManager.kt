@@ -80,11 +80,13 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
                     val logHit = Json.decodeValue(liveEvent.data, LiveLogHit::class.java)
                     val hitMark = SourceMarkSearch.findByLogId(logHit.logId)
                     if (hitMark != null) {
-                        val portal = hitMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                        vertx.eventBus().send(
-                            ArtifactLogUpdated,
-                            logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
-                        )
+                        SourceMarkSearch.findInheritedSourceMarks(hitMark).forEach {
+                            val portal = it.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                            vertx.eventBus().send(
+                                ArtifactLogUpdated,
+                                logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
+                            )
+                        }
                     } else {
                         log.debug("Could not find source mark. Ignored log hit.")
                     }
