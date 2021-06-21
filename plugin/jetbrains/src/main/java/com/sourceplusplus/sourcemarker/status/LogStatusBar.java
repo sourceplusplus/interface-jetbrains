@@ -432,7 +432,6 @@ public class LogStatusBar extends JPanel {
         panel1 = new JPanel();
         label1 = new JLabel();
         label2 = new JLabel();
-        label4 = new JLabel();
         textField1 = new JTextPane();
         panel2 = new JPanel();
         label8 = new JLabel();
@@ -445,18 +444,11 @@ public class LogStatusBar extends JPanel {
         setMinimumSize(new Dimension(500, 40));
         setPreferredSize(new Dimension(500, 40));
         setBackground(new Color(43, 43, 43));
-//        setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.
-//        border.EmptyBorder(0,0,0,0), "JF\u006frmDes\u0069gner \u0045valua\u0074ion",javax.swing.border.TitledBorder.CENTER
-//        ,javax.swing.border.TitledBorder.BOTTOM,new java.awt.Font("D\u0069alog",java.awt.Font
-//        .BOLD,12),java.awt.Color.red), getBorder())); addPropertyChangeListener(
-//        new java.beans.PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("\u0062order"
-//        .equals(e.getPropertyName()))throw new RuntimeException();}});
         setLayout(new MigLayout(
                 "fill,insets 0,hidemode 3",
                 // columns
                 "[50!]0" +
                         "[fill]0" +
-                        "[40!,fill]-5" +
                         "[grow,fill]0" +
                         "[fill]",
                 // rows
@@ -484,16 +476,12 @@ public class LogStatusBar extends JPanel {
         }
         add(panel1, "cell 0 0,width 50:50:50,height 29:29:29");
 
-        //---- label4 ----
-        label4.setIcon(IconLoader.getIcon("/icons/info.svg"));
-        add(label4, "cell 2 0");
-
         //---- textField1 ----
         textField1.setMinimumSize(new Dimension(0, 0));
         textField1.setBackground(new Color(43, 43, 43));
         textField1.setBorder(null);
         textField1.setEditable(false);
-        add(textField1, "cell 3 0");
+        add(textField1, "cell 2 0");
 
         //======== panel2 ========
         {
@@ -522,7 +510,7 @@ public class LogStatusBar extends JPanel {
             label6.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
             panel2.add(label6, "cell 2 0");
         }
-        add(panel2, "cell 4 0,height 29:29:29");
+        add(panel2, "cell 3 0,height 29:29:29");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -531,7 +519,6 @@ public class LogStatusBar extends JPanel {
     private JPanel panel1;
     private JLabel label1;
     private JLabel label2;
-    private JLabel label4;
     private JTextPane textField1;
     private JPanel panel2;
     private JLabel label8;
