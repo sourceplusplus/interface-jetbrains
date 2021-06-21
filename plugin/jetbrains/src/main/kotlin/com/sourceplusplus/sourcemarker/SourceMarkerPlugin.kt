@@ -421,6 +421,18 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initPortal(config: SourceMarkerConfig) {
+        val hardcodedConfig: JsonObject = try {
+            JsonObject(
+                Resources.toString(
+                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                )
+            )
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
+            .getBoolean("service_discovery")
+
         //todo: portal should be connected to event bus without bridge
         val sockJSHandler = SockJSHandler.create(vertx)
         val portalBridgeOptions = SockJSBridgeOptions()
@@ -439,7 +451,13 @@ object SourceMarkerPlugin {
 
         //todo: load portal config (custom themes, etc)
         deploymentIds.add(
-            vertx.deployVerticle(PortalServer(bridgeServer.actualPort(), config.portalRefreshIntervalMs)).await()
+            vertx.deployVerticle(
+                PortalServer(
+                    bridgeServer.actualPort(),
+                    config.portalRefreshIntervalMs,
+                    !serviceDiscoveryEnabled
+                )
+            ).await()
         )
         deploymentIds.add(vertx.deployVerticle(PortalEventListener(config)).await())
     }

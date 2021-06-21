@@ -27,20 +27,25 @@ import org.slf4j.LoggerFactory
  * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.LOGS) {
+class LogsDisplay(private val refreshIntervalMs: Int, private val pullMode: Boolean) : AbstractDisplay(PageType.LOGS) {
 
     companion object {
         private val log = LoggerFactory.getLogger(LogsDisplay::class.java)
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(refreshIntervalMs.toLong()) {
-            SourcePortal.getPortals().filter {
-                it.configuration.currentPage == PageType.LOGS &&
-                        (it.visible || it.configuration.external || it.configuration.statusBar)
-            }.forEach {
-                vertx.eventBus().send(RefreshLogs, it)
+        if (pullMode) {
+            log.info("Log pull mode enabled")
+            vertx.setPeriodic(refreshIntervalMs.toLong()) {
+                SourcePortal.getPortals().filter {
+                    it.configuration.currentPage == PageType.LOGS &&
+                            (it.visible || it.configuration.external || it.configuration.statusBar)
+                }.forEach {
+                    vertx.eventBus().send(RefreshLogs, it)
+                }
             }
+        } else {
+            log.info("Log push mode enabled")
         }
 
         vertx.eventBus().consumer(SetLogOrderType, this@LogsDisplay::setLogOrderType)
