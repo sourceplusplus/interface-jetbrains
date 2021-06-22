@@ -1,6 +1,7 @@
 package com.sourceplusplus.protocol
 
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize.LIVE_INSTRUMENT
+import com.sourceplusplus.protocol.SourceMarkerServices.Utilize.LIVE_VIEW
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
@@ -24,6 +25,7 @@ object SourceMarkerServices {
     }
 
     object Utilize {
+        const val LIVE_VIEW = "sm.service.live-view"
         const val LIVE_INSTRUMENT = "sm.service.live-instrument"
         const val LOCAL_TRACING = "sm.service.local-tracing"
         const val LOG_COUNT_INDICATOR = "sm.service.log-count-indicator"
@@ -31,5 +33,6 @@ object SourceMarkerServices {
 
     object Provide {
         const val LIVE_INSTRUMENT_SUBSCRIBER = "$LIVE_INSTRUMENT.subscriber"
+        const val LIVE_VIEW_SUBSCRIBER = "$LIVE_VIEW.subscriber"
     }
 }
