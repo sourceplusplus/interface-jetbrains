@@ -72,7 +72,8 @@ tasks {
             dependencies {
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
-                implementation("io.vertx:vertx-service-proxy:$vertxVersion")
+                //implementation("io.vertx:vertx-service-proxy:$vertxVersion")
+                implementation(files("../plugin/jetbrains/.ext/vertx-service-proxy-4.0.2.jar"))
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
                 compileOnly(project(":protocol"))
             }
