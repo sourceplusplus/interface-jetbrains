@@ -7,6 +7,7 @@ plugins {
     id("java")
 }
 
+//jitpack trigger
 val vertxVersion = ext.get("vertxVersion")
 val kotlinVersion = ext.get("kotlinVersion")
 
