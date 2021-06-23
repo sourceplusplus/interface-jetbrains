@@ -1,5 +1,6 @@
 package com.sourceplusplus.protocol.service.live
 
+import com.sourceplusplus.protocol.view.LiveViewSubscription
 import io.vertx.codegen.annotations.ProxyGen
 import io.vertx.codegen.annotations.VertxGen
 import io.vertx.core.AsyncResult
@@ -14,7 +15,7 @@ import io.vertx.core.Handler
 @ProxyGen
 @VertxGen
 interface LiveViewService {
-    fun addLiveViewSubscription(metricNames: List<String>, handler: Handler<AsyncResult<String>>)
-    fun removeLiveViewSubscription(subscriptionId: String, handler: Handler<AsyncResult<Boolean>>)
-    fun clearLiveViewSubscriptions(handler: Handler<AsyncResult<Boolean>>)
+    fun addLiveViewSubscription(metricNames: List<String>, handler: Handler<AsyncResult<LiveViewSubscription>>)
+    fun removeLiveViewSubscription(subscriptionId: String, handler: Handler<AsyncResult<LiveViewSubscription>>)
+    fun clearLiveViewSubscriptions(handler: Handler<AsyncResult<List<LiveViewSubscription>>>)
 }
