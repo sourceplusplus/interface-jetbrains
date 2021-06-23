@@ -14,6 +14,7 @@ import io.vertx.core.Handler
 @ProxyGen
 @VertxGen
 interface LiveViewService {
-    fun addLiveViewSubscriber(metricName: String, handler: Handler<AsyncResult<String>>)
-    fun removeLiveViewSubscriber(subscriptionId: String, handler: Handler<AsyncResult<Boolean>>)
+    fun addLiveViewSubscription(metricNames: List<String>, handler: Handler<AsyncResult<String>>)
+    fun removeLiveViewSubscription(subscriptionId: String, handler: Handler<AsyncResult<Boolean>>)
+    fun clearLiveViewSubscriptions(handler: Handler<AsyncResult<Boolean>>)
 }
