@@ -34,7 +34,8 @@ kotlin {
             dependencies {
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
-                implementation("io.vertx:vertx-service-proxy:$vertxVersion")
+                //implementation("io.vertx:vertx-service-proxy:$vertxVersion")
+                implementation(files("../plugin/jetbrains/.ext/vertx-service-proxy-4.0.2.jar"))
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
