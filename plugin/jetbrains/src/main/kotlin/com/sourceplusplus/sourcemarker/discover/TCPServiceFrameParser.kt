@@ -1,6 +1,7 @@
 package com.sourceplusplus.sourcemarker.discover
 
 import com.sourceplusplus.protocol.error.*
+import com.sourceplusplus.protocol.error.LiveInstrumentException.ErrorType
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
@@ -86,10 +87,7 @@ class TCPServiceFrameParser(val vertx: Vertx) : Handler<AsyncResult<JsonObject>>
                 val exceptionMessage = causeMessage.substringAfter("]: ").trimEnd()
                 if (exceptionType == "LiveInstrumentException") {
                     error.initCause(
-                        LiveInstrumentException(
-                            LiveInstrumentException.ErrorType.valueOf(exceptionParams),
-                            exceptionMessage
-                        )
+                        LiveInstrumentException(ErrorType.valueOf(exceptionParams), exceptionMessage)
                     )
                 } else {
                     TODO()
@@ -125,7 +123,7 @@ class TCPServiceFrameParser(val vertx: Vertx) : Handler<AsyncResult<JsonObject>>
                             LiveInstrumentException::class.simpleName -> {
                                 error.initCause(
                                     LiveInstrumentException(
-                                        LiveInstrumentException.ErrorType.valueOf(exceptionParams),
+                                        ErrorType.valueOf(exceptionParams),
                                         exceptionMessage
                                     )
                                 )
