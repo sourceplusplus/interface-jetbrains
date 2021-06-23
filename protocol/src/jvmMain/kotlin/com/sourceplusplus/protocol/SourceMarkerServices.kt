@@ -3,6 +3,7 @@ package com.sourceplusplus.protocol
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize.LIVE_INSTRUMENT
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize.LIVE_VIEW
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService
+import com.sourceplusplus.protocol.service.live.LiveViewService
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 
@@ -16,6 +17,7 @@ object SourceMarkerServices {
 
     object Instance {
         var liveInstrument: LiveInstrumentService? = null
+        var liveView: LiveViewService? = null
         var localTracing: LocalTracingService? = null
         var logCountIndicator: LogCountIndicatorService? = null
     }
