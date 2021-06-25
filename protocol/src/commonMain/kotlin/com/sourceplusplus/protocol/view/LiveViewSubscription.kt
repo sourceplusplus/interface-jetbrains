@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class LiveViewSubscription(
-    val subscriptionId: String,
+    val subscriptionId: String? = null,
     val metricNames: List<String>,
     val type: ViewSubscriptionType,
     val refreshRateLimit: Int = 1000 //limit of once per X milliseconds
