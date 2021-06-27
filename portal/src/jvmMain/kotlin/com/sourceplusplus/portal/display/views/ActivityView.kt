@@ -72,10 +72,6 @@ class ActivityView(
                         metricResultCache[cachedResult.artifactQualifiedName]!![cachedResult.timeFrame] =
                             cachedResult.copy(artifactMetrics = newMetrics)
                     } else if (cachedResult.stop <= metricResult.start) {
-                        log.info(
-                            "Moving artifact values from: {} to {} - Type: {}",
-                            cachedResult.start, cachedResult.stop, metricResult.artifactMetrics.first().metricType
-                        )
                         val moveIndex = ChronoUnit.MINUTES.between(
                             cachedResult.stop.toJavaInstant(), metricResult.start.toJavaInstant()
                         ).toInt() + 1
@@ -108,8 +104,6 @@ class ActivityView(
         } else {
             metricResultCache[metricResult.artifactQualifiedName]!![metricResult.timeFrame] = metricResult
         }
-
-        log.info("Current metrics: {}", metricResultCache[metricResult.artifactQualifiedName]!![QueryTimeFrame.LAST_5_MINUTES])
     }
 
     val metricResult: ArtifactMetricResult?

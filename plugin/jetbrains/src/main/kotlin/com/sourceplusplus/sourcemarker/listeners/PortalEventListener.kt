@@ -480,7 +480,7 @@ class PortalEventListener(
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
-                val endTime = ZonedDateTime.now().truncatedTo(ChronoUnit.MINUTES)
+                val endTime = ZonedDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MINUTES)
                 val startTime = endTime.minusMinutes(portal.activityView.timeFrame.minutes.toLong())
                 val metricsRequest = GetEndpointMetrics(
                     listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
