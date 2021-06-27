@@ -13,7 +13,7 @@ data class LiveViewEvent(
     val entityId: String,
     val artifactQualifiedName: String,
     val timeBucket: String,
-    val metricName: String,
+    val metricNames: List<String>,
     val metricsData: String, //todo: type out
     val type: ViewSubscriptionType
 )
