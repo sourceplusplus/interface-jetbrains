@@ -20,18 +20,22 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class OverviewDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.OVERVIEW) {
+class OverviewDisplay(
+    private val refreshIntervalMs: Int, private val pullMode: Boolean
+) : AbstractDisplay(PageType.OVERVIEW) {
 
     companion object {
         private val log = LoggerFactory.getLogger(OverviewDisplay::class.java)
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(refreshIntervalMs.toLong()) {
-            SourcePortal.getPortals().filter {
-                it.configuration.currentPage == PageType.OVERVIEW && (it.visible || it.configuration.external)
-            }.forEach {
-                vertx.eventBus().send(RefreshOverview, it)
+        if (pullMode) {
+            vertx.setPeriodic(refreshIntervalMs.toLong()) {
+                SourcePortal.getPortals().filter {
+                    it.configuration.currentPage == PageType.OVERVIEW && (it.visible || it.configuration.external)
+                }.forEach {
+                    vertx.eventBus().send(RefreshOverview, it)
+                }
             }
         }
 

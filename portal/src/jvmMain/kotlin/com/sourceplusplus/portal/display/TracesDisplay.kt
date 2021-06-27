@@ -44,7 +44,9 @@ import kotlin.time.ExperimentalTime
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class TracesDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.TRACES) {
+class TracesDisplay(
+    private val refreshIntervalMs: Int, private val pullMode: Boolean
+) : AbstractDisplay(PageType.TRACES) {
 
     companion object {
         private val log = LoggerFactory.getLogger(TracesDisplay::class.java)
@@ -52,11 +54,13 @@ class TracesDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageTy
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(refreshIntervalMs.toLong()) {
-            SourcePortal.getPortals().filter {
-                it.configuration.currentPage == PageType.TRACES && (it.visible || it.configuration.external)
-            }.forEach {
-                vertx.eventBus().send(RefreshTraces, it)
+        if (pullMode) {
+            vertx.setPeriodic(refreshIntervalMs.toLong()) {
+                SourcePortal.getPortals().filter {
+                    it.configuration.currentPage == PageType.TRACES && (it.visible || it.configuration.external)
+                }.forEach {
+                    vertx.eventBus().send(RefreshTraces, it)
+                }
             }
         }
 

@@ -13,7 +13,6 @@ import com.sourceplusplus.protocol.artifact.ArtifactType
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import org.junit.Before
-import java.io.File
 
 abstract class SourceMapperTest : LightPlatformCodeInsightFixture4TestCase() {
 

@@ -22,5 +22,6 @@ data class ArtifactMetricResult(
     @Serializable(with = Serializers.InstantKSerializer::class)
     val stop: Instant,
     val step: String,
-    val artifactMetrics: List<ArtifactMetrics>
+    val artifactMetrics: List<ArtifactMetrics>,
+    val pushMode: Boolean = false
 )

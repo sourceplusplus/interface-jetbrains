@@ -142,6 +142,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 }
 
                 setupHandler(vertx, "get-records")
+                setupHandler(vertx, Utilize.LIVE_VIEW)
                 setupHandler(vertx, Utilize.LIVE_INSTRUMENT)
                 setupHandler(vertx, Utilize.LOCAL_TRACING)
                 setupHandler(vertx, Utilize.LOG_COUNT_INDICATOR)

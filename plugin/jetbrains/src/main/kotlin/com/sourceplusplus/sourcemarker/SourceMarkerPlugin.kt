@@ -42,6 +42,7 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService
+import com.sourceplusplus.protocol.service.live.LiveViewService
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.sourcemarker.PluginBundle.message
@@ -49,6 +50,7 @@ import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
 import com.sourceplusplus.sourcemarker.service.LiveInstrumentManager
+import com.sourceplusplus.sourcemarker.service.LiveViewManager
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
@@ -299,6 +301,22 @@ object SourceMarkerPlugin {
             project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
         } else {
             log.warn("Live instruments unavailable")
+        }
+
+        //live view
+        if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_VIEW }) {
+            log.info("Live views available")
+            Instance.liveView = ServiceProxyBuilder(vertx)
+                .setToken(config.serviceToken!!)
+                .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
+                .build(LiveViewService::class.java)
+
+            val viewListener = LiveViewManager(project)
+            GlobalScope.launch(vertx.dispatcher()) {
+                deploymentIds.add(vertx.deployVerticle(viewListener).await())
+            }
+        } else {
+            log.warn("Live views unavailable")
         }
     }
 

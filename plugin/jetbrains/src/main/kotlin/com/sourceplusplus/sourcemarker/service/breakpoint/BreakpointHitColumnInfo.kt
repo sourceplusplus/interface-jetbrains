@@ -22,7 +22,8 @@ import javax.swing.table.TableCellRenderer
  */
 class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, String>(name) {
 
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S").withZone(ZoneId.systemDefault())
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")
+        .withZone(ZoneId.systemDefault())
 
     override fun getColumnClass(): Class<*> {
         return when (name) {

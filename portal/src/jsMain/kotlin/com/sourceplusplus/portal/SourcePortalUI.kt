@@ -165,11 +165,11 @@ fun clickedLogsOrderType(eb: EventBus, portalUuid: String, orderType: LogOrderTy
 }
 
 fun setActiveTime(interval: QueryTimeFrame) {
-    jq("#last_5_minutes_time").removeClass("active")
-    jq("#last_15_minutes_time").removeClass("active")
-    jq("#last_30_minutes_time").removeClass("active")
-    jq("#last_hour_time").removeClass("active")
-    jq("#last_3_hours_time").removeClass("active")
+    QueryTimeFrame.values().forEach {
+        if (it != interval) {
+            jq("#${it.name}_time").removeClass("active")
+        }
+    }
     jq("#" + interval.name.toLowerCase() + "_time").addClass("active")
 }
 

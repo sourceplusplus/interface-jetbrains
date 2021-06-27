@@ -1,9 +1,15 @@
 package com.sourceplusplus.portal.display.views
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
-import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
+import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetrics
+import com.sourceplusplus.protocol.artifact.metrics.MetricType
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaInstant
+import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -15,6 +21,10 @@ import java.util.concurrent.ConcurrentHashMap
 class ActivityView(
     val portal: SourcePortal
 ) {
+
+    companion object {
+        private val log = LoggerFactory.getLogger(ActivityView::class.java)
+    }
 
     var metricResultCache = ConcurrentHashMap<String, MutableMap<QueryTimeFrame, ArtifactMetricResult>>()
     var timeFrame = QueryTimeFrame.LAST_5_MINUTES
@@ -31,7 +41,75 @@ class ActivityView(
             metricResult.artifactQualifiedName,
             ConcurrentHashMap<QueryTimeFrame, ArtifactMetricResult>()
         )
-        metricResultCache[metricResult.artifactQualifiedName]!![metricResult.timeFrame] = metricResult
+
+        if (metricResult.pushMode) {
+            if (!metricResultCache[metricResult.artifactQualifiedName]!!.containsKey(metricResult.timeFrame)) {
+                metricResultCache[metricResult.artifactQualifiedName]!![metricResult.timeFrame] = metricResult
+            } else {
+                metricResultCache[metricResult.artifactQualifiedName]!!.forEach { (_, cachedResult) ->
+                    if (cachedResult.start <= metricResult.start && cachedResult.stop >= metricResult.stop) {
+                        //log.info("Updating artifact value at: {} - {}", metricResult.start, metricResult.stop)
+                        val updateIndex = ChronoUnit.MINUTES.between(
+                            cachedResult.start.toJavaInstant(), metricResult.start.toJavaInstant()
+                        ).toInt()
+                        val updatedMetrics = mutableListOf<ArtifactMetrics>()
+                        cachedResult.artifactMetrics.forEach { metric ->
+                            val updatedMetric = metricResult.artifactMetrics.find { metric.metricType == it.metricType }
+                            if (updatedMetric != null) {
+                                updatedMetrics.add(
+                                    ArtifactMetrics(
+                                        metric.metricType,
+                                        metric.values.toMutableList()
+                                            .apply { set(updateIndex, updatedMetric.values[0]) }
+                                    )
+                                )
+                            }
+                        }
+
+                        val newMetrics = cachedResult.artifactMetrics.toMutableList()
+                            .filterNot { updatedMetrics.map { it.metricType }.contains(it.metricType) }
+                            .toMutableList().apply { addAll(updatedMetrics) }
+                        metricResultCache[cachedResult.artifactQualifiedName]!![cachedResult.timeFrame] =
+                            cachedResult.copy(artifactMetrics = newMetrics)
+                    } else if (cachedResult.stop <= metricResult.start) {
+                        log.info(
+                            "Moving artifact values from: {} to {} - Type: {}",
+                            cachedResult.start, cachedResult.stop, metricResult.artifactMetrics.first().metricType
+                        )
+                        val moveIndex = ChronoUnit.MINUTES.between(
+                            cachedResult.stop.toJavaInstant(), metricResult.start.toJavaInstant()
+                        ).toInt() + 1
+                        val updatedMetrics = mutableListOf<ArtifactMetrics>()
+                        cachedResult.artifactMetrics.forEach { metric ->
+                            val updatedMetric = metricResult.artifactMetrics.find { metric.metricType == it.metricType }
+                            if (updatedMetric != null) {
+                                updatedMetrics.add(
+                                    ArtifactMetrics(
+                                        metric.metricType,
+                                        metric.values.toMutableList().apply { addAll(updatedMetric.values) }
+                                            .drop(moveIndex)
+                                    )
+                                )
+                            }
+                        }
+
+                        val newMetrics = cachedResult.artifactMetrics.toMutableList()
+                            .filterNot { updatedMetrics.map { it.metricType }.contains(it.metricType) }
+                            .toMutableList().apply { addAll(updatedMetrics) }
+                        metricResultCache[cachedResult.artifactQualifiedName]!![cachedResult.timeFrame] =
+                            cachedResult.copy(
+                                start = cachedResult.start.plus(moveIndex, DateTimeUnit.MINUTE),
+                                stop = cachedResult.stop.plus(moveIndex, DateTimeUnit.MINUTE),
+                                artifactMetrics = newMetrics
+                            )
+                    }
+                }
+            }
+        } else {
+            metricResultCache[metricResult.artifactQualifiedName]!![metricResult.timeFrame] = metricResult
+        }
+
+        log.info("Current metrics: {}", metricResultCache[metricResult.artifactQualifiedName]!![QueryTimeFrame.LAST_5_MINUTES])
     }
 
     val metricResult: ArtifactMetricResult?

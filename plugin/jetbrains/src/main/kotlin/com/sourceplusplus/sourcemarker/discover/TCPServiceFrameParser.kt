@@ -27,6 +27,10 @@ class TCPServiceFrameParser(val vertx: Vertx) : Handler<AsyncResult<JsonObject>>
     }
 
     override fun handle(event: AsyncResult<JsonObject>) {
+        if (event.failed()) {
+            log.error("Failed to receive frame", event.cause())
+            return
+        }
         val frame = event.result()
         log.trace("Received frame: {}", frame)
 

@@ -20,6 +20,13 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
  */
 object SourceMarkSearch {
 
+    fun findByEndpointName(endpointName: String): SourceMark? {
+        return SourceMarker.getSourceMarks()
+            .firstOrNull {
+                it.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)?.getEndpointName(it) == endpointName
+            }
+    }
+
     fun findByLogId(logId: String): SourceMark? {
         return SourceMarker.getSourceMarks()
             .firstOrNull {

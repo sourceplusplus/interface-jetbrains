@@ -59,6 +59,8 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.error.AccessDenied
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
+import com.sourceplusplus.protocol.view.LiveViewSubscription
+import com.sourceplusplus.protocol.view.ViewSubscriptionType
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
@@ -80,6 +82,7 @@ import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import javax.swing.UIManager
 
 /**
@@ -129,6 +132,40 @@ class PortalEventListener(
             it.reply(JsonObject.mapFrom(portal.configuration))
             log.info("Set portal ${portal.portalUuid} page type to $pageType")
 
+            Instance.liveView?.clearLiveViewSubscriptions {
+                if (it.succeeded()) {
+                    if (pageType == PageType.ACTIVITY) {
+                        GlobalScope.launch(vertx.dispatcher()) {
+                            val sourceMark = SourceMarker.getSourceMark(
+                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                            ) ?: return@launch
+                            val endpointName = sourceMark.getUserData(
+                                ENDPOINT_DETECTOR
+                            )?.getOrFindEndpointName(sourceMark) ?: return@launch
+                            Instance.liveView?.addLiveViewSubscription(
+                                LiveViewSubscription(
+                                    null,
+                                    endpointName,
+                                    sourceMark.artifactQualifiedName,
+                                    listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+                                    ViewSubscriptionType.TOTAL,
+                                    refreshRateLimit = 0
+                                )
+                            ) {
+                                if (it.failed()) {
+                                    log.error("Failed to add live view subscription", it.cause())
+                                }
+                            }
+                        }
+                    } else {
+                        TODO()
+                    }
+                } else {
+                    log.error("Failed to clear live view subscriptions", it.cause())
+                }
+            }
+
+            //todo: probably don't need to do in push mode
             vertx.eventBus().publish(RefreshPortal, portal)
         }
         vertx.eventBus().consumer<String>(GetPortalConfiguration) {
@@ -443,14 +480,12 @@ class PortalEventListener(
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
+                val endTime = ZonedDateTime.now().truncatedTo(ChronoUnit.MINUTES)
+                val startTime = endTime.minusMinutes(portal.activityView.timeFrame.minutes.toLong())
                 val metricsRequest = GetEndpointMetrics(
                     listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
                     endpointId,
-                    ZonedDuration(
-                        ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
-                        ZonedDateTime.now(),
-                        SkywalkingClient.DurationStep.MINUTE
-                    )
+                    ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
                 )
                 val metrics = EndpointMetricsBridge.getMetrics(metricsRequest, vertx)
                 val metricResult = toProtocol(
