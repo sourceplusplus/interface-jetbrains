@@ -131,41 +131,6 @@ class PortalEventListener(
             portal.configuration.currentPage = pageType
             it.reply(JsonObject.mapFrom(portal.configuration))
             log.info("Set portal ${portal.portalUuid} page type to $pageType")
-
-            Instance.liveView?.clearLiveViewSubscriptions {
-                if (it.succeeded()) {
-                    if (pageType == PageType.ACTIVITY) {
-                        GlobalScope.launch(vertx.dispatcher()) {
-                            val sourceMark = SourceMarker.getSourceMark(
-                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
-                            ) ?: return@launch
-                            val endpointName = sourceMark.getUserData(
-                                ENDPOINT_DETECTOR
-                            )?.getOrFindEndpointName(sourceMark) ?: return@launch
-                            Instance.liveView?.addLiveViewSubscription(
-                                LiveViewSubscription(
-                                    null,
-                                    endpointName,
-                                    sourceMark.artifactQualifiedName,
-                                    listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
-                                    ViewSubscriptionType.TOTAL,
-                                    refreshRateLimit = 0
-                                )
-                            ) {
-                                if (it.failed()) {
-                                    log.error("Failed to add live view subscription", it.cause())
-                                }
-                            }
-                        }
-                    } else {
-                        TODO()
-                    }
-                } else {
-                    log.error("Failed to clear live view subscriptions", it.cause())
-                }
-            }
-
-            //todo: probably don't need to do in push mode
             vertx.eventBus().publish(RefreshPortal, portal)
         }
         vertx.eventBus().consumer<String>(GetPortalConfiguration) {
@@ -236,8 +201,43 @@ class PortalEventListener(
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshActivity) {
+            val portal = it.body()
+            //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
-                refreshActivity(it.body())
+                refreshActivity(portal)
+            }
+
+            //update subscriptions
+            if (Instance.liveView != null) {
+                Instance.liveView!!.clearLiveViewSubscriptions {
+                    if (it.succeeded()) {
+                        GlobalScope.launch(vertx.dispatcher()) {
+                            val sourceMark = SourceMarker.getSourceMark(
+                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                            ) ?: return@launch
+                            val endpointName = sourceMark.getUserData(
+                                ENDPOINT_DETECTOR
+                            )?.getOrFindEndpointName(sourceMark) ?: return@launch
+
+                            Instance.liveView!!.addLiveViewSubscription(
+                                LiveViewSubscription(
+                                    null,
+                                    endpointName,
+                                    sourceMark.artifactQualifiedName,
+                                    listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+                                    ViewSubscriptionType.TOTAL,
+                                    refreshRateLimit = 0
+                                )
+                            ) {
+                                if (it.failed()) {
+                                    log.error("Failed to add live view subscription", it.cause())
+                                }
+                            }
+                        }
+                    } else {
+                        log.error("Failed to clear live view subscriptions", it.cause())
+                    }
+                }
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshTraces) {
