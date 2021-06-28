@@ -9,9 +9,9 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class LiveViewSubscription(
-    val subscriptionId: String? = null,
-    val entityId: String? = null,
-    val artifactQualifiedName: String,
-    val liveViewConfig: LiveViewConfig
+data class LiveViewConfig(
+    val viewName: String,
+    val userDefined: Boolean,
+    val viewMetrics: List<String>,
+    val refreshRateLimit: Int = 1000 //limit of once per X milliseconds
 )

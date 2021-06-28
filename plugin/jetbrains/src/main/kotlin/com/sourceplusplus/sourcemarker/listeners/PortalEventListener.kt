@@ -59,8 +59,8 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.error.AccessDenied
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
+import com.sourceplusplus.protocol.view.LiveViewConfig
 import com.sourceplusplus.protocol.view.LiveViewSubscription
-import com.sourceplusplus.protocol.view.ViewSubscriptionType
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
@@ -224,9 +224,12 @@ class PortalEventListener(
                                     null,
                                     endpointName,
                                     sourceMark.artifactQualifiedName,
-                                    listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
-                                    ViewSubscriptionType.TOTAL,
-                                    refreshRateLimit = 0
+                                    LiveViewConfig(
+                                        "ACTIVITY",
+                                        false,
+                                        listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+                                        0
+                                    )
                                 )
                             ) {
                                 if (it.failed()) {
@@ -241,8 +244,46 @@ class PortalEventListener(
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshTraces) {
+            val portal = it.body()
+            //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
                 refreshTraces(it.body())
+            }
+
+            //update subscriptions
+            if (Instance.liveView != null) {
+                Instance.liveView!!.clearLiveViewSubscriptions {
+                    if (it.succeeded()) {
+                        GlobalScope.launch(vertx.dispatcher()) {
+                            val sourceMark = SourceMarker.getSourceMark(
+                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                            ) ?: return@launch
+                            val endpointName = sourceMark.getUserData(
+                                ENDPOINT_DETECTOR
+                            )?.getOrFindEndpointName(sourceMark) ?: return@launch
+
+                            Instance.liveView!!.addLiveViewSubscription(
+                                LiveViewSubscription(
+                                    null,
+                                    endpointName,
+                                    sourceMark.artifactQualifiedName,
+                                    LiveViewConfig(
+                                        "TRACES",
+                                        false,
+                                        listOf("endpoint_trace"),
+                                        0
+                                    )
+                                )
+                            ) {
+                                if (it.failed()) {
+                                    log.error("Failed to add live view subscription", it.cause())
+                                }
+                            }
+                        }
+                    } else {
+                        log.error("Failed to clear live view subscriptions", it.cause())
+                    }
+                }
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshLogs) {

@@ -35,13 +35,6 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
 
     override suspend fun start() {
         //register listener
-//        FrameHelper.sendFrame(
-//            BridgeEventType.REGISTER.name.toLowerCase(),
-//            SourceMarkerServices.Provide.LIVE_VIEW_SUBSCRIBER,
-//            JsonObject(),
-//            TCPServiceDiscoveryBackend.socket!!
-//        )
-
         vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_VIEW_SUBSCRIBER + "." + INSTANCE_ID) {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
             if (log.isTraceEnabled) {
@@ -56,9 +49,9 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
             val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
 
             val rawMetrics = mutableListOf<Int>()
-            if (event.metricNames.size > 1) {
+            if (event.viewConfig.viewMetrics.size > 1) {
                 val multiMetrics = JsonArray(event.metricsData)
-                event.metricNames.forEachIndexed { i, it ->
+                event.viewConfig.viewMetrics.forEachIndexed { i, it ->
                     val value = when (val metricType = MetricType.realValueOf(it)) {
                         MetricType.Throughput_Average -> multiMetrics.getJsonObject(i)
                             .getInteger("value")
@@ -71,7 +64,7 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
                     rawMetrics.add(value)
                 }
             } else {
-                val value = when (val metricType = MetricType.realValueOf(event.metricNames.first())) {
+                val value = when (val metricType = MetricType.realValueOf(event.viewConfig.viewMetrics.first())) {
                     MetricType.Throughput_Average -> JsonObject(event.metricsData).getInteger("value")
                     MetricType.ResponseTime_Average -> JsonObject(event.metricsData).getInteger("value")
                     MetricType.ServiceLevelAgreement_Average -> JsonObject(event.metricsData).getInteger("percentage")
@@ -80,7 +73,7 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
                 rawMetrics.add(value)
             }
             val artifactMetrics = rawMetrics.mapIndexed { i: Int, it: Int ->
-                ArtifactMetrics(MetricType.realValueOf(event.metricNames.get(i)), listOf(it.toDouble()))
+                ArtifactMetrics(MetricType.realValueOf(event.viewConfig.viewMetrics.get(i)), listOf(it.toDouble()))
             }
 
             val metricResult = ArtifactMetricResult(
