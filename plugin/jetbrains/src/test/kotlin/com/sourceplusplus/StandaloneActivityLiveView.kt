@@ -1,7 +1,6 @@
 package com.sourceplusplus
 
-import com.intellij.openapi.application.invokeLater
-import com.intellij.openapi.application.runReadAction
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.projectRoots.Sdk
@@ -10,29 +9,39 @@ import com.intellij.openapi.roots.LanguageLevelModuleExtension
 import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.pom.java.LanguageLevel
-import com.intellij.psi.JavaPsiFacade
-import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
+import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.portal.PortalConfiguration
+import com.sourceplusplus.protocol.view.LiveViewConfig
+import com.sourceplusplus.protocol.view.LiveViewSubscription
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
+import io.vertx.core.json.Json
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.cli.common.toBooleanLenient
 import org.junit.Assume.assumeTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import java.io.File
+import kotlin.system.exitProcess
 
-@RunWith(JUnit4::class)
-class StandaloneServer : LightJavaCodeInsightFixtureTestCase() {
+class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
 
     @Before
     public override fun setUp() {
@@ -72,9 +81,20 @@ class StandaloneServer : LightJavaCodeInsightFixtureTestCase() {
         }
     }
 
+    @Ignore
     @Test
     fun test() {
         assumeTrue((System.getenv("STANDALONE_ENABLED")?.toBooleanLenient() ?: false))
+        val projectSettings = PropertiesComponent.getInstance(project)
+        val pluginConfig = SourceMarkerConfig(
+            serviceHost = "https://localhost:5445",
+            accessToken = "change-me",
+            certificatePins = listOf(
+                "47:09:B8:64:03:06:5C:1A:25:D5:9B:95:CD:0F:8B:DD:5C:BA:7C:89:48:F0:37:14:E2:21:9D:E1:45:64:11:2C"
+            )
+        )
+        projectSettings.setValue("sourcemarker_plugin_config", Json.encode(pluginConfig))
+
         val className = "spp.example.webapp.controller.WebappController"
         val artifactName = "$className.getUser(long)"
         val portalUuid = "5471535f-2a5f-4ed2-bfaf-65345c59fd7b"
@@ -86,27 +106,49 @@ class StandaloneServer : LightJavaCodeInsightFixtureTestCase() {
                 PortalConfiguration(external = true)
             )
         )
+        val portal = SourcePortal.getPortal(portalUuid)!!
 
-        SourceMarkerPlugin.vertx.sharedData().getLocalMap<String, Int>("portal")["bridge.port"] = 8888
+        vertx.sharedData().getLocalMap<String, Int>("portal")["bridge.port"] = 8888
         runBlocking {
             SourceMarkerPlugin.init(project)
         }
 
-        invokeLater {
-            runReadAction {
-                val testFile = JavaPsiFacade.getInstance(project).findClass(
-                    className,
-                    GlobalSearchScope.allScope(project)
-                )!!.containingFile
-                val fileMarker = SourceMarker.getSourceFileMarker(testFile)
-                assertNotNull(fileMarker)
+        myFixture.testHighlighting(
+            false,
+            false,
+            false,
+            "spp/example/webapp/controller/WebappController.java"
+        )
 
-                myFixture.testHighlighting(
-                    false,
-                    false,
-                    false,
-                    "spp/example/webapp/controller/WebappController.java"
+        GlobalScope.launch(vertx.dispatcher()) {
+            vertx.eventBus().send(RefreshActivity, portal)
+            delay(5000)
+
+            val sourceMark = SourceMarker.getSourceMark(
+                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+            ) ?: return@launch
+            val endpointName = sourceMark.getUserData(
+                SourceMarkKeys.ENDPOINT_DETECTOR
+            )?.getOrFindEndpointName(sourceMark) ?: return@launch
+            SourceMarkerServices.Instance.liveView?.addLiveViewSubscription(
+                LiveViewSubscription(
+                    null,
+                    endpointName,
+                    sourceMark.artifactQualifiedName,
+                    LiveViewConfig(
+                        "ACTIVITY",
+                        false,
+                        listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+                        refreshRateLimit = 0
+                    )
                 )
+            ) {
+                if (it.succeeded()) {
+                    println(it)
+                } else {
+                    it.cause().printStackTrace()
+                    exitProcess(-1)
+                }
             }
         }
 
