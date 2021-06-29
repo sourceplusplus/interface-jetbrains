@@ -287,8 +287,45 @@ class PortalEventListener(
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshLogs) {
+            val portal = it.body()
+            //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
-                refreshLogs(it.body())
+                refreshLogs(portal)
+            }
+
+            //update subscriptions
+            if (Instance.liveView != null) {
+                Instance.liveView!!.clearLiveViewSubscriptions {
+                    if (it.succeeded()) {
+                        GlobalScope.launch(vertx.dispatcher()) {
+                            val sourceMark = SourceMarker.getSourceMark(
+                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                            ) as MethodSourceMark? ?: return@launch
+                            val logPatterns = sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                                .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
+
+                            Instance.liveView!!.addLiveViewSubscription(
+                                LiveViewSubscription(
+                                    null,
+                                    logPatterns,
+                                    sourceMark.artifactQualifiedName,
+                                    LiveViewConfig(
+                                        "LOGS",
+                                        false,
+                                        listOf("endpoint_logs"),
+                                        0
+                                    )
+                                )
+                            ) {
+                                if (it.failed()) {
+                                    log.error("Failed to add live view subscription", it.cause())
+                                }
+                            }
+                        }
+                    } else {
+                        log.error("Failed to clear live view subscriptions", it.cause())
+                    }
+                }
             }
         }
         vertx.eventBus().consumer<String>(QueryTraceStack) { handler ->

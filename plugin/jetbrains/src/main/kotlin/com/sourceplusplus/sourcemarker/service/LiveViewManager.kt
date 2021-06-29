@@ -3,11 +3,15 @@ package com.sourceplusplus.sourcemarker.service
 import com.intellij.openapi.project.Project
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.portal.SourcePortal
+import com.sourceplusplus.protocol.ProtocolAddress
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
 import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import com.sourceplusplus.protocol.artifact.log.Log
+import com.sourceplusplus.protocol.artifact.log.LogOrderType
+import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetrics
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
@@ -26,6 +30,9 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
@@ -49,17 +56,26 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
 
-            val sourceMark = SourceMarkSearch.findByEndpointName(event.entityId)
-            if (sourceMark == null) {
-                log.info("Could not find source mark for: " + event.entityId)
-                return@consumer
-            }
-
-            val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            if (event.viewConfig.viewName == "TRACES") {
-                consumeTracesViewEvent(event, sourceMark, portal)
-            } else {
-                consumeActivityViewEvent(event, sourceMark, portal)
+            when (event.viewConfig.viewName) {
+                "LOGS" -> GlobalScope.launch(vertx.dispatcher()) { consumeLogsViewEvent(event) }
+                "TRACES" -> {
+                    val sourceMark = SourceMarkSearch.findByEndpointName(event.entityId)
+                    if (sourceMark == null) {
+                        log.info("Could not find source mark for: " + event.entityId)
+                        return@consumer
+                    }
+                    val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                    consumeTracesViewEvent(event, sourceMark, portal)
+                }
+                else -> {
+                    val sourceMark = SourceMarkSearch.findByEndpointName(event.entityId)
+                    if (sourceMark == null) {
+                        log.info("Could not find source mark for: " + event.entityId)
+                        return@consumer
+                    }
+                    val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                    consumeActivityViewEvent(event, sourceMark, portal)
+                }
             }
         }
 
@@ -69,6 +85,31 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
             JsonObject(),
             TCPServiceDiscoveryBackend.socket!!
         )
+    }
+
+    private suspend fun consumeLogsViewEvent(event: LiveViewEvent) {
+        val rawMetrics = JsonObject(event.metricsData)
+        val logData = Json.decodeValue(rawMetrics.getJsonObject("log").toString(), Log::class.java)
+        val logsResult = LogResult(
+            event.artifactQualifiedName,
+            LogOrderType.NEWEST_LOGS,
+            logData.timestamp,
+            listOf(logData),
+            Int.MAX_VALUE
+        )
+
+        for ((content, logs) in logsResult.logs.groupBy { it.content }) {
+            SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                vertx.eventBus().send(
+                    ProtocolAddress.Global.ArtifactLogUpdated,
+                    logsResult.copy(
+                        artifactQualifiedName = it.artifactQualifiedName,
+                        total = logs.size,
+                        logs = logs,
+                    )
+                )
+            }
+        }
     }
 
     private fun consumeTracesViewEvent(
