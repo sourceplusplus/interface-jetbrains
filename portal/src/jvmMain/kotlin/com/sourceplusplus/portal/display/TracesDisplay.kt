@@ -341,10 +341,11 @@ class TracesDisplay(
         spanQueryResult: TraceSpanStackQueryResult
     ): TraceStack {
         val spanInfos = ArrayList<TraceSpan>()
-        val totalTime = spanQueryResult.traceSpans[0].endTime - spanQueryResult.traceSpans[0].startTime
+        val totalTimeMs = spanQueryResult.traceSpans[0].endTime.toEpochMilliseconds() -
+                spanQueryResult.traceSpans[0].startTime.toEpochMilliseconds()
 
         spanQueryResult.traceSpans.forEach { span ->
-            val timeTook = span.endTime - span.startTime
+            val timeTook = span.endTime.toEpochMilliseconds() - span.startTime.toEpochMilliseconds()
 
             //detect if operation name is really an artifact name
             val finalSpan = if (QUALIFIED_NAME_PATTERN.matcher(span.endpointName!!).matches()) {
@@ -364,8 +365,8 @@ class TracesDisplay(
                     putMetaString("rootArtifactQualifiedName", rootArtifactQualifiedName)
                     putMetaString("operationName", operationName)
                     putMetaDouble(
-                        "totalTracePercent", if (totalTime.toLongMilliseconds() == 0L) 0.0
-                        else timeTook / totalTime * 100.0
+                        "totalTracePercent", if (totalTimeMs == 0L) 0.0
+                        else timeTook / totalTimeMs * 100.0
                     )
                 }
             )

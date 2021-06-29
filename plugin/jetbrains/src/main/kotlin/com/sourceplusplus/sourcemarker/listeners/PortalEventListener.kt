@@ -270,7 +270,7 @@ class PortalEventListener(
                                     LiveViewConfig(
                                         "TRACES",
                                         false,
-                                        listOf("endpoint_trace"),
+                                        listOf("endpoint_traces"),
                                         0
                                     )
                                 )

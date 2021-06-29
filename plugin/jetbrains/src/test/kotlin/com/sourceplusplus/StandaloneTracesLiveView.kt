@@ -18,6 +18,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
 import com.sourceplusplus.protocol.SourceMarkerServices
+import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import com.sourceplusplus.protocol.view.LiveViewConfig
 import com.sourceplusplus.protocol.view.LiveViewSubscription
@@ -40,7 +41,7 @@ import org.junit.Test
 import java.io.File
 import kotlin.system.exitProcess
 
-class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
+class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
 
     @Before
     public override fun setUp() {
@@ -101,7 +102,10 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
                 portalUuid,
                 "null",
                 artifactName,
-                PortalConfiguration(external = true)
+                PortalConfiguration(
+                    currentPage = PageType.TRACES,
+                    external = true
+                )
             )
         )
         val portal = SourcePortal.getPortal(portalUuid)!!
@@ -134,9 +138,9 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
                     endpointName,
                     sourceMark.artifactQualifiedName,
                     LiveViewConfig(
-                        "ACTIVITY",
+                        "TRACES",
                         false,
-                        listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+                        listOf("endpoint_traces"),
                         refreshRateLimit = 0
                     )
                 )
