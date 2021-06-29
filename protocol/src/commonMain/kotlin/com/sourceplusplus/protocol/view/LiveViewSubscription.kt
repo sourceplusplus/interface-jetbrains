@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LiveViewSubscription(
     val subscriptionId: String? = null,
-    val entityId: String? = null,
+    val entityIds: List<String>,
     val artifactQualifiedName: String,
     val liveViewConfig: LiveViewConfig
 )

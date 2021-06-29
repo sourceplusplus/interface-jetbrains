@@ -16,7 +16,7 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
@@ -123,7 +123,7 @@ class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
         )
 
         GlobalScope.launch(vertx.dispatcher()) {
-            vertx.eventBus().send(RefreshActivity, portal)
+            vertx.eventBus().send(RefreshTraces, portal)
             delay(5000)
 
             val sourceMark = SourceMarker.getSourceMark(
@@ -135,7 +135,7 @@ class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
             SourceMarkerServices.Instance.liveView?.addLiveViewSubscription(
                 LiveViewSubscription(
                     null,
-                    endpointName,
+                    listOf(endpointName),
                     sourceMark.artifactQualifiedName,
                     LiveViewConfig(
                         "TRACES",

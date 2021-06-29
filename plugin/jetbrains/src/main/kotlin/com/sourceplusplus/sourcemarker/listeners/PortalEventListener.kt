@@ -222,7 +222,7 @@ class PortalEventListener(
                             Instance.liveView!!.addLiveViewSubscription(
                                 LiveViewSubscription(
                                     null,
-                                    endpointName,
+                                    listOf(endpointName),
                                     sourceMark.artifactQualifiedName,
                                     LiveViewConfig(
                                         "ACTIVITY",
@@ -265,7 +265,7 @@ class PortalEventListener(
                             Instance.liveView!!.addLiveViewSubscription(
                                 LiveViewSubscription(
                                     null,
-                                    endpointName,
+                                    listOf(endpointName),
                                     sourceMark.artifactQualifiedName,
                                     LiveViewConfig(
                                         "TRACES",

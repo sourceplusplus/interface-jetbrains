@@ -131,7 +131,7 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
             SourceMarkerServices.Instance.liveView?.addLiveViewSubscription(
                 LiveViewSubscription(
                     null,
-                    endpointName,
+                    listOf(endpointName),
                     sourceMark.artifactQualifiedName,
                     LiveViewConfig(
                         "ACTIVITY",
