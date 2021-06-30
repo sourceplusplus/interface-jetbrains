@@ -25,17 +25,24 @@ import javax.swing.JPanel
 object CommandBarController {
 
     private val log = LoggerFactory.getLogger(CommandBarController::class.java)
+    private var previousCommandBar: InlayMark? = null
 
-    fun handleCommandInput(input: String, inlayMark: InlayMark, editor: Editor) {
+    fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
         if (input == "/add-live-log") {
             //replace command inlay with log status inlay
-            inlayMark.dispose()
-            LiveLogStatusManager.showStatusBar(editor, inlayMark.lineNumber)
+            previousCommandBar!!.dispose()
+            LiveLogStatusManager.showStatusBar(editor, previousCommandBar!!.lineNumber)
+            previousCommandBar = null
         }
     }
 
     fun showCommandBar(editor: Editor, lineNumber: Int) {
+        //close previous command bar (if open)
+        previousCommandBar?.dispose(true, false)
+        previousCommandBar = null
+
+        //determine command bar location
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
@@ -47,13 +54,12 @@ object CommandBarController {
         if (findInlayMark.isPresent) {
             val inlayMark = findInlayMark.get()
             if (!fileMarker.containsSourceMark(inlayMark)) {
+                //create and display command bar
+                previousCommandBar = inlayMark
+
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
-
-                //val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
-                val statusBar = CommandBar(
-                    inlayMark
-                )
+                val statusBar = CommandBar(inlayMark)
                 wrapperPanel.add(statusBar)
                 statusBar.setEditor(editor)
 

@@ -57,15 +57,15 @@ public class CommandBar extends JPanel {
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     String autoCompleteText = textField1.getSelectedText();
                     if (autoCompleteText != null) {
-                        CommandBarController.INSTANCE.handleCommandInput(autoCompleteText, inlayMark, editor);
+                        CommandBarController.INSTANCE.handleCommandInput(autoCompleteText, editor);
                     } else {
-                        CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), inlayMark, editor);
+                        CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
                     }
                 }
             }
         });
         textField1.addActionListener(it -> {
-            CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), inlayMark, editor);
+            CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
         });
         textField1.setFocusTraversalKeysEnabled(false);
         textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
