@@ -22,10 +22,6 @@ public final class AutocompleteField extends JTextField implements FocusListener
     private final ListModel model;
     private String placeHolderText;
 
-    public AutocompleteField(Function<String, List<String>> lookup) {
-        this(null, lookup);
-    }
-
     public AutocompleteField(String placeHolderText, Function<String, List<String>> lookup) {
         super();
         this.placeHolderText = placeHolderText;
@@ -99,10 +95,9 @@ public final class AutocompleteField extends JTextField implements FocusListener
             list.setVisibleRowCount(Math.min(results.size(), 10));
 
             // Selecting first result
-//            if ( results.size () > 0 )
-//            {
-//                list.setSelectedIndex ( 0 );
-//            }
+            if (results.size() > 0) {
+                list.setSelectedIndex(0);
+            }
 
             // Ensure autocomplete popup has correct size
             popup.pack();
@@ -133,7 +128,7 @@ public final class AutocompleteField extends JTextField implements FocusListener
             if (index != -1 && list.getModel().getSize() > index + 1) {
                 list.setSelectedIndex(index + 1);
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+        } else if (e.getKeyCode() == KeyEvent.VK_TAB) {
             final String text = (String) list.getSelectedValue();
             setText(text);
             setCaretPosition(text.length());

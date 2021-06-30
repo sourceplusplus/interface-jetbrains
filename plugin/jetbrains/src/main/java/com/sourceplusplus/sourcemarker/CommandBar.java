@@ -1,18 +1,21 @@
 package com.sourceplusplus.sourcemarker;
 
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.impl.EditorComponentImpl;
+import com.intellij.openapi.util.IconLoader;
+import com.intellij.util.ui.UIUtil;
+import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.sourcemarker.command.CommandBarController;
+import net.miginfocom.swing.MigLayout;
+
+import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.swing.*;
-import javax.swing.border.*;
-
-import com.intellij.openapi.editor.impl.EditorComponentImpl;
-import com.intellij.openapi.util.IconLoader;
-import com.intellij.util.ui.UIUtil;
-import net.miginfocom.swing.*;
 
 import static com.sourceplusplus.sourcemarker.status.LogStatusBar.containsScreenLocation;
 
@@ -20,15 +23,40 @@ public class CommandBar extends JPanel {
 
     private final List<String> values = Arrays.asList("/add-live-log", "/add-live-breakpoint");
     private final Function<String, List<String>> lookup = text -> values.stream()
-            .filter(v -> !text.isEmpty() && v.toLowerCase().contains(text.toLowerCase()) && !v.equals(text))
+            .filter(v -> !text.isEmpty() && v.toLowerCase().contains(text.toLowerCase()))
             .collect(Collectors.toList());
 
-    public CommandBar() {
+    private final InlayMark inlayMark;
+    private Editor editor;
+
+    public CommandBar(InlayMark inlayMark) {
+        this.inlayMark = inlayMark;
+
         initComponents();
         setupComponents();
     }
 
+    public void setEditor(Editor editor) {
+        this.editor = editor;
+    }
+
+    public void focus() {
+        textField1.grabFocus();
+        textField1.requestFocusInWindow();
+    }
+
     private void setupComponents() {
+        textField1.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
+                    dispose();
+                }
+            }
+        });
+        textField1.addActionListener(it -> {
+            CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), inlayMark, editor);
+        });
         textField1.setFocusTraversalKeysEnabled(false);
         textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
         label2.setCursor(Cursor.getDefaultCursor());
@@ -41,7 +69,7 @@ public class CommandBar extends JPanel {
         addRecursiveMouseListener(label2, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-//                dispose();
+                dispose();
             }
 
             @Override
@@ -54,6 +82,10 @@ public class CommandBar extends JPanel {
                 label2.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
             }
         });
+    }
+
+    private void dispose() {
+        inlayMark.dispose(true, false);
     }
 
     public void addRecursiveMouseListener(final Component component, final MouseListener listener) {
