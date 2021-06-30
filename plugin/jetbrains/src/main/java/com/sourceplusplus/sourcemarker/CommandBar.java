@@ -2,16 +2,26 @@ package com.sourceplusplus.sourcemarker;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.border.*;
 
 import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.*;
 
 import static com.sourceplusplus.sourcemarker.status.LogStatusBar.containsScreenLocation;
 
 public class CommandBar extends JPanel {
+
+    private final List<String> values = Arrays.asList("/add-live-log", "/add-live-breakpoint");
+    private final Function<String, List<String>> lookup = text -> values.stream()
+            .filter(v -> !text.isEmpty() && v.toLowerCase().contains(text.toLowerCase()) && !v.equals(text))
+            .collect(Collectors.toList());
 
     public CommandBar() {
         initComponents();
@@ -19,6 +29,8 @@ public class CommandBar extends JPanel {
     }
 
     private void setupComponents() {
+        textField1.setFocusTraversalKeysEnabled(false);
+        textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
         label2.setCursor(Cursor.getDefaultCursor());
         label2.addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -80,7 +92,7 @@ public class CommandBar extends JPanel {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
-        textField1 = new JTextField();
+        textField1 = new AutocompleteField("Search or Type a Command (/)", lookup);
         label2 = new JLabel();
 
         //======== this ========
@@ -88,11 +100,12 @@ public class CommandBar extends JPanel {
         setMinimumSize(new Dimension(500, 40));
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setBackground(new Color(43, 43, 43));
-//        setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(
-//        0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion",javax.swing.border.TitledBorder.CENTER,javax.swing.border.TitledBorder
-//        .BOTTOM,new java.awt.Font("Dia\u006cog",java.awt.Font.BOLD,12),java.awt.Color.
-//        red), getBorder())); addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override public void propertyChange(java.
-//        beans.PropertyChangeEvent e){if("bord\u0065r".equals(e.getPropertyName()))throw new RuntimeException();}});
+//        setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing.
+//        border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JFor\u006dDesi\u0067ner \u0045valu\u0061tion" , javax. swing .border . TitledBorder. CENTER
+//        ,javax . swing. border .TitledBorder . BOTTOM, new java. awt .Font ( "Dia\u006cog", java .awt . Font
+//        . BOLD ,12 ) ,java . awt. Color .red ) , getBorder () ) );  addPropertyChangeListener(
+//        new java. beans .PropertyChangeListener ( ){ @Override public void propertyChange (java . beans. PropertyChangeEvent e) { if( "bord\u0065r"
+//        .equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } );
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -109,6 +122,7 @@ public class CommandBar extends JPanel {
         //---- textField1 ----
         textField1.setBackground(new Color(37, 37, 37));
         textField1.setBorder(new LineBorder(Color.darkGray, 1, true));
+        textField1.setFont(new Font("Roboto Light", Font.PLAIN, 14));
         add(textField1, "cell 1 0");
 
         //---- label2 ----
