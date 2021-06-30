@@ -14,7 +14,7 @@ import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
+import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshLogs
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
@@ -33,7 +33,7 @@ import org.junit.Before
 import org.junit.Test
 import java.io.File
 
-class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
+class StandaloneLogsLiveView : LightJavaCodeInsightFixtureTestCase() {
 
     @Before
     public override fun setUp() {
@@ -95,7 +95,7 @@ class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
                 "null",
                 artifactName,
                 PortalConfiguration(
-                    currentPage = PageType.TRACES,
+                    currentPage = PageType.LOGS,
                     external = true
                 )
             )
@@ -115,7 +115,7 @@ class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
         )
 
         GlobalScope.launch(vertx.dispatcher()) {
-            vertx.eventBus().send(RefreshTraces, portal)
+            vertx.eventBus().send(RefreshLogs, portal)
         }
 
         runBlocking { Promise.promise<Nothing>().future().await() }
