@@ -61,9 +61,11 @@ object SourceMarkSearch {
             val methodMark = SourceMarker.getSourceMark(
                 rootMark.artifactQualifiedName.substringBefore("#"), SourceMark.Type.GUTTER
             )
-            listOfNotNull(rootMark, methodMark, rootMark.sourceFileMarker.getClassSourceMarks()[0])
+            //todo: proper class crawl
+            listOfNotNull(rootMark, methodMark) + rootMark.sourceFileMarker.getClassSourceMarks()
         } else if (rootMark.isMethodMark) {
-            listOf(rootMark, rootMark.sourceFileMarker.getClassSourceMarks()[0])
+            //todo: proper class crawl
+            listOf(rootMark) + rootMark.sourceFileMarker.getClassSourceMarks()
         } else {
             listOf(rootMark)
         }
