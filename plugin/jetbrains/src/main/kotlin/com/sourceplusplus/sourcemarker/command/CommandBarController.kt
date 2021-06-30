@@ -27,6 +27,7 @@ object CommandBarController {
     private val log = LoggerFactory.getLogger(CommandBarController::class.java)
 
     fun handleCommandInput(input: String, inlayMark: InlayMark, editor: Editor) {
+        log.info("Processing command input: {}", input)
         if (input == "/add-live-log") {
             //replace command inlay with log status inlay
             inlayMark.dispose()

@@ -111,6 +111,10 @@ public final class AutocompleteField extends JTextField implements FocusListener
         });
     }
 
+    public String getSelectedText() {
+        return (String) list.getSelectedValue();
+    }
+
     @Override
     public void focusLost(final FocusEvent e) {
         SwingUtilities.invokeLater(this::hideAutocompletePopup);
@@ -132,8 +136,6 @@ public final class AutocompleteField extends JTextField implements FocusListener
             final String text = (String) list.getSelectedValue();
             setText(text);
             setCaretPosition(text.length());
-        } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            hideAutocompletePopup();
         }
     }
 

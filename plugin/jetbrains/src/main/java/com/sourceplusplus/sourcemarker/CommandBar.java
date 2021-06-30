@@ -12,16 +12,17 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.sourceplusplus.sourcemarker.status.LogStatusBar.containsScreenLocation;
 
 public class CommandBar extends JPanel {
 
-    private final List<String> values = Arrays.asList("/add-live-log", "/add-live-breakpoint");
+    private final List<String> values = Stream.of("/add-live-log", "/add-live-breakpoint")
+            .sorted().collect(Collectors.toList());
     private final Function<String, List<String>> lookup = text -> values.stream()
             .filter(v -> !text.isEmpty() && v.toLowerCase().contains(text.toLowerCase()))
             .collect(Collectors.toList());
@@ -51,6 +52,12 @@ public class CommandBar extends JPanel {
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
+                } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    String autoCompleteText = textField1.getSelectedText();
+                    if (autoCompleteText != null) {
+                        textField1.setText(autoCompleteText);
+                    }
+                    CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), inlayMark, editor);
                 }
             }
         });
@@ -132,12 +139,6 @@ public class CommandBar extends JPanel {
         setMinimumSize(new Dimension(500, 40));
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setBackground(new Color(43, 43, 43));
-//        setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing.
-//        border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JFor\u006dDesi\u0067ner \u0045valu\u0061tion" , javax. swing .border . TitledBorder. CENTER
-//        ,javax . swing. border .TitledBorder . BOTTOM, new java. awt .Font ( "Dia\u006cog", java .awt . Font
-//        . BOLD ,12 ) ,java . awt. Color .red ) , getBorder () ) );  addPropertyChangeListener(
-//        new java. beans .PropertyChangeListener ( ){ @Override public void propertyChange (java . beans. PropertyChangeEvent e) { if( "bord\u0065r"
-//        .equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } );
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -166,7 +167,7 @@ public class CommandBar extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
     private JLabel label1;
-    private JTextField textField1;
+    private AutocompleteField textField1;
     private JLabel label2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
