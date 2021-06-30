@@ -21,11 +21,13 @@ import static com.sourceplusplus.sourcemarker.status.LogStatusBar.containsScreen
 
 public class CommandBar extends JPanel {
 
-    private final List<String> values = Stream.of("/add-live-log", "/add-live-breakpoint")
+    private final List<String> commands = Stream.of("/add-live-log", "/add-live-breakpoint")
             .sorted().collect(Collectors.toList());
-    private final Function<String, List<String>> lookup = text -> values.stream()
-            .filter(v -> !text.isEmpty() && v.toLowerCase().contains(text.toLowerCase()))
-            .collect(Collectors.toList());
+    private final Function<String, List<String>> lookup = text -> commands.stream()
+            .filter(v -> !text.isEmpty()
+                    && v.toLowerCase().contains(text.toLowerCase().replace("/", ""))
+                    && text.startsWith("/")
+            ).collect(Collectors.toList());
 
     private final InlayMark inlayMark;
     private Editor editor;
@@ -55,9 +57,10 @@ public class CommandBar extends JPanel {
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     String autoCompleteText = textField1.getSelectedText();
                     if (autoCompleteText != null) {
-                        textField1.setText(autoCompleteText);
+                        CommandBarController.INSTANCE.handleCommandInput(autoCompleteText, inlayMark, editor);
+                    } else {
+                        CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), inlayMark, editor);
                     }
-                    CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), inlayMark, editor);
                 }
             }
         });
