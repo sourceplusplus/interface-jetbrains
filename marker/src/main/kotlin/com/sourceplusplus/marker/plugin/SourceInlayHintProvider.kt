@@ -27,7 +27,7 @@ import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
-import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
+import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.*
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.psiUtil.getParentOfType
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
@@ -58,7 +58,7 @@ open class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
         init {
             SourceMarker.addGlobalSourceMarkEventListener { event ->
                 when (event.eventCode) {
-                    InlayMarkEventCode.VIRTUAL_TEXT_UPDATED -> {
+                    VIRTUAL_TEXT_UPDATED, INLAY_MARK_VISIBLE, INLAY_MARK_HIDDEN -> {
                         ApplicationManager.getApplication().invokeLater {
                             FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                                 //todo: smaller range
@@ -128,6 +128,8 @@ open class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                     if (SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation) return true else {
                         inlayMark = createInlayMarkIfNecessary(element) ?: return true
                     }
+                } else if (!inlayMark.isVisible()) {
+                    return true
                 }
                 if (!fileMarker.containsSourceMark(inlayMark) && !inlayMark.canApply()) return true
                 if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply()

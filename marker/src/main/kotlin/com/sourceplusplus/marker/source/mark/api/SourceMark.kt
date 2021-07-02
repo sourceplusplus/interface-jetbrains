@@ -33,6 +33,8 @@ import com.sourceplusplus.marker.source.mark.api.event.SynchronousSourceMarkEven
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
+import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_HIDDEN
+import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_VISIBLE
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
@@ -91,6 +93,9 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val project: Project; get() = sourceFileMarker.project
     fun getPsiElement(): PsiElement
 
+    fun isVisible(): Boolean
+    fun setVisible(visible: Boolean)
+
     fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
     fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true)
     fun apply(addToMarker: Boolean = true) {
@@ -120,7 +125,32 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                         configuration.inlayRef = Ref.create()
                         configuration.inlayRef!!.set(inlay)
                         val viewport = (editor as? EditorImpl)?.scrollPane?.viewport
-                        viewport?.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
+                        viewport!!.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
+
+                        addEventListener { event ->
+                            when (event.eventCode) {
+                                INLAY_MARK_VISIBLE -> {
+                                    ApplicationManager.getApplication().invokeLater {
+                                        configuration.inlayRef = Ref.create()
+                                        configuration.inlayRef!!.set(
+                                            provider.insertAfter(
+                                                lineNumber - 2,
+                                                configuration.componentProvider.getComponent(this).getComponent()
+                                            )
+                                        )
+                                        viewport.dispatchEvent(
+                                            ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED)
+                                        )
+                                    }
+                                }
+                                INLAY_MARK_HIDDEN -> {
+                                    ApplicationManager.getApplication().invokeLater {
+                                        configuration.inlayRef?.get()?.dispose()
+                                        configuration.inlayRef = null
+                                    }
+                                }
+                            }
+                        }
                     }
                 } else {
                     ApplicationManager.getApplication().invokeLater {
