@@ -35,9 +35,9 @@ class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
 
     init {
         editor.scrollPane.viewport.addComponentListener(editorWidthWatcher)
-        Disposer.register(this, Disposable {
+        Disposer.register(this) {
             editor.scrollPane.viewport.removeComponentListener(editorWidthWatcher)
-        })
+        }
 
         EditorUtil.disposeWithEditor(editor, this)
     }
@@ -61,7 +61,7 @@ class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
                 )
             )?.also {
                 managedInlays[wrappedComponent] = it
-                Disposer.register(it, Disposable { managedInlays.remove(wrappedComponent) })
+                Disposer.register(it) { managedInlays.remove(wrappedComponent) }
             }
     }
 
@@ -145,7 +145,7 @@ class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
     }
 
     companion object {
-        val INLAYS_KEY: Key<SourceInlayComponentProvider> = Key.create("SourceInlayComponentProvider")
+        private val INLAYS_KEY: Key<SourceInlayComponentProvider> = Key.create("SourceInlayComponentProvider")
 
         fun from(editor: Editor): SourceInlayComponentProvider {
             return synchronized(editor) {
