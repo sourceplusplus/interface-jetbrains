@@ -17,7 +17,10 @@ class SourceMarkerVisibilityAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         visible = !visible
-        SourceMarker.getSourceMarks().forEach { it.setVisible(visible) }
-        DaemonCodeAnalyzer.getInstance(e.project).restart()
+        val currentMarks = SourceMarker.getSourceMarks()
+        if (currentMarks.isNotEmpty()) {
+            currentMarks.forEach { it.setVisible(visible) }
+            DaemonCodeAnalyzer.getInstance(e.project).restart()
+        }
     }
 }
