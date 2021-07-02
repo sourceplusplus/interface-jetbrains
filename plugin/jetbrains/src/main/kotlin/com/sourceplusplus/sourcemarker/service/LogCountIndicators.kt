@@ -60,6 +60,7 @@ class LogCountIndicators : CoroutineVerticle() {
                                                     logSummary.value,
                                                     if (logger.level == "warn" || logger.level == "error") "#e1483b" else "#182d34"
                                                 )
+                                            //todo: should just be updating rendering, not all analysis
                                             methodMark.sourceFileMarker.refresh()
                                         }
                                     }

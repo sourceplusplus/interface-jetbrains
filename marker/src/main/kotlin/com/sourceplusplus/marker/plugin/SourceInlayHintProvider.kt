@@ -128,11 +128,13 @@ open class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                     if (SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation) return true else {
                         inlayMark = createInlayMarkIfNecessary(element) ?: return true
                     }
-                } else if (!inlayMark.isVisible()) {
-                    return true
                 }
                 if (!fileMarker.containsSourceMark(inlayMark) && !inlayMark.canApply()) return true
                 if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply()
+                if (!inlayMark.isVisible()) {
+                    return true
+                }
+
                 val virtualText = inlayMark.configuration.virtualText ?: return true
                 virtualText.inlayMark = inlayMark
 

@@ -13,13 +13,15 @@ import com.sourceplusplus.marker.SourceMarker
  */
 class SourceMarkerVisibilityAction : AnAction() {
 
-    var visible = true
+    companion object {
+        var globalVisibility = true
+    }
 
     override fun actionPerformed(e: AnActionEvent) {
-        visible = !visible
+        globalVisibility = !globalVisibility
         val currentMarks = SourceMarker.getSourceMarks()
         if (currentMarks.isNotEmpty()) {
-            currentMarks.forEach { it.setVisible(visible) }
+            currentMarks.forEach { it.setVisible(globalVisibility) }
             DaemonCodeAnalyzer.getInstance(e.project).restart()
         }
     }

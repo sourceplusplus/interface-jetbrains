@@ -44,7 +44,8 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             var gutterMark = fileMarker.getSourceMark(artifactQualifiedName, SourceMark.Type.GUTTER) as ClassGutterMark?
             if (gutterMark == null) {
                 gutterMark = SourceMarkerUtils.getOrCreateClassGutterMark(fileMarker, element) ?: return null
-            } else if (!gutterMark.isVisible()) {
+            }
+            if (!gutterMark.isVisible()) {
                 return null
             }
 
@@ -78,7 +79,8 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             ) as MethodGutterMark?
             if (gutterMark == null) {
                 gutterMark = SourceMarkerUtils.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
-            } else if (!gutterMark.isVisible()) {
+            }
+            if (!gutterMark.isVisible()) {
                 return null
             }
 

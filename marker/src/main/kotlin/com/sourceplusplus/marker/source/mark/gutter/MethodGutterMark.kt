@@ -1,5 +1,6 @@
 package com.sourceplusplus.marker.source.mark.gutter
 
+import com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
@@ -21,7 +22,7 @@ open class MethodGutterMark(
 ) : MethodSourceMark(sourceFileMarker, psiMethod), GutterMark {
 
     override val configuration: GutterMarkConfiguration = pluginConfiguration.gutterMarkConfiguration.copy()
-    private var visible: AtomicBoolean = AtomicBoolean()
+    private var visible: AtomicBoolean = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
 
     override fun isVisible(): Boolean {
         return visible.get()

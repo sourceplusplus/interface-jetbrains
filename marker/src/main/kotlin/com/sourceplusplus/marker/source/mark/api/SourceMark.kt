@@ -32,7 +32,9 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
+import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
+import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_HIDDEN
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_VISIBLE
 import kotlinx.coroutines.GlobalScope
@@ -106,8 +108,16 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_ADDED))
 
             if (this is GutterMark) {
+                setVisible(isVisible() && configuration.icon != null)
                 if (configuration.icon != null) {
-                    setVisible(true)
+                    if (isVisible()) {
+                        setVisible(true)
+
+                        //initial mark visible event
+                        triggerEvent(SourceMarkEvent(this, GutterMarkEventCode.GUTTER_MARK_VISIBLE))
+                    } else {
+                        setVisible(false)
+                    }
                 } else {
                     setVisible(false)
                 }
@@ -118,14 +128,21 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                         TODO()
                     } else {
                         val provider = SourceInlayComponentProvider.from(editor)
-                        val inlay = provider.insertAfter(
-                            lineNumber - 2,
-                            configuration.componentProvider.getComponent(this).getComponent()
-                        )
-                        configuration.inlayRef = Ref.create()
-                        configuration.inlayRef!!.set(inlay)
-                        val viewport = (editor as? EditorImpl)?.scrollPane?.viewport
-                        viewport!!.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
+                        val viewport = (editor as? EditorImpl)?.scrollPane?.viewport!!
+                        if (isVisible()) {
+                            val inlay = provider.insertAfter(
+                                lineNumber - 2,
+                                configuration.componentProvider.getComponent(this).getComponent()
+                            )
+                            configuration.inlayRef = Ref.create()
+                            configuration.inlayRef!!.set(inlay)
+                            viewport.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
+
+                            //initial mark visible event
+                            triggerEvent(SourceMarkEvent(this, InlayMarkEventCode.INLAY_MARK_VISIBLE))
+                        } else {
+                            setVisible(false)
+                        }
 
                         addEventListener { event ->
                             when (event.eventCode) {

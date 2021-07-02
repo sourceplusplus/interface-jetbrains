@@ -1,5 +1,6 @@
 package com.sourceplusplus.marker.source.mark.inlay
 
+import com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.ExpressionSourceMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
@@ -18,5 +19,5 @@ open class ExpressionInlayMark @JvmOverloads constructor(
     override var psiExpression: UExpression,
     override val configuration: InlayMarkConfiguration = pluginConfiguration.inlayMarkConfiguration.copy()
 ) : ExpressionSourceMark(sourceFileMarker, psiExpression), InlayMark {
-    override var visible: AtomicBoolean = AtomicBoolean(true)
+    override var visible: AtomicBoolean = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
 }
