@@ -10,6 +10,7 @@ import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
+import com.sourceplusplus.sourcemarker.AutocompletePane;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
 import net.miginfocom.swing.MigLayout;
@@ -25,7 +26,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,24 +36,41 @@ import java.util.stream.Collectors;
 import static com.sourceplusplus.protocol.SourceMarkerServices.Instance;
 
 public class LogStatusBar extends JPanel {
-
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("(\\$[a-zA-Z0-9_]+)");
     private Editor editor;
     private final LiveSourceLocation sourceLocation;
+    private final List<String> scopeVars;
     private final InlayMark inlayMark;
     private LiveLog liveLog;
     private boolean textFieldFocused = false;
     private boolean editMode;
-    private JLabel label3 = new JLabel();
+    private final JLabel label3 = new JLabel();
+    private final Function<String, List<String>> lookup;
+    private final Pattern VARIABLE_PATTERN;
 
-    public LogStatusBar(LiveSourceLocation sourceLocation, InlayMark inlayMark) {
-        this(sourceLocation, inlayMark, null, null);
+    public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
+        this(sourceLocation, scopeVars, inlayMark, null, null);
     }
 
-    public LogStatusBar(LiveSourceLocation sourceLocation, InlayMark inlayMark, LiveLog liveLog, Editor editor) {
+    public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
+                        LiveLog liveLog, Editor editor) {
         this.sourceLocation = sourceLocation;
+        this.scopeVars = scopeVars;
+        lookup = text -> scopeVars.stream()
+                .filter(v -> !text.isEmpty() && v.toLowerCase().contains(text.toLowerCase()))
+                .collect(Collectors.toList());
+
+        StringBuilder sb = new StringBuilder("(");
+        for (int i = 0; i < scopeVars.size(); i++) {
+            sb.append("\\$").append(scopeVars.get(i));
+            if (i + 1 < scopeVars.size()) {
+                sb.append("|");
+            }
+        }
+        sb.append(")(?:\\s|$)");
+        VARIABLE_PATTERN = Pattern.compile(sb.toString());
+
         this.inlayMark = inlayMark;
         this.liveLog = liveLog;
         this.editor = editor;
@@ -87,13 +107,16 @@ public class LogStatusBar extends JPanel {
                 textField1.getStyledDocument().setCharacterAttributes(
                         0, formattedMessage.length(), textField1.getStyle("default"), true);
 
+                int varOffset = 0;
                 int minIndex = 0;
                 for (String var : latestLog.getArguments()) {
-                    int varIndex = formattedMessage.indexOf(var, minIndex);
-                    minIndex = varIndex;
+                    int varIndex = latestLog.getContent().indexOf("{}", minIndex);
+                    varOffset += varIndex - minIndex;
+                    minIndex = varIndex + "{}".length();
 
-                    textField1.getStyledDocument().setCharacterAttributes(varIndex, var.length(),
+                    textField1.getStyledDocument().setCharacterAttributes(varOffset, var.length(),
                             textField1.getStyle("numbers"), true);
+                    varOffset += var.length();
                 }
             });
         }
@@ -188,10 +211,13 @@ public class LogStatusBar extends JPanel {
                     int minIndex = 0;
                     Matcher m = VARIABLE_PATTERN.matcher(text);
                     while (m.find()) {
-                        String var = m.group();
-                        int varIndex = text.indexOf(var, minIndex);
-                        minIndex = varIndex;
+                        String var = m.group(1);
+                        if (!scopeVars.contains(var.substring(1))) {
+                            continue;
+                        }
 
+                        int varIndex = text.indexOf(var, minIndex);
+                        minIndex = varIndex + var.length();
                         textField1.getStyledDocument().setCharacterAttributes(varIndex, var.length(),
                                 textField1.getStyle("numbers"), true);
                     }
@@ -214,7 +240,7 @@ public class LogStatusBar extends JPanel {
                     ArrayList<String> varMatches = new ArrayList<>();
                     Matcher m = VARIABLE_PATTERN.matcher(logPattern);
                     while (m.find()) {
-                        String var = m.group();
+                        String var = m.group(1);
                         logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
                         varMatches.add(var);
                     }
@@ -432,7 +458,7 @@ public class LogStatusBar extends JPanel {
         panel1 = new JPanel();
         label1 = new JLabel();
         label2 = new JLabel();
-        textField1 = new JTextPane();
+        textField1 = new AutocompletePane("Input log message (use $ for variables)", lookup);
         panel2 = new JPanel();
         label8 = new JLabel();
         label7 = new JLabel();
