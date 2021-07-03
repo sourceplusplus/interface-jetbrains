@@ -63,6 +63,7 @@ public class LogStatusBar extends JPanel {
                     return var.startsWith("$") && v.toLowerCase().contains(var.substring(1))
                             && !v.toLowerCase().equals(var.substring(1));
                 })
+                .limit(7)
                 .collect(Collectors.toList());
 
         StringBuilder sb = new StringBuilder("(");
