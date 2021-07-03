@@ -34,7 +34,6 @@ import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
-import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_HIDDEN
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_VISIBLE
 import kotlinx.coroutines.GlobalScope
@@ -139,13 +138,13 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                             viewport.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
 
                             //initial mark visible event
-                            triggerEvent(SourceMarkEvent(this, InlayMarkEventCode.INLAY_MARK_VISIBLE))
+                            triggerEvent(SourceMarkEvent(this, INLAY_MARK_VISIBLE))
                         } else {
                             setVisible(false)
                         }
 
-                        addEventListener { event ->
-                            when (event.eventCode) {
+                        addEventListener(SynchronousSourceMarkEventListener {
+                            when (it.eventCode) {
                                 INLAY_MARK_VISIBLE -> {
                                     ApplicationManager.getApplication().invokeLater {
                                         configuration.inlayRef = Ref.create()
@@ -167,7 +166,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                                     }
                                 }
                             }
-                        }
+                        })
                     }
                 } else {
                     ApplicationManager.getApplication().invokeLater {
