@@ -33,7 +33,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-jdk8"))
                 implementation(project(":protocol"))
-                implementation("org.slf4j:slf4j-api:1.7.30")
+                implementation("org.slf4j:slf4j-api:1.7.31")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
                 implementation("io.vertx:vertx-core:$vertxVersion")
