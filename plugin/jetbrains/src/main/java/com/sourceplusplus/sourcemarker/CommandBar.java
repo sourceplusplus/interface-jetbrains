@@ -27,6 +27,7 @@ public class CommandBar extends JPanel {
             .filter(v -> !text.isEmpty()
                     && v.toLowerCase().contains(text.toLowerCase().replace("/", ""))
                     && text.startsWith("/")
+                    && !v.equalsIgnoreCase(text)
             ).collect(Collectors.toList());
 
     private final InlayMark inlayMark;
