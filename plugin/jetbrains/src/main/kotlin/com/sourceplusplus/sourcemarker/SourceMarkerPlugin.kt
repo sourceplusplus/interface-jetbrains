@@ -247,76 +247,101 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun discoverAvailableServices(config: SourceMarkerConfig, project: Project) {
+        val hardcodedConfig: JsonObject = try {
+            JsonObject(
+                Resources.toString(
+                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                )
+            )
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
             ServiceDiscoveryOptions().setBackendConfiguration(
                 JsonObject().put("backend-name", "tcp-service-discovery")
             )
         )
-
         val availableRecords = discovery.getRecords { true }.await()
 
         //local tracing
-        if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOCAL_TRACING }) {
-            log.info("Local tracing available")
-            Instance.localTracing = ServiceProxyBuilder(vertx)
-                .setToken(config.serviceToken!!)
-                .setAddress(SourceMarkerServices.Utilize.LOCAL_TRACING)
-                .build(LocalTracingService::class.java)
+        if (hardcodedConfig.getJsonObject("services").getBoolean("local_tracing")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOCAL_TRACING }) {
+                log.info("Local tracing available")
+                Instance.localTracing = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LOCAL_TRACING)
+                    .build(LocalTracingService::class.java)
+            } else {
+                log.warn("Local tracing unavailable")
+            }
         } else {
-            log.warn("Local tracing unavailable")
+            log.info("Local tracing disabled")
         }
 
         //log count indicator
-        if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR }) {
-            log.info("Log count indicator available")
-            Instance.logCountIndicator = ServiceProxyBuilder(vertx)
-                .setToken(config.serviceToken!!)
-                .setAddress(SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR)
-                .build(LogCountIndicatorService::class.java)
+        if (hardcodedConfig.getJsonObject("services").getBoolean("log_count_indicator")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR }) {
+                log.info("Log count indicator available")
+                Instance.logCountIndicator = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR)
+                    .build(LogCountIndicatorService::class.java)
 
-            GlobalScope.launch(vertx.dispatcher()) {
-                deploymentIds.add(vertx.deployVerticle(LogCountIndicators()).await())
+                GlobalScope.launch(vertx.dispatcher()) {
+                    deploymentIds.add(vertx.deployVerticle(LogCountIndicators()).await())
+                }
+            } else {
+                log.warn("Log count indicator unavailable")
             }
         } else {
-            log.warn("Log count indicator unavailable")
+            log.info("Log count indicator disabled")
         }
 
         //live instrument
-        if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_INSTRUMENT }) {
-            log.info("Live instruments available")
-            SourceMarker.addGlobalSourceMarkEventListener(LiveLogStatusManager)
+        if (hardcodedConfig.getJsonObject("services").getBoolean("live_instrument")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_INSTRUMENT }) {
+                log.info("Live instruments available")
+                SourceMarker.addGlobalSourceMarkEventListener(LiveLogStatusManager)
 
-            Instance.liveInstrument = ServiceProxyBuilder(vertx)
-                .setToken(config.serviceToken!!)
-                .setAddress(SourceMarkerServices.Utilize.LIVE_INSTRUMENT)
-                .build(LiveInstrumentService::class.java)
-            ApplicationManager.getApplication().invokeLater {
-                BreakpointHitWindowService.getInstance(project).showEventsWindow()
+                Instance.liveInstrument = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LIVE_INSTRUMENT)
+                    .build(LiveInstrumentService::class.java)
+                ApplicationManager.getApplication().invokeLater {
+                    BreakpointHitWindowService.getInstance(project).showEventsWindow()
+                }
+                val breakpointListener = LiveInstrumentManager(project)
+                GlobalScope.launch(vertx.dispatcher()) {
+                    deploymentIds.add(vertx.deployVerticle(breakpointListener).await())
+                }
+                project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
+            } else {
+                log.warn("Live instruments unavailable")
             }
-            val breakpointListener = LiveInstrumentManager(project)
-            GlobalScope.launch(vertx.dispatcher()) {
-                deploymentIds.add(vertx.deployVerticle(breakpointListener).await())
-            }
-            project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
         } else {
-            log.warn("Live instruments unavailable")
+            log.info("Live instruments disabled")
         }
 
         //live view
-        if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_VIEW }) {
-            log.info("Live views available")
-            Instance.liveView = ServiceProxyBuilder(vertx)
-                .setToken(config.serviceToken!!)
-                .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
-                .build(LiveViewService::class.java)
+        if (hardcodedConfig.getJsonObject("services").getBoolean("live_view")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_VIEW }) {
+                log.info("Live views available")
+                Instance.liveView = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
+                    .build(LiveViewService::class.java)
 
-            val viewListener = LiveViewManager(project)
-            GlobalScope.launch(vertx.dispatcher()) {
-                deploymentIds.add(vertx.deployVerticle(viewListener).await())
+                val viewListener = LiveViewManager(project)
+                GlobalScope.launch(vertx.dispatcher()) {
+                    deploymentIds.add(vertx.deployVerticle(viewListener).await())
+                }
+            } else {
+                log.warn("Live views unavailable")
             }
         } else {
-            log.warn("Live views unavailable")
+            log.info("Live views disabled")
         }
     }
 
