@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.5.10"
+    kotlin("plugin.serialization") version "1.5.20"
 }
 
 val vertxVersion = ext.get("vertxVersion")
