@@ -21,7 +21,7 @@ class CommandBarAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = e.getData(PlatformDataKeys.EDITOR) ?: return
-        val lineNumber = editor.document.getLineNumber(editor.caretModel.offset) + 1
+        val lineNumber = editor.document.getLineNumber(editor.caretModel.offset) + 2
         CommandBarController.showCommandBar(editor, lineNumber)
     }
 }
