@@ -132,10 +132,11 @@ public final class AutocompletePane extends JTextPane implements FocusListener, 
             if (index != -1 && list.getModel().getSize() > index + 1) {
                 list.setSelectedIndex(index + 1);
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_TAB) {
+        } else if (e.getKeyCode() == KeyEvent.VK_TAB || e.getKeyChar() == KeyEvent.VK_ENTER) {
             final String text = (String) list.getSelectedValue();
-            setText(text);
-            setCaretPosition(text.length());
+            String varCompleted = substringAfterLast("$", getText());
+            setText(getText() + text.substring(varCompleted.length()));
+            setCaretPosition(getText().length());
         }
     }
 
@@ -195,5 +196,11 @@ public final class AutocompletePane extends JTextPane implements FocusListener, 
         g.setColor(new Color(85, 85, 85, 200));
         g.drawString(placeHolderText, getInsets().left + 6, pG.getFontMetrics()
                 .getMaxAscent() + getInsets().top + 2);
+    }
+
+    public static String substringAfterLast(String delimiter, String value) {
+        int index = value.lastIndexOf(delimiter);
+        if (index == -1) return value;
+        else return value.substring(index + delimiter.length());
     }
 }

@@ -58,7 +58,11 @@ public class LogStatusBar extends JPanel {
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars;
         lookup = text -> scopeVars.stream()
-                .filter(v -> !text.isEmpty() && v.toLowerCase().contains(text.toLowerCase()))
+                .filter(v -> {
+                    String var = substringAfterLast(" ", text);
+                    return var.startsWith("$") && v.toLowerCase().contains(var.substring(1))
+                            && !v.toLowerCase().equals(var.substring(1));
+                })
                 .collect(Collectors.toList());
 
         StringBuilder sb = new StringBuilder("(");
@@ -183,7 +187,7 @@ public class LogStatusBar extends JPanel {
             @Override
             public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attr)
                     throws BadLocationException {
-                fb.insertString(offset, string.replaceAll("\\n", ""), attr);
+                fb.replace(offset, length, string.replaceAll("\\n", ""), attr);
             }
         });
         textField1.getDocument().addDocumentListener(new DocumentListener() {
@@ -227,6 +231,14 @@ public class LogStatusBar extends JPanel {
         textField1.getDocument().putProperty("filterNewlines", Boolean.TRUE);
         textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
         textField1.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_TAB) {
+                    //ignore tab; handled by auto-complete pane
+                    e.consume();
+                }
+            }
+
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
@@ -450,6 +462,12 @@ public class LogStatusBar extends JPanel {
         int relativeX = screenLocation.x - compLocation.x;
         int relativeY = screenLocation.y - compLocation.y;
         return (relativeX >= 0 && relativeX < compSize.width && relativeY >= 0 && relativeY < compSize.height);
+    }
+
+    public static String substringAfterLast(String delimiter, String value) {
+        int index = value.lastIndexOf(delimiter);
+        if (index == -1) return value;
+        else return value.substring(index + delimiter.length());
     }
 
     private void initComponents() {
