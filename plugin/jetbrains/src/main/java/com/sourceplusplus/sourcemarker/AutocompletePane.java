@@ -134,9 +134,11 @@ public final class AutocompletePane extends JTextPane implements FocusListener, 
             }
         } else if (e.getKeyCode() == KeyEvent.VK_TAB || e.getKeyChar() == KeyEvent.VK_ENTER) {
             final String text = (String) list.getSelectedValue();
-            String varCompleted = substringAfterLast("$", getText());
-            setText(getText() + text.substring(varCompleted.length()));
-            setCaretPosition(getText().length());
+            if (text != null) {
+                String varCompleted = substringAfterLast("$", getText());
+                setText(getText() + text.substring(varCompleted.length()));
+                setCaretPosition(getText().length());
+            }
         }
     }
 
