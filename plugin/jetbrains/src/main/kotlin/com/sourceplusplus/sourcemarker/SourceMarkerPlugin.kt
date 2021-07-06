@@ -260,7 +260,10 @@ object SourceMarkerPlugin {
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
             ServiceDiscoveryOptions().setBackendConfiguration(
-                JsonObject().put("backend-name", "tcp-service-discovery")
+                JsonObject()
+                    .put("backend-name", "tcp-service-discovery")
+                    .put("hardcoded_config", hardcodedConfig)
+                    .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
             )
         )
         val availableRecords = discovery.getRecords { true }.await()

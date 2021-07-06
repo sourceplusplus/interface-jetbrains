@@ -1,9 +1,5 @@
 package com.sourceplusplus.sourcemarker.discover
 
-import com.google.common.base.Charsets
-import com.google.common.io.Resources
-import com.intellij.ide.util.PropertiesComponent
-import com.intellij.openapi.project.ProjectManager
 import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
 import com.sourceplusplus.protocol.status.MarkerConnection
@@ -31,7 +27,6 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.math.BigInteger
 import java.net.NetworkInterface
 import java.security.MessageDigest
@@ -55,46 +50,35 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     private lateinit var client: NetClient
     private val setupPromise = Promise.promise<Void>()
     private val setupFuture = setupPromise.future()
-    private val hardcodedConfig: JsonObject = try {
-        JsonObject(
-            Resources.toString(
-                Resources.getResource(SourceMarkerPlugin::class.java, "/plugin-configuration.json"), Charsets.UTF_8
-            )
-        )
-    } catch (e: IOException) {
-        throw RuntimeException(e)
-    }
 
     override fun init(vertx: Vertx, config: JsonObject) {
         this.vertx = vertx
 
+        val hardcodedConfig = config.getJsonObject("hardcoded_config")
+        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings").getBoolean("service_discovery")
+        val pluginConfig = Json.decodeValue(
+            config.getJsonObject("sourcemarker_plugin_config").toString(), SourceMarkerConfig::class.java
+        )
+        if (!serviceDiscoveryEnabled || pluginConfig.serviceHost.isNullOrBlank()) {
+            log.warn("Service discovery disabled")
+            return
+        }
+
+        var serviceHost = pluginConfig.serviceHost!!.substringAfter("https://").substringAfter("http://")
+        val servicePort = hardcodedConfig.getInteger("tcp_service_port")
+        if (serviceHost.contains(":")) {
+            serviceHost = serviceHost.split(":")[0]
+        }
+
+        val certificatePins = mutableListOf<String>()
+        certificatePins.addAll(pluginConfig.certificatePins)
+        val hardcodedPin = hardcodedConfig.getString("certificate_pin")
+        if (!hardcodedPin.isNullOrBlank()) {
+            certificatePins.add(hardcodedPin)
+        }
+
         GlobalScope.launch(vertx.dispatcher()) {
             try {
-                val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
-                    .getBoolean("service_discovery")
-                val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
-                val pluginConfig = Json.decodeValue(
-                    projectSettings.getValue("sourcemarker_plugin_config"), SourceMarkerConfig::class.java
-                )
-                if (!serviceDiscoveryEnabled || pluginConfig.serviceHost.isNullOrBlank()) {
-                    log.warn("Service discovery disabled")
-                    return@launch
-                }
-
-                var serviceHost = pluginConfig.serviceHost!!
-                    .substringAfter("https://").substringAfter("http://")
-                val servicePort = hardcodedConfig.getInteger("tcp_service_port")
-                if (serviceHost.contains(":")) {
-                    serviceHost = serviceHost.split(":")[0]
-                }
-
-                val certificatePins = mutableListOf<String>()
-                certificatePins.addAll(pluginConfig.certificatePins)
-                val hardcodedPin = hardcodedConfig.getString("certificate_pin")
-                if (!hardcodedPin.isNullOrBlank()) {
-                    certificatePins.add(hardcodedPin)
-                }
-
                 client = if (certificatePins.isNotEmpty()) {
                     val options = NetClientOptions()
                         .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
@@ -162,6 +146,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                     }
                 }
                 val headers = JsonObject()
+                headers.put("token", pluginConfig.serviceToken!!)
                 FrameHelper.sendFrame(
                     BridgeEventType.SEND.name.toLowerCase(),
                     SourceMarkerServices.Status.MARKER_CONNECTED,
