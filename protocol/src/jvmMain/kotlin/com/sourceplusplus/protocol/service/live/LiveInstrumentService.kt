@@ -28,4 +28,7 @@ interface LiveInstrumentService {
     fun getLiveInstruments(handler: Handler<AsyncResult<List<LiveInstrument>>>)
     fun getLiveBreakpoints(handler: Handler<AsyncResult<List<LiveBreakpoint>>>)
     fun getLiveLogs(handler: Handler<AsyncResult<List<LiveLog>>>)
+    fun clearLiveInstruments(handler: Handler<AsyncResult<Boolean>>)
+    fun clearLiveBreakpoints(handler: Handler<AsyncResult<Boolean>>)
+    fun clearLiveLogs(handler: Handler<AsyncResult<Boolean>>)
 }
