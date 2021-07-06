@@ -51,14 +51,16 @@ class LogCountIndicators : CoroutineVerticle() {
                                             logIndicator.configuration.icon =
                                                 SourceMarkerIcons.getNumericGutterMarkIcon(
                                                     logSummary.value,
-                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b" else "#182d34"
+                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b"
+                                                    else "#182d34"
                                                 )
                                             logIndicator.apply(true)
                                         } else {
                                             logIndicator.configuration.icon =
                                                 SourceMarkerIcons.getNumericGutterMarkIcon(
                                                     logSummary.value,
-                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b" else "#182d34"
+                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b"
+                                                    else "#182d34"
                                                 )
                                             //todo: should just be updating rendering, not all analysis
                                             methodMark.sourceFileMarker.refresh()
