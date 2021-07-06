@@ -28,14 +28,14 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.cli.common.toBooleanLenient
-import org.junit.Assume.assumeTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assumptions.assumeTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
 
-    @Before
+    @BeforeEach
     public override fun setUp() {
         assumeTrue((System.getenv("STANDALONE_ENABLED")?.toBooleanLenient() ?: false))
         super.setUp()

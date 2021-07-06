@@ -80,6 +80,8 @@ dependencies {
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
     implementation("ch.qos.logback:logback-core:1.2.3")
     implementation("ch.qos.logback:logback-classic:1.2.3")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
 }
 
 tasks {
@@ -133,3 +135,9 @@ tasks {
 sourceSets.main.get().java.srcDirs(
     sourceSets.main.get().java.srcDirs, "$rootDir/protocol/build/generated/source/kapt/main"
 )
+
+tasks {
+    test {
+        useJUnitPlatform()
+    }
+}

@@ -12,6 +12,7 @@ import com.intellij.pom.java.LanguageLevel
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.LightProjectDescriptor
+import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import io.vertx.kotlin.coroutines.await
@@ -19,12 +20,11 @@ import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 
-@RunWith(JUnit4::class)
 class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     override fun getProjectDescriptor(): LightProjectDescriptor {
@@ -59,6 +59,7 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
         }
     }
 
+    @BeforeEach
     public override fun setUp() {
         super.setUp()
 
@@ -89,6 +90,12 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                     "    public void error(String msg, Throwable t){}\n" +
                     "}\n"
         )
+    }
+
+    @AfterEach
+    override fun tearDown() {
+        super.tearDown()
+        TestApplicationManager.getInstance().setDataProvider(null)
     }
 
     @Test

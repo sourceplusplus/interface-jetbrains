@@ -7,9 +7,9 @@ import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetrics
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 import kotlinx.datetime.toKotlinInstant
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
