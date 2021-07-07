@@ -4,83 +4,41 @@ new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
-			"$layoutConstraints": "fill,insets 0,hidemode 3"
-			"$columnConstraints": "[50!]0[fill]0[40!,fill]-5[grow,fill]0[fill]"
+			"$layoutConstraints": "hidemode 3"
+			"$columnConstraints": "[fill][grow,fill][fill]"
 			"$rowConstraints": "0[grow]0"
 		} ) {
 			name: "this"
-			"border": new javax.swing.border.LineBorder( new java.awt.Color( 85, 85, 85, 255 ), 1, false )
-			"maximumSize": new java.awt.Dimension( 2147483647, 40 )
-			"minimumSize": new java.awt.Dimension( 500, 40 )
 			"preferredSize": new java.awt.Dimension( 500, 40 )
+			"minimumSize": new java.awt.Dimension( 500, 40 )
+			"border": new javax.swing.border.LineBorder( new java.awt.Color( 85, 85, 85, 255 ), 1, false )
 			"background": new java.awt.Color( 43, 43, 43, 255 )
-			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
-				"$layoutConstraints": "fill,insets 0,hidemode 3"
-				"$columnConstraints": "[fill][fill]"
-				"$rowConstraints": "[grow]"
-			} ) {
-				name: "panel1"
-				"background": new java.awt.Color( 37, 37, 37, 255 )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label1"
-					"icon": new com.jformdesigner.model.SwingIcon( 0, "/icons/align-left.png" )
-					"horizontalAlignment": 0
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "pad 0 10 0 0,cell 0 0"
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label2"
-					"icon": new com.jformdesigner.model.SwingIcon( 0, "/icons/angle-down.png" )
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 0"
-				} )
-			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-				"value": "cell 0 0,width 50:50:50,height 29:29:29"
-			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "label4"
-				"icon": new com.jformdesigner.model.SwingIcon( 0, "/icons/info.png" )
+				name: "label1"
+				auxiliary() {
+					"JavaCodeGenerator.preInitCode": "label1.setIcon(IconLoader.getIcon(\"/icons/command/logo.svg\"));"
+				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-				"value": "cell 2 0"
+				"value": "cell 0 0"
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
 				name: "textField1"
-				"background": new java.awt.Color( 43, 43, 43, 255 )
-				"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				"editable": false
+				"background": new java.awt.Color( 37, 37, 37, 255 )
+				"border": new javax.swing.border.LineBorder( sfield java.awt.Color darkGray, 1, true )
+				"font": new java.awt.Font( "Roboto Light", 0, 14 )
+				auxiliary() {
+					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"Search or Type a Command (/)\", lookup);"
+				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-				"value": "cell 3 0"
+				"value": "cell 1 0"
 			} )
-			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
-				"$layoutConstraints": "btt,hidemode 3"
-				"$columnConstraints": "[fill]5[fill]5[fill]"
-				"$rowConstraints": "[]"
-			} ) {
-				name: "panel2"
-				"background": new java.awt.Color( 43, 43, 43, 255 )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label8"
-					"icon": new com.jformdesigner.model.SwingIcon( 0, "/icons/search.png" )
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 0"
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label7"
-					"icon": new com.jformdesigner.model.SwingIcon( 0, "/icons/closeIcon1.png" )
-					"maximumSize": new java.awt.Dimension( 24, 24 )
-					"minimumSize": new java.awt.Dimension( 24, 24 )
-					"preferredSize": new java.awt.Dimension( 24, 24 )
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 0"
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label6"
-					"icon": new com.jformdesigner.model.SwingIcon( 0, "/icons/closeIcon.png" )
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 2 0"
-				} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label2"
+				auxiliary() {
+					"JavaCodeGenerator.preInitCode": "label2.setIcon(IconLoader.getIcon(\"/icons/closeIcon.svg\"));"
+				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-				"value": "cell 4 0,height 29:29:29"
+				"value": "cell 2 0"
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
