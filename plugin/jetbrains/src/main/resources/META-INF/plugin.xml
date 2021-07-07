@@ -40,9 +40,9 @@
     </projectListeners>
 
     <actions>
-        <action id="com.sourceplusplus.sourcemarker.command.CommandBarAction"
-                class="com.sourceplusplus.sourcemarker.command.CommandBarAction"
-                text="SourceCommand Action" description="Source command action">
+        <action id="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
+                class="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
+                text="SourcePortal Popup Action" description="SourcePortal popup action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>
     </actions>
