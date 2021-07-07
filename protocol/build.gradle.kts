@@ -39,7 +39,7 @@ kotlin {
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
-                implementation("org.jooq:jooq:3.14.12")
+                implementation("org.jooq:jooq:3.15.0")
             }
         }
         val jvmTest by getting {
