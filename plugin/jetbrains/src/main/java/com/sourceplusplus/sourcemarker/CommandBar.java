@@ -21,8 +21,12 @@ import static com.sourceplusplus.sourcemarker.status.LogStatusBar.containsScreen
 
 public class CommandBar extends JPanel {
 
-    private final List<String> commands = Stream.of("/add-live-log", "/add-live-breakpoint")
-            .sorted().collect(Collectors.toList());
+    private final List<String> commands = Stream.of(
+            "/add-live-log", "/add-live-breakpoint"
+
+//todo: impl, don't show clears if results in no-op
+//            ,"/clear-live-logs", "/clear-live-breakpoints", "/clear-live-instruments"
+    ).sorted().collect(Collectors.toList());
     private final Function<String, List<String>> lookup = text -> commands.stream()
             .filter(v -> !text.isEmpty()
                     && v.toLowerCase().contains(text.toLowerCase().replace("/", ""))
