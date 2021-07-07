@@ -44,10 +44,19 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label4"
-				"text": "time goes here"
+				"text": "proposing"
 				auxiliary() {
 					"JavaCodeGenerator.preInitCode": "label4.setIcon(IconLoader.getIcon(\"/icons/clock.svg\"));"
 				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 1 0,gapx null 8"
+			} )
+			add( new FormComponent( "javax.swing.JSeparator" ) {
+				name: "separator1"
+				"preferredSize": new java.awt.Dimension( 5, 20 )
+				"minimumSize": new java.awt.Dimension( 5, 20 )
+				"orientation": 1
+				"maximumSize": new java.awt.Dimension( 5, 20 )
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 1 0"
 			} )
@@ -57,7 +66,7 @@ new FormModel {
 				"border": new javax.swing.border.LineBorder( sfield java.awt.Color darkGray, 1, true )
 				"font": new java.awt.Font( "Roboto Light", 0, 14 )
 				auxiliary() {
-					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"Search or Type a Command (/)\", lookup);"
+					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"Input log message (use $ for variables)\", lookup);"
 				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 2 0"
