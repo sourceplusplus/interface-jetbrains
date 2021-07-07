@@ -45,7 +45,7 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.4")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.4")
             }
