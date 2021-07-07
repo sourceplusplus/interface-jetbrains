@@ -37,8 +37,7 @@ class LogsDisplay(private val refreshIntervalMs: Int, private val pullMode: Bool
             log.info("Log pull mode enabled")
             vertx.setPeriodic(refreshIntervalMs.toLong()) {
                 SourcePortal.getPortals().filter {
-                    it.configuration.currentPage == PageType.LOGS &&
-                            (it.visible || it.configuration.external || it.configuration.statusBar)
+                    it.configuration.currentPage == PageType.LOGS && (it.visible || it.configuration.external)
                 }.forEach {
                     vertx.eventBus().send(RefreshLogs, it)
                 }
