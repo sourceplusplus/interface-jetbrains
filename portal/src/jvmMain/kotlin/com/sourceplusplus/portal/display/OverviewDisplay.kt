@@ -30,6 +30,7 @@ class OverviewDisplay(
 
     override suspend fun start() {
         if (pullMode) {
+            log.info("Log pull mode enabled")
             vertx.setPeriodic(refreshIntervalMs.toLong()) {
                 SourcePortal.getPortals().filter {
                     it.configuration.currentPage == PageType.OVERVIEW && (it.visible || it.configuration.external)
@@ -37,6 +38,8 @@ class OverviewDisplay(
                     vertx.eventBus().send(RefreshOverview, it)
                 }
             }
+        } else {
+            log.info("Log push mode enabled")
         }
 
         vertx.eventBus().consumer<JsonObject>(SetOverviewTimeFrame) {

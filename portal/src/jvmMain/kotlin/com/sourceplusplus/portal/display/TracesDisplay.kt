@@ -55,6 +55,7 @@ class TracesDisplay(
 
     override suspend fun start() {
         if (pullMode) {
+            log.info("Log pull mode enabled")
             vertx.setPeriodic(refreshIntervalMs.toLong()) {
                 SourcePortal.getPortals().filter {
                     it.configuration.currentPage == PageType.TRACES && (it.visible || it.configuration.external)
@@ -62,6 +63,8 @@ class TracesDisplay(
                     vertx.eventBus().send(RefreshTraces, it)
                 }
             }
+        } else {
+            log.info("Log push mode enabled")
         }
 
         //plugin listeners

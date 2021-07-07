@@ -40,6 +40,7 @@ class ActivityDisplay(
 
     override suspend fun start() {
         if (pullMode) {
+            log.info("Log pull mode enabled")
             vertx.setPeriodic(refreshIntervalMs.toLong()) {
                 SourcePortal.getPortals().filter {
                     it.configuration.currentPage == PageType.ACTIVITY && (it.visible || it.configuration.external)
@@ -47,6 +48,8 @@ class ActivityDisplay(
                     vertx.eventBus().send(RefreshActivity, it)
                 }
             }
+        } else {
+            log.info("Log push mode enabled")
         }
 
         //refresh with stats from cache (if avail)
