@@ -17,7 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.sourceplusplus.sourcemarker.status.LogStatusBar.containsScreenLocation;
+import static com.sourceplusplus.sourcemarker.status.ViewUtils.containsScreenLocation;
 
 public class CommandBar extends JPanel {
 
