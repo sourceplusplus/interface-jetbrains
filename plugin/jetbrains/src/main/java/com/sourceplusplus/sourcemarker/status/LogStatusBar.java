@@ -10,7 +10,7 @@ import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
-import com.sourceplusplus.sourcemarker.AutocompleteField;
+import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
 import net.miginfocom.swing.MigLayout;

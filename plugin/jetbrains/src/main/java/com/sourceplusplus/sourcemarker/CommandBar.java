@@ -6,6 +6,7 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.sourcemarker.command.CommandBarController;
+import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
