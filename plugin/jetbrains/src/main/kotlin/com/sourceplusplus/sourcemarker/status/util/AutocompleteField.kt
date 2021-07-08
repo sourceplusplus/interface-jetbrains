@@ -9,12 +9,14 @@ import java.awt.event.FocusListener
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import java.util.function.Function
+import java.util.regex.Pattern
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
 class AutocompleteField(
     private val placeHolderText: String?,
+    private val allLookup: List<String>,
     private val lookup: Function<String, List<String>>
 ) : JTextField(), FocusListener, DocumentListener, KeyListener {
 
@@ -102,10 +104,13 @@ class AutocompleteField(
             if (index != -1 && list.model.size > index + 1) {
                 list.selectedIndex = index + 1
             }
-        } else if (e.keyCode == KeyEvent.VK_TAB) {
+        } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
             val text = list.selectedValue
-            setText(text)
-            caretPosition = text.length
+            if (text != null) {
+                val varCompleted = getText().substringAfterLast("$")
+                setText(getText() + text.substring(varCompleted.length))
+                caretPosition = getText().length
+            }
         }
     }
 
@@ -123,24 +128,53 @@ class AutocompleteField(
 
     override fun paintComponent(pG: Graphics) {
         super.paintComponent(pG)
-        if (text.isNotEmpty() || placeHolderText == null) {
-            return
-        }
 
         val g = pG as Graphics2D
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
-//        //        g.setColor(Color.decode("#252525"));
-////        g.drawString(placeHolderText, getInsets().left + 6, pG.getFontMetrics()
-////                .getMaxAscent() + getInsets().top + 2);
-//        g.setColor(new Color(225, 72, 59));
-//        g.drawString(placeHolderText.substring(6), ((float) g.getFontMetrics().getStringBounds(placeHolderText.substring(0, 6), g).getWidth()) + ((float) getInsets().left + 6), pG.getFontMetrics()
-//                .getMaxAscent() + getInsets().top + 2);
+        if (text.isEmpty() && placeHolderText != null) {
+            g.color = Color(85, 85, 85, 200)
+            g.drawString(placeHolderText, insets.left + 6, pG.getFontMetrics().maxAscent + insets.top + 2)
+        } else {
+//            val inputs = text.split(" ")
+//            val foundCommand = allLookup.find { inputs.contains(it) }
+//            if (foundCommand != null) {
+//                val commandIndex = text.indexOf(foundCommand)
+//
+//                g.color = Color(225, 72, 59).darker()
+//                g.drawString(
+//                    foundCommand,
+//                    g.fontMetrics.getStringBounds(text.substring(0, commandIndex), g).width.toFloat() + (insets.left + 6).toFloat(),
+//                    (pG.getFontMetrics().maxAscent + insets.top + 2).toFloat()
+//                )
+//            }
 
-        g.color = Color(85, 85, 85, 200)
-        g.drawString(
-            placeHolderText, insets.left + 6,
-            pG.getFontMetrics().maxAscent + insets.top + 2
-        )
+            val sb = StringBuilder("(")
+            for (i in allLookup.indices) {
+                sb.append(Regex.escape(allLookup[i]))
+                if (i + 1 < allLookup.size) {
+                    sb.append("|")
+                }
+            }
+            sb.append(")(?:\\s|$)")
+            val variablePattern = Pattern.compile(sb.toString())
+
+            var minIndex = 0
+            val m = variablePattern.matcher(text)
+            while (m.find()) {
+                val variable: String = m.group(1)
+                val varIndex = text.indexOf(variable, minIndex)
+                minIndex = varIndex + variable.length
+
+                g.color = Color(225, 72, 59)
+                g.drawString(
+                    variable,
+                    g.fontMetrics.getStringBounds(
+                        text.substring(0, varIndex), g
+                    ).width.toFloat() + (insets.left + 6).toFloat(),
+                    (pG.getFontMetrics().maxAscent + insets.top + 2).toFloat()
+                )
+            }
+        }
     }
 }

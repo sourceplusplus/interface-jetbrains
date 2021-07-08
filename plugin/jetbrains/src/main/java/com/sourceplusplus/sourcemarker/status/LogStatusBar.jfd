@@ -69,7 +69,7 @@ new FormModel {
 				"border": new javax.swing.border.LineBorder( sfield java.awt.Color darkGray, 1, true )
 				"font": new java.awt.Font( "Roboto Light", 0, 14 )
 				auxiliary() {
-					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"Input log message (use $ for variables)\", lookup);"
+					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"Input log message (use $ for variables)\", scopeVars, lookup);"
 				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 2 0"

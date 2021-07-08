@@ -52,7 +52,7 @@ public class LogStatusBar extends JPanel {
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
                         LiveLog liveLog, Editor editor) {
         this.sourceLocation = sourceLocation;
-        this.scopeVars = scopeVars;
+        this.scopeVars = scopeVars.stream().map(it -> "$" + it).collect(Collectors.toList());
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
                     String var = substringAfterLast(" ", text);
@@ -329,7 +329,7 @@ public class LogStatusBar extends JPanel {
         label3 = new JLabel();
         label4 = new JLabel();
         separator1 = new JSeparator();
-        textField1 = new AutocompleteField("Input log message (use $ for variables)", lookup);
+        textField1 = new AutocompleteField("Input log message (use $ for variables)", scopeVars, lookup);
         label2 = new JLabel();
 
         //======== this ========

@@ -140,7 +140,7 @@ public class CommandBar extends JPanel {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
-        textField1 = new AutocompleteField("Search or Type a Command (/)", lookup);
+        textField1 = new AutocompleteField("Search or Type a Command (/)", commands, lookup);
         label2 = new JLabel();
 
         //======== this ========
@@ -176,7 +176,7 @@ public class CommandBar extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
     private JLabel label1;
-    private AutocompleteField textField1;
+    private JTextField textField1;
     private JLabel label2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
