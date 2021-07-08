@@ -44,7 +44,6 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label4"
-				"text": "proposing"
 				"visible": false
 				auxiliary() {
 					"JavaCodeGenerator.preInitCode": "label4.setIcon(IconLoader.getIcon(\"/icons/clock.svg\"));"

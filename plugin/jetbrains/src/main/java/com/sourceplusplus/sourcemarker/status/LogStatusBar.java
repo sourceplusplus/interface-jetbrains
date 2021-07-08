@@ -1,7 +1,6 @@
 package com.sourceplusplus.sourcemarker.status;
 
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
@@ -24,7 +23,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.sourceplusplus.sourcemarker.status.ViewUtils.containsScreenLocation;
+import static com.sourceplusplus.sourcemarker.status.ViewUtils.addRecursiveMouseListener;
 
 public class LogStatusBar extends JPanel {
 
@@ -91,6 +90,20 @@ public class LogStatusBar extends JPanel {
         separator1.setVisible(true);
     }
 
+    private void removeActiveDecorations() {
+        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+//        label7.setIcon(IconLoader.getIcon("/icons/expand.svg"));
+//        label8.setIcon(IconLoader.getIcon("/icons/search.svg"));
+//        label6.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+//        panel1.setBackground(Color.decode("#252525"));
+//
+//        if (!editMode) {
+//            textField1.setBorder(null);
+//            textField1.setBackground(Color.decode("#2B2B2B"));
+//            textField1.setEditable(false);
+//        }
+    }
+
     private void setupComponents() {
         textField1.addKeyListener(new KeyAdapter() {
             @Override
@@ -134,43 +147,14 @@ public class LogStatusBar extends JPanel {
             public void mouseReleased(MouseEvent e) {
                 label2.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
             }
+        }, () -> {
+            removeActiveDecorations();
+            return null;
         });
     }
 
     private void dispose() {
         inlayMark.dispose(true, false);
-    }
-
-    public void addRecursiveMouseListener(final Component component, final MouseListener listener) {
-        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
-            if (event instanceof MouseEvent) {
-                MouseEvent mouseEvent = (MouseEvent) event;
-
-                if (mouseEvent.getComponent() instanceof EditorComponentImpl) {
-                    if (event.getID() == MouseEvent.MOUSE_ENTERED) {
-                        removeActiveDecorations();
-                    }
-                } else if (mouseEvent.getComponent().isShowing() && component.isShowing()) {
-                    if (containsScreenLocation(component, mouseEvent.getLocationOnScreen())) {
-                        if (event.getID() == MouseEvent.MOUSE_PRESSED) {
-                            listener.mousePressed(mouseEvent);
-                        } else if (event.getID() == MouseEvent.MOUSE_RELEASED) {
-                            listener.mouseReleased(mouseEvent);
-                        } else if (event.getID() == MouseEvent.MOUSE_ENTERED) {
-                            listener.mouseEntered(mouseEvent);
-                        } else if (event.getID() == MouseEvent.MOUSE_EXITED) {
-                            listener.mouseExited(mouseEvent);
-                        } else if (event.getID() == MouseEvent.MOUSE_CLICKED) {
-                            listener.mouseClicked(mouseEvent);
-                        }
-                    }
-                }
-            }
-        }, AWTEvent.MOUSE_EVENT_MASK);
-    }
-
-    private void removeActiveDecorations() {
-        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
     }
 
     public static String substringAfterLast(String delimiter, String value) {
@@ -231,7 +215,6 @@ public class LogStatusBar extends JPanel {
 
         //---- label4 ----
         label4.setIcon(IconLoader.getIcon("/icons/clock.svg"));
-        label4.setText("time goes here");
         label4.setVisible(false);
         add(label4, "cell 1 0,gapx null 8");
 
