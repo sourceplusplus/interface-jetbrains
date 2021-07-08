@@ -11,7 +11,6 @@ import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.AutocompleteField;
-import com.sourceplusplus.sourcemarker.command.CommandBarController;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
 import net.miginfocom.swing.MigLayout;
@@ -45,7 +44,6 @@ public class LogStatusBar extends JPanel {
     private Editor editor;
     private LiveLog liveLog;
     private boolean editMode;
-    private boolean textFieldFocused = false;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -83,11 +81,18 @@ public class LogStatusBar extends JPanel {
 
         if (liveLog != null) {
             addTimeField();
+            removeActiveDecorations();
+        } else {
+            //edit mode
+            editMode = true;
+//            textField1.setBorder(new LineBorder(new Color(64, 64, 64), 1, true));
+//            textField1.setBackground(Color.decode("#252525"));
+//            textField1.setEditable(true);
         }
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
-        if (textFieldFocused) {
+        if (editMode) {
             return; //ignore as they're likely updating text
         }
 
@@ -211,29 +216,23 @@ public class LogStatusBar extends JPanel {
                 }
             }
         });
-        textField1.addActionListener(it -> {
-            CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
-        });
-        textField1.setFocusTraversalKeysEnabled(false);
         textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
         textField1.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                textFieldFocused = true;
+                editMode = true;
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                if (editMode) {
-                    if (textField1.getText().equals("")) {
-                        dispose();
-                    }
+                if (liveLog == null && textField1.getText().equals("")) {
+                    dispose();
                 } else {
                     textField1.setBorder(null);
                     textField1.setBackground(Color.decode("#2B2B2B"));
                     textField1.setEditable(false);
 
-                    textFieldFocused = false;
+                    editMode = false;
                 }
             }
         });
@@ -247,7 +246,7 @@ public class LogStatusBar extends JPanel {
 
             @Override
             public void mouseExited(MouseEvent mouseEvent) {
-                if (!editMode && !textFieldFocused) {
+                if (!editMode) {
                     textField1.setBorder(null);
                     textField1.setBackground(Color.decode("#2B2B2B"));
                     textField1.setEditable(false);
