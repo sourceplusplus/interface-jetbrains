@@ -1,7 +1,10 @@
 package com.sourceplusplus.sourcemarker;
 
+import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBList;
+import com.intellij.util.ui.JBUI;
+
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -18,28 +21,25 @@ public final class AutocompleteField extends JTextField implements FocusListener
     private final Function<String, List<String>> lookup;
     private final List<String> results;
     private final JWindow popup;
-    private final JList list;
-    private final ListModel model;
-    private String placeHolderText;
+    private final JList<String> list;
+    private final ListModel<String> model;
+    private final String placeHolderText;
 
     public AutocompleteField(String placeHolderText, Function<String, List<String>> lookup) {
-        super();
         this.placeHolderText = placeHolderText;
         this.lookup = lookup;
         this.results = new ArrayList<>();
 
-        final Window parent = SwingUtilities.getWindowAncestor(this);
+        Window parent = SwingUtilities.getWindowAncestor(this);
         popup = new JWindow(parent);
-//        popup.setBackground(Color.black);
         popup.setType(Window.Type.POPUP);
         popup.setFocusableWindowState(false);
         popup.setAlwaysOnTop(true);
-//        popup.setOpacity(0.5f);
 
-        model = new ListModel();
-        list = new JList(model);
-        list.setBackground(Color.decode("#252525"));
-        list.setBorder(new EmptyBorder(0, 0, 0, 0));
+        model = new ListModel<>();
+        list = new JBList<>(model);
+        list.setBackground(JBColor.decode("#252525"));
+        list.setBorder(JBUI.Borders.empty());
 
         JScrollPane scroll = new JScrollPane(list) {
             @Override
@@ -49,20 +49,12 @@ public final class AutocompleteField extends JTextField implements FocusListener
                 return ps;
             }
         };
-        scroll.setBorder(new EmptyBorder(0, 0, 0, 0));
+        scroll.setBorder(JBUI.Borders.empty());
         popup.add(scroll);
 
         addFocusListener(this);
         getDocument().addDocumentListener(this);
         addKeyListener(this);
-    }
-
-    public String getPlaceHolderText() {
-        return placeHolderText;
-    }
-
-    public void setPlaceHolderText(String placeHolderText) {
-        this.placeHolderText = placeHolderText;
     }
 
     private void showAutocompletePopup() {
@@ -112,7 +104,7 @@ public final class AutocompleteField extends JTextField implements FocusListener
     }
 
     public String getSelectedText() {
-        return (String) list.getSelectedValue();
+        return list.getSelectedValue();
     }
 
     @Override
@@ -133,7 +125,7 @@ public final class AutocompleteField extends JTextField implements FocusListener
                 list.setSelectedIndex(index + 1);
             }
         } else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-            final String text = (String) list.getSelectedValue();
+            final String text = list.getSelectedValue();
             setText(text);
             setCaretPosition(text.length());
         }
@@ -164,15 +156,15 @@ public final class AutocompleteField extends JTextField implements FocusListener
         // Do nothing
     }
 
-    private class ListModel extends AbstractListModel {
+    private class ListModel<T> extends AbstractListModel<T> {
         @Override
         public int getSize() {
             return results.size();
         }
 
         @Override
-        public Object getElementAt(final int index) {
-            return results.get(index);
+        public T getElementAt(final int index) {
+            return (T) results.get(index);
         }
 
         public void updateView() {
@@ -192,6 +184,14 @@ public final class AutocompleteField extends JTextField implements FocusListener
         g.setRenderingHint(
                 RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
+
+//        //        g.setColor(Color.decode("#252525"));
+////        g.drawString(placeHolderText, getInsets().left + 6, pG.getFontMetrics()
+////                .getMaxAscent() + getInsets().top + 2);
+//        g.setColor(new Color(225, 72, 59));
+//        g.drawString(placeHolderText.substring(6), ((float) g.getFontMetrics().getStringBounds(placeHolderText.substring(0, 6), g).getWidth()) + ((float) getInsets().left + 6), pG.getFontMetrics()
+//                .getMaxAscent() + getInsets().top + 2);
+
         g.setColor(new Color(85, 85, 85, 200));
         g.drawString(placeHolderText, getInsets().left + 6, pG.getFontMetrics()
                 .getMaxAscent() + getInsets().top + 2);
