@@ -45,6 +45,7 @@ new FormModel {
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label4"
 				"text": "proposing"
+				"visible": false
 				auxiliary() {
 					"JavaCodeGenerator.preInitCode": "label4.setIcon(IconLoader.getIcon(\"/icons/clock.svg\"));"
 				}
@@ -57,6 +58,7 @@ new FormModel {
 				"minimumSize": new java.awt.Dimension( 5, 20 )
 				"orientation": 1
 				"maximumSize": new java.awt.Dimension( 5, 20 )
+				"visible": false
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 1 0"
 			} )

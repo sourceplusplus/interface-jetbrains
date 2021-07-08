@@ -86,6 +86,11 @@ public class LogStatusBar extends JPanel {
         textField1.requestFocusInWindow();
     }
 
+    private void addTimeField() {
+        label4.setVisible(true);
+        separator1.setVisible(true);
+    }
+
     private void setupComponents() {
         textField1.addKeyListener(new KeyAdapter() {
             @Override
@@ -190,12 +195,6 @@ public class LogStatusBar extends JPanel {
         setMinimumSize(new Dimension(500, 40));
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setBackground(new Color(43, 43, 43));
-//        setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing. border .
-//        EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn" , javax. swing .border . TitledBorder. CENTER ,javax . swing
-//        . border .TitledBorder . BOTTOM, new java. awt .Font ( "Dia\u006cog", java .awt . Font. BOLD ,12 ) ,
-//        java . awt. Color .red ) , getBorder () ) );  addPropertyChangeListener( new java. beans .PropertyChangeListener ( )
-//        { @Override public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062ord\u0065r" .equals ( e. getPropertyName () ) )
-//        throw new RuntimeException( ) ;} } );
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -233,6 +232,7 @@ public class LogStatusBar extends JPanel {
         //---- label4 ----
         label4.setIcon(IconLoader.getIcon("/icons/clock.svg"));
         label4.setText("time goes here");
+        label4.setVisible(false);
         add(label4, "cell 1 0,gapx null 8");
 
         //---- separator1 ----
@@ -240,6 +240,7 @@ public class LogStatusBar extends JPanel {
         separator1.setMinimumSize(new Dimension(5, 20));
         separator1.setOrientation(SwingConstants.VERTICAL);
         separator1.setMaximumSize(new Dimension(5, 20));
+        separator1.setVisible(false);
         add(separator1, "cell 1 0");
 
         //---- textField1 ----
