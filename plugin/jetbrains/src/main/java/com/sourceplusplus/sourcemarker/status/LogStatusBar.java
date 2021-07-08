@@ -2,13 +2,18 @@ package com.sourceplusplus.sourcemarker.status;
 
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
+import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.AutocompleteField;
 import com.sourceplusplus.sourcemarker.command.CommandBarController;
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
+import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -18,8 +23,11 @@ import java.awt.event.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -36,6 +44,8 @@ public class LogStatusBar extends JPanel {
     private final Pattern VARIABLE_PATTERN;
     private Editor editor;
     private LiveLog liveLog;
+    private boolean editMode;
+    private boolean textFieldFocused = false;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -70,10 +80,40 @@ public class LogStatusBar extends JPanel {
 
         initComponents();
         setupComponents();
+
+        if (liveLog != null) {
+            addTimeField();
+        }
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
+        if (textFieldFocused) {
+            return; //ignore as they're likely updating text
+        }
 
+        String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
+        String formattedMessage = latestLog.getFormattedMessage();
+        if (!label4.getText().equals(formattedTime) || !textField1.getText().equals(formattedMessage)) {
+            SwingUtilities.invokeLater(() -> {
+                label4.setText(formattedTime);
+                textField1.setText(formattedMessage);
+
+//                textField1.getStyledDocument().setCharacterAttributes(
+//                        0, formattedMessage.length(), textField1.getStyle("default"), true);
+
+                int varOffset = 0;
+                int minIndex = 0;
+                for (String var : latestLog.getArguments()) {
+                    int varIndex = latestLog.getContent().indexOf("{}", minIndex);
+                    varOffset += varIndex - minIndex;
+                    minIndex = varIndex + "{}".length();
+
+//                    textField1.getStyledDocument().setCharacterAttributes(varOffset, var.length(),
+//                            textField1.getStyle("numbers"), true);
+                    varOffset += var.length();
+                }
+            });
+        }
     }
 
     public void setEditor(Editor editor) {
@@ -91,32 +131,83 @@ public class LogStatusBar extends JPanel {
     }
 
     private void removeActiveDecorations() {
-        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
 //        label7.setIcon(IconLoader.getIcon("/icons/expand.svg"));
 //        label8.setIcon(IconLoader.getIcon("/icons/search.svg"));
-//        label6.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
-//        panel1.setBackground(Color.decode("#252525"));
-//
-//        if (!editMode) {
-//            textField1.setBorder(null);
-//            textField1.setBackground(Color.decode("#2B2B2B"));
-//            textField1.setEditable(false);
-//        }
+        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+        panel1.setBackground(Color.decode("#252525"));
+
+        if (!editMode) {
+            textField1.setBorder(null);
+            textField1.setBackground(Color.decode("#2B2B2B"));
+            textField1.setEditable(false);
+        }
     }
 
     private void setupComponents() {
         textField1.addKeyListener(new KeyAdapter() {
             @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_TAB) {
+                    //ignore tab; handled by auto-complete
+                    e.consume();
+                }
+            }
+
+            @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    String autoCompleteText = textField1.getSelectedText();
-                    if (autoCompleteText != null) {
-                        CommandBarController.INSTANCE.handleCommandInput(autoCompleteText, editor);
-                    } else {
-                        CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
+                    if (textField1.getText().equals("")) {
+                        return;
                     }
+
+                    String logPattern = textField1.getText();
+                    ArrayList<String> varMatches = new ArrayList<>();
+                    Matcher m = VARIABLE_PATTERN.matcher(logPattern);
+                    while (m.find()) {
+                        String var = m.group(1);
+                        logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+                        varMatches.add(var);
+                    }
+                    final String finalLogPattern = logPattern;
+
+                    LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
+                    LiveLog log = new LiveLog(
+                            finalLogPattern,
+                            varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
+                            sourceLocation,
+                            null,
+                            null,
+                            Integer.MAX_VALUE,
+                            null,
+                            false,
+                            false,
+                            false,
+                            1000
+                    );
+                    instrumentService.addLiveInstrument(log, it -> {
+                        if (it.succeeded()) {
+                            inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
+                            editMode = false;
+                            removeActiveDecorations();
+
+                            LoggerDetector detector = inlayMark.getUserData(
+                                    SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
+                            );
+                            detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
+                            liveLog = (LiveLog) it.result();
+                            LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
+
+                            addTimeField();
+
+                            //focus back to IDE
+                            IdeFocusManager.getInstance(editor.getProject())
+                                    .requestFocusInProject(editor.getContentComponent(), editor.getProject());
+                        } else {
+                            it.cause().printStackTrace();
+                        }
+                    });
                 }
             }
         });
@@ -125,6 +216,52 @@ public class LogStatusBar extends JPanel {
         });
         textField1.setFocusTraversalKeysEnabled(false);
         textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+        textField1.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textFieldFocused = true;
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (editMode) {
+                    if (textField1.getText().equals("")) {
+                        dispose();
+                    }
+                } else {
+                    textField1.setBorder(null);
+                    textField1.setBackground(Color.decode("#2B2B2B"));
+                    textField1.setEditable(false);
+
+                    textFieldFocused = false;
+                }
+            }
+        });
+        textField1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                textField1.setBorder(new LineBorder(new Color(64, 64, 64), 1, true));
+                textField1.setBackground(Color.decode("#252525"));
+                textField1.setEditable(true);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent mouseEvent) {
+                if (!editMode && !textFieldFocused) {
+                    textField1.setBorder(null);
+                    textField1.setBackground(Color.decode("#2B2B2B"));
+                    textField1.setEditable(false);
+                }
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                removeActiveDecorations();
+            }
+        });
+
         label2.setCursor(Cursor.getDefaultCursor());
         label2.addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -151,10 +288,32 @@ public class LogStatusBar extends JPanel {
             removeActiveDecorations();
             return null;
         });
+
+        panel1.setCursor(Cursor.getDefaultCursor());
+        panel1.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                panel1.setBackground(Color.decode("#3C3C3C"));
+            }
+        });
+
+        label4.setCursor(Cursor.getDefaultCursor());
+
+        setCursor(Cursor.getDefaultCursor());
     }
 
     private void dispose() {
         inlayMark.dispose(true, false);
+
+        if (liveLog != null) {
+            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
+                if (it.succeeded()) {
+                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(liveLog);
+                } else {
+                    it.cause().printStackTrace();
+                }
+            });
+        }
     }
 
     public static String substringAfterLast(String delimiter, String value) {
@@ -215,6 +374,8 @@ public class LogStatusBar extends JPanel {
 
         //---- label4 ----
         label4.setIcon(IconLoader.getIcon("/icons/clock.svg"));
+        label4.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+        label4.setIconTextGap(8);
         label4.setVisible(false);
         add(label4, "cell 1 0,gapx null 8");
 

@@ -44,6 +44,8 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label4"
+				"font": new java.awt.Font( "Roboto Light", 0, 14 )
+				"iconTextGap": 8
 				"visible": false
 				auxiliary() {
 					"JavaCodeGenerator.preInitCode": "label4.setIcon(IconLoader.getIcon(\"/icons/clock.svg\"));"
