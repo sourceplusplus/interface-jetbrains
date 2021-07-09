@@ -45,6 +45,7 @@ public class LogStatusBar extends JPanel {
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
     private final Pattern VARIABLE_PATTERN;
+    private final String placeHolderText;
     private Editor editor;
     private LiveLog liveLog;
     private Instant latestTime;
@@ -105,15 +106,20 @@ public class LogStatusBar extends JPanel {
         this.liveLog = liveLog;
         this.editor = editor;
 
+        if (liveLog != null) {
+            placeHolderText = "Waiting for live log data...";
+        } else {
+            placeHolderText = "Input log message (use $ for variables)";
+        }
+
         initComponents();
         setupComponents();
 
         if (liveLog != null) {
-            addTimeField();
-            removeActiveDecorations();
             ((AutocompleteField) textField1).setEditMode(false);
+            removeActiveDecorations();
+            addTimeField();
         } else {
-            //edit mode
             ((AutocompleteField) textField1).setEditMode(true);
         }
     }
@@ -374,7 +380,7 @@ public class LogStatusBar extends JPanel {
         label3 = new JLabel();
         label4 = new JLabel();
         separator1 = new JSeparator();
-        textField1 = new AutocompleteField("$", "Input log message (use $ for variables)", scopeVars, lookup, inlayMark.getLineNumber(), false);
+        textField1 = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false);
         label2 = new JLabel();
 
         //======== this ========
