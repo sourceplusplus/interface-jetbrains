@@ -3,8 +3,8 @@ package com.sourceplusplus.sourcemarker.status.util
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
-import com.sourceplusplus.sourcemarker.Tester
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow
+import com.sourceplusplus.sourcemarker.element.AutocompleteRow
 import org.jetbrains.kotlin.idea.completion.smart.SmartCompletionItemPriority
 import java.awt.*
 import java.awt.event.FocusEvent
@@ -208,16 +208,16 @@ class AutocompleteField(
             list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean
         ): Component {
             val entry = value as AutocompleteFieldRow
-            val t = Tester()
-            t.setCommandName(entry.getText())
+            val row = AutocompleteRow()
+            row.setCommandName(entry.getText())
             if (entry.getDescription() != null) {
-                t.setDescription(entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString()))
+                row.setDescription(entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString()))
             }
 
             if (isSelected) {
-                t.background = Color.decode("#3C3C3C")
+                row.background = Color.decode("#3C3C3C")
             }
-            return t
+            return row
         }
     }
 }

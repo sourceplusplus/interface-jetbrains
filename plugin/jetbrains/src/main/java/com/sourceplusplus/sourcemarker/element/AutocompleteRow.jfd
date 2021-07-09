@@ -12,7 +12,7 @@ new FormModel {
 			"background": new java.awt.Color( 37, 37, 37, 255 )
 			"maximumSize": new java.awt.Dimension( 2147483647, 38 )
 			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "label1"
+				name: "commandLabel"
 				"text": ""
 				"foreground": new java.awt.Color( 225, 72, 59, 255 )
 				"font": new java.awt.Font( "Roboto Light", 1, 14 )
@@ -20,7 +20,7 @@ new FormModel {
 				"value": "cell 0 0"
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "label2"
+				name: "descriptionLabel"
 				"text": ""
 				"foreground": new java.awt.Color( 187, 187, 187, 75 )
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
