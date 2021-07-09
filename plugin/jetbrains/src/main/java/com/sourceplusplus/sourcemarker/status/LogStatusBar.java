@@ -47,6 +47,8 @@ public class LogStatusBar extends JPanel {
     private final Pattern VARIABLE_PATTERN;
     private Editor editor;
     private LiveLog liveLog;
+    private Instant latestTime;
+    private Log latestLog;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -117,6 +119,8 @@ public class LogStatusBar extends JPanel {
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
+        this.latestTime = time;
+        this.latestLog = latestLog;
         if (((AutocompleteField) textField1).getEditMode()) {
             return; //ignore as they're likely updating text
         }
@@ -250,6 +254,15 @@ public class LogStatusBar extends JPanel {
             @Override
             public void focusGained(FocusEvent e) {
                 ((AutocompleteField) textField1).setEditMode(true);
+
+                String originalMessage = liveLog.getLogFormat();
+                for (String var: liveLog.getLogArguments()) {
+                    originalMessage = originalMessage.replaceFirst(
+                            Pattern.quote("{}"),
+                            Matcher.quoteReplacement("$" + var)
+                    );
+                }
+                textField1.setText(originalMessage);
             }
 
             @Override
@@ -259,6 +272,10 @@ public class LogStatusBar extends JPanel {
                 } else if (liveLog != null) {
                     ((AutocompleteField) textField1).setEditMode(false);
                     removeActiveDecorations();
+
+                    if (latestLog != null) {
+                        setLatestLog(latestTime, latestLog);
+                    }
                 }
             }
         });
