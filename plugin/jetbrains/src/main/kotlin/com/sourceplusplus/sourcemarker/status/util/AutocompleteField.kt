@@ -18,6 +18,12 @@ import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import javax.swing.text.*
 
+/**
+ * todo: description.
+ *
+ * @since 0.2.2
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class AutocompleteField(
     private val commandDelimiter: String,
     private val placeHolderText: String?,
