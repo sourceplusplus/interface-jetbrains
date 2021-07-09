@@ -125,6 +125,7 @@ public class LogStatusBar extends JPanel {
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
+        if (liveLog == null) return;
         this.latestTime = time;
         this.latestLog = latestLog;
         if (((AutocompleteField) textField1).getEditMode()) {
@@ -206,6 +207,22 @@ public class LogStatusBar extends JPanel {
                         return;
                     }
 
+                    if (liveLog != null) {
+                        //editing existing live log; remove old one first
+                        LiveLog oldLiveLog = liveLog;
+                        liveLog = null;
+                        latestTime = null;
+                        latestLog = null;
+
+                        SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
+                            if (it.succeeded()) {
+                                LiveLogStatusManager.INSTANCE.removeActiveLiveLog(oldLiveLog);
+                            } else {
+                                it.cause().printStackTrace();
+                            }
+                        });
+                    }
+
                     String logPattern = textField1.getText();
                     ArrayList<String> varMatches = new ArrayList<>();
                     Matcher m = VARIABLE_PATTERN.matcher(logPattern);
@@ -263,7 +280,7 @@ public class LogStatusBar extends JPanel {
 
                 if (liveLog != null) {
                     String originalMessage = liveLog.getLogFormat();
-                    for (String var: liveLog.getLogArguments()) {
+                    for (String var : liveLog.getLogArguments()) {
                         originalMessage = originalMessage.replaceFirst(
                                 Pattern.quote("{}"),
                                 Matcher.quoteReplacement("$" + var)
