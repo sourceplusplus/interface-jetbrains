@@ -31,6 +31,7 @@ class AutocompleteField(
     private val list: JList<AutocompleteFieldRow>
     private val model: ListModel<AutocompleteFieldRow>
     private val variablePattern: Pattern
+    var editMode: Boolean = true
 
     init {
         results = ArrayList()
@@ -80,6 +81,26 @@ class AutocompleteField(
             override fun replace(fb: FilterBypass, offset: Int, length: Int, string: String, attr: AttributeSet) =
                 fb.replace(offset, length, string.replace("\\n".toRegex(), ""), attr)
         }
+
+        document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(documentEvent: DocumentEvent) {
+                if (editMode) {
+                    SwingUtilities.invokeLater {
+                        applyStyle()
+                    }
+                }
+            }
+
+            override fun removeUpdate(documentEvent: DocumentEvent) {
+                if (editMode) {
+                    SwingUtilities.invokeLater {
+                        applyStyle()
+                    }
+                }
+            }
+
+            override fun changedUpdate(documentEvent: DocumentEvent) = Unit
+        })
     }
 
     private fun applyStyle() {
@@ -96,7 +117,7 @@ class AutocompleteField(
             val variable: String = m.group(1)
             val varIndex = text.indexOf(variable, minIndex)
             minIndex = varIndex + variable.length
-            styledDocument.setCharacterAttributes(varIndex, variable.length, getStyle("numbers"), false)
+            styledDocument.setCharacterAttributes(varIndex, variable.length, getStyle("numbers"), true)
         }
     }
 
@@ -172,11 +193,7 @@ class AutocompleteField(
         }
     }
 
-    override fun keyReleased(e: KeyEvent) {
-        if (e.keyCode != KeyEvent.VK_UP && e.keyCode != KeyEvent.VK_DOWN) {
-            applyStyle()
-        }
-    }
+    override fun keyReleased(e: KeyEvent) = Unit
 
     override fun insertUpdate(e: DocumentEvent) = documentChanged()
     override fun removeUpdate(e: DocumentEvent) = documentChanged()

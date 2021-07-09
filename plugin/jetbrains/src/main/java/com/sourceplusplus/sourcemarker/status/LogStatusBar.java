@@ -47,7 +47,6 @@ public class LogStatusBar extends JPanel {
     private final Pattern VARIABLE_PATTERN;
     private Editor editor;
     private LiveLog liveLog;
-    private boolean editMode;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -110,14 +109,15 @@ public class LogStatusBar extends JPanel {
         if (liveLog != null) {
             addTimeField();
             removeActiveDecorations();
+            ((AutocompleteField) textField1).setEditMode(false);
         } else {
             //edit mode
-            editMode = true;
+            ((AutocompleteField) textField1).setEditMode(true);
         }
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
-        if (editMode) {
+        if (((AutocompleteField) textField1).getEditMode()) {
             return; //ignore as they're likely updating text
         }
 
@@ -168,7 +168,7 @@ public class LogStatusBar extends JPanel {
         label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
         panel1.setBackground(Color.decode("#252525"));
 
-        if (!editMode) {
+        if (!((AutocompleteField) textField1).getEditMode()) {
             textField1.setBorder(new CompoundBorder(
                     new LineBorder(Color.darkGray, 0, true),
                     new EmptyBorder(2, 6, 0, 0)));
@@ -223,7 +223,7 @@ public class LogStatusBar extends JPanel {
                     instrumentService.addLiveInstrument(log, it -> {
                         if (it.succeeded()) {
                             inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
-                            editMode = false;
+                            ((AutocompleteField) textField1).setEditMode(false);
                             removeActiveDecorations();
 
                             LoggerDetector detector = inlayMark.getUserData(
@@ -249,7 +249,7 @@ public class LogStatusBar extends JPanel {
         textField1.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                editMode = true;
+                ((AutocompleteField) textField1).setEditMode(true);
             }
 
             @Override
@@ -257,7 +257,7 @@ public class LogStatusBar extends JPanel {
                 if (liveLog == null && textField1.getText().equals("")) {
                     dispose();
                 } else if (liveLog != null) {
-                    editMode = false;
+                    ((AutocompleteField) textField1).setEditMode(false);
                     removeActiveDecorations();
                 }
             }
@@ -274,7 +274,7 @@ public class LogStatusBar extends JPanel {
 
             @Override
             public void mouseExited(MouseEvent mouseEvent) {
-                if (!editMode) {
+                if (!((AutocompleteField) textField1).getEditMode()) {
                     removeActiveDecorations();
                 }
             }
