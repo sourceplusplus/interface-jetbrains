@@ -1,8 +1,6 @@
 package com.sourceplusplus.sourcemarker;
 
-import javax.swing.border.*;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
@@ -11,6 +9,8 @@ import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
@@ -19,7 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.sourceplusplus.sourcemarker.status.ViewUtils.containsScreenLocation;
+import static com.sourceplusplus.sourcemarker.status.ViewUtils.addRecursiveMouseListener;
 
 public class CommandBar extends JPanel {
 
@@ -71,11 +71,21 @@ public class CommandBar extends JPanel {
                 }
             }
         });
-//        textField1.addActionListener(it -> {
-//            CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
-//        });
         textField1.setFocusTraversalKeysEnabled(false);
         textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+        textField1.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (textField1.getText().equals("")) {
+                    dispose();
+                }
+            }
+        });
+
         label2.setCursor(Cursor.getDefaultCursor());
         label2.addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -98,39 +108,14 @@ public class CommandBar extends JPanel {
             public void mouseReleased(MouseEvent e) {
                 label2.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
             }
+        }, () -> {
+            removeActiveDecorations();
+            return null;
         });
     }
 
     private void dispose() {
         inlayMark.dispose(true, false);
-    }
-
-    public void addRecursiveMouseListener(final Component component, final MouseListener listener) {
-        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
-            if (event instanceof MouseEvent) {
-                MouseEvent mouseEvent = (MouseEvent) event;
-
-                if (mouseEvent.getComponent() instanceof EditorComponentImpl) {
-                    if (event.getID() == MouseEvent.MOUSE_ENTERED) {
-                        removeActiveDecorations();
-                    }
-                } else if (mouseEvent.getComponent().isShowing() && component.isShowing()) {
-                    if (containsScreenLocation(component, mouseEvent.getLocationOnScreen())) {
-                        if (event.getID() == MouseEvent.MOUSE_PRESSED) {
-                            listener.mousePressed(mouseEvent);
-                        } else if (event.getID() == MouseEvent.MOUSE_RELEASED) {
-                            listener.mouseReleased(mouseEvent);
-                        } else if (event.getID() == MouseEvent.MOUSE_ENTERED) {
-                            listener.mouseEntered(mouseEvent);
-                        } else if (event.getID() == MouseEvent.MOUSE_EXITED) {
-                            listener.mouseExited(mouseEvent);
-                        } else if (event.getID() == MouseEvent.MOUSE_CLICKED) {
-                            listener.mouseClicked(mouseEvent);
-                        }
-                    }
-                }
-            }
-        }, AWTEvent.MOUSE_EVENT_MASK);
     }
 
     private void removeActiveDecorations() {
