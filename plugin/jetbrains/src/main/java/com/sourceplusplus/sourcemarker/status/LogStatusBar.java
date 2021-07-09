@@ -255,14 +255,16 @@ public class LogStatusBar extends JPanel {
             public void focusGained(FocusEvent e) {
                 ((AutocompleteField) textField1).setEditMode(true);
 
-                String originalMessage = liveLog.getLogFormat();
-                for (String var: liveLog.getLogArguments()) {
-                    originalMessage = originalMessage.replaceFirst(
-                            Pattern.quote("{}"),
-                            Matcher.quoteReplacement("$" + var)
-                    );
+                if (liveLog != null) {
+                    String originalMessage = liveLog.getLogFormat();
+                    for (String var: liveLog.getLogArguments()) {
+                        originalMessage = originalMessage.replaceFirst(
+                                Pattern.quote("{}"),
+                                Matcher.quoteReplacement("$" + var)
+                        );
+                    }
+                    textField1.setText(originalMessage);
                 }
-                textField1.setText(originalMessage);
             }
 
             @Override
