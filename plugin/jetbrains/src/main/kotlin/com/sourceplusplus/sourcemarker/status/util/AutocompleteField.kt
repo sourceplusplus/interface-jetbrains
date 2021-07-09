@@ -19,6 +19,7 @@ import javax.swing.event.DocumentListener
 import javax.swing.text.*
 
 class AutocompleteField(
+    private val commandDelimiter: String,
     private val placeHolderText: String?,
     private val allLookup: List<AutocompleteFieldRow>,
     private val lookup: Function<String, List<AutocompleteFieldRow>>,
@@ -164,8 +165,8 @@ class AutocompleteField(
         } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
             val text = list.selectedValue
             if (text != null) {
-                val varCompleted = getText().substringAfterLast("$")
-                setText(getText() + text.getText().substring(varCompleted.length))
+                val varCompleted = getText().substringAfterLast(commandDelimiter)
+                setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
                 caretPosition = getText().length
             }
         }
@@ -210,6 +211,7 @@ class AutocompleteField(
             val entry = value as AutocompleteFieldRow
             val row = AutocompleteRow()
             row.setCommandName(entry.getText())
+            row.setCommandIcon(entry.getIcon())
             if (entry.getDescription() != null) {
                 row.setDescription(entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString()))
             }

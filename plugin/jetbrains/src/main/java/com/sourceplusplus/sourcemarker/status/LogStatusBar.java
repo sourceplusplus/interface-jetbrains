@@ -64,6 +64,10 @@ public class LogStatusBar extends JPanel {
             public String getDescription() {
                 return null;
             }
+
+            public Icon getIcon() {
+                return IconLoader.getIcon("/nodes/variable.png");
+            }
         }).collect(Collectors.toList());
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
@@ -77,6 +81,10 @@ public class LogStatusBar extends JPanel {
 
                     public String getDescription() {
                         return null;
+                    }
+
+                    public Icon getIcon() {
+                        return IconLoader.getIcon("/nodes/variable.png");
                     }
                 })
                 .limit(7)
@@ -347,7 +355,7 @@ public class LogStatusBar extends JPanel {
         label3 = new JLabel();
         label4 = new JLabel();
         separator1 = new JSeparator();
-        textField1 = new AutocompleteField("Input log message (use $ for variables)", scopeVars, lookup, inlayMark.getLineNumber());
+        textField1 = new AutocompleteField("$", "Input log message (use $ for variables)", scopeVars, lookup, inlayMark.getLineNumber());
         label2 = new JLabel();
 
         //======== this ========

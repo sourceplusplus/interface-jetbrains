@@ -1,5 +1,7 @@
 package com.sourceplusplus.sourcemarker.command
 
+import javax.swing.Icon
+
 enum class CommandAction(
     private val command: String,
     private val description: String
@@ -16,4 +18,5 @@ enum class CommandAction(
 
     override fun getText(): String = command
     override fun getDescription(): String? = description
+    override fun getIcon(): Icon? = null
 }

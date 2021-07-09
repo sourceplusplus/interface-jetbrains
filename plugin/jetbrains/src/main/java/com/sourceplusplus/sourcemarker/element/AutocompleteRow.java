@@ -1,9 +1,9 @@
 package com.sourceplusplus.sourcemarker.element;
 
-import java.awt.*;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class AutocompleteRow extends JPanel {
 
@@ -13,6 +13,10 @@ public class AutocompleteRow extends JPanel {
 
     public void setCommandName(String commandName) {
         commandLabel.setText(commandName);
+    }
+
+    public void setCommandIcon(Icon icon) {
+        commandLabel.setIcon(icon);
     }
 
     public void setDescription(String description) {
