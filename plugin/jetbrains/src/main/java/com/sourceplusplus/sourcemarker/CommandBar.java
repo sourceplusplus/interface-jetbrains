@@ -19,7 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.sourceplusplus.sourcemarker.status.ViewUtils.addRecursiveMouseListener;
+import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class CommandBar extends JPanel {
 

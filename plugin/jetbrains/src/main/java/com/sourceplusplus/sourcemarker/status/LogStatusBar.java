@@ -19,6 +19,7 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
@@ -32,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.sourceplusplus.sourcemarker.status.ViewUtils.addRecursiveMouseListener;
+import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class LogStatusBar extends JPanel {
 
@@ -102,8 +103,10 @@ public class LogStatusBar extends JPanel {
                 label4.setText(formattedTime);
                 textField1.setText(formattedMessage);
 
-//                textField1.getStyledDocument().setCharacterAttributes(
-//                        0, formattedMessage.length(), textField1.getStyle("default"), true);
+                textField1.getStyledDocument().setCharacterAttributes(
+                        0, formattedMessage.length(),
+                        StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE), true
+                );
 
                 int varOffset = 0;
                 int minIndex = 0;
@@ -112,8 +115,8 @@ public class LogStatusBar extends JPanel {
                     varOffset += varIndex - minIndex;
                     minIndex = varIndex + "{}".length();
 
-//                    textField1.getStyledDocument().setCharacterAttributes(varOffset, var.length(),
-//                            textField1.getStyle("numbers"), true);
+                    textField1.getStyledDocument().setCharacterAttributes(varOffset, var.length(),
+                            textField1.getStyle("numbers"), true);
                     varOffset += var.length();
                 }
             });

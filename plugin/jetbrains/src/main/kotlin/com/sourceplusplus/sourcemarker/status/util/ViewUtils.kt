@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.status
+package com.sourceplusplus.sourcemarker.status.util
 
 import com.intellij.openapi.editor.impl.EditorComponentImpl
 import java.awt.AWTEvent
