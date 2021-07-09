@@ -130,7 +130,7 @@ public class CommandBar extends JPanel {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
-        textField1 = new AutocompleteField("/", "Search or Type a Command (/)", Arrays.stream(CommandAction.values()).collect(Collectors.toList()), lookup, inlayMark.getLineNumber());
+        textField1 = new AutocompleteField("/", "Search or Type a Command (/)", Arrays.stream(CommandAction.values()).collect(Collectors.toList()), lookup, inlayMark.getLineNumber(), true);
         label2 = new JLabel();
 
         //======== this ========

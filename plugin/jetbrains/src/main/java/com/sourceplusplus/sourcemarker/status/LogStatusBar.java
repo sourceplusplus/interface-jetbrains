@@ -372,7 +372,7 @@ public class LogStatusBar extends JPanel {
         label3 = new JLabel();
         label4 = new JLabel();
         separator1 = new JSeparator();
-        textField1 = new AutocompleteField("$", "Input log message (use $ for variables)", scopeVars, lookup, inlayMark.getLineNumber());
+        textField1 = new AutocompleteField("$", "Input log message (use $ for variables)", scopeVars, lookup, inlayMark.getLineNumber(), false);
         label2 = new JLabel();
 
         //======== this ========

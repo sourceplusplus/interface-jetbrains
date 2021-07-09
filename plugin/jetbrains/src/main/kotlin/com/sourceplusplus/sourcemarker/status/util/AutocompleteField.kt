@@ -23,7 +23,8 @@ class AutocompleteField(
     private val placeHolderText: String?,
     private val allLookup: List<AutocompleteFieldRow>,
     private val lookup: Function<String, List<AutocompleteFieldRow>>,
-    private val lineNumber: Int = 0
+    private val lineNumber: Int = 0,
+    private val replaceCommandOnTab: Boolean = false
 ) : JTextPane(), FocusListener, DocumentListener, KeyListener {
 
     private val results: MutableList<AutocompleteFieldRow>
@@ -186,9 +187,14 @@ class AutocompleteField(
         } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
             val text = list.selectedValue
             if (text != null) {
-                val varCompleted = getText().substringAfterLast(commandDelimiter)
-                setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
-                caretPosition = getText().length
+                if (replaceCommandOnTab) {
+                    setText(text.getText())
+                    caretPosition = getText().length
+                } else {
+                    val varCompleted = getText().substringAfterLast(commandDelimiter)
+                    setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
+                    caretPosition = getText().length
+                }
             }
         }
     }
