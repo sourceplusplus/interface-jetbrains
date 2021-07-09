@@ -67,6 +67,7 @@ object CommandBarController {
                 inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
                     override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
                 }
+                inlayMark.visible.set(true)
                 inlayMark.apply()
 
                 val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
