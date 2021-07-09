@@ -10,12 +10,14 @@ import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
-import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
+import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
@@ -85,9 +87,6 @@ public class LogStatusBar extends JPanel {
         } else {
             //edit mode
             editMode = true;
-//            textField1.setBorder(new LineBorder(new Color(64, 64, 64), 1, true));
-//            textField1.setBackground(Color.decode("#252525"));
-//            textField1.setEditable(true);
         }
     }
 
@@ -142,7 +141,9 @@ public class LogStatusBar extends JPanel {
         panel1.setBackground(Color.decode("#252525"));
 
         if (!editMode) {
-            textField1.setBorder(null);
+            textField1.setBorder(new CompoundBorder(
+                    new LineBorder(Color.darkGray, 0, true),
+                    new EmptyBorder(2, 6, 0, 0)));
             textField1.setBackground(Color.decode("#2B2B2B"));
             textField1.setEditable(false);
         }
@@ -227,19 +228,18 @@ public class LogStatusBar extends JPanel {
             public void focusLost(FocusEvent e) {
                 if (liveLog == null && textField1.getText().equals("")) {
                     dispose();
-                } else {
-                    textField1.setBorder(null);
-                    textField1.setBackground(Color.decode("#2B2B2B"));
-                    textField1.setEditable(false);
-
+                } else if (liveLog != null) {
                     editMode = false;
+                    removeActiveDecorations();
                 }
             }
         });
         textField1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
-                textField1.setBorder(new LineBorder(new Color(64, 64, 64), 1, true));
+                textField1.setBorder(new CompoundBorder(
+                        new LineBorder(Color.darkGray, 1, true),
+                        new EmptyBorder(2, 6, 0, 0)));
                 textField1.setBackground(Color.decode("#252525"));
                 textField1.setEditable(true);
             }
@@ -247,9 +247,7 @@ public class LogStatusBar extends JPanel {
             @Override
             public void mouseExited(MouseEvent mouseEvent) {
                 if (!editMode) {
-                    textField1.setBorder(null);
-                    textField1.setBackground(Color.decode("#2B2B2B"));
-                    textField1.setEditable(false);
+                    removeActiveDecorations();
                 }
             }
         });
@@ -388,8 +386,11 @@ public class LogStatusBar extends JPanel {
 
         //---- textField1 ----
         textField1.setBackground(new Color(37, 37, 37));
-        textField1.setBorder(new LineBorder(Color.darkGray, 1, true));
+        textField1.setBorder(new CompoundBorder(
+                new LineBorder(Color.darkGray, 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
         textField1.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+        textField1.setMinimumSize(new Dimension(0, 27));
         add(textField1, "cell 2 0");
 
         //---- label2 ----
@@ -405,7 +406,7 @@ public class LogStatusBar extends JPanel {
     private JLabel label3;
     private JLabel label4;
     private JSeparator separator1;
-    private JTextField textField1;
+    private JTextPane textField1;
     private JLabel label2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

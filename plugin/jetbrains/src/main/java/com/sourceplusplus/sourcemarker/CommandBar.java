@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker;
 
+import javax.swing.border.*;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.util.IconLoader;
@@ -70,9 +71,9 @@ public class CommandBar extends JPanel {
                 }
             }
         });
-        textField1.addActionListener(it -> {
-            CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
-        });
+//        textField1.addActionListener(it -> {
+//            CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
+//        });
         textField1.setFocusTraversalKeysEnabled(false);
         textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
         label2.setCursor(Cursor.getDefaultCursor());
@@ -163,8 +164,11 @@ public class CommandBar extends JPanel {
 
         //---- textField1 ----
         textField1.setBackground(new Color(37, 37, 37));
-        textField1.setBorder(new LineBorder(Color.darkGray, 1, true));
+        textField1.setBorder(new CompoundBorder(
+            new LineBorder(Color.darkGray, 1, true),
+            new EmptyBorder(2, 6, 0, 0)));
         textField1.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+        textField1.setMinimumSize(new Dimension(0, 27));
         add(textField1, "cell 1 0");
 
         //---- label2 ----
@@ -176,7 +180,7 @@ public class CommandBar extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
     private JLabel label1;
-    private JTextField textField1;
+    private JTextPane textField1;
     private JLabel label2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

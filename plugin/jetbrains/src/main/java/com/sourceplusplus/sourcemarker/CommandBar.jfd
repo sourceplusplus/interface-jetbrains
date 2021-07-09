@@ -21,11 +21,12 @@ new FormModel {
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 0 0"
 			} )
-			add( new FormComponent( "javax.swing.JTextField" ) {
+			add( new FormComponent( "javax.swing.JTextPane" ) {
 				name: "textField1"
 				"background": new java.awt.Color( 37, 37, 37, 255 )
-				"border": new javax.swing.border.LineBorder( sfield java.awt.Color darkGray, 1, true )
+				"border": new javax.swing.border.CompoundBorder( new javax.swing.border.LineBorder( sfield java.awt.Color darkGray, 1, true ), new javax.swing.border.EmptyBorder( 2, 6, 0, 0 ) )
 				"font": new java.awt.Font( "Roboto Light", 0, 14 )
+				"minimumSize": new java.awt.Dimension( 0, 27 )
 				auxiliary() {
 					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"Search or Type a Command (/)\", commands, lookup);"
 				}

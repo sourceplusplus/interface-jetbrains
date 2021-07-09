@@ -3,6 +3,7 @@ package com.sourceplusplus.sourcemarker.status.util
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
+import org.jetbrains.kotlin.idea.completion.smart.SmartCompletionItemPriority
 import java.awt.*
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
@@ -13,17 +14,20 @@ import java.util.regex.Pattern
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import javax.swing.text.*
+
 
 class AutocompleteField(
     private val placeHolderText: String?,
     private val allLookup: List<String>,
     private val lookup: Function<String, List<String>>
-) : JTextField(), FocusListener, DocumentListener, KeyListener {
+) : JTextPane(), FocusListener, DocumentListener, KeyListener {
 
     private val results: MutableList<String>
     private val popup: JWindow
     private val list: JList<String>
     private val model: ListModel<String>
+    private val variablePattern: Pattern
 
     init {
         results = ArrayList()
@@ -47,6 +51,51 @@ class AutocompleteField(
         addFocusListener(this)
         document.addDocumentListener(this)
         addKeyListener(this)
+
+        val sb = StringBuilder("(")
+        for (i in allLookup.indices) {
+            sb.append(Regex.escape(allLookup[i]))
+            if (i + 1 < allLookup.size) {
+                sb.append("|")
+            }
+        }
+        sb.append(")(?:\\s|$)")
+        variablePattern = Pattern.compile(sb.toString())
+
+        document.putProperty("filterNewlines", SmartCompletionItemPriority.TRUE)
+
+        addNumberStyle(this)
+
+        (document as AbstractDocument).documentFilter = object : DocumentFilter() {
+            override fun insertString(fb: FilterBypass, offset: Int, string: String, attr: AttributeSet) =
+                fb.insertString(offset, string.replace("\\n".toRegex(), ""), attr)
+
+            override fun replace(fb: FilterBypass, offset: Int, length: Int, string: String, attr: AttributeSet) =
+                fb.replace(offset, length, string.replace("\\n".toRegex(), ""), attr)
+        }
+    }
+
+    private fun applyStyle() {
+        styledDocument.setCharacterAttributes(
+            0,
+            text.length,
+            StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE),
+            true
+        )
+
+        var minIndex = 0
+        val m = variablePattern.matcher(text)
+        while (m.find()) {
+            val variable: String = m.group(1)
+            val varIndex = text.indexOf(variable, minIndex)
+            minIndex = varIndex + variable.length
+            styledDocument.setCharacterAttributes(varIndex, variable.length, getStyle("numbers"), false)
+        }
+    }
+
+    private fun addNumberStyle(pn: JTextPane) {
+        val style = pn.addStyle("numbers", null)
+        StyleConstants.setForeground(style, Color.decode("#e1483b"))
     }
 
     private fun showAutocompletePopup() {
@@ -93,6 +142,8 @@ class AutocompleteField(
 
     override fun getSelectedText(): String? = list.selectedValue
 
+    override fun keyTyped(e: KeyEvent) = Unit
+
     override fun keyPressed(e: KeyEvent) {
         if (e.keyCode == KeyEvent.VK_UP) {
             val index = list.selectedIndex
@@ -114,11 +165,15 @@ class AutocompleteField(
         }
     }
 
+    override fun keyReleased(e: KeyEvent) {
+        if (e.keyCode != KeyEvent.VK_UP && e.keyCode != KeyEvent.VK_DOWN) {
+            applyStyle()
+        }
+    }
+
     override fun insertUpdate(e: DocumentEvent) = documentChanged()
     override fun removeUpdate(e: DocumentEvent) = documentChanged()
     override fun changedUpdate(e: DocumentEvent) = documentChanged()
-    override fun keyTyped(e: KeyEvent) = Unit
-    override fun keyReleased(e: KeyEvent) = Unit
 
     private inner class ListModel<T> : AbstractListModel<T>() {
         override fun getSize(): Int = results.size
@@ -129,52 +184,12 @@ class AutocompleteField(
     override fun paintComponent(pG: Graphics) {
         super.paintComponent(pG)
 
-        val g = pG as Graphics2D
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
         if (text.isEmpty() && placeHolderText != null) {
+            val g = pG as Graphics2D
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
             g.color = Color(85, 85, 85, 200)
-            g.drawString(placeHolderText, insets.left + 6, pG.getFontMetrics().maxAscent + insets.top + 2)
-        } else {
-//            val inputs = text.split(" ")
-//            val foundCommand = allLookup.find { inputs.contains(it) }
-//            if (foundCommand != null) {
-//                val commandIndex = text.indexOf(foundCommand)
-//
-//                g.color = Color(225, 72, 59).darker()
-//                g.drawString(
-//                    foundCommand,
-//                    g.fontMetrics.getStringBounds(text.substring(0, commandIndex), g).width.toFloat() + (insets.left + 6).toFloat(),
-//                    (pG.getFontMetrics().maxAscent + insets.top + 2).toFloat()
-//                )
-//            }
-
-            val sb = StringBuilder("(")
-            for (i in allLookup.indices) {
-                sb.append(Regex.escape(allLookup[i]))
-                if (i + 1 < allLookup.size) {
-                    sb.append("|")
-                }
-            }
-            sb.append(")(?:\\s|$)")
-            val variablePattern = Pattern.compile(sb.toString())
-
-            var minIndex = 0
-            val m = variablePattern.matcher(text)
-            while (m.find()) {
-                val variable: String = m.group(1)
-                val varIndex = text.indexOf(variable, minIndex)
-                minIndex = varIndex + variable.length
-
-                g.color = Color(225, 72, 59)
-                g.drawString(
-                    variable,
-                    g.fontMetrics.getStringBounds(
-                        text.substring(0, varIndex), g
-                    ).width.toFloat() + (insets.left + 6).toFloat(),
-                    (pG.getFontMetrics().maxAscent + insets.top + 2).toFloat()
-                )
-            }
+            g.drawString(placeHolderText, insets.left, pG.getFontMetrics().maxAscent + insets.top)
         }
     }
 }
