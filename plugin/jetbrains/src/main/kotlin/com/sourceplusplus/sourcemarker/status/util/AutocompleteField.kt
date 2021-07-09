@@ -3,6 +3,8 @@ package com.sourceplusplus.sourcemarker.status.util
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
+import com.sourceplusplus.sourcemarker.Tester
+import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow
 import org.jetbrains.kotlin.idea.completion.smart.SmartCompletionItemPriority
 import java.awt.*
 import java.awt.event.FocusEvent
@@ -16,17 +18,17 @@ import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import javax.swing.text.*
 
-
 class AutocompleteField(
     private val placeHolderText: String?,
-    private val allLookup: List<String>,
-    private val lookup: Function<String, List<String>>
+    private val allLookup: List<AutocompleteFieldRow>,
+    private val lookup: Function<String, List<AutocompleteFieldRow>>,
+    private val lineNumber: Int = 0
 ) : JTextPane(), FocusListener, DocumentListener, KeyListener {
 
-    private val results: MutableList<String>
+    private val results: MutableList<AutocompleteFieldRow>
     private val popup: JWindow
-    private val list: JList<String>
-    private val model: ListModel<String>
+    private val list: JList<AutocompleteFieldRow>
+    private val model: ListModel<AutocompleteFieldRow>
     private val variablePattern: Pattern
 
     init {
@@ -37,6 +39,10 @@ class AutocompleteField(
         popup.isAlwaysOnTop = true
         model = ListModel()
         list = JBList(model)
+
+        list.font = Font("Roboto Light", Font.PLAIN, 14)
+        list.setCellRenderer(MyCellRenderer())
+
         list.setBackground(JBColor.decode("#252525"))
         list.setBorder(JBUI.Borders.empty())
         val scroll: JScrollPane = object : JScrollPane(list) {
@@ -54,7 +60,7 @@ class AutocompleteField(
 
         val sb = StringBuilder("(")
         for (i in allLookup.indices) {
-            sb.append(Regex.escape(allLookup[i]))
+            sb.append(Regex.escape(allLookup[i].getText()))
             if (i + 1 < allLookup.size) {
                 sb.append("|")
             }
@@ -140,7 +146,7 @@ class AutocompleteField(
         }
     }
 
-    override fun getSelectedText(): String? = list.selectedValue
+    override fun getSelectedText(): String? = list.selectedValue?.getText()
 
     override fun keyTyped(e: KeyEvent) = Unit
 
@@ -159,7 +165,7 @@ class AutocompleteField(
             val text = list.selectedValue
             if (text != null) {
                 val varCompleted = getText().substringAfterLast("$")
-                setText(getText() + text.substring(varCompleted.length))
+                setText(getText() + text.getText().substring(varCompleted.length))
                 caretPosition = getText().length
             }
         }
@@ -190,6 +196,28 @@ class AutocompleteField(
 
             g.color = Color(85, 85, 85, 200)
             g.drawString(placeHolderText, insets.left, pG.getFontMetrics().maxAscent + insets.top)
+        }
+    }
+
+    inner class MyCellRenderer : DefaultListCellRenderer() {
+        init {
+            isOpaque = true
+        }
+
+        override fun getListCellRendererComponent(
+            list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean
+        ): Component {
+            val entry = value as AutocompleteFieldRow
+            val t = Tester()
+            t.setCommandName(entry.getText())
+            if (entry.getDescription() != null) {
+                t.setDescription(entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString()))
+            }
+
+            if (isSelected) {
+                t.background = Color.decode("#3C3C3C")
+            }
+            return t
         }
     }
 }

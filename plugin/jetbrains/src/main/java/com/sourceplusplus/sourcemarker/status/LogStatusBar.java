@@ -10,6 +10,7 @@ import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
+import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
@@ -41,8 +42,8 @@ public class LogStatusBar extends JPanel {
             .withZone(ZoneId.systemDefault());
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
-    private final List<String> scopeVars;
-    private final Function<String, List<String>> lookup;
+    private final List<AutocompleteFieldRow> scopeVars;
+    private final Function<String, List<AutocompleteFieldRow>> lookup;
     private final Pattern VARIABLE_PATTERN;
     private Editor editor;
     private LiveLog liveLog;
@@ -55,12 +56,28 @@ public class LogStatusBar extends JPanel {
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
                         LiveLog liveLog, Editor editor) {
         this.sourceLocation = sourceLocation;
-        this.scopeVars = scopeVars.stream().map(it -> "$" + it).collect(Collectors.toList());
+        this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
+            public String getText() {
+                return "$" + it;
+            }
+
+            public String getDescription() {
+                return null;
+            }
+        }).collect(Collectors.toList());
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
                     String var = substringAfterLast(" ", text);
                     return var.startsWith("$") && v.toLowerCase().contains(var.substring(1))
                             && !v.toLowerCase().equals(var.substring(1));
+                }).map(it -> new AutocompleteFieldRow() {
+                    public String getText() {
+                        return "$" + it;
+                    }
+
+                    public String getDescription() {
+                        return null;
+                    }
                 })
                 .limit(7)
                 .collect(Collectors.toList());
@@ -330,7 +347,7 @@ public class LogStatusBar extends JPanel {
         label3 = new JLabel();
         label4 = new JLabel();
         separator1 = new JSeparator();
-        textField1 = new AutocompleteField("Input log message (use $ for variables)", scopeVars, lookup);
+        textField1 = new AutocompleteField("Input log message (use $ for variables)", scopeVars, lookup, inlayMark.getLineNumber());
         label2 = new JLabel();
 
         //======== this ========

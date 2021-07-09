@@ -4,6 +4,8 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
+import com.sourceplusplus.sourcemarker.command.CommandAction;
 import com.sourceplusplus.sourcemarker.command.CommandBarController;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
@@ -14,26 +16,20 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class CommandBar extends JPanel {
 
-    private final List<String> commands = Stream.of(
-            "/add-live-log", "/add-live-breakpoint"
-
-//todo: impl, don't show clears if results in no-op
-//            ,"/clear-live-logs", "/clear-live-breakpoints", "/clear-live-instruments"
-    ).sorted().collect(Collectors.toList());
-    private final Function<String, List<String>> lookup = text -> commands.stream()
+    private final Function<String, List<AutocompleteFieldRow>> lookup = text -> Arrays.stream(CommandAction.values())
             .filter(v -> !text.isEmpty()
-                    && v.toLowerCase().contains(text.toLowerCase().replace("/", ""))
+                    && v.getText().toLowerCase().contains(text.toLowerCase().replace("/", ""))
                     && text.startsWith("/")
-                    && !v.equalsIgnoreCase(text)
+                    && !v.getText().equalsIgnoreCase(text)
             ).collect(Collectors.toList());
 
     private final InlayMark inlayMark;
@@ -126,7 +122,7 @@ public class CommandBar extends JPanel {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
-        textField1 = new AutocompleteField("Search or Type a Command (/)", commands, lookup);
+        textField1 = new AutocompleteField("Search or Type a Command (/)", Arrays.stream(CommandAction.values()).collect(Collectors.toList()), lookup, inlayMark.getLineNumber());
         label2 = new JLabel();
 
         //======== this ========
