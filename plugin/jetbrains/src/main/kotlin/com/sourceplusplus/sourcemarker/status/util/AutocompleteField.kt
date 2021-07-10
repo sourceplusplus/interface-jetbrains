@@ -245,7 +245,7 @@ class AutocompleteField(
                 row.setDescription(entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString()))
             }
 
-            if (isSelected) {
+            if (isSelected && results.size > 1) {
                 row.background = Color.decode("#3C3C3C")
             }
             return row
