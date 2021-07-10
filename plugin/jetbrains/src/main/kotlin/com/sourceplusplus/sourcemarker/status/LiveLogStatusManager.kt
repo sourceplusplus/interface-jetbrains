@@ -86,7 +86,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
 
                 //determine available vars
                 val scopeVars = mutableListOf<String>()
-                val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)
+                val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
                 val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
                     override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
                 }
@@ -142,7 +142,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
 
                     //determine available vars
                     val scopeVars = mutableListOf<String>()
-                    val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, liveLog.location.line - 1)
+                    val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, liveLog.location.line - 1)!!
                     val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
                         override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
                     }

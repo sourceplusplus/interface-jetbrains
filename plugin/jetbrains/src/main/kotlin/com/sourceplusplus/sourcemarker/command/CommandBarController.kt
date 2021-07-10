@@ -37,7 +37,7 @@ object CommandBarController {
         }
     }
 
-    fun showCommandBar(editor: Editor, lineNumber: Int) {
+    fun showCommandBar(editor: Editor, lineNumber: Int, tryingAboveLine: Boolean = false) {
         //close previous command bar (if open)
         previousCommandBar?.dispose(true, false)
         previousCommandBar = null
@@ -76,8 +76,10 @@ object CommandBarController {
 
                 statusBar.focus()
             }
-        } else {
+        } else if (tryingAboveLine) {
             log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
+        } else if (!tryingAboveLine) {
+            showCommandBar(editor, lineNumber - 1, true)
         }
     }
 }
