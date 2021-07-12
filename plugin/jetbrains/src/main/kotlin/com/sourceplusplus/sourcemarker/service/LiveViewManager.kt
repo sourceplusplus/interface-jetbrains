@@ -64,8 +64,7 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
                         log.info("Could not find source mark for: " + event.entityId)
                         return@consumer
                     }
-                    val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                    consumeTracesViewEvent(event, sourceMark, portal)
+                    consumeTracesViewEvent(event, sourceMark)
                 }
                 else -> {
                     val sourceMark = SourceMarkSearch.findByEndpointName(event.entityId)
@@ -114,8 +113,7 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
 
     private fun consumeTracesViewEvent(
         event: LiveViewEvent,
-        sourceMark: SourceMark,
-        portal: SourcePortal
+        sourceMark: SourceMark
     ) {
         val rawMetrics = JsonObject(event.metricsData)
         val traces = mutableListOf<Trace>()
