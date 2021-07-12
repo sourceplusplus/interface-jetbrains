@@ -24,6 +24,7 @@ import javax.swing.text.*
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber")
 class AutocompleteField(
     private val commandDelimiter: String,
     private val placeHolderText: String?,
