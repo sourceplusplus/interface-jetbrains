@@ -28,7 +28,9 @@ import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
+import com.sourceplusplus.protocol.instrument.log.LiveLog
 import com.sourceplusplus.protocol.instrument.log.event.LiveLogHit
+import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
@@ -104,6 +106,49 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
                         val project = ProjectManager.getInstance().openProjects[0]
                         BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
                     }
+                }
+                LiveInstrumentEventType.LOG_ADDED -> {
+                    if (!SourceMarker.enabled) {
+                        log.debug("SourceMarker disabled. Ignored log added")
+                        return@consumer
+                    }
+
+                    val logAdded = Json.decodeValue(liveEvent.data, LiveLog::class.java)
+                    ApplicationManager.getApplication().invokeLater {
+                        val fileMarker = SourceMarker.getSourceFileMarker(logAdded.location.source)
+                        if (fileMarker != null) {
+                            LiveLogStatusManager.showStatusBar(logAdded, fileMarker)
+                        } else {
+                            LiveLogStatusManager.addActiveLiveLog(logAdded)
+                        }
+                    }
+                }
+                LiveInstrumentEventType.LOG_REMOVED -> {
+                    val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
+                    if (logRemoved.cause != null) {
+                        log.error("Log remove error: {}", logRemoved.cause!!.message)
+
+                        Notifications.Bus.notify(
+                            Notification(
+                                "SourceMarker", "Live Log Failed",
+                                "Log failed: " + logRemoved.cause!!.message,
+                                NotificationType.ERROR
+                            )
+                        )
+                    }
+
+                    val removedMark = SourceMarkSearch.findByLogId(logRemoved.logId)
+                    if (removedMark != null) {
+                        LiveLogStatusManager.removeActiveLiveLog(logRemoved.logId)
+                        ApplicationManager.getApplication().invokeLater {
+                            removedMark.dispose()
+                        }
+                    } else {
+                        log.debug("Could not find source mark. Ignored log removed.")
+                    }
+                }
+                else -> {
+                    log.warn("Un-implemented event type: {}", liveEvent.eventType)
                 }
             }
         }

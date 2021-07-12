@@ -191,4 +191,8 @@ object LiveLogStatusManager : SourceMarkEventListener {
     fun removeActiveLiveLog(liveLog: LiveLog) {
         activeStatusBars.remove(liveLog)
     }
+
+    fun removeActiveLiveLog(logId: String) {
+        activeStatusBars.removeIf { it.id == logId }
+    }
 }
