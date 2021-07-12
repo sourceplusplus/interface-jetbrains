@@ -125,6 +125,8 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
                 }
                 LiveInstrumentEventType.LOG_REMOVED -> {
                     val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
+                    LiveLogStatusManager.removeActiveLiveLog(logRemoved.logId)
+
                     if (logRemoved.cause != null) {
                         log.error("Log remove error: {}", logRemoved.cause!!.message)
 
@@ -139,12 +141,9 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
 
                     val removedMark = SourceMarkSearch.findByLogId(logRemoved.logId)
                     if (removedMark != null) {
-                        LiveLogStatusManager.removeActiveLiveLog(logRemoved.logId)
                         ApplicationManager.getApplication().invokeLater {
                             removedMark.dispose()
                         }
-                    } else {
-                        log.debug("Could not find source mark. Ignored log removed.")
                     }
                 }
                 else -> {
