@@ -69,6 +69,9 @@ object LiveLogStatusManager : SourceMarkEventListener {
         }
     }
 
+    /**
+     * Invoked via command bar. Force visible.
+     */
     fun showStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
@@ -108,6 +111,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
                 inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
                     override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
                 }
+                inlayMark.visible.set(true)
                 inlayMark.apply()
 
                 val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
