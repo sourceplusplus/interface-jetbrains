@@ -409,7 +409,7 @@ object SourceMarkerPlugin {
             ).await()
             req.end().await()
             val resp = req.response().await()
-            if (resp.statusCode() == 200) {
+            if (resp.statusCode() in 200..299) {
                 val body = resp.body().await().toString()
                 config.serviceToken = body
             } else {
