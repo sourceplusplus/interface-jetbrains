@@ -21,7 +21,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
             }
         }
         val commonTest by getting {
