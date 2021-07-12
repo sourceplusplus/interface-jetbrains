@@ -21,7 +21,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
             }
         }
         val commonTest by getting {
@@ -36,11 +36,11 @@ kotlin {
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
                 //implementation("io.vertx:vertx-service-proxy:$vertxVersion")
                 implementation(files("../plugin/jetbrains/.ext/vertx-service-proxy-4.0.2.jar"))
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
-                implementation("org.jooq:jooq:3.14.12")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.4")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.4")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
+                implementation("org.jooq:jooq:3.15.0")
             }
         }
         val jvmTest by getting {
@@ -49,12 +49,12 @@ kotlin {
                 implementation("com.google.guava:guava:30.1.1-jre")
                 implementation("junit:junit:4.13.2")
                 implementation(project(":protocol"))
-                implementation("com.fasterxml.jackson.core:jackson-core:2.12.3")
-                implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
+                implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
+                implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.4")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.4")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
             }
         }

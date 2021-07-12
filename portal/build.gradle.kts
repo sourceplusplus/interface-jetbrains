@@ -45,9 +45,9 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3")
-                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.3")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.4")
+                implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.4")
             }
         }
 
@@ -63,7 +63,7 @@ kotlin {
                 implementation(kotlin("stdlib-js"))
                 implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.7.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
                 implementation("com.github.bfergerson:kotlin-vertx3-eventbus-bridge:bacec93ae1")
             }
         }
