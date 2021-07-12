@@ -73,82 +73,12 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
             log.debug("Received instrument event. Type: {}", liveEvent.eventType)
 
             when (liveEvent.eventType) {
-                LiveInstrumentEventType.LOG_HIT -> {
-                    if (!SourceMarker.enabled) {
-                        log.debug("SourceMarker disabled. Ignored log hit")
-                        return@consumer
-                    }
-
-                    val logHit = Json.decodeValue(liveEvent.data, LiveLogHit::class.java)
-                    val hitMark = SourceMarkSearch.findByLogId(logHit.logId)
-                    if (hitMark != null) {
-                        SourceMarkSearch.findInheritedSourceMarks(hitMark).forEach {
-                            val portal = it.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                            vertx.eventBus().send(
-                                ArtifactLogUpdated,
-                                logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
-                            )
-                        }
-                    } else {
-                        log.debug("Could not find source mark. Ignored log hit.")
-                    }
-                }
-                LiveInstrumentEventType.BREAKPOINT_HIT -> {
-                    val bpHit = Json.decodeValue(liveEvent.data, LiveBreakpointHit::class.java)
-                    ApplicationManager.getApplication().invokeLater {
-                        val project = ProjectManager.getInstance().openProjects[0]
-                        BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
-                    }
-                }
-                LiveInstrumentEventType.BREAKPOINT_REMOVED -> {
-                    val bpRemoved = Json.decodeValue(liveEvent.data, LiveBreakpointRemoved::class.java)
-                    ApplicationManager.getApplication().invokeLater {
-                        val project = ProjectManager.getInstance().openProjects[0]
-                        BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
-                    }
-                }
-                LiveInstrumentEventType.LOG_ADDED -> {
-                    if (!SourceMarker.enabled) {
-                        log.debug("SourceMarker disabled. Ignored log added")
-                        return@consumer
-                    }
-
-                    val logAdded = Json.decodeValue(liveEvent.data, LiveLog::class.java)
-                    ApplicationManager.getApplication().invokeLater {
-                        val fileMarker = SourceMarker.getSourceFileMarker(logAdded.location.source)
-                        if (fileMarker != null) {
-                            LiveLogStatusManager.showStatusBar(logAdded, fileMarker)
-                        } else {
-                            LiveLogStatusManager.addActiveLiveLog(logAdded)
-                        }
-                    }
-                }
-                LiveInstrumentEventType.LOG_REMOVED -> {
-                    val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
-                    LiveLogStatusManager.removeActiveLiveLog(logRemoved.logId)
-
-                    if (logRemoved.cause != null) {
-                        log.error("Log remove error: {}", logRemoved.cause!!.message)
-
-                        Notifications.Bus.notify(
-                            Notification(
-                                "SourceMarker", "Live Log Failed",
-                                "Log failed: " + logRemoved.cause!!.message,
-                                NotificationType.ERROR
-                            )
-                        )
-                    }
-
-                    val removedMark = SourceMarkSearch.findByLogId(logRemoved.logId)
-                    if (removedMark != null) {
-                        ApplicationManager.getApplication().invokeLater {
-                            removedMark.dispose()
-                        }
-                    }
-                }
-                else -> {
-                    log.warn("Un-implemented event type: {}", liveEvent.eventType)
-                }
+                LiveInstrumentEventType.LOG_HIT -> handleLogHitEvent(liveEvent)
+                LiveInstrumentEventType.BREAKPOINT_HIT -> handleBreakpointHitEvent(liveEvent)
+                LiveInstrumentEventType.BREAKPOINT_REMOVED -> handleBreakpointRemovedEvent(liveEvent)
+                LiveInstrumentEventType.LOG_ADDED -> handleLogAddedEvent(liveEvent)
+                LiveInstrumentEventType.LOG_REMOVED -> handleLogRemovedEvent(liveEvent)
+                else -> log.warn("Un-implemented event type: {}", liveEvent.eventType)
             }
         }
 
@@ -190,6 +120,85 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
             } else {
                 log.error("Failed to get live logs", it.cause())
             }
+        }
+    }
+
+    private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
+        val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
+        LiveLogStatusManager.removeActiveLiveLog(logRemoved.logId)
+
+        if (logRemoved.cause != null) {
+            log.error("Log remove error: {}", logRemoved.cause!!.message)
+
+            Notifications.Bus.notify(
+                Notification(
+                    "SourceMarker", "Live Log Failed",
+                    "Log failed: " + logRemoved.cause!!.message,
+                    NotificationType.ERROR
+                )
+            )
+        }
+
+        val removedMark = SourceMarkSearch.findByLogId(logRemoved.logId)
+        if (removedMark != null) {
+            ApplicationManager.getApplication().invokeLater {
+                removedMark.dispose()
+            }
+        }
+    }
+
+    private fun handleLogAddedEvent(liveEvent: LiveInstrumentEvent) {
+        if (!SourceMarker.enabled) {
+            log.debug("SourceMarker disabled. Ignored log added")
+            return
+        }
+
+        val logAdded = Json.decodeValue(liveEvent.data, LiveLog::class.java)
+        ApplicationManager.getApplication().invokeLater {
+            val fileMarker = SourceMarker.getSourceFileMarker(logAdded.location.source)
+            if (fileMarker != null) {
+                LiveLogStatusManager.showStatusBar(logAdded, fileMarker)
+            } else {
+                LiveLogStatusManager.addActiveLiveLog(logAdded)
+            }
+        }
+    }
+
+    private fun handleBreakpointRemovedEvent(liveEvent: LiveInstrumentEvent) {
+        val bpRemoved = Json.decodeValue(liveEvent.data, LiveBreakpointRemoved::class.java)
+        ApplicationManager.getApplication().invokeLater {
+            val project = ProjectManager.getInstance().openProjects[0]
+            BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
+        }
+    }
+
+    private fun handleBreakpointHitEvent(liveEvent: LiveInstrumentEvent) {
+        val bpHit = Json.decodeValue(liveEvent.data, LiveBreakpointHit::class.java)
+        ApplicationManager.getApplication().invokeLater {
+            val project = ProjectManager.getInstance().openProjects[0]
+            BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
+        }
+    }
+
+    private fun handleLogHitEvent(liveEvent: LiveInstrumentEvent) {
+        if (!SourceMarker.enabled) {
+            log.debug("SourceMarker disabled. Ignored log hit")
+            return
+        }
+
+        //todo: can get log hit without log added (race) try open
+        val logHit = Json.decodeValue(liveEvent.data, LiveLogHit::class.java)
+        val hitMark = SourceMarkSearch.findByLogId(logHit.logId)
+        if (hitMark != null) {
+            SourceMarkSearch.findInheritedSourceMarks(hitMark).forEach {
+                val portal = it.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                vertx.eventBus().send(
+                    ArtifactLogUpdated,
+                    logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
+                )
+            }
+        } else {
+            log.debug("Could not find source mark. Ignored log hit.")
         }
     }
 
