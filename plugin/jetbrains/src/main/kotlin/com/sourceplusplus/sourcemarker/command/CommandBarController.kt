@@ -7,6 +7,7 @@ import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
+import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.CommandBar
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
@@ -34,6 +35,30 @@ object CommandBarController {
             previousCommandBar!!.dispose()
             LiveLogStatusManager.showStatusBar(editor, previousCommandBar!!.lineNumber)
             previousCommandBar = null
+        } else if (input == "/clear-live-breakpoints") {
+            previousCommandBar!!.dispose()
+            previousCommandBar = null
+            SourceMarkerServices.Instance.liveInstrument!!.clearLiveBreakpoints {
+                if (it.failed()) {
+                    log.error("Failed to clear live breakpoints", it.cause())
+                }
+            }
+        } else if (input == "/clear-live-logs") {
+            previousCommandBar!!.dispose()
+            previousCommandBar = null
+            SourceMarkerServices.Instance.liveInstrument!!.clearLiveLogs {
+                if (it.failed()) {
+                    log.error("Failed to clear live logs", it.cause())
+                }
+            }
+        } else if (input == "/clear-live-instruments") {
+            previousCommandBar!!.dispose()
+            previousCommandBar = null
+            SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments {
+                if (it.failed()) {
+                    log.error("Failed to clear live instruments", it.cause())
+                }
+            }
         }
     }
 

@@ -21,7 +21,19 @@ enum class CommandAction(
     ADD_LIVE_LOG(
         "/add-live-log",
         "Add live log instrument after line *lineNumber*"
+    ),
+//    CLEAR_LIVE_BREAKPOINTS(
+//        "/clear-live-breakpoints",
+//        "Clear all self-created live breakpoints"
+//    ),
+    CLEAR_LIVE_INSTRUMENTS(
+        "/clear-live-instruments",
+        "Clear all self-created live instruments"
     );
+//    CLEAR_LIVE_LOGS(
+//        "/clear-live-logs",
+//        "Clear all self-created live logs"
+//    );
 
     override fun getText(): String = command
     override fun getDescription(): String? = description
