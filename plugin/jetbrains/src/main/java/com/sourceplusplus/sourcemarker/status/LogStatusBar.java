@@ -174,18 +174,20 @@ public class LogStatusBar extends JPanel {
     }
 
     private void removeActiveDecorations() {
-//        label7.setIcon(IconLoader.getIcon("/icons/expand.svg"));
-//        label8.setIcon(IconLoader.getIcon("/icons/search.svg"));
-        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
-        panel1.setBackground(Color.decode("#252525"));
+        SwingUtilities.invokeLater(() -> {
+//            label7.setIcon(IconLoader.getIcon("/icons/expand.svg"));
+//            label8.setIcon(IconLoader.getIcon("/icons/search.svg"));
+            label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+            panel1.setBackground(Color.decode("#252525"));
 
-        if (!((AutocompleteField) textField1).getEditMode()) {
-            textField1.setBorder(new CompoundBorder(
-                    new LineBorder(Color.darkGray, 0, true),
-                    new EmptyBorder(2, 6, 0, 0)));
-            textField1.setBackground(Color.decode("#2B2B2B"));
-            textField1.setEditable(false);
-        }
+            if (!((AutocompleteField) textField1).getEditMode()) {
+                textField1.setBorder(new CompoundBorder(
+                        new LineBorder(Color.darkGray, 0, true),
+                        new EmptyBorder(2, 6, 0, 0)));
+                textField1.setBackground(Color.decode("#2B2B2B"));
+                textField1.setEditable(false);
+            }
+        });
     }
 
     private void setupComponents() {
