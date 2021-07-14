@@ -16,6 +16,12 @@ data class ZonedDuration(
     val step: SkywalkingClient.DurationStep
 ) {
     fun toDuration(skywalkingClient: SkywalkingClient): Duration {
-        return skywalkingClient.getDuration(start, stop, step)
+        //minus on stop as skywalking stop is inclusive
+        return when (step) {
+            SkywalkingClient.DurationStep.SECOND -> skywalkingClient.getDuration(start, stop.minusSeconds(1), step)
+            SkywalkingClient.DurationStep.MINUTE -> skywalkingClient.getDuration(start, stop.minusMinutes(1), step)
+            SkywalkingClient.DurationStep.HOUR -> skywalkingClient.getDuration(start, stop.minusHours(1), step)
+            SkywalkingClient.DurationStep.DAY -> skywalkingClient.getDuration(start, stop.minusDays(1), step)
+        }
     }
 }

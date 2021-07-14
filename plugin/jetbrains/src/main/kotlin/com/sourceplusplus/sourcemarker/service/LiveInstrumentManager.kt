@@ -14,26 +14,33 @@ import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiManager
 import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.XDebuggerUtil
-import com.intellij.xdebugger.breakpoints.SuspendPolicy
-import com.intellij.xdebugger.breakpoints.XBreakpointListener
-import com.intellij.xdebugger.breakpoints.XLineBreakpoint
+import com.intellij.xdebugger.breakpoints.*
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
-import com.sourceplusplus.protocol.ProtocolErrors
+import com.intellij.xdebugger.impl.breakpoints.XLineBreakpointImpl
+import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
+import com.sourceplusplus.protocol.error.AccessDenied
 import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
 import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
+import com.sourceplusplus.protocol.instrument.log.LiveLog
+import com.sourceplusplus.protocol.instrument.log.event.LiveLogHit
+import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointConditionParser
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
+import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
@@ -50,36 +57,28 @@ import javax.swing.Icon
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
+class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
     XBreakpointListener<XLineBreakpoint<LiveBreakpointProperties>> {
 
     companion object {
-        private val log = LoggerFactory.getLogger(LiveBreakpointManager::class.java)
+        private val log = LoggerFactory.getLogger(LiveInstrumentManager::class.java)
     }
 
     override suspend fun start() {
-        log.debug("LiveBreakpointManager started")
+        log.debug("LiveInstrumentManager started")
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
         vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_INSTRUMENT_SUBSCRIBER) {
             val liveEvent = Json.decodeValue(it.body().toString(), LiveInstrumentEvent::class.java)
-            log.info("Received breakpoint event. Type: {}", liveEvent.eventType)
+            log.debug("Received instrument event. Type: {}", liveEvent.eventType)
 
             when (liveEvent.eventType) {
-                LiveInstrumentEventType.BREAKPOINT_HIT -> {
-                    val bpHit = Json.decodeValue(liveEvent.data, LiveBreakpointHit::class.java)
-                    ApplicationManager.getApplication().invokeLater {
-                        val project = ProjectManager.getInstance().openProjects[0]
-                        BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
-                    }
-                }
-                LiveInstrumentEventType.BREAKPOINT_REMOVED -> {
-                    val bpRemoved = Json.decodeValue(liveEvent.data, LiveBreakpointRemoved::class.java)
-                    ApplicationManager.getApplication().invokeLater {
-                        val project = ProjectManager.getInstance().openProjects[0]
-                        BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
-                    }
-                }
+                LiveInstrumentEventType.LOG_HIT -> handleLogHitEvent(liveEvent)
+                LiveInstrumentEventType.BREAKPOINT_HIT -> handleBreakpointHitEvent(liveEvent)
+                LiveInstrumentEventType.BREAKPOINT_REMOVED -> handleBreakpointRemovedEvent(liveEvent)
+                LiveInstrumentEventType.LOG_ADDED -> handleLogAddedEvent(liveEvent)
+                LiveInstrumentEventType.LOG_REMOVED -> handleLogRemovedEvent(liveEvent)
+                else -> log.warn("Un-implemented event type: {}", liveEvent.eventType)
             }
         }
 
@@ -88,8 +87,136 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
             BridgeEventType.REGISTER.name.toLowerCase(),
             Provide.LIVE_INSTRUMENT_SUBSCRIBER,
             JsonObject(),
-            TCPServiceDiscoveryBackend.socket
+            TCPServiceDiscoveryBackend.socket!!
         )
+
+        //todo: should run this logic on plugin shutdown as well
+        //add/remove active/inactive breakpoints
+        ApplicationManager.getApplication().runReadAction {
+            val manager = XDebuggerManager.getInstance(project).breakpointManager
+            val liveBreakpoints = manager.allBreakpoints.filter { it.type.id == "live-breakpoint" }
+            val bpIds = liveBreakpoints.map {
+                (it.properties as LiveBreakpointProperties?)?.getBreakpointId()
+            }.filterNotNull()
+
+            if (bpIds.isEmpty()) {
+                removeInvalidBreakpoints(manager, liveBreakpoints, emptySet())
+            } else {
+                Instance.liveInstrument!!.getLiveInstrumentsByIds(bpIds) {
+                    if (it.succeeded()) {
+                        removeInvalidBreakpoints(manager, liveBreakpoints, it.result().map { it.id!! }.toSet())
+                    } else {
+                        log.error("Failed to get live instruments by ids", it.cause())
+                    }
+                }
+            }
+        }
+
+        //show live log status bars
+        Instance.liveInstrument!!.getLiveLogs {
+            if (it.succeeded()) {
+                log.info("Found {} active live logs", it.result().size)
+                LiveLogStatusManager.addActiveLiveLogs(it.result())
+            } else {
+                log.error("Failed to get live logs", it.cause())
+            }
+        }
+    }
+
+    private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
+        val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
+        LiveLogStatusManager.removeActiveLiveLog(logRemoved.logId)
+
+        if (logRemoved.cause != null) {
+            log.error("Log remove error: {}", logRemoved.cause!!.message)
+
+            Notifications.Bus.notify(
+                Notification(
+                    "SourceMarker", "Live Log Failed",
+                    "Log failed: " + logRemoved.cause!!.message,
+                    NotificationType.ERROR
+                )
+            )
+        }
+
+        val removedMark = SourceMarkSearch.findByLogId(logRemoved.logId)
+        if (removedMark != null) {
+            ApplicationManager.getApplication().invokeLater {
+                removedMark.dispose()
+            }
+        }
+    }
+
+    private fun handleLogAddedEvent(liveEvent: LiveInstrumentEvent) {
+        if (!SourceMarker.enabled) {
+            log.debug("SourceMarker disabled. Ignored log added")
+            return
+        }
+
+        val logAdded = Json.decodeValue(liveEvent.data, LiveLog::class.java)
+        ApplicationManager.getApplication().invokeLater {
+            val fileMarker = SourceMarker.getSourceFileMarker(logAdded.location.source)
+            if (fileMarker != null) {
+                LiveLogStatusManager.showStatusBar(logAdded, fileMarker)
+            } else {
+                LiveLogStatusManager.addActiveLiveLog(logAdded)
+            }
+        }
+    }
+
+    private fun handleBreakpointRemovedEvent(liveEvent: LiveInstrumentEvent) {
+        val bpRemoved = Json.decodeValue(liveEvent.data, LiveBreakpointRemoved::class.java)
+        ApplicationManager.getApplication().invokeLater {
+            val project = ProjectManager.getInstance().openProjects[0]
+            BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
+        }
+    }
+
+    private fun handleBreakpointHitEvent(liveEvent: LiveInstrumentEvent) {
+        val bpHit = Json.decodeValue(liveEvent.data, LiveBreakpointHit::class.java)
+        ApplicationManager.getApplication().invokeLater {
+            val project = ProjectManager.getInstance().openProjects[0]
+            BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
+        }
+    }
+
+    private fun handleLogHitEvent(liveEvent: LiveInstrumentEvent) {
+        if (!SourceMarker.enabled) {
+            log.debug("SourceMarker disabled. Ignored log hit")
+            return
+        }
+
+        //todo: can get log hit without log added (race) try open
+        val logHit = Json.decodeValue(liveEvent.data, LiveLogHit::class.java)
+        val hitMark = SourceMarkSearch.findByLogId(logHit.logId)
+        if (hitMark != null) {
+            SourceMarkSearch.findInheritedSourceMarks(hitMark).forEach {
+                val portal = it.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                vertx.eventBus().send(
+                    ArtifactLogUpdated,
+                    logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
+                )
+            }
+        } else {
+            log.debug("Could not find source mark. Ignored log hit.")
+        }
+    }
+
+    private fun removeInvalidBreakpoints(
+        manager: XBreakpointManager, liveBreakpoints: List<XBreakpoint<*>>, validInstrumentIds: Set<String>
+    ) {
+        ApplicationManager.getApplication().invokeLater {
+            liveBreakpoints.forEach {
+                val bp = it as XLineBreakpointImpl<LiveBreakpointProperties>
+                val bpProps = it.properties
+                if (bpProps?.getBreakpointId() == null) {
+                    bp.dispose()
+                    manager.removeBreakpoint(bp)
+                } else if (bpProps.getBreakpointId() !in validInstrumentIds) {
+                    breakpointRemoved(bp)
+                }
+            }
+        }
     }
 
     override fun breakpointAdded(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
@@ -145,6 +272,9 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
     override fun breakpointRemoved(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
         if (breakpoint.type.id != "live-breakpoint") {
             return
+        } else if (breakpoint.properties == null) {
+            log.warn("Ignored removing breakpoint without properties")
+            return
         } else if (breakpoint.properties.getBreakpointId() == null) {
             log.debug("Ignored removing un-published breakpoint")
             return
@@ -181,6 +311,9 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
 
     override fun breakpointChanged(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
         if (breakpoint.type.id != "live-breakpoint") {
+            return
+        } else if (breakpoint.properties == null) {
+            log.warn("Ignored changing breakpoint without properties")
             return
         } else if (!breakpoint.properties.getSuspend() && breakpoint.properties.getBreakpointId() == null
             && breakpoint.suspendPolicy == SuspendPolicy.NONE
@@ -259,14 +392,13 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                 )
             )
         } else {
-            val rawFailure = JsonObject(replyException.message)
-            val debugInfo = rawFailure.getJsonObject("debugInfo")
-            if (debugInfo.getString("type") == ProtocolErrors.ServiceUnavailable.name) {
-                log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+            val actualException = replyException.cause!!
+            if (actualException is AccessDenied) {
+                log.error("Access denied. Reason: " + actualException.reason)
                 Notifications.Bus.notify(
                     Notification(
                         message("plugin_name"), "Live Breakpoint Failed",
-                        "Unable to connect to service: " + debugInfo.getString("name"),
+                        "Access denied. Reason: " + actualException.reason,
                         NotificationType.ERROR
                     )
                 )
@@ -276,7 +408,7 @@ class LiveBreakpointManager(private val project: Project) : CoroutineVerticle(),
                 Notifications.Bus.notify(
                     Notification(
                         message("plugin_name"), "Live Breakpoint Failed",
-                        "Failed to add live breakpoint",
+                        "Failed to add/remove live breakpoint",
                         NotificationType.ERROR
                     )
                 )

@@ -7,7 +7,7 @@ import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class KotlinEndpointDetectorTest : EndpointDetectorTest() {
 

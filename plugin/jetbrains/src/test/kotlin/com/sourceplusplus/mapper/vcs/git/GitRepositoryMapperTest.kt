@@ -4,8 +4,8 @@ import com.sourceplusplus.mapper.SourceMapperTest
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.intellij.lang.annotations.Language
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import java.io.File
 import java.nio.file.Files
 import java.util.*
@@ -132,7 +132,7 @@ class GitRepositoryMapperTest : SourceMapperTest() {
 //        gitMapper.targetSourceDirectory.deleteRecursively()
 //    }
 
-    @Ignore
+    @Disabled
     @Test
     fun `tokenized scala getter method`() {
         val tmpRepo = Files.createTempDirectory("test-" + UUID.randomUUID()).toFile()

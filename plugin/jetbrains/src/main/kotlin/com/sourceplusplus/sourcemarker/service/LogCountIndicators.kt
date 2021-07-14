@@ -2,14 +2,13 @@ package com.sourceplusplus.sourcemarker.service
 
 import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.marker.source.SourceMarkerUtils
-import com.sourceplusplus.protocol.ProtocolErrors
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
+import com.sourceplusplus.protocol.error.AccessDenied
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
-import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
@@ -52,15 +51,18 @@ class LogCountIndicators : CoroutineVerticle() {
                                             logIndicator.configuration.icon =
                                                 SourceMarkerIcons.getNumericGutterMarkIcon(
                                                     logSummary.value,
-                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b" else "#182d34"
+                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b"
+                                                    else "#182d34"
                                                 )
                                             logIndicator.apply(true)
                                         } else {
                                             logIndicator.configuration.icon =
                                                 SourceMarkerIcons.getNumericGutterMarkIcon(
                                                     logSummary.value,
-                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b" else "#182d34"
+                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b"
+                                                    else "#182d34"
                                                 )
+                                            //todo: should just be updating rendering, not all analysis
                                             methodMark.sourceFileMarker.refresh()
                                         }
                                     }
@@ -73,10 +75,9 @@ class LogCountIndicators : CoroutineVerticle() {
                         if (replyException.failureType() == ReplyFailure.TIMEOUT) {
                             log.warn("Timed out getting log count summary")
                         } else {
-                            val rawFailure = JsonObject(it.cause().message)
-                            val debugInfo = rawFailure.getJsonObject("debugInfo")
-                            if (debugInfo.getString("type") == ProtocolErrors.ServiceUnavailable.name) {
-                                log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+                            val actualException = replyException.cause!!
+                            if (actualException is AccessDenied) {
+                                log.error("Access denied. Reason: " + actualException.reason)
                             } else {
                                 it.cause().printStackTrace()
                                 log.error("Failed to get log count summary", it.cause())
@@ -86,5 +87,9 @@ class LogCountIndicators : CoroutineVerticle() {
                 }
             }
         }
+    }
+
+    override suspend fun stop() {
+        log.info("Log count indicators stopped")
     }
 }

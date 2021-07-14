@@ -11,7 +11,9 @@ import com.sourceplusplus.marker.source.mark.inlay.InlayMark
  */
 @Suppress("MagicNumber")
 enum class InlayMarkEventCode(private val code: Int) : IEventCode {
-    VIRTUAL_TEXT_UPDATED(3000);
+    INLAY_MARK_VISIBLE(3000),
+    INLAY_MARK_HIDDEN(3001),
+    VIRTUAL_TEXT_UPDATED(3002);
 
     override fun code(): Int {
         return this.code

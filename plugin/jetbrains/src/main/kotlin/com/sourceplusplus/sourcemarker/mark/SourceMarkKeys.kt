@@ -18,4 +18,5 @@ object SourceMarkKeys {
     val ENDPOINT_DETECTOR = SourceKey<EndpointDetector>("ENDPOINT_DETECTOR")
     val LOGGER_DETECTOR = SourceKey<LoggerDetector>("LOGGER_DETECTOR")
     val ARTIFACT_ADVICE = SourceKey<MutableList<ArtifactAdvice>>("ARTIFACT_ADVICE")
+    val LOG_ID = SourceKey<String>("LOG_ID")
 }

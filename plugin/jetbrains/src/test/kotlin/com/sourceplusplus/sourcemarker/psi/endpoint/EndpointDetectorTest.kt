@@ -1,14 +1,13 @@
 package com.sourceplusplus.sourcemarker.psi.endpoint
 
+import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import org.junit.After
-import org.junit.Before
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 
-@RunWith(JUnit4::class)
 abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
+    @BeforeEach
     public override fun setUp() {
         super.setUp()
 
@@ -94,5 +93,11 @@ abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                     "    String operationName() default \"\";\n" +
                     "}\n"
         )
+    }
+
+    @AfterEach
+    override fun tearDown() {
+        super.tearDown()
+        TestApplicationManager.getInstance().setDataProvider(null)
     }
 }

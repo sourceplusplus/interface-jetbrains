@@ -30,19 +30,26 @@ import org.slf4j.LoggerFactory
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ActivityDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.ACTIVITY) {
+class ActivityDisplay(
+    private val refreshIntervalMs: Int, private val pullMode: Boolean
+) : AbstractDisplay(PageType.ACTIVITY) {
 
     companion object {
         private val log = LoggerFactory.getLogger(ActivityDisplay::class.java)
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(refreshIntervalMs.toLong()) {
-            SourcePortal.getPortals().filter {
-                it.configuration.currentPage == PageType.ACTIVITY && (it.visible || it.configuration.external)
-            }.forEach {
-                vertx.eventBus().send(RefreshActivity, it)
+        if (pullMode) {
+            log.info("Log pull mode enabled")
+            vertx.setPeriodic(refreshIntervalMs.toLong()) {
+                SourcePortal.getPortals().filter {
+                    it.configuration.currentPage == PageType.ACTIVITY && (it.visible || it.configuration.external)
+                }.forEach {
+                    vertx.eventBus().send(RefreshActivity, it)
+                }
             }
+        } else {
+            log.info("Log push mode enabled")
         }
 
         //refresh with stats from cache (if avail)

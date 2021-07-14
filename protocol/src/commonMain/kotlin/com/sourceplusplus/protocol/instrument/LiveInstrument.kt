@@ -16,5 +16,19 @@ abstract class LiveInstrument {
     abstract val hitLimit: Int
     abstract val id: String?
     abstract val type: LiveInstrumentType
-    open var applyImmediately: Boolean = false
+    abstract val applyImmediately: Boolean
+    abstract val applied: Boolean
+    abstract val pending: Boolean
+    abstract val hitRateLimit: Int //limit of once per X milliseconds
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is LiveInstrument) return false
+        if (id != other.id) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
 }

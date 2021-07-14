@@ -16,6 +16,7 @@ import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.instrument.log.LiveLog
+import com.sourceplusplus.protocol.view.LiveViewSubscription
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.MessageCodec
@@ -141,6 +142,16 @@ object ProtocolMarshaller {
     @JvmStatic
     fun serializeLiveInstrumentBatch(value: LiveInstrumentBatch): JsonObject {
         return JsonObject(Json.encode(value))
+    }
+
+    @JvmStatic
+    fun serializeLiveViewSubscription(value: LiveViewSubscription): JsonObject {
+        return JsonObject(Json.encode(value))
+    }
+
+    @JvmStatic
+    fun deserializeLiveViewSubscription(value: JsonObject): LiveViewSubscription {
+        return value.mapTo(LiveViewSubscription::class.java)
     }
 
     @JvmStatic

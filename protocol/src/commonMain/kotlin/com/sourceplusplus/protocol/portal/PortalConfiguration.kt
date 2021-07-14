@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PortalConfiguration(
     var currentPage: PageType = PageType.ACTIVITY,
-    var darkMode: Boolean = false,
+    var darkMode: Boolean = false, //todo: can be page or status bar
     var external: Boolean = false,
     var visibleOverview: Boolean = true,
     var visibleActivity: Boolean = true,
@@ -20,7 +20,8 @@ data class PortalConfiguration(
     var visibleLogs: Boolean = true,
     var visibleConfiguration: Boolean = false,
     var autoResolveEndpointNames: Boolean = false,
-    var artifactType: ArtifactType? = null //todo: allow multiple types? (endpoint + method)
+    var artifactType: ArtifactType? = null, //todo: allow multiple types? (endpoint + method)
+    var statusBar: Boolean = false
 ) {
     fun isViewable(pageType: PageType): Boolean {
         return when (pageType) {

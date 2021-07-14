@@ -5,8 +5,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiInvalidElementAccessException
-import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
@@ -14,8 +14,6 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import org.jetbrains.uast.UClass
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 /**
  * Represents a [SourceMark] associated to a class artifact.
@@ -78,10 +76,10 @@ abstract class ClassSourceMark(
         apply(configuration.componentProvider.getComponent(this), addToMarker)
     }
 
-    override fun dispose(removeFromMarker: Boolean) {
+    override fun dispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
         psiClass.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
         psiClass.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
-        super.dispose(removeFromMarker)
+        super.dispose(removeFromMarker, assertRemoval)
     }
 
     private val userData = HashMap<Any, Any>()

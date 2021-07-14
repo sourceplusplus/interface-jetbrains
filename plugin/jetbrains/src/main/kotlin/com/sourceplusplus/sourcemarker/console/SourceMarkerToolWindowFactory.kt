@@ -47,6 +47,8 @@ class SourceMarkerToolWindowFactory : ToolWindowFactory {
         toolWindow.contentManager.addContent(content)
         toolWindow.setAnchor(ToolWindowAnchor.BOTTOM, null)
         toolWindow.isAvailable = true
+
+        SourceMarkerAppender.consoleView = consoleView
         log.info("Internal console enabled")
     }
 }

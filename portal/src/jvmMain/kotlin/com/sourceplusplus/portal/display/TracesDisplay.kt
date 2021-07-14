@@ -44,7 +44,9 @@ import kotlin.time.ExperimentalTime
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class TracesDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.TRACES) {
+class TracesDisplay(
+    private val refreshIntervalMs: Int, private val pullMode: Boolean
+) : AbstractDisplay(PageType.TRACES) {
 
     companion object {
         private val log = LoggerFactory.getLogger(TracesDisplay::class.java)
@@ -52,12 +54,17 @@ class TracesDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageTy
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(refreshIntervalMs.toLong()) {
-            SourcePortal.getPortals().filter {
-                it.configuration.currentPage == PageType.TRACES && (it.visible || it.configuration.external)
-            }.forEach {
-                vertx.eventBus().send(RefreshTraces, it)
+        if (pullMode) {
+            log.info("Log pull mode enabled")
+            vertx.setPeriodic(refreshIntervalMs.toLong()) {
+                SourcePortal.getPortals().filter {
+                    it.configuration.currentPage == PageType.TRACES && (it.visible || it.configuration.external)
+                }.forEach {
+                    vertx.eventBus().send(RefreshTraces, it)
+                }
             }
+        } else {
+            log.info("Log push mode enabled")
         }
 
         //plugin listeners
@@ -337,10 +344,11 @@ class TracesDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageTy
         spanQueryResult: TraceSpanStackQueryResult
     ): TraceStack {
         val spanInfos = ArrayList<TraceSpan>()
-        val totalTime = spanQueryResult.traceSpans[0].endTime - spanQueryResult.traceSpans[0].startTime
+        val totalTimeMs = spanQueryResult.traceSpans[0].endTime.toEpochMilliseconds() -
+                spanQueryResult.traceSpans[0].startTime.toEpochMilliseconds()
 
         spanQueryResult.traceSpans.forEach { span ->
-            val timeTook = span.endTime - span.startTime
+            val timeTook = span.endTime.toEpochMilliseconds() - span.startTime.toEpochMilliseconds()
 
             //detect if operation name is really an artifact name
             val finalSpan = if (QUALIFIED_NAME_PATTERN.matcher(span.endpointName!!).matches()) {
@@ -360,8 +368,8 @@ class TracesDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageTy
                     putMetaString("rootArtifactQualifiedName", rootArtifactQualifiedName)
                     putMetaString("operationName", operationName)
                     putMetaDouble(
-                        "totalTracePercent", if (totalTime.toLongMilliseconds() == 0L) 0.0
-                        else timeTook / totalTime * 100.0
+                        "totalTracePercent", if (totalTimeMs == 0L) 0.0
+                        else timeTook / totalTimeMs * 100.0
                     )
                 }
             )

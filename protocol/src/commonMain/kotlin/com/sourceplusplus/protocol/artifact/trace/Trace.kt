@@ -20,7 +20,8 @@ data class Trace(
     val error: Boolean? = null,
     val traceIds: List<String>,
     val partial: Boolean = false,
-    val segmentId: String? = null
+    val segmentId: String? = null,
+    val meta: Map<String, String> = mutableMapOf()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

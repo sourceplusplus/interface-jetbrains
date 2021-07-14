@@ -1,8 +1,10 @@
 package com.sourceplusplus.marker.source.mark.inlay
 
 import com.sourceplusplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
-import org.slf4j.LoggerFactory
+import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A [SourceMark] which adds visualizations inside source code text.
@@ -15,4 +17,18 @@ interface InlayMark : SourceMark {
     override val type: SourceMark.Type
         get() = SourceMark.Type.INLAY
     override val configuration: InlayMarkConfiguration
+    val visible: AtomicBoolean
+
+    override fun isVisible(): Boolean {
+        return visible.get()
+    }
+
+    override fun setVisible(visible: Boolean) {
+        val previousVisibility = this.visible.getAndSet(visible)
+        if (visible && !previousVisibility) {
+            triggerEvent(SourceMarkEvent(this, InlayMarkEventCode.INLAY_MARK_VISIBLE))
+        } else if (!visible && previousVisibility) {
+            triggerEvent(SourceMarkEvent(this, InlayMarkEventCode.INLAY_MARK_HIDDEN))
+        }
+    }
 }

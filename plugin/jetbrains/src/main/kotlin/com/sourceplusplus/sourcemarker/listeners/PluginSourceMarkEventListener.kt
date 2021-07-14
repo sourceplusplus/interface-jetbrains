@@ -68,10 +68,12 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
                 sourcePortal.configuration.visibleActivity = false
                 sourcePortal.configuration.visibleTraces = false
                 sourcePortal.configuration.artifactType = ArtifactType.CLASS
-            } else {
+            } else if (sourceMark is MethodSourceMark) {
                 //method-based portals don't have overview page
                 sourcePortal.configuration.visibleOverview = false
                 sourcePortal.configuration.artifactType = ArtifactType.METHOD
+            } else {
+                sourcePortal.configuration.artifactType = ArtifactType.EXPRESSION
             }
 
             if (sourceMark is MethodSourceMark) {
@@ -80,10 +82,10 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
                 GlobalScope.launch(vertx.dispatcher()) {
                     endpointDetector.getOrFindEndpointId(sourceMark)
                 }
-
-                //setup logger detector
-                sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
             }
+
+            //setup logger detector
+            sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
             event.sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!.close()
             SourceMarkConstructor.tearDownSourceMark(event.sourceMark)

@@ -2,13 +2,13 @@ package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayLog
-import com.sourceplusplus.portal.extensions.displayLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLog
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedDisplayLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.FetchMoreLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetLogOrderType
+import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.RenderPage
 import com.sourceplusplus.protocol.artifact.log.Log
 import com.sourceplusplus.protocol.artifact.log.LogOrderType
@@ -26,19 +26,24 @@ import org.slf4j.LoggerFactory
  * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType.LOGS) {
+class LogsDisplay(private val refreshIntervalMs: Int, private val pullMode: Boolean) : AbstractDisplay(PageType.LOGS) {
 
     companion object {
         private val log = LoggerFactory.getLogger(LogsDisplay::class.java)
     }
 
     override suspend fun start() {
-        vertx.setPeriodic(refreshIntervalMs.toLong()) {
-            SourcePortal.getPortals().filter {
-                it.configuration.currentPage == PageType.LOGS && (it.visible || it.configuration.external)
-            }.forEach {
-                vertx.eventBus().send(RefreshLogs, it)
+        if (pullMode) {
+            log.info("Log pull mode enabled")
+            vertx.setPeriodic(refreshIntervalMs.toLong()) {
+                SourcePortal.getPortals().filter {
+                    it.configuration.currentPage == PageType.LOGS && (it.visible || it.configuration.external)
+                }.forEach {
+                    vertx.eventBus().send(RefreshLogs, it)
+                }
             }
+        } else {
+            log.info("Log push mode enabled")
         }
 
         vertx.eventBus().consumer(SetLogOrderType, this@LogsDisplay::setLogOrderType)
@@ -59,7 +64,7 @@ class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType
             LogViewType.LIVE_TAIL -> {
                 val logResult = portal.logsView.logResult
                 if (logResult != null) {
-                    vertx.eventBus().displayLogs(portal.portalUuid, logResult)
+                    vertx.eventBus().send(DisplayLogs(portal.portalUuid), logResult)
                     log.debug("Displayed logs for artifact. Log size: {}", logResult.logs.size)
                 }
             }
@@ -136,7 +141,7 @@ class LogsDisplay(private val refreshIntervalMs: Int) : AbstractDisplay(PageType
 
     private fun handleArtifactLogResult(artifactLogResult: LogResult) {
         SourcePortal.getPortals().filter {
-            artifactLogResult.artifactQualifiedName?.equals(it.viewingPortalArtifact) == true
+            it.viewingPortalArtifact == artifactLogResult.artifactQualifiedName!!
         }.forEach {
             it.logsView.cacheArtifactLogResult(artifactLogResult)
             updateUI(it)

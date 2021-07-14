@@ -66,10 +66,10 @@ abstract class ExpressionSourceMark(
         apply(configuration.componentProvider.getComponent(this), addToMarker)
     }
 
-    override fun dispose(removeFromMarker: Boolean) {
+    override fun dispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
         getPsiElement().putUserData(SourceKey.GutterMark, null)
         getPsiElement().putUserData(SourceKey.InlayMark, null)
-        super.dispose(removeFromMarker)
+        super.dispose(removeFromMarker, assertRemoval)
     }
 
     private val userData = HashMap<Any, Any>()
@@ -84,7 +84,7 @@ abstract class ExpressionSourceMark(
 
     override fun hasUserData(): Boolean = userData.isNotEmpty()
 
-    fun getPsiExpresion(): UExpression {
+    fun getPsiExpression(): UExpression {
         return psiExpression
     }
 

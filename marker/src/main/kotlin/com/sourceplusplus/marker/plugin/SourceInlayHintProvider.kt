@@ -27,7 +27,7 @@ import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
-import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode
+import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.*
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.psiUtil.getParentOfType
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
@@ -48,7 +48,7 @@ import javax.swing.JPanel
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("UnstableApiUsage")
-open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
+open class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
         @Volatile
@@ -58,7 +58,7 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
         init {
             SourceMarker.addGlobalSourceMarkEventListener { event ->
                 when (event.eventCode) {
-                    InlayMarkEventCode.VIRTUAL_TEXT_UPDATED -> {
+                    VIRTUAL_TEXT_UPDATED, INLAY_MARK_VISIBLE, INLAY_MARK_HIDDEN -> {
                         ApplicationManager.getApplication().invokeLater {
                             FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                                 //todo: smaller range
@@ -131,6 +131,10 @@ open class SourceInlayProvider : InlayHintsProvider<NoSettings> {
                 }
                 if (!fileMarker.containsSourceMark(inlayMark) && !inlayMark.canApply()) return true
                 if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply()
+                if (!inlayMark.isVisible()) {
+                    return true
+                }
+
                 val virtualText = inlayMark.configuration.virtualText ?: return true
                 virtualText.inlayMark = inlayMark
 

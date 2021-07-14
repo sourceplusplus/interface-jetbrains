@@ -96,8 +96,8 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
     fun processRemoveBreakpoint(bpr: LiveBreakpointRemoved) {
         XDebuggerManager.getInstance(project).breakpointManager.allBreakpoints.forEach {
             if (it.type.id == "live-breakpoint") {
-                val props = (it.properties as LiveBreakpointProperties)
-                if (bpr.breakpointId == props.getBreakpointId()) {
+                val props = (it.properties as LiveBreakpointProperties?)
+                if (bpr.breakpointId == props?.getBreakpointId()) {
                     props.setFinished(true)
                     props.setActive(false)
 

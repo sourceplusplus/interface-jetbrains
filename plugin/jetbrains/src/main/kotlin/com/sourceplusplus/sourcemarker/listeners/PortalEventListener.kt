@@ -45,8 +45,6 @@ import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Global.SetCurrentPage
 import com.sourceplusplus.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateEndpoints
-import com.sourceplusplus.protocol.ProtocolErrors.ServiceUnavailable
-import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
@@ -58,8 +56,11 @@ import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
 import com.sourceplusplus.protocol.artifact.trace.TraceSpan
+import com.sourceplusplus.protocol.error.AccessDenied
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getQualifiedClassName
+import com.sourceplusplus.protocol.view.LiveViewConfig
+import com.sourceplusplus.protocol.view.LiveViewSubscription
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
@@ -69,6 +70,7 @@ import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import io.vertx.core.eventbus.ReplyException
+import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -80,6 +82,7 @@ import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import javax.swing.UIManager
 
 /**
@@ -128,7 +131,6 @@ class PortalEventListener(
             portal.configuration.currentPage = pageType
             it.reply(JsonObject.mapFrom(portal.configuration))
             log.info("Set portal ${portal.portalUuid} page type to $pageType")
-
             vertx.eventBus().publish(RefreshPortal, portal)
         }
         vertx.eventBus().consumer<String>(GetPortalConfiguration) {
@@ -199,18 +201,131 @@ class PortalEventListener(
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshActivity) {
+            val portal = it.body()
+            //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
-                refreshActivity(it.body())
+                refreshActivity(portal)
+            }
+
+            //update subscriptions
+            if (Instance.liveView != null) {
+                Instance.liveView!!.clearLiveViewSubscriptions {
+                    if (it.succeeded()) {
+                        GlobalScope.launch(vertx.dispatcher()) {
+                            val sourceMark = SourceMarker.getSourceMark(
+                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                            ) ?: return@launch
+                            val endpointName = sourceMark.getUserData(
+                                ENDPOINT_DETECTOR
+                            )?.getOrFindEndpointName(sourceMark) ?: return@launch
+
+                            Instance.liveView!!.addLiveViewSubscription(
+                                LiveViewSubscription(
+                                    null,
+                                    listOf(endpointName),
+                                    sourceMark.artifactQualifiedName,
+                                    LiveViewConfig(
+                                        "ACTIVITY",
+                                        false,
+                                        listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+                                        0
+                                    )
+                                )
+                            ) {
+                                if (it.failed()) {
+                                    log.error("Failed to add live view subscription", it.cause())
+                                }
+                            }
+                        }
+                    } else {
+                        log.error("Failed to clear live view subscriptions", it.cause())
+                    }
+                }
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshTraces) {
+            val portal = it.body()
+            //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
                 refreshTraces(it.body())
             }
+
+            //update subscriptions
+            if (Instance.liveView != null) {
+                Instance.liveView!!.clearLiveViewSubscriptions {
+                    if (it.succeeded()) {
+                        GlobalScope.launch(vertx.dispatcher()) {
+                            val sourceMark = SourceMarker.getSourceMark(
+                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                            ) ?: return@launch
+                            val endpointName = sourceMark.getUserData(
+                                ENDPOINT_DETECTOR
+                            )?.getOrFindEndpointName(sourceMark) ?: return@launch
+
+                            Instance.liveView!!.addLiveViewSubscription(
+                                LiveViewSubscription(
+                                    null,
+                                    listOf(endpointName),
+                                    sourceMark.artifactQualifiedName,
+                                    LiveViewConfig(
+                                        "TRACES",
+                                        false,
+                                        listOf("endpoint_traces"),
+                                        0
+                                    )
+                                )
+                            ) {
+                                if (it.failed()) {
+                                    log.error("Failed to add live view subscription", it.cause())
+                                }
+                            }
+                        }
+                    } else {
+                        log.error("Failed to clear live view subscriptions", it.cause())
+                    }
+                }
+            }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshLogs) {
+            val portal = it.body()
+            //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
-                refreshLogs(it.body())
+                refreshLogs(portal)
+            }
+
+            //update subscriptions
+            if (Instance.liveView != null) {
+                Instance.liveView!!.clearLiveViewSubscriptions {
+                    if (it.succeeded()) {
+                        GlobalScope.launch(vertx.dispatcher()) {
+                            val sourceMark = SourceMarker.getSourceMark(
+                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                            ) as MethodSourceMark? ?: return@launch
+                            val logPatterns = sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                                .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
+
+                            Instance.liveView!!.addLiveViewSubscription(
+                                LiveViewSubscription(
+                                    null,
+                                    logPatterns,
+                                    sourceMark.artifactQualifiedName,
+                                    LiveViewConfig(
+                                        "LOGS",
+                                        false,
+                                        listOf("endpoint_logs"),
+                                        0
+                                    )
+                                )
+                            ) {
+                                if (it.failed()) {
+                                    log.error("Failed to add live view subscription", it.cause())
+                                }
+                            }
+                        }
+                    } else {
+                        log.error("Failed to clear live view subscriptions", it.cause())
+                    }
+                }
             }
         }
         vertx.eventBus().consumer<String>(QueryTraceStack) { handler ->
@@ -289,13 +404,17 @@ class PortalEventListener(
                     if (it.succeeded()) {
                         handleTraceResult(it.result(), portal, portal.viewingPortalArtifact)
                     } else {
-                        val rawFailure = JsonObject(it.cause().message)
-                        val debugInfo = rawFailure.getJsonObject("debugInfo")
-                        if (debugInfo.getString("type") == ServiceUnavailable.name) {
-                            log.warn("Unable to connect to service: " + debugInfo.getString("name"))
+                        val replyException = it.cause() as ReplyException
+                        if (replyException.failureType() == ReplyFailure.TIMEOUT) {
+                            log.warn("Timed out getting local trace results")
                         } else {
-                            it.cause().printStackTrace()
-                            log.error("Failed to get local trace results", it.cause())
+                            val actualException = replyException.cause!!
+                            if (actualException is AccessDenied) {
+                                log.error("Access denied. Reason: " + actualException.reason)
+                            } else {
+                                it.cause().printStackTrace()
+                                log.error("Failed to get local trace results", it.cause())
+                            }
                         }
                     }
                 }
@@ -334,6 +453,7 @@ class PortalEventListener(
     }
 
     private suspend fun refreshLogs(portal: SourcePortal) {
+        if (log.isTraceEnabled) log.trace("Refreshing logs. Portal: {}", portal.portalUuid)
         val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         GlobalScope.launch(vertx.dispatcher()) {
             val logsResult = LogsBridge.queryLogs(
@@ -438,14 +558,12 @@ class PortalEventListener(
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
+                val endTime = ZonedDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MINUTES)
+                val startTime = endTime.minusMinutes(portal.activityView.timeFrame.minutes.toLong())
                 val metricsRequest = GetEndpointMetrics(
                     listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
                     endpointId,
-                    ZonedDuration(
-                        ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
-                        ZonedDateTime.now(),
-                        SkywalkingClient.DurationStep.MINUTE
-                    )
+                    ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
                 )
                 val metrics = EndpointMetricsBridge.getMetrics(metricsRequest, vertx)
                 val metricResult = toProtocol(

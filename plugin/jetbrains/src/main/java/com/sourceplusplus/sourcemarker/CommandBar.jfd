@@ -1,0 +1,49 @@
+JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.11" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
+			"$layoutConstraints": "hidemode 3"
+			"$columnConstraints": "[fill][grow,fill][fill]"
+			"$rowConstraints": "0[grow]0"
+		} ) {
+			name: "this"
+			"preferredSize": new java.awt.Dimension( 500, 40 )
+			"minimumSize": new java.awt.Dimension( 500, 40 )
+			"border": new javax.swing.border.LineBorder( new java.awt.Color( 85, 85, 85, 255 ), 1, false )
+			"background": new java.awt.Color( 43, 43, 43, 255 )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label1"
+				auxiliary() {
+					"JavaCodeGenerator.preInitCode": "label1.setIcon(IconLoader.getIcon(\"/icons/command/logo.svg\"));"
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 0 0"
+			} )
+			add( new FormComponent( "javax.swing.JTextPane" ) {
+				name: "textField1"
+				"background": new java.awt.Color( 37, 37, 37, 255 )
+				"border": new javax.swing.border.CompoundBorder( new javax.swing.border.LineBorder( sfield java.awt.Color darkGray, 1, true ), new javax.swing.border.EmptyBorder( 2, 6, 0, 0 ) )
+				"font": new java.awt.Font( "Roboto Light", 0, 14 )
+				"minimumSize": new java.awt.Dimension( 0, 27 )
+				auxiliary() {
+					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"Search or Type a Command (/)\", commands, lookup);"
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 1 0"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label2"
+				auxiliary() {
+					"JavaCodeGenerator.preInitCode": "label2.setIcon(IconLoader.getIcon(\"/icons/closeIcon.svg\"));"
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 2 0"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 800, 40 )
+		} )
+	}
+}
