@@ -3,6 +3,6 @@
         <codeInsight.lineMarkerProvider language="kotlin"
                                         implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$KotlinDescriptor"/>
         <codeInsight.inlayProvider language="kotlin"
-                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayProvider"/>
+                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayHintProvider"/>
     </extensions>
 </idea-plugin>

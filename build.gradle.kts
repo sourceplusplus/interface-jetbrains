@@ -26,7 +26,6 @@ version = pluginVersion
 repositories {
     mavenCentral()
     jcenter()
-    maven(url = "https://kotlin.bintray.com/kotlinx/")
 }
 
 subprojects {
@@ -38,7 +37,6 @@ subprojects {
     repositories {
         mavenCentral()
         jcenter()
-        maven(url = "https://kotlin.bintray.com/kotlinx/")
         maven(url = "https://jitpack.io")
     }
 
@@ -80,9 +78,9 @@ tasks {
     register("downloadSkywalking") {
         doLast {
             println("Downloading Apache SkyWalking")
-            val f = File(projectDir, "test/e2e/apache-skywalking-apm-es7-8.5.0.tar.gz")
+            val f = File(projectDir, "test/e2e/apache-skywalking-apm-es7-8.6.0.tar.gz")
             if (!f.exists()) {
-                java.net.URL("https://downloads.apache.org/skywalking/8.5.0/apache-skywalking-apm-es7-8.5.0.tar.gz")
+                java.net.URL("https://downloads.apache.org/skywalking/8.6.0/apache-skywalking-apm-es7-8.6.0.tar.gz")
                     .openStream().use { input ->
                         java.io.FileOutputStream(f).use { output ->
                             input.copyTo(output)

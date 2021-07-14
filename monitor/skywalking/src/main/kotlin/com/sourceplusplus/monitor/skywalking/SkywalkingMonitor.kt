@@ -36,31 +36,27 @@ class SkywalkingMonitor(
     @Suppress("MagicNumber")
     private suspend fun setup() {
         log.debug("Apache SkyWalking server: $serverUrl")
-        val client = if (jwtToken.isNullOrEmpty()) {
-            ApolloClient.builder()
-                .serverUrl(serverUrl)
-                .build()
-        } else {
-            var httpBuilder = OkHttpClient().newBuilder()
-                .hostnameVerifier { _, _ -> true }
-                .addInterceptor { chain ->
-                    chain.proceed(
-                        chain.request().newBuilder()
-                            .header("Authorization", "Bearer $jwtToken")
-                            .build()
-                    )
-                }
-            if (certificatePins.isNotEmpty()) {
-                httpBuilder = httpBuilder.sslSocketFactory(
-                    JavaPinning.forPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") }).socketFactory,
-                    JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+        val httpBuilder = OkHttpClient().newBuilder()
+            .hostnameVerifier { _, _ -> true }
+        if (!jwtToken.isNullOrEmpty()) {
+            httpBuilder.addInterceptor { chain ->
+                chain.proceed(
+                    chain.request().newBuilder()
+                        .header("Authorization", "Bearer $jwtToken")
+                        .build()
                 )
             }
-            ApolloClient.builder()
-                .serverUrl(serverUrl)
-                .okHttpClient(httpBuilder.build())
-                .build()
         }
+        if (certificatePins.isNotEmpty()) {
+            httpBuilder.sslSocketFactory(
+                JavaPinning.forPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") }).socketFactory,
+                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+            )
+        }
+        val client = ApolloClient.builder()
+            .serverUrl(serverUrl)
+            .okHttpClient(httpBuilder.build())
+            .build()
 
         val response = client.query(GetTimeInfoQuery()).await()
         if (response.hasErrors()) {

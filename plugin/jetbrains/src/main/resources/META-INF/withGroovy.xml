@@ -3,6 +3,6 @@
         <codeInsight.lineMarkerProvider language="Groovy"
                                         implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$GroovyDescriptor"/>
         <codeInsight.inlayProvider language="Groovy"
-                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayProvider"/>
+                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayHintProvider"/>
     </extensions>
 </idea-plugin>

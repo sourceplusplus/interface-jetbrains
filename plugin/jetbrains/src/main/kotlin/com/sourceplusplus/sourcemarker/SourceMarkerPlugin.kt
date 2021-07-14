@@ -10,6 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -29,6 +30,7 @@ import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfigurati
 import com.sourceplusplus.monitor.skywalking.SkywalkingMonitor
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.backend.PortalServer
+import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
@@ -40,18 +42,22 @@ import com.sourceplusplus.protocol.artifact.trace.TraceSpan
 import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
 import com.sourceplusplus.protocol.artifact.trace.TraceStack
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService
+import com.sourceplusplus.protocol.service.live.LiveViewService
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.sourcemarker.PluginBundle.message
+import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
-import com.sourceplusplus.sourcemarker.service.LiveBreakpointManager
+import com.sourceplusplus.sourcemarker.service.LiveInstrumentManager
+import com.sourceplusplus.sourcemarker.service.LiveViewManager
 import com.sourceplusplus.sourcemarker.service.LogCountIndicators
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import com.sourceplusplus.sourcemarker.settings.getServicePortNormalized
 import com.sourceplusplus.sourcemarker.settings.isSsl
 import com.sourceplusplus.sourcemarker.settings.serviceHostNormalized
+import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.Promise
@@ -75,8 +81,10 @@ import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.impl.DiscoveryImpl
-import io.vertx.servicediscovery.types.EventBusService
+import io.vertx.serviceproxy.ServiceProxyBuilder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
@@ -100,6 +108,7 @@ object SourceMarkerPlugin {
     private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
     private val deploymentIds = mutableListOf<String>()
     val vertx: Vertx
+    private var connectionJob: Job? = null
 
     /**
      * Setup Vert.x EventBus for communication between plugin modules.
@@ -108,7 +117,7 @@ object SourceMarkerPlugin {
         SourceMarker.enabled = false
         val options = if (System.getProperty("sourcemarker.debug.unblocked_threads", "false")!!.toBoolean()) {
             log.info("Removed blocked thread checker")
-            VertxOptions().setBlockedThreadCheckInterval(Long.MAX_VALUE)
+            VertxOptions().setBlockedThreadCheckInterval(Int.MAX_VALUE.toLong())
         } else {
             VertxOptions()
         }
@@ -190,12 +199,16 @@ object SourceMarkerPlugin {
         }
 
         checkRootPackage.future().onComplete {
-            GlobalScope.launch(vertx.dispatcher()) {
+            connectionJob?.cancel()
+            connectionJob = null
+
+            connectionJob = GlobalScope.launch(vertx.dispatcher()) {
                 var connectedMonitor = false
                 try {
                     initServices(config)
                     initMonitor(config)
                     connectedMonitor = true
+                } catch (ignored: CancellationException) {
                 } catch (throwable: Throwable) {
                     //todo: if first time bring up config panel automatically instead of notification
                     val pluginName = message("plugin_name")
@@ -220,59 +233,121 @@ object SourceMarkerPlugin {
                             )
                         )
                     }
-                    log.error("Connection failed", throwable)
+                    log.error("Connection failed. Reason: {}", throwable.message)
                 }
 
+                discoverAvailableServices(config, project)
                 if (connectedMonitor) {
                     initPortal(config)
-                    initMarker(config)
+                    initMarker(config, project)
                     initMapper()
                 }
-                discoverAvailableServices(project)
             }
         }
     }
 
-    private fun discoverAvailableServices(project: Project) {
+    private suspend fun discoverAvailableServices(config: SourceMarkerConfig, project: Project) {
+        val hardcodedConfig: JsonObject = try {
+            JsonObject(
+                Resources.toString(
+                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                )
+            )
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+        if (!hardcodedConfig.getJsonObject("visible_settings").getBoolean("service_discovery")) {
+            return
+        }
+
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
             ServiceDiscoveryOptions().setBackendConfiguration(
-                JsonObject().put("backend-name", "tcp-service-discovery")
+                JsonObject()
+                    .put("backend-name", "tcp-service-discovery")
+                    .put("hardcoded_config", hardcodedConfig)
+                    .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
             )
         )
+        val availableRecords = discovery.getRecords { true }.await()
 
-        EventBusService.getProxy(discovery, LocalTracingService::class.java) {
-            if (it.succeeded()) {
+        //local tracing
+        if (hardcodedConfig.getJsonObject("services").getBoolean("local_tracing")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOCAL_TRACING }) {
                 log.info("Local tracing available")
-                Instance.localTracing = it.result()
+                Instance.localTracing = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LOCAL_TRACING)
+                    .build(LocalTracingService::class.java)
             } else {
                 log.warn("Local tracing unavailable")
             }
+        } else {
+            log.info("Local tracing disabled")
         }
-        EventBusService.getProxy(discovery, LogCountIndicatorService::class.java) {
-            if (it.succeeded()) {
-                log.info("Log count indicator available")
-                Instance.logCountIndicator = it.result()
 
-                vertx.deployVerticle(LogCountIndicators())
+        //log count indicator
+        if (hardcodedConfig.getJsonObject("services").getBoolean("log_count_indicator")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR }) {
+                log.info("Log count indicator available")
+                Instance.logCountIndicator = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR)
+                    .build(LogCountIndicatorService::class.java)
+
+                GlobalScope.launch(vertx.dispatcher()) {
+                    deploymentIds.add(vertx.deployVerticle(LogCountIndicators()).await())
+                }
             } else {
                 log.warn("Log count indicator unavailable")
             }
+        } else {
+            log.info("Log count indicator disabled")
         }
-        EventBusService.getProxy(discovery, LiveInstrumentService::class.java) {
-            if (it.succeeded()) {
-                log.info("Live instruments available")
-                Instance.liveInstrument = it.result()
 
+        //live instrument
+        if (hardcodedConfig.getJsonObject("services").getBoolean("live_instrument")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_INSTRUMENT }) {
+                log.info("Live instruments available")
+                SourceMarker.addGlobalSourceMarkEventListener(LiveLogStatusManager)
+
+                Instance.liveInstrument = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LIVE_INSTRUMENT)
+                    .build(LiveInstrumentService::class.java)
                 ApplicationManager.getApplication().invokeLater {
                     BreakpointHitWindowService.getInstance(project).showEventsWindow()
                 }
-                val breakpointListener = LiveBreakpointManager(project)
-                vertx.deployVerticle(breakpointListener)
+                val breakpointListener = LiveInstrumentManager(project)
+                GlobalScope.launch(vertx.dispatcher()) {
+                    deploymentIds.add(vertx.deployVerticle(breakpointListener).await())
+                }
                 project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
             } else {
                 log.warn("Live instruments unavailable")
             }
+        } else {
+            log.info("Live instruments disabled")
+        }
+
+        //live view
+        if (hardcodedConfig.getJsonObject("services").getBoolean("live_view")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_VIEW }) {
+                log.info("Live views available")
+                Instance.liveView = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
+                    .build(LiveViewService::class.java)
+
+                val viewListener = LiveViewManager(project)
+                GlobalScope.launch(vertx.dispatcher()) {
+                    deploymentIds.add(vertx.deployVerticle(viewListener).await())
+                }
+            } else {
+                log.warn("Live views unavailable")
+            }
+        } else {
+            log.info("Live views disabled")
         }
     }
 
@@ -289,6 +364,9 @@ object SourceMarkerPlugin {
         deploymentIds.forEach { vertx.undeploy(it).await() }
         deploymentIds.clear()
         clearMarkers.future().await()
+
+        TCPServiceDiscoveryBackend.socket?.close()?.await()
+        TCPServiceDiscoveryBackend.socket = null
     }
 
     private suspend fun initServices(config: SourceMarkerConfig) {
@@ -334,7 +412,7 @@ object SourceMarkerPlugin {
             ).await()
             req.end().await()
             val resp = req.response().await()
-            if (resp.statusCode() == 200) {
+            if (resp.statusCode() in 200..299) {
                 val body = resp.body().await().toString()
                 config.serviceToken = body
             } else {
@@ -392,6 +470,18 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initPortal(config: SourceMarkerConfig) {
+        val hardcodedConfig: JsonObject = try {
+            JsonObject(
+                Resources.toString(
+                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
+                )
+            )
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
+            .getBoolean("service_discovery")
+
         //todo: portal should be connected to event bus without bridge
         val sockJSHandler = SockJSHandler.create(vertx)
         val portalBridgeOptions = SockJSBridgeOptions()
@@ -410,12 +500,18 @@ object SourceMarkerPlugin {
 
         //todo: load portal config (custom themes, etc)
         deploymentIds.add(
-            vertx.deployVerticle(PortalServer(bridgeServer.actualPort(), config.portalRefreshIntervalMs)).await()
+            vertx.deployVerticle(
+                PortalServer(
+                    bridgeServer.actualPort(),
+                    config.portalRefreshIntervalMs,
+                    !serviceDiscoveryEnabled
+                )
+            ).await()
         )
         deploymentIds.add(vertx.deployVerticle(PortalEventListener(config)).await())
     }
 
-    private fun initMarker(config: SourceMarkerConfig) {
+    private fun initMarker(config: SourceMarkerConfig, project: Project) {
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
 
         val gutterMarkConfig = GutterMarkConfiguration()
@@ -450,6 +546,9 @@ object SourceMarkerPlugin {
             log.warn("Could not determine root source package. Skipped adding create source mark filter...")
         }
         SourceMarker.enabled = true
+
+        //force marker re-processing
+        DaemonCodeAnalyzer.getInstance(project).restart()
     }
 
     /**

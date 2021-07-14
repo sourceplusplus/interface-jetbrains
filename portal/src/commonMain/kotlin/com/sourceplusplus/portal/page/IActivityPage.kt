@@ -1,7 +1,6 @@
 package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.IPortalPage
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.portal.PortalConfiguration
 

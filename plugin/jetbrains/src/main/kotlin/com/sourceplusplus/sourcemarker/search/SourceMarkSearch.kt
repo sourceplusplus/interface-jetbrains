@@ -1,6 +1,10 @@
 package com.sourceplusplus.sourcemarker.search
 
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.LogicalPosition
+import com.intellij.openapi.util.TextRange
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.ExpressionSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
@@ -15,6 +19,20 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkSearch {
+
+    fun findByEndpointName(endpointName: String): SourceMark? {
+        return SourceMarker.getSourceMarks()
+            .firstOrNull {
+                it.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)?.getEndpointName(it) == endpointName
+            }
+    }
+
+    fun findByLogId(logId: String): SourceMark? {
+        return SourceMarker.getSourceMarks()
+            .firstOrNull {
+                it.getUserData(SourceMarkKeys.LOG_ID) == logId
+            }
+    }
 
     suspend fun findSourceMark(artifact: ArtifactQualifiedName): SourceMark? {
         return when (artifact.type) {
@@ -34,11 +52,22 @@ object SourceMarkSearch {
     }
 
     suspend fun findInheritedSourceMarks(logPattern: String): List<SourceMark> {
-        val rootMark = findSourceMark(logPattern)
-        return if (rootMark != null) {
-            listOf(rootMark, rootMark.sourceFileMarker.getClassSourceMarks()[0])
+        val rootMark = findSourceMark(logPattern) ?: return emptyList()
+        return findInheritedSourceMarks(rootMark)
+    }
+
+    fun findInheritedSourceMarks(rootMark: SourceMark): List<SourceMark> {
+        return if (rootMark.isExpressionMark) {
+            val methodMark = SourceMarker.getSourceMark(
+                rootMark.artifactQualifiedName.substringBefore("#"), SourceMark.Type.GUTTER
+            )
+            //todo: proper class crawl
+            listOfNotNull(rootMark, methodMark) + rootMark.sourceFileMarker.getClassSourceMarks()
+        } else if (rootMark.isMethodMark) {
+            //todo: proper class crawl
+            listOf(rootMark) + rootMark.sourceFileMarker.getClassSourceMarks()
         } else {
-            emptyList()
+            listOf(rootMark)
         }
     }
 
@@ -59,5 +88,24 @@ object SourceMarkSearch {
         } else {
             null
         }
+    }
+
+    fun findMethodSourceMark(editor: Editor, fileMarker: SourceFileMarker, line: Int): MethodSourceMark? {
+        return fileMarker.getSourceMarks().find {
+            if (it is MethodSourceMark) {
+                if (it.configuration.activateOnKeyboardShortcut) {
+                    //+1 on end offset so match is made even right after method end
+                    val incTextRange = TextRange(
+                        it.getPsiMethod().sourcePsi!!.textRange.startOffset,
+                        it.getPsiMethod().sourcePsi!!.textRange.endOffset + 1
+                    )
+                    incTextRange.contains(editor.logicalPositionToOffset(LogicalPosition(line - 1, 0)))
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        } as MethodSourceMark?
     }
 }

@@ -1,0 +1,34 @@
+JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.11" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
+			"$layoutConstraints": "hidemode 3"
+			"$columnConstraints": "7[grow,fill]"
+			"$rowConstraints": "2[]2[]2"
+		} ) {
+			name: "this"
+			"background": new java.awt.Color( 37, 37, 37, 255 )
+			"maximumSize": new java.awt.Dimension( 2147483647, 38 )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "commandLabel"
+				"text": ""
+				"foreground": new java.awt.Color( 225, 72, 59, 255 )
+				"font": new java.awt.Font( "Roboto Light", 1, 14 )
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 0 0"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "descriptionLabel"
+				"text": ""
+				"foreground": new java.awt.Color( 187, 187, 187, 75 )
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 0 1"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 45 )
+		} )
+	}
+}

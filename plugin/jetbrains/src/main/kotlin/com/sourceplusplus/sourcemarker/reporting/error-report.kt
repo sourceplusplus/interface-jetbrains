@@ -35,6 +35,7 @@ import org.eclipse.egit.github.core.Label
 import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
+import org.slf4j.LoggerFactory
 import java.awt.Component
 import java.io.IOException
 import java.io.PrintWriter
@@ -50,6 +51,7 @@ import java.util.*
  */
 private object AnonymousFeedback {
 
+    private val log = LoggerFactory.getLogger(AnonymousFeedback::class.java)
     private const val gitRepoUser = "sourceplusplus"
     private const val gitRepo = "sourcemarker"
 
@@ -84,6 +86,7 @@ private object AnonymousFeedback {
                 if (isNewIssue) SubmissionStatus.NEW_ISSUE else SubmissionStatus.DUPLICATE
             )
         } catch (e: Exception) {
+            log.error("Failed to submit feedback", e)
             return SubmittedReportInfo(
                 null,
                 PluginBundle.message("report.error.connection.failure"),

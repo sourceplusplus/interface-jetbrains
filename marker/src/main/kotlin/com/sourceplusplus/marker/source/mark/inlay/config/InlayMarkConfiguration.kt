@@ -1,5 +1,7 @@
 package com.sourceplusplus.marker.source.mark.inlay.config
 
+import com.intellij.openapi.editor.Inlay
+import com.intellij.openapi.util.Ref
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponentProvider
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
 import com.sourceplusplus.marker.source.mark.api.config.SourceMarkConfiguration
@@ -16,6 +18,8 @@ data class InlayMarkConfiguration(
     override var applySourceMarkFilter: ApplySourceMarkFilter = ApplySourceMarkFilter.NONE,
     var strictlyManualCreation: Boolean = false,
     var virtualText: InlayMarkVirtualText? = null,
+    var showComponentInlay: Boolean = false,
+    var inlayRef: Ref<Inlay<*>>? = null,
     var activateOnMouseClick: Boolean = true,
     override var activateOnKeyboardShortcut: Boolean = false, //todo: remove
     override var componentProvider: SourceMarkComponentProvider = SourceMarkJcefComponentProvider()

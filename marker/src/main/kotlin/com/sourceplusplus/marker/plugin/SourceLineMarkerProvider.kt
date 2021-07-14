@@ -45,6 +45,9 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             if (gutterMark == null) {
                 gutterMark = SourceMarkerUtils.getOrCreateClassGutterMark(fileMarker, element) ?: return null
             }
+            if (!gutterMark.isVisible()) {
+                return null
+            }
 
             var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
             if (gutterMark.configuration.activateOnMouseClick) {
@@ -77,6 +80,9 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             if (gutterMark == null) {
                 gutterMark = SourceMarkerUtils.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
             }
+            if (!gutterMark.isVisible()) {
+                return null
+            }
 
             var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
             if (gutterMark.configuration.activateOnMouseClick) {
@@ -97,6 +103,10 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             //todo: only works for manually created expression gutter marks atm
             if (element.getUserData(SourceKey.GutterMark) != null) {
                 val gutterMark = element.getUserData(SourceKey.GutterMark)!!
+                if (!gutterMark.isVisible()) {
+                    return null
+                }
+
                 var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
                 if (gutterMark.configuration.activateOnMouseClick) {
                     navigationHandler = GutterIconNavigationHandler { _, elt ->

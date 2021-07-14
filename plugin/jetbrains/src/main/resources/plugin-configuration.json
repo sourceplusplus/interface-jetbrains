@@ -8,5 +8,11 @@
   "token_uri": null,
   "certificate_pin": null,
   "service_port": null,
-  "tcp_service_port": null
+  "tcp_service_port": null,
+  "services": {
+    "local_tracing": false,
+    "log_count_indicator": false,
+    "live_instrument": false,
+    "live_view": false
+  }
 }

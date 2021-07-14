@@ -2,7 +2,6 @@ package com.sourceplusplus.marker.source.mark.gutter
 
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfiguration
-import org.slf4j.LoggerFactory
 
 /**
  * A [SourceMark] which adds visualizations in the panel to the left of source code.
@@ -16,6 +15,6 @@ interface GutterMark : SourceMark {
         get() = SourceMark.Type.GUTTER
     override val configuration: GutterMarkConfiguration
 
-    fun isVisible(): Boolean
-    fun setVisible(visible: Boolean)
+    override fun isVisible(): Boolean
+    override fun setVisible(visible: Boolean)
 }

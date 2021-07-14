@@ -152,7 +152,9 @@ class ActivityPage(
             }
             activityContent {
                 navBar {
-                    timeDropdown(*QueryTimeFrame.values()) {
+                    timeDropdown(
+                        *QueryTimeFrame.values().filterNot { it == QueryTimeFrame.LAST_MINUTE }.toTypedArray()
+                    ) {
                         eb.send(
                             SetMetricTimeFrame,
                             json("portalUuid" to portalUuid, "metricTimeFrame" to it.name)
