@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
@@ -13,6 +14,7 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import org.jetbrains.annotations.NotNull
+import org.slf4j.LoggerFactory
 
 /**
  * todo: description.
@@ -22,7 +24,14 @@ import org.jetbrains.annotations.NotNull
  */
 open class SourceMarkPopupAction : AnAction() {
 
+    private val log = LoggerFactory.getLogger(SourceMarkPopupAction::class.java)
+
     override fun update(@NotNull e: AnActionEvent) {
+        if (!SourceMarker.enabled) {
+            log.warn("SourceMarker popup action disabled")
+            return
+        }
+
         val project: Project? = e.project
         e.presentation.isEnabledAndVisible = project != null
     }
