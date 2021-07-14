@@ -256,6 +256,9 @@ object SourceMarkerPlugin {
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
+        if (!hardcodedConfig.getJsonObject("visible_settings").getBoolean("service_discovery")) {
+            return
+        }
 
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
