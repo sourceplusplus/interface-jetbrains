@@ -30,6 +30,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,6 +54,7 @@ public class LogStatusBar extends JPanel {
     private Instant latestTime;
     private Log latestLog;
     private JWindow popup;
+    private LiveLogConfigurationPanel configurationPanel;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -237,19 +240,27 @@ public class LogStatusBar extends JPanel {
                     }
                     final String finalLogPattern = logPattern;
 
+                    String condition = null;
+                    Long expirationDate = null;
+                    int hitRateLimit = 1000;
+                    if (configurationPanel != null) {
+                        condition = configurationPanel.getCondition().getExpression();
+                        expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
+                    }
+
                     LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
                     LiveLog log = new LiveLog(
                             finalLogPattern,
                             varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
                             sourceLocation,
-                            null,
-                            null,
+                            condition,
+                            expirationDate,
                             Integer.MAX_VALUE,
                             null,
                             false,
                             false,
                             false,
-                            1000
+                            hitRateLimit
                     );
                     instrumentService.addLiveInstrument(log, it -> {
                         if (it.succeeded()) {
@@ -280,10 +291,6 @@ public class LogStatusBar extends JPanel {
         liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (popup != null) {
-                    popup.dispose();
-                    popup = null;
-                }
                 ((AutocompleteField) liveLogTextField).setEditMode(true);
 
                 if (liveLog != null) {
@@ -315,6 +322,14 @@ public class LogStatusBar extends JPanel {
             }
         });
         liveLogTextField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (popup != null) {
+                    popup.dispose();
+                    popup = null;
+                }
+            }
+
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
                 liveLogTextField.setBorder(new CompoundBorder(
@@ -366,22 +381,48 @@ public class LogStatusBar extends JPanel {
             return null;
         });
 
+        AtomicBoolean configPressed = new AtomicBoolean(false);
         configPanel.setCursor(Cursor.getDefaultCursor());
         configPanel.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                configPressed.set(true);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                configPressed.set(false);
+            }
+
             @Override
             public void mouseMoved(MouseEvent e) {
                 configPanel.setBackground(Color.decode("#3C3C3C"));
             }
         });
+
+        AtomicLong popupLastOpened = new AtomicLong();
         addRecursiveMouseListener(configPanel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (System.currentTimeMillis() - popupLastOpened.get() <= 200) {
+                    return;
+                }
+
                 popup = new JWindow(SwingUtilities.getWindowAncestor(LogStatusBar.this));
                 popup.setType(Window.Type.POPUP);
                 popup.setAlwaysOnTop(true);
 
-                LiveLogConfigurationPanel panel = new LiveLogConfigurationPanel();
-                popup.add(panel);
+                LiveLogConfigurationPanel previousConfigurationPanel = configurationPanel;
+                configurationPanel = new LiveLogConfigurationPanel(inlayMark);
+                if (previousConfigurationPanel != null) {
+                    configurationPanel.setCondition(previousConfigurationPanel.getCondition());
+                    configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
+                    configurationPanel.setHitLimit(previousConfigurationPanel.getHitLimit());
+                    configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
+                    configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
+                }
+
+                popup.add(configurationPanel);
                 popup.setPreferredSize(new Dimension(LogStatusBar.this.getWidth(), popup.getPreferredSize().height));
                 popup.pack();
                 popup.setLocation(configPanel.getLocationOnScreen().x - 1,
@@ -395,6 +436,8 @@ public class LogStatusBar extends JPanel {
                         if (popup != null) {
                             popup.dispose();
                             popup = null;
+
+                            popupLastOpened.set(System.currentTimeMillis());
                         }
                     }
                 });

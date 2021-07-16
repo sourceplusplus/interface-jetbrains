@@ -25,10 +25,9 @@ new FormModel {
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"
 				} )
-				add( new FormComponent( "javax.swing.JTextField" ) {
-					name: "textField1"
-					"background": new java.awt.Color( 37, 37, 37, 255 )
-					"font": new java.awt.Font( "Roboto Light", 0, 14 )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "panel7"
+					"minimumSize": new java.awt.Dimension( 0, 27 )
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 1"
 				} )
@@ -57,7 +56,7 @@ new FormModel {
 					"value": "cell 0 0"
 				} )
 				add( new FormComponent( "javax.swing.JSpinner" ) {
-					name: "spinner2"
+					name: "hitLimitSpinner"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					"model": new javax.swing.SpinnerNumberModel {
 						minimum: 100
@@ -96,59 +95,66 @@ new FormModel {
 					name: "panel1"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
-						name: "radioButton2"
+						name: "expiration15MinButton"
 						"text": "15 Minutes"
 						"selected": true
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						"font": new java.awt.Font( "Roboto Light", 0, 15 )
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 0 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
-						name: "radioButton3"
+						name: "expiration30MinButton"
 						"text": "30 Minutes"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						"font": #Font0
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 1 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
-						name: "radioButton4"
+						name: "expiration1HrButton"
 						"text": "1 Hour"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						"font": #Font0
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 2 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
-						name: "radioButton5"
+						name: "expiration3HrsButton"
 						"text": "3 Hours"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						"font": #Font0
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 3 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
-						name: "radioButton6"
+						name: "expiration6HrsButton"
 						"text": "6 Hours"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						"font": #Font0
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 4 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
-						name: "radioButton1"
+						name: "expiration12HrsButton"
 						"text": "12 Hours"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						"font": #Font0
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 5 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
-						name: "radioButton7"
+						name: "expiration24HrsButton"
 						"text": "24 Hours"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						"font": new java.awt.Font( "Roboto Light", 0, 15 )
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 6 0"
 					} )
@@ -187,7 +193,7 @@ new FormModel {
 					name: "panel2"
 					"background": new java.awt.Color( 43, 43, 43, 255 )
 					add( new FormComponent( "javax.swing.JSpinner" ) {
-						name: "spinner1"
+						name: "rateLimitCountSpinner"
 						"model": new javax.swing.SpinnerNumberModel {
 							minimum: 1
 							value: 1
@@ -203,10 +209,12 @@ new FormModel {
 						"value": "cell 1 0"
 					} )
 					add( new FormComponent( "javax.swing.JComboBox" ) {
-						name: "comboBox2"
+						name: "rateLimitStepCombobox"
 						"model": new javax.swing.DefaultComboBoxModel {
 							selectedItem: "second"
 							addElement( "second" )
+							addElement( "minute" )
+							addElement( "hour" )
 						}
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 2 0"
@@ -220,6 +228,11 @@ new FormModel {
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
 			"size": new java.awt.Dimension( 930, 175 )
+		} )
+		add( new FormNonVisual( "javax.swing.ButtonGroup" ) {
+			name: "expirationButtonGroup"
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 191 )
 		} )
 	}
 }
