@@ -13,6 +13,7 @@ import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
+import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 
@@ -50,6 +51,7 @@ public class LogStatusBar extends JPanel {
     private LiveLog liveLog;
     private Instant latestTime;
     private Log latestLog;
+    private JWindow popup;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -278,6 +280,10 @@ public class LogStatusBar extends JPanel {
         liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
+                if (popup != null) {
+                    popup.dispose();
+                    popup = null;
+                }
                 ((AutocompleteField) liveLogTextField).setEditMode(true);
 
                 if (liveLog != null) {
@@ -295,7 +301,9 @@ public class LogStatusBar extends JPanel {
             @Override
             public void focusLost(FocusEvent e) {
                 if (liveLog == null && liveLogTextField.getText().equals("")) {
-                    dispose();
+                    if (popup == null) {
+                        dispose();
+                    }
                 } else if (liveLog != null) {
                     ((AutocompleteField) liveLogTextField).setEditMode(false);
                     removeActiveDecorations();
@@ -365,6 +373,36 @@ public class LogStatusBar extends JPanel {
                 configPanel.setBackground(Color.decode("#3C3C3C"));
             }
         });
+        addRecursiveMouseListener(configPanel, new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                popup = new JWindow(SwingUtilities.getWindowAncestor(LogStatusBar.this));
+                popup.setType(Window.Type.POPUP);
+                popup.setAlwaysOnTop(true);
+
+                LiveLogConfigurationPanel panel = new LiveLogConfigurationPanel();
+                popup.add(panel);
+                popup.setPreferredSize(new Dimension(LogStatusBar.this.getWidth(), popup.getPreferredSize().height));
+                popup.pack();
+                popup.setLocation(configPanel.getLocationOnScreen().x - 1,
+                        configPanel.getLocationOnScreen().y + LogStatusBar.this.getHeight() - 2);
+
+                popup.setVisible(true);
+
+                popup.addWindowFocusListener(new WindowAdapter() {
+                    @Override
+                    public void windowLostFocus(WindowEvent e) {
+                        if (popup != null) {
+                            popup.dispose();
+                            popup = null;
+                        }
+                    }
+                });
+            }
+        }, () -> {
+            removeActiveDecorations();
+            return null;
+        });
 
         timeLabel.setCursor(Cursor.getDefaultCursor());
 
@@ -372,6 +410,10 @@ public class LogStatusBar extends JPanel {
     }
 
     private void dispose() {
+        if (popup != null) {
+            popup.dispose();
+            popup = null;
+        }
         inlayMark.dispose(true, false);
 
         if (liveLog != null) {
