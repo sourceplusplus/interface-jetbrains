@@ -241,7 +241,7 @@ public class LogStatusBar extends JPanel {
                     final String finalLogPattern = logPattern;
 
                     String condition = null;
-                    Long expirationDate = null;
+                    long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
                     int hitRateLimit = 1000;
                     if (configurationPanel != null) {
                         condition = configurationPanel.getCondition().getExpression();
