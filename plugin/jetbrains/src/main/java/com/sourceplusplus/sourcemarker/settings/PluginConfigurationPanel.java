@@ -37,6 +37,7 @@ public class PluginConfigurationPanel {
     private JTextField serviceHostTextField;
     private JTextField accessTokenTextField;
     private JPanel testPanel;
+    private JLabel portalRefreshLabel;
     private SourceMarkerConfig config;
     private final SpinnerNumberModel portalRefreshModel;
     private CertificatePinPanel myCertificatePins;
@@ -64,6 +65,13 @@ public class PluginConfigurationPanel {
         portalRefreshModel = new SpinnerNumberModel();
         portalRefreshModel.setMinimum(0);
         portalRefreshSpinner.setModel(portalRefreshModel);
+
+        boolean serviceDiscoveryEnabled = configuration.getJsonObject("visible_settings")
+                .getBoolean("service_discovery");
+        if (serviceDiscoveryEnabled) {
+            portalRefreshLabel.setVisible(false);
+            portalRefreshSpinner.setVisible(false);
+        }
     }
 
     public JComponent getContentPane() {
