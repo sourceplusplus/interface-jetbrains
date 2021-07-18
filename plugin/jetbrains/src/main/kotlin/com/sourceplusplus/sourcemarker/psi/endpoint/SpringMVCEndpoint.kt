@@ -11,6 +11,7 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.expressions.UInjectionHost
+import org.jetbrains.uast.java.JavaUSimpleNameReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
 import org.jetbrains.uast.kotlin.expressions.KotlinUCollectionLiteralExpression
 import java.util.*
@@ -65,14 +66,19 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
     ): Optional<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
             var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
-            if (endpointNameExpr == null) endpointNameExpr =
-                annotation.attributeValues.find { it.name == "path" }!!.expression
+            if (endpointNameExpr == null) {
+                endpointNameExpr = annotation.attributeValues.find { it.name == "path" }?.expression
+            }
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
-            val value = (endpointNameExpr as UInjectionHost).evaluateToString()
+            val value = if (endpointNameExpr == null) "" else (endpointNameExpr as UInjectionHost).evaluateToString()
             val method = if (methodExpr is UQualifiedReferenceExpression) {
                 methodExpr.selector.toString()
             } else {
-                (methodExpr as GrUReferenceExpression).resolvedName.toString()
+                when (methodExpr) {
+                    is JavaUSimpleNameReferenceExpression -> methodExpr.resolvedName.toString()
+                    is GrUReferenceExpression -> methodExpr.resolvedName.toString()
+                    else -> throw UnsupportedOperationException(methodExpr.javaClass.name)
+                }
             }
             return Optional.of(DetectedEndpoint("{$method}$value", false))
         } else {
