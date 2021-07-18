@@ -7,9 +7,7 @@ import com.sourceplusplus.sourcemarker.psi.EndpointDetector.DetectedEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUReferenceExpression
-import org.jetbrains.uast.UAnnotation
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.UQualifiedReferenceExpression
+import org.jetbrains.uast.*
 import org.jetbrains.uast.expressions.UInjectionHost
 import org.jetbrains.uast.java.JavaUSimpleNameReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
@@ -43,7 +41,31 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                     when {
                         annotation.lang === Language.findLanguageByID("JAVA")
                                 || annotation.lang === Language.findLanguageByID("Groovy") -> {
-                            promise.complete(handleJavaOrGroovyAnnotation(annotation, annotationName))
+                            val detectedEndpoint = handleJavaOrGroovyAnnotation(false, annotation, annotationName)
+                            val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
+                                ?.findAnnotation(requestMappingAnnotation)
+                            if (classRequestMapping != null) {
+                                val classEndpoint =
+                                    handleJavaOrGroovyAnnotation(true, classRequestMapping, requestMappingAnnotation)
+                                if (detectedEndpoint.isPresent && classEndpoint.isPresent) {
+                                    var classEndpointPath = classEndpoint.get().path!!
+                                    if (classEndpointPath.endsWith("/")) {
+                                        classEndpointPath = classEndpointPath.substringBeforeLast("/")
+                                    }
+                                    promise.complete(
+                                        Optional.of(
+                                            DetectedEndpoint(
+                                                "{${detectedEndpoint.get().type}}" + classEndpointPath + detectedEndpoint.get().path,
+                                                false
+                                            )
+                                        )
+                                    )
+                                } else {
+                                    promise.complete(detectedEndpoint)
+                                }
+                            } else {
+                                promise.complete(detectedEndpoint)
+                            }
                         }
                         annotation.lang === Language.findLanguageByID("kotlin") -> {
                             promise.complete(handleKotlinAnnotation(annotation, annotationName))
@@ -61,6 +83,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
     }
 
     private fun handleJavaOrGroovyAnnotation(
+        isClass: Boolean,
         annotation: UAnnotation,
         annotationName: String
     ): Optional<DetectedEndpoint> {
@@ -69,6 +92,16 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             if (endpointNameExpr == null) {
                 endpointNameExpr = annotation.attributeValues.find { it.name == "path" }?.expression
             }
+            if (endpointNameExpr == null) {
+                endpointNameExpr = annotation.attributeValues.find { it.name == null }?.expression
+            }
+            if (isClass) {
+                val value = if (endpointNameExpr == null) {
+                    "/"
+                } else (endpointNameExpr as UInjectionHost).evaluateToString()
+                return Optional.of(DetectedEndpoint(value.toString(), false, value.toString()))
+            }
+
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
             val value = if (endpointNameExpr == null) "" else (endpointNameExpr as UInjectionHost).evaluateToString()
             val method = if (methodExpr is UQualifiedReferenceExpression) {
@@ -80,7 +113,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                     else -> throw UnsupportedOperationException(methodExpr.javaClass.name)
                 }
             }
-            return Optional.of(DetectedEndpoint("{$method}$value", false))
+            return Optional.of(DetectedEndpoint("{$method}$value", false, value, method))
         } else {
             var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }
             if (endpointNameExpr == null) endpointNameExpr = annotation.attributeValues.find { it.name == "path" }
@@ -93,7 +126,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             } as String
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
-            return Optional.of(DetectedEndpoint("{$method}$value", false))
+            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
         }
     }
 
@@ -109,7 +142,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             val method = ((methodExpr as KotlinUCollectionLiteralExpression)
                 .valueArguments[0] as KotlinUQualifiedReferenceExpression)
                 .selector.asSourceString()
-            return Optional.of(DetectedEndpoint("{$method}$value", false))
+            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
@@ -122,7 +155,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
-            return Optional.of(DetectedEndpoint("{$method}$value", false))
+            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
         }
     }
 }
