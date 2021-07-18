@@ -35,6 +35,129 @@ class KotlinEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     @Test
+    fun `SpringMVC RequestMapping method with static import`() {
+        @Language("Kt") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import org.springframework.web.bind.annotation.RequestMethod.*
+                    class TestController {
+                        @RequestMapping(method = [GET], value = ["/doGet"])
+                        fun doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.kt", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(2, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/doGet", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC RequestMapping method with no value`() {
+        @Language("Kt") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import org.springframework.web.bind.annotation.RequestMethod.*
+                    class TestController {
+                        @RequestMapping(method = [GET])
+                        fun doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.kt", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(2, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC RequestMapping method with class request mapping`() {
+        @Language("Kt") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import org.springframework.web.bind.annotation.RequestMethod.*
+                    @RequestMapping("/todos")
+                    class TestController {
+                        @RequestMapping(method = [GET])
+                        fun doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.kt", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(2, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/todos", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC RequestMapping method with class request mapping 2`() {
+        @Language("Kt") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import org.springframework.web.bind.annotation.RequestMethod.*
+                    @RequestMapping("/todos/")
+                    class TestController {
+                        @RequestMapping(method = [GET])
+                        fun doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.kt", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(2, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/todos", result.get().name)
+            }
+        }
+    }
+
+    @Test
+    fun `SpringMVC RequestMapping method with class request mapping 3`() {
+        @Language("Kt") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import org.springframework.web.bind.annotation.RequestMethod.*
+                    @RequestMapping("/todos")
+                    class TestController {
+                        @RequestMapping(method = [GET], value = ["/doGet"])
+                        fun doGet() {}
+                    }
+                """.trimIndent()
+        val uFile = myFixture.configureByText("TestController.kt", code).toUElement() as UFile
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, uFile.classes.size)
+            assertEquals(2, uFile.classes[0].methods.size)
+
+            runBlocking {
+                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                assertTrue(result.isPresent)
+                assertEquals("{GET}/todos/doGet", result.get().name)
+            }
+        }
+    }
+
+    @Test
     fun `SpringMVC GetMapping method`() {
         @Language("Kt") val code = """
                     import org.springframework.web.bind.annotation.GetMapping
