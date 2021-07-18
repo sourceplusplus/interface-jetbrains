@@ -116,11 +116,11 @@ public class LogStatusBar extends JPanel {
         setupComponents();
 
         if (liveLog != null) {
-            ((AutocompleteField) textField1).setEditMode(false);
+            ((AutocompleteField) liveLogTextField).setEditMode(false);
             removeActiveDecorations();
             addTimeField();
         } else {
-            ((AutocompleteField) textField1).setEditMode(true);
+            ((AutocompleteField) liveLogTextField).setEditMode(true);
         }
     }
 
@@ -128,18 +128,18 @@ public class LogStatusBar extends JPanel {
         if (liveLog == null) return;
         this.latestTime = time;
         this.latestLog = latestLog;
-        if (((AutocompleteField) textField1).getEditMode()) {
+        if (((AutocompleteField) liveLogTextField).getEditMode()) {
             return; //ignore as they're likely updating text
         }
 
         String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
         String formattedMessage = latestLog.getFormattedMessage();
-        if (!label4.getText().equals(formattedTime) || !textField1.getText().equals(formattedMessage)) {
+        if (!timeLabel.getText().equals(formattedTime) || !liveLogTextField.getText().equals(formattedMessage)) {
             SwingUtilities.invokeLater(() -> {
-                label4.setText(formattedTime);
-                textField1.setText(formattedMessage);
+                timeLabel.setText(formattedTime);
+                liveLogTextField.setText(formattedMessage);
 
-                textField1.getStyledDocument().setCharacterAttributes(
+                liveLogTextField.getStyledDocument().setCharacterAttributes(
                         0, formattedMessage.length(),
                         StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE), true
                 );
@@ -151,8 +151,8 @@ public class LogStatusBar extends JPanel {
                     varOffset += varIndex - minIndex;
                     minIndex = varIndex + "{}".length();
 
-                    textField1.getStyledDocument().setCharacterAttributes(varOffset, var.length(),
-                            textField1.getStyle("numbers"), true);
+                    liveLogTextField.getStyledDocument().setCharacterAttributes(varOffset, var.length(),
+                            liveLogTextField.getStyle("numbers"), true);
                     varOffset += var.length();
                 }
             });
@@ -164,12 +164,12 @@ public class LogStatusBar extends JPanel {
     }
 
     public void focus() {
-        textField1.grabFocus();
-        textField1.requestFocusInWindow();
+        liveLogTextField.grabFocus();
+        liveLogTextField.requestFocusInWindow();
     }
 
     private void addTimeField() {
-        label4.setVisible(true);
+        timeLabel.setVisible(true);
         separator1.setVisible(true);
     }
 
@@ -177,21 +177,21 @@ public class LogStatusBar extends JPanel {
         SwingUtilities.invokeLater(() -> {
 //            label7.setIcon(IconLoader.getIcon("/icons/expand.svg"));
 //            label8.setIcon(IconLoader.getIcon("/icons/search.svg"));
-            label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
-            panel1.setBackground(Color.decode("#252525"));
+            closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+            configPanel.setBackground(Color.decode("#252525"));
 
-            if (!((AutocompleteField) textField1).getEditMode()) {
-                textField1.setBorder(new CompoundBorder(
+            if (!((AutocompleteField) liveLogTextField).getEditMode()) {
+                liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                textField1.setBackground(Color.decode("#2B2B2B"));
-                textField1.setEditable(false);
+                liveLogTextField.setBackground(Color.decode("#2B2B2B"));
+                liveLogTextField.setEditable(false);
             }
         });
     }
 
     private void setupComponents() {
-        textField1.addKeyListener(new KeyAdapter() {
+        liveLogTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_TAB) {
@@ -205,7 +205,7 @@ public class LogStatusBar extends JPanel {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    if (textField1.getText().equals("")) {
+                    if (liveLogTextField.getText().equals("")) {
                         return;
                     }
 
@@ -225,7 +225,7 @@ public class LogStatusBar extends JPanel {
                         });
                     }
 
-                    String logPattern = textField1.getText();
+                    String logPattern = liveLogTextField.getText();
                     ArrayList<String> varMatches = new ArrayList<>();
                     Matcher m = VARIABLE_PATTERN.matcher(logPattern);
                     while (m.find()) {
@@ -252,7 +252,7 @@ public class LogStatusBar extends JPanel {
                     instrumentService.addLiveInstrument(log, it -> {
                         if (it.succeeded()) {
                             inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
-                            ((AutocompleteField) textField1).setEditMode(false);
+                            ((AutocompleteField) liveLogTextField).setEditMode(false);
                             removeActiveDecorations();
 
                             LoggerDetector detector = inlayMark.getUserData(
@@ -274,11 +274,11 @@ public class LogStatusBar extends JPanel {
                 }
             }
         });
-        textField1.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
-        textField1.addFocusListener(new FocusAdapter() {
+        liveLogTextField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+        liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                ((AutocompleteField) textField1).setEditMode(true);
+                ((AutocompleteField) liveLogTextField).setEditMode(true);
 
                 if (liveLog != null) {
                     String originalMessage = liveLog.getLogFormat();
@@ -288,16 +288,16 @@ public class LogStatusBar extends JPanel {
                                 Matcher.quoteReplacement("$" + var)
                         );
                     }
-                    textField1.setText(originalMessage);
+                    liveLogTextField.setText(originalMessage);
                 }
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                if (liveLog == null && textField1.getText().equals("")) {
+                if (liveLog == null && liveLogTextField.getText().equals("")) {
                     dispose();
                 } else if (liveLog != null) {
-                    ((AutocompleteField) textField1).setEditMode(false);
+                    ((AutocompleteField) liveLogTextField).setEditMode(false);
                     removeActiveDecorations();
 
                     if (latestLog != null) {
@@ -306,19 +306,19 @@ public class LogStatusBar extends JPanel {
                 }
             }
         });
-        textField1.addMouseListener(new MouseAdapter() {
+        liveLogTextField.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
-                textField1.setBorder(new CompoundBorder(
+                liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 1, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                textField1.setBackground(Color.decode("#252525"));
-                textField1.setEditable(true);
+                liveLogTextField.setBackground(Color.decode("#252525"));
+                liveLogTextField.setEditable(true);
             }
 
             @Override
             public void mouseExited(MouseEvent mouseEvent) {
-                if (!((AutocompleteField) textField1).getEditMode()) {
+                if (!((AutocompleteField) liveLogTextField).getEditMode()) {
                     removeActiveDecorations();
                 }
             }
@@ -331,14 +331,14 @@ public class LogStatusBar extends JPanel {
             }
         });
 
-        label2.setCursor(Cursor.getDefaultCursor());
-        label2.addMouseMotionListener(new MouseAdapter() {
+        closeLabel.setCursor(Cursor.getDefaultCursor());
+        closeLabel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                label2.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
+                closeLabel.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
             }
         });
-        addRecursiveMouseListener(label2, new MouseAdapter() {
+        addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 dispose();
@@ -346,27 +346,27 @@ public class LogStatusBar extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                label2.setIcon(IconLoader.getIcon("/icons/closeIconPressed.svg"));
+                closeLabel.setIcon(IconLoader.getIcon("/icons/closeIconPressed.svg"));
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                label2.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
+                closeLabel.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
             }
         }, () -> {
             removeActiveDecorations();
             return null;
         });
 
-        panel1.setCursor(Cursor.getDefaultCursor());
-        panel1.addMouseMotionListener(new MouseAdapter() {
+        configPanel.setCursor(Cursor.getDefaultCursor());
+        configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                panel1.setBackground(Color.decode("#3C3C3C"));
+                configPanel.setBackground(Color.decode("#3C3C3C"));
             }
         });
 
-        label4.setCursor(Cursor.getDefaultCursor());
+        timeLabel.setCursor(Cursor.getDefaultCursor());
 
         setCursor(Cursor.getDefaultCursor());
     }
@@ -394,13 +394,13 @@ public class LogStatusBar extends JPanel {
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
-        panel1 = new JPanel();
-        label1 = new JLabel();
-        label3 = new JLabel();
-        label4 = new JLabel();
+        configPanel = new JPanel();
+        configLabel = new JLabel();
+        configDropdownLabel = new JLabel();
+        timeLabel = new JLabel();
         separator1 = new JSeparator();
-        textField1 = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false);
-        label2 = new JLabel();
+        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false);
+        closeLabel = new JLabel();
 
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
@@ -417,13 +417,13 @@ public class LogStatusBar extends JPanel {
             // rows
             "0[grow]0"));
 
-        //======== panel1 ========
+        //======== configPanel ========
         {
-            panel1.setBackground(new Color(37, 37, 37));
-            panel1.setPreferredSize(null);
-            panel1.setMinimumSize(null);
-            panel1.setMaximumSize(null);
-            panel1.setLayout(new MigLayout(
+            configPanel.setBackground(new Color(37, 37, 37));
+            configPanel.setPreferredSize(null);
+            configPanel.setMinimumSize(null);
+            configPanel.setMaximumSize(null);
+            configPanel.setLayout(new MigLayout(
                 "fill,insets 0,hidemode 3",
                 // columns
                 "5[fill]" +
@@ -431,22 +431,22 @@ public class LogStatusBar extends JPanel {
                 // rows
                 "[grow]"));
 
-            //---- label1 ----
-            label1.setIcon(IconLoader.getIcon("/icons/align-left.svg"));
-            panel1.add(label1, "cell 0 0");
+            //---- configLabel ----
+            configLabel.setIcon(IconLoader.getIcon("/icons/align-left.svg"));
+            configPanel.add(configLabel, "cell 0 0");
 
-            //---- label3 ----
-            label3.setIcon(IconLoader.getIcon("/icons/angle-down.svg"));
-            panel1.add(label3, "cell 1 0");
+            //---- configDropdownLabel ----
+            configDropdownLabel.setIcon(IconLoader.getIcon("/icons/angle-down.svg"));
+            configPanel.add(configDropdownLabel, "cell 1 0");
         }
-        add(panel1, "cell 0 0, grow");
+        add(configPanel, "cell 0 0, grow");
 
-        //---- label4 ----
-        label4.setIcon(IconLoader.getIcon("/icons/clock.svg"));
-        label4.setFont(new Font("Roboto Light", Font.PLAIN, 14));
-        label4.setIconTextGap(8);
-        label4.setVisible(false);
-        add(label4, "cell 1 0,gapx null 8");
+        //---- timeLabel ----
+        timeLabel.setIcon(IconLoader.getIcon("/icons/clock.svg"));
+        timeLabel.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+        timeLabel.setIconTextGap(8);
+        timeLabel.setVisible(false);
+        add(timeLabel, "cell 1 0,gapx null 8");
 
         //---- separator1 ----
         separator1.setPreferredSize(new Dimension(5, 20));
@@ -456,29 +456,29 @@ public class LogStatusBar extends JPanel {
         separator1.setVisible(false);
         add(separator1, "cell 1 0");
 
-        //---- textField1 ----
-        textField1.setBackground(new Color(37, 37, 37));
-        textField1.setBorder(new CompoundBorder(
-                new LineBorder(Color.darkGray, 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
-        textField1.setFont(new Font("Roboto Light", Font.PLAIN, 14));
-        textField1.setMinimumSize(new Dimension(0, 27));
-        add(textField1, "cell 2 0");
+        //---- liveLogTextField ----
+        liveLogTextField.setBackground(new Color(37, 37, 37));
+        liveLogTextField.setBorder(new CompoundBorder(
+            new LineBorder(Color.darkGray, 1, true),
+            new EmptyBorder(2, 6, 0, 0)));
+        liveLogTextField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+        liveLogTextField.setMinimumSize(new Dimension(0, 27));
+        add(liveLogTextField, "cell 2 0");
 
-        //---- label2 ----
-        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
-        add(label2, "cell 3 0");
+        //---- closeLabel ----
+        closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+        add(closeLabel, "cell 3 0");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
-    private JPanel panel1;
-    private JLabel label1;
-    private JLabel label3;
-    private JLabel label4;
+    private JPanel configPanel;
+    private JLabel configLabel;
+    private JLabel configDropdownLabel;
+    private JLabel timeLabel;
     private JSeparator separator1;
-    private JTextPane textField1;
-    private JLabel label2;
+    private JTextPane liveLogTextField;
+    private JLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
