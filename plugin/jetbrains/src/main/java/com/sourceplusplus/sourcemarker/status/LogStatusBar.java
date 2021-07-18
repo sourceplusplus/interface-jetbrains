@@ -78,7 +78,7 @@ public class LogStatusBar extends JPanel {
         }).collect(Collectors.toList());
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
-                    String var = substringAfterLast(" ", text);
+                    String var = substringAfterLast(" ", text.toLowerCase());
                     return var.startsWith("$") && v.toLowerCase().contains(var.substring(1));
                 }).map(it -> new AutocompleteFieldRow() {
                     public String getText() {
