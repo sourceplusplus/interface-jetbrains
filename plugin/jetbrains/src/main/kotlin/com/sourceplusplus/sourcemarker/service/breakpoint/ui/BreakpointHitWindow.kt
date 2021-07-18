@@ -5,6 +5,7 @@ import com.intellij.execution.ui.layout.PlaceInGrid
 import com.intellij.icons.AllIcons
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Disposer
@@ -103,7 +104,9 @@ class BreakpointHitWindow(project: Project, executionPointHighlighter: Execution
     }
 
     fun showExecutionLine() {
-        this.executionPointManager.onChanged(stackFrameManager)
+        ApplicationManager.getApplication().runReadAction {
+            executionPointManager.onChanged(stackFrameManager)
+        }
     }
 
     override fun dispose() {}

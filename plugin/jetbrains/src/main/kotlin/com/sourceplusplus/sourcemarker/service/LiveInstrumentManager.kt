@@ -206,14 +206,16 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         manager: XBreakpointManager, liveBreakpoints: List<XBreakpoint<*>>, validInstrumentIds: Set<String>
     ) {
         ApplicationManager.getApplication().invokeLater {
-            liveBreakpoints.forEach {
-                val bp = it as XLineBreakpointImpl<LiveBreakpointProperties>
-                val bpProps = it.properties
-                if (bpProps?.getBreakpointId() == null) {
-                    bp.dispose()
-                    manager.removeBreakpoint(bp)
-                } else if (bpProps.getBreakpointId() !in validInstrumentIds) {
-                    breakpointRemoved(bp)
+            ApplicationManager.getApplication().runWriteAction {
+                liveBreakpoints.forEach {
+                    val bp = it as XLineBreakpointImpl<LiveBreakpointProperties>
+                    val bpProps = it.properties
+                    if (bpProps?.getBreakpointId() == null) {
+                        bp.dispose()
+                        manager.removeBreakpoint(bp)
+                    } else if (bpProps.getBreakpointId() !in validInstrumentIds) {
+                        breakpointRemoved(bp)
+                    }
                 }
             }
         }
