@@ -141,7 +141,9 @@ class EndpointDetector {
      */
     data class DetectedEndpoint(
         val name: String,
-        val internal: Boolean
+        val internal: Boolean,
+        val path: String? = null,
+        val type: String? = null,
     )
 
     /**
