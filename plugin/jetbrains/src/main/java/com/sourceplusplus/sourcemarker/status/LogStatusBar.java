@@ -132,14 +132,15 @@ public class LogStatusBar extends JPanel {
         if (liveLog == null) return;
         this.latestTime = time;
         this.latestLog = latestLog;
-        if (((AutocompleteField) liveLogTextField).getEditMode()) {
-            return; //ignore as they're likely updating text
-        }
 
         String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
         String formattedMessage = latestLog.getFormattedMessage();
         if (!timeLabel.getText().equals(formattedTime) || !liveLogTextField.getText().equals(formattedMessage)) {
             SwingUtilities.invokeLater(() -> {
+                if (((AutocompleteField) liveLogTextField).getEditMode()) {
+                    return; //ignore as they're likely updating text
+                }
+
                 timeLabel.setText(formattedTime);
                 liveLogTextField.setText(formattedMessage);
 
