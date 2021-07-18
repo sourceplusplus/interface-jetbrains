@@ -79,8 +79,7 @@ public class LogStatusBar extends JPanel {
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
                     String var = substringAfterLast(" ", text);
-                    return var.startsWith("$") && v.toLowerCase().contains(var.substring(1))
-                            && !v.toLowerCase().equals(var.substring(1));
+                    return var.startsWith("$") && v.toLowerCase().contains(var.substring(1));
                 }).map(it -> new AutocompleteFieldRow() {
                     public String getText() {
                         return "$" + it;
@@ -484,7 +483,7 @@ public class LogStatusBar extends JPanel {
         configDropdownLabel = new JLabel();
         timeLabel = new JLabel();
         separator1 = new JSeparator();
-        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false);
+        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false);
         closeLabel = new JLabel();
 
         //======== this ========

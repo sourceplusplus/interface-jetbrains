@@ -31,7 +31,8 @@ class AutocompleteField(
     private val allLookup: List<AutocompleteFieldRow>,
     private val lookup: Function<String, List<AutocompleteFieldRow>>,
     private val lineNumber: Int = 0,
-    private val replaceCommandOnTab: Boolean = false
+    private val replaceCommandOnTab: Boolean = false,
+    private val autocompleteOnEnter: Boolean = true
 ) : JTextPane(), FocusListener, DocumentListener, KeyListener {
 
     private val results: MutableList<AutocompleteFieldRow>
@@ -135,8 +136,12 @@ class AutocompleteField(
     }
 
     private fun showAutocompletePopup() {
-        popup.setLocation(locationOnScreen.x, locationOnScreen.y + height + 6)
-        popup.isVisible = true
+        try {
+            popup.setLocation(locationOnScreen.x, locationOnScreen.y + height + 6)
+            popup.isVisible = true
+        } catch (ignored: IllegalComponentStateException) {
+            //trying to open popup too soon/late
+        }
     }
 
     private fun hideAutocompletePopup() {
@@ -192,6 +197,7 @@ class AutocompleteField(
                 list.selectedIndex = index + 1
             }
         } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
+            if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) return
             val text = list.selectedValue
             if (text != null) {
                 if (replaceCommandOnTab) {
