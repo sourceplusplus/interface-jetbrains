@@ -33,3 +33,7 @@ exceptions:
 empty-blocks:
   EmptyFunctionBlock:
     active: false
+
+complexity:
+  LongMethod:
+    excludes: ['**/test/**']
