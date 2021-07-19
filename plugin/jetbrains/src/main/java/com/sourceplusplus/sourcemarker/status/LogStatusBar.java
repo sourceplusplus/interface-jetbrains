@@ -508,7 +508,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             popup.dispose();
             popup = null;
         }
-        inlayMark.dispose(true, false);
+        inlayMark.dispose(true);
 
         if (liveLog != null) {
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {

@@ -80,56 +80,51 @@ object LiveLogStatusManager : SourceMarkEventListener {
             return
         }
 
-        val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
-        if (findInlayMark.isPresent) {
-            val inlayMark = findInlayMark.get()
-            if (!fileMarker.containsSourceMark(inlayMark)) {
-                val wrapperPanel = JPanel()
-                wrapperPanel.layout = BorderLayout()
+        val inlayMark = SourceMarkerUtils.createExpressionInlayMark(fileMarker, lineNumber)
+        if (!fileMarker.containsSourceMark(inlayMark)) {
+            val wrapperPanel = JPanel()
+            wrapperPanel.layout = BorderLayout()
 
-                //determine available vars
-                val scopeVars = mutableListOf<String>()
-                val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
-                val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-                    override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-                }
-                PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-                for (i in 0 until variablesProcessor.size()) {
-                    scopeVars.add(variablesProcessor.getResult(i).name!!)
-                }
-
-                val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
-                val statusBar = LogStatusBar(
-                    LiveSourceLocation(qualifiedClassName, lineNumber),
-                    scopeVars,
-                    inlayMark
-                )
-                wrapperPanel.add(statusBar)
-                statusBar.setEditor(editor)
-                editor.scrollingModel.addVisibleAreaListener(statusBar)
-
-                inlayMark.configuration.showComponentInlay = true
-                inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
-                    override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
-                }
-                inlayMark.visible.set(true)
-                inlayMark.apply()
-
-                val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                sourcePortal.configuration.currentPage = PageType.LOGS
-                sourcePortal.configuration.statusBar = true
-
-                SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
-                    val latestLog = it.body().logs.first()
-                    statusBar.setLatestLog(
-                        Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog
-                    )
-                }
-
-                statusBar.focus()
+            //determine available vars
+            val scopeVars = mutableListOf<String>()
+            val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
+            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
             }
-        } else {
-            log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
+            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+            for (i in 0 until variablesProcessor.size()) {
+                scopeVars.add(variablesProcessor.getResult(i).name!!)
+            }
+
+            val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
+            val statusBar = LogStatusBar(
+                LiveSourceLocation(qualifiedClassName, lineNumber),
+                scopeVars,
+                inlayMark
+            )
+            wrapperPanel.add(statusBar)
+            statusBar.setEditor(editor)
+            editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+            inlayMark.configuration.showComponentInlay = true
+            inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+            }
+            inlayMark.visible.set(true)
+            inlayMark.apply()
+
+            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+            sourcePortal.configuration.currentPage = PageType.LOGS
+            sourcePortal.configuration.statusBar = true
+
+            SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
+                val latestLog = it.body().logs.first()
+                statusBar.setLatestLog(
+                    Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog
+                )
+            }
+
+            statusBar.focus()
         }
     }
 

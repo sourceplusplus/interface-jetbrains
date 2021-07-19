@@ -90,9 +90,7 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
 
             @Override
             public void focusLost(FocusEvent e) {
-                if (textField1.getText().equals("")) {
                     dispose();
-                }
             }
         });
 

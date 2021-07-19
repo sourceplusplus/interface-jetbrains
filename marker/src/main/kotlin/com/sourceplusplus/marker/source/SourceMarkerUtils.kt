@@ -136,6 +136,53 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
+     * @since 0.2.2
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark {
+        val element = getElementAtLine(fileMarker.psiFile, lineNumber) as PsiStatement
+        return createExpressionInlayMark(fileMarker, element, autoApply = autoApply)
+    }
+
+    /**
+     * todo: description.
+     *
+     * @since 0.2.2
+     */
+    @JvmStatic
+    @JvmOverloads
+    @Synchronized
+    fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiStatement,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark {
+        log.trace("createExpressionInlayMark: $element")
+        val statementExpression: PsiElement = getUniversalExpression(element)
+        val inlayMark = fileMarker.createSourceMark(
+            statementExpression.toUElement() as UExpression,
+            SourceMark.Type.INLAY
+        ) as ExpressionInlayMark
+        return if (autoApply) {
+            if (inlayMark.canApply()) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                throw IllegalStateException("Could not apply inlay mark: $inlayMark")
+            }
+        } else {
+            inlayMark
+        }
+    }
+
+    /**
+     * todo: description.
+     *
      * @since 0.1.0
      */
     @JvmStatic
