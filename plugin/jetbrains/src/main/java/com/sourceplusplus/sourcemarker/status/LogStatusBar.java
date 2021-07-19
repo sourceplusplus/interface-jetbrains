@@ -122,11 +122,11 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         setupComponents();
 
         if (liveLog != null) {
-            ((AutocompleteField) liveLogTextField).setEditMode(false);
+            liveLogTextField.setEditMode(false);
             removeActiveDecorations();
             addTimeField();
         } else {
-            ((AutocompleteField) liveLogTextField).setEditMode(true);
+            liveLogTextField.setEditMode(true);
         }
 
         liveLogTextField.addSaveListener(this::saveLiveLog);
@@ -146,7 +146,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         String formattedMessage = latestLog.getFormattedMessage();
         if (!timeLabel.getText().equals(formattedTime) || !liveLogTextField.getText().equals(formattedMessage)) {
             SwingUtilities.invokeLater(() -> {
-                if (((AutocompleteField) liveLogTextField).getEditMode()) {
+                if (liveLogTextField.getEditMode()) {
                     return; //ignore as they're likely updating text
                 }
 
@@ -194,7 +194,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
             configPanel.setBackground(Color.decode("#252525"));
 
-            if (!((AutocompleteField) liveLogTextField).getEditMode()) {
+            if (!liveLogTextField.getEditMode()) {
                 liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
@@ -202,6 +202,14 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 liveLogTextField.setEditable(false);
             }
         });
+    }
+
+    private void showEditableMode() {
+        liveLogTextField.setBorder(new CompoundBorder(
+                new LineBorder(Color.darkGray, 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
+        liveLogTextField.setBackground(Color.decode("#252525"));
+        liveLogTextField.setEditable(true);
     }
 
     private void setupComponents() {
@@ -227,8 +235,9 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
+                if (liveLogTextField.getEditMode()) return;
                 liveLogTextField.reset();
-                ((AutocompleteField) liveLogTextField).setEditMode(true);
+                liveLogTextField.setEditMode(true);
 
                 if (liveLog != null) {
                     String originalMessage = liveLog.getLogFormat();
@@ -248,8 +257,8 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                     if (popup == null) {
                         dispose();
                     }
-                } else if (liveLog != null) {
-                    ((AutocompleteField) liveLogTextField).setEditMode(false);
+                } else if (!liveLogTextField.getEditMode()) {
+                    liveLogTextField.setEditMode(false);
                     removeActiveDecorations();
 
                     if (latestLog != null) {
@@ -269,16 +278,12 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
-                liveLogTextField.setBorder(new CompoundBorder(
-                        new LineBorder(Color.darkGray, 1, true),
-                        new EmptyBorder(2, 6, 0, 0)));
-                liveLogTextField.setBackground(Color.decode("#252525"));
-                liveLogTextField.setEditable(true);
+                showEditableMode();
             }
 
             @Override
             public void mouseExited(MouseEvent mouseEvent) {
-                if (!((AutocompleteField) liveLogTextField).getEditMode()) {
+                if (!liveLogTextField.getEditMode()) {
                     removeActiveDecorations();
                 }
             }
@@ -318,19 +323,8 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             return null;
         });
 
-        AtomicBoolean configPressed = new AtomicBoolean(false);
         configPanel.setCursor(Cursor.getDefaultCursor());
         configPanel.addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                configPressed.set(true);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                configPressed.set(false);
-            }
-
             @Override
             public void mouseMoved(MouseEvent e) {
                 configPanel.setBackground(Color.decode("#3C3C3C"));
@@ -345,6 +339,8 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                     return;
                 }
                 liveLogTextField.setShowSaveButton(true);
+                liveLogTextField.setEditMode(true);
+                showEditableMode();
 
                 popup = new JWindow(SwingUtilities.getWindowAncestor(LogStatusBar.this));
                 popup.setType(Window.Type.POPUP);
@@ -447,7 +443,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         instrumentService.addLiveInstrument(log, it -> {
             if (it.succeeded()) {
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
-                ((AutocompleteField) liveLogTextField).setEditMode(false);
+                liveLogTextField.setEditMode(false);
                 removeActiveDecorations();
 
                 LoggerDetector detector = inlayMark.getUserData(
