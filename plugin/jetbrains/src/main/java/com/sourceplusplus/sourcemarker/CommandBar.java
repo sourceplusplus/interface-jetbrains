@@ -36,6 +36,7 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
 
     private final Editor editor;
     private final InlayMark inlayMark;
+    private boolean disposed = false;
 
     public CommandBar(Editor editor, InlayMark inlayMark) {
         this.editor = editor;
@@ -124,6 +125,8 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
     }
 
     private void dispose() {
+        if (disposed) return;
+        disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);
         inlayMark.dispose(true, false);
     }
