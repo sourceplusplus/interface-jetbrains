@@ -69,7 +69,11 @@ object SourceMarkerUtils {
         val element = getElementAtLine(fileMarker.psiFile, lineNumber)
         return if (element is PsiStatement) {
             Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply = autoApply))
-        } else Optional.empty()
+        } else if (element is PsiElement) {
+            Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply = autoApply))
+        } else {
+            Optional.empty()
+        }
     }
 
     /**
@@ -126,6 +130,62 @@ object SourceMarkerUtils {
         } else {
             if (fileMarker.removeIfInvalid(inlayMark)) {
                 statementExpression.putUserData(SourceKey.InlayMark, null)
+                null
+            } else {
+                inlayMark
+            }
+        }
+    }
+
+    /**
+     * todo: description.
+     *
+     * @since 0.2.2
+     */
+    @JvmStatic
+    @JvmOverloads
+    @Synchronized
+    fun getOrCreateExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark? {
+        log.trace("getOrCreateExpressionInlayMark: $element")
+        var inlayMark = element.getUserData(SourceKey.InlayMark) as ExpressionInlayMark?
+        if (inlayMark == null) {
+            inlayMark = fileMarker.getExpressionSourceMark(
+                element,
+                SourceMark.Type.INLAY
+            ) as ExpressionInlayMark?
+            if (inlayMark != null) {
+                if (inlayMark.updatePsiExpression(element.toUElement() as UExpression)) {
+                    element.putUserData(SourceKey.InlayMark, inlayMark)
+                } else {
+                    inlayMark = null
+                }
+            }
+        }
+
+        return if (inlayMark == null) {
+            val uExpression = element.toUElement()
+            if (uExpression !is UExpression) return null
+            inlayMark = fileMarker.createSourceMark(
+                uExpression,
+                SourceMark.Type.INLAY
+            ) as ExpressionInlayMark
+            return if (autoApply) {
+                if (inlayMark.canApply()) {
+                    inlayMark.apply(true)
+                    inlayMark
+                } else {
+                    null
+                }
+            } else {
+                inlayMark
+            }
+        } else {
+            if (fileMarker.removeIfInvalid(inlayMark)) {
+                element.putUserData(SourceKey.InlayMark, null)
                 null
             } else {
                 inlayMark
