@@ -380,6 +380,10 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                         configurationPanel.setHitLimit(previousConfigurationPanel.getHitLimit());
                         configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
                         configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
+                    } else if (liveLog != null) {
+                        configurationPanel.setConditionByString(liveLog.getCondition());
+                        configurationPanel.setHitLimit(liveLog.getHitLimit());
+                        //todo: rest
                     }
                 }
 
@@ -448,9 +452,13 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         String condition = null;
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
         int hitRateLimit = 1000;
+        int hitLimit = 100;
         if (configurationPanel != null) {
             condition = configurationPanel.getCondition().getExpression();
             expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
+            hitLimit = configurationPanel.getHitLimit();
+
+            configurationPanel.setNewDefaults();
         }
 
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
@@ -460,7 +468,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 sourceLocation,
                 condition,
                 expirationDate,
-                Integer.MAX_VALUE,
+                hitLimit,
                 null,
                 false,
                 false,

@@ -63,6 +63,10 @@ public class LiveLogConfigurationPanel extends JPanel {
         panel7.add(comboBox.getComponent());
     }
 
+    public void setConditionByString(String condition) {
+        //todo: this
+    }
+
     public void setCondition(XExpression condition) {
         this.condition = condition;
         comboBox.setExpression(condition);
@@ -147,6 +151,14 @@ public class LiveLogConfigurationPanel extends JPanel {
                 || expirationInMinutes != getExpirationInMinutes()
                 || rateLimitCount != getRateLimitCount()
                 || !Objects.equals(rateLimitStep, getRateLimitStep());
+    }
+
+    public void setNewDefaults() {
+        setCondition(getCondition());
+        setHitLimit(getHitLimit());
+        setExpirationInMinutes(getExpirationInMinutes());
+        setRateLimitCount(getRateLimitCount());
+        setRateLimitStep(getRateLimitStep());
     }
 
     private void initComponents() {
