@@ -231,7 +231,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                     }
 
                     boolean logMessageChanged = !originalMessage.equals(liveLogTextField.getText());
-                    if (configurationPanel != null) {
+                    if (configurationPanel != null && liveLogTextField.getEditMode()) {
                         liveLogTextField.setShowSaveButton(configurationPanel.isChanged() || logMessageChanged);
                     } else if (liveLogTextField.getEditMode()) {
                         liveLogTextField.setShowSaveButton(logMessageChanged);
