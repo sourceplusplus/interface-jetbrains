@@ -60,6 +60,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     private JWindow popup;
     private LiveLogConfigurationPanel configurationPanel;
     private AtomicBoolean settingFormattedMessage = new AtomicBoolean(false);
+    private boolean disposed = false;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -500,6 +501,8 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     }
 
     private void dispose() {
+        if (disposed) return;
+        disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);
         if (popup != null) {
             popup.dispose();

@@ -34,10 +34,11 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
                     && !v.getText().equalsIgnoreCase(text)
             ).collect(Collectors.toList());
 
+    private final Editor editor;
     private final InlayMark inlayMark;
-    private Editor editor;
 
-    public CommandBar(InlayMark inlayMark) {
+    public CommandBar(Editor editor, InlayMark inlayMark) {
+        this.editor = editor;
         this.inlayMark = inlayMark;
 
         initComponents();
@@ -48,10 +49,6 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
         textField1.hideAutocompletePopup();
-    }
-
-    public void setEditor(Editor editor) {
-        this.editor = editor;
     }
 
     public void focus() {
@@ -127,6 +124,7 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
     }
 
     private void dispose() {
+        editor.getScrollingModel().removeVisibleAreaListener(this);
         inlayMark.dispose(true, false);
     }
 

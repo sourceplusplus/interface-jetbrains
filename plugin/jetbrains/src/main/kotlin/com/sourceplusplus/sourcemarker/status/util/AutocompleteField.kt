@@ -224,7 +224,11 @@ class AutocompleteField(
                     caretPosition = getText().length
                 } else {
                     val varCompleted = getText().substringAfterLast(commandDelimiter)
-                    setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
+                    if (text.getText().startsWith("$" + varCompleted)) {
+                        setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
+                    } else {
+                        setText(getText().substring(0, getText().length - varCompleted.length) + text.getText().substring(commandDelimiter.length))
+                    }
                     caretPosition = getText().length
                 }
             }
@@ -293,7 +297,7 @@ class AutocompleteField(
                 row.setDescription(entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString()))
             }
 
-            if (isSelected && results.size > 1) {
+            if (isSelected) {
                 row.background = Color.decode("#3C3C3C")
             }
             return row

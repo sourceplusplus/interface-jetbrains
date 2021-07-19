@@ -84,9 +84,8 @@ object CommandBarController {
 
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
-                val commandBar = CommandBar(inlayMark)
+                val commandBar = CommandBar(editor, inlayMark)
                 wrapperPanel.add(commandBar)
-                commandBar.setEditor(editor)
                 editor.scrollingModel.addVisibleAreaListener(commandBar)
 
                 inlayMark.configuration.showComponentInlay = true
