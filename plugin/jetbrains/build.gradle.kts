@@ -42,7 +42,7 @@ tasks.getByName<JavaExec>("runIde") {
 }
 
 changelog {
-    version = pluginVersion
+    version.set(pluginVersion)
 }
 
 repositories {
