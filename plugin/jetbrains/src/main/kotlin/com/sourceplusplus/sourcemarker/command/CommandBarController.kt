@@ -84,9 +84,10 @@ object CommandBarController {
 
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
-                val statusBar = CommandBar(inlayMark)
-                wrapperPanel.add(statusBar)
-                statusBar.setEditor(editor)
+                val commandBar = CommandBar(inlayMark)
+                wrapperPanel.add(commandBar)
+                commandBar.setEditor(editor)
+                editor.scrollingModel.addVisibleAreaListener(commandBar)
 
                 inlayMark.configuration.showComponentInlay = true
                 inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
@@ -99,7 +100,7 @@ object CommandBarController {
                 sourcePortal.configuration.currentPage = PageType.LOGS
                 sourcePortal.configuration.statusBar = true
 
-                statusBar.focus()
+                commandBar.focus()
             }
         } else if (tryingAboveLine) {
             log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)

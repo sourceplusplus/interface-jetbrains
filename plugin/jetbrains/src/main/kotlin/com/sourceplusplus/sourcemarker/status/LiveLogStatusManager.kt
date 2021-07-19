@@ -106,6 +106,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
                 )
                 wrapperPanel.add(statusBar)
                 statusBar.setEditor(editor)
+                editor.scrollingModel.addVisibleAreaListener(statusBar)
 
                 inlayMark.configuration.showComponentInlay = true
                 inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
@@ -157,6 +158,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
 
                     val statusBar = LogStatusBar(liveLog.location, scopeVars, inlayMark, liveLog, editor)
                     wrapperPanel.add(statusBar)
+                    editor.scrollingModel.addVisibleAreaListener(statusBar)
 
                     inlayMark.configuration.showComponentInlay = true
                     inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {

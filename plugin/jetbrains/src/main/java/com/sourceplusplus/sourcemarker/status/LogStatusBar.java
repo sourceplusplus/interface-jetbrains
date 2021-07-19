@@ -1,6 +1,8 @@
 package com.sourceplusplus.sourcemarker.status;
 
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.event.VisibleAreaEvent;
+import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.util.ui.UIUtil;
@@ -39,7 +41,7 @@ import java.util.stream.Collectors;
 
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class LogStatusBar extends JPanel {
+public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -126,6 +128,13 @@ public class LogStatusBar extends JPanel {
         } else {
             ((AutocompleteField) liveLogTextField).setEditMode(true);
         }
+
+        liveLogTextField.addSaveListener(this::saveLiveLog);
+    }
+
+    @Override
+    public void visibleAreaChanged(VisibleAreaEvent e) {
+        liveLogTextField.hideAutocompletePopup();
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
@@ -210,80 +219,7 @@ public class LogStatusBar extends JPanel {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    if (liveLogTextField.getText().equals("")) {
-                        return;
-                    }
-
-                    if (liveLog != null) {
-                        //editing existing live log; remove old one first
-                        LiveLog oldLiveLog = liveLog;
-                        liveLog = null;
-                        latestTime = null;
-                        latestLog = null;
-
-                        SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
-                            if (it.succeeded()) {
-                                LiveLogStatusManager.INSTANCE.removeActiveLiveLog(oldLiveLog);
-                            } else {
-                                it.cause().printStackTrace();
-                            }
-                        });
-                    }
-
-                    String logPattern = liveLogTextField.getText();
-                    ArrayList<String> varMatches = new ArrayList<>();
-                    Matcher m = VARIABLE_PATTERN.matcher(logPattern);
-                    while (m.find()) {
-                        String var = m.group(1);
-                        logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-                        varMatches.add(var);
-                    }
-                    final String finalLogPattern = logPattern;
-
-                    String condition = null;
-                    long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
-                    int hitRateLimit = 1000;
-                    if (configurationPanel != null) {
-                        condition = configurationPanel.getCondition().getExpression();
-                        expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
-                    }
-
-                    LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
-                    LiveLog log = new LiveLog(
-                            finalLogPattern,
-                            varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
-                            sourceLocation,
-                            condition,
-                            expirationDate,
-                            Integer.MAX_VALUE,
-                            null,
-                            false,
-                            false,
-                            false,
-                            hitRateLimit
-                    );
-                    instrumentService.addLiveInstrument(log, it -> {
-                        if (it.succeeded()) {
-                            inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
-                            ((AutocompleteField) liveLogTextField).setEditMode(false);
-                            removeActiveDecorations();
-
-                            LoggerDetector detector = inlayMark.getUserData(
-                                    SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
-                            );
-                            detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
-                            liveLog = (LiveLog) it.result();
-                            LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
-
-                            addTimeField();
-
-                            //focus back to IDE
-                            IdeFocusManager.getInstance(editor.getProject())
-                                    .requestFocusInProject(editor.getContentComponent(), editor.getProject());
-                        } else {
-                            it.cause().printStackTrace();
-                        }
-                    });
+                    saveLiveLog();
                 }
             }
         });
@@ -291,6 +227,7 @@ public class LogStatusBar extends JPanel {
         liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
+                liveLogTextField.reset();
                 ((AutocompleteField) liveLogTextField).setEditMode(true);
 
                 if (liveLog != null) {
@@ -407,6 +344,7 @@ public class LogStatusBar extends JPanel {
                 if (System.currentTimeMillis() - popupLastOpened.get() <= 200) {
                     return;
                 }
+                liveLogTextField.setShowSaveButton(true);
 
                 popup = new JWindow(SwingUtilities.getWindowAncestor(LogStatusBar.this));
                 popup.setType(Window.Type.POPUP);
@@ -452,7 +390,86 @@ public class LogStatusBar extends JPanel {
         setCursor(Cursor.getDefaultCursor());
     }
 
+    private void saveLiveLog() {
+        if (liveLogTextField.getText().equals("")) {
+            return;
+        }
+        liveLogTextField.setShowSaveButton(false);
+
+        if (liveLog != null) {
+            //editing existing live log; remove old one first
+            LiveLog oldLiveLog = liveLog;
+            liveLog = null;
+            latestTime = null;
+            latestLog = null;
+
+            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
+                if (it.succeeded()) {
+                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(oldLiveLog);
+                } else {
+                    it.cause().printStackTrace();
+                }
+            });
+        }
+
+        String logPattern = liveLogTextField.getText();
+        ArrayList<String> varMatches = new ArrayList<>();
+        Matcher m = VARIABLE_PATTERN.matcher(logPattern);
+        while (m.find()) {
+            String var = m.group(1);
+            logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+            varMatches.add(var);
+        }
+        final String finalLogPattern = logPattern;
+
+        String condition = null;
+        long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
+        int hitRateLimit = 1000;
+        if (configurationPanel != null) {
+            condition = configurationPanel.getCondition().getExpression();
+            expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
+        }
+
+        LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
+        LiveLog log = new LiveLog(
+                finalLogPattern,
+                varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
+                sourceLocation,
+                condition,
+                expirationDate,
+                Integer.MAX_VALUE,
+                null,
+                false,
+                false,
+                false,
+                hitRateLimit
+        );
+        instrumentService.addLiveInstrument(log, it -> {
+            if (it.succeeded()) {
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
+                ((AutocompleteField) liveLogTextField).setEditMode(false);
+                removeActiveDecorations();
+
+                LoggerDetector detector = inlayMark.getUserData(
+                        SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
+                );
+                detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
+                liveLog = (LiveLog) it.result();
+                LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
+
+                addTimeField();
+
+                //focus back to IDE
+                IdeFocusManager.getInstance(editor.getProject())
+                        .requestFocusInProject(editor.getContentComponent(), editor.getProject());
+            } else {
+                it.cause().printStackTrace();
+            }
+        });
+    }
+
     private void dispose() {
+        editor.getScrollingModel().removeVisibleAreaListener(this);
         if (popup != null) {
             popup.dispose();
             popup = null;
@@ -563,7 +580,7 @@ public class LogStatusBar extends JPanel {
     private JLabel configDropdownLabel;
     private JLabel timeLabel;
     private JSeparator separator1;
-    private JTextPane liveLogTextField;
+    private AutocompleteField liveLogTextField;
     private JLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

@@ -1,6 +1,8 @@
 package com.sourceplusplus.sourcemarker;
 
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.event.VisibleAreaEvent;
+import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class CommandBar extends JPanel {
+public class CommandBar extends JPanel implements VisibleAreaListener {
 
     private final Function<String, List<AutocompleteFieldRow>> lookup = text -> Arrays.stream(CommandAction.values())
             .filter(v -> !text.isEmpty()
@@ -40,6 +42,12 @@ public class CommandBar extends JPanel {
 
         initComponents();
         setupComponents();
+        setCursor(Cursor.getDefaultCursor());
+    }
+
+    @Override
+    public void visibleAreaChanged(VisibleAreaEvent e) {
+        textField1.hideAutocompletePopup();
     }
 
     public void setEditor(Editor editor) {
@@ -169,7 +177,7 @@ public class CommandBar extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
     private JLabel label1;
-    private JTextPane textField1;
+    private AutocompleteField textField1;
     private JLabel label2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
