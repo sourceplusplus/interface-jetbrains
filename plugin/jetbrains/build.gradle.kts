@@ -4,7 +4,7 @@ plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij") version "1.1.3"
-    id("org.jetbrains.changelog") version "1.1.2"
+    id("org.jetbrains.changelog") version "1.2.0"
     id("maven-publish")
 }
 
@@ -42,7 +42,7 @@ tasks.getByName<JavaExec>("runIde") {
 }
 
 changelog {
-    version = pluginVersion
+    version.set(pluginVersion)
 }
 
 repositories {
@@ -72,14 +72,14 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.4")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("io.dropwizard.metrics:metrics-core:4.2.2")
+    implementation("io.dropwizard.metrics:metrics-core:4.2.3")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
     implementation("org.jooq:jooq:3.15.1")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
-    implementation("ch.qos.logback:logback-core:1.2.3")
-    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("ch.qos.logback:logback-core:1.2.4")
+    implementation("ch.qos.logback:logback-classic:1.2.4")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
 }

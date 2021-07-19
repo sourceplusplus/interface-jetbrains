@@ -19,6 +19,7 @@ import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMe
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
+import org.slf4j.LoggerFactory
 
 /**
  * Used to associate [GutterMark]s with IntelliJ PSI elements.
@@ -27,6 +28,8 @@ import org.jetbrains.uast.toUElement
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
+
+    private val log = LoggerFactory.getLogger(SourceLineMarkerProvider::class.java)
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
         if (!SourceMarker.enabled) {
@@ -69,7 +72,12 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         ) {
             //method gutter marks
             val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
-            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod)
+            val uMethod = element.parent.toUElement() as UMethod?
+            if (uMethod == null) {
+                log.warn("Unable to transform to UMethod: {}", element.parent)
+                return null
+            }
+            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
             if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
 
             //check by artifact name first due to user can erroneously name same method twice
