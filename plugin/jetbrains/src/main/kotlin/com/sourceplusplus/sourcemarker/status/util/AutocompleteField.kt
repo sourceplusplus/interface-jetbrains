@@ -40,7 +40,7 @@ class AutocompleteField(
     private val model: ListModel<AutocompleteFieldRow>
     private val variablePattern: Pattern
     var editMode: Boolean = true
-    var showSaveButton: Boolean = false
+    private var showSaveButton: Boolean = false
     private val listeners: MutableList<SaveListener> = mutableListOf()
 
     init {
@@ -116,6 +116,15 @@ class AutocompleteField(
         addMouseMotionListener(this)
     }
 
+    fun setShowSaveButton(showSaveButton: Boolean) {
+        this.showSaveButton = showSaveButton
+        repaint()
+    }
+
+    fun isShowingSaveButton() : Boolean {
+        return showSaveButton
+    }
+
     fun addSaveListener(listener: SaveListener) {
         listeners.add(listener)
     }
@@ -156,12 +165,7 @@ class AutocompleteField(
         popup.isVisible = false
     }
 
-    override fun focusGained(e: FocusEvent) = SwingUtilities.invokeLater {
-        if (results.size > 0) {
-            showAutocompletePopup()
-        }
-    }
-
+    override fun focusGained(e: FocusEvent) = Unit
     override fun focusLost(e: FocusEvent) = SwingUtilities.invokeLater { hideAutocompletePopup() }
 
     private fun documentChanged() = SwingUtilities.invokeLater {

@@ -1,23 +1,34 @@
 package com.sourceplusplus.sourcemarker.settings;
 
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.psi.PsiFile;
+import com.intellij.ui.EditorTextField;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.Objects;
 
 public class LiveLogConfigurationPanel extends JPanel {
 
-    private XDebuggerExpressionComboBox comboBox;
+    private final XDebuggerExpressionComboBox comboBox;
+    private XExpression condition;
+    private int hitLimit = 100;
+    private int expirationInMinutes = 15;
+    private int rateLimitCount = 1;
+    private String rateLimitStep = "second";
 
-    public LiveLogConfigurationPanel(InlayMark inlayMark) {
+    public LiveLogConfigurationPanel(AutocompleteField autocompleteField, InlayMark inlayMark) {
         PsiFile psiFile = inlayMark.getSourceFileMarker().getPsiFile();
         XSourcePosition sourcePosition = XDebuggerUtil.getInstance().createPosition(
                 psiFile.getVirtualFile(), inlayMark.getLineNumber()
@@ -29,10 +40,31 @@ public class LiveLogConfigurationPanel extends JPanel {
 
         initComponents();
 
+        EditorTextField editorTextField = (EditorTextField) comboBox.getEditorComponent();
+        editorTextField.addDocumentListener(new DocumentListener() {
+            @Override
+            public void documentChanged(@NotNull DocumentEvent event) {
+                autocompleteField.setShowSaveButton(isChanged());
+            }
+        });
+        expiration15MinButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
+        expiration30MinButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
+        expiration1HrButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
+        expiration3HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
+        expiration6HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
+        expiration12HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
+        expiration24HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
+
+        hitLimitSpinner.addChangeListener(changeEvent -> autocompleteField.setShowSaveButton(isChanged()));
+
+        rateLimitCountSpinner.addChangeListener(changeEvent -> autocompleteField.setShowSaveButton(isChanged()));
+        rateLimitStepCombobox.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
+
         panel7.add(comboBox.getComponent());
     }
 
     public void setCondition(XExpression condition) {
+        this.condition = condition;
         comboBox.setExpression(condition);
     }
 
@@ -41,6 +73,7 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
 
     public void setHitLimit(int hitLimit) {
+        this.hitLimit = hitLimit;
         hitLimitSpinner.setValue(hitLimit);
     }
 
@@ -69,6 +102,8 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
 
     public void setExpirationInMinutes(int value) {
+        this.expirationInMinutes = value;
+
         if (value == 15) {
             expiration15MinButton.setSelected(true);
         } else if (value == 30) {
@@ -93,6 +128,7 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
     
     public void setRateLimitCount(int count) {
+        this.rateLimitCount = count;
         rateLimitCountSpinner.setValue(count);
     }
     
@@ -101,7 +137,16 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
     
     public void setRateLimitStep(String step) {
+        this.rateLimitStep = step;
         rateLimitStepCombobox.setSelectedItem(step);
+    }
+
+    public boolean isChanged() {
+        return ((condition == null && !getCondition().getExpression().isEmpty()) || (condition != null && !Objects.equals(condition.getExpression(), getCondition().getExpression())))
+                || hitLimit != getHitLimit()
+                || expirationInMinutes != getExpirationInMinutes()
+                || rateLimitCount != getRateLimitCount()
+                || !Objects.equals(rateLimitStep, getRateLimitStep());
     }
 
     private void initComponents() {
@@ -195,7 +240,7 @@ public class LiveLogConfigurationPanel extends JPanel {
 
             //---- hitLimitSpinner ----
             hitLimitSpinner.setBackground(null);
-            hitLimitSpinner.setModel(new SpinnerNumberModel(100, 100, null, 1));
+            hitLimitSpinner.setModel(new SpinnerNumberModel(100, 1, null, 1));
             panel6.add(hitLimitSpinner, "cell 0 1");
         }
         add(panel6, "cell 2 0");

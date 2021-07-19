@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.IdeFocusManager;
+import com.intellij.ui.DocumentAdapter;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
@@ -23,6 +24,7 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.*;
@@ -57,6 +59,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     private Log latestLog;
     private JWindow popup;
     private LiveLogConfigurationPanel configurationPanel;
+    private AtomicBoolean settingFormattedMessage = new AtomicBoolean(false);
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -213,6 +216,28 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     }
 
     private void setupComponents() {
+        liveLogTextField.getDocument().addDocumentListener(new DocumentAdapter() {
+            @Override
+            protected void textChanged(DocumentEvent e) {
+                if (settingFormattedMessage.get()) return;
+                if (liveLog != null) {
+                    String originalMessage = liveLog.getLogFormat();
+                    for (String var : liveLog.getLogArguments()) {
+                        originalMessage = originalMessage.replaceFirst(
+                                Pattern.quote("{}"),
+                                Matcher.quoteReplacement("$" + var)
+                        );
+                    }
+
+                    boolean logMessageChanged = !originalMessage.equals(liveLogTextField.getText());
+                    if (configurationPanel != null) {
+                        liveLogTextField.setShowSaveButton(configurationPanel.isChanged() || logMessageChanged);
+                    } else {
+                        liveLogTextField.setShowSaveButton(logMessageChanged);
+                    }
+                } else liveLogTextField.setShowSaveButton(!liveLogTextField.getText().isEmpty());
+            }
+        });
         liveLogTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -247,7 +272,9 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                                 Matcher.quoteReplacement("$" + var)
                         );
                     }
+                    settingFormattedMessage.set(true);
                     liveLogTextField.setText(originalMessage);
+                    settingFormattedMessage.set(false);
                 }
             }
 
@@ -257,7 +284,8 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                     if (popup == null) {
                         dispose();
                     }
-                } else if (!liveLogTextField.getEditMode()) {
+                } else if (!liveLogTextField.getEditMode() ||
+                        (liveLogTextField.getEditMode() && !liveLogTextField.isShowingSaveButton())) {
                     liveLogTextField.setEditMode(false);
                     removeActiveDecorations();
 
@@ -338,22 +366,21 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 if (System.currentTimeMillis() - popupLastOpened.get() <= 200) {
                     return;
                 }
-                liveLogTextField.setShowSaveButton(true);
-                liveLogTextField.setEditMode(true);
-                showEditableMode();
 
                 popup = new JWindow(SwingUtilities.getWindowAncestor(LogStatusBar.this));
                 popup.setType(Window.Type.POPUP);
                 popup.setAlwaysOnTop(true);
 
-                LiveLogConfigurationPanel previousConfigurationPanel = configurationPanel;
-                configurationPanel = new LiveLogConfigurationPanel(inlayMark);
-                if (previousConfigurationPanel != null) {
-                    configurationPanel.setCondition(previousConfigurationPanel.getCondition());
-                    configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
-                    configurationPanel.setHitLimit(previousConfigurationPanel.getHitLimit());
-                    configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
-                    configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
+                if (configurationPanel == null || !liveLogTextField.isShowingSaveButton()) {
+                    LiveLogConfigurationPanel previousConfigurationPanel = configurationPanel;
+                    configurationPanel = new LiveLogConfigurationPanel(liveLogTextField, inlayMark);
+                    if (previousConfigurationPanel != null) {
+                        configurationPanel.setCondition(previousConfigurationPanel.getCondition());
+                        configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
+                        configurationPanel.setHitLimit(previousConfigurationPanel.getHitLimit());
+                        configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
+                        configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
+                    }
                 }
 
                 popup.add(configurationPanel);
