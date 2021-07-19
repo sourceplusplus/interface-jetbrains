@@ -376,8 +376,13 @@ object SourceMarkerUtils {
         }
 
         if (gutterMark == null) {
+            val uClass = element.parent.toUElement() as UClass
+            if (uClass.qualifiedName == null) {
+                log.warn("Could not determine qualified name of class: {}", uClass)
+                return null
+            }
             gutterMark = fileMarker.createSourceMark(
-                element.parent.toUElement() as UClass,
+                uClass,
                 SourceMark.Type.GUTTER
             ) as ClassGutterMark
             return if (autoApply) {
@@ -512,8 +517,10 @@ object SourceMarkerUtils {
                 repeat(arrayDimensions) {
                     methodParams += "[]"
                 }
-            } else {
+            } else if (it.typeElement != null) {
                 methodParams += it.typeElement!!.text
+            } else {
+                log.warn("Unable to detect element type: {}", it)
             }
         }
         return "$methodName($methodParams)"
