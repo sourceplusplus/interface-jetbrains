@@ -78,7 +78,12 @@ object CommandBarController {
         val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
         if (findInlayMark.isPresent) {
             val inlayMark = findInlayMark.get()
-            if (!fileMarker.containsSourceMark(inlayMark)) {
+            if (fileMarker.containsSourceMark(inlayMark)) {
+                if (!tryingAboveLine) {
+                    //already showing inlay here, try line above
+                    showCommandBar(editor, lineNumber - 1, true)
+                }
+            } else {
                 //create and display command bar
                 previousCommandBar = inlayMark
 
