@@ -78,7 +78,7 @@ dependencies {
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
-    implementation("ch.qos.logback:logback-core:1.2.3")
+    implementation("ch.qos.logback:logback-core:1.2.4")
     implementation("ch.qos.logback:logback-classic:1.2.3")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
