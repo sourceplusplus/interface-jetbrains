@@ -72,7 +72,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.4")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("io.dropwizard.metrics:metrics-core:4.2.2")
+    implementation("io.dropwizard.metrics:metrics-core:4.2.3")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
     implementation("org.jooq:jooq:3.15.1")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
