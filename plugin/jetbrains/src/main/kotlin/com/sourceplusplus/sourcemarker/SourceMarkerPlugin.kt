@@ -176,6 +176,10 @@ object SourceMarkerPlugin {
 
                 //remove non-code packages
                 basePackages = basePackages!!.filter {
+                    val dirs = it.directories
+                    dirs.isNotEmpty() && !dirs[0].virtualFile.path.contains("/src/main/resources/")
+                }.toTypedArray()
+                basePackages = basePackages.filter {
                     it.qualifiedName != "asciidoc" && it.qualifiedName != "lib"
                 }.toTypedArray() //todo: probably shouldn't be necessary
 
