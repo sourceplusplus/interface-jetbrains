@@ -431,6 +431,23 @@ object SourceMarkerPlugin {
                     )
                 )
             }
+        } else if (serviceDiscoveryEnabled) {
+            //try default local access
+            val servicePort = config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!
+            val tokenUri = hardcodedConfig.getString("token_uri")
+            val req = vertx.createHttpClient().request(
+                RequestOptions()
+                    .setHost(config.serviceHostNormalized!!)
+                    .setPort(servicePort)
+                    .setURI(tokenUri)
+            ).await()
+            req.end().await()
+            val resp = req.response().await()
+            if (resp.statusCode() in 200..299) {
+                val body = resp.body().await().toString()
+                config.serviceToken = body
+                config.serviceHost = "localhost"
+            }
         }
     }
 
