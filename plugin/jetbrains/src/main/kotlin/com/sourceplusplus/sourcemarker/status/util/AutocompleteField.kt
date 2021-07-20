@@ -44,6 +44,8 @@ class AutocompleteField(
     private val listeners: MutableList<SaveListener> = mutableListOf()
 
     init {
+        foreground = Color.decode("#A9B7C6")
+
         results = ArrayList()
         popup = JWindow(SwingUtilities.getWindowAncestor(this))
         popup.type = Window.Type.POPUP
