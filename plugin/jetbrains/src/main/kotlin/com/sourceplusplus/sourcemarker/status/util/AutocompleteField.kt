@@ -120,6 +120,8 @@ class AutocompleteField(
 
     fun setShowSaveButton(showSaveButton: Boolean) {
         this.showSaveButton = showSaveButton
+        icon = (if (showSaveButton) saveIcon else null)
+
         repaint()
     }
 
@@ -338,10 +340,9 @@ class AutocompleteField(
 
     override fun mouseClicked(e: MouseEvent) {
         if (showSaveButton && iconRect.contains(Point(e.x, e.y))) {
-            icon = null
-            repaint()
 
             listeners.forEach(SaveListener::onSave)
+            repaint()
         }
     }
 
