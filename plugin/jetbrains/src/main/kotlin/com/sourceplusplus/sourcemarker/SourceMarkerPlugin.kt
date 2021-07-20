@@ -219,7 +219,7 @@ object SourceMarkerPlugin {
                     if (throwable.message == "HTTP 401 Unauthorized") {
                         Notifications.Bus.notify(
                             Notification(
-                                pluginName, "Connection Unauthorized",
+                                pluginName, "Connection unauthorized",
                                 "Failed to authenticate with $pluginName. " +
                                         "Please ensure the correct configuration " +
                                         "is set at: Settings -> Tools -> $pluginName",
@@ -229,7 +229,7 @@ object SourceMarkerPlugin {
                     } else {
                         Notifications.Bus.notify(
                             Notification(
-                                pluginName, "Connection Failed",
+                                pluginName, "Connection failed",
                                 "$pluginName failed to connect to Apache SkyWalking. " +
                                         "Please ensure Apache SkyWalking is running and the correct configuration " +
                                         "is set at: Settings -> Tools -> $pluginName",
@@ -425,7 +425,7 @@ object SourceMarkerPlugin {
                 log.error("Invalid access token")
                 Notifications.Bus.notify(
                     Notification(
-                        message("plugin_name"), "Invalid Access Token",
+                        message("plugin_name"), "Invalid access token",
                         "Failed to validate access token",
                         NotificationType.ERROR
                     )
@@ -448,6 +448,15 @@ object SourceMarkerPlugin {
 
                 val projectSettings = PropertiesComponent.getInstance(project)
                 projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
+
+                //auto-established notification
+                Notifications.Bus.notify(
+                    Notification(
+                        message("plugin_name"), "Connection auto-established",
+                        "You have successfully auto-connected. ${message("plugin_name")} is now fully activated.",
+                        NotificationType.INFORMATION
+                    )
+                )
             }
         }
     }
