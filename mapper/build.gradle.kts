@@ -28,7 +28,7 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.12.0.202106070339-r")
     implementation("com.google.guava:guava:30.1.1-jre")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.slf4j:slf4j-log4j12:1.7.31")
+    testImplementation("org.slf4j:slf4j-log4j12:1.7.32")
 }
 
 tasks {
