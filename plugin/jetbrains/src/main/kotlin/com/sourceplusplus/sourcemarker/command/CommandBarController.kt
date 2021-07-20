@@ -78,15 +78,20 @@ object CommandBarController {
         val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
         if (findInlayMark.isPresent) {
             val inlayMark = findInlayMark.get()
-            if (!fileMarker.containsSourceMark(inlayMark)) {
+            if (fileMarker.containsSourceMark(inlayMark)) {
+                if (!tryingAboveLine) {
+                    //already showing inlay here, try line above
+                    showCommandBar(editor, lineNumber - 1, true)
+                }
+            } else {
                 //create and display command bar
                 previousCommandBar = inlayMark
 
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
-                val statusBar = CommandBar(inlayMark)
-                wrapperPanel.add(statusBar)
-                statusBar.setEditor(editor)
+                val commandBar = CommandBar(editor, inlayMark)
+                wrapperPanel.add(commandBar)
+                editor.scrollingModel.addVisibleAreaListener(commandBar)
 
                 inlayMark.configuration.showComponentInlay = true
                 inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
@@ -99,7 +104,7 @@ object CommandBarController {
                 sourcePortal.configuration.currentPage = PageType.LOGS
                 sourcePortal.configuration.statusBar = true
 
-                statusBar.focus()
+                commandBar.focus()
             }
         } else if (tryingAboveLine) {
             log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
