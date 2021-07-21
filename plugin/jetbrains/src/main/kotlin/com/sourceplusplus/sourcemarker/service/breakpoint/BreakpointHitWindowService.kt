@@ -20,6 +20,7 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
+import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
 import com.sourceplusplus.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
@@ -113,7 +114,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
                         log.warn("Breakpoint failed: " + bpr.cause!!.message)
                         Notifications.Bus.notify(
                             Notification(
-                                "SourceMarker", "Live Breakpoint Failed",
+                                PluginBundle.message("plugin_name"), "Live breakpoint failed",
                                 "Breakpoint failed: " + bpr.cause!!.message,
                                 NotificationType.ERROR
                             )

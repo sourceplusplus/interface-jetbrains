@@ -1,6 +1,7 @@
 package com.sourceplusplus.sourcemarker.service.breakpoint
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
@@ -45,18 +46,21 @@ class ExecutionPointManager(
         val virtualFile = containingClass.containingFile.virtualFile ?: return
         val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return
         val lineStartOffset = document.getLineStartOffset(currentFrame.sourceAsLineNumber()!!) - 1
-        try {
-            FileEditorManager.getInstance(project).openTextEditor(
-                OpenFileDescriptor(project, virtualFile, lineStartOffset), true
-            )
-            executionPointHighlighter.hide()
-            executionPointHighlighter.show(
-                XDebuggerUtil.getInstance().createPositionByOffset(
-                    virtualFile, lineStartOffset
-                )!!, false, null
-            )
-        } catch (e: Throwable) {
-            log.error("Failed to set execution point", e)
+
+        ApplicationManager.getApplication().invokeLater {
+            try {
+                FileEditorManager.getInstance(project).openTextEditor(
+                    OpenFileDescriptor(project, virtualFile, lineStartOffset), true
+                )
+                executionPointHighlighter.hide()
+                executionPointHighlighter.show(
+                    XDebuggerUtil.getInstance().createPositionByOffset(
+                        virtualFile, lineStartOffset
+                    )!!, false, null
+                )
+            } catch (e: Throwable) {
+                log.error("Failed to set execution point", e)
+            }
         }
     }
 
