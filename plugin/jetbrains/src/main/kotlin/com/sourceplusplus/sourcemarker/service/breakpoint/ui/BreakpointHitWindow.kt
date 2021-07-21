@@ -5,11 +5,12 @@ import com.intellij.execution.ui.layout.PlaceInGrid
 import com.intellij.icons.AllIcons
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.content.Content
+import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
@@ -83,11 +84,13 @@ class BreakpointHitWindow(project: Project, executionPointHighlighter: Execution
     }
 
     fun onStackFrameUpdated() {
-        for (listener in listeners) {
-            if (listener is VariableTab || listener is ExecutionPointManager) {
-                listener.onChanged(stackFrameManager)
+        ReadAction.nonBlocking {
+            for (listener in listeners) {
+                if (listener is VariableTab || listener is ExecutionPointManager) {
+                    listener.onChanged(stackFrameManager)
+                }
             }
-        }
+        }.submit(AppExecutorUtil.getAppExecutorService())
 
         if (content != null) {
             content!!.displayName =
@@ -98,15 +101,18 @@ class BreakpointHitWindow(project: Project, executionPointHighlighter: Execution
     fun showFrames(stackTrace: JvmStackTrace, currentFrame: JvmStackTraceElement) {
         stackFrameManager = StackFrameManager(stackTrace)
         stackFrameManager.currentFrame = currentFrame
-        for (listener in listeners) {
-            listener.onChanged(stackFrameManager)
-        }
+
+        ReadAction.nonBlocking {
+            for (listener in listeners) {
+                listener.onChanged(stackFrameManager)
+            }
+        }.submit(AppExecutorUtil.getAppExecutorService())
     }
 
     fun showExecutionLine() {
-        ApplicationManager.getApplication().runReadAction {
+        ReadAction.nonBlocking {
             executionPointManager.onChanged(stackFrameManager)
-        }
+        }.submit(AppExecutorUtil.getAppExecutorService())
     }
 
     override fun dispose() {}

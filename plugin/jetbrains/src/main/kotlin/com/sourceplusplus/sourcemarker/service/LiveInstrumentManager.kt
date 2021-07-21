@@ -57,8 +57,8 @@ import javax.swing.Icon
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
-    XBreakpointListener<XLineBreakpoint<LiveBreakpointProperties>> {
+@Suppress("UNCHECKED_CAST")
+class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(), XBreakpointListener<XBreakpoint<*>> {
 
     companion object {
         private val log = LoggerFactory.getLogger(LiveInstrumentManager::class.java)
@@ -132,7 +132,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
 
             Notifications.Bus.notify(
                 Notification(
-                    "SourceMarker", "Live Log Failed",
+                    message("plugin_name"), "Live log failed",
                     "Log failed: " + logRemoved.cause!!.message,
                     NotificationType.ERROR
                 )
@@ -221,10 +221,10 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         }
     }
 
-    override fun breakpointAdded(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
-        if (breakpoint.type.id != "live-breakpoint") {
-            return
-        } else if (!breakpoint.properties.getSuspend()) {
+    override fun breakpointAdded(wildBreakpoint: XBreakpoint<*>) {
+        if (wildBreakpoint.type.id != "live-breakpoint") return
+        val breakpoint = wildBreakpoint as XLineBreakpoint<LiveBreakpointProperties>
+        if (!breakpoint.properties.getSuspend()) {
             log.debug("Ignoring un-suspended breakpoint")
             val setIconMethod = XBreakpointBase::class.java.getDeclaredMethod("setIcon", Icon::class.java)
             setIconMethod.isAccessible = true
@@ -271,10 +271,10 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         }
     }
 
-    override fun breakpointRemoved(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
-        if (breakpoint.type.id != "live-breakpoint") {
-            return
-        } else if (breakpoint.properties == null) {
+    override fun breakpointRemoved(wildBreakpoint: XBreakpoint<*>) {
+        if (wildBreakpoint.type.id != "live-breakpoint") return
+        val breakpoint = wildBreakpoint as XLineBreakpoint<LiveBreakpointProperties>
+        if (breakpoint.properties == null) {
             log.warn("Ignored removing breakpoint without properties")
             return
         } else if (breakpoint.properties.getBreakpointId() == null) {
@@ -311,10 +311,10 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         }
     }
 
-    override fun breakpointChanged(breakpoint: XLineBreakpoint<LiveBreakpointProperties>) {
-        if (breakpoint.type.id != "live-breakpoint") {
-            return
-        } else if (breakpoint.properties == null) {
+    override fun breakpointChanged(wildBreakpoint: XBreakpoint<*>) {
+        if (wildBreakpoint.type.id != "live-breakpoint") return
+        val breakpoint = wildBreakpoint as XLineBreakpoint<LiveBreakpointProperties>
+        if (breakpoint.properties == null) {
             log.warn("Ignored changing breakpoint without properties")
             return
         } else if (!breakpoint.properties.getSuspend() && breakpoint.properties.getBreakpointId() == null
@@ -388,7 +388,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
             log.error("Timed out removing live breakpoint")
             Notifications.Bus.notify(
                 Notification(
-                    message("plugin_name"), "Live Breakpoint Failed",
+                    message("plugin_name"), "Live breakpoint failed",
                     "Timed out removing live breakpoint",
                     NotificationType.ERROR
                 )
@@ -399,7 +399,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
                 log.error("Access denied. Reason: " + actualException.reason)
                 Notifications.Bus.notify(
                     Notification(
-                        message("plugin_name"), "Live Breakpoint Failed",
+                        message("plugin_name"), "Live breakpoint failed",
                         "Access denied. Reason: " + actualException.reason,
                         NotificationType.ERROR
                     )
@@ -409,7 +409,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
                 log.error("Failed to add live breakpoint", replyException)
                 Notifications.Bus.notify(
                     Notification(
-                        message("plugin_name"), "Live Breakpoint Failed",
+                        message("plugin_name"), "Live breakpoint failed",
                         "Failed to add/remove live breakpoint",
                         NotificationType.ERROR
                     )

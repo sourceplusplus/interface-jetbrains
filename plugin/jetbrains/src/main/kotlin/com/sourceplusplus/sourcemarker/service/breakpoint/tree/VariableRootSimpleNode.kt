@@ -19,6 +19,10 @@ class VariableRootSimpleNode : SimpleNode() {
     }
 
     override fun getChildren(): Array<SimpleNode> {
+        if (!this::stackFrameManager.isInitialized) {
+            return emptyArray() //wait till initialized
+        }
+
         return if (stackFrameManager.currentFrame?.variables.isNullOrEmpty()) {
             NO_CHILDREN
         } else {
