@@ -1,8 +1,11 @@
 package com.sourceplusplus.sourcemarker.status;
 
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.event.VisibleAreaEvent;
+import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.IdeFocusManager;
+import com.intellij.ui.DocumentAdapter;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
@@ -13,6 +16,7 @@ import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
+import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 
@@ -20,6 +24,7 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.*;
@@ -29,6 +34,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +43,7 @@ import java.util.stream.Collectors;
 
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class LogStatusBar extends JPanel {
+public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -50,6 +57,10 @@ public class LogStatusBar extends JPanel {
     private LiveLog liveLog;
     private Instant latestTime;
     private Log latestLog;
+    private JWindow popup;
+    private LiveLogConfigurationPanel configurationPanel;
+    private AtomicBoolean settingFormattedMessage = new AtomicBoolean(false);
+    private boolean disposed = false;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -73,9 +84,8 @@ public class LogStatusBar extends JPanel {
         }).collect(Collectors.toList());
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
-                    String var = substringAfterLast(" ", text);
-                    return var.startsWith("$") && v.toLowerCase().contains(var.substring(1))
-                            && !v.toLowerCase().equals(var.substring(1));
+                    String var = substringAfterLast(" ", text.toLowerCase());
+                    return var.startsWith("$") && v.toLowerCase().contains(var.substring(1));
                 }).map(it -> new AutocompleteFieldRow() {
                     public String getText() {
                         return "$" + it;
@@ -116,26 +126,34 @@ public class LogStatusBar extends JPanel {
         setupComponents();
 
         if (liveLog != null) {
-            ((AutocompleteField) liveLogTextField).setEditMode(false);
+            liveLogTextField.setEditMode(false);
             removeActiveDecorations();
             addTimeField();
         } else {
-            ((AutocompleteField) liveLogTextField).setEditMode(true);
+            liveLogTextField.setEditMode(true);
         }
+
+        liveLogTextField.addSaveListener(this::saveLiveLog);
+    }
+
+    @Override
+    public void visibleAreaChanged(VisibleAreaEvent e) {
+        liveLogTextField.hideAutocompletePopup();
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
         if (liveLog == null) return;
         this.latestTime = time;
         this.latestLog = latestLog;
-        if (((AutocompleteField) liveLogTextField).getEditMode()) {
-            return; //ignore as they're likely updating text
-        }
 
         String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
         String formattedMessage = latestLog.getFormattedMessage();
         if (!timeLabel.getText().equals(formattedTime) || !liveLogTextField.getText().equals(formattedMessage)) {
             SwingUtilities.invokeLater(() -> {
+                if (liveLogTextField.getEditMode()) {
+                    return; //ignore as they're likely updating text
+                }
+
                 timeLabel.setText(formattedTime);
                 liveLogTextField.setText(formattedMessage);
 
@@ -180,7 +198,7 @@ public class LogStatusBar extends JPanel {
             closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
             configPanel.setBackground(Color.decode("#252525"));
 
-            if (!((AutocompleteField) liveLogTextField).getEditMode()) {
+            if (!liveLogTextField.getEditMode()) {
                 liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
@@ -190,7 +208,37 @@ public class LogStatusBar extends JPanel {
         });
     }
 
+    private void showEditableMode() {
+        liveLogTextField.setBorder(new CompoundBorder(
+                new LineBorder(Color.darkGray, 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
+        liveLogTextField.setBackground(Color.decode("#252525"));
+        liveLogTextField.setEditable(true);
+    }
+
     private void setupComponents() {
+        liveLogTextField.getDocument().addDocumentListener(new DocumentAdapter() {
+            @Override
+            protected void textChanged(DocumentEvent e) {
+                if (settingFormattedMessage.get()) return;
+                if (liveLog != null) {
+                    String originalMessage = liveLog.getLogFormat();
+                    for (String var : liveLog.getLogArguments()) {
+                        originalMessage = originalMessage.replaceFirst(
+                                Pattern.quote("{}"),
+                                Matcher.quoteReplacement("$" + var)
+                        );
+                    }
+
+                    boolean logMessageChanged = !originalMessage.equals(liveLogTextField.getText());
+                    if (configurationPanel != null && liveLogTextField.getEditMode()) {
+                        liveLogTextField.setShowSaveButton(configurationPanel.isChanged() || logMessageChanged);
+                    } else if (liveLogTextField.getEditMode()) {
+                        liveLogTextField.setShowSaveButton(logMessageChanged);
+                    }
+                } else liveLogTextField.setShowSaveButton(!liveLogTextField.getText().isEmpty());
+            }
+        });
         liveLogTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -205,72 +253,7 @@ public class LogStatusBar extends JPanel {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    if (liveLogTextField.getText().equals("")) {
-                        return;
-                    }
-
-                    if (liveLog != null) {
-                        //editing existing live log; remove old one first
-                        LiveLog oldLiveLog = liveLog;
-                        liveLog = null;
-                        latestTime = null;
-                        latestLog = null;
-
-                        SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
-                            if (it.succeeded()) {
-                                LiveLogStatusManager.INSTANCE.removeActiveLiveLog(oldLiveLog);
-                            } else {
-                                it.cause().printStackTrace();
-                            }
-                        });
-                    }
-
-                    String logPattern = liveLogTextField.getText();
-                    ArrayList<String> varMatches = new ArrayList<>();
-                    Matcher m = VARIABLE_PATTERN.matcher(logPattern);
-                    while (m.find()) {
-                        String var = m.group(1);
-                        logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-                        varMatches.add(var);
-                    }
-                    final String finalLogPattern = logPattern;
-
-                    LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
-                    LiveLog log = new LiveLog(
-                            finalLogPattern,
-                            varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
-                            sourceLocation,
-                            null,
-                            null,
-                            Integer.MAX_VALUE,
-                            null,
-                            false,
-                            false,
-                            false,
-                            1000
-                    );
-                    instrumentService.addLiveInstrument(log, it -> {
-                        if (it.succeeded()) {
-                            inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
-                            ((AutocompleteField) liveLogTextField).setEditMode(false);
-                            removeActiveDecorations();
-
-                            LoggerDetector detector = inlayMark.getUserData(
-                                    SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
-                            );
-                            detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
-                            liveLog = (LiveLog) it.result();
-                            LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
-
-                            addTimeField();
-
-                            //focus back to IDE
-                            IdeFocusManager.getInstance(editor.getProject())
-                                    .requestFocusInProject(editor.getContentComponent(), editor.getProject());
-                        } else {
-                            it.cause().printStackTrace();
-                        }
-                    });
+                    saveLiveLog();
                 }
             }
         });
@@ -278,7 +261,9 @@ public class LogStatusBar extends JPanel {
         liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                ((AutocompleteField) liveLogTextField).setEditMode(true);
+                if (liveLogTextField.getEditMode()) return;
+                liveLogTextField.reset();
+                liveLogTextField.setEditMode(true);
 
                 if (liveLog != null) {
                     String originalMessage = liveLog.getLogFormat();
@@ -288,16 +273,21 @@ public class LogStatusBar extends JPanel {
                                 Matcher.quoteReplacement("$" + var)
                         );
                     }
+                    settingFormattedMessage.set(true);
                     liveLogTextField.setText(originalMessage);
+                    settingFormattedMessage.set(false);
                 }
             }
 
             @Override
             public void focusLost(FocusEvent e) {
                 if (liveLog == null && liveLogTextField.getText().equals("")) {
-                    dispose();
-                } else if (liveLog != null) {
-                    ((AutocompleteField) liveLogTextField).setEditMode(false);
+                    if (popup == null) {
+                        dispose();
+                    }
+                } else if (!liveLogTextField.getEditMode() ||
+                        (liveLogTextField.getEditMode() && !liveLogTextField.isShowingSaveButton())) {
+                    liveLogTextField.setEditMode(false);
                     removeActiveDecorations();
 
                     if (latestLog != null) {
@@ -308,17 +298,21 @@ public class LogStatusBar extends JPanel {
         });
         liveLogTextField.addMouseListener(new MouseAdapter() {
             @Override
+            public void mouseClicked(MouseEvent e) {
+                if (popup != null) {
+                    popup.dispose();
+                    popup = null;
+                }
+            }
+
+            @Override
             public void mouseEntered(MouseEvent mouseEvent) {
-                liveLogTextField.setBorder(new CompoundBorder(
-                        new LineBorder(Color.darkGray, 1, true),
-                        new EmptyBorder(2, 6, 0, 0)));
-                liveLogTextField.setBackground(Color.decode("#252525"));
-                liveLogTextField.setEditable(true);
+                showEditableMode();
             }
 
             @Override
             public void mouseExited(MouseEvent mouseEvent) {
-                if (!((AutocompleteField) liveLogTextField).getEditMode()) {
+                if (!liveLogTextField.getEditMode()) {
                     removeActiveDecorations();
                 }
             }
@@ -366,13 +360,155 @@ public class LogStatusBar extends JPanel {
             }
         });
 
+        AtomicLong popupLastOpened = new AtomicLong();
+        addRecursiveMouseListener(configPanel, new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (System.currentTimeMillis() - popupLastOpened.get() <= 200) {
+                    return;
+                }
+
+                popup = new JWindow(SwingUtilities.getWindowAncestor(LogStatusBar.this));
+                popup.setType(Window.Type.POPUP);
+                popup.setAlwaysOnTop(true);
+
+                if (configurationPanel == null || !liveLogTextField.isShowingSaveButton()) {
+                    LiveLogConfigurationPanel previousConfigurationPanel = configurationPanel;
+                    configurationPanel = new LiveLogConfigurationPanel(liveLogTextField, inlayMark);
+                    if (previousConfigurationPanel != null) {
+                        configurationPanel.setCondition(previousConfigurationPanel.getCondition());
+                        configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
+                        configurationPanel.setHitLimit(previousConfigurationPanel.getHitLimit());
+                        configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
+                        configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
+                    } else if (liveLog != null) {
+                        configurationPanel.setConditionByString(liveLog.getCondition());
+                        configurationPanel.setHitLimit(liveLog.getHitLimit());
+                        //todo: rest
+                    }
+                }
+
+                popup.add(configurationPanel);
+                popup.setPreferredSize(new Dimension(LogStatusBar.this.getWidth(), popup.getPreferredSize().height));
+                popup.pack();
+                popup.setLocation(configPanel.getLocationOnScreen().x - 1,
+                        configPanel.getLocationOnScreen().y + LogStatusBar.this.getHeight() - 2);
+
+                popup.setVisible(true);
+
+                popup.addWindowFocusListener(new WindowAdapter() {
+                    @Override
+                    public void windowLostFocus(WindowEvent e) {
+                        if (popup != null) {
+                            popup.dispose();
+                            popup = null;
+
+                            popupLastOpened.set(System.currentTimeMillis());
+                        }
+                    }
+                });
+            }
+        }, () -> {
+            removeActiveDecorations();
+            return null;
+        });
+
         timeLabel.setCursor(Cursor.getDefaultCursor());
 
         setCursor(Cursor.getDefaultCursor());
     }
 
+    private void saveLiveLog() {
+        if (liveLogTextField.getText().equals("")) {
+            return;
+        }
+        liveLogTextField.setShowSaveButton(false);
+
+        if (liveLog != null) {
+            //editing existing live log; remove old one first
+            LiveLog oldLiveLog = liveLog;
+            liveLog = null;
+            latestTime = null;
+            latestLog = null;
+
+            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
+                if (it.succeeded()) {
+                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(oldLiveLog);
+                } else {
+                    it.cause().printStackTrace();
+                }
+            });
+        }
+
+        String logPattern = liveLogTextField.getText();
+        ArrayList<String> varMatches = new ArrayList<>();
+        Matcher m = VARIABLE_PATTERN.matcher(logPattern);
+        while (m.find()) {
+            String var = m.group(1);
+            logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+            varMatches.add(var);
+        }
+        final String finalLogPattern = logPattern;
+
+        String condition = null;
+        long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
+        int hitRateLimit = 1000;
+        int hitLimit = 100;
+        if (configurationPanel != null) {
+            condition = configurationPanel.getCondition().getExpression();
+            expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
+            hitLimit = configurationPanel.getHitLimit();
+
+            configurationPanel.setNewDefaults();
+        }
+
+        LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
+        LiveLog log = new LiveLog(
+                finalLogPattern,
+                varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
+                sourceLocation,
+                condition,
+                expirationDate,
+                hitLimit,
+                null,
+                false,
+                false,
+                false,
+                hitRateLimit
+        );
+        instrumentService.addLiveInstrument(log, it -> {
+            if (it.succeeded()) {
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
+                liveLogTextField.setEditMode(false);
+                removeActiveDecorations();
+
+                LoggerDetector detector = inlayMark.getUserData(
+                        SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
+                );
+                detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
+                liveLog = (LiveLog) it.result();
+                LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
+
+                addTimeField();
+
+                //focus back to IDE
+                IdeFocusManager.getInstance(editor.getProject())
+                        .requestFocusInProject(editor.getContentComponent(), editor.getProject());
+            } else {
+                it.cause().printStackTrace();
+            }
+        });
+    }
+
     private void dispose() {
-        inlayMark.dispose(true, false);
+        if (disposed) return;
+        disposed = true;
+        editor.getScrollingModel().removeVisibleAreaListener(this);
+        if (popup != null) {
+            popup.dispose();
+            popup = null;
+        }
+        inlayMark.dispose(true);
 
         if (liveLog != null) {
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
@@ -399,7 +535,7 @@ public class LogStatusBar extends JPanel {
         configDropdownLabel = new JLabel();
         timeLabel = new JLabel();
         separator1 = new JSeparator();
-        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false);
+        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false);
         closeLabel = new JLabel();
 
         //======== this ========
@@ -478,7 +614,7 @@ public class LogStatusBar extends JPanel {
     private JLabel configDropdownLabel;
     private JLabel timeLabel;
     private JSeparator separator1;
-    private JTextPane liveLogTextField;
+    private AutocompleteField liveLogTextField;
     private JLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

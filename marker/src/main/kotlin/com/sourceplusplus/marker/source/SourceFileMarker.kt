@@ -1,7 +1,6 @@
 package com.sourceplusplus.marker.source
 
 import com.google.common.collect.ImmutableList
-import com.google.common.collect.Sets
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProcessCanceledException
@@ -27,6 +26,7 @@ import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.getContainingUMethod
 import org.slf4j.LoggerFactory
+import java.util.*
 
 /**
  * Used to mark a source code file with SourceMarker artifact marks.
@@ -57,7 +57,9 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         }
     }
 
-    private val sourceMarks: MutableSet<SourceMark> = Sets.newConcurrentHashSet()
+    private val sourceMarks: MutableSet<SourceMark> = Collections.synchronizedSet(
+        Collections.newSetFromMap(IdentityHashMap())
+    )
     val project: Project = psiFile.project
 
     /**

@@ -1,5 +1,7 @@
 package com.sourceplusplus.sourcemarker.status.util
 
+import com.intellij.openapi.util.IconLoader
+import com.intellij.openapi.util.ScalableIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
@@ -7,10 +9,7 @@ import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow
 import com.sourceplusplus.sourcemarker.element.AutocompleteRow
 import org.jetbrains.kotlin.idea.completion.smart.SmartCompletionItemPriority
 import java.awt.*
-import java.awt.event.FocusEvent
-import java.awt.event.FocusListener
-import java.awt.event.KeyEvent
-import java.awt.event.KeyListener
+import java.awt.event.*
 import java.util.function.Function
 import java.util.regex.Pattern
 import javax.swing.*
@@ -28,11 +27,12 @@ import javax.swing.text.*
 class AutocompleteField(
     private val commandDelimiter: String,
     private val placeHolderText: String?,
-    private val allLookup: List<AutocompleteFieldRow>,
+    allLookup: List<AutocompleteFieldRow>,
     private val lookup: Function<String, List<AutocompleteFieldRow>>,
     private val lineNumber: Int = 0,
-    private val replaceCommandOnTab: Boolean = false
-) : JTextPane(), FocusListener, DocumentListener, KeyListener {
+    private val replaceCommandOnTab: Boolean = false,
+    private val autocompleteOnEnter: Boolean = true
+) : JTextPane(), FocusListener, DocumentListener, KeyListener, MouseMotionListener, MouseListener {
 
     private val results: MutableList<AutocompleteFieldRow>
     private val popup: JWindow
@@ -40,8 +40,12 @@ class AutocompleteField(
     private val model: ListModel<AutocompleteFieldRow>
     private val variablePattern: Pattern
     var editMode: Boolean = true
+    private var showSaveButton: Boolean = false
+    private val listeners: MutableList<SaveListener> = mutableListOf()
 
     init {
+        foreground = Color.decode("#A9B7C6")
+
         results = ArrayList()
         popup = JWindow(SwingUtilities.getWindowAncestor(this))
         popup.type = Window.Type.POPUP
@@ -109,6 +113,24 @@ class AutocompleteField(
 
             override fun changedUpdate(documentEvent: DocumentEvent) = Unit
         })
+
+        addMouseListener(this)
+        addMouseMotionListener(this)
+    }
+
+    fun setShowSaveButton(showSaveButton: Boolean) {
+        this.showSaveButton = showSaveButton
+        icon = (if (showSaveButton) saveIcon else null)
+
+        repaint()
+    }
+
+    fun isShowingSaveButton() : Boolean {
+        return showSaveButton
+    }
+
+    fun addSaveListener(listener: SaveListener) {
+        listeners.add(listener)
     }
 
     private fun applyStyle() {
@@ -134,21 +156,20 @@ class AutocompleteField(
         StyleConstants.setForeground(style, Color.decode("#e1483b"))
     }
 
-    private fun showAutocompletePopup() {
-        popup.setLocation(locationOnScreen.x, locationOnScreen.y + height + 6)
-        popup.isVisible = true
-    }
-
-    private fun hideAutocompletePopup() {
-        popup.isVisible = false
-    }
-
-    override fun focusGained(e: FocusEvent) = SwingUtilities.invokeLater {
-        if (results.size > 0) {
-            showAutocompletePopup()
+    fun showAutocompletePopup() {
+        try {
+            popup.setLocation(locationOnScreen.x, locationOnScreen.y + height + 6)
+            popup.isVisible = true
+        } catch (ignored: IllegalComponentStateException) {
+            //trying to open popup too soon/late
         }
     }
 
+    fun hideAutocompletePopup() {
+        popup.isVisible = false
+    }
+
+    override fun focusGained(e: FocusEvent) = Unit
     override fun focusLost(e: FocusEvent) = SwingUtilities.invokeLater { hideAutocompletePopup() }
 
     private fun documentChanged() = SwingUtilities.invokeLater {
@@ -169,7 +190,7 @@ class AutocompleteField(
         popup.pack()
 
         // Display or hide popup depending on the results
-        if (results.size > 0) {
+        if (hasKeyPressed && results.size > 0) {
             showAutocompletePopup()
         } else {
             hideAutocompletePopup()
@@ -180,7 +201,14 @@ class AutocompleteField(
 
     override fun keyTyped(e: KeyEvent) = Unit
 
+    var hasKeyPressed = false
+
+    fun reset() {
+        hasKeyPressed = false
+    }
+
     override fun keyPressed(e: KeyEvent) {
+        hasKeyPressed = true
         if (e.keyCode == KeyEvent.VK_UP) {
             val index = list.selectedIndex
             if (index > 0) {
@@ -192,6 +220,7 @@ class AutocompleteField(
                 list.selectedIndex = index + 1
             }
         } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
+            if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) return
             val text = list.selectedValue
             if (text != null) {
                 if (replaceCommandOnTab) {
@@ -199,7 +228,11 @@ class AutocompleteField(
                     caretPosition = getText().length
                 } else {
                     val varCompleted = getText().substringAfterLast(commandDelimiter)
-                    setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
+                    if (text.getText().startsWith("$" + varCompleted)) {
+                        setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
+                    } else {
+                        setText(getText().substring(0, getText().length - varCompleted.length) + text.getText().substring(commandDelimiter.length))
+                    }
                     caretPosition = getText().length
                 }
             }
@@ -218,11 +251,33 @@ class AutocompleteField(
         fun updateView() = fireContentsChanged(this@AutocompleteField, 0, size)
     }
 
+    private val saveIcon = (IconLoader.findIcon("/icons/instrument/live-log/save.svg") as ScalableIcon)
+        .scale(0.40f)
+    private val saveHoveredIcon = (IconLoader.findIcon("/icons/instrument/live-log/saveHovered.svg") as ScalableIcon)
+        .scale(0.40f)
+    private val savePressedIcon = (IconLoader.findIcon("/icons/instrument/live-log/savePressed.svg") as ScalableIcon)
+        .scale(0.40f)
+    private var icon: Icon? = saveIcon
+    private var iconX: Int = 0
+    private var iconY: Int = 0
+    private var iconWidth: Int = 0
+    private var iconHeight: Int = 0
+    private var iconRect: Rectangle = Rectangle(0, 0, 0, 0)
+
     override fun paintComponent(pG: Graphics) {
         super.paintComponent(pG)
+        val g = pG as Graphics2D
+        val paintIcon = icon
+        if (showSaveButton && paintIcon != null) {
+            iconX = width - paintIcon.iconWidth - 3
+            iconY = 4
+            iconWidth = paintIcon.iconWidth
+            iconHeight = paintIcon.iconHeight
+            iconRect = Rectangle(iconX, iconY, iconWidth, iconHeight)
+            paintIcon.paintIcon(null, g, iconX, iconY)
+        }
 
         if (text.isEmpty() && placeHolderText != null) {
-            val g = pG as Graphics2D
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
             g.color = Color(85, 85, 85, 200)
@@ -246,10 +301,73 @@ class AutocompleteField(
                 row.setDescription(entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString()))
             }
 
-            if (isSelected && results.size > 1) {
+            if (isSelected) {
                 row.background = Color.decode("#3C3C3C")
             }
             return row
         }
+    }
+
+    override fun mouseDragged(e: MouseEvent) {
+        val previousIcon = icon
+        if (iconRect.contains(Point(e.x, e.y))) {
+            cursor = Cursor.getDefaultCursor()
+            icon = savePressedIcon
+
+            if (previousIcon !== icon) repaint()
+        } else {
+            cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
+            icon = saveIcon
+
+            if (previousIcon !== icon) repaint()
+        }
+    }
+
+    override fun mouseMoved(e: MouseEvent) {
+        val previousIcon = icon
+        if (iconRect.contains(Point(e.x, e.y))) {
+            cursor = Cursor.getDefaultCursor()
+            icon = saveHoveredIcon
+
+            if (previousIcon !== icon) repaint()
+        } else {
+            cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
+            icon = saveIcon
+
+            if (previousIcon !== icon) repaint()
+        }
+    }
+
+    override fun mouseClicked(e: MouseEvent) {
+        if (showSaveButton && iconRect.contains(Point(e.x, e.y))) {
+
+            listeners.forEach(SaveListener::onSave)
+            repaint()
+        }
+    }
+
+    override fun mousePressed(e: MouseEvent) {
+        val previousIcon = icon
+        if (iconRect.contains(Point(e.x, e.y))) {
+            icon = savePressedIcon
+
+            if (previousIcon !== icon) repaint()
+        }
+    }
+
+    override fun mouseReleased(e: MouseEvent) {
+        val previousIcon = icon
+        if (iconRect.contains(Point(e.x, e.y))) {
+            icon = saveHoveredIcon
+
+            if (previousIcon !== icon) repaint()
+        }
+    }
+
+    override fun mouseEntered(e: MouseEvent) = Unit
+    override fun mouseExited(e: MouseEvent) = Unit
+
+    fun interface SaveListener {
+        fun onSave()
     }
 }

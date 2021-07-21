@@ -157,7 +157,10 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         ApplicationManager.getApplication().invokeLater {
             val fileMarker = SourceMarker.getSourceFileMarker(logAdded.location.source)
             if (fileMarker != null) {
-                LiveLogStatusManager.showStatusBar(logAdded, fileMarker)
+                //add live log only if not already known
+                if (SourceMarkSearch.findByLogId(logAdded.id!!) == null) {
+                    LiveLogStatusManager.showStatusBar(logAdded, fileMarker)
+                }
             } else {
                 LiveLogStatusManager.addActiveLiveLog(logAdded)
             }

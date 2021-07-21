@@ -1,6 +1,8 @@
 package com.sourceplusplus.sourcemarker;
 
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.event.VisibleAreaEvent;
+import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class CommandBar extends JPanel {
+public class CommandBar extends JPanel implements VisibleAreaListener {
 
     private final Function<String, List<AutocompleteFieldRow>> lookup = text -> Arrays.stream(CommandAction.values())
             .filter(v -> !text.isEmpty()
@@ -32,18 +34,22 @@ public class CommandBar extends JPanel {
                     && !v.getText().equalsIgnoreCase(text)
             ).collect(Collectors.toList());
 
+    private final Editor editor;
     private final InlayMark inlayMark;
-    private Editor editor;
+    private boolean disposed = false;
 
-    public CommandBar(InlayMark inlayMark) {
+    public CommandBar(Editor editor, InlayMark inlayMark) {
+        this.editor = editor;
         this.inlayMark = inlayMark;
 
         initComponents();
         setupComponents();
+        setCursor(Cursor.getDefaultCursor());
     }
 
-    public void setEditor(Editor editor) {
-        this.editor = editor;
+    @Override
+    public void visibleAreaChanged(VisibleAreaEvent e) {
+        textField1.hideAutocompletePopup();
     }
 
     public void focus() {
@@ -84,9 +90,7 @@ public class CommandBar extends JPanel {
 
             @Override
             public void focusLost(FocusEvent e) {
-                if (textField1.getText().equals("")) {
                     dispose();
-                }
             }
         });
 
@@ -119,6 +123,9 @@ public class CommandBar extends JPanel {
     }
 
     private void dispose() {
+        if (disposed) return;
+        disposed = true;
+        editor.getScrollingModel().removeVisibleAreaListener(this);
         inlayMark.dispose(true, false);
     }
 
@@ -130,7 +137,7 @@ public class CommandBar extends JPanel {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
-        textField1 = new AutocompleteField("/", "Search or Type a Command (/)", Arrays.stream(CommandAction.values()).collect(Collectors.toList()), lookup, inlayMark.getLineNumber(), true);
+        textField1 = new AutocompleteField("/", "Search or Type a Command (/)", Arrays.stream(CommandAction.values()).collect(Collectors.toList()), lookup, inlayMark.getLineNumber(), true, true);
         label2 = new JLabel();
 
         //======== this ========
@@ -169,7 +176,7 @@ public class CommandBar extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
     private JLabel label1;
-    private JTextPane textField1;
+    private AutocompleteField textField1;
     private JLabel label2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
