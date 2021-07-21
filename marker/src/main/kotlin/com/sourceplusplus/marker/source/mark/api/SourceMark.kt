@@ -181,6 +181,10 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         dispose(true)
     }
 
+    fun dispose(removeFromMarker: Boolean = true) {
+        dispose(removeFromMarker, true)
+    }
+
     fun dispose(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
         if (this is InlayMark) {
             configuration.inlayRef?.get()?.dispose()

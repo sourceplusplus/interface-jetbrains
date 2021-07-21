@@ -47,24 +47,10 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                             val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
                                 ?.findAnnotation(requestMappingAnnotation)
                             if (classRequestMapping != null) {
-                                val classEndpoint =
-                                    handleJavaOrGroovyAnnotation(true, classRequestMapping, requestMappingAnnotation)
-                                if (detectedEndpoint.isPresent && classEndpoint.isPresent) {
-                                    var classEndpointPath = classEndpoint.get().path!!
-                                    if (classEndpointPath.endsWith("/")) {
-                                        classEndpointPath = classEndpointPath.substringBeforeLast("/")
-                                    }
-                                    promise.complete(
-                                        Optional.of(
-                                            DetectedEndpoint(
-                                                "{${detectedEndpoint.get().type}}" + classEndpointPath + detectedEndpoint.get().path,
-                                                false
-                                            )
-                                        )
-                                    )
-                                } else {
-                                    promise.complete(detectedEndpoint)
-                                }
+                                val classEndpoint = handleJavaOrGroovyAnnotation(
+                                    true, classRequestMapping, requestMappingAnnotation
+                                )
+                                handleEndpointDetection(detectedEndpoint, classEndpoint, promise)
                             } else {
                                 promise.complete(detectedEndpoint)
                             }
@@ -74,23 +60,10 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                             val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
                                 ?.findAnnotation(requestMappingAnnotation)
                             if (classRequestMapping != null) {
-                                val classEndpoint = handleKotlinAnnotation(true, classRequestMapping, requestMappingAnnotation)
-                                if (detectedEndpoint.isPresent && classEndpoint.isPresent) {
-                                    var classEndpointPath = classEndpoint.get().path!!
-                                    if (classEndpointPath.endsWith("/")) {
-                                        classEndpointPath = classEndpointPath.substringBeforeLast("/")
-                                    }
-                                    promise.complete(
-                                        Optional.of(
-                                            DetectedEndpoint(
-                                                "{${detectedEndpoint.get().type}}" + classEndpointPath + detectedEndpoint.get().path,
-                                                false
-                                            )
-                                        )
-                                    )
-                                } else {
-                                    promise.complete(detectedEndpoint)
-                                }
+                                val classEndpoint = handleKotlinAnnotation(
+                                    true, classRequestMapping, requestMappingAnnotation
+                                )
+                                handleEndpointDetection(detectedEndpoint, classEndpoint, promise)
                             } else {
                                 promise.complete(detectedEndpoint)
                             }
@@ -105,6 +78,30 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             promise.tryComplete(Optional.empty())
         }
         return promise.future()
+    }
+
+    private fun handleEndpointDetection(
+        detectedEndpoint: Optional<DetectedEndpoint>,
+        classEndpoint: Optional<DetectedEndpoint>,
+        promise: Promise<Optional<DetectedEndpoint>>
+    ) {
+        if (detectedEndpoint.isPresent && classEndpoint.isPresent) {
+            var classEndpointPath = classEndpoint.get().path!!
+            if (classEndpointPath.endsWith("/")) {
+                classEndpointPath = classEndpointPath.substringBeforeLast("/")
+            }
+
+            val endpointName = buildString {
+                append("{")
+                append(detectedEndpoint.get().type)
+                append("}")
+                append(classEndpointPath)
+                append(detectedEndpoint.get().path)
+            }
+            promise.complete(Optional.of(DetectedEndpoint(endpointName, false)))
+        } else {
+            promise.complete(detectedEndpoint)
+        }
     }
 
     private fun handleJavaOrGroovyAnnotation(

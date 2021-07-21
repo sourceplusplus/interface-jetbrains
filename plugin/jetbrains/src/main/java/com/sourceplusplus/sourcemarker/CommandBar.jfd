@@ -28,7 +28,7 @@ new FormModel {
 				"font": new java.awt.Font( "Roboto Light", 0, 14 )
 				"minimumSize": new java.awt.Dimension( 0, 27 )
 				auxiliary() {
-					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"Search or Type a Command (/)\", commands, lookup);"
+					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"/\", \"Search or Type a Command (/)\", Arrays.stream(CommandAction.values()).collect(Collectors.toList()), lookup, inlayMark.getLineNumber(), true, true);"
 				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 1 0"
