@@ -37,7 +37,7 @@ object CommandBarController {
             previousCommandBar!!.dispose()
             previousCommandBar = null
 
-            ApplicationManager.getApplication().runReadAction {
+            ApplicationManager.getApplication().runWriteAction {
                 LiveLogStatusManager.showStatusBar(editor, prevCommandBar.lineNumber)
             }
         } else if (input == "/clear-live-breakpoints") {
