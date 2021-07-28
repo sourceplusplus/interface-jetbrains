@@ -19,7 +19,7 @@ abstract class LiveInstrument {
     abstract val applyImmediately: Boolean
     abstract val applied: Boolean
     abstract val pending: Boolean
-    abstract val hitRateLimit: Int //limit of once per X milliseconds
+    abstract val throttle: InstrumentThrottle
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

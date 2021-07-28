@@ -11,7 +11,9 @@ import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.artifact.log.Log;
+import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
+import com.sourceplusplus.protocol.instrument.ThrottleStep;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
@@ -455,12 +457,16 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
         String condition = null;
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
-        int hitRateLimit = 1000;
+        InstrumentThrottle throttle = new InstrumentThrottle(1, ThrottleStep.SECOND);
         int hitLimit = 100;
         if (configurationPanel != null) {
             condition = configurationPanel.getCondition().getExpression();
             expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
             hitLimit = configurationPanel.getHitLimit();
+            throttle = new InstrumentThrottle(
+                    configurationPanel.getRateLimitCount(),
+                    ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
+            );
 
             configurationPanel.setNewDefaults();
         }
@@ -477,7 +483,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 false,
                 false,
                 false,
-                hitRateLimit
+                throttle
         );
         instrumentService.addLiveInstrument(log, it -> {
             if (it.succeeded()) {
