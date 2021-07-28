@@ -1,6 +1,7 @@
 package com.sourceplusplus.protocol.instrument
 
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 /**
  * todo: description.
@@ -9,7 +10,7 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class LiveSourceLocation(
+data class LiveSourceLocation @JvmOverloads constructor(
     val source: String,
     val line: Int,
     val commitId: String? = null,
