@@ -357,7 +357,7 @@ public class LiveLogConfigurationPanel extends JPanel {
                 "[grow]"));
 
             //---- label6 ----
-            label6.setText("Rate Limit");
+            label6.setText("Hit Throttle");
             label6.setFont(new Font("Roboto Light", Font.PLAIN, 15));
             panel5.add(label6, "cell 0 0");
 
