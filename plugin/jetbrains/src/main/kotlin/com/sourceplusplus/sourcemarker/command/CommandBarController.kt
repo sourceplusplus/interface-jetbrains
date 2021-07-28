@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.command
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocumentManager
 import com.sourceplusplus.marker.source.SourceFileMarker
@@ -32,9 +33,13 @@ object CommandBarController {
         log.info("Processing command input: {}", input)
         if (input == "/add-live-log") {
             //replace command inlay with log status inlay
+            val prevCommandBar = previousCommandBar!!
             previousCommandBar!!.dispose()
-            LiveLogStatusManager.showStatusBar(editor, previousCommandBar!!.lineNumber)
             previousCommandBar = null
+
+            ApplicationManager.getApplication().runReadAction {
+                LiveLogStatusManager.showStatusBar(editor, prevCommandBar.lineNumber)
+            }
         } else if (input == "/clear-live-breakpoints") {
             previousCommandBar!!.dispose()
             previousCommandBar = null
