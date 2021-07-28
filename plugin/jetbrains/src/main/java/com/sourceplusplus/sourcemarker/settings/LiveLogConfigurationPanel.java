@@ -126,20 +126,20 @@ public class LiveLogConfigurationPanel extends JPanel {
             throw new IllegalArgumentException();
         }
     }
-    
+
     public int getRateLimitCount() {
         return (int) rateLimitCountSpinner.getValue();
     }
-    
+
     public void setRateLimitCount(int count) {
         this.rateLimitCount = count;
         rateLimitCountSpinner.setValue(count);
     }
-    
+
     public String getRateLimitStep() {
         return (String) rateLimitStepCombobox.getSelectedItem();
     }
-    
+
     public void setRateLimitStep(String step) {
         this.rateLimitStep = step;
         rateLimitStepCombobox.setSelectedItem(step);
