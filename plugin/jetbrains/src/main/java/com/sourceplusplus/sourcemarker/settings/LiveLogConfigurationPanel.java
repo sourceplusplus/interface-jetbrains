@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.settings;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.psi.PsiFile;
@@ -69,7 +70,7 @@ public class LiveLogConfigurationPanel extends JPanel {
 
     public void setCondition(XExpression condition) {
         this.condition = condition;
-        comboBox.setExpression(condition);
+        ApplicationManager.getApplication().runWriteAction(() -> comboBox.setExpression(condition));
     }
 
     public XExpression getCondition() {
