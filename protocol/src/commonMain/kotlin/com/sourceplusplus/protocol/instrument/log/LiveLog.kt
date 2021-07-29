@@ -1,6 +1,9 @@
 package com.sourceplusplus.protocol.instrument.log
 
-import com.sourceplusplus.protocol.instrument.*
+import com.sourceplusplus.protocol.instrument.InstrumentThrottle
+import com.sourceplusplus.protocol.instrument.LiveInstrument
+import com.sourceplusplus.protocol.instrument.LiveInstrumentType
+import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import kotlinx.serialization.Serializable
 
 /**
@@ -21,7 +24,7 @@ data class LiveLog(
     override val applyImmediately: Boolean = false,
     override val applied: Boolean = false,
     override val pending: Boolean = false,
-    override val throttle: InstrumentThrottle = InstrumentThrottle(1, ThrottleStep.SECOND)
+    override val throttle: InstrumentThrottle = InstrumentThrottle.DEFAULT
 ) : LiveInstrument() {
     override val type: LiveInstrumentType = LiveInstrumentType.LOG
 }

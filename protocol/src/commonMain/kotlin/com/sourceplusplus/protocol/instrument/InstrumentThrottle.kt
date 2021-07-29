@@ -12,4 +12,8 @@ import kotlinx.serialization.Serializable
 data class InstrumentThrottle(
     val limit: Int,
     val step: ThrottleStep,
-)
+) {
+    companion object {
+        val DEFAULT: InstrumentThrottle = InstrumentThrottle(1, ThrottleStep.SECOND)
+    }
+}

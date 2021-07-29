@@ -457,7 +457,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
         String condition = null;
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
-        InstrumentThrottle throttle = new InstrumentThrottle(1, ThrottleStep.SECOND);
+        InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
         int hitLimit = 100;
         if (configurationPanel != null) {
             condition = configurationPanel.getCondition().getExpression();
