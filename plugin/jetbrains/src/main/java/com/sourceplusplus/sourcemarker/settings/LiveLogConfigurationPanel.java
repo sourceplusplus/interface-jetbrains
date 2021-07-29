@@ -8,8 +8,10 @@ import com.intellij.ui.EditorTextField;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
+import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
@@ -65,7 +67,7 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
 
     public void setConditionByString(String condition) {
-        //todo: this
+        setCondition(XExpressionImpl.fromText(InstrumentConditionParser.INSTANCE.fromLiveConditional(condition)));
     }
 
     public void setCondition(XExpression condition) {
