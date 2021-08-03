@@ -42,6 +42,7 @@ class AutocompleteField(
     var editMode: Boolean = true
     private var showSaveButton: Boolean = false
     private val listeners: MutableList<SaveListener> = mutableListOf()
+    var saveOnSuggestionDoubleClick: Boolean = false
 
     init {
         foreground = Color.decode("#A9B7C6")
@@ -53,6 +54,13 @@ class AutocompleteField(
         popup.isAlwaysOnTop = true
         model = ListModel()
         list = JBList(model)
+        list.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (saveOnSuggestionDoubleClick && e.clickCount == 2) {
+                    listeners.forEach(SaveListener::onSave)
+                }
+            }
+        })
 
         list.font = Font("Roboto Light", Font.PLAIN, 14)
         list.setCellRenderer(MyCellRenderer())

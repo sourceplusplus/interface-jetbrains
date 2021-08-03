@@ -45,6 +45,16 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
         initComponents();
         setupComponents();
         setCursor(Cursor.getDefaultCursor());
+
+        textField1.setSaveOnSuggestionDoubleClick(true);
+        textField1.addSaveListener(() -> {
+            String autoCompleteText = textField1.getSelectedText();
+            if (autoCompleteText != null) {
+                CommandBarController.INSTANCE.handleCommandInput(autoCompleteText, editor);
+            } else {
+                CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
+            }
+        });
     }
 
     @Override
