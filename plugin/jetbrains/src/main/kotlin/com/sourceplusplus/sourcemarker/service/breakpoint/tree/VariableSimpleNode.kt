@@ -65,7 +65,12 @@ class VariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
     }
 
     override fun update(presentation: PresentationData) {
-        presentation.addText(variable.name + " = ", XDebuggerUIConstants.VALUE_NAME_ATTRIBUTES)
+        if (variable.scope == LiveVariableScope.GENERATED_METHOD) {
+            presentation.addText(variable.name + " = ", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+            presentation.setIcon(AllIcons.Nodes.Method)
+        } else {
+            presentation.addText(variable.name + " = ", XDebuggerUIConstants.VALUE_NAME_ATTRIBUTES)
+        }
 
         if (variable.liveClazz != null && primitives.contains(variable.liveClazz)) {
             if (variable.liveClazz == "java.lang.Boolean") {
@@ -121,7 +126,10 @@ class VariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                     SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.STRING))
                 )
             }
-            presentation.setIcon(AllIcons.Debugger.Db_primitive)
+
+            if (variable.scope != LiveVariableScope.GENERATED_METHOD) {
+                presentation.setIcon(AllIcons.Debugger.Db_primitive)
+            }
         }
 
         if (variable.liveClazz != null && primitives.contains(variable.liveClazz)) {
