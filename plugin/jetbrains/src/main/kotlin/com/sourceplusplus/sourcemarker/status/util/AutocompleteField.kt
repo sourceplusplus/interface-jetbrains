@@ -87,10 +87,10 @@ class AutocompleteField(
         addNumberStyle(this)
 
         (document as AbstractDocument).documentFilter = object : DocumentFilter() {
-            override fun insertString(fb: FilterBypass, offset: Int, string: String, attr: AttributeSet) =
+            override fun insertString(fb: FilterBypass, offset: Int, string: String, attr: AttributeSet?) =
                 fb.insertString(offset, string.replace("\\n".toRegex(), ""), attr)
 
-            override fun replace(fb: FilterBypass, offset: Int, length: Int, string: String, attr: AttributeSet) =
+            override fun replace(fb: FilterBypass, offset: Int, length: Int, string: String, attr: AttributeSet?) =
                 fb.replace(offset, length, string.replace("\\n".toRegex(), ""), attr)
         }
 
@@ -125,7 +125,7 @@ class AutocompleteField(
         repaint()
     }
 
-    fun isShowingSaveButton() : Boolean {
+    fun isShowingSaveButton(): Boolean {
         return showSaveButton
     }
 
@@ -231,7 +231,10 @@ class AutocompleteField(
                     if (text.getText().startsWith("$" + varCompleted)) {
                         setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
                     } else {
-                        setText(getText().substring(0, getText().length - varCompleted.length) + text.getText().substring(commandDelimiter.length))
+                        setText(
+                            getText().substring(0, getText().length - varCompleted.length)
+                                    + text.getText().substring(commandDelimiter.length)
+                        )
                     }
                     caretPosition = getText().length
                 }
