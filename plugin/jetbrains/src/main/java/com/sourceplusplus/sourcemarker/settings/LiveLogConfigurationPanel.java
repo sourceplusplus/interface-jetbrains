@@ -63,7 +63,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         rateLimitCountSpinner.addChangeListener(changeEvent -> autocompleteField.setShowSaveButton(isChanged()));
         rateLimitStepCombobox.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
 
-        panel7.add(comboBox.getComponent());
+        conditionPanel.add(comboBox.getComponent());
     }
 
     public void setConditionByString(String condition) {
@@ -169,7 +169,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         // Generated using JFormDesigner Evaluation license - unknown
         panel4 = new JPanel();
         label1 = new JLabel();
-        panel7 = new JPanel();
+        conditionPanel = new JPanel();
         separator2 = new JSeparator();
         panel6 = new JPanel();
         label5 = new JLabel();
@@ -223,12 +223,12 @@ public class LiveLogConfigurationPanel extends JPanel {
             label1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
             panel4.add(label1, "cell 0 0");
 
-            //======== panel7 ========
+            //======== conditionPanel ========
             {
-                panel7.setMinimumSize(new Dimension(0, 27));
-                panel7.setLayout(new BorderLayout());
+                conditionPanel.setMinimumSize(new Dimension(0, 27));
+                conditionPanel.setLayout(new BorderLayout());
             }
-            panel4.add(panel7, "cell 0 1");
+            panel4.add(conditionPanel, "cell 0 1");
         }
         add(panel4, "cell 0 0");
 
@@ -413,7 +413,7 @@ public class LiveLogConfigurationPanel extends JPanel {
     // Generated using JFormDesigner Evaluation license - unknown
     private JPanel panel4;
     private JLabel label1;
-    private JPanel panel7;
+    private JPanel conditionPanel;
     private JSeparator separator2;
     private JPanel panel6;
     private JLabel label5;

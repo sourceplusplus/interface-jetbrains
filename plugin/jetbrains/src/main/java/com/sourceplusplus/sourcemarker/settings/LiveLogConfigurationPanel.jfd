@@ -26,7 +26,7 @@ new FormModel {
 					"value": "cell 0 0"
 				} )
 				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
-					name: "panel7"
+					name: "conditionPanel"
 					"minimumSize": new java.awt.Dimension( 0, 27 )
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 1"
