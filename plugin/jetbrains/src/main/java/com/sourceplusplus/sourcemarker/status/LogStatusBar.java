@@ -484,7 +484,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         }
 
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
-        LiveLog log = new LiveLog(
+        LiveLog instrument = new LiveLog(
                 finalLogPattern,
                 varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
                 sourceLocation,
@@ -497,7 +497,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 false,
                 throttle
         );
-        instrumentService.addLiveInstrument(log, it -> {
+        instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
                 liveLogTextField.setEditMode(false);
