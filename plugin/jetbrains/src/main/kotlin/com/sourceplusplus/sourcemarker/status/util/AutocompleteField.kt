@@ -235,8 +235,12 @@ class AutocompleteField(
                     setText(text.getText())
                     caretPosition = getText().length
                 } else {
-                    val varCompleted = getText().substringAfterLast(commandDelimiter)
-                    if (text.getText().startsWith("$" + varCompleted)) {
+                    val varCompleted = if (commandDelimiter.isEmpty()) {
+                        getText()
+                    } else {
+                        getText().substringAfterLast(commandDelimiter)
+                    }
+                    if (text.getText().startsWith(commandDelimiter + varCompleted)) {
                         setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
                     } else {
                         setText(
