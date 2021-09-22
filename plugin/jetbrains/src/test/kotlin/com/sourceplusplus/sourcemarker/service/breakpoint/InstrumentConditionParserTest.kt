@@ -15,7 +15,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class BreakpointConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
+class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
 
     @BeforeEach
     override fun setUp() = super.setUp()
@@ -55,8 +55,48 @@ class BreakpointConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
                 .createCodeFragment(expressionText, context, project)
             assertEquals(
                 "staticFields[staticVar] == 1 && fields[instanceVar] == 2 && localVariables[localVar] == 3",
-                BreakpointConditionParser.toBreakpointConditional(codeFragment)
+                InstrumentConditionParser.toLiveConditional(codeFragment)
             )
         }
+    }
+
+    @Test
+    fun `qualified string expression`() {
+        @Language("Java") val code = """
+                public class Test {
+                    public void test() {
+                        String s = "hi";
+                        System.out.println("done");
+                    }
+                }
+            """.trimIndent()
+
+        ApplicationManager.getApplication().runReadAction {
+            val sourceFile = PsiFileFactory.getInstance(project).createFileFromText(
+                "Test.java", JavaFileType.INSTANCE, code
+            ) as PsiJavaFile
+
+            val context = sourceFile.findElementAt(78) //System.out line
+            val expressionText = TextWithImportsImpl.fromXExpression(
+                XExpressionImpl(
+                    "s.startsWith(\"hi\")",
+                    JavaLanguage.INSTANCE, null
+                )
+            )
+            val codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
+                .createCodeFragment(expressionText, context, project)
+            assertEquals(
+                "localVariables[s].startsWith(\"hi\")",
+                InstrumentConditionParser.toLiveConditional(codeFragment)
+            )
+        }
+    }
+
+    @Test
+    fun `polyadic expression back to string`() {
+        assertEquals(
+            "staticVar == 1 && instanceVar == 2 && localVar == 3",
+            InstrumentConditionParser.fromLiveConditional("staticFields[staticVar] == 1 && fields[instanceVar] == 2 && localVariables[localVar] == 3")
+        )
     }
 }

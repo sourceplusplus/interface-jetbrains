@@ -42,6 +42,7 @@ class AutocompleteField(
     var editMode: Boolean = true
     private var showSaveButton: Boolean = false
     private val listeners: MutableList<SaveListener> = mutableListOf()
+    var saveOnSuggestionDoubleClick: Boolean = false
 
     init {
         foreground = Color.decode("#A9B7C6")
@@ -53,6 +54,13 @@ class AutocompleteField(
         popup.isAlwaysOnTop = true
         model = ListModel()
         list = JBList(model)
+        list.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (saveOnSuggestionDoubleClick && e.clickCount == 2) {
+                    listeners.forEach(SaveListener::onSave)
+                }
+            }
+        })
 
         list.font = Font("Roboto Light", Font.PLAIN, 14)
         list.setCellRenderer(MyCellRenderer())
@@ -87,10 +95,10 @@ class AutocompleteField(
         addNumberStyle(this)
 
         (document as AbstractDocument).documentFilter = object : DocumentFilter() {
-            override fun insertString(fb: FilterBypass, offset: Int, string: String, attr: AttributeSet) =
+            override fun insertString(fb: FilterBypass, offset: Int, string: String, attr: AttributeSet?) =
                 fb.insertString(offset, string.replace("\\n".toRegex(), ""), attr)
 
-            override fun replace(fb: FilterBypass, offset: Int, length: Int, string: String, attr: AttributeSet) =
+            override fun replace(fb: FilterBypass, offset: Int, length: Int, string: String, attr: AttributeSet?) =
                 fb.replace(offset, length, string.replace("\\n".toRegex(), ""), attr)
         }
 
@@ -125,7 +133,7 @@ class AutocompleteField(
         repaint()
     }
 
-    fun isShowingSaveButton() : Boolean {
+    fun isShowingSaveButton(): Boolean {
         return showSaveButton
     }
 
@@ -231,7 +239,10 @@ class AutocompleteField(
                     if (text.getText().startsWith("$" + varCompleted)) {
                         setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
                     } else {
-                        setText(getText().substring(0, getText().length - varCompleted.length) + text.getText().substring(commandDelimiter.length))
+                        setText(
+                            getText().substring(0, getText().length - varCompleted.length)
+                                    + text.getText().substring(commandDelimiter.length)
+                        )
                     }
                     caretPosition = getText().length
                 }

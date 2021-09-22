@@ -1,5 +1,6 @@
 package com.sourceplusplus.protocol.instrument.breakpoint
 
+import com.sourceplusplus.protocol.instrument.InstrumentThrottle
 import com.sourceplusplus.protocol.instrument.LiveInstrument
 import com.sourceplusplus.protocol.instrument.LiveInstrumentType
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
@@ -21,7 +22,7 @@ data class LiveBreakpoint(
     override val applyImmediately: Boolean = false,
     override val applied: Boolean = false,
     override val pending: Boolean = false,
-    override val hitRateLimit: Int = 1000 //limit of once per X milliseconds
+    override val throttle: InstrumentThrottle = InstrumentThrottle.DEFAULT
 ) : LiveInstrument() {
     override val type: LiveInstrumentType = LiveInstrumentType.BREAKPOINT
 }

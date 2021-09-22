@@ -1,21 +1,30 @@
 package com.sourceplusplus.sourcemarker.status;
 
+import com.intellij.debugger.engine.evaluation.TextWithImports;
+import com.intellij.debugger.engine.evaluation.TextWithImportsImpl;
+import com.intellij.debugger.impl.DebuggerUtilsEx;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.IdeFocusManager;
+import com.intellij.psi.JavaCodeFragment;
+import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.artifact.log.Log;
+import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
+import com.sourceplusplus.protocol.instrument.ThrottleStep;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
+import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
@@ -364,49 +373,9 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         addRecursiveMouseListener(configPanel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (System.currentTimeMillis() - popupLastOpened.get() <= 200) {
-                    return;
+                if (System.currentTimeMillis() - popupLastOpened.get() > 200) {
+                    ApplicationManager.getApplication().runWriteAction(() -> showConfigurationPopup(popupLastOpened));
                 }
-
-                popup = new JWindow(SwingUtilities.getWindowAncestor(LogStatusBar.this));
-                popup.setType(Window.Type.POPUP);
-                popup.setAlwaysOnTop(true);
-
-                if (configurationPanel == null || !liveLogTextField.isShowingSaveButton()) {
-                    LiveLogConfigurationPanel previousConfigurationPanel = configurationPanel;
-                    configurationPanel = new LiveLogConfigurationPanel(liveLogTextField, inlayMark);
-                    if (previousConfigurationPanel != null) {
-                        configurationPanel.setCondition(previousConfigurationPanel.getCondition());
-                        configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
-                        configurationPanel.setHitLimit(previousConfigurationPanel.getHitLimit());
-                        configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
-                        configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
-                    } else if (liveLog != null) {
-                        configurationPanel.setConditionByString(liveLog.getCondition());
-                        configurationPanel.setHitLimit(liveLog.getHitLimit());
-                        //todo: rest
-                    }
-                }
-
-                popup.add(configurationPanel);
-                popup.setPreferredSize(new Dimension(LogStatusBar.this.getWidth(), popup.getPreferredSize().height));
-                popup.pack();
-                popup.setLocation(configPanel.getLocationOnScreen().x - 1,
-                        configPanel.getLocationOnScreen().y + LogStatusBar.this.getHeight() - 2);
-
-                popup.setVisible(true);
-
-                popup.addWindowFocusListener(new WindowAdapter() {
-                    @Override
-                    public void windowLostFocus(WindowEvent e) {
-                        if (popup != null) {
-                            popup.dispose();
-                            popup = null;
-
-                            popupLastOpened.set(System.currentTimeMillis());
-                        }
-                    }
-                });
             }
         }, () -> {
             removeActiveDecorations();
@@ -416,6 +385,50 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         timeLabel.setCursor(Cursor.getDefaultCursor());
 
         setCursor(Cursor.getDefaultCursor());
+    }
+
+    private void showConfigurationPopup(AtomicLong popupLastOpened) {
+        popup = new JWindow(SwingUtilities.getWindowAncestor(LogStatusBar.this));
+        popup.setType(Window.Type.POPUP);
+        popup.setAlwaysOnTop(true);
+
+        if (configurationPanel == null || !liveLogTextField.isShowingSaveButton()) {
+            LiveLogConfigurationPanel previousConfigurationPanel = configurationPanel;
+            configurationPanel = new LiveLogConfigurationPanel(liveLogTextField, inlayMark);
+            if (previousConfigurationPanel != null) {
+                configurationPanel.setCondition(previousConfigurationPanel.getCondition());
+                configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
+                configurationPanel.setHitLimit(previousConfigurationPanel.getHitLimit());
+                configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
+                configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
+            } else if (liveLog != null) {
+                configurationPanel.setConditionByString(liveLog.getCondition());
+                configurationPanel.setHitLimit(liveLog.getHitLimit());
+                configurationPanel.setRateLimitCount(liveLog.getThrottle().getLimit());
+                configurationPanel.setRateLimitStep(liveLog.getThrottle().getStep().name().toLowerCase());
+                //todo: rest
+            }
+        }
+
+        popup.add(configurationPanel);
+        popup.setPreferredSize(new Dimension(LogStatusBar.this.getWidth(), popup.getPreferredSize().height));
+        popup.pack();
+        popup.setLocation(configPanel.getLocationOnScreen().x - 1,
+                configPanel.getLocationOnScreen().y + LogStatusBar.this.getHeight() - 2);
+
+        popup.setVisible(true);
+
+        popup.addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                if (popup != null) {
+                    popup.dispose();
+                    popup = null;
+
+                    popupLastOpened.set(System.currentTimeMillis());
+                }
+            }
+        });
     }
 
     private void saveLiveLog() {
@@ -452,12 +465,20 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
         String condition = null;
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
-        int hitRateLimit = 1000;
+        InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
         int hitLimit = 100;
         if (configurationPanel != null) {
-            condition = configurationPanel.getCondition().getExpression();
+            TextWithImports expressionText = TextWithImportsImpl.fromXExpression(configurationPanel.getCondition());
+            PsiElement context = inlayMark.getPsiElement();
+            JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
+                    .createCodeFragment(expressionText, context, inlayMark.getProject());
+            condition = InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
             expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
             hitLimit = configurationPanel.getHitLimit();
+            throttle = new InstrumentThrottle(
+                    configurationPanel.getRateLimitCount(),
+                    ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
+            );
 
             configurationPanel.setNewDefaults();
         }
@@ -474,7 +495,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 false,
                 false,
                 false,
-                hitRateLimit
+                throttle
         );
         instrumentService.addLiveInstrument(log, it -> {
             if (it.succeeded()) {

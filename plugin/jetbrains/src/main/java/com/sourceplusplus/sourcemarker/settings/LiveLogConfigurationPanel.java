@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.settings;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.psi.PsiFile;
@@ -7,8 +8,10 @@ import com.intellij.ui.EditorTextField;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
+import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
@@ -64,12 +67,12 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
 
     public void setConditionByString(String condition) {
-        //todo: this
+        setCondition(XExpressionImpl.fromText(InstrumentConditionParser.INSTANCE.fromLiveConditional(condition)));
     }
 
     public void setCondition(XExpression condition) {
         this.condition = condition;
-        comboBox.setExpression(condition);
+        ApplicationManager.getApplication().runWriteAction(() -> comboBox.setExpression(condition));
     }
 
     public XExpression getCondition() {
@@ -126,20 +129,20 @@ public class LiveLogConfigurationPanel extends JPanel {
             throw new IllegalArgumentException();
         }
     }
-    
+
     public int getRateLimitCount() {
         return (int) rateLimitCountSpinner.getValue();
     }
-    
+
     public void setRateLimitCount(int count) {
         this.rateLimitCount = count;
         rateLimitCountSpinner.setValue(count);
     }
-    
+
     public String getRateLimitStep() {
         return (String) rateLimitStepCombobox.getSelectedItem();
     }
-    
+
     public void setRateLimitStep(String step) {
         this.rateLimitStep = step;
         rateLimitStepCombobox.setSelectedItem(step);
@@ -357,7 +360,7 @@ public class LiveLogConfigurationPanel extends JPanel {
                 "[grow]"));
 
             //---- label6 ----
-            label6.setText("Rate Limit");
+            label6.setText("Hit Throttle");
             label6.setFont(new Font("Roboto Light", Font.PLAIN, 15));
             panel5.add(label6, "cell 0 0");
 
