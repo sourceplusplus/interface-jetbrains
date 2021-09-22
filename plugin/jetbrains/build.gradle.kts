@@ -82,7 +82,7 @@ dependencies {
     implementation("ch.qos.logback:logback-core:1.2.5")
     implementation("ch.qos.logback:logback-classic:1.2.6")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
 }
 
 tasks {
