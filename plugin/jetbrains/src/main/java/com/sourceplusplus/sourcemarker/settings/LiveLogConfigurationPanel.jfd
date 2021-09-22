@@ -59,7 +59,7 @@ new FormModel {
 					name: "hitLimitSpinner"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					"model": new javax.swing.SpinnerNumberModel {
-						minimum: 100
+						minimum: 1
 						value: 100
 					}
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
@@ -180,7 +180,7 @@ new FormModel {
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label6"
-					"text": "Rate Limit"
+					"text": "Hit Throttle"
 					"font": #Font0
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"
