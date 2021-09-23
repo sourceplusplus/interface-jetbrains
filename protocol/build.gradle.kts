@@ -50,7 +50,7 @@ kotlin {
                 implementation("junit:junit:4.13.2")
                 implementation(project(":protocol"))
                 implementation("com.fasterxml.jackson.core:jackson-core:2.12.5")
-                implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
+                implementation("com.fasterxml.jackson.core:jackson-databind:2.12.5")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.5")
                 implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.4")
