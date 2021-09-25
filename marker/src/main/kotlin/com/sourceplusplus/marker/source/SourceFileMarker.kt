@@ -100,7 +100,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open fun removeInvalidSourceMarks(): Boolean {
         var removedMark = false
-        sourceMarks.forEach {
+        sourceMarks.toList().forEach {
             if (!it.valid) {
                 check(removeSourceMark(it))
                 removedMark = true
