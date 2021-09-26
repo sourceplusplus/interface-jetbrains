@@ -22,7 +22,7 @@ new FormModel {
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "descriptionLabel"
 				"text": ""
-				"foreground": new java.awt.Color( 187, 187, 187, 75 )
+				"foreground": sfield java.awt.Color gray
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 0 1"
 			} )

@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.command
 
+import com.intellij.openapi.util.IconLoader
 import javax.swing.Icon
 
 /**
@@ -10,32 +11,64 @@ import javax.swing.Icon
  */
 @Suppress("unused")
 enum class CommandAction(
-    private val command: String,
-    private val description: String
+    val command: String,
+    private val description: String,
+    val selectedIcon: Icon? = null,
+    val unselectedIcon: Icon? = null
 ) : AutocompleteFieldRow {
 
-//    ADD_LIVE_BREAKPOINT(
-//        "/add-live-breakpoint",
-//        "Add live breakpoint instrument after line *lineNumber*"
-//    ),
-    ADD_LIVE_LOG(
-        "/add-live-log",
-        "Add live log instrument after line *lineNumber*"
+    VIEW_ACTIVITY(
+        "view-activity",
+        "View method activity"
     ),
-//    CLEAR_LIVE_BREAKPOINTS(
-//        "/clear-live-breakpoints",
-//        "Clear all self-created live breakpoints"
-//    ),
+    WATCH_VARIABLE(
+        "watch",
+        "Manual Tracing ➛ Watched Variables ➛ Scope: Local / Add *variable* to watched variables"
+    ),
+    TRACE_METHOD(
+        "trace",
+        "Add method to distributed tracing system"
+    ),
+    ADD_LIVE_BREAKPOINT(
+        "Add Breakpoint",
+        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
+        IconLoader.findIcon("/icons/command/live-breakpoint_selected.svg"),
+        IconLoader.findIcon("/icons/command/live-breakpoint_unselected.svg")
+    ),
+    ADD_LIVE_LOG(
+        "Add Log",
+        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">After line *lineNumber*</span></html>",
+        IconLoader.findIcon("/icons/command/live-log_selected.svg"),
+        IconLoader.findIcon("/icons/command/live-log_unselected.svg")
+    ),
+    CLEAR_LIVE_BREAKPOINTS(
+        "Clear Breakpoints",
+        "Clear all self-created live breakpoints",
+        IconLoader.findIcon("/icons/command/clear-instruments_selected.svg"),
+        IconLoader.findIcon("/icons/command/clear-instruments_unselected.svg")
+    ),
     CLEAR_LIVE_INSTRUMENTS(
-        "/clear-live-instruments",
-        "Clear all self-created live instruments"
+        "Clear Instruments",
+        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Clear All</span></html>",
+        IconLoader.findIcon("/icons/command/clear-instruments_selected.svg"),
+        IconLoader.findIcon("/icons/command/clear-instruments_unselected.svg")
+    ),
+    CLEAR_LIVE_LOGS(
+        "Clear Logs",
+        "Clear all self-created live logs",
+        IconLoader.findIcon("/icons/command/clear-instruments_selected.svg"),
+        IconLoader.findIcon("/icons/command/clear-instruments_unselected.svg")
     );
-//    CLEAR_LIVE_LOGS(
-//        "/clear-live-logs",
-//        "Clear all self-created live logs"
-//    );
 
-    override fun getText(): String = command
-    override fun getDescription(): String? = description
-    override fun getIcon(): Icon? = null
+    override fun getText(): String {
+        return command
+    }
+
+    override fun getDescription(): String? {
+        return description
+    }
+
+    override fun getIcon(): Icon? {
+        return unselectedIcon
+    }
 }

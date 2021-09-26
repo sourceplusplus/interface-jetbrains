@@ -125,6 +125,7 @@ class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
             }
         }
 
+        //todo: make configurable and dynamic like ComponentSizeEvaluator.getDynamicSize
         private fun calcWidth(): Int {
             val visibleEditorTextWidth =
                 editor.scrollPane.viewport.width - getVerticalScrollbarWidth() - getGutterTextGap()

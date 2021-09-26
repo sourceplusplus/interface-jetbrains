@@ -6,7 +6,6 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow
-import com.sourceplusplus.sourcemarker.element.AutocompleteRow
 import org.jetbrains.kotlin.idea.completion.smart.SmartCompletionItemPriority
 import java.awt.*
 import java.awt.event.*
@@ -27,9 +26,9 @@ import javax.swing.text.*
 class AutocompleteField(
     private val commandDelimiter: String,
     private val placeHolderText: String?,
-    allLookup: List<AutocompleteFieldRow>,
+    private val allLookup: List<AutocompleteFieldRow>,
     private val lookup: Function<String, List<AutocompleteFieldRow>>,
-    private val lineNumber: Int = 0,
+    internal val lineNumber: Int = 0,
     private val replaceCommandOnTab: Boolean = false,
     private val autocompleteOnEnter: Boolean = true
 ) : JTextPane(), FocusListener, DocumentListener, KeyListener, MouseMotionListener, MouseListener {
@@ -63,7 +62,7 @@ class AutocompleteField(
         })
 
         list.font = Font("Roboto Light", Font.PLAIN, 14)
-        list.setCellRenderer(MyCellRenderer())
+        list.setCellRenderer(AutoCompleteCellRenderer(lineNumber))
 
         list.setBackground(JBColor.decode("#252525"))
         list.setBorder(JBUI.Borders.empty())
@@ -124,6 +123,10 @@ class AutocompleteField(
 
         addMouseListener(this)
         addMouseMotionListener(this)
+    }
+
+    fun setCellRenderer(listCellRenderer: DefaultListCellRenderer) {
+        list.cellRenderer = listCellRenderer
     }
 
     fun setShowSaveButton(showSaveButton: Boolean) {
@@ -215,9 +218,31 @@ class AutocompleteField(
         hasKeyPressed = false
     }
 
+    private var hasControlHeld = false
+
     override fun keyPressed(e: KeyEvent) {
         hasKeyPressed = true
-        if (e.keyCode == KeyEvent.VK_UP) {
+        if (e.keyCode == KeyEvent.VK_SPACE && hasControlHeld) {
+            // Updating results list
+            results.clear()
+            results.addAll(allLookup)
+
+            // Updating list view
+            model.updateView()
+            list.visibleRowCount = results.size.coerceAtMost(10)
+
+            // Selecting first result
+            if (results.size > 0) {
+                list.selectedIndex = 0
+            }
+
+            // Ensure autocomplete popup has correct size
+            popup.pack()
+
+            showAutocompletePopup()
+        } else if (e.keyCode == KeyEvent.VK_CONTROL) {
+            hasControlHeld = true
+        } else if (e.keyCode == KeyEvent.VK_UP) {
             val index = list.selectedIndex
             if (index > 0) {
                 list.selectedIndex = index - 1
@@ -254,7 +279,11 @@ class AutocompleteField(
         }
     }
 
-    override fun keyReleased(e: KeyEvent) = Unit
+    override fun keyReleased(e: KeyEvent) {
+        if (hasControlHeld && e.keyCode == KeyEvent.VK_CONTROL) {
+            hasControlHeld = false
+        }
+    }
 
     override fun insertUpdate(e: DocumentEvent) = documentChanged()
     override fun removeUpdate(e: DocumentEvent) = documentChanged()
@@ -295,31 +324,15 @@ class AutocompleteField(
         if (text.isEmpty() && placeHolderText != null) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
+            val textLength = pG.getFontMetrics().stringWidth(placeHolderText)
+            val fieldLength = width
+
             g.color = Color(85, 85, 85, 200)
-            g.drawString(placeHolderText, insets.left, pG.getFontMetrics().maxAscent + insets.top)
-        }
-    }
-
-    inner class MyCellRenderer : DefaultListCellRenderer() {
-        init {
-            isOpaque = true
-        }
-
-        override fun getListCellRendererComponent(
-            list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean
-        ): Component {
-            val entry = value as AutocompleteFieldRow
-            val row = AutocompleteRow()
-            row.setCommandName(entry.getText())
-            row.setCommandIcon(entry.getIcon())
-            if (entry.getDescription() != null) {
-                row.setDescription(entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString()))
-            }
-
-            if (isSelected) {
-                row.background = Color.decode("#3C3C3C")
-            }
-            return row
+            g.drawString(
+                placeHolderText,
+                insets.left + (fieldLength / 2) - (textLength / 2),
+                pG.getFontMetrics().maxAscent + insets.top
+            )
         }
     }
 

@@ -10,6 +10,8 @@ import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.command.CommandAction;
 import com.sourceplusplus.sourcemarker.command.CommandBarController;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
+import com.sourceplusplus.sourcemarker.status.util.ControlBarCellRenderer;
+import info.debatty.java.stringsimilarity.*;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -27,12 +29,27 @@ import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursive
 
 public class CommandBar extends JPanel implements VisibleAreaListener {
 
-    private final Function<String, List<AutocompleteFieldRow>> lookup = text -> Arrays.stream(CommandAction.values())
-            .filter(v -> !text.isEmpty()
-                    && v.getText().toLowerCase().contains(text.toLowerCase().replace("/", ""))
-                    && text.startsWith("/")
-                    && !v.getText().equalsIgnoreCase(text)
-            ).collect(Collectors.toList());
+    private static final JaroWinkler sift4 = new JaroWinkler(1.0d);
+    private final List<CommandAction> availableCommands = Arrays.asList(
+            CommandAction.ADD_LIVE_BREAKPOINT,
+            CommandAction.ADD_LIVE_LOG,
+            CommandAction.CLEAR_LIVE_INSTRUMENTS
+    );
+    private final Function<String, List<AutocompleteFieldRow>> lookup = text -> availableCommands.stream()
+            .sorted((c1, c2) -> {
+                String c1Command = c1.getCommand().replace("_", "").toLowerCase();
+                String c2Command = c2.getCommand().replace("_", "").toLowerCase();
+                double c1Distance = sift4.distance(text.toLowerCase(), c1Command);
+                double c2Distance = sift4.distance(text.toLowerCase(), c2Command);
+                if (c1Command.contains(text.toLowerCase())) {
+                    c1Distance -= 1; //exact match = top priority
+                }
+                if (c2Command.contains(text.toLowerCase())) {
+                    c2Distance -= 1; //exact match = top priority
+                }
+                return Double.compare(c1Distance, c2Distance);
+            })
+            .collect(Collectors.toList());
 
     private final Editor editor;
     private final InlayMark inlayMark;
@@ -100,7 +117,7 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
 
             @Override
             public void focusLost(FocusEvent e) {
-                    dispose();
+                dispose();
             }
         });
 
@@ -147,7 +164,15 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
-        textField1 = new AutocompleteField("/", "Search or Type a Command (/)", Arrays.stream(CommandAction.values()).collect(Collectors.toList()), lookup, inlayMark.getLineNumber(), true, true);
+        String functionName = inlayMark.getArtifactQualifiedName();
+        if (functionName.contains("#")) {
+            functionName = functionName.substring(functionName.substring(0,
+                    functionName.lastIndexOf(".")).lastIndexOf(".") + 1, functionName.indexOf("#"));
+        }
+        textField1 = new AutocompleteField("",
+                "Location: " + functionName + "#" + inlayMark.getLineNumber(),
+                availableCommands, lookup, inlayMark.getLineNumber(), true, true);
+        textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();
 
         //======== this ========

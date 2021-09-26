@@ -31,42 +31,61 @@ object CommandBarController {
 
     fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
-        if (input == "/add-live-log") {
-            //replace command inlay with log status inlay
-            val prevCommandBar = previousCommandBar!!
-            previousCommandBar!!.dispose()
-            previousCommandBar = null
+        when (input) {
+            CommandAction.ADD_LIVE_BREAKPOINT.command -> {
+                //replace command inlay with breakpoint status inlay
+                val prevCommandBar = previousCommandBar!!
+                previousCommandBar!!.dispose()
+                previousCommandBar = null
 
-            ApplicationManager.getApplication().runWriteAction {
-                LiveLogStatusManager.showStatusBar(editor, prevCommandBar.lineNumber)
-            }
-        } else if (input == "/clear-live-breakpoints") {
-            previousCommandBar!!.dispose()
-            previousCommandBar = null
-            SourceMarkerServices.Instance.liveInstrument!!.clearLiveBreakpoints {
-                if (it.failed()) {
-                    log.error("Failed to clear live breakpoints", it.cause())
+                ApplicationManager.getApplication().runWriteAction {
+                    LiveLogStatusManager.showBreakpointStatusBar(editor, prevCommandBar.lineNumber - 1)
                 }
             }
-        } else if (input == "/clear-live-logs") {
-            previousCommandBar!!.dispose()
-            previousCommandBar = null
-            SourceMarkerServices.Instance.liveInstrument!!.clearLiveLogs {
-                if (it.failed()) {
-                    log.error("Failed to clear live logs", it.cause())
+            CommandAction.ADD_LIVE_LOG.command -> {
+                //replace command inlay with log status inlay
+                val prevCommandBar = previousCommandBar!!
+                previousCommandBar!!.dispose()
+                previousCommandBar = null
+
+                ApplicationManager.getApplication().runWriteAction {
+                    LiveLogStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
-        } else if (input == "/clear-live-instruments") {
-            previousCommandBar!!.dispose()
-            previousCommandBar = null
-            SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments {
-                if (it.failed()) {
-                    log.error("Failed to clear live instruments", it.cause())
+            CommandAction.CLEAR_LIVE_BREAKPOINTS.command -> {
+                previousCommandBar!!.dispose()
+                previousCommandBar = null
+                SourceMarkerServices.Instance.liveInstrument!!.clearLiveBreakpoints {
+                    if (it.failed()) {
+                        log.error("Failed to clear live breakpoints", it.cause())
+                    }
                 }
             }
+            CommandAction.CLEAR_LIVE_LOGS.command -> {
+                previousCommandBar!!.dispose()
+                previousCommandBar = null
+                SourceMarkerServices.Instance.liveInstrument!!.clearLiveLogs {
+                    if (it.failed()) {
+                        log.error("Failed to clear live logs", it.cause())
+                    }
+                }
+            }
+            CommandAction.CLEAR_LIVE_INSTRUMENTS.command -> {
+                previousCommandBar!!.dispose()
+                previousCommandBar = null
+                SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments {
+                    if (it.failed()) {
+                        log.error("Failed to clear live instruments", it.cause())
+                    }
+                }
+            }
+            else -> throw UnsupportedOperationException("Command input: $input")
         }
     }
 
+    /**
+     * Attempts to display command bar above [lineNumber].
+     */
     fun showCommandBar(editor: Editor, lineNumber: Int, tryingAboveLine: Boolean = false) {
         //close previous command bar (if open)
         previousCommandBar?.dispose(true, false)

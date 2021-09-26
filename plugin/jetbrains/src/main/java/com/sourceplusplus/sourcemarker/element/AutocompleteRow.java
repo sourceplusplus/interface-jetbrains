@@ -48,7 +48,7 @@ public class AutocompleteRow extends JPanel {
 
         //---- descriptionLabel ----
         descriptionLabel.setText("");
-        descriptionLabel.setForeground(new Color(187, 187, 187, 75));
+        descriptionLabel.setForeground(Color.gray);
         add(descriptionLabel, "cell 0 1");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
