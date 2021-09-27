@@ -38,6 +38,7 @@ import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
+import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser

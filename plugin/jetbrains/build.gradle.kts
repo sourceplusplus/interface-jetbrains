@@ -3,8 +3,8 @@ import org.jetbrains.changelog.markdownToHTML
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "1.1.3"
-    id("org.jetbrains.changelog") version "1.2.1"
+    id("org.jetbrains.intellij") version "1.1.6"
+    id("org.jetbrains.changelog") version "1.3.0"
     id("maven-publish")
 }
 
@@ -68,22 +68,22 @@ dependencies {
     //implementation("io.vertx:vertx-service-proxy:$vertxVersion")
     implementation(files(".ext/vertx-service-proxy-4.0.2.jar"))
     implementation("io.vertx:vertx-tcp-eventbus-bridge:$vertxVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.4")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.4")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.5")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.5")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.5")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("io.dropwizard.metrics:metrics-core:4.2.3")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
-    implementation("org.jooq:jooq:3.15.1")
+    implementation("org.jooq:jooq:3.15.3")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
-    implementation("ch.qos.logback:logback-core:1.2.5")
-    implementation("ch.qos.logback:logback-classic:1.2.5")
+    implementation("ch.qos.logback:logback-core:1.2.6")
+    implementation("ch.qos.logback:logback-classic:1.2.6")
     implementation("info.debatty:java-string-similarity:2.0.0")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
 }
 
 tasks {

@@ -253,7 +253,8 @@ class AutocompleteField(
         if (getText().isEmpty()) {
             setText(list.selectedValue.getText())
         } else {
-            setText(getText().substring(0, getText().lastIndexOf(getText().substringAfterLast(" "))) + text.getText())
+            setText(getText().substring(0, getText().lastIndexOf(getText().substringAfterLast(" ")))
+                                    + text.getText())
         }
         caretPosition = getText().length
     }
