@@ -102,7 +102,7 @@ class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
         init {
             val metrics = editor.getFontMetrics(Font.PLAIN)
             val spaceWidth = FontLayoutService.getInstance().charWidth2D(metrics, ' '.toInt())
-            // -4 to create some space
+            @Suppress("MagicNumber") // -4 to create some space
             maximumEditorTextWidth = ceil(spaceWidth * (editor.settings.getRightMargin(editor.project)) - 4).toInt()
 
             val scrollbarFlip = editor.scrollPane.getClientProperty(JBScrollPane.Flip::class.java)

@@ -96,7 +96,9 @@ class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
     fun `polyadic expression back to string`() {
         assertEquals(
             "staticVar == 1 && instanceVar == 2 && localVar == 3",
-            InstrumentConditionParser.fromLiveConditional("staticFields[staticVar] == 1 && fields[instanceVar] == 2 && localVariables[localVar] == 3")
+            InstrumentConditionParser.fromLiveConditional(
+                "staticFields[staticVar] == 1 && fields[instanceVar] == 2 && localVariables[localVar] == 3"
+            )
         )
     }
 }

@@ -9,7 +9,7 @@ import javax.swing.Icon
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("unused")
+@Suppress("unused", "MaxLineLength")
 enum class LiveControlCommand(
     val command: String,
     private val description: String,
