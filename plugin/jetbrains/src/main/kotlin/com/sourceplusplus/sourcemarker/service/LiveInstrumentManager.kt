@@ -176,6 +176,12 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
             val inlayMark = SourceMarkSearch.findByBreakpointId(bp.id!!)
             if (inlayMark != null) {
                 inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
+                inlayMark.getUserData(SourceMarkKeys.GROUPED_MARKS)?.forEach {
+                    if (it is GutterMark) {
+                        it.configuration.icon = IconLoader.getIcon("/icons/eye.svg")
+                        it.sourceFileMarker.refresh()
+                    }
+                }
             }
         }
     }
@@ -202,6 +208,12 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
             val inlayMark = SourceMarkSearch.findByBreakpointId(bpHit.breakpointId)
             if (inlayMark != null) {
                 inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
+                inlayMark.getUserData(SourceMarkKeys.GROUPED_MARKS)?.forEach {
+                    if (it is GutterMark) {
+                        it.configuration.icon = IconLoader.getIcon("/icons/eye-hit.svg")
+                        it.sourceFileMarker.refresh()
+                    }
+                }
             }
         }
     }

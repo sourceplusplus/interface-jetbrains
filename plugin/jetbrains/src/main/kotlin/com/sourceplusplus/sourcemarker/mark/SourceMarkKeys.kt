@@ -21,5 +21,6 @@ object SourceMarkKeys {
     val ARTIFACT_ADVICE = SourceKey<MutableList<ArtifactAdvice>>("ARTIFACT_ADVICE")
     val LOG_ID = SourceKey<String>("LOG_ID")
     val BREAKPOINT_ID = SourceKey<String>("BREAKPOINT_ID")
+    val GROUPED_MARKS = SourceKey<List<SourceMark>>("GROUPED_MARKS")
     val INSTRUMENT_EVENT_LISTENERS = SourceKey<List<InstrumentEventListener>>("INSTRUMENT_EVENT_LISTENERS")
 }
