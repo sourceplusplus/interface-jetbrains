@@ -41,7 +41,6 @@ import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
-import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser
 import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
 import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
 import io.vertx.core.eventbus.ReplyException

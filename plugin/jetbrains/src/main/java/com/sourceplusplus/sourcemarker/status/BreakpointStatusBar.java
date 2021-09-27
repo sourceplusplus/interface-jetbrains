@@ -353,13 +353,13 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                             if (event.getEventType() == BREAKPOINT_HIT) {
                                 commandModel.insertRow(0, event);
                             } else if (event.getEventType() == BREAKPOINT_REMOVED) {
-                                commandModel.insertRow(0, event);
                                 configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
 
                                 LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
                                 if (removed.getCause() == null) {
                                     statusPanel.setStatus("Complete", Color.decode("#BBB529"));
                                 } else {
+                                    commandModel.insertRow(0, event);
                                     statusPanel.setStatus("Error", Color.decode("#e1483b"));
                                 }
                             }
