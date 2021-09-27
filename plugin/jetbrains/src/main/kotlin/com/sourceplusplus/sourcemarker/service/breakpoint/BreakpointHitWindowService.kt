@@ -125,6 +125,10 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
     }
 
+    fun clearContent() {
+        contentManager!!.removeAllContents(true)
+    }
+
     fun addBreakpointHit(hit: LiveBreakpointHit) {
         eventsWindow.eventsTab.model.insertRow(0, hit)
         val max = 1000
@@ -133,9 +137,9 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
     }
 
-    fun showBreakpointHit(hit: LiveBreakpointHit) {
-        removeExecutionShower()
-        breakpointWindow = BreakpointHitWindow(project, executionPointHighlighter)
+    fun showBreakpointHit(hit: LiveBreakpointHit, showExecutionPoint: Boolean = true) {
+        if (showExecutionPoint) removeExecutionShower()
+        breakpointWindow = BreakpointHitWindow(project, executionPointHighlighter, showExecutionPoint)
         breakpointWindow.showFrames(hit.stackTrace, hit.stackTrace.first())
         val content = ContentFactory.SERVICE.getInstance().createContent(
             breakpointWindow.layoutComponent, hit.stackTrace.first().source + " at #0", false

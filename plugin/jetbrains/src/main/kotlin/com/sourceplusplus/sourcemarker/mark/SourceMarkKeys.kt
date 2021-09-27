@@ -6,6 +6,7 @@ import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.sourcemarker.psi.EndpointDetector
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector
+import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 
 /**
  * Used to associate custom data to [SourceMark]s.
@@ -19,4 +20,6 @@ object SourceMarkKeys {
     val LOGGER_DETECTOR = SourceKey<LoggerDetector>("LOGGER_DETECTOR")
     val ARTIFACT_ADVICE = SourceKey<MutableList<ArtifactAdvice>>("ARTIFACT_ADVICE")
     val LOG_ID = SourceKey<String>("LOG_ID")
+    val BREAKPOINT_ID = SourceKey<String>("BREAKPOINT_ID")
+    val INSTRUMENT_EVENT_LISTENERS = SourceKey<List<InstrumentEventListener>>("INSTRUMENT_EVENT_LISTENERS")
 }

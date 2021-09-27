@@ -11,9 +11,12 @@
     <depends optional="true" config-file="withKotlin.xml">org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService"/>
-        <xdebugger.breakpointType implementation="com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointType"/>
-        <editor.linePainter implementation="com.sourceplusplus.sourcemarker.service.breakpoint.painter.VariableEditorLinePainter"/>
+        <projectService
+                serviceImplementation="com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService"/>
+        <xdebugger.breakpointType
+                implementation="com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointType"/>
+        <editor.linePainter
+                implementation="com.sourceplusplus.sourcemarker.service.breakpoint.painter.VariableEditorLinePainter"/>
         <applicationConfigurable
                 instance="com.sourceplusplus.sourcemarker.settings.SourceMarkerConfigurable"
                 groupId="tools"
@@ -40,10 +43,15 @@
     </projectListeners>
 
     <actions>
-        <action id="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
-                class="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
-                text="SourcePortal Popup Action" description="SourcePortal popup action">
+        <action id="com.sourceplusplus.sourcemarker.command.ControlBarAction"
+                class="com.sourceplusplus.sourcemarker.command.ControlBarAction"
+                text="SourceCommand Action" description="Source command action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
+        </action>
+        <action id="com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction"
+                class="com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction"
+                text="SourceMarkVisibility Action" description="SourceMark visibility action">
+            <keyboard-shortcut first-keystroke="control shift D" keymap="$default"/>
         </action>
     </actions>
 </idea-plugin>

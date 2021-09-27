@@ -10,7 +10,7 @@ import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMark
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.portal.PageType
-import com.sourceplusplus.sourcemarker.CommandBar
+import com.sourceplusplus.sourcemarker.ControlBar
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
 import org.slf4j.LoggerFactory
@@ -24,55 +24,55 @@ import javax.swing.JPanel
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object CommandBarController {
+object ControlBarController {
 
-    private val log = LoggerFactory.getLogger(CommandBarController::class.java)
-    private var previousCommandBar: InlayMark? = null
+    private val log = LoggerFactory.getLogger(ControlBarController::class.java)
+    private var previousControlBar: InlayMark? = null
 
     fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
         when (input) {
-            CommandAction.ADD_LIVE_BREAKPOINT.command -> {
+            LiveControlCommand.ADD_LIVE_BREAKPOINT.command -> {
                 //replace command inlay with breakpoint status inlay
-                val prevCommandBar = previousCommandBar!!
-                previousCommandBar!!.dispose()
-                previousCommandBar = null
+                val prevCommandBar = previousControlBar!!
+                previousControlBar!!.dispose()
+                previousControlBar = null
 
                 ApplicationManager.getApplication().runWriteAction {
                     LiveLogStatusManager.showBreakpointStatusBar(editor, prevCommandBar.lineNumber - 1)
                 }
             }
-            CommandAction.ADD_LIVE_LOG.command -> {
+            LiveControlCommand.ADD_LIVE_LOG.command -> {
                 //replace command inlay with log status inlay
-                val prevCommandBar = previousCommandBar!!
-                previousCommandBar!!.dispose()
-                previousCommandBar = null
+                val prevCommandBar = previousControlBar!!
+                previousControlBar!!.dispose()
+                previousControlBar = null
 
                 ApplicationManager.getApplication().runWriteAction {
                     LiveLogStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
-            CommandAction.CLEAR_LIVE_BREAKPOINTS.command -> {
-                previousCommandBar!!.dispose()
-                previousCommandBar = null
+            LiveControlCommand.CLEAR_LIVE_BREAKPOINTS.command -> {
+                previousControlBar!!.dispose()
+                previousControlBar = null
                 SourceMarkerServices.Instance.liveInstrument!!.clearLiveBreakpoints {
                     if (it.failed()) {
                         log.error("Failed to clear live breakpoints", it.cause())
                     }
                 }
             }
-            CommandAction.CLEAR_LIVE_LOGS.command -> {
-                previousCommandBar!!.dispose()
-                previousCommandBar = null
+            LiveControlCommand.CLEAR_LIVE_LOGS.command -> {
+                previousControlBar!!.dispose()
+                previousControlBar = null
                 SourceMarkerServices.Instance.liveInstrument!!.clearLiveLogs {
                     if (it.failed()) {
                         log.error("Failed to clear live logs", it.cause())
                     }
                 }
             }
-            CommandAction.CLEAR_LIVE_INSTRUMENTS.command -> {
-                previousCommandBar!!.dispose()
-                previousCommandBar = null
+            LiveControlCommand.CLEAR_LIVE_INSTRUMENTS.command -> {
+                previousControlBar!!.dispose()
+                previousControlBar = null
                 SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments {
                     if (it.failed()) {
                         log.error("Failed to clear live instruments", it.cause())
@@ -84,14 +84,14 @@ object CommandBarController {
     }
 
     /**
-     * Attempts to display command bar above [lineNumber].
+     * Attempts to display live control bar above [lineNumber].
      */
-    fun showCommandBar(editor: Editor, lineNumber: Int, tryingAboveLine: Boolean = false) {
-        //close previous command bar (if open)
-        previousCommandBar?.dispose(true, false)
-        previousCommandBar = null
+    fun showControlBar(editor: Editor, lineNumber: Int, tryingAboveLine: Boolean = false) {
+        //close previous control bar (if open)
+        previousControlBar?.dispose(true, false)
+        previousControlBar = null
 
-        //determine command bar location
+        //determine control bar location
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
@@ -105,17 +105,17 @@ object CommandBarController {
             if (fileMarker.containsSourceMark(inlayMark)) {
                 if (!tryingAboveLine) {
                     //already showing inlay here, try line above
-                    showCommandBar(editor, lineNumber - 1, true)
+                    showControlBar(editor, lineNumber - 1, true)
                 }
             } else {
-                //create and display command bar
-                previousCommandBar = inlayMark
+                //create and display control bar
+                previousControlBar = inlayMark
 
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
-                val commandBar = CommandBar(editor, inlayMark)
-                wrapperPanel.add(commandBar)
-                editor.scrollingModel.addVisibleAreaListener(commandBar)
+                val controlBar = ControlBar(editor, inlayMark)
+                wrapperPanel.add(controlBar)
+                editor.scrollingModel.addVisibleAreaListener(controlBar)
 
                 inlayMark.configuration.showComponentInlay = true
                 inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
@@ -128,12 +128,12 @@ object CommandBarController {
                 sourcePortal.configuration.currentPage = PageType.LOGS
                 sourcePortal.configuration.statusBar = true
 
-                commandBar.focus()
+                controlBar.focus()
             }
         } else if (tryingAboveLine) {
             log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
         } else if (!tryingAboveLine) {
-            showCommandBar(editor, lineNumber - 1, true)
+            showControlBar(editor, lineNumber - 1, true)
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.status.util
 
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow
-import com.sourceplusplus.sourcemarker.command.CommandAction
+import com.sourceplusplus.sourcemarker.command.LiveControlCommand
 import com.sourceplusplus.sourcemarker.element.LiveControlBarRow
 import java.awt.Color
 import java.awt.Component
@@ -28,7 +28,7 @@ class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) :
 
         if (isSelected) {
             row.background = Color.decode("#1C1C1C")
-            if (entry is CommandAction) {
+            if (entry is LiveControlCommand) {
                 row.setCommandIcon(entry.selectedIcon)
             }
         }

@@ -7,80 +7,92 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
+import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.JBIntSpinner;
+import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
+import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
+import com.sourceplusplus.marker.source.mark.api.SourceMark;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
-import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
+import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.ThrottleStep;
-import com.sourceplusplus.protocol.instrument.log.LiveLog;
+import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint;
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit;
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
-import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService;
 import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
-import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
+import com.sourceplusplus.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
+import io.vertx.core.json.Json;
 import net.miginfocom.swing.MigLayout;
+import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
-import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
+import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
 
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
-            .withZone(ZoneId.systemDefault());
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
+    private EditorImpl editor;
+    private JWindow popup;
+    private LiveBreakpointConfigurationPanel configurationPanel;
+    private boolean disposed = false;
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
-    private final Pattern VARIABLE_PATTERN;
-    private final String placeHolderText;
-    private Editor editor;
-    private LiveLog liveLog;
-    private Instant latestTime;
-    private Log latestLog;
-    private JWindow popup;
-    private LiveLogConfigurationPanel configurationPanel;
-    private AtomicBoolean settingFormattedMessage = new AtomicBoolean(false);
-    private boolean disposed = false;
+    private final String placeHolderText = "Breakpoint Condition";
+    private LiveBreakpoint liveBreakpoint;
+    private LiveBreakpointStatusPanel statusPanel;
+    private JPanel wrapper;
+    private JPanel panel;
+    private boolean expanded = false;
+    private ListTableModel commandModel = new ListTableModel(
+            new ColumnInfo[]{
+                    new BreakpointHitColumnInfo("Breakpoint Data"),
+                    new BreakpointHitColumnInfo("Time")
+            },
+            new ArrayList(), 0, SortOrder.DESCENDING);
 
     public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
-        this(sourceLocation, scopeVars, inlayMark, null, null);
+        this(sourceLocation, scopeVars, inlayMark, null);
     }
 
-    public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
-                        LiveLog liveLog, Editor editor) {
+    public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark, Editor editor) {
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
-                return "$" + it;
+                return it;
             }
 
             public String getDescription() {
@@ -94,10 +106,10 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
                     String var = substringAfterLast(" ", text.toLowerCase());
-                    return var.startsWith("$") && v.toLowerCase().contains(var.substring(1));
+                    return !var.isEmpty() && !var.equalsIgnoreCase(v) && v.toLowerCase().contains(var);
                 }).map(it -> new AutocompleteFieldRow() {
                     public String getText() {
-                        return "$" + it;
+                        return it;
                     }
 
                     public String getDescription() {
@@ -111,93 +123,29 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 .limit(7)
                 .collect(Collectors.toList());
 
-        StringBuilder sb = new StringBuilder("(");
-        for (int i = 0; i < scopeVars.size(); i++) {
-            sb.append("\\$").append(scopeVars.get(i));
-            if (i + 1 < scopeVars.size()) {
-                sb.append("|");
-            }
-        }
-        sb.append(")(?:\\s|$)");
-        VARIABLE_PATTERN = Pattern.compile(sb.toString());
-
         this.inlayMark = inlayMark;
-        this.liveLog = liveLog;
-        this.editor = editor;
-
-        if (liveLog != null) {
-            placeHolderText = "Waiting for live log data...";
-        } else {
-            placeHolderText = "Input log message (use $ for variables)";
-        }
+        this.editor = (EditorImpl) editor;
 
         initComponents();
         setupComponents();
+    }
 
-        if (liveLog != null) {
-            liveLogTextField.setEditMode(false);
-            removeActiveDecorations();
-            addTimeField();
-        } else {
-            liveLogTextField.setEditMode(true);
-        }
-
-        liveLogTextField.addSaveListener(this::saveLiveLog);
+    public void setWrapperPanel(JPanel wrapperPanel) {
+        this.wrapper = wrapperPanel;
     }
 
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
-        liveLogTextField.hideAutocompletePopup();
-    }
-
-    public void setLatestLog(Instant time, Log latestLog) {
-        if (liveLog == null) return;
-        this.latestTime = time;
-        this.latestLog = latestLog;
-
-        String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
-        String formattedMessage = latestLog.getFormattedMessage();
-        if (!timeLabel.getText().equals(formattedTime) || !liveLogTextField.getText().equals(formattedMessage)) {
-            SwingUtilities.invokeLater(() -> {
-                if (liveLogTextField.getEditMode()) {
-                    return; //ignore as they're likely updating text
-                }
-
-                timeLabel.setText(formattedTime);
-                liveLogTextField.setText(formattedMessage);
-
-                liveLogTextField.getStyledDocument().setCharacterAttributes(
-                        0, formattedMessage.length(),
-                        StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE), true
-                );
-
-                int varOffset = 0;
-                int minIndex = 0;
-                for (String var : latestLog.getArguments()) {
-                    int varIndex = latestLog.getContent().indexOf("{}", minIndex);
-                    varOffset += varIndex - minIndex;
-                    minIndex = varIndex + "{}".length();
-
-                    liveLogTextField.getStyledDocument().setCharacterAttributes(varOffset, var.length(),
-                            liveLogTextField.getStyle("numbers"), true);
-                    varOffset += var.length();
-                }
-            });
-        }
+        breakpointConditionField.hideAutocompletePopup();
     }
 
     public void setEditor(Editor editor) {
-        this.editor = editor;
+        this.editor = (EditorImpl) editor;
     }
 
     public void focus() {
-        liveLogTextField.grabFocus();
-        liveLogTextField.requestFocusInWindow();
-    }
-
-    private void addTimeField() {
-        timeLabel.setVisible(true);
-        separator1.setVisible(true);
+        breakpointConditionField.grabFocus();
+        breakpointConditionField.requestFocusInWindow();
     }
 
     private void removeActiveDecorations() {
@@ -207,48 +155,37 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
             configPanel.setBackground(Color.decode("#252525"));
 
-            if (!liveLogTextField.getEditMode()) {
-                liveLogTextField.setBorder(new CompoundBorder(
+            if (!breakpointConditionField.getEditMode()) {
+                breakpointConditionField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                liveLogTextField.setBackground(Color.decode("#2B2B2B"));
-                liveLogTextField.setEditable(false);
+                breakpointConditionField.setBackground(Color.decode("#2B2B2B"));
+                breakpointConditionField.setEditable(false);
             }
         });
-    }
-
-    private void showEditableMode() {
-        liveLogTextField.setBorder(new CompoundBorder(
-                new LineBorder(Color.darkGray, 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
-        liveLogTextField.setBackground(Color.decode("#252525"));
-        liveLogTextField.setEditable(true);
     }
 
     private void setupComponents() {
-        liveLogTextField.getDocument().addDocumentListener(new DocumentAdapter() {
+        JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) hitLimitSpinner.getEditor()).getTextField();
+        spinnerTextField.addKeyListener(new KeyAdapter() {
             @Override
-            protected void textChanged(DocumentEvent e) {
-                if (settingFormattedMessage.get()) return;
-                if (liveLog != null) {
-                    String originalMessage = liveLog.getLogFormat();
-                    for (String var : liveLog.getLogArguments()) {
-                        originalMessage = originalMessage.replaceFirst(
-                                Pattern.quote("{}"),
-                                Matcher.quoteReplacement("$" + var)
-                        );
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    if (StringUtils.isNumeric(spinnerTextField.getText())) {
+                        ApplicationManager.getApplication().runWriteAction(() -> saveLiveBreakpoint());
+                    } else {
+                        spinnerTextField.setText("1");
                     }
-
-                    boolean logMessageChanged = !originalMessage.equals(liveLogTextField.getText());
-                    if (configurationPanel != null && liveLogTextField.getEditMode()) {
-                        liveLogTextField.setShowSaveButton(configurationPanel.isChanged() || logMessageChanged);
-                    } else if (liveLogTextField.getEditMode()) {
-                        liveLogTextField.setShowSaveButton(logMessageChanged);
-                    }
-                } else liveLogTextField.setShowSaveButton(!liveLogTextField.getText().isEmpty());
+                }
             }
         });
-        liveLogTextField.addKeyListener(new KeyAdapter() {
+        spinnerTextField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+        breakpointConditionField.getDocument().addDocumentListener(new DocumentAdapter() {
+            @Override
+            protected void textChanged(DocumentEvent e) {
+            }
+        });
+        breakpointConditionField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_TAB) {
@@ -262,70 +199,11 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    saveLiveLog();
+                    spinnerTextField.requestFocus();
                 }
             }
         });
-        liveLogTextField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
-        liveLogTextField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (liveLogTextField.getEditMode()) return;
-                liveLogTextField.reset();
-                liveLogTextField.setEditMode(true);
-
-                if (liveLog != null) {
-                    String originalMessage = liveLog.getLogFormat();
-                    for (String var : liveLog.getLogArguments()) {
-                        originalMessage = originalMessage.replaceFirst(
-                                Pattern.quote("{}"),
-                                Matcher.quoteReplacement("$" + var)
-                        );
-                    }
-                    settingFormattedMessage.set(true);
-                    liveLogTextField.setText(originalMessage);
-                    settingFormattedMessage.set(false);
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (liveLog == null && liveLogTextField.getText().equals("")) {
-                    if (popup == null) {
-                        dispose();
-                    }
-                } else if (!liveLogTextField.getEditMode() ||
-                        (liveLogTextField.getEditMode() && !liveLogTextField.isShowingSaveButton())) {
-                    liveLogTextField.setEditMode(false);
-                    removeActiveDecorations();
-
-                    if (latestLog != null) {
-                        setLatestLog(latestTime, latestLog);
-                    }
-                }
-            }
-        });
-        liveLogTextField.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (popup != null) {
-                    popup.dispose();
-                    popup = null;
-                }
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent) {
-                showEditableMode();
-            }
-
-            @Override
-            public void mouseExited(MouseEvent mouseEvent) {
-                if (!liveLogTextField.getEditMode()) {
-                    removeActiveDecorations();
-                }
-            }
-        });
+        breakpointConditionField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
 
         addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -365,7 +243,9 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                configPanel.setBackground(Color.decode("#3C3C3C"));
+                if (configDropdownLabel.isVisible()) {
+                    configPanel.setBackground(Color.decode("#3C3C3C"));
+                }
             }
         });
 
@@ -373,7 +253,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         addRecursiveMouseListener(configPanel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (System.currentTimeMillis() - popupLastOpened.get() > 200) {
+                if (configDropdownLabel.isVisible() && System.currentTimeMillis() - popupLastOpened.get() > 200) {
                     ApplicationManager.getApplication().runWriteAction(() -> showConfigurationPopup(popupLastOpened));
                 }
             }
@@ -392,22 +272,20 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         popup.setType(Window.Type.POPUP);
         popup.setAlwaysOnTop(true);
 
-        if (configurationPanel == null || !liveLogTextField.isShowingSaveButton()) {
-            LiveLogConfigurationPanel previousConfigurationPanel = configurationPanel;
-            configurationPanel = new LiveLogConfigurationPanel(liveLogTextField, inlayMark);
-            if (previousConfigurationPanel != null) {
-                configurationPanel.setCondition(previousConfigurationPanel.getCondition());
-                configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
-                configurationPanel.setHitLimit(previousConfigurationPanel.getHitLimit());
-                configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
-                configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
-            } else if (liveLog != null) {
-                configurationPanel.setConditionByString(liveLog.getCondition());
-                configurationPanel.setHitLimit(liveLog.getHitLimit());
-                configurationPanel.setRateLimitCount(liveLog.getThrottle().getLimit());
-                configurationPanel.setRateLimitStep(liveLog.getThrottle().getStep().name().toLowerCase());
-                //todo: rest
-            }
+        if (configurationPanel == null) {
+            LiveBreakpointConfigurationPanel previousConfigurationPanel = configurationPanel;
+            configurationPanel = new LiveBreakpointConfigurationPanel(breakpointConditionField);
+//            if (previousConfigurationPanel != null) {
+//                configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
+//                configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
+//                configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
+//            } else if (liveLog != null) {
+//                configurationPanel.setConditionByString(liveLog.getCondition());
+//                configurationPanel.setHitLimit(liveLog.getHitLimit());
+//                configurationPanel.setRateLimitCount(liveLog.getThrottle().getLimit());
+//                configurationPanel.setRateLimitStep(liveLog.getThrottle().getStep().name().toLowerCase());
+//                //todo: rest
+//            }
         }
 
         popup.add(configurationPanel);
@@ -431,50 +309,20 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         });
     }
 
-    private void saveLiveLog() {
-        if (liveLogTextField.getText().equals("")) {
-            return;
-        }
-        liveLogTextField.setShowSaveButton(false);
+    private void saveLiveBreakpoint() {
+        breakpointConditionField.setShowSaveButton(false);
 
-        if (liveLog != null) {
-            //editing existing live log; remove old one first
-            LiveLog oldLiveLog = liveLog;
-            liveLog = null;
-            latestTime = null;
-            latestLog = null;
-
-            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
-                if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(oldLiveLog);
-                } else {
-                    it.cause().printStackTrace();
-                }
-            });
-        }
-
-        String logPattern = liveLogTextField.getText();
-        ArrayList<String> varMatches = new ArrayList<>();
-        Matcher m = VARIABLE_PATTERN.matcher(logPattern);
-        while (m.find()) {
-            String var = m.group(1);
-            logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-            varMatches.add(var);
-        }
-        final String finalLogPattern = logPattern;
-
-        String condition = null;
+        TextWithImports expressionText = TextWithImportsImpl.fromXExpression(XExpressionImpl.fromText(breakpointConditionField.getText()));
+        PsiElement context = inlayMark.getPsiElement();
+        JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
+                .createCodeFragment(expressionText, context, inlayMark.getProject());
+        String condition = InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
         InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
-        int hitLimit = 100;
+        JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) hitLimitSpinner.getEditor()).getTextField();
+        int hitLimit = Integer.parseInt(spinnerTextField.getText());
         if (configurationPanel != null) {
-            TextWithImports expressionText = TextWithImportsImpl.fromXExpression(configurationPanel.getCondition());
-            PsiElement context = inlayMark.getPsiElement();
-            JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
-                    .createCodeFragment(expressionText, context, inlayMark.getProject());
-            condition = InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
             expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
-            hitLimit = configurationPanel.getHitLimit();
             throttle = new InstrumentThrottle(
                     configurationPanel.getRateLimitCount(),
                     ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
@@ -484,9 +332,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         }
 
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
-        LiveLog log = new LiveLog(
-                finalLogPattern,
-                varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
+        LiveBreakpoint instrument = new LiveBreakpoint(
                 sourceLocation,
                 condition,
                 expirationDate,
@@ -497,24 +343,107 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 false,
                 throttle
         );
-        instrumentService.addLiveInstrument(log, it -> {
+        instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
-                liveLogTextField.setEditMode(false);
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getBREAKPOINT_ID(), it.result().getId());
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS(), new ArrayList<>());
+                inlayMark.getUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS())
+                        .add(event -> {
+                            if (commandModel == null || statusPanel == null) return;
+                            if (event.getEventType() == BREAKPOINT_HIT) {
+                                commandModel.insertRow(0, event);
+                            } else if (event.getEventType() == BREAKPOINT_REMOVED) {
+                                commandModel.insertRow(0, event);
+                                configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
+
+                                LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
+                                if (removed.getCause() == null) {
+                                    statusPanel.setStatus("Complete", Color.decode("#BBB529"));
+                                } else {
+                                    statusPanel.setStatus("Error", Color.decode("#e1483b"));
+                                }
+                            }
+                        });
+                statusPanel = new LiveBreakpointStatusPanel();
+                breakpointConditionField.setEditMode(false);
                 removeActiveDecorations();
 
-                LoggerDetector detector = inlayMark.getUserData(
-                        SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
-                );
-                detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
-                liveLog = (LiveLog) it.result();
-                LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
+                liveBreakpoint = (LiveBreakpoint) it.result();
+                LiveLogStatusManager.INSTANCE.addActiveLiveInstrument(liveBreakpoint);
 
-                addTimeField();
+                configDropdownLabel.setVisible(false);
 
                 //focus back to IDE
                 IdeFocusManager.getInstance(editor.getProject())
                         .requestFocusInProject(editor.getContentComponent(), editor.getProject());
+
+                SwingUtilities.invokeLater(() -> {
+                    mainPanel.removeAll();
+                    mainPanel.setLayout(new BorderLayout());
+                    statusPanel.setExpires(liveBreakpoint.getExpiresAt());
+                    mainPanel.add(statusPanel);
+
+                    remove(closeLabel);
+//                    JLabel searchLabel = new JLabel();
+//                    searchLabel.setIcon(IconLoader.getIcon("/icons/search.svg"));
+//                    add(searchLabel, "cell 2 0");
+                    JLabel expandLabel = new JLabel();
+                    expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
+                    add(expandLabel, "cell 2 0");
+                    expandLabel.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent mouseEvent) {
+                            if (!expanded) {
+                                expanded = true;
+
+                                panel = new JPanel();
+                                panel.setLayout(new BorderLayout());
+                                JBTable table = new JBTable();
+                                JScrollPane scrollPane = new JBScrollPane(table);
+                                table.setRowHeight(30);
+                                table.setShowColumns(true);
+                                table.setModel(commandModel);
+                                table.setStriped(true);
+                                table.setShowColumns(true);
+
+                                final LiveBreakpointHit[] shownBreakpointHit = {null};
+                                table.getSelectionModel().addListSelectionListener(event -> ApplicationManager.getApplication().invokeLater(() -> {
+                                    if (table.getSelectedRow() > -1) {
+                                        LiveInstrumentEvent selectedEvent = (LiveInstrumentEvent) commandModel.getItem(
+                                                table.convertRowIndexToModel(table.getSelectedRow())
+                                        );
+                                        if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
+                                        LiveBreakpointHit selectedValue = Json.decodeValue(selectedEvent.getData(), LiveBreakpointHit.class);
+                                        if (shownBreakpointHit[0] == selectedValue) return;
+
+                                        SwingUtilities.invokeLater(() -> {
+                                            expanded = false;
+                                            wrapper.remove(panel);
+
+                                            BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
+                                                    .clearContent();
+                                            shownBreakpointHit[0] = selectedValue;
+                                            BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
+                                                    .showBreakpointHit(shownBreakpointHit[0], false);
+                                        });
+                                    }
+                                }));
+
+                                table.setBackground(Color.decode("#252525"));
+                                panel.add(scrollPane);
+                                panel.setPreferredSize(new Dimension(0, 250));
+                                wrapper.add(panel, BorderLayout.NORTH);
+                            } else {
+                                expanded = false;
+                                wrapper.remove(panel);
+                            }
+
+                            JViewport viewport = editor.getScrollPane().getViewport();
+                            viewport.dispatchEvent(new ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED));
+                        }
+                    });
+                    add(closeLabel);
+                });
             } else {
                 it.cause().printStackTrace();
             }
@@ -530,11 +459,13 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             popup = null;
         }
         inlayMark.dispose(true);
+        List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkKeys.INSTANCE.getGROUPED_MARKS());
+        if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
-        if (liveLog != null) {
-            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
+        if (liveBreakpoint != null) {
+            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveBreakpoint.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(liveLog);
+                    LiveLogStatusManager.INSTANCE.removeActiveLiveInstrument(liveBreakpoint);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -554,9 +485,12 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
+        mainPanel = new JPanel();
+        breakpointConditionField = new AutocompleteField("", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
+        label1 = new JLabel();
+        hitLimitSpinner = new JBIntSpinner(1, 1, 10_000);
         timeLabel = new JLabel();
         separator1 = new JSeparator();
-        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false);
         closeLabel = new JLabel();
 
         //======== this ========
@@ -568,7 +502,6 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 "hidemode 3",
                 // columns
                 "0[fill]" +
-                        "[fill]" +
                         "[grow,fill]" +
                         "[fill]",
                 // rows
@@ -589,7 +522,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                     "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(IconLoader.getIcon("/icons/align-left.svg"));
+            configLabel.setIcon(IconLoader.getIcon("/icons/eye.svg"));
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----
@@ -598,12 +531,45 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         }
         add(configPanel, "cell 0 0, grow");
 
-        //---- timeLabel ----
-        timeLabel.setIcon(IconLoader.getIcon("/icons/clock.svg"));
-        timeLabel.setFont(new Font("Roboto Light", Font.PLAIN, 14));
-        timeLabel.setIconTextGap(8);
-        timeLabel.setVisible(false);
-        add(timeLabel, "cell 1 0,gapx null 8");
+        //======== mainPanel ========
+        {
+            mainPanel.setBackground(null);
+            mainPanel.setLayout(new MigLayout(
+                    "novisualpadding,hidemode 3",
+                    // columns
+                    "[grow,fill]" +
+                            "[fill]",
+                    // rows
+                    "0[grow]0"));
+
+            //---- breakpointConditionField ----
+            breakpointConditionField.setBackground(new Color(37, 37, 37));
+            breakpointConditionField.setBorder(new CompoundBorder(
+                    new LineBorder(Color.darkGray, 1, true),
+                    new EmptyBorder(2, 6, 0, 0)));
+            breakpointConditionField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+            breakpointConditionField.setMinimumSize(new Dimension(0, 27));
+            mainPanel.add(breakpointConditionField, "cell 0 0");
+
+            //---- label1 ----
+            label1.setText("Hit Limit");
+            label1.setForeground(Color.gray);
+            label1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            mainPanel.add(label1, "cell 1 0");
+
+            //---- hitLimitSpinner ----
+            hitLimitSpinner.setBackground(null);
+            //hitLimitSpinner.setModel(new SpinnerNumberModel(1, 1, null, 1));
+            mainPanel.add(hitLimitSpinner, "cell 1 0");
+
+            //---- timeLabel ----
+            timeLabel.setIcon(IconLoader.getIcon("/icons/clock.svg"));
+            timeLabel.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+            timeLabel.setIconTextGap(8);
+            timeLabel.setVisible(false);
+            mainPanel.add(timeLabel, "cell 1 0,gapx null 8");
+        }
+        add(mainPanel, "pad 0,cell 1 0,grow,gapx 0 0,gapy 0 0");
 
         //---- separator1 ----
         separator1.setPreferredSize(new Dimension(5, 20));
@@ -613,18 +579,9 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         separator1.setVisible(false);
         add(separator1, "cell 1 0");
 
-        //---- liveLogTextField ----
-        liveLogTextField.setBackground(new Color(37, 37, 37));
-        liveLogTextField.setBorder(new CompoundBorder(
-                new LineBorder(Color.darkGray, 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
-        liveLogTextField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
-        liveLogTextField.setMinimumSize(new Dimension(0, 27));
-        add(liveLogTextField, "cell 2 0");
-
         //---- closeLabel ----
         closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
-        add(closeLabel, "cell 3 0");
+        add(closeLabel, "cell 2 0");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -633,9 +590,12 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     private JPanel configPanel;
     private JLabel configLabel;
     private JLabel configDropdownLabel;
+    private JPanel mainPanel;
+    private AutocompleteField breakpointConditionField;
+    private JLabel label1;
+    private JBIntSpinner hitLimitSpinner;
     private JLabel timeLabel;
     private JSeparator separator1;
-    private AutocompleteField liveLogTextField;
     private JLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

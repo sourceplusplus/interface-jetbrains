@@ -29,12 +29,16 @@ import javax.swing.JComponent
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class BreakpointHitWindow(project: Project, executionPointHighlighter: ExecutionPointHighlighter) : Disposable {
+class BreakpointHitWindow(
+    project: Project,
+    executionPointHighlighter: ExecutionPointHighlighter,
+    showExecutionPoint: Boolean
+) : Disposable {
 
     lateinit var stackFrameManager: StackFrameManager
     var content: Content? = null
     val layoutComponent: JComponent
-    private val executionPointManager = ExecutionPointManager(project, executionPointHighlighter)
+    private val executionPointManager = ExecutionPointManager(project, executionPointHighlighter, showExecutionPoint)
     private val listeners: MutableList<DebugStackFrameListener>
     private val layoutUi: RunnerLayoutUi
 

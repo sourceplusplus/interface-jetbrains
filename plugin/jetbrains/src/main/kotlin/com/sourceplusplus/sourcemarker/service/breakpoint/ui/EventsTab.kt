@@ -8,7 +8,7 @@ import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitColumnInfo
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointEventColumnInfo
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import java.awt.BorderLayout
@@ -29,13 +29,13 @@ class EventsTab : Disposable {
     val component: JPanel = JPanel(BorderLayout())
     val model: ListTableModel<LiveBreakpointHit> = ListTableModel<LiveBreakpointHit>(
         arrayOf(
-            BreakpointHitColumnInfo("Time"),
-            BreakpointHitColumnInfo("Host Name"),
-            BreakpointHitColumnInfo("Application Name"),
-            BreakpointHitColumnInfo("Class Name"),
-            BreakpointHitColumnInfo("Method Name"),
-            BreakpointHitColumnInfo("Line No"),
-            BreakpointHitColumnInfo("Breakpoint Data")
+            BreakpointEventColumnInfo("Time"),
+            BreakpointEventColumnInfo("Host Name"),
+            BreakpointEventColumnInfo("Application Name"),
+            BreakpointEventColumnInfo("Class Name"),
+            BreakpointEventColumnInfo("Method Name"),
+            BreakpointEventColumnInfo("Line No"),
+            BreakpointEventColumnInfo("Breakpoint Data")
         ),
         ArrayList(), 0, SortOrder.DESCENDING
     )

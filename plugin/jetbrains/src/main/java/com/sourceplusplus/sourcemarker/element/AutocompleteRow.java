@@ -42,7 +42,7 @@ public class AutocompleteRow extends JPanel {
 
         //---- commandLabel ----
         commandLabel.setText("");
-        commandLabel.setForeground(new Color(225, 72, 59));
+        commandLabel.setForeground(new Color(152, 118, 170));
         commandLabel.setFont(new Font("Roboto Light", Font.BOLD, 14));
         add(commandLabel, "cell 0 0");
 

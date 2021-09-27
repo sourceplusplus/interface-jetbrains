@@ -271,7 +271,6 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             @Override
             public void focusGained(FocusEvent e) {
                 if (liveLogTextField.getEditMode()) return;
-                liveLogTextField.reset();
                 liveLogTextField.setEditMode(true);
 
                 if (liveLog != null) {
@@ -446,7 +445,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(oldLiveLog);
+                    LiveLogStatusManager.INSTANCE.removeActiveLiveInstrument(oldLiveLog);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -508,7 +507,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 );
                 detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
                 liveLog = (LiveLog) it.result();
-                LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
+                LiveLogStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
 
                 addTimeField();
 
@@ -534,7 +533,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         if (liveLog != null) {
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(liveLog);
+                    LiveLogStatusManager.INSTANCE.removeActiveLiveInstrument(liveLog);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -556,7 +555,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         configDropdownLabel = new JLabel();
         timeLabel = new JLabel();
         separator1 = new JSeparator();
-        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false);
+        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
         closeLabel = new JLabel();
 
         //======== this ========

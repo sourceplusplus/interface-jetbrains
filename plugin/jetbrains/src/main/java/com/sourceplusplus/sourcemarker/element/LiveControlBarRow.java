@@ -39,10 +39,6 @@ public class LiveControlBarRow extends JPanel {
         commandLabel.setText("<html>" + commandHtml + "</html>");
     }
 
-    public void setCommandSelected() {
-        commandLabel.setForeground(Color.decode("#E6E6E6"));
-    }
-
     public void setCommandIcon(Icon icon) {
         commandIcon.setIcon(icon);
     }

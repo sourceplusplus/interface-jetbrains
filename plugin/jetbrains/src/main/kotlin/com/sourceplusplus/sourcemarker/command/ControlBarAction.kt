@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class CommandBarAction : AnAction() {
+class ControlBarAction : AnAction() {
 
     override fun update(@NotNull e: AnActionEvent) {
         val project: Project? = e.project
@@ -22,6 +22,6 @@ class CommandBarAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val editor = e.getData(PlatformDataKeys.EDITOR) ?: return
         val lineNumber = editor.document.getLineNumber(editor.caretModel.offset) + 2
-        CommandBarController.showCommandBar(editor, lineNumber)
+        ControlBarController.showControlBar(editor, lineNumber)
     }
 }

@@ -10,7 +10,7 @@ import javax.swing.Icon
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("unused")
-enum class CommandAction(
+enum class LiveControlCommand(
     val command: String,
     private val description: String,
     val selectedIcon: Icon? = null,

@@ -14,7 +14,7 @@ new FormModel {
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "commandLabel"
 				"text": ""
-				"foreground": new java.awt.Color( 225, 72, 59, 255 )
+				"foreground": new java.awt.Color( 152, 118, 170, 255 )
 				"font": new java.awt.Font( "Roboto Light", 1, 14 )
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 0 0"

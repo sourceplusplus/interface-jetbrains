@@ -30,7 +30,8 @@ class AutocompleteField(
     private val lookup: Function<String, List<AutocompleteFieldRow>>,
     internal val lineNumber: Int = 0,
     private val replaceCommandOnTab: Boolean = false,
-    private val autocompleteOnEnter: Boolean = true
+    private val autocompleteOnEnter: Boolean = true,
+    private val varColor: Color = Color.decode("#9876AA")
 ) : JTextPane(), FocusListener, DocumentListener, KeyListener, MouseMotionListener, MouseListener {
 
     private val results: MutableList<AutocompleteFieldRow>
@@ -41,7 +42,9 @@ class AutocompleteField(
     var editMode: Boolean = true
     private var showSaveButton: Boolean = false
     private val listeners: MutableList<SaveListener> = mutableListOf()
+    private var hasControlHeld = false
     var saveOnSuggestionDoubleClick: Boolean = false
+    var addOnSuggestionDoubleClick: Boolean = true
 
     init {
         foreground = Color.decode("#A9B7C6")
@@ -55,8 +58,12 @@ class AutocompleteField(
         list = JBList(model)
         list.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
-                if (saveOnSuggestionDoubleClick && e.clickCount == 2) {
-                    listeners.forEach(SaveListener::onSave)
+                if (e.clickCount == 2) {
+                    if (saveOnSuggestionDoubleClick) {
+                        listeners.forEach(SaveListener::onSave)
+                    } else if (addOnSuggestionDoubleClick) {
+                        addAutoCompleteToInput(list.selectedValue)
+                    }
                 }
             }
         })
@@ -164,7 +171,7 @@ class AutocompleteField(
 
     private fun addNumberStyle(pn: JTextPane) {
         val style = pn.addStyle("numbers", null)
-        StyleConstants.setForeground(style, Color.decode("#e1483b"))
+        StyleConstants.setForeground(style, varColor)
     }
 
     fun showAutocompletePopup() {
@@ -184,24 +191,16 @@ class AutocompleteField(
     override fun focusLost(e: FocusEvent) = SwingUtilities.invokeLater { hideAutocompletePopup() }
 
     private fun documentChanged() = SwingUtilities.invokeLater {
-        // Updating results list
         results.clear()
         results.addAll(lookup.apply(text))
-
-        // Updating list view
         model.updateView()
         list.visibleRowCount = results.size.coerceAtMost(10)
-
-        // Selecting first result
         if (results.size > 0) {
             list.selectedIndex = 0
         }
-
-        // Ensure autocomplete popup has correct size
         popup.pack()
 
-        // Display or hide popup depending on the results
-        if (hasKeyPressed && results.size > 0) {
+        if (text.isNotEmpty() && results.size > 0) {
             showAutocompletePopup()
         } else {
             hideAutocompletePopup()
@@ -212,31 +211,15 @@ class AutocompleteField(
 
     override fun keyTyped(e: KeyEvent) = Unit
 
-    var hasKeyPressed = false
-
-    fun reset() {
-        hasKeyPressed = false
-    }
-
-    private var hasControlHeld = false
-
     override fun keyPressed(e: KeyEvent) {
-        hasKeyPressed = true
         if (e.keyCode == KeyEvent.VK_SPACE && hasControlHeld) {
-            // Updating results list
             results.clear()
             results.addAll(allLookup)
-
-            // Updating list view
             model.updateView()
             list.visibleRowCount = results.size.coerceAtMost(10)
-
-            // Selecting first result
             if (results.size > 0) {
                 list.selectedIndex = 0
             }
-
-            // Ensure autocomplete popup has correct size
             popup.pack()
 
             showAutocompletePopup()
@@ -260,23 +243,19 @@ class AutocompleteField(
                     setText(text.getText())
                     caretPosition = getText().length
                 } else {
-                    val varCompleted = if (commandDelimiter.isEmpty()) {
-                        getText()
-                    } else {
-                        getText().substringAfterLast(commandDelimiter)
-                    }
-                    if (text.getText().startsWith(commandDelimiter + varCompleted)) {
-                        setText(getText() + text.getText().substring(commandDelimiter.length + varCompleted.length))
-                    } else {
-                        setText(
-                            getText().substring(0, getText().length - varCompleted.length)
-                                    + text.getText().substring(commandDelimiter.length)
-                        )
-                    }
-                    caretPosition = getText().length
+                    addAutoCompleteToInput(text)
                 }
             }
         }
+    }
+
+    private fun addAutoCompleteToInput(text: AutocompleteFieldRow) {
+        if (getText().isEmpty()) {
+            setText(list.selectedValue.getText())
+        } else {
+            setText(getText().substring(0, getText().lastIndexOf(getText().substringAfterLast(" "))) + text.getText())
+        }
+        caretPosition = getText().length
     }
 
     override fun keyReleased(e: KeyEvent) {
