@@ -26,7 +26,7 @@ dependencies {
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
-    implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("com.google.guava:guava:31.0-jre")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.slf4j:slf4j-log4j12:1.7.32")
 }

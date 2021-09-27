@@ -46,7 +46,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation("io.vertx:vertx-core:$vertxVersion")
-                implementation("com.google.guava:guava:30.1.1-jre")
+                implementation("com.google.guava:guava:31.0-jre")
                 implementation("junit:junit:4.13.2")
                 implementation(project(":protocol"))
                 implementation("com.fasterxml.jackson.core:jackson-core:2.12.5")
