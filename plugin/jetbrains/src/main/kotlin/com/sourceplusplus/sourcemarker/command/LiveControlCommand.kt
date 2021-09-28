@@ -37,7 +37,7 @@ enum class LiveControlCommand(
     ),
     ADD_LIVE_LOG(
         "Add Log",
-        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">After line *lineNumber*</span></html>",
+        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
         IconLoader.findIcon("/icons/command/live-log_selected.svg"),
         IconLoader.findIcon("/icons/command/live-log_unselected.svg")
     ),
