@@ -9,7 +9,6 @@ import com.sourceplusplus.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import io.vertx.core.json.Json
 import kotlinx.datetime.Clock
-import java.lang.IllegalArgumentException
 
 /**
  * todo: description.
@@ -51,14 +50,17 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
             }
             return when (name) {
                 "Breakpoint Data" -> Json.encode(breakpointData)
-                "Time" -> (Clock.System.now() - item.occurredAt).toPrettyDuration() + " " + message("ago")
+                "Time" ->
+                    (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())
+                        .toPrettyDuration() + " " + message("ago")
                 else -> item.toString()
             }
         } else {
             val item = Json.decodeValue(event.data, LiveBreakpointRemoved::class.java)
             return when (name) {
                 "Breakpoint Data" -> item.cause!!.message!!
-                "Time" -> (Clock.System.now() - item.occurredAt).toPrettyDuration() + " " + message("ago")
+                "Time" -> (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())
+                    .toPrettyDuration() + " " + message("ago")
                 else -> item.toString()
             }
         }
