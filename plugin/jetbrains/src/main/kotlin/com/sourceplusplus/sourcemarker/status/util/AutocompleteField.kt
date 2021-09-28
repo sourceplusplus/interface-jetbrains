@@ -191,6 +191,7 @@ class AutocompleteField(
     override fun focusLost(e: FocusEvent) = SwingUtilities.invokeLater { hideAutocompletePopup() }
 
     private fun documentChanged() = SwingUtilities.invokeLater {
+        if (!editMode) return@invokeLater
         results.clear()
         results.addAll(lookup.apply(text))
         model.updateView()
@@ -236,7 +237,11 @@ class AutocompleteField(
                 list.selectedIndex = index + 1
             }
         } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
-            if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) return
+            if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) {
+                hideAutocompletePopup()
+                return
+            }
+
             val text = list.selectedValue
             if (text != null) {
                 if (replaceCommandOnTab) {
@@ -253,8 +258,10 @@ class AutocompleteField(
         if (getText().isEmpty()) {
             setText(list.selectedValue.getText())
         } else {
-            setText(getText().substring(0, getText().lastIndexOf(getText().substringAfterLast(" ")))
-                                    + text.getText())
+            setText(
+                getText().substring(0, getText().lastIndexOf(getText().substringAfterLast(" ")))
+                        + text.getText()
+            )
         }
         caretPosition = getText().length
     }
