@@ -12,7 +12,7 @@ import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.ControlBar
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
-import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
+import com.sourceplusplus.sourcemarker.status.LiveStatusManager
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
 import javax.swing.JComponent
@@ -39,7 +39,7 @@ object ControlBarController {
                 previousControlBar = null
 
                 ApplicationManager.getApplication().runWriteAction {
-                    LiveLogStatusManager.showBreakpointStatusBar(editor, prevCommandBar.lineNumber - 1)
+                    LiveStatusManager.showBreakpointStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
             LiveControlCommand.ADD_LIVE_LOG.command -> {
@@ -49,7 +49,7 @@ object ControlBarController {
                 previousControlBar = null
 
                 ApplicationManager.getApplication().runWriteAction {
-                    LiveLogStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
+                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
             LiveControlCommand.CLEAR_LIVE_BREAKPOINTS.command -> {

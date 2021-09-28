@@ -42,7 +42,7 @@ import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionPar
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
-import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
+import com.sourceplusplus.sourcemarker.status.LiveStatusManager
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
@@ -119,7 +119,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         Instance.liveInstrument!!.getLiveLogs {
             if (it.succeeded()) {
                 log.info("Found {} active live logs", it.result().size)
-                LiveLogStatusManager.addActiveLiveInstruments(it.result())
+                LiveStatusManager.addActiveLiveInstruments(it.result())
             } else {
                 log.error("Failed to get live logs", it.cause())
             }
@@ -128,7 +128,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
 
     private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
         val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
-        LiveLogStatusManager.removeActiveLiveInstrument(logRemoved.logId)
+        LiveStatusManager.removeActiveLiveInstrument(logRemoved.logId)
 
         if (logRemoved.cause != null) {
             log.error("Log remove error: {}", logRemoved.cause!!.message)
@@ -162,10 +162,10 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
             if (fileMarker != null) {
                 //add live log only if not already known
                 if (SourceMarkSearch.findByLogId(logAdded.id!!) == null) {
-                    LiveLogStatusManager.showLogStatusBar(logAdded, fileMarker)
+                    LiveStatusManager.showLogStatusBar(logAdded, fileMarker)
                 }
             } else {
-                LiveLogStatusManager.addActiveLiveInstrument(logAdded)
+                LiveStatusManager.addActiveLiveInstrument(logAdded)
             }
         }
     }

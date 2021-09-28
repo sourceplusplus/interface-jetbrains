@@ -360,7 +360,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 removeActiveDecorations();
 
                 liveBreakpoint = (LiveBreakpoint) it.result();
-                LiveLogStatusManager.INSTANCE.addActiveLiveInstrument(liveBreakpoint);
+                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveBreakpoint);
 
                 configDropdownLabel.setVisible(false);
 
@@ -476,7 +476,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         if (liveBreakpoint != null) {
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveBreakpoint.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveInstrument(liveBreakpoint);
+                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveBreakpoint);
                 } else {
                     it.cause().printStackTrace();
                 }

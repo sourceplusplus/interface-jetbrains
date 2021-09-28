@@ -39,9 +39,9 @@ import javax.swing.JPanel
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object LiveLogStatusManager : SourceMarkEventListener {
+object LiveStatusManager : SourceMarkEventListener {
 
-    private val log = LoggerFactory.getLogger(LiveLogStatusManager::class.java)
+    private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
 
     override fun handleEvent(event: SourceMarkEvent) {
@@ -86,7 +86,7 @@ object LiveLogStatusManager : SourceMarkEventListener {
             return
         }
 
-        val inlayMark = SourceMarkerUtils.createExpressionInlayMark(fileMarker, lineNumber + 1)
+        val inlayMark = SourceMarkerUtils.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
@@ -125,26 +125,6 @@ object LiveLogStatusManager : SourceMarkEventListener {
             sourcePortal.configuration.statusBar = true
 
             statusBar.focus()
-
-//            //bp gutter mark
-//            val gutterMark = SourceMarkerUtils.getOrCreateExpressionGutterMark(fileMarker, lineNumber)
-//            gutterMark.get().configuration.icon = IconLoader.getIcon("/icons/eye-slash.svg")
-//            gutterMark.get().setVisible(true)
-//
-//            gutterMark.get().configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
-//                override fun makeSwingComponent(sourceMark: SourceMark): JComponent {
-//                    val panel = LiveBreakpointStatusPanel()
-//                    panel.preferredSize = Dimension(400, 40)
-//                    panel.minimumSize = Dimension(400, 40)
-//                    return panel
-//                }
-//            }
-//            gutterMark.get().configuration.activateOnMouseHover = true
-//            gutterMark.get().configuration.activateOnMouseClick = true
-//
-//            gutterMark.get().apply()
-//            fileMarker.refresh()
-//            inlayMark.putUserData(SourceMarkKeys.GROUPED_MARKS, listOf(gutterMark.get()))
         }
     }
 

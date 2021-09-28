@@ -444,7 +444,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveInstrument(oldLiveLog);
+                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(oldLiveLog);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -502,7 +502,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 );
                 detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
                 liveLog = (LiveLog) it.result();
-                LiveLogStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
+                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
 
                 //dispose this bar; another will be created
                 ApplicationManager.getApplication().invokeLater(inlayMark::dispose);
@@ -525,7 +525,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         if (liveLog != null) {
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveInstrument(liveLog);
+                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveLog);
                 } else {
                     it.cause().printStackTrace();
                 }
