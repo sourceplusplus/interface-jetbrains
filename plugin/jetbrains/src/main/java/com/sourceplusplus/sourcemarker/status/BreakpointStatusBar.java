@@ -76,6 +76,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     private LiveBreakpointStatusPanel statusPanel;
     private JPanel wrapper;
     private JPanel panel;
+    private JLabel expandLabel;
     private boolean expanded = false;
     private ListTableModel commandModel = new ListTableModel(
             new ColumnInfo[]{
@@ -153,6 +154,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
 //            label7.setIcon(IconLoader.getIcon("/icons/expand.svg"));
 //            label8.setIcon(IconLoader.getIcon("/icons/search.svg"));
             closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+            if (expandLabel != null) expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
             configPanel.setBackground(Color.decode("#252525"));
 
             if (!breakpointConditionField.getEditMode()) {
@@ -387,12 +389,17 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
 //                    JLabel searchLabel = new JLabel();
 //                    searchLabel.setIcon(IconLoader.getIcon("/icons/search.svg"));
 //                    add(searchLabel, "cell 2 0");
-                    JLabel expandLabel = new JLabel();
-                    expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
-                    add(expandLabel, "cell 2 0");
-                    expandLabel.addMouseListener(new MouseAdapter() {
+                    expandLabel = new JLabel();
+                    expandLabel.setCursor(Cursor.getDefaultCursor());
+                    expandLabel.addMouseMotionListener(new MouseAdapter() {
                         @Override
-                        public void mouseClicked(MouseEvent mouseEvent) {
+                        public void mouseMoved(MouseEvent e) {
+                            expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
+                        }
+                    });
+                    addRecursiveMouseListener(expandLabel, new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
                             if (!expanded) {
                                 expanded = true;
 
@@ -441,7 +448,22 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                             JViewport viewport = editor.getScrollPane().getViewport();
                             viewport.dispatchEvent(new ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED));
                         }
+
+                        @Override
+                        public void mousePressed(MouseEvent e) {
+                            expandLabel.setIcon(IconLoader.getIcon("/icons/expandPressed.svg"));
+                        }
+
+                        @Override
+                        public void mouseReleased(MouseEvent e) {
+                            expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
+                        }
+                    }, () -> {
+                        removeActiveDecorations();
+                        return null;
                     });
+                    expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
+                    add(expandLabel, "cell 2 0");
                     add(closeLabel);
                 });
             } else {
