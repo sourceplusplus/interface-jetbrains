@@ -1,12 +1,19 @@
 package com.sourceplusplus.sourcemarker.status;
 
+import com.codahale.metrics.Meter;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+import com.sourceplusplus.protocol.utils.TimeUtilsKt;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class LiveBreakpointStatusPanel extends JPanel {
+
+    private final Meter meter = new Meter();
 
     public LiveBreakpointStatusPanel() {
         initComponents();
@@ -22,25 +29,52 @@ public class LiveBreakpointStatusPanel extends JPanel {
         }
     }
 
-    public void setHits(String hits) {
-        //todo: impl
+    public void incrementHits() {
+        meter.mark();
+        setHits(meter.getCount());
+        setRate(meter.getMeanRate());
     }
 
-    public void setRate(String rate) {
-        //todo: impl
+    private void setHits(long hits) {
+        hitsValueLabel.setText(Long.toString(hits));
     }
 
-    public void setExpires(long expires) {
-        long diffMs = expires - System.currentTimeMillis();
+    private void setRate(double rate) {
+        rateValueLabel.setText(TimeUtilsKt.fromPerSecondToPrettyFrequency(rate));
+    }
+
+    public void setExpires(long expiresAt) {
+        updateExpiresLabel(expiresAt);
+
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(() -> {
+            if (expiresValueLabel.isVisible()) {
+                updateExpiresLabel(expiresAt);
+            } else {
+                executor.shutdown();
+            }
+        }, 0, 1, TimeUnit.SECONDS);
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(expiresAt - System.currentTimeMillis());
+            } catch (InterruptedException ignored) {
+            }
+            executor.shutdown();
+        }).start();
+    }
+
+    private void updateExpiresLabel(long expiresTime) {
+        long diffMs = expiresTime - System.currentTimeMillis();
         long diffSec = diffMs / 1000;
         long min = diffSec / 60;
         long sec = diffSec % 60;
-        if (min > 1) {
-            expiresValueLabel.setText(min + " minutes");
-        } else if (min > 0) {
-            expiresValueLabel.setText("about 1 minute");
+        if (min > 0) {
+            expiresValueLabel.setForeground(Color.decode("#BBBBBB"));
+            expiresValueLabel.setText(min + "min " + sec + "s");
         } else {
-            expiresValueLabel.setText(sec + " seconds");
+            expiresValueLabel.setForeground(Color.decode("#e1483b"));
+            expiresValueLabel.setText(sec + "s");
         }
     }
 

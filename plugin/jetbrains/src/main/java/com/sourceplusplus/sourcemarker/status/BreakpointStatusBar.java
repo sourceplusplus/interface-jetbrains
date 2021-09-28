@@ -275,19 +275,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         popup.setAlwaysOnTop(true);
 
         if (configurationPanel == null) {
-            LiveBreakpointConfigurationPanel previousConfigurationPanel = configurationPanel;
             configurationPanel = new LiveBreakpointConfigurationPanel(breakpointConditionField);
-//            if (previousConfigurationPanel != null) {
-//                configurationPanel.setExpirationInMinutes(previousConfigurationPanel.getExpirationInMinutes());
-//                configurationPanel.setRateLimitCount(previousConfigurationPanel.getRateLimitCount());
-//                configurationPanel.setRateLimitStep(previousConfigurationPanel.getRateLimitStep());
-//            } else if (liveLog != null) {
-//                configurationPanel.setConditionByString(liveLog.getCondition());
-//                configurationPanel.setHitLimit(liveLog.getHitLimit());
-//                configurationPanel.setRateLimitCount(liveLog.getThrottle().getLimit());
-//                configurationPanel.setRateLimitStep(liveLog.getThrottle().getStep().name().toLowerCase());
-//                //todo: rest
-//            }
         }
 
         popup.add(configurationPanel);
@@ -354,6 +342,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                             if (commandModel == null || statusPanel == null) return;
                             if (event.getEventType() == BREAKPOINT_HIT) {
                                 commandModel.insertRow(0, event);
+                                statusPanel.incrementHits();
                             } else if (event.getEventType() == BREAKPOINT_REMOVED) {
                                 configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
 
