@@ -25,6 +25,7 @@ import com.sourceplusplus.protocol.instrument.log.LiveLog
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
@@ -188,7 +189,46 @@ object LiveStatusManager : SourceMarkEventListener {
     }
 
     fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
+        ApplicationManager.getApplication().invokeLater {
+            val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
+            val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
+            if (findInlayMark.isPresent) {
+                val inlayMark = findInlayMark.get()
+                if (!fileMarker.containsSourceMark(inlayMark)) {
+                    inlayMark.putUserData(BREAKPOINT_ID, liveBreakpoint.id)
 
+                    val wrapperPanel = JPanel()
+                    wrapperPanel.layout = BorderLayout()
+
+                    //determine available vars
+                    val scopeVars = mutableListOf<String>()
+                    val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, liveBreakpoint.location.line - 1)!!
+                    val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+                        override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+                    }
+                    PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+                    for (i in 0 until variablesProcessor.size()) {
+                        scopeVars.add(variablesProcessor.getResult(i).name!!)
+                    }
+
+                    val statusBar = BreakpointStatusBar(liveBreakpoint.location, scopeVars, inlayMark, liveBreakpoint, editor)
+                    wrapperPanel.add(statusBar)
+                    editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+                    inlayMark.configuration.showComponentInlay = true
+                    inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                        override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+                    }
+                    inlayMark.apply()
+
+                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                    //sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
+                    sourcePortal.configuration.statusBar = true
+                }
+            } else {
+                log.warn("No detected expression at line {}. Inlay mark ignored", liveBreakpoint.location.line)
+            }
+        }
     }
 
     fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {

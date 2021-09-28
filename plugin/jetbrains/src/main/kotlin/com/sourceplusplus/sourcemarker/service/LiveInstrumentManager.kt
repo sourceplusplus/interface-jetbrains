@@ -171,11 +171,16 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
     }
 
     private fun handleBreakpointAddedEvent(liveEvent: LiveInstrumentEvent) {
-        val bp = Json.decodeValue(liveEvent.data, LiveBreakpoint::class.java)
+        val bpAdded = Json.decodeValue(liveEvent.data, LiveBreakpoint::class.java)
         ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByBreakpointId(bp.id!!)
-            if (inlayMark != null) {
-                inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
+            val fileMarker = SourceMarker.getSourceFileMarker(bpAdded.location.source)
+            if (fileMarker != null) {
+                //add live breakpoint only if not already known
+                if (SourceMarkSearch.findByLogId(bpAdded.id!!) == null) {
+                    LiveStatusManager.showBreakpointStatusBar(bpAdded, fileMarker)
+                }
+            } else {
+                LiveStatusManager.addActiveLiveInstrument(bpAdded)
             }
         }
     }

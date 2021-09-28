@@ -9,7 +9,6 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
@@ -86,10 +85,11 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             new ArrayList(), 0, SortOrder.DESCENDING);
 
     public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
-        this(sourceLocation, scopeVars, inlayMark, null);
+        this(sourceLocation, scopeVars, inlayMark, null, null);
     }
 
-    public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark, Editor editor) {
+    public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
+                               LiveBreakpoint liveBreakpoint, Editor editor) {
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
@@ -125,10 +125,15 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 .collect(Collectors.toList());
 
         this.inlayMark = inlayMark;
+        this.liveBreakpoint = liveBreakpoint;
         this.editor = (EditorImpl) editor;
 
         initComponents();
         setupComponents();
+
+        if (liveBreakpoint != null) {
+            setupAsActive();
+        }
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -151,10 +156,8 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
 
     private void removeActiveDecorations() {
         SwingUtilities.invokeLater(() -> {
-//            label7.setIcon(IconLoader.getIcon("/icons/expand.svg"));
-//            label8.setIcon(IconLoader.getIcon("/icons/search.svg"));
-            closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
             if (expandLabel != null) expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
+            closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
             configPanel.setBackground(Color.decode("#252525"));
 
             if (!breakpointConditionField.getEditMode()) {
@@ -164,6 +167,120 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 breakpointConditionField.setBackground(Color.decode("#2B2B2B"));
                 breakpointConditionField.setEditable(false);
             }
+        });
+    }
+
+    private void setupAsActive() {
+        inlayMark.putUserData(SourceMarkKeys.INSTANCE.getBREAKPOINT_ID(), liveBreakpoint.getId());
+        inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS(), new ArrayList<>());
+        inlayMark.getUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS())
+                .add(event -> {
+                    if (commandModel == null || statusPanel == null) return;
+                    if (event.getEventType() == BREAKPOINT_HIT) {
+                        commandModel.insertRow(0, event);
+                        statusPanel.incrementHits();
+                    } else if (event.getEventType() == BREAKPOINT_REMOVED) {
+                        configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
+
+                        LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
+                        if (removed.getCause() == null) {
+                            statusPanel.setStatus("Complete", Color.decode("#9876AA"));
+                        } else {
+                            commandModel.insertRow(0, event);
+                            statusPanel.setStatus("Error", Color.decode("#e1483b"));
+                        }
+                    }
+                });
+        statusPanel = new LiveBreakpointStatusPanel();
+        breakpointConditionField.setEditMode(false);
+        removeActiveDecorations();
+        configDropdownLabel.setVisible(false);
+        SwingUtilities.invokeLater(() -> {
+            mainPanel.removeAll();
+            mainPanel.setLayout(new BorderLayout());
+            statusPanel.setExpires(liveBreakpoint.getExpiresAt());
+            mainPanel.add(statusPanel);
+
+            remove(closeLabel);
+//                    JLabel searchLabel = new JLabel();
+//                    searchLabel.setIcon(IconLoader.getIcon("/icons/search.svg"));
+//                    add(searchLabel, "cell 2 0");
+            expandLabel = new JLabel();
+            expandLabel.setCursor(Cursor.getDefaultCursor());
+            expandLabel.addMouseMotionListener(new MouseAdapter() {
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
+                }
+            });
+            addRecursiveMouseListener(expandLabel, new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (!expanded) {
+                        expanded = true;
+
+                        panel = new JPanel();
+                        panel.setLayout(new BorderLayout());
+                        JBTable table = new JBTable();
+                        JScrollPane scrollPane = new JBScrollPane(table);
+                        table.setRowHeight(30);
+                        table.setShowColumns(true);
+                        table.setModel(commandModel);
+                        table.setStriped(true);
+                        table.setShowColumns(true);
+
+                        final LiveBreakpointHit[] shownBreakpointHit = {null};
+                        table.getSelectionModel().addListSelectionListener(event -> ApplicationManager.getApplication().invokeLater(() -> {
+                            if (table.getSelectedRow() > -1) {
+                                LiveInstrumentEvent selectedEvent = (LiveInstrumentEvent) commandModel.getItem(
+                                        table.convertRowIndexToModel(table.getSelectedRow())
+                                );
+                                if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
+                                LiveBreakpointHit selectedValue = Json.decodeValue(selectedEvent.getData(), LiveBreakpointHit.class);
+                                if (shownBreakpointHit[0] == selectedValue) return;
+
+                                SwingUtilities.invokeLater(() -> {
+                                    expanded = false;
+                                    wrapper.remove(panel);
+
+                                    BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
+                                            .clearContent();
+                                    shownBreakpointHit[0] = selectedValue;
+                                    BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
+                                            .showBreakpointHit(shownBreakpointHit[0], false);
+                                });
+                            }
+                        }));
+
+                        table.setBackground(Color.decode("#252525"));
+                        panel.add(scrollPane);
+                        panel.setPreferredSize(new Dimension(0, 250));
+                        wrapper.add(panel, BorderLayout.NORTH);
+                    } else {
+                        expanded = false;
+                        wrapper.remove(panel);
+                    }
+
+                    JViewport viewport = editor.getScrollPane().getViewport();
+                    viewport.dispatchEvent(new ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED));
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    expandLabel.setIcon(IconLoader.getIcon("/icons/expandPressed.svg"));
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
+                }
+            }, () -> {
+                removeActiveDecorations();
+                return null;
+            });
+            expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
+            add(expandLabel, "cell 2 0");
+            add(closeLabel);
         });
     }
 
@@ -335,126 +452,11 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         );
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getBREAKPOINT_ID(), it.result().getId());
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS(), new ArrayList<>());
-                inlayMark.getUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS())
-                        .add(event -> {
-                            if (commandModel == null || statusPanel == null) return;
-                            if (event.getEventType() == BREAKPOINT_HIT) {
-                                commandModel.insertRow(0, event);
-                                statusPanel.incrementHits();
-                            } else if (event.getEventType() == BREAKPOINT_REMOVED) {
-                                configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
-
-                                LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
-                                if (removed.getCause() == null) {
-                                    statusPanel.setStatus("Complete", Color.decode("#9876AA"));
-                                } else {
-                                    commandModel.insertRow(0, event);
-                                    statusPanel.setStatus("Error", Color.decode("#e1483b"));
-                                }
-                            }
-                        });
-                statusPanel = new LiveBreakpointStatusPanel();
-                breakpointConditionField.setEditMode(false);
-                removeActiveDecorations();
-
                 liveBreakpoint = (LiveBreakpoint) it.result();
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveBreakpoint);
 
-                configDropdownLabel.setVisible(false);
-
-                //focus back to IDE
-                IdeFocusManager.getInstance(editor.getProject())
-                        .requestFocusInProject(editor.getContentComponent(), editor.getProject());
-
-                SwingUtilities.invokeLater(() -> {
-                    mainPanel.removeAll();
-                    mainPanel.setLayout(new BorderLayout());
-                    statusPanel.setExpires(liveBreakpoint.getExpiresAt());
-                    mainPanel.add(statusPanel);
-
-                    remove(closeLabel);
-//                    JLabel searchLabel = new JLabel();
-//                    searchLabel.setIcon(IconLoader.getIcon("/icons/search.svg"));
-//                    add(searchLabel, "cell 2 0");
-                    expandLabel = new JLabel();
-                    expandLabel.setCursor(Cursor.getDefaultCursor());
-                    expandLabel.addMouseMotionListener(new MouseAdapter() {
-                        @Override
-                        public void mouseMoved(MouseEvent e) {
-                            expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
-                        }
-                    });
-                    addRecursiveMouseListener(expandLabel, new MouseAdapter() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                            if (!expanded) {
-                                expanded = true;
-
-                                panel = new JPanel();
-                                panel.setLayout(new BorderLayout());
-                                JBTable table = new JBTable();
-                                JScrollPane scrollPane = new JBScrollPane(table);
-                                table.setRowHeight(30);
-                                table.setShowColumns(true);
-                                table.setModel(commandModel);
-                                table.setStriped(true);
-                                table.setShowColumns(true);
-
-                                final LiveBreakpointHit[] shownBreakpointHit = {null};
-                                table.getSelectionModel().addListSelectionListener(event -> ApplicationManager.getApplication().invokeLater(() -> {
-                                    if (table.getSelectedRow() > -1) {
-                                        LiveInstrumentEvent selectedEvent = (LiveInstrumentEvent) commandModel.getItem(
-                                                table.convertRowIndexToModel(table.getSelectedRow())
-                                        );
-                                        if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
-                                        LiveBreakpointHit selectedValue = Json.decodeValue(selectedEvent.getData(), LiveBreakpointHit.class);
-                                        if (shownBreakpointHit[0] == selectedValue) return;
-
-                                        SwingUtilities.invokeLater(() -> {
-                                            expanded = false;
-                                            wrapper.remove(panel);
-
-                                            BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
-                                                    .clearContent();
-                                            shownBreakpointHit[0] = selectedValue;
-                                            BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
-                                                    .showBreakpointHit(shownBreakpointHit[0], false);
-                                        });
-                                    }
-                                }));
-
-                                table.setBackground(Color.decode("#252525"));
-                                panel.add(scrollPane);
-                                panel.setPreferredSize(new Dimension(0, 250));
-                                wrapper.add(panel, BorderLayout.NORTH);
-                            } else {
-                                expanded = false;
-                                wrapper.remove(panel);
-                            }
-
-                            JViewport viewport = editor.getScrollPane().getViewport();
-                            viewport.dispatchEvent(new ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED));
-                        }
-
-                        @Override
-                        public void mousePressed(MouseEvent e) {
-                            expandLabel.setIcon(IconLoader.getIcon("/icons/expandPressed.svg"));
-                        }
-
-                        @Override
-                        public void mouseReleased(MouseEvent e) {
-                            expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
-                        }
-                    }, () -> {
-                        removeActiveDecorations();
-                        return null;
-                    });
-                    expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
-                    add(expandLabel, "cell 2 0");
-                    add(closeLabel);
-                });
+                //dispose this bar; another will be created
+                ApplicationManager.getApplication().invokeLater(inlayMark::dispose);
             } else {
                 it.cause().printStackTrace();
             }
