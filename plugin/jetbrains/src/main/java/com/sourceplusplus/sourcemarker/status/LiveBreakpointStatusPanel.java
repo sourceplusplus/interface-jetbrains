@@ -23,9 +23,11 @@ public class LiveBreakpointStatusPanel extends JPanel {
     }
 
     public void setHits(String hits) {
+        //todo: impl
     }
 
     public void setRate(String rate) {
+        //todo: impl
     }
 
     public void setExpires(long expires) {
