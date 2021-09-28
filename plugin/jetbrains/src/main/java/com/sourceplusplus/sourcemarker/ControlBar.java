@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.command.LiveControlCommand;
 import com.sourceplusplus.sourcemarker.command.ControlBarController;
@@ -169,13 +170,15 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
-        String functionName = inlayMark.getArtifactQualifiedName();
-        if (functionName.contains("#")) {
-            functionName = functionName.substring(functionName.substring(0,
-                    functionName.lastIndexOf(".")).lastIndexOf(".") + 1, functionName.indexOf("#"));
+        String fullyQualified = inlayMark.getArtifactQualifiedName();
+        if (fullyQualified.contains("#")) {
+            fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"));
         }
+        String className = ArtifactNameUtils.INSTANCE.getClassName(fullyQualified);
+        String shortFuncName = ArtifactNameUtils.INSTANCE.getShortFunctionSignature(
+                ArtifactNameUtils.INSTANCE.removePackageNames(fullyQualified));
         textField1 = new AutocompleteField("",
-                "Location: " + functionName + "#" + inlayMark.getLineNumber(),
+                "Location: " + className + "." + shortFuncName + "#" + inlayMark.getLineNumber(),
                 availableCommands, lookup, inlayMark.getLineNumber(), true, true, Color.decode("#e1483b"));
         textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();
