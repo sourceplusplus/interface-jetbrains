@@ -20,7 +20,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
             }
         }
@@ -75,7 +75,7 @@ tasks {
                 implementation("io.vertx:vertx-codegen:$vertxVersion")
                 //implementation("io.vertx:vertx-service-proxy:$vertxVersion")
                 implementation(files("../plugin/jetbrains/.ext/vertx-service-proxy-4.0.2.jar"))
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.0")
                 compileOnly(project(":protocol"))
             }
         }
