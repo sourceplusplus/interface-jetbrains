@@ -94,7 +94,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
                     String var = substringAfterLast(" ", text.toLowerCase());
-                    return var.startsWith("$") && v.toLowerCase().contains(var.substring(1));
+                    return var.startsWith("$") && !var.substring(1).equals(v) && v.toLowerCase().contains(var.substring(1));
                 }).map(it -> new AutocompleteFieldRow() {
                     public String getText() {
                         return "$" + it;
