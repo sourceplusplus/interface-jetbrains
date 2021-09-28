@@ -22,7 +22,7 @@ class AutoCompleteCellRenderer(private val lineNumber: Int) : DefaultListCellRen
         row.setCommandIcon(entry.getIcon())
         if (entry.getDescription() != null) {
             row.setDescription(
-                entry.getDescription()!!.replace("*lineNumber*", (lineNumber - 1).toString())
+                entry.getDescription()!!.replace("*lineNumber*", lineNumber.toString())
             )
         }
 

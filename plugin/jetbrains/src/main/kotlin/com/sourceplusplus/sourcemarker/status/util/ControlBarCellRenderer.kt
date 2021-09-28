@@ -22,7 +22,7 @@ class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) :
         row.setCommandIcon(entry.getIcon())
         if (entry.getDescription() != null) {
             row.setDescription(
-                entry.getDescription()!!.replace("*lineNumber*", (autocompleteField.lineNumber - 1).toString())
+                entry.getDescription()!!.replace("*lineNumber*", autocompleteField.lineNumber.toString())
             )
         }
 
