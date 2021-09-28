@@ -84,7 +84,7 @@ object ControlBarController {
     }
 
     /**
-     * Attempts to display live control bar above [lineNumber].
+     * Attempts to display live control bar below [lineNumber].
      */
     fun showControlBar(editor: Editor, lineNumber: Int, tryingAboveLine: Boolean = false) {
         //close previous control bar (if open)

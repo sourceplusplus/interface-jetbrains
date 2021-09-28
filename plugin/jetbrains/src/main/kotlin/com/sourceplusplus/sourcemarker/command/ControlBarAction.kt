@@ -21,7 +21,7 @@ class ControlBarAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = e.getData(PlatformDataKeys.EDITOR) ?: return
-        val lineNumber = editor.document.getLineNumber(editor.caretModel.offset) + 2
+        val lineNumber = editor.document.getLineNumber(editor.caretModel.offset) + 1
         ControlBarController.showControlBar(editor, lineNumber)
     }
 }

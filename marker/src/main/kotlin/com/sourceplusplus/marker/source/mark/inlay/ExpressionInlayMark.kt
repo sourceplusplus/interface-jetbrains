@@ -20,4 +20,5 @@ open class ExpressionInlayMark @JvmOverloads constructor(
     override val configuration: InlayMarkConfiguration = pluginConfiguration.inlayMarkConfiguration.copy()
 ) : ExpressionSourceMark(sourceFileMarker, psiExpression), InlayMark {
     override var visible: AtomicBoolean = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
+    var showAboveExpression = false
 }
