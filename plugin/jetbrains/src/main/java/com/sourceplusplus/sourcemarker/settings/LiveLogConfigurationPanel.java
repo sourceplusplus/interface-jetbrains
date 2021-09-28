@@ -67,7 +67,11 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
 
     public void setConditionByString(String condition) {
-        setCondition(XExpressionImpl.fromText(InstrumentConditionParser.INSTANCE.fromLiveConditional(condition)));
+        if (condition == null) {
+            setCondition(null);
+        } else {
+            setCondition(XExpressionImpl.fromText(InstrumentConditionParser.INSTANCE.fromLiveConditional(condition)));
+        }
     }
 
     public void setCondition(XExpression condition) {
