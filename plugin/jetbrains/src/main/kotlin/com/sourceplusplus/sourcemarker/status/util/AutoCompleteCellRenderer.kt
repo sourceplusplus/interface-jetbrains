@@ -8,6 +8,12 @@ import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
 
+/**
+ * todo: description.
+ *
+ * @since 0.2.2
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class AutoCompleteCellRenderer(private val lineNumber: Int) : DefaultListCellRenderer() {
     init {
         isOpaque = true

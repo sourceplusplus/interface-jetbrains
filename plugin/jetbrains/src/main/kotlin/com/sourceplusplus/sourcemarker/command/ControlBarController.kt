@@ -55,6 +55,7 @@ object ControlBarController {
             LiveControlCommand.CLEAR_LIVE_BREAKPOINTS.command -> {
                 previousControlBar!!.dispose()
                 previousControlBar = null
+
                 SourceMarkerServices.Instance.liveInstrument!!.clearLiveBreakpoints {
                     if (it.failed()) {
                         log.error("Failed to clear live breakpoints", it.cause())
@@ -64,6 +65,7 @@ object ControlBarController {
             LiveControlCommand.CLEAR_LIVE_LOGS.command -> {
                 previousControlBar!!.dispose()
                 previousControlBar = null
+
                 SourceMarkerServices.Instance.liveInstrument!!.clearLiveLogs {
                     if (it.failed()) {
                         log.error("Failed to clear live logs", it.cause())
@@ -73,6 +75,7 @@ object ControlBarController {
             LiveControlCommand.CLEAR_LIVE_INSTRUMENTS.command -> {
                 previousControlBar!!.dispose()
                 previousControlBar = null
+
                 SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments {
                     if (it.failed()) {
                         log.error("Failed to clear live instruments", it.cause())
