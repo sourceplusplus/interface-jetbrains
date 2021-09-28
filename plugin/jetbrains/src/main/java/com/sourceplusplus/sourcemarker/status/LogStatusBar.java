@@ -8,7 +8,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
@@ -498,10 +497,6 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         );
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
-                liveLogTextField.setEditMode(false);
-                removeActiveDecorations();
-
                 LoggerDetector detector = inlayMark.getUserData(
                         SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
                 );
@@ -509,11 +504,8 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 liveLog = (LiveLog) it.result();
                 LiveLogStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
 
-                addTimeField();
-
-                //focus back to IDE
-                IdeFocusManager.getInstance(editor.getProject())
-                        .requestFocusInProject(editor.getContentComponent(), editor.getProject());
+                //dispose this bar; another will be created
+                ApplicationManager.getApplication().invokeLater(inlayMark::dispose);
             } else {
                 it.cause().printStackTrace();
             }
