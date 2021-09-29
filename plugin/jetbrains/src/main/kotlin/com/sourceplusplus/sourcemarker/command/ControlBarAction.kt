@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull
 /**
  * todo: description.
  *
- * @since 0.2.2
+ * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ControlBarAction : AnAction() {

@@ -17,7 +17,7 @@ import javax.swing.table.TableCellRenderer
 /**
  * todo: description.
  *
- * @since 0.2.2
+ * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class BreakpointEventColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, String>(name) {

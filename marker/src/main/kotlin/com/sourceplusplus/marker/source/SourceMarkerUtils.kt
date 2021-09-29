@@ -62,7 +62,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.2.2
+     * @since 0.3.0
      */
     @JvmStatic
     fun isBlankLine(psiFile: PsiFile, lineNumber: Int): Boolean {
@@ -76,7 +76,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.2.2
+     * @since 0.3.0
      */
     @JvmStatic
     fun getLineNumber(element: PsiElement): Int {
@@ -170,7 +170,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.2.2
+     * @since 0.3.0
      */
     @JvmStatic
     @JvmOverloads
@@ -226,7 +226,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.2.2
+     * @since 0.3.0
      */
     @JvmStatic
     @JvmOverloads
@@ -242,7 +242,7 @@ object SourceMarkerUtils {
     /**
      * todo: description.
      *
-     * @since 0.2.2
+     * @since 0.3.0
      */
     @JvmStatic
     @JvmOverloads
