@@ -511,13 +511,13 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setBackground(new Color(43, 43, 43));
         setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "0[fill]" +
-                        "[grow,fill]" +
-                        "[fill]",
-                // rows
-                "0[grow]0"));
+            "hidemode 3",
+            // columns
+            "0[fill]" +
+            "[grow,fill]" +
+            "[fill]",
+            // rows
+            "0[grow]0"));
 
         //======== configPanel ========
         {
@@ -526,12 +526,12 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
             configPanel.setLayout(new MigLayout(
-                    "fill,insets 0,hidemode 3",
-                    // columns
-                    "5[fill]" +
-                            "[fill]4",
-                    // rows
-                    "[grow]"));
+                "fill,insets 0,hidemode 3",
+                // columns
+                "5[fill]" +
+                "[fill]4",
+                // rows
+                "[grow]"));
 
             //---- configLabel ----
             configLabel.setIcon(IconLoader.getIcon("/icons/eye.svg"));
@@ -547,18 +547,18 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         {
             mainPanel.setBackground(null);
             mainPanel.setLayout(new MigLayout(
-                    "novisualpadding,hidemode 3",
-                    // columns
-                    "[grow,fill]" +
-                            "[fill]",
-                    // rows
-                    "0[grow]0"));
+                "novisualpadding,hidemode 3",
+                // columns
+                "[grow,fill]" +
+                "[fill]",
+                // rows
+                "0[grow]0"));
 
             //---- breakpointConditionField ----
             breakpointConditionField.setBackground(new Color(37, 37, 37));
             breakpointConditionField.setBorder(new CompoundBorder(
-                    new LineBorder(Color.darkGray, 1, true),
-                    new EmptyBorder(2, 6, 0, 0)));
+                new LineBorder(Color.darkGray, 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
             breakpointConditionField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
             breakpointConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(breakpointConditionField, "cell 0 0");
