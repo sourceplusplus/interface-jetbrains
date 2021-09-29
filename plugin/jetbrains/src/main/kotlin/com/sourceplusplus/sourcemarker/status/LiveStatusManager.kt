@@ -209,7 +209,9 @@ object LiveStatusManager : SourceMarkEventListener {
 
                     //determine available vars
                     val scopeVars = mutableListOf<String>()
-                    val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, liveBreakpoint.location.line - 1)!!
+                    val minScope = SourceMarkerUtils.getElementAtLine(
+                        fileMarker.psiFile, liveBreakpoint.location.line - 1
+                    )!!
                     val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
                         override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
                     }
@@ -218,7 +220,9 @@ object LiveStatusManager : SourceMarkEventListener {
                         scopeVars.add(variablesProcessor.getResult(i).name!!)
                     }
 
-                    val statusBar = BreakpointStatusBar(liveBreakpoint.location, scopeVars, inlayMark, liveBreakpoint, editor)
+                    val statusBar = BreakpointStatusBar(
+                        liveBreakpoint.location, scopeVars, inlayMark, liveBreakpoint, editor
+                    )
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     editor.scrollingModel.addVisibleAreaListener(statusBar)

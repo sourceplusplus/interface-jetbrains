@@ -177,7 +177,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         String className = ArtifactNameUtils.INSTANCE.getClassName(fullyQualified);
         String shortFuncName = ArtifactNameUtils.INSTANCE.getShortFunctionSignature(
                 ArtifactNameUtils.INSTANCE.removePackageNames(fullyQualified));
-        textField1 = new AutocompleteField("",
+        textField1 = new AutocompleteField(
                 "Location: " + className + "." + shortFuncName + "#" + inlayMark.getLineNumber(),
                 availableCommands, lookup, inlayMark.getLineNumber(), true, true, Color.decode("#e1483b"));
         textField1.setCellRenderer(new ControlBarCellRenderer(textField1));

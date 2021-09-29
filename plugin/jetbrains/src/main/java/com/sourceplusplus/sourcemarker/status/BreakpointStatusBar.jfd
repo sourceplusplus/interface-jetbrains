@@ -56,7 +56,7 @@ new FormModel {
 					"font": new java.awt.Font( "Roboto Light", 0, 14 )
 					"minimumSize": new java.awt.Dimension( 0, 27 )
 					auxiliary() {
-						"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"\", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode(\"#9876AA\"));"
+						"JavaCodeGenerator.customCreateCode": "new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode(\"#9876AA\"));"
 					}
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"

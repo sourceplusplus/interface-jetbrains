@@ -24,7 +24,6 @@ import javax.swing.text.*
  */
 @Suppress("MagicNumber")
 class AutocompleteField(
-    private val commandDelimiter: String,
     var placeHolderText: String?,
     private val allLookup: List<AutocompleteFieldRow>,
     private val lookup: Function<String, List<AutocompleteFieldRow>>,
