@@ -10,7 +10,7 @@ import com.intellij.execution.ui.ConsoleViewContentType
 /**
  * Displays logs from the SourceMarker plugin to a console window.
  *
- * @since 0.2.2
+ * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class SourceMarkerAppender<E> : AppenderBase<E>() {
