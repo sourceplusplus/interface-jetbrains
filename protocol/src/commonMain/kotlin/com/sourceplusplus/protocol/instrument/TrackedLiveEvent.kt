@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.instrument.breakpoint.event
+package com.sourceplusplus.protocol.instrument
 
 import kotlinx.datetime.Instant
 
