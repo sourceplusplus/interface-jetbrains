@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -171,25 +172,23 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     }
 
     private void setupAsActive() {
-        inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS(), new ArrayList<>());
-        inlayMark.getUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS())
-                .add(event -> {
-                    if (statusPanel == null) return;
-                    if (event.getEventType() == BREAKPOINT_HIT) {
-                        commandModel.insertRow(0, event);
-                        statusPanel.incrementHits();
-                    } else if (event.getEventType() == BREAKPOINT_REMOVED) {
-                        configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
+        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, event -> {
+            if (statusPanel == null) return;
+            if (event.getEventType() == BREAKPOINT_HIT) {
+                commandModel.insertRow(0, event);
+                statusPanel.incrementHits();
+            } else if (event.getEventType() == BREAKPOINT_REMOVED) {
+                configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
 
-                        LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
-                        if (removed.getCause() == null) {
-                            statusPanel.setStatus("Complete", Color.decode("#9876AA"));
-                        } else {
-                            commandModel.insertRow(0, event);
-                            statusPanel.setStatus("Error", Color.decode("#e1483b"));
-                        }
-                    }
-                });
+                LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
+                if (removed.getCause() == null) {
+                    statusPanel.setStatus("Complete", Color.decode("#9876AA"));
+                } else {
+                    commandModel.insertRow(0, event);
+                    statusPanel.setStatus("Error", Color.decode("#e1483b"));
+                }
+            }
+        });
         statusPanel = new LiveBreakpointStatusPanel();
         breakpointConditionField.setEditMode(false);
         removeActiveDecorations();
@@ -228,7 +227,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                         table.setStriped(true);
                         table.setShowColumns(true);
 
-                        final LiveBreakpointHit[] shownBreakpointHit = {null};
+                        AtomicReference<LiveBreakpointHit> shownBreakpointHit = new AtomicReference<>();
                         table.getSelectionModel().addListSelectionListener(event -> ApplicationManager.getApplication().invokeLater(() -> {
                             if (table.getSelectedRow() > -1) {
                                 LiveInstrumentEvent selectedEvent = (LiveInstrumentEvent) commandModel.getItem(
@@ -236,7 +235,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                                 );
                                 if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
                                 LiveBreakpointHit selectedValue = Json.decodeValue(selectedEvent.getData(), LiveBreakpointHit.class);
-                                if (selectedValue.equals(shownBreakpointHit[0])) return;
+                                if (selectedValue.equals(shownBreakpointHit.getAndSet(selectedValue))) return;
 
                                 SwingUtilities.invokeLater(() -> {
                                     expanded = false;
@@ -244,9 +243,8 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
 
                                     BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
                                             .clearContent();
-                                    shownBreakpointHit[0] = selectedValue;
                                     BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
-                                            .showBreakpointHit(shownBreakpointHit[0], false);
+                                            .showBreakpointHit(shownBreakpointHit.get(), false);
                                 });
                             }
                         }));
@@ -511,13 +509,13 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setBackground(new Color(43, 43, 43));
         setLayout(new MigLayout(
-            "hidemode 3",
-            // columns
-            "0[fill]" +
-            "[grow,fill]" +
-            "[fill]",
-            // rows
-            "0[grow]0"));
+                "hidemode 3",
+                // columns
+                "0[fill]" +
+                        "[grow,fill]" +
+                        "[fill]",
+                // rows
+                "0[grow]0"));
 
         //======== configPanel ========
         {
@@ -526,12 +524,12 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
             configPanel.setLayout(new MigLayout(
-                "fill,insets 0,hidemode 3",
-                // columns
-                "5[fill]" +
-                "[fill]4",
-                // rows
-                "[grow]"));
+                    "fill,insets 0,hidemode 3",
+                    // columns
+                    "5[fill]" +
+                            "[fill]4",
+                    // rows
+                    "[grow]"));
 
             //---- configLabel ----
             configLabel.setIcon(IconLoader.getIcon("/icons/eye.svg"));
@@ -547,18 +545,18 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         {
             mainPanel.setBackground(null);
             mainPanel.setLayout(new MigLayout(
-                "novisualpadding,hidemode 3",
-                // columns
-                "[grow,fill]" +
-                "[fill]",
-                // rows
-                "0[grow]0"));
+                    "novisualpadding,hidemode 3",
+                    // columns
+                    "[grow,fill]" +
+                            "[fill]",
+                    // rows
+                    "0[grow]0"));
 
             //---- breakpointConditionField ----
             breakpointConditionField.setBackground(new Color(37, 37, 37));
             breakpointConditionField.setBorder(new CompoundBorder(
-                new LineBorder(Color.darkGray, 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
+                    new LineBorder(Color.darkGray, 1, true),
+                    new EmptyBorder(2, 6, 0, 0)));
             breakpointConditionField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
             breakpointConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(breakpointConditionField, "cell 0 0");

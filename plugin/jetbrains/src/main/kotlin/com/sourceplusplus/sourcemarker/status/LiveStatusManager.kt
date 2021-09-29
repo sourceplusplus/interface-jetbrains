@@ -16,9 +16,11 @@ import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
+import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
 import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.instrument.LiveInstrument
+import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.log.LiveLog
@@ -26,7 +28,10 @@ import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
+import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
+import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
 import java.time.Instant
@@ -44,6 +49,7 @@ object LiveStatusManager : SourceMarkEventListener {
 
     private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
+    private val pendingEvents = CopyOnWriteArrayList<PendingInstrumentEvent>()
 
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
@@ -287,6 +293,41 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
+    fun addStatusBar(inlayMark: InlayMark, listener: InstrumentEventListener) {
+        if (inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS) == null) {
+            inlayMark.putUserData(INSTRUMENT_EVENT_LISTENERS, ArrayList())
+        }
+        inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
+
+        val instrumentId = inlayMark.getUserData(BREAKPOINT_ID) ?: inlayMark.getUserData(LOG_ID)
+        pendingEvents.removeIf {
+            if (instrumentId == it.instrumentId) {
+                listener.accept(it.event)
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    fun addPendingEvent(event: LiveInstrumentEvent, instrumentId: String) {
+        pendingEvents.add(PendingInstrumentEvent(instrumentId, event))
+        pendingEvents.removeIf { event ->
+            val sourceMark = SourceMarkSearch.findByInstrumentId(event.instrumentId)
+            if (sourceMark != null) {
+                val eventListeners = sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS)
+                if (eventListeners?.isNotEmpty() == true) {
+                    eventListeners.forEach { it.accept(event.event) }
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        }
+    }
+
     fun addActiveLiveInstrument(instrument: LiveInstrument) {
         activeStatusBars.add(instrument)
     }
@@ -302,4 +343,9 @@ object LiveStatusManager : SourceMarkEventListener {
     fun removeActiveLiveInstrument(instrumentId: String) {
         activeStatusBars.removeIf { it.id == instrumentId }
     }
+
+    data class PendingInstrumentEvent(
+        val instrumentId: String,
+        val event: LiveInstrumentEvent
+    )
 }

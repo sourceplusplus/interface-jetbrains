@@ -226,31 +226,29 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     }
 
     private void setupAsActive() {
-        inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS(), new ArrayList<>());
-        inlayMark.getUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS())
-                .add(event -> {
-                    if (event.getEventType() == LOG_HIT) {
-                        commandModel.insertRow(0, event);
-                    } else if (event.getEventType() == LOG_REMOVED) {
-                        //configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
+        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, event -> {
+            if (event.getEventType() == LOG_HIT) {
+                commandModel.insertRow(0, event);
+            } else if (event.getEventType() == LOG_REMOVED) {
+                //configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
 
-                        LiveLogRemoved removed = Json.decodeValue(event.getData(), LiveLogRemoved.class);
-                        if (removed.getCause() != null) {
-                            commandModel.insertRow(0, event);
+                LiveLogRemoved removed = Json.decodeValue(event.getData(), LiveLogRemoved.class);
+                if (removed.getCause() != null) {
+                    commandModel.insertRow(0, event);
 
-                            errored = true;
-                            liveLogTextField.setEditMode(false);
-                            liveLogTextField.setText("");
-                            liveLogTextField.setPlaceHolderText(removed.getCause().getMessage());
-                            liveLogTextField.setPlaceHolderTextColor(Color.decode("#e1483b"));
-                            configDropdownLabel.setVisible(false);
-                            removeActiveDecorations();
-                            remove(timeLabel);
-                            remove(separator1);
-                            repaint();
-                        }
-                    }
-                });
+                    errored = true;
+                    liveLogTextField.setEditMode(false);
+                    liveLogTextField.setText("");
+                    liveLogTextField.setPlaceHolderText(removed.getCause().getMessage());
+                    liveLogTextField.setPlaceHolderTextColor(Color.decode("#e1483b"));
+                    configDropdownLabel.setVisible(false);
+                    removeActiveDecorations();
+                    remove(timeLabel);
+                    remove(separator1);
+                    repaint();
+                }
+            }
+        });
     }
 
     private void addExpandButton() {

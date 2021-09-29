@@ -48,12 +48,24 @@ class LoggerDetector {
         ApplicationManager.getApplication().runReadAction {
             val methodSourceMark = SourceMarkSearch.findMethodSourceMark(
                 editor, inlayMark.sourceFileMarker, lineLocation
-            )!!
-            runBlocking {
-                getOrFindLoggerStatements(methodSourceMark)
+            )
+            if (methodSourceMark != null) {
+                runBlocking {
+                    getOrFindLoggerStatements(methodSourceMark)
+                }
+                val loggerStatements = methodSourceMark.getUserData(LOGGER_STATEMENTS)!! as MutableList
+                loggerStatements.add(DetectedLogger(logPattern, "live", lineLocation))
+            } else {
+                val loggerStatements = inlayMark.getUserData(LOGGER_STATEMENTS) as MutableList?
+                if (loggerStatements == null) {
+                    inlayMark.putUserData(
+                        LOGGER_STATEMENTS,
+                        mutableListOf(DetectedLogger(logPattern, "live", lineLocation))
+                    )
+                } else {
+                    loggerStatements.add(DetectedLogger(logPattern, "live", lineLocation))
+                }
             }
-            val loggerStatements = methodSourceMark.getUserData(LOGGER_STATEMENTS)!! as MutableList
-            loggerStatements.add(DetectedLogger(logPattern, "live", lineLocation))
         }
     }
 
