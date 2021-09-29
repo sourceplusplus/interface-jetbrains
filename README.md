@@ -69,19 +69,19 @@ SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedbac
 
 ### Framework
 
-| Module                        | Description                                                          | Version |
-| ----------------------------- | -------------------------------------------------------------------- | ------- |
-| :mapper                       | Tracks source code artifact refactoring                              | 0.2.1   |
-| :marker                       | Used to tie visual marks & popups to source code artifacts           | 0.2.1   |
-| :portal                       | Used to visually display contextualized artifact data/advice         | 0.2.1   |
-| :protocol                     | Common communication data models                                     | 0.2.1   |
+| Module                        | Description                                                          |
+| ----------------------------- | -------------------------------------------------------------------- |
+| :mapper                       | Tracks source code artifact refactoring                              |
+| :marker                       | Used to tie visual marks & popups to source code artifacts           |
+| :portal                       | Used to visually display contextualized artifact data/advice         |
+| :protocol                     | Common communication data models                                     |
 
 ### Implementation
 
-| Module                        | Description                                                          | Version |
-| ----------------------------- | -------------------------------------------------------------------- | ------- |
-| :monitor:skywalking           | Apache SkyWalking monitor implementation                             | 0.2.1   |
-| :plugin:jetbrains             | JetBrains plugin implementation                                      | 0.2.1   |
+| Module                        | Description                                                          |
+| ----------------------------- | -------------------------------------------------------------------- |
+| :monitor:skywalking           | Apache SkyWalking monitor implementation                             |
+| :plugin:jetbrains             | JetBrains plugin implementation                                      |
 
 ## Attribution
 
