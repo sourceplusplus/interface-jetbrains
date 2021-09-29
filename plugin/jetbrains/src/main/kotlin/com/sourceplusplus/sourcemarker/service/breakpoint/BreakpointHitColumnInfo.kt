@@ -58,7 +58,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
         } else {
             val item = Json.decodeValue(event.data, LiveBreakpointRemoved::class.java)
             return when (name) {
-                "Breakpoint Data" -> item.cause!!.message!!
+                "Breakpoint Data" -> item.cause!!.message ?: item.cause!!.exceptionType
                 "Time" -> (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())
                     .toPrettyDuration() + " " + message("ago")
                 else -> item.toString()

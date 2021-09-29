@@ -54,7 +54,7 @@ class LogHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(n
         } else {
             val item = Json.decodeValue(event.data, LiveLogRemoved::class.java)
             return when (name) {
-                "Message" -> item.cause!!.message!!
+                "Message" -> item.cause!!.message ?: item.cause!!.exceptionType
                 "Time" -> (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())
                     .toPrettyDuration() + " " + message("ago")
                 else -> item.toString()

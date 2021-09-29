@@ -41,6 +41,14 @@ object SourceMarkSearch {
             }
     }
 
+    fun findByInstrumentId(instrumentId: String): SourceMark? {
+        return SourceMarker.getSourceMarks()
+            .firstOrNull {
+                it.getUserData(SourceMarkKeys.BREAKPOINT_ID) == instrumentId
+                        || it.getUserData(SourceMarkKeys.LOG_ID) == instrumentId
+            }
+    }
+
     suspend fun findSourceMark(artifact: ArtifactQualifiedName): SourceMark? {
         return when (artifact.type) {
             ArtifactType.ENDPOINT -> findEndpointSourceMark(artifact)
