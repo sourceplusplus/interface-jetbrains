@@ -236,7 +236,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                                 );
                                 if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
                                 LiveBreakpointHit selectedValue = Json.decodeValue(selectedEvent.getData(), LiveBreakpointHit.class);
-                                if (shownBreakpointHit[0] == selectedValue) return;
+                                if (selectedValue.equals(shownBreakpointHit[0])) return;
 
                                 SwingUtilities.invokeLater(() -> {
                                     expanded = false;
