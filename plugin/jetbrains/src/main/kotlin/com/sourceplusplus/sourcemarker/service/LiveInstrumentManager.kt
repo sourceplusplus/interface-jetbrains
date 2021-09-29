@@ -9,6 +9,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiManager
@@ -18,6 +19,7 @@ import com.intellij.xdebugger.breakpoints.*
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
 import com.intellij.xdebugger.impl.breakpoints.XLineBreakpointImpl
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
@@ -40,7 +42,7 @@ import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionPar
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
-import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
+import com.sourceplusplus.sourcemarker.status.LiveStatusManager
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
@@ -75,6 +77,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
             when (liveEvent.eventType) {
                 LiveInstrumentEventType.LOG_HIT -> handleLogHitEvent(liveEvent)
                 LiveInstrumentEventType.BREAKPOINT_HIT -> handleBreakpointHitEvent(liveEvent)
+                LiveInstrumentEventType.BREAKPOINT_ADDED -> handleBreakpointAddedEvent(liveEvent)
                 LiveInstrumentEventType.BREAKPOINT_REMOVED -> handleBreakpointRemovedEvent(liveEvent)
                 LiveInstrumentEventType.LOG_ADDED -> handleLogAddedEvent(liveEvent)
                 LiveInstrumentEventType.LOG_REMOVED -> handleLogRemovedEvent(liveEvent)
@@ -116,7 +119,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         Instance.liveInstrument!!.getLiveLogs {
             if (it.succeeded()) {
                 log.info("Found {} active live logs", it.result().size)
-                LiveLogStatusManager.addActiveLiveLogs(it.result())
+                LiveStatusManager.addActiveLiveInstruments(it.result())
             } else {
                 log.error("Failed to get live logs", it.cause())
             }
@@ -125,7 +128,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
 
     private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
         val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
-        LiveLogStatusManager.removeActiveLiveLog(logRemoved.logId)
+        LiveStatusManager.removeActiveLiveInstrument(logRemoved.logId)
 
         if (logRemoved.cause != null) {
             log.error("Log remove error: {}", logRemoved.cause!!.message)
@@ -159,10 +162,25 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
             if (fileMarker != null) {
                 //add live log only if not already known
                 if (SourceMarkSearch.findByLogId(logAdded.id!!) == null) {
-                    LiveLogStatusManager.showStatusBar(logAdded, fileMarker)
+                    LiveStatusManager.showLogStatusBar(logAdded, fileMarker)
                 }
             } else {
-                LiveLogStatusManager.addActiveLiveLog(logAdded)
+                LiveStatusManager.addActiveLiveInstrument(logAdded)
+            }
+        }
+    }
+
+    private fun handleBreakpointAddedEvent(liveEvent: LiveInstrumentEvent) {
+        val bpAdded = Json.decodeValue(liveEvent.data, LiveBreakpoint::class.java)
+        ApplicationManager.getApplication().invokeLater {
+            val fileMarker = SourceMarker.getSourceFileMarker(bpAdded.location.source)
+            if (fileMarker != null) {
+                //add live breakpoint only if not already known
+                if (SourceMarkSearch.findByLogId(bpAdded.id!!) == null) {
+                    LiveStatusManager.showBreakpointStatusBar(bpAdded, fileMarker)
+                }
+            } else {
+                LiveStatusManager.addActiveLiveInstrument(bpAdded)
             }
         }
     }
@@ -172,6 +190,11 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         ApplicationManager.getApplication().invokeLater {
             val project = ProjectManager.getInstance().openProjects[0]
             BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
+
+            val inlayMark = SourceMarkSearch.findByBreakpointId(bpRemoved.breakpointId)
+            if (inlayMark != null) {
+                inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
+            }
         }
     }
 
@@ -180,6 +203,11 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
         ApplicationManager.getApplication().invokeLater {
             val project = ProjectManager.getInstance().openProjects[0]
             BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
+
+            val inlayMark = SourceMarkSearch.findByBreakpointId(bpHit.breakpointId)
+            if (inlayMark != null) {
+                inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
+            }
         }
     }
 

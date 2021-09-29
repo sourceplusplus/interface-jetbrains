@@ -54,8 +54,8 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
             var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
             if (gutterMark.configuration.activateOnMouseClick) {
-                navigationHandler = GutterIconNavigationHandler { _, elt ->
-                    elt!!.getUserData(SourceKey.GutterMark)!!.displayPopup()
+                navigationHandler = GutterIconNavigationHandler { _, _ ->
+                    element.getUserData(SourceKey.GutterMark)!!.displayPopup()
                 }
             }
             return LineMarkerInfo(
@@ -94,8 +94,8 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
             var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
             if (gutterMark.configuration.activateOnMouseClick) {
-                navigationHandler = GutterIconNavigationHandler { _, elt ->
-                    elt!!.getUserData(SourceKey.GutterMark)!!.displayPopup()
+                navigationHandler = GutterIconNavigationHandler { _, _ ->
+                    element.getUserData(SourceKey.GutterMark)!!.displayPopup()
                 }
             }
             return LineMarkerInfo(
@@ -117,8 +117,8 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
                 var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
                 if (gutterMark.configuration.activateOnMouseClick) {
-                    navigationHandler = GutterIconNavigationHandler { _, elt ->
-                        elt!!.getUserData(SourceKey.GutterMark)!!.displayPopup()
+                    navigationHandler = GutterIconNavigationHandler { _, _ ->
+                        element.getUserData(SourceKey.GutterMark)!!.displayPopup()
                     }
                 }
                 return LineMarkerInfo(

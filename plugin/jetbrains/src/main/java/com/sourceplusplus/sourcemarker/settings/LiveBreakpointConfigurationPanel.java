@@ -1,55 +1,22 @@
 package com.sourceplusplus.sourcemarker.settings;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.event.DocumentEvent;
-import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.psi.PsiFile;
-import com.intellij.ui.EditorTextField;
-import com.intellij.xdebugger.XDebuggerUtil;
-import com.intellij.xdebugger.XExpression;
-import com.intellij.xdebugger.XSourcePosition;
-import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
-import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
-import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
-import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Objects;
 
-public class LiveLogConfigurationPanel extends JPanel {
+public class LiveBreakpointConfigurationPanel extends JPanel {
 
-    private final XDebuggerExpressionComboBox comboBox;
-    private XExpression condition;
-    private int hitLimit = 100;
     private int expirationInMinutes = 15;
     private int rateLimitCount = 1;
     private String rateLimitStep = "second";
 
-    public LiveLogConfigurationPanel(AutocompleteField autocompleteField, InlayMark inlayMark) {
-        PsiFile psiFile = inlayMark.getSourceFileMarker().getPsiFile();
-        XSourcePosition sourcePosition = XDebuggerUtil.getInstance().createPosition(
-                psiFile.getVirtualFile(), inlayMark.getLineNumber()
-        );
-        comboBox = new XDebuggerExpressionComboBox(
-                psiFile.getProject(), new JavaDebuggerEditorsProvider(), "LiveLogCondition",
-                sourcePosition, false, false
-        );
-
+    public LiveBreakpointConfigurationPanel(AutocompleteField autocompleteField) {
         initComponents();
 
-        EditorTextField editorTextField = (EditorTextField) comboBox.getEditorComponent();
-        editorTextField.addDocumentListener(new DocumentListener() {
-            @Override
-            public void documentChanged(@NotNull DocumentEvent event) {
-                autocompleteField.setShowSaveButton(isChanged());
-            }
-        });
         expiration15MinButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
         expiration30MinButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
         expiration1HrButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
@@ -58,38 +25,8 @@ public class LiveLogConfigurationPanel extends JPanel {
         expiration12HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
         expiration24HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
 
-        hitLimitSpinner.addChangeListener(changeEvent -> autocompleteField.setShowSaveButton(isChanged()));
-
         rateLimitCountSpinner.addChangeListener(changeEvent -> autocompleteField.setShowSaveButton(isChanged()));
         rateLimitStepCombobox.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-
-        conditionPanel.add(comboBox.getComponent());
-    }
-
-    public void setConditionByString(String condition) {
-        if (condition == null) {
-            setCondition(null);
-        } else {
-            setCondition(XExpressionImpl.fromText(InstrumentConditionParser.INSTANCE.fromLiveConditional(condition)));
-        }
-    }
-
-    public void setCondition(XExpression condition) {
-        this.condition = condition;
-        ApplicationManager.getApplication().runWriteAction(() -> comboBox.setExpression(condition));
-    }
-
-    public XExpression getCondition() {
-        return comboBox.getExpression();
-    }
-
-    public void setHitLimit(int hitLimit) {
-        this.hitLimit = hitLimit;
-        hitLimitSpinner.setValue(hitLimit);
-    }
-
-    public int getHitLimit() {
-        return (int) hitLimitSpinner.getValue();
     }
 
     public int getExpirationInMinutes() {
@@ -153,16 +90,12 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
 
     public boolean isChanged() {
-        return ((condition == null && !getCondition().getExpression().isEmpty()) || (condition != null && !Objects.equals(condition.getExpression(), getCondition().getExpression())))
-                || hitLimit != getHitLimit()
-                || expirationInMinutes != getExpirationInMinutes()
+        return expirationInMinutes != getExpirationInMinutes()
                 || rateLimitCount != getRateLimitCount()
                 || !Objects.equals(rateLimitStep, getRateLimitStep());
     }
 
     public void setNewDefaults() {
-        setCondition(getCondition());
-        setHitLimit(getHitLimit());
         setExpirationInMinutes(getExpirationInMinutes());
         setRateLimitCount(getRateLimitCount());
         setRateLimitStep(getRateLimitStep());
@@ -171,14 +104,6 @@ public class LiveLogConfigurationPanel extends JPanel {
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
-        panel4 = new JPanel();
-        label1 = new JLabel();
-        conditionPanel = new JPanel();
-        separator2 = new JSeparator();
-        panel6 = new JPanel();
-        label5 = new JLabel();
-        hitLimitSpinner = new JSpinner();
-        separator1 = new JSeparator();
         panel3 = new JPanel();
         label3 = new JLabel();
         panel1 = new JPanel();
@@ -207,63 +132,7 @@ public class LiveLogConfigurationPanel extends JPanel {
             "[fill]" +
             "[100,fill]",
             // rows
-            "[]" +
-            "[]" +
             "[]"));
-
-        //======== panel4 ========
-        {
-            panel4.setBackground(null);
-            panel4.setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "[100,grow,fill]",
-                // rows
-                "[]" +
-                "[]"));
-
-            //---- label1 ----
-            label1.setText("Condtion");
-            label1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            panel4.add(label1, "cell 0 0");
-
-            //======== conditionPanel ========
-            {
-                conditionPanel.setMinimumSize(new Dimension(0, 27));
-                conditionPanel.setLayout(new BorderLayout());
-            }
-            panel4.add(conditionPanel, "cell 0 1");
-        }
-        add(panel4, "cell 0 0");
-
-        //---- separator2 ----
-        separator2.setOrientation(SwingConstants.VERTICAL);
-        separator2.setPreferredSize(new Dimension(3, 50));
-        add(separator2, "cell 1 0");
-
-        //======== panel6 ========
-        {
-            panel6.setBackground(null);
-            panel6.setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "[grow,fill]",
-                // rows
-                "[]" +
-                "[grow]"));
-
-            //---- label5 ----
-            label5.setText("Hit Limit");
-            label5.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            panel6.add(label5, "cell 0 0");
-
-            //---- hitLimitSpinner ----
-            hitLimitSpinner.setBackground(null);
-            hitLimitSpinner.setModel(new SpinnerNumberModel(100, 1, null, 1));
-            panel6.add(hitLimitSpinner, "cell 0 1");
-        }
-        add(panel6, "cell 2 0");
-        add(separator1, "cell 0 1 3 1");
 
         //======== panel3 ========
         {
@@ -345,12 +214,12 @@ public class LiveLogConfigurationPanel extends JPanel {
             }
             panel3.add(panel1, "cell 0 1 3 1");
         }
-        add(panel3, "cell 0 2");
+        add(panel3, "cell 0 0");
 
         //---- separator3 ----
         separator3.setOrientation(SwingConstants.VERTICAL);
         separator3.setPreferredSize(new Dimension(3, 50));
-        add(separator3, "cell 1 2");
+        add(separator3, "cell 1 0");
 
         //======== panel5 ========
         {
@@ -399,7 +268,7 @@ public class LiveLogConfigurationPanel extends JPanel {
             }
             panel5.add(panel2, "cell 0 1,grow");
         }
-        add(panel5, "cell 2 2");
+        add(panel5, "cell 2 0");
 
         //---- expirationButtonGroup ----
         ButtonGroup expirationButtonGroup = new ButtonGroup();
@@ -415,14 +284,6 @@ public class LiveLogConfigurationPanel extends JPanel {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
-    private JPanel panel4;
-    private JLabel label1;
-    private JPanel conditionPanel;
-    private JSeparator separator2;
-    private JPanel panel6;
-    private JLabel label5;
-    private JSpinner hitLimitSpinner;
-    private JSeparator separator1;
     private JPanel panel3;
     private JLabel label3;
     private JPanel panel1;

@@ -8,7 +8,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
@@ -94,7 +93,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         lookup = text -> scopeVars.stream()
                 .filter(v -> {
                     String var = substringAfterLast(" ", text.toLowerCase());
-                    return var.startsWith("$") && v.toLowerCase().contains(var.substring(1));
+                    return var.startsWith("$") && !var.substring(1).equals(v) && v.toLowerCase().contains(var.substring(1));
                 }).map(it -> new AutocompleteFieldRow() {
                     public String getText() {
                         return "$" + it;
@@ -271,7 +270,6 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             @Override
             public void focusGained(FocusEvent e) {
                 if (liveLogTextField.getEditMode()) return;
-                liveLogTextField.reset();
                 liveLogTextField.setEditMode(true);
 
                 if (liveLog != null) {
@@ -446,7 +444,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(oldLiveLog);
+                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(oldLiveLog);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -484,7 +482,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         }
 
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
-        LiveLog log = new LiveLog(
+        LiveLog instrument = new LiveLog(
                 finalLogPattern,
                 varMatches.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
                 sourceLocation,
@@ -497,24 +495,17 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 false,
                 throttle
         );
-        instrumentService.addLiveInstrument(log, it -> {
+        instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
-                liveLogTextField.setEditMode(false);
-                removeActiveDecorations();
-
                 LoggerDetector detector = inlayMark.getUserData(
                         SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
                 );
                 detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
                 liveLog = (LiveLog) it.result();
-                LiveLogStatusManager.INSTANCE.addActiveLiveLog(liveLog);
+                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
 
-                addTimeField();
-
-                //focus back to IDE
-                IdeFocusManager.getInstance(editor.getProject())
-                        .requestFocusInProject(editor.getContentComponent(), editor.getProject());
+                //dispose this bar; another will be created
+                ApplicationManager.getApplication().invokeLater(inlayMark::dispose);
             } else {
                 it.cause().printStackTrace();
             }
@@ -534,7 +525,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         if (liveLog != null) {
             SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveLogStatusManager.INSTANCE.removeActiveLiveLog(liveLog);
+                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveLog);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -556,7 +547,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         configDropdownLabel = new JLabel();
         timeLabel = new JLabel();
         separator1 = new JSeparator();
-        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false);
+        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
         closeLabel = new JLabel();
 
         //======== this ========

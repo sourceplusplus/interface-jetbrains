@@ -36,7 +36,6 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
 import java.util.regex.Pattern
-import kotlin.time.ExperimentalTime
 
 /**
  * Displays traces (and the underlying spans) for a given source code artifact.
@@ -317,7 +316,6 @@ class TracesDisplay(
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun handleArtifactTraceResult(portals: List<SourcePortal>, artifactTraceResult: TraceResult) {
         val updatedArtifactTraceResult = artifactTraceResult.copy(
             artifactSimpleName = removePackageAndClassName(
@@ -337,7 +335,6 @@ class TracesDisplay(
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun handleTraceStack(
         appUuid: String,
         rootArtifactQualifiedName: String,

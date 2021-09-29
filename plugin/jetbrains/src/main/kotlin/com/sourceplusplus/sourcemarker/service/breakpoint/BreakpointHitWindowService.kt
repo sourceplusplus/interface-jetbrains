@@ -22,6 +22,8 @@ import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
+import com.sourceplusplus.sourcemarker.service.breakpoint.LiveBreakpointConstants.LIVE_BREAKPOINT_NAME
 import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
 import com.sourceplusplus.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
 import com.sourceplusplus.sourcemarker.service.breakpoint.ui.EventsWindow
@@ -53,15 +55,12 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
     init {
         try {
             _toolWindow = ToolWindowManager.getInstance(project) //2019.3+
-                .registerToolWindow(LiveBreakpointConstants.LIVE_BREAKPOINT_NAME, true, ToolWindowAnchor.BOTTOM, this, true)
-            _toolWindow!!.setIcon(SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON)
+                .registerToolWindow(LIVE_BREAKPOINT_NAME, true, ToolWindowAnchor.BOTTOM, this, true)
+            _toolWindow!!.setIcon(LIVE_BREAKPOINT_DISABLED_ICON)
         } catch (ignored: Throwable) {
             _toolWindow = ToolWindowManager.getInstance(project) //2020+
                 .registerToolWindow(
-                    RegisterToolWindowTask.closable(
-                        LiveBreakpointConstants.LIVE_BREAKPOINT_NAME,
-                        SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
-                    )
+                    RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, LIVE_BREAKPOINT_DISABLED_ICON)
                 )
         }
 
@@ -125,6 +124,10 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
     }
 
+    fun clearContent() {
+        contentManager!!.removeAllContents(true)
+    }
+
     fun addBreakpointHit(hit: LiveBreakpointHit) {
         eventsWindow.eventsTab.model.insertRow(0, hit)
         val max = 1000
@@ -133,9 +136,9 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
     }
 
-    fun showBreakpointHit(hit: LiveBreakpointHit) {
-        removeExecutionShower()
-        breakpointWindow = BreakpointHitWindow(project, executionPointHighlighter)
+    fun showBreakpointHit(hit: LiveBreakpointHit, showExecutionPoint: Boolean = true) {
+        if (showExecutionPoint) removeExecutionShower()
+        breakpointWindow = BreakpointHitWindow(project, executionPointHighlighter, showExecutionPoint)
         breakpointWindow.showFrames(hit.stackTrace, hit.stackTrace.first())
         val content = ContentFactory.SERVICE.getInstance().createContent(
             breakpointWindow.layoutComponent, hit.stackTrace.first().source + " at #0", false

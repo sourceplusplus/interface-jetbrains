@@ -40,11 +40,14 @@ object ArtifactNameUtils {
             || !qualifiedMethodName.contains(".")
         ) {
             qualifiedMethodName
-        } else qualifiedMethodName.substring(
-            0, qualifiedMethodName.substring(
-                0, qualifiedMethodName.indexOf("(")
-            ).lastIndexOf(".")
-        )
+        } else {
+            val qualifiedClassName = qualifiedMethodName.substring(
+                0, qualifiedMethodName.substring(
+                    0, qualifiedMethodName.indexOf("(")
+                ).lastIndexOf(".")
+            )
+            qualifiedClassName.substringAfterLast(".")
+        }
     }
 
     fun getShortFunctionSignature(qualifiedName: String): String {

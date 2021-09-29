@@ -104,14 +104,14 @@ object SourceMarkConstructor {
                 val expressionMark = inlayMark as ExpressionInlayMark
                 val prettyTimeAgo = if (expressionMark.getPsiExpression() is UThrowExpression) {
                     {
-                        val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() +
+                        val occurred = (Clock.System.now().toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
                                 " " + message("ago")
                         " //${message("last_occurred")} $occurred "
                     }
                 } else {
                     {
                         val exceptionType = advice.stackTrace.exceptionType.substringAfterLast(".")
-                        val occurred = (Clock.System.now() - advice.occurredAt).toPrettyDuration() +
+                        val occurred = (Clock.System.now().toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
                                 " " + message("ago")
                         " //${message("threw")} $exceptionType $occurred "
                     }
