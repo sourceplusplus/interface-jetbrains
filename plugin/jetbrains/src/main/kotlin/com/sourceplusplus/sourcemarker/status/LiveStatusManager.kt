@@ -162,6 +162,7 @@ object LiveStatusManager : SourceMarkEventListener {
                 scopeVars,
                 inlayMark
             )
+            statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
             editor.scrollingModel.addVisibleAreaListener(statusBar)
@@ -212,6 +213,7 @@ object LiveStatusManager : SourceMarkEventListener {
                     }
 
                     val statusBar = BreakpointStatusBar(liveBreakpoint.location, scopeVars, inlayMark, liveBreakpoint, editor)
+                    statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     editor.scrollingModel.addVisibleAreaListener(statusBar)
 
@@ -255,6 +257,7 @@ object LiveStatusManager : SourceMarkEventListener {
                     }
 
                     val statusBar = LogStatusBar(liveLog.location, scopeVars, inlayMark, liveLog, editor)
+                    statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     editor.scrollingModel.addVisibleAreaListener(statusBar)
 

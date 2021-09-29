@@ -9,7 +9,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiManager
@@ -19,7 +18,6 @@ import com.intellij.xdebugger.breakpoints.*
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
 import com.intellij.xdebugger.impl.breakpoints.XLineBreakpointImpl
 import com.sourceplusplus.marker.SourceMarker
-import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.SourceMarkerServices.Provide
@@ -38,9 +36,9 @@ import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
-import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
+import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser
 import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
 import com.sourceplusplus.sourcemarker.status.LiveStatusManager
 import io.vertx.core.eventbus.ReplyException
@@ -128,24 +126,10 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
 
     private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
         val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
-        LiveStatusManager.removeActiveLiveInstrument(logRemoved.logId)
-
-        if (logRemoved.cause != null) {
-            log.error("Log remove error: {}", logRemoved.cause!!.message)
-
-            Notifications.Bus.notify(
-                Notification(
-                    message("plugin_name"), "Live log failed",
-                    "Log failed: " + logRemoved.cause!!.message,
-                    NotificationType.ERROR
-                )
-            )
-        }
-
-        val removedMark = SourceMarkSearch.findByLogId(logRemoved.logId)
-        if (removedMark != null) {
-            ApplicationManager.getApplication().invokeLater {
-                removedMark.dispose()
+        ApplicationManager.getApplication().invokeLater {
+            val inlayMark = SourceMarkSearch.findByLogId(logRemoved.logId)
+            if (inlayMark != null) {
+                inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
             }
         }
     }
@@ -219,17 +203,19 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle(),
 
         //todo: can get log hit without log added (race) try open
         val logHit = Json.decodeValue(liveEvent.data, LiveLogHit::class.java)
-        val hitMark = SourceMarkSearch.findByLogId(logHit.logId)
-        if (hitMark != null) {
-            SourceMarkSearch.findInheritedSourceMarks(hitMark).forEach {
-                val portal = it.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                vertx.eventBus().send(
-                    ArtifactLogUpdated,
-                    logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
-                )
+        ApplicationManager.getApplication().invokeLater {
+            val inlayMark = SourceMarkSearch.findByLogId(logHit.logId)
+            if (inlayMark != null) {
+                inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
+
+                SourceMarkSearch.findInheritedSourceMarks(inlayMark).forEach {
+                    val portal = it.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                    vertx.eventBus().send(
+                        ArtifactLogUpdated,
+                        logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
+                    )
+                }
             }
-        } else {
-            log.debug("Could not find source mark. Ignored log hit.")
         }
     }
 

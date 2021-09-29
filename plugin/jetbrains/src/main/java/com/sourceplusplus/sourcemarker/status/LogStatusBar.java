@@ -7,10 +7,15 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
+import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
@@ -19,13 +24,16 @@ import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.ThrottleStep;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
+import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
 import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
+import com.sourceplusplus.sourcemarker.service.log.LogHitColumnInfo;
 import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
+import io.vertx.core.json.Json;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -49,6 +57,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.*;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class LogStatusBar extends JPanel implements VisibleAreaListener {
@@ -61,7 +70,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     private final Function<String, List<AutocompleteFieldRow>> lookup;
     private final Pattern VARIABLE_PATTERN;
     private final String placeHolderText;
-    private Editor editor;
+    private EditorImpl editor;
     private LiveLog liveLog;
     private Instant latestTime;
     private Log latestLog;
@@ -69,6 +78,17 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     private LiveLogConfigurationPanel configurationPanel;
     private AtomicBoolean settingFormattedMessage = new AtomicBoolean(false);
     private boolean disposed = false;
+    private JLabel expandLabel;
+    private boolean expanded;
+    private JPanel panel;
+    private JPanel wrapper;
+    private boolean errored = false;
+    private final ListTableModel commandModel = new ListTableModel<>(
+            new ColumnInfo[]{
+                    new LogHitColumnInfo("Message"),
+                    new LogHitColumnInfo("Time")
+            },
+            new ArrayList<>(), 0, SortOrder.DESCENDING);
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -122,7 +142,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
         this.inlayMark = inlayMark;
         this.liveLog = liveLog;
-        this.editor = editor;
+        this.editor = (EditorImpl) editor;
 
         if (liveLog != null) {
             placeHolderText = "Waiting for live log data...";
@@ -137,11 +157,17 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             liveLogTextField.setEditMode(false);
             removeActiveDecorations();
             addTimeField();
+            addExpandButton();
+            setupAsActive();
         } else {
             liveLogTextField.setEditMode(true);
         }
 
         liveLogTextField.addSaveListener(this::saveLiveLog);
+    }
+
+    public void setWrapperPanel(JPanel wrapperPanel) {
+        this.wrapper = wrapperPanel;
     }
 
     @Override
@@ -186,7 +212,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     }
 
     public void setEditor(Editor editor) {
-        this.editor = editor;
+        this.editor = (EditorImpl) editor;
     }
 
     public void focus() {
@@ -199,10 +225,95 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         separator1.setVisible(true);
     }
 
+    private void setupAsActive() {
+        inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS(), new ArrayList<>());
+        inlayMark.getUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS())
+                .add(event -> {
+                    if (event.getEventType() == LOG_HIT) {
+                        commandModel.insertRow(0, event);
+                    } else if (event.getEventType() == LOG_REMOVED) {
+                        //configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
+
+                        LiveLogRemoved removed = Json.decodeValue(event.getData(), LiveLogRemoved.class);
+                        if (removed.getCause() != null) {
+                            commandModel.insertRow(0, event);
+
+                            errored = true;
+                            liveLogTextField.setEditMode(false);
+                            liveLogTextField.setText("");
+                            liveLogTextField.setPlaceHolderText(removed.getCause().getMessage());
+                            liveLogTextField.setPlaceHolderTextColor(Color.decode("#e1483b"));
+                            configDropdownLabel.setVisible(false);
+                            removeActiveDecorations();
+                            remove(timeLabel);
+                            remove(separator1);
+                            repaint();
+                        }
+                    }
+                });
+    }
+
+    private void addExpandButton() {
+        expandLabel = new JLabel();
+        expandLabel.setCursor(Cursor.getDefaultCursor());
+        expandLabel.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
+            }
+        });
+        addRecursiveMouseListener(expandLabel, new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!expanded) {
+                    expanded = true;
+
+                    panel = new JPanel();
+                    panel.setLayout(new BorderLayout());
+                    JBTable table = new JBTable();
+                    JScrollPane scrollPane = new JBScrollPane(table);
+                    table.setRowHeight(30);
+                    table.setShowColumns(true);
+                    table.setModel(commandModel);
+                    table.setStriped(true);
+                    table.setShowColumns(true);
+
+                    table.setBackground(Color.decode("#252525"));
+                    panel.add(scrollPane);
+                    panel.setPreferredSize(new Dimension(0, 250));
+                    wrapper.add(panel, BorderLayout.NORTH);
+                } else {
+                    expanded = false;
+                    wrapper.remove(panel);
+                }
+
+                JViewport viewport = editor.getScrollPane().getViewport();
+                viewport.dispatchEvent(new ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED));
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                expandLabel.setIcon(IconLoader.getIcon("/icons/expandPressed.svg"));
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
+            }
+        }, () -> {
+            removeActiveDecorations();
+            return null;
+        });
+
+        remove(closeLabel);
+        expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
+        add(expandLabel, "cell 3 0");
+        add(closeLabel, "cell 3 0");
+    }
+
     private void removeActiveDecorations() {
         SwingUtilities.invokeLater(() -> {
-//            label7.setIcon(IconLoader.getIcon("/icons/expand.svg"));
-//            label8.setIcon(IconLoader.getIcon("/icons/search.svg"));
+            if (expandLabel != null) expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
             closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
             configPanel.setBackground(Color.decode("#252525"));
 
@@ -269,7 +380,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (liveLogTextField.getEditMode()) return;
+                if (errored || liveLogTextField.getEditMode()) return;
                 liveLogTextField.setEditMode(true);
 
                 if (liveLog != null) {
@@ -314,7 +425,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
-                showEditableMode();
+                if (!errored) showEditableMode();
             }
 
             @Override
@@ -363,7 +474,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                configPanel.setBackground(Color.decode("#3C3C3C"));
+                if (!errored) configPanel.setBackground(Color.decode("#3C3C3C"));
             }
         });
 
@@ -371,7 +482,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         addRecursiveMouseListener(configPanel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (System.currentTimeMillis() - popupLastOpened.get() > 200) {
+                if (!errored && System.currentTimeMillis() - popupLastOpened.get() > 200) {
                     ApplicationManager.getApplication().runWriteAction(() -> showConfigurationPopup(popupLastOpened));
                 }
             }
