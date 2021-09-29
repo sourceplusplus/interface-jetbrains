@@ -25,7 +25,7 @@ import javax.swing.text.*
 @Suppress("MagicNumber")
 class AutocompleteField(
     private val commandDelimiter: String,
-    private val placeHolderText: String?,
+    var placeHolderText: String?,
     private val allLookup: List<AutocompleteFieldRow>,
     private val lookup: Function<String, List<AutocompleteFieldRow>>,
     internal val lineNumber: Int = 0,
@@ -45,6 +45,7 @@ class AutocompleteField(
     private var hasControlHeld = false
     var saveOnSuggestionDoubleClick: Boolean = false
     var addOnSuggestionDoubleClick: Boolean = true
+    var placeHolderTextColor: Color = Color(85, 85, 85, 200)
 
     init {
         foreground = Color.decode("#A9B7C6")
@@ -314,7 +315,7 @@ class AutocompleteField(
             val textLength = pG.getFontMetrics().stringWidth(placeHolderText)
             val fieldLength = width
 
-            g.color = Color(85, 85, 85, 200)
+            g.color = placeHolderTextColor
             g.drawString(
                 placeHolderText,
                 insets.left + (fieldLength / 2) - (textLength / 2),

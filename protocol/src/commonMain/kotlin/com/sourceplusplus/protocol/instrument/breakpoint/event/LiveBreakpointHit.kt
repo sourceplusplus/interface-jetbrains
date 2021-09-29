@@ -3,6 +3,7 @@ package com.sourceplusplus.protocol.instrument.breakpoint.event
 import com.sourceplusplus.protocol.Serializers
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
 import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
+import com.sourceplusplus.protocol.instrument.TrackedLiveEvent
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
