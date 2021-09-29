@@ -77,12 +77,12 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     private JPanel panel;
     private JLabel expandLabel;
     private boolean expanded = false;
-    private ListTableModel commandModel = new ListTableModel(
+    private final ListTableModel commandModel = new ListTableModel<>(
             new ColumnInfo[]{
                     new BreakpointHitColumnInfo("Breakpoint Data"),
                     new BreakpointHitColumnInfo("Time")
             },
-            new ArrayList(), 0, SortOrder.DESCENDING);
+            new ArrayList<>(), 0, SortOrder.DESCENDING);
 
     public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -171,11 +171,10 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     }
 
     private void setupAsActive() {
-        inlayMark.putUserData(SourceMarkKeys.INSTANCE.getBREAKPOINT_ID(), liveBreakpoint.getId());
         inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS(), new ArrayList<>());
         inlayMark.getUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS())
                 .add(event -> {
-                    if (commandModel == null || statusPanel == null) return;
+                    if (statusPanel == null) return;
                     if (event.getEventType() == BREAKPOINT_HIT) {
                         commandModel.insertRow(0, event);
                         statusPanel.incrementHits();
