@@ -45,7 +45,6 @@ import moment
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import kotlin.js.json
-import kotlin.time.ExperimentalTime
 
 /**
  * todo: description.
@@ -147,7 +146,6 @@ class TracesPage(
             .replace("<", "&lt;").replace(">", "&gt;")
     }
 
-    @OptIn(ExperimentalTime::class)
     override fun displayTraces(traceResult: TraceResult) {
         console.log("Displaying ${traceResult.traces.size} traces - ${traceResult.orderType}")
         resetUI(TraceDisplayType.TRACES, traceResult.orderType)
@@ -250,7 +248,6 @@ class TracesPage(
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun displayTraceSegment(segment: TraceStack.Segment, traceStackPath: TraceStackPath) {
         val segmentSpans = segment.traceSpans
         val spans = if (traceStackPath.getCurrentRoot() != null) {
@@ -359,8 +356,8 @@ class TracesPage(
                 }
                 td {
                     classes += "collapsing"
-                    val duration = (span.endTime - span.startTime)
-                    attributes["data-sort-value"] = duration.toLongMilliseconds().toString()
+                    val duration = (span.endTime.toEpochMilliseconds() - span.startTime.toEpochMilliseconds())
+                    attributes["data-sort-value"] = duration.toString()
                     +duration.toPrettyDuration()
                 }
             }

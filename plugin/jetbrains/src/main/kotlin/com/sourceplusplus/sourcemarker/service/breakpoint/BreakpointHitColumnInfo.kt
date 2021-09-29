@@ -1,18 +1,14 @@
 package com.sourceplusplus.sourcemarker.service.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
-import com.intellij.util.ui.table.IconTableCellRenderer
-import com.sourceplusplus.protocol.artifact.exception.methodName
-import com.sourceplusplus.protocol.artifact.exception.qualifiedClassName
-import com.sourceplusplus.protocol.artifact.exception.shortQualifiedClassName
-import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
+import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
+import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
-import kotlinx.datetime.toJavaInstant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import javax.swing.Icon
-import javax.swing.table.TableCellRenderer
+import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
+import com.sourceplusplus.protocol.utils.toPrettyDuration
+import com.sourceplusplus.sourcemarker.PluginBundle.message
+import io.vertx.core.json.Json
+import kotlinx.datetime.Clock
 
 /**
  * todo: description.
@@ -20,50 +16,53 @@ import javax.swing.table.TableCellRenderer
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, String>(name) {
+class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(name) {
 
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")
-        .withZone(ZoneId.systemDefault())
-
-    override fun getColumnClass(): Class<*> {
+    override fun getComparator(): Comparator<LiveInstrumentEvent>? {
         return when (name) {
-            "Breakpoint Data" -> Icon::class.java
-            else -> super.getColumnClass()
-        }
-    }
-
-    override fun getCustomizedRenderer(o: LiveBreakpointHit, renderer: TableCellRenderer): TableCellRenderer {
-        return when (name) {
-            "Breakpoint Data" -> IconTableCellRenderer.create(SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON)
-            else -> super.getCustomizedRenderer(o, renderer)
-        }
-    }
-
-    override fun getComparator(): Comparator<LiveBreakpointHit>? {
-        return when (name) {
-            "Time" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
-                t.occurredAt.compareTo(t2.occurredAt) //todo: could add line number too
-            }
-            "Class Name" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
-                t.stackTrace.first().qualifiedClassName().compareTo(t2.stackTrace.first().qualifiedClassName())
-            }
-            "Line No" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
-                t.stackTrace.first().sourceAsLineNumber()!!.compareTo(t2.stackTrace.first().sourceAsLineNumber()!!)
+            "Time" -> Comparator { t: LiveInstrumentEvent, t2: LiveInstrumentEvent ->
+                val obj1 = if (t.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
+                    Json.decodeValue(t.data, LiveBreakpointHit::class.java)
+                } else if (t.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
+                    Json.decodeValue(t.data, LiveBreakpointRemoved::class.java)
+                } else {
+                    throw IllegalArgumentException(t.eventType.name)
+                }
+                val obj2 = if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
+                    Json.decodeValue(t2.data, LiveBreakpointHit::class.java)
+                } else if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
+                    Json.decodeValue(t2.data, LiveBreakpointRemoved::class.java)
+                } else {
+                    throw IllegalArgumentException(t2.eventType.name)
+                }
+                obj1.occurredAt.compareTo(obj2.occurredAt)
             }
             else -> null
         }
     }
 
-    override fun valueOf(item: LiveBreakpointHit): String {
-        return when (name) {
-            "Time" -> formatter.format(item.occurredAt.toJavaInstant())
-            "Host Name" -> item.host
-            "Application Name" -> item.application
-            "Class Name" -> item.stackTrace.first().shortQualifiedClassName()
-            "Method Name" -> item.stackTrace.first().methodName()
-            "Line No" -> item.stackTrace.first().sourceAsLineNumber()!!.toString()
-            "Breakpoint Data" -> "View Frames/Variables"
-            else -> item.toString()
+    override fun valueOf(event: LiveInstrumentEvent): String {
+        val breakpointData = mutableListOf<Map<String, Any>>()
+        if (event.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
+            val item = Json.decodeValue(event.data, LiveBreakpointHit::class.java)
+            item.stackTrace.elements.first().variables.forEach {
+                breakpointData.add(mapOf(it.name to it.value))
+            }
+            return when (name) {
+                "Breakpoint Data" -> Json.encode(breakpointData)
+                "Time" ->
+                    (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())
+                        .toPrettyDuration() + " " + message("ago")
+                else -> item.toString()
+            }
+        } else {
+            val item = Json.decodeValue(event.data, LiveBreakpointRemoved::class.java)
+            return when (name) {
+                "Breakpoint Data" -> item.cause!!.message!!
+                "Time" -> (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())
+                    .toPrettyDuration() + " " + message("ago")
+                else -> item.toString()
+            }
         }
     }
 }

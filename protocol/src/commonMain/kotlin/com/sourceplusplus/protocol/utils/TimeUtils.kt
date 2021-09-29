@@ -1,8 +1,5 @@
 package com.sourceplusplus.protocol.utils
 
-import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
-
 fun Int.toPrettyDuration(): String {
     val days = this / 86400000.0
     if (days > 1) {
@@ -32,26 +29,22 @@ fun Double.fromPerSecondToPrettyFrequency(): String {
     }
 }
 
-@OptIn(ExperimentalTime::class)
-fun Duration.toPrettyDuration(): String {
-    toComponents { days, hours, minutes, seconds, _ ->
-        var prettyDuration = ""
-        if (days > 0) {
-            prettyDuration += "${days}d"
-        }
-        if (hours > 0) {
-            if (prettyDuration.isNotEmpty()) prettyDuration += " "
-            prettyDuration += "${hours}h"
-        }
-        if (days == 0 && minutes > 0) {
-            if (prettyDuration.isNotEmpty()) prettyDuration += " "
-            prettyDuration += "${minutes}m"
-        } else if (minutes == 0 && seconds > 0) {
-            if (prettyDuration.isNotEmpty()) prettyDuration += " "
-            prettyDuration += "${seconds}s"
-        } else if (days == 0 && hours == 0 && minutes == 0) {
-            prettyDuration = "${inMilliseconds.toInt()}ms"
-        }
-        return prettyDuration
+fun Long.toPrettyDuration(): String {
+    val days = this / 86400000.0
+    if (days > 1) {
+        return "${days.toInt()}d"
     }
+    val hours = this / 3600000.0
+    if (hours > 1) {
+        return "${hours.toInt()}h"
+    }
+    val minutes = this / 60000.0
+    if (minutes > 1) {
+        return "${minutes.toInt()}m"
+    }
+    val seconds = this / 1000.0
+    if (seconds > 1) {
+        return "${seconds.toInt()}s"
+    }
+    return "${this}ms"
 }

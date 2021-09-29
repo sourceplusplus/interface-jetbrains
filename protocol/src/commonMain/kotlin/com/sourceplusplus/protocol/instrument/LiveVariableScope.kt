@@ -12,5 +12,6 @@ import kotlinx.serialization.Serializable
 enum class LiveVariableScope {
     LOCAL_VARIABLE,
     INSTANCE_FIELD,
-    STATIC_FIELD
+    STATIC_FIELD,
+    GENERATED_METHOD
 }

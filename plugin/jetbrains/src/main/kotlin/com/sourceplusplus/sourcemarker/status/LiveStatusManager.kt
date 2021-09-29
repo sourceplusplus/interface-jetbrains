@@ -18,11 +18,14 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
 import com.sourceplusplus.protocol.artifact.log.LogResult
+import com.sourceplusplus.protocol.instrument.LiveInstrument
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
+import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.log.LiveLog
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
@@ -37,10 +40,10 @@ import javax.swing.JPanel
  * @since 0.2.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object LiveLogStatusManager : SourceMarkEventListener {
+object LiveStatusManager : SourceMarkEventListener {
 
-    private val log = LoggerFactory.getLogger(LiveLogStatusManager::class.java)
-    private val activeStatusBars = CopyOnWriteArrayList<LiveLog>()
+    private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
+    private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
 
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
@@ -61,7 +64,11 @@ object LiveLogStatusManager : SourceMarkEventListener {
 
                     activeStatusBars.forEach {
                         if (qualifiedClassName == it.location.source && it.location.line in startLine..endLine) {
-                            showStatusBar(it, event.sourceMark.sourceFileMarker)
+                            when (it) {
+                                is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
+                                is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
+                                else -> throw UnsupportedOperationException(it.javaClass.simpleName)
+                            }
                         }
                     }
                 }
@@ -70,9 +77,62 @@ object LiveLogStatusManager : SourceMarkEventListener {
     }
 
     /**
-     * Invoked via command bar. Force visible.
+     * Invoked via control bar. Force visible.
      */
-    fun showStatusBar(editor: Editor, lineNumber: Int) {
+    fun showBreakpointStatusBar(editor: Editor, lineNumber: Int) {
+        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
+            .getUserData(SourceFileMarker.KEY)
+        if (fileMarker == null) {
+            log.warn("Could not find file marker for file: {}", editor.document)
+            return
+        }
+
+        val inlayMark = SourceMarkerUtils.createExpressionInlayMark(fileMarker, lineNumber)
+        if (!fileMarker.containsSourceMark(inlayMark)) {
+            val wrapperPanel = JPanel()
+            wrapperPanel.layout = BorderLayout()
+
+            //determine available vars
+            val scopeVars = mutableListOf<String>()
+            val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
+            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+            }
+            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+            for (i in 0 until variablesProcessor.size()) {
+                scopeVars.add(variablesProcessor.getResult(i).name!!)
+            }
+
+            val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
+            val statusBar = BreakpointStatusBar(
+                LiveSourceLocation(qualifiedClassName, lineNumber),
+                scopeVars,
+                inlayMark
+            )
+            statusBar.setWrapperPanel(wrapperPanel)
+            wrapperPanel.add(statusBar)
+            statusBar.setEditor(editor)
+            editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+            inlayMark.configuration.showComponentInlay = true
+            inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+            }
+            inlayMark.visible.set(true)
+            inlayMark.apply()
+
+            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+//            sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
+            sourcePortal.configuration.statusBar = true
+
+            statusBar.focus()
+        }
+    }
+
+    /**
+     * Invoked via control bar. Force visible.
+     */
+    fun showLogStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
@@ -128,7 +188,50 @@ object LiveLogStatusManager : SourceMarkEventListener {
         }
     }
 
-    fun showStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
+    fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
+        ApplicationManager.getApplication().invokeLater {
+            val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
+            val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
+            if (findInlayMark.isPresent) {
+                val inlayMark = findInlayMark.get()
+                if (!fileMarker.containsSourceMark(inlayMark)) {
+                    inlayMark.putUserData(BREAKPOINT_ID, liveBreakpoint.id)
+
+                    val wrapperPanel = JPanel()
+                    wrapperPanel.layout = BorderLayout()
+
+                    //determine available vars
+                    val scopeVars = mutableListOf<String>()
+                    val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, liveBreakpoint.location.line - 1)!!
+                    val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+                        override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+                    }
+                    PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+                    for (i in 0 until variablesProcessor.size()) {
+                        scopeVars.add(variablesProcessor.getResult(i).name!!)
+                    }
+
+                    val statusBar = BreakpointStatusBar(liveBreakpoint.location, scopeVars, inlayMark, liveBreakpoint, editor)
+                    wrapperPanel.add(statusBar)
+                    editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+                    inlayMark.configuration.showComponentInlay = true
+                    inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                        override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+                    }
+                    inlayMark.apply()
+
+                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                    //sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
+                    sourcePortal.configuration.statusBar = true
+                }
+            } else {
+                log.warn("No detected expression at line {}. Inlay mark ignored", liveBreakpoint.location.line)
+            }
+        }
+    }
+
+    fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
             val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
@@ -181,19 +284,19 @@ object LiveLogStatusManager : SourceMarkEventListener {
         }
     }
 
-    fun addActiveLiveLog(liveLog: LiveLog) {
-        activeStatusBars.add(liveLog)
+    fun addActiveLiveInstrument(instrument: LiveInstrument) {
+        activeStatusBars.add(instrument)
     }
 
-    fun addActiveLiveLogs(liveLogs: List<LiveLog>) {
-        activeStatusBars.addAll(liveLogs)
+    fun addActiveLiveInstruments(instruments: List<LiveInstrument>) {
+        activeStatusBars.addAll(instruments)
     }
 
-    fun removeActiveLiveLog(liveLog: LiveLog) {
-        activeStatusBars.remove(liveLog)
+    fun removeActiveLiveInstrument(instrument: LiveInstrument) {
+        activeStatusBars.remove(instrument)
     }
 
-    fun removeActiveLiveLog(logId: String) {
-        activeStatusBars.removeIf { it.id == logId }
+    fun removeActiveLiveInstrument(instrumentId: String) {
+        activeStatusBars.removeIf { it.id == instrumentId }
     }
 }

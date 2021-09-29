@@ -22,7 +22,8 @@ import org.slf4j.LoggerFactory
  */
 class ExecutionPointManager(
     private val project: Project,
-    private val executionPointHighlighter: ExecutionPointHighlighter
+    private val executionPointHighlighter: ExecutionPointHighlighter,
+    private val showExecutionPoint: Boolean = true
 ) : DebugStackFrameListener, Disposable {
 
     companion object {
@@ -30,6 +31,7 @@ class ExecutionPointManager(
     }
 
     override fun onChanged(stackFrameManager: StackFrameManager) {
+        if (!showExecutionPoint) return
         val currentFrame = stackFrameManager.currentFrame
         var fromClass = currentFrame!!.qualifiedClassName()
 

@@ -57,7 +57,7 @@ import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import com.sourceplusplus.sourcemarker.settings.getServicePortNormalized
 import com.sourceplusplus.sourcemarker.settings.isSsl
 import com.sourceplusplus.sourcemarker.settings.serviceHostNormalized
-import com.sourceplusplus.sourcemarker.status.LiveLogStatusManager
+import com.sourceplusplus.sourcemarker.status.LiveStatusManager
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.Promise
@@ -313,7 +313,7 @@ object SourceMarkerPlugin {
         if (hardcodedConfig.getJsonObject("services").getBoolean("live_instrument")) {
             if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_INSTRUMENT }) {
                 log.info("Live instruments available")
-                SourceMarker.addGlobalSourceMarkEventListener(LiveLogStatusManager)
+                SourceMarker.addGlobalSourceMarkEventListener(LiveStatusManager)
 
                 Instance.liveInstrument = ServiceProxyBuilder(vertx)
                     .setToken(config.serviceToken!!)

@@ -8,9 +8,9 @@ import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitColumnInfo
+import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointEventColumnInfo
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService
-import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
 import java.awt.BorderLayout
 import java.awt.Point
 import javax.swing.*
@@ -29,13 +29,13 @@ class EventsTab : Disposable {
     val component: JPanel = JPanel(BorderLayout())
     val model: ListTableModel<LiveBreakpointHit> = ListTableModel<LiveBreakpointHit>(
         arrayOf(
-            BreakpointHitColumnInfo("Time"),
-            BreakpointHitColumnInfo("Host Name"),
-            BreakpointHitColumnInfo("Application Name"),
-            BreakpointHitColumnInfo("Class Name"),
-            BreakpointHitColumnInfo("Method Name"),
-            BreakpointHitColumnInfo("Line No"),
-            BreakpointHitColumnInfo("Breakpoint Data")
+            BreakpointEventColumnInfo("Time"),
+            BreakpointEventColumnInfo("Host Name"),
+            BreakpointEventColumnInfo("Application Name"),
+            BreakpointEventColumnInfo("Class Name"),
+            BreakpointEventColumnInfo("Method Name"),
+            BreakpointEventColumnInfo("Line No"),
+            BreakpointEventColumnInfo("Breakpoint Data")
         ),
         ArrayList(), 0, SortOrder.DESCENDING
     )
@@ -44,7 +44,7 @@ class EventsTab : Disposable {
         val table = JBTable(model)
         table.isStriped = true
         table.setShowColumns(true)
-        table.setDefaultRenderer(Icon::class.java, IconTableCellRenderer.create(SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON))
+        table.setDefaultRenderer(Icon::class.java, IconTableCellRenderer.create(LIVE_BREAKPOINT_ACTIVE_ICON))
         table.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(mouseEvent: MouseEvent) {
                 val point: Point = mouseEvent.point

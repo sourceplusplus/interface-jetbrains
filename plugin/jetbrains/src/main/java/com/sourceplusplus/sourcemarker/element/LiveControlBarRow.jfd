@@ -1,0 +1,61 @@
+JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.12" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
+			"$columnSpecs": "default:grow, labelcompgap, default, labelcompgap, 0dlu"
+			"$rowSpecs": "default:grow"
+		} ) {
+			name: "this"
+			"background": new java.awt.Color( 37, 37, 37, 255 )
+			"minimumSize": new java.awt.Dimension( 219, 45 )
+			"maximumSize": new java.awt.Dimension( 2147483647, 45 )
+			"preferredSize": new java.awt.Dimension( 370, 45 )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
+				"$columnSpecs": "default:grow"
+				"$rowSpecs": "default, default, linegap, default"
+			} ) {
+				name: "panel1"
+				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
+				add( new FormComponent( "javax.swing.JTextPane" ) {
+					name: "commandLabel"
+					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
+					"editable": false
+					"font": new java.awt.Font( "Roboto", 0, 15 )
+					"text": "<html><span style=\"color: gray; font-size: 15%\">Manual Tracing ➛ Watched Variables ➛ Scope: Local</span></html>"
+					"contentType": "text/html"
+					"maximumSize": new java.awt.Dimension( 2147483647, 12 )
+				}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+					"gridX": 1
+					"gridY": 1
+				} )
+				add( new FormComponent( "javax.swing.JTextPane" ) {
+					name: "descriptionLabel"
+					"text": "<html><span style=\"color: gray; font-size: 15%\">Manual Tracing ➛ Watched Variables ➛ Scope: Local</span></html>"
+					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
+					"font": new java.awt.Font( "Roboto", 0, 11 )
+					"foreground": new java.awt.Color( 128, 128, 128, 255 )
+					"contentType": "text/html"
+					"editable": false
+				}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+					"gridX": 1
+					"gridY": 2
+					"insets": new java.awt.Insets( -7, 0, 0, 0 )
+				} )
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 1
+				"gridY": 1
+				"insets": new java.awt.Insets( 3, 10, 0, 0 )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "commandIcon"
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 3
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 700, 45 )
+		} )
+	}
+}

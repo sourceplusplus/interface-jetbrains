@@ -51,7 +51,37 @@ object SourceMarkerUtils {
                 element = element.nextSibling
             }
         }
+
+        if (element != null && getLineNumber(element) != line) {
+            return null
+        }
+
         return element
+    }
+
+    /**
+     * todo: description.
+     *
+     * @since 0.2.2
+     */
+    @JvmStatic
+    fun isBlankLine(psiFile: PsiFile, lineNumber: Int): Boolean {
+        val element = getElementAtLine(psiFile, lineNumber)
+        if (element != null) {
+            return getLineNumber(element) != lineNumber
+        }
+        return true
+    }
+
+    /**
+     * todo: description.
+     *
+     * @since 0.2.2
+     */
+    @JvmStatic
+    fun getLineNumber(element: PsiElement): Int {
+        val document = element.containingFile.viewProvider.document
+        return document!!.getLineNumber(element.textRange.startOffset) + 1
     }
 
     /**

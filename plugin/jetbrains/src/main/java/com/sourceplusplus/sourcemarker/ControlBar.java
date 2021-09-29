@@ -6,10 +6,13 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
+import com.sourceplusplus.protocol.utils.ArtifactNameUtils;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
-import com.sourceplusplus.sourcemarker.command.CommandAction;
-import com.sourceplusplus.sourcemarker.command.CommandBarController;
+import com.sourceplusplus.sourcemarker.command.LiveControlCommand;
+import com.sourceplusplus.sourcemarker.command.ControlBarController;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
+import com.sourceplusplus.sourcemarker.status.util.ControlBarCellRenderer;
+import info.debatty.java.stringsimilarity.*;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -25,20 +28,35 @@ import java.util.stream.Collectors;
 
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class CommandBar extends JPanel implements VisibleAreaListener {
+public class ControlBar extends JPanel implements VisibleAreaListener {
 
-    private final Function<String, List<AutocompleteFieldRow>> lookup = text -> Arrays.stream(CommandAction.values())
-            .filter(v -> !text.isEmpty()
-                    && v.getText().toLowerCase().contains(text.toLowerCase().replace("/", ""))
-                    && text.startsWith("/")
-                    && !v.getText().equalsIgnoreCase(text)
-            ).collect(Collectors.toList());
+    private static final JaroWinkler sift4 = new JaroWinkler(1.0d);
+    private final List<LiveControlCommand> availableCommands = Arrays.asList(
+            LiveControlCommand.ADD_LIVE_BREAKPOINT,
+            LiveControlCommand.ADD_LIVE_LOG,
+            LiveControlCommand.CLEAR_LIVE_INSTRUMENTS
+    );
+    private final Function<String, List<AutocompleteFieldRow>> lookup = text -> availableCommands.stream()
+            .sorted((c1, c2) -> {
+                String c1Command = c1.getCommand().replace("_", "").toLowerCase();
+                String c2Command = c2.getCommand().replace("_", "").toLowerCase();
+                double c1Distance = sift4.distance(text.toLowerCase(), c1Command);
+                double c2Distance = sift4.distance(text.toLowerCase(), c2Command);
+                if (c1Command.contains(text.toLowerCase())) {
+                    c1Distance -= 1; //exact match = top priority
+                }
+                if (c2Command.contains(text.toLowerCase())) {
+                    c2Distance -= 1; //exact match = top priority
+                }
+                return Double.compare(c1Distance, c2Distance);
+            })
+            .collect(Collectors.toList());
 
     private final Editor editor;
     private final InlayMark inlayMark;
     private boolean disposed = false;
 
-    public CommandBar(Editor editor, InlayMark inlayMark) {
+    public ControlBar(Editor editor, InlayMark inlayMark) {
         this.editor = editor;
         this.inlayMark = inlayMark;
 
@@ -50,9 +68,9 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
         textField1.addSaveListener(() -> {
             String autoCompleteText = textField1.getSelectedText();
             if (autoCompleteText != null) {
-                CommandBarController.INSTANCE.handleCommandInput(autoCompleteText, editor);
+                ControlBarController.INSTANCE.handleCommandInput(autoCompleteText, editor);
             } else {
-                CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
+                ControlBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
             }
         });
     }
@@ -84,9 +102,14 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     String autoCompleteText = textField1.getSelectedText();
                     if (autoCompleteText != null) {
-                        CommandBarController.INSTANCE.handleCommandInput(autoCompleteText, editor);
-                    } else {
-                        CommandBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
+                        ControlBarController.INSTANCE.handleCommandInput(autoCompleteText, editor);
+                    } else if (!textField1.getText().isEmpty()) {
+                        List<AutocompleteFieldRow> commands = lookup.apply(textField1.getText());
+                        if (commands.isEmpty()) {
+                            ControlBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
+                        } else {
+                            ControlBarController.INSTANCE.handleCommandInput(commands.get(0).getText(), editor);
+                        }
                     }
                 }
             }
@@ -100,7 +123,7 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
 
             @Override
             public void focusLost(FocusEvent e) {
-                    dispose();
+                dispose();
             }
         });
 
@@ -147,7 +170,17 @@ public class CommandBar extends JPanel implements VisibleAreaListener {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
-        textField1 = new AutocompleteField("/", "Search or Type a Command (/)", Arrays.stream(CommandAction.values()).collect(Collectors.toList()), lookup, inlayMark.getLineNumber(), true, true);
+        String fullyQualified = inlayMark.getArtifactQualifiedName();
+        if (fullyQualified.contains("#")) {
+            fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"));
+        }
+        String className = ArtifactNameUtils.INSTANCE.getClassName(fullyQualified);
+        String shortFuncName = ArtifactNameUtils.INSTANCE.getShortFunctionSignature(
+                ArtifactNameUtils.INSTANCE.removePackageNames(fullyQualified));
+        textField1 = new AutocompleteField("",
+                "Location: " + className + "." + shortFuncName + "#" + inlayMark.getLineNumber(),
+                availableCommands, lookup, inlayMark.getLineNumber(), true, true, Color.decode("#e1483b"));
+        textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();
 
         //======== this ========

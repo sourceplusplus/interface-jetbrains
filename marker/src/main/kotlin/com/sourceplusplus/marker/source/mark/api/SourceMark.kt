@@ -33,6 +33,7 @@ import com.sourceplusplus.marker.source.mark.api.event.SynchronousSourceMarkEven
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
+import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_HIDDEN
 import com.sourceplusplus.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_VISIBLE
@@ -128,9 +129,16 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                     } else {
                         val provider = SourceInlayComponentProvider.from(editor)
                         val viewport = (editor as? EditorImpl)?.scrollPane?.viewport!!
+                        var displayLineIndex = lineNumber - 1
+                        if (this is ExpressionInlayMark) {
+                            if (showAboveExpression) {
+                                displayLineIndex--
+                            }
+                        }
+
                         if (isVisible()) {
                             val inlay = provider.insertAfter(
-                                lineNumber - 2,
+                                displayLineIndex,
                                 configuration.componentProvider.getComponent(this).getComponent()
                             )
                             configuration.inlayRef = Ref.create()
@@ -150,7 +158,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                                         configuration.inlayRef = Ref.create()
                                         configuration.inlayRef!!.set(
                                             provider.insertAfter(
-                                                lineNumber - 2,
+                                                displayLineIndex,
                                                 configuration.componentProvider.getComponent(this).getComponent()
                                             )
                                         )

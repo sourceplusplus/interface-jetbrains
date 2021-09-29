@@ -17,10 +17,10 @@ data class LiveBreakpointHit(
     val breakpointId: String,
     val traceId: String,
     @Serializable(with = Serializers.InstantKSerializer::class)
-    val occurredAt: Instant,
+    override val occurredAt: Instant,
     val host: String,
     val application: String,
     val stackTrace: JvmStackTrace
-) {
+) : TrackedLiveEvent {
     val eventType: LiveInstrumentEventType = LiveInstrumentEventType.BREAKPOINT_HIT
 }

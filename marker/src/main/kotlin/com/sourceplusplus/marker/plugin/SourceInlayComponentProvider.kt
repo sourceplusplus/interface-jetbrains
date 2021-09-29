@@ -102,7 +102,7 @@ class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
         init {
             val metrics = editor.getFontMetrics(Font.PLAIN)
             val spaceWidth = FontLayoutService.getInstance().charWidth2D(metrics, ' '.toInt())
-            // -4 to create some space
+            @Suppress("MagicNumber") // -4 to create some space
             maximumEditorTextWidth = ceil(spaceWidth * (editor.settings.getRightMargin(editor.project)) - 4).toInt()
 
             val scrollbarFlip = editor.scrollPane.getClientProperty(JBScrollPane.Flip::class.java)
@@ -125,6 +125,7 @@ class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
             }
         }
 
+        //todo: make configurable and dynamic like ComponentSizeEvaluator.getDynamicSize
         private fun calcWidth(): Int {
             val visibleEditorTextWidth =
                 editor.scrollPane.viewport.width - getVerticalScrollbarWidth() - getGutterTextGap()

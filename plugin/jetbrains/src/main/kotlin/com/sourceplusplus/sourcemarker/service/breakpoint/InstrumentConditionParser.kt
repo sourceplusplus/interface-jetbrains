@@ -37,7 +37,7 @@ object InstrumentConditionParser {
                 super.visitElement(element)
                 if (element is PsiReferenceExpression) {
                     val resolve = element.resolve()
-                    if (resolve is PsiVariable) {
+                    if (resolve is PsiVariable && resolve !is PsiCompiledElement) {
                         variables.add(ParseRange(element.textRange, resolve))
                     }
                 }
