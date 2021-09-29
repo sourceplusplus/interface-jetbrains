@@ -77,12 +77,12 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     private JPanel panel;
     private JLabel expandLabel;
     private boolean expanded = false;
-    private ListTableModel commandModel = new ListTableModel(
+    private final ListTableModel commandModel = new ListTableModel<>(
             new ColumnInfo[]{
                     new BreakpointHitColumnInfo("Breakpoint Data"),
                     new BreakpointHitColumnInfo("Time")
             },
-            new ArrayList(), 0, SortOrder.DESCENDING);
+            new ArrayList<>(), 0, SortOrder.DESCENDING);
 
     public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this(sourceLocation, scopeVars, inlayMark, null, null);
@@ -171,11 +171,10 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     }
 
     private void setupAsActive() {
-        inlayMark.putUserData(SourceMarkKeys.INSTANCE.getBREAKPOINT_ID(), liveBreakpoint.getId());
         inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS(), new ArrayList<>());
         inlayMark.getUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_EVENT_LISTENERS())
                 .add(event -> {
-                    if (commandModel == null || statusPanel == null) return;
+                    if (statusPanel == null) return;
                     if (event.getEventType() == BREAKPOINT_HIT) {
                         commandModel.insertRow(0, event);
                         statusPanel.incrementHits();
@@ -237,7 +236,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                                 );
                                 if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
                                 LiveBreakpointHit selectedValue = Json.decodeValue(selectedEvent.getData(), LiveBreakpointHit.class);
-                                if (shownBreakpointHit[0] == selectedValue) return;
+                                if (selectedValue.equals(shownBreakpointHit[0])) return;
 
                                 SwingUtilities.invokeLater(() -> {
                                     expanded = false;
@@ -512,13 +511,13 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setBackground(new Color(43, 43, 43));
         setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "0[fill]" +
-                        "[grow,fill]" +
-                        "[fill]",
-                // rows
-                "0[grow]0"));
+            "hidemode 3",
+            // columns
+            "0[fill]" +
+            "[grow,fill]" +
+            "[fill]",
+            // rows
+            "0[grow]0"));
 
         //======== configPanel ========
         {
@@ -527,12 +526,12 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
             configPanel.setLayout(new MigLayout(
-                    "fill,insets 0,hidemode 3",
-                    // columns
-                    "5[fill]" +
-                            "[fill]4",
-                    // rows
-                    "[grow]"));
+                "fill,insets 0,hidemode 3",
+                // columns
+                "5[fill]" +
+                "[fill]4",
+                // rows
+                "[grow]"));
 
             //---- configLabel ----
             configLabel.setIcon(IconLoader.getIcon("/icons/eye.svg"));
@@ -548,18 +547,18 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         {
             mainPanel.setBackground(null);
             mainPanel.setLayout(new MigLayout(
-                    "novisualpadding,hidemode 3",
-                    // columns
-                    "[grow,fill]" +
-                            "[fill]",
-                    // rows
-                    "0[grow]0"));
+                "novisualpadding,hidemode 3",
+                // columns
+                "[grow,fill]" +
+                "[fill]",
+                // rows
+                "0[grow]0"));
 
             //---- breakpointConditionField ----
             breakpointConditionField.setBackground(new Color(37, 37, 37));
             breakpointConditionField.setBorder(new CompoundBorder(
-                    new LineBorder(Color.darkGray, 1, true),
-                    new EmptyBorder(2, 6, 0, 0)));
+                new LineBorder(Color.darkGray, 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
             breakpointConditionField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
             breakpointConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(breakpointConditionField, "cell 0 0");
