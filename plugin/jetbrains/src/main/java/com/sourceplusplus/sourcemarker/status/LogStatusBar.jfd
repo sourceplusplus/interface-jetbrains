@@ -70,7 +70,7 @@ new FormModel {
 				"font": new java.awt.Font( "Roboto Light", 0, 14 )
 				"minimumSize": new java.awt.Dimension( 0, 27 )
 				auxiliary() {
-					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(\"$\", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false);"
+					"JavaCodeGenerator.customCreateCode": "new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false);"
 				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 2 0"

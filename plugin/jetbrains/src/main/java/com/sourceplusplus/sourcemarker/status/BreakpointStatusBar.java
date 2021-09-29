@@ -496,7 +496,7 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        breakpointConditionField = new AutocompleteField("", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
+        breakpointConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
         label1 = new JLabel();
         hitLimitSpinner = new JBIntSpinner(1, 1, 10_000);
         timeLabel = new JLabel();

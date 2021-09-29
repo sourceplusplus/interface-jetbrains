@@ -656,7 +656,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         configDropdownLabel = new JLabel();
         timeLabel = new JLabel();
         separator1 = new JSeparator();
-        liveLogTextField = new AutocompleteField("$", placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
+        liveLogTextField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
         closeLabel = new JLabel();
 
         //======== this ========
