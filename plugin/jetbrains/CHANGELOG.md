@@ -3,11 +3,15 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+
+## [0.3.0] - 2021-09-30
+### Added
+- Live instruments & live control bar
+- Hide/show global source marks shortcut (Ctrl+Shift+D)
+- Various dependency upgrades
+
 ### Fixed
 - Issue determining endpoint name ([#358](https://github.com/sourceplusplus/SourceMarker/issues/358))
-
-### Upgraded
-- Apache SkyWalking (8.4.0 -> 8.5.0)
 
 ## [0.2.1] - 2020-03-23
 ### Added
