@@ -1,5 +1,11 @@
 package com.sourceplusplus.protocol.error
 
+/**
+ * todo: description.
+ *
+ * @since 0.3.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class InstrumentAccessDenied : RuntimeException {
 
     private val instrumentLocation: String
