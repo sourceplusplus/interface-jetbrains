@@ -3,8 +3,6 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
-
-## [0.3.0] - 2021-09-30
 ### Added
 - Live instruments & live control bar
 - Hide/show global source marks shortcut (Ctrl+Shift+D)
