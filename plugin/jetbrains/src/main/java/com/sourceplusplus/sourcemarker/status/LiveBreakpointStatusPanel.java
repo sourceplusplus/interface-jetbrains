@@ -14,9 +14,14 @@ import java.util.concurrent.TimeUnit;
 public class LiveBreakpointStatusPanel extends JPanel {
 
     private final Meter meter = new Meter();
+    private int hitLimit;
 
     public LiveBreakpointStatusPanel() {
         initComponents();
+    }
+
+    public void setHitLimit(int hitLimit) {
+        this.hitLimit = hitLimit;
     }
 
     public void setStatus(String status, Color statusColor) {
@@ -26,6 +31,11 @@ public class LiveBreakpointStatusPanel extends JPanel {
         if ("Error".equals(status) || "Complete".equals(status)) {
             expiresLabel.setVisible(false);
             expiresValueLabel.setVisible(false);
+
+            if (hitLimit == 1) {
+                rateLabel.setVisible(false);
+                rateValueLabel.setVisible(false);
+            }
         }
     }
 
