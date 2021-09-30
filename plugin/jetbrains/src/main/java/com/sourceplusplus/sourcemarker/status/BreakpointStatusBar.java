@@ -190,6 +190,8 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             }
         });
         statusPanel = new LiveBreakpointStatusPanel();
+        statusPanel.setHitLimit(liveBreakpoint.getHitLimit());
+
         breakpointConditionField.setEditMode(false);
         removeActiveDecorations();
         configDropdownLabel.setVisible(false);
