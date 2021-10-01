@@ -69,7 +69,7 @@ dependencies {
     implementation(files(".ext/vertx-service-proxy-4.0.2.jar"))
     implementation("io.vertx:vertx-tcp-eventbus-bridge:$vertxVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.5")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.12.5")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.5")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
