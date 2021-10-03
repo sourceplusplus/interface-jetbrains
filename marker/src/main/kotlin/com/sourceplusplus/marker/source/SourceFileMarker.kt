@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
+import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.marker.source.mark.api.*
@@ -17,6 +18,12 @@ import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.inlay.MethodInlayMark
+import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
+import org.jetbrains.uast.UClass
+import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.getContainingUMethod
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -230,7 +237,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open fun getClassQualifiedNames(): List<String> {
         return when (psiFile) {
-            is com.intellij.psi.PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
+            is PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
             else -> throw IllegalStateException("Unsupported file: $psiFile")
         }
     }
