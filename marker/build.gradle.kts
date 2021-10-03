@@ -53,6 +53,8 @@ dependencies {
     compileOnly("com.jetbrains.intellij.java:java-psi:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:extensions:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:util-rt:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.python:python-psi:211.7628.21") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.python:python-community:211.7628.21") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion") { isTransitive = false }
     testImplementation("junit:junit:4.13.2")

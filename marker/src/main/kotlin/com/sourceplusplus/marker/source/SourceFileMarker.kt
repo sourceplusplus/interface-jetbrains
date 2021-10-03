@@ -33,34 +33,11 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     companion object {
         val KEY = Key.create<SourceFileMarker>("sm.SourceFileMarker")
         private val log = LoggerFactory.getLogger(SourceFileMarker::class.java)
+        val SUPPORTED_FILE_TYPES = mutableListOf<Class<out PsiFile>>()
 
         @JvmStatic
         fun isFileSupported(psiFile: PsiFile): Boolean {
-            try {
-                if (psiFile is org.jetbrains.plugins.groovy.lang.psi.GroovyFile) {
-                    return true
-                }
-            } catch (ignore: NoClassDefFoundError) {
-            }
-            try {
-                if (psiFile is com.intellij.psi.PsiJavaFile) {
-                    return true
-                }
-            } catch (ignore: NoClassDefFoundError) {
-            }
-            try {
-                if (psiFile is org.jetbrains.kotlin.psi.KtFile) {
-                    return true
-                }
-            } catch (ignore: NoClassDefFoundError) {
-            }
-            try {
-                if (psiFile is com.jetbrains.python.psi.PyFile) {
-                    return true
-                }
-            } catch (ignore: NoClassDefFoundError) {
-            }
-            return false
+            return SUPPORTED_FILE_TYPES.any { it.isInstance(psiFile) }
         }
     }
 
