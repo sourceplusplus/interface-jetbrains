@@ -23,6 +23,12 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
 
+/**
+ * todo: description.
+ *
+ * @since 0.4.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
 
     private val log = LoggerFactory.getLogger(JVMLineMarkerProvider::class.java)
