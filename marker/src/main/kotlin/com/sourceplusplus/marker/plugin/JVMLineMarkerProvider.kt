@@ -1,0 +1,102 @@
+package com.sourceplusplus.marker.plugin
+
+import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
+import com.intellij.codeInsight.daemon.LineMarkerInfo
+import com.intellij.openapi.editor.markup.GutterIconRenderer
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiMethod
+import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.source.mark.api.key.SourceKey
+import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
+import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
+import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
+import org.jetbrains.uast.UClass
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.toUElement
+import org.slf4j.LoggerFactory
+
+abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
+
+    private val log = LoggerFactory.getLogger(JVMLineMarkerProvider::class.java)
+
+    override fun getLineMarkerInfo(
+        parent: PsiElement?,
+        element: PsiElement
+    ): LineMarkerInfo<PsiElement>? {
+        if (parent is PsiClass && element === parent.nameIdentifier) {
+            //class gutter marks
+            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
+            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
+            if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
+
+            //check by artifact name first due to user can erroneously name same class twice
+            var gutterMark = fileMarker.getSourceMark(artifactQualifiedName, SourceMark.Type.GUTTER) as ClassGutterMark?
+            if (gutterMark == null) {
+                gutterMark = SourceMarkerUtils.getOrCreateClassGutterMark(fileMarker, element) ?: return null
+            }
+            if (!gutterMark.isVisible()) {
+                return null
+            }
+
+            var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
+            if (gutterMark.configuration.activateOnMouseClick) {
+                navigationHandler = GutterIconNavigationHandler { _, _ ->
+                    element.getUserData(SourceKey.GutterMark)!!.displayPopup()
+                }
+            }
+            return LineMarkerInfo(
+                getFirstLeaf(element),
+                element.textRange,
+                gutterMark.configuration.icon,
+                null,
+                navigationHandler,
+                GutterIconRenderer.Alignment.CENTER
+            )
+        } else if ((parent is PsiMethod && element === parent.nameIdentifier)
+            || (parent is GrMethod && element === parent.nameIdentifierGroovy)
+            || (parent is KtNamedFunction && element === parent.nameIdentifier)
+        ) {
+            //method gutter marks
+            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
+            val uMethod = element.parent.toUElement() as UMethod?
+            if (uMethod == null) {
+                log.warn("Unable to transform to UMethod: {}", element.parent)
+                return null
+            }
+            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
+            if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
+
+            //check by artifact name first due to user can erroneously name same method twice
+            var gutterMark = fileMarker.getSourceMark(
+                artifactQualifiedName,
+                SourceMark.Type.GUTTER
+            ) as MethodGutterMark?
+            if (gutterMark == null) {
+                gutterMark = SourceMarkerUtils.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
+            }
+            if (!gutterMark.isVisible()) {
+                return null
+            }
+
+            var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
+            if (gutterMark.configuration.activateOnMouseClick) {
+                navigationHandler = GutterIconNavigationHandler { _, _ ->
+                    element.getUserData(SourceKey.GutterMark)!!.displayPopup()
+                }
+            }
+            return LineMarkerInfo(
+                getFirstLeaf(element),
+                element.textRange,
+                gutterMark.configuration.icon,
+                null,
+                navigationHandler,
+                GutterIconRenderer.Alignment.CENTER
+            )
+        }
+        return null
+    }
+}

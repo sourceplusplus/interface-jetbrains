@@ -6,10 +6,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiJavaFile
 import com.sourceplusplus.marker.source.mark.api.*
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
@@ -19,12 +17,6 @@ import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.inlay.MethodInlayMark
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
-import org.jetbrains.uast.UClass
-import org.jetbrains.uast.UExpression
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.getContainingUMethod
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -44,16 +36,31 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
         @JvmStatic
         fun isFileSupported(psiFile: PsiFile): Boolean {
-            return try {
-                when (psiFile) {
-                    is GroovyFile -> true
-                    is PsiJavaFile -> true
-                    is KtFile -> true
-                    else -> false
+            try {
+                if (psiFile is org.jetbrains.plugins.groovy.lang.psi.GroovyFile) {
+                    return true
                 }
             } catch (ignore: NoClassDefFoundError) {
-                false
             }
+            try {
+                if (psiFile is com.intellij.psi.PsiJavaFile) {
+                    return true
+                }
+            } catch (ignore: NoClassDefFoundError) {
+            }
+            try {
+                if (psiFile is org.jetbrains.kotlin.psi.KtFile) {
+                    return true
+                }
+            } catch (ignore: NoClassDefFoundError) {
+            }
+            try {
+                if (psiFile is com.jetbrains.python.psi.PyFile) {
+                    return true
+                }
+            } catch (ignore: NoClassDefFoundError) {
+            }
+            return false
         }
     }
 
@@ -246,7 +253,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open fun getClassQualifiedNames(): List<String> {
         return when (psiFile) {
-            is PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
+            is com.intellij.psi.PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
             else -> throw IllegalStateException("Unsupported file: $psiFile")
         }
     }
