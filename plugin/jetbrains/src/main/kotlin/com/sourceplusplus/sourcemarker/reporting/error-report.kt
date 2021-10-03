@@ -252,7 +252,9 @@ private fun getKeyValuePairs(
     } catch (e: IOException) {
         throw RuntimeException(e)
     }
-    PluginManagerCore.getPlugin(PluginId.findId(hardcodedConfig.getString("plugin_id")))?.run {
+    PluginManagerCore.getPlugin(
+        PluginId.findId(hardcodedConfig.getString("plugin_id"), hardcodedConfig.getString("plugin_id"))
+    )?.run {
         if (error.pluginName.isBlank()) error.pluginName = name
         if (error.pluginVersion.isBlank()) error.pluginVersion = version
     }

@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [0.3.1] - 2021-10-02
+### Fixed
+- Plugin verification build issue
+
 ## [0.3.0] - 2021-09-30
 ### Added
 - Live instruments & live control bar
