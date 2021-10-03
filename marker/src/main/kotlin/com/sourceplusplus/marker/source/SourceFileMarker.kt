@@ -230,7 +230,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open fun getClassQualifiedNames(): List<String> {
         return when (psiFile) {
-            is com.intellij.psi.PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
+            is PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
             else -> throw IllegalStateException("Unsupported file: $psiFile")
         }
     }
