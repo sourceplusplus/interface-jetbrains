@@ -1,18 +1,20 @@
-package com.sourceplusplus.marker.plugin
+package com.sourceplusplus.marker.py
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyFile
+import com.sourceplusplus.marker.plugin.SourceLineMarkerProvider
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import org.slf4j.LoggerFactory
 
 /**
- * todo: description.
+ * Associates Python [GutterMark]s to PSI elements.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-abstract class PythonLineMarkerProvider : SourceLineMarkerProvider() {
+class PythonLineMarkerProvider : SourceLineMarkerProvider() {
 
     private val log = LoggerFactory.getLogger(PythonLineMarkerProvider::class.java)
 
@@ -25,4 +27,6 @@ abstract class PythonLineMarkerProvider : SourceLineMarkerProvider() {
     override fun getLineMarkerInfo(parent: PsiElement?, element: PsiElement): LineMarkerInfo<PsiElement>? {
         return null //todo: this
     }
+
+    override fun getName(): String = "Python source line markers"
 }

@@ -53,6 +53,8 @@ repositories {
 dependencies {
     implementation(project(":mapper"))
     implementation(project(":marker"))
+    implementation(project(":marker:jvm-marker"))
+    implementation(project(":marker:py-marker"))
     implementation(project(":monitor:skywalking"))
     implementation(project(":protocol"))
     implementation(project(":portal"))

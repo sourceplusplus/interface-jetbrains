@@ -78,48 +78,4 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         }
         return e
     }
-
-    /**
-     * Associates Groovy [GutterMark]s to PSI elements.
-     *
-     * @since 0.1.0
-     */
-    class GroovyDescriptor : JVMLineMarkerProvider() {
-        override fun getName(): String {
-            return "Groovy source line markers"
-        }
-    }
-
-    /**
-     * Associates Java [GutterMark]s to PSI elements.
-     *
-     * @since 0.1.0
-     */
-    class JavaDescriptor : JVMLineMarkerProvider() {
-        override fun getName(): String {
-            return "Java source line markers"
-        }
-    }
-
-    /**
-     * Associates Kotlin [GutterMark]s to PSI elements.
-     *
-     * @since 0.1.0
-     */
-    class KotlinDescriptor : JVMLineMarkerProvider() {
-        override fun getName(): String {
-            return "Kotlin source line markers"
-        }
-    }
-
-    /**
-     * Associates Python [GutterMark]s to PSI elements.
-     *
-     * @since 0.4.0
-     */
-    class PythonDescriptor : PythonLineMarkerProvider() {
-        override fun getName(): String {
-            return "Python source line markers"
-        }
-    }
 }

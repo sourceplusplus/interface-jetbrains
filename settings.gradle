@@ -4,6 +4,8 @@ rootProject.name = 'SourceMarker'
 //framework
 include 'mapper'
 include 'marker'
+include 'marker:jvm-marker'
+include 'marker:py-marker'
 include 'monitor'
 include 'plugin'
 include 'portal'

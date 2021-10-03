@@ -1,23 +1,8 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("maven-publish")
 }
 
 val kotlinVersion = ext.get("kotlinVersion")
-val pluginGroup: String by project
-val markerVersion: String by project
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = pluginGroup
-            artifactId = "marker"
-            version = markerVersion
-
-            from(components["java"])
-        }
-    }
-}
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
@@ -25,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly(project(":marker"))
     val intellijVersion = "212.5284.40"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
@@ -55,5 +41,4 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:util-rt:$intellijVersion") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion") { isTransitive = false }
-    testImplementation("junit:junit:4.13.2")
 }

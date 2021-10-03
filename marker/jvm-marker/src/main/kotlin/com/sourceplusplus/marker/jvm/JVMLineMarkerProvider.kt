@@ -1,4 +1,4 @@
-package com.sourceplusplus.marker.plugin
+package com.sourceplusplus.marker.jvm
 
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
@@ -8,11 +8,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.plugin.SourceLineMarkerProvider
 import com.sourceplusplus.marker.source.SourceFileMarker.Companion.SUPPORTED_FILE_TYPES
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
+import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
@@ -116,5 +118,38 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
             )
         }
         return null
+    }
+
+    /**
+     * Associates Groovy [GutterMark]s to PSI elements.
+     *
+     * @since 0.1.0
+     */
+    class GroovyDescriptor : JVMLineMarkerProvider() {
+        override fun getName(): String {
+            return "Groovy source line markers"
+        }
+    }
+
+    /**
+     * Associates Java [GutterMark]s to PSI elements.
+     *
+     * @since 0.1.0
+     */
+    class JavaDescriptor : JVMLineMarkerProvider() {
+        override fun getName(): String {
+            return "Java source line markers"
+        }
+    }
+
+    /**
+     * Associates Kotlin [GutterMark]s to PSI elements.
+     *
+     * @since 0.1.0
+     */
+    class KotlinDescriptor : JVMLineMarkerProvider() {
+        override fun getName(): String {
+            return "Kotlin source line markers"
+        }
     }
 }
