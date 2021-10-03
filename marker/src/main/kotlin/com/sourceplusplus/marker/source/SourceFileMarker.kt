@@ -18,8 +18,6 @@ import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.inlay.MethodInlayMark
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
