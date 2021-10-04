@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
- * Utility functions for working with [SourceMark]s.
+ * JVM utility functions for working with [SourceMark]s.
  *
- * @since 0.1.0
+ * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("TooManyFunctions")

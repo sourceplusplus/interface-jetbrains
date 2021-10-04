@@ -2,7 +2,14 @@ package com.sourceplusplus.marker
 
 import com.intellij.openapi.editor.Document
 import com.intellij.psi.*
+import com.sourceplusplus.marker.source.mark.api.SourceMark
 
+/**
+ * Utility functions for working with [SourceMark]s.
+ *
+ * @since 0.1.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 object SourceMarkerUtils {
 
     /**
