@@ -7,6 +7,12 @@ import com.sourceplusplus.marker.plugin.SourceInlayHintProvider
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 
+/**
+ * todo: description.
+ *
+ * @since 0.4.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class PythonSourceInlayHintProvider : SourceInlayHintProvider() {
     override fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? {
         TODO("Not yet implemented")

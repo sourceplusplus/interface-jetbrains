@@ -4,6 +4,12 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.marker.ArtifactNamingService
 
+/**
+ * todo: description.
+ *
+ * @since 0.4.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class PythonArtifactNamingService : ArtifactNamingService {
     override fun getFullyQualifiedName(element: PsiElement): String {
         val fileName = element.containingFile.name

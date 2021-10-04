@@ -10,6 +10,12 @@ import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 
+/**
+ * todo: description.
+ *
+ * @since 0.4.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class JVMArtifactNamingService : ArtifactNamingService {
 
     override fun getFullyQualifiedName(element: PsiElement): String {
