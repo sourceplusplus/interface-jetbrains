@@ -8,6 +8,7 @@ import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
+import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import java.util.*
 
@@ -29,6 +30,14 @@ class PythonArtifactCreationService : ArtifactCreationService {
             return Optional.ofNullable(getOrCreateExpressionGutterMark(fileMarker, element, autoApply))
         }
         return Optional.empty()
+    }
+
+    override fun getOrCreateMethodGutterMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): MethodGutterMark? {
+        TODO()
     }
 
     fun getOrCreateExpressionGutterMark(

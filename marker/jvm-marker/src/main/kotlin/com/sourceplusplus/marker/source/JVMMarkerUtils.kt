@@ -3,13 +3,10 @@ package com.sourceplusplus.marker.source
 import com.intellij.lang.Language
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
-import com.sourceplusplus.marker.SourceMarker.creationService
-import com.sourceplusplus.marker.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
-import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.inlay.MethodInlayMark
 import org.jetbrains.kotlin.psi.KtNamedFunction
@@ -28,21 +25,6 @@ import java.util.*
 object JVMMarkerUtils {
 
     private val log = LoggerFactory.getLogger(JVMMarkerUtils::class.java)
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun getOrCreateExpressionInlayMark(
-        fileMarker: SourceFileMarker,
-        lineNumber: Int,
-        autoApply: Boolean = false
-    ): Optional<ExpressionInlayMark> {
-        return creationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber, autoApply)
-    }
 
     /**
      * todo: description.
@@ -166,21 +148,6 @@ object JVMMarkerUtils {
                 inlayMark
             }
         }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.3.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun createExpressionInlayMark(
-        fileMarker: SourceFileMarker,
-        lineNumber: Int,
-        autoApply: Boolean = false
-    ): ExpressionInlayMark {
-        return creationService.createExpressionInlayMark(fileMarker, lineNumber, autoApply)
     }
 
     /**
@@ -339,81 +306,6 @@ object JVMMarkerUtils {
                 null
             } else {
                 inlayMark
-            }
-        }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun getOrCreateMethodGutterMark(
-        fileMarker: SourceFileMarker,
-        psiMethod: PsiMethod,
-        autoApply: Boolean = true
-    ): MethodGutterMark? {
-        return getOrCreateMethodGutterMark(fileMarker, psiMethod.nameIdentifier!!, autoApply)
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun getOrCreateMethodGutterMark(
-        fileMarker: SourceFileMarker,
-        element: PsiElement,
-        autoApply: Boolean = true
-    ): MethodGutterMark? {
-        var gutterMark = element.getUserData(SourceKey.GutterMark) as MethodGutterMark?
-        if (gutterMark == null) {
-            gutterMark = fileMarker.getMethodSourceMark(element.parent, SourceMark.Type.GUTTER) as MethodGutterMark?
-            if (gutterMark != null) {
-                if (gutterMark.updatePsiMethod(element.parent as PsiNameIdentifierOwner)) {
-                    element.putUserData(SourceKey.GutterMark, gutterMark)
-                } else {
-                    gutterMark = null
-                }
-            }
-        }
-
-        if (gutterMark == null) {
-            gutterMark = fileMarker.createMethodSourceMark(
-                element.parent as PsiNameIdentifierOwner,
-                getFullyQualifiedName(element.parent.toUElement() as UMethod),
-                SourceMark.Type.GUTTER
-            ) as MethodGutterMark
-            return if (autoApply) {
-                if (gutterMark.canApply()) {
-                    gutterMark.apply(true)
-                    gutterMark
-                } else {
-                    null
-                }
-            } else {
-                gutterMark
-            }
-        } else {
-            return when {
-                fileMarker.removeIfInvalid(gutterMark) -> {
-                    element.putUserData(SourceKey.GutterMark, null)
-                    null
-                }
-                gutterMark.configuration.icon != null -> {
-                    gutterMark.setVisible(true)
-                    gutterMark
-                }
-                else -> {
-                    gutterMark.setVisible(false)
-                    gutterMark
-                }
             }
         }
     }

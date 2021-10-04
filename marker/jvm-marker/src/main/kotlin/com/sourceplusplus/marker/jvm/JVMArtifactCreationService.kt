@@ -1,13 +1,19 @@
 package com.sourceplusplus.marker.jvm
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiStatement
 import com.sourceplusplus.marker.ArtifactCreationService
 import com.sourceplusplus.marker.SourceMarkerUtils
 import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
+import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.toUElement
 import java.util.*
 
 /**
@@ -27,6 +33,57 @@ class JVMArtifactCreationService : ArtifactCreationService {
         return if (element is PsiStatement) {
             Optional.ofNullable(JVMMarkerUtils.getOrCreateExpressionGutterMark(fileMarker, element, autoApply))
         } else Optional.empty()
+    }
+
+    override fun getOrCreateMethodGutterMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): MethodGutterMark? {
+        var gutterMark = element.getUserData(SourceKey.GutterMark) as MethodGutterMark?
+        if (gutterMark == null) {
+            gutterMark = fileMarker.getMethodSourceMark(element.parent, SourceMark.Type.GUTTER) as MethodGutterMark?
+            if (gutterMark != null) {
+                if (gutterMark.updatePsiMethod(element.parent as PsiNameIdentifierOwner)) {
+                    element.putUserData(SourceKey.GutterMark, gutterMark)
+                } else {
+                    gutterMark = null
+                }
+            }
+        }
+
+        if (gutterMark == null) {
+            gutterMark = fileMarker.createMethodSourceMark(
+                element.parent as PsiNameIdentifierOwner,
+                JVMMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod),
+                SourceMark.Type.GUTTER
+            ) as MethodGutterMark
+            return if (autoApply) {
+                if (gutterMark.canApply()) {
+                    gutterMark.apply(true)
+                    gutterMark
+                } else {
+                    null
+                }
+            } else {
+                gutterMark
+            }
+        } else {
+            return when {
+                fileMarker.removeIfInvalid(gutterMark) -> {
+                    element.putUserData(SourceKey.GutterMark, null)
+                    null
+                }
+                gutterMark.configuration.icon != null -> {
+                    gutterMark.setVisible(true)
+                    gutterMark
+                }
+                else -> {
+                    gutterMark.setVisible(false)
+                    gutterMark
+                }
+            }
+        }
     }
 
     override fun getOrCreateExpressionInlayMark(

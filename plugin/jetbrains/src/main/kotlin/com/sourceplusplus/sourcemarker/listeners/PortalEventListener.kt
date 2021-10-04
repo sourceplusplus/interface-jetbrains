@@ -6,8 +6,8 @@ import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.SourceMarker.creationService
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
@@ -169,7 +169,7 @@ class PortalEventListener(
                     val fileMarker = SourceMarker.getSourceFileMarker(classArtifact!!.containingFile)!!
                     val searchArtifact = findArtifact(vertx, artifactQualifiedName) as PsiNameIdentifierOwner
                     runReadAction {
-                        val gutterMark = JVMMarkerUtils.getOrCreateMethodGutterMark(
+                        val gutterMark = creationService.getOrCreateMethodGutterMark(
                             fileMarker, searchArtifact.nameIdentifier!!
                         )!!
                         it.reply(gutterMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)

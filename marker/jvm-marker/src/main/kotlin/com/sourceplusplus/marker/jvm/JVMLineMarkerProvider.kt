@@ -8,9 +8,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.SourceMarker.creationService
 import com.sourceplusplus.marker.plugin.SourceLineMarkerProvider
-import com.sourceplusplus.marker.source.SourceFileMarker.Companion.SUPPORTED_FILE_TYPES
 import com.sourceplusplus.marker.source.JVMMarkerUtils
+import com.sourceplusplus.marker.source.SourceFileMarker.Companion.SUPPORTED_FILE_TYPES
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
@@ -96,7 +97,7 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
                 SourceMark.Type.GUTTER
             ) as MethodGutterMark?
             if (gutterMark == null) {
-                gutterMark = JVMMarkerUtils.getOrCreateMethodGutterMark(fileMarker, element as PsiMethod) ?: return null
+                gutterMark = creationService.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
             }
             if (!gutterMark.isVisible()) {
                 return null
