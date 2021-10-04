@@ -125,7 +125,8 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = LoggerDetector(SourceMarkerPlugin.vertx).getOrFindLoggerStatements(uFile.classes[0].methods[0]).await()
+                val result = LoggerDetector(SourceMarkerPlugin.vertx)
+                    .getOrFindLoggerStatements(uFile.classes[0].methods[0]).await()
                     .map { it.logPattern }
                 assertEquals(5, result.size)
                 assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
