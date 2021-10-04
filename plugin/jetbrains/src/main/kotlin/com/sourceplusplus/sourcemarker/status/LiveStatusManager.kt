@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
+import com.sourceplusplus.marker.SourceMarker.namingService
 import com.sourceplusplus.marker.SourceMarker.scopeService
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.SourceMarkerUtils
@@ -57,7 +58,9 @@ object LiveStatusManager : SourceMarkEventListener {
 
                 ApplicationManager.getApplication().runReadAction {
                     val methodSourceMark = event.sourceMark as MethodSourceMark
-                    val qualifiedClassName = methodSourceMark.sourceFileMarker.getClassQualifiedNames()[0]
+                    val qualifiedClassName = namingService.getClassQualifiedNames(
+                        methodSourceMark.sourceFileMarker.psiFile
+                    )[0]
 
                     val textRange = methodSourceMark.getPsiElement().textRange
                     val document = PsiDocumentManager.getInstance(methodSourceMark.project)
@@ -95,13 +98,8 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val locationSource = if ("Python" != inlayMark.language.id) {
-                fileMarker.getClassQualifiedNames()[0]
-            } else {
-                fileMarker.psiFile.virtualFile.path //todo: ability to relative/translate
-            }
             val statusBar = BreakpointStatusBar(
-                LiveSourceLocation(locationSource, lineNumber),
+                LiveSourceLocation(namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
@@ -141,13 +139,8 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val locationSource = if ("Python" != inlayMark.language.id) {
-                fileMarker.getClassQualifiedNames()[0]
-            } else {
-                fileMarker.psiFile.virtualFile.path //todo: ability to relative/translate
-            }
             val statusBar = LogStatusBar(
-                LiveSourceLocation(locationSource, lineNumber),
+                LiveSourceLocation(namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )

@@ -87,19 +87,9 @@ object SourceMarker {
     fun getSourceFileMarker(classQualifiedName: String): SourceFileMarker? {
         check(enabled) { "SourceMarker disabled" }
 
-        availableSourceFileMarkers.values.forEach { marker ->
-            if ("Python" != marker.psiFile.language.id) {
-                if (marker.getClassQualifiedNames().contains(classQualifiedName)) {
-                    return marker
-                }
-            } else {
-                //by location
-                if (marker.psiFile.virtualFile.path == classQualifiedName) {
-                    return marker
-                }
-            }
+        return availableSourceFileMarkers.values.find {
+            namingService.getClassQualifiedNames(it.psiFile).contains(classQualifiedName)
         }
-        return null
     }
 
     fun getAvailableSourceFileMarkers(): List<SourceFileMarker> {

@@ -20,6 +20,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.jvm.ArtifactSearch
 import com.sourceplusplus.marker.jvm.JVMArtifactCreationService
 import com.sourceplusplus.marker.jvm.JVMArtifactNamingService
 import com.sourceplusplus.marker.jvm.JVMArtifactScopeService
@@ -191,11 +192,13 @@ object SourceMarkerPlugin {
         val checkRootPackage = Promise.promise<Nothing>()
         if (config.rootSourcePackage.isNullOrBlank()) {
             ApplicationManager.getApplication().runReadAction {
-//                val rootPackage = ArtifactSearch.detectRootPackage(project)
-//                if (rootPackage != null) {
-//                    config.rootSourcePackage = rootPackage
-//                    projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
-//                }
+                if (PluginManagerCore.getBuildNumber().productCode != "PY") {
+                    val rootPackage = ArtifactSearch.detectRootPackage(project)
+                    if (rootPackage != null) {
+                        config.rootSourcePackage = rootPackage
+                        projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
+                    }
+                }
                 checkRootPackage.complete()
             }
         } else {

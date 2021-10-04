@@ -233,14 +233,6 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         }
     }
 
-    open fun getClassQualifiedNames(): List<String> {
-        TODO()
-//        return when (psiFile) {
-//            is PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
-//            else -> throw IllegalStateException("Unsupported file: $psiFile")
-//        }
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
