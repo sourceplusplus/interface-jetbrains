@@ -4,9 +4,9 @@
     <vendor email="support@sourceplusplus.com" url="https://github.com/sourceplusplus">Source++</vendor>
 
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.xdebugger</depends>
+    <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="withGroovy.xml">org.intellij.groovy</depends>
     <depends optional="true" config-file="withKotlin.xml">org.jetbrains.kotlin</depends>
 
@@ -25,10 +25,6 @@
         <postStartupActivity
                 implementation="com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity"/>
 
-        <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="com.sourceplusplus.marker.jvm.JVMLineMarkerProvider$JavaDescriptor"/>
-        <codeInsight.inlayProvider language="JAVA"
-                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayHintProvider"/>
         <errorHandler implementation="com.sourceplusplus.sourcemarker.reporting.GitHubErrorReporter"/>
 
         <projectService

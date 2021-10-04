@@ -28,7 +28,7 @@ import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
-import com.sourceplusplus.sourcemarker.psi.LoggerDetector;
+import com.sourceplusplus.marker.jvm.psi.LoggerDetector;
 import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.service.log.LogHitColumnInfo;
 import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;

@@ -1,6 +1,7 @@
 package com.sourceplusplus.marker.plugin
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.EditorMouseEvent
 import com.intellij.openapi.editor.event.EditorMouseEventArea
@@ -9,14 +10,15 @@ import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import org.slf4j.LoggerFactory
+import java.awt.Point
 
 /**
  * todo: description.
@@ -74,7 +76,7 @@ class FileActivityListener : FileEditorManagerListener {
                         return
                     }
 
-                    val lineNumber = SourceMarkerUtils.convertPointToLineNumber(psiFile.project, e.mouseEvent.point)
+                    val lineNumber = convertPointToLineNumber(psiFile.project, e.mouseEvent.point)
                     if (lineNumber == -1) {
                         return
                     }
@@ -116,6 +118,24 @@ class FileActivityListener : FileEditorManagerListener {
                     }
                 }
             }
+        }
+
+        private fun convertPointToLineNumber(project: Project, p: Point): Int {
+            val myEditor = FileEditorManager.getInstance(project).selectedTextEditor
+            val document = myEditor!!.document
+            val line = EditorUtil.yPositionToLogicalLine(myEditor, p)
+            if (!isValidLine(document, line)) return -1
+            val startOffset = document.getLineStartOffset(line)
+            val region = myEditor.foldingModel.getCollapsedRegionAtOffset(startOffset)
+            return if (region != null) {
+                document.getLineNumber(region.endOffset)
+            } else line
+        }
+
+        private fun isValidLine(document: Document, line: Int): Boolean {
+            if (line < 0) return false
+            val lineCount = document.lineCount
+            return if (lineCount == 0) line == 0 else line < lineCount
         }
     }
 }

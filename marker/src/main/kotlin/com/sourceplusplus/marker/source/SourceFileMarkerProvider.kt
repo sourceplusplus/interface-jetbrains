@@ -1,6 +1,7 @@
 package com.sourceplusplus.marker.source
 
 import com.intellij.psi.PsiFile
+import com.sourceplusplus.marker.ArtifactNamingService
 
 /**
  * Returns a [SourceFileMarker] given a [PsiFile].
@@ -10,7 +11,9 @@ import com.intellij.psi.PsiFile
  */
 interface SourceFileMarkerProvider {
 
+    fun getArtifactNamingService(): ArtifactNamingService
+
     fun createSourceFileMarker(psiFile: PsiFile): SourceFileMarker {
-        return SourceFileMarker(psiFile)
+        return SourceFileMarker(psiFile, getArtifactNamingService())
     }
 }

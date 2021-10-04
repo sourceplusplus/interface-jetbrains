@@ -1,9 +1,9 @@
-package com.sourceplusplus.sourcemarker.psi.endpoint
+package com.sourceplusplus.marker.jvm.psi.endpoint
 
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector.DetectedEndpoint
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector.DetectedEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUReferenceExpression

@@ -1,8 +1,7 @@
 package com.sourceplusplus.marker.source.mark.api
 
-import org.jetbrains.uast.UClass
-import org.jetbrains.uast.UExpression
-import org.jetbrains.uast.UMethod
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 
 /**
  * Returns a [SourceMark] given a PSI element.
@@ -12,7 +11,15 @@ import org.jetbrains.uast.UMethod
  */
 interface SourceMarkProvider {
 
-    fun createSourceMark(psiExpression: UExpression, type: SourceMark.Type): ExpressionSourceMark
-    fun createSourceMark(psiMethod: UMethod, type: SourceMark.Type): MethodSourceMark
-    fun createSourceMark(psiClass: UClass, type: SourceMark.Type): ClassSourceMark
+    fun createExpressionSourceMark(
+        psiExpression: PsiElement, type: SourceMark.Type
+    ): ExpressionSourceMark
+
+    fun createMethodSourceMark(
+        psiMethod: PsiNameIdentifierOwner, qualifiedName: String, type: SourceMark.Type
+    ): MethodSourceMark
+
+    fun createClassSourceMark(
+        psiClass: PsiNameIdentifierOwner, qualifiedName: String, type: SourceMark.Type
+    ): ClassSourceMark
 }

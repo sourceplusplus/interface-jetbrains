@@ -1,21 +1,21 @@
-package com.sourceplusplus.sourcemarker.psi
+package com.sourceplusplus.marker.jvm.psi
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.search.searches.OverridingMethodsSearch
+import com.sourceplusplus.marker.jvm.ArtifactSearch
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.extend.SqlProducerSearch
-import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
-import com.sourceplusplus.sourcemarker.psi.sqlsource.SpringDataSqlSource
-import com.sourceplusplus.sourcemarker.search.ArtifactSearch
+import com.sourceplusplus.marker.jvm.psi.sqlsource.SpringDataSqlSource
 import io.vertx.core.Promise
+import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.kotlin.idea.util.application.runReadAction
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElementOfType
@@ -30,7 +30,7 @@ import java.util.*
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PluginSqlProducerSearch : SqlProducerSearch {
+class PluginSqlProducerSearch(val vertx: Vertx) : SqlProducerSearch {
 
     companion object {
         private val log = LoggerFactory.getLogger(PluginSqlProducerSearch::class.java)
@@ -47,16 +47,16 @@ class PluginSqlProducerSearch : SqlProducerSearch {
         searchPoint: ArtifactQualifiedName
     ): Optional<ArtifactQualifiedName> {
         val promise = Promise.promise<Optional<ArtifactQualifiedName>>()
-        val searchArtifact = ArtifactSearch.findArtifact(searchPoint)
+        val searchArtifact = ArtifactSearch.findArtifact(vertx ,searchPoint)
         if (searchArtifact == null) {
             promise.fail("Could not determine search point artifact")
             return promise.future().await()
         }
 
-        runReadAction {
+        ApplicationManager.getApplication().runReadAction {
             dependencySearch(searchArtifact.toUElementOfType()!!)
 
-            GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
+            GlobalScope.launch(vertx.dispatcher()) {
                 var keepSearching = true
                 for (method in possibleRegressionSources) { //todo: fix dupes
                     for (detector in detectorSet) {

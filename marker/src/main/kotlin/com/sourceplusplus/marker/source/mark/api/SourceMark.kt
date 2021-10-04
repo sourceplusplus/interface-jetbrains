@@ -20,6 +20,7 @@ import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
+import com.sourceplusplus.marker.ArtifactNamingService
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.plugin.SourceInlayComponentProvider
 import com.sourceplusplus.marker.plugin.SourceInlayHintProvider
@@ -93,6 +94,9 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val configuration: SourceMarkConfiguration
     var sourceMarkComponent: SourceMarkComponent
     val project: Project; get() = sourceFileMarker.project
+    val namingService: ArtifactNamingService
+        get() = sourceFileMarker.namingService
+
     fun getPsiElement(): PsiElement
 
     fun isVisible(): Boolean

@@ -4,8 +4,8 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector
-import com.sourceplusplus.sourcemarker.psi.LoggerDetector
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector
+import com.sourceplusplus.marker.jvm.psi.LoggerDetector
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 
 /**

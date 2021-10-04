@@ -134,7 +134,11 @@ object SourceMarkerUtils {
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark?
             if (inlayMark != null) {
-                if (inlayMark.updatePsiExpression(statementExpression.toUElement() as UExpression)) {
+                if (inlayMark.updatePsiExpression(
+                        statementExpression,
+                        getFullyQualifiedName(statementExpression.toUElement() as UExpression)
+                    )
+                ) {
                     statementExpression.putUserData(SourceKey.InlayMark, inlayMark)
                 } else {
                     inlayMark = null
@@ -143,8 +147,8 @@ object SourceMarkerUtils {
         }
 
         return if (inlayMark == null) {
-            inlayMark = fileMarker.createSourceMark(
-                statementExpression.toUElement() as UExpression,
+            inlayMark = fileMarker.createExpressionSourceMark(
+                statementExpression,
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark
             return if (autoApply) {
@@ -188,7 +192,10 @@ object SourceMarkerUtils {
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark?
             if (inlayMark != null) {
-                if (inlayMark.updatePsiExpression(element.toUElement() as UExpression)) {
+                if (inlayMark.updatePsiExpression(
+                        element, getFullyQualifiedName(element.toUElement() as UExpression)
+                    )
+                ) {
                     element.putUserData(SourceKey.InlayMark, inlayMark)
                 } else {
                     inlayMark = null
@@ -199,8 +206,8 @@ object SourceMarkerUtils {
         return if (inlayMark == null) {
             val uExpression = element.toUElement()
             if (uExpression !is UExpression) return null
-            inlayMark = fileMarker.createSourceMark(
-                uExpression,
+            inlayMark = fileMarker.createExpressionSourceMark(
+                element,
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark
             return if (autoApply) {
@@ -254,8 +261,8 @@ object SourceMarkerUtils {
     ): ExpressionInlayMark {
         log.trace("createExpressionInlayMark: $element")
         val statementExpression: PsiElement = getUniversalExpression(element)
-        val inlayMark = fileMarker.createSourceMark(
-            statementExpression.toUElement() as UExpression,
+        val inlayMark = fileMarker.createExpressionSourceMark(
+            statementExpression,
             SourceMark.Type.INLAY
         ) as ExpressionInlayMark
         return if (autoApply) {
@@ -316,7 +323,10 @@ object SourceMarkerUtils {
                 SourceMark.Type.GUTTER
             ) as ExpressionGutterMark?
             if (gutterMark != null) {
-                if (gutterMark.updatePsiExpression(statementExpression.toUElement() as UExpression)) {
+                if (gutterMark.updatePsiExpression(
+                        statementExpression, getFullyQualifiedName(statementExpression.toUElement() as UExpression)
+                    )
+                ) {
                     statementExpression.putUserData(SourceKey.GutterMark, gutterMark)
                 } else {
                     gutterMark = null
@@ -325,8 +335,8 @@ object SourceMarkerUtils {
         }
 
         return if (gutterMark == null) {
-            gutterMark = fileMarker.createSourceMark(
-                statementExpression.toUElement() as UExpression,
+            gutterMark = fileMarker.createExpressionSourceMark(
+                statementExpression,
                 SourceMark.Type.GUTTER
             ) as ExpressionGutterMark
             return if (autoApply) {
@@ -380,7 +390,7 @@ object SourceMarkerUtils {
         if (inlayMark == null) {
             inlayMark = fileMarker.getMethodSourceMark(element.parent, SourceMark.Type.INLAY) as MethodInlayMark?
             if (inlayMark != null) {
-                if (inlayMark.updatePsiMethod(element.parent.toUElement() as UMethod)) {
+                if (inlayMark.updatePsiMethod(element.parent as PsiNameIdentifierOwner)) {
                     element.putUserData(SourceKey.InlayMark, inlayMark)
                 } else {
                     inlayMark = null
@@ -389,8 +399,9 @@ object SourceMarkerUtils {
         }
 
         return if (inlayMark == null) {
-            inlayMark = fileMarker.createSourceMark(
-                element.parent.toUElement() as UMethod,
+            inlayMark = fileMarker.createMethodSourceMark(
+                element.parent as PsiNameIdentifierOwner,
+                getFullyQualifiedName(element.parent.toUElement() as UMethod),
                 SourceMark.Type.INLAY
             ) as MethodInlayMark
             return if (autoApply) {
@@ -446,7 +457,7 @@ object SourceMarkerUtils {
         if (gutterMark == null) {
             gutterMark = fileMarker.getMethodSourceMark(element.parent, SourceMark.Type.GUTTER) as MethodGutterMark?
             if (gutterMark != null) {
-                if (gutterMark.updatePsiMethod(element.parent.toUElement() as UMethod)) {
+                if (gutterMark.updatePsiMethod(element.parent as PsiNameIdentifierOwner)) {
                     element.putUserData(SourceKey.GutterMark, gutterMark)
                 } else {
                     gutterMark = null
@@ -455,8 +466,9 @@ object SourceMarkerUtils {
         }
 
         if (gutterMark == null) {
-            gutterMark = fileMarker.createSourceMark(
-                element.parent.toUElement() as UMethod,
+            gutterMark = fileMarker.createMethodSourceMark(
+                element.parent as PsiNameIdentifierOwner,
+                getFullyQualifiedName(element.parent.toUElement() as UMethod),
                 SourceMark.Type.GUTTER
             ) as MethodGutterMark
             return if (autoApply) {
@@ -518,8 +530,9 @@ object SourceMarkerUtils {
                 log.warn("Could not determine qualified name of class: {}", uClass)
                 return null
             }
-            gutterMark = fileMarker.createSourceMark(
-                uClass,
+            gutterMark = fileMarker.createClassSourceMark(
+                element.parent as PsiNameIdentifierOwner,
+                getFullyQualifiedName(uClass),
                 SourceMark.Type.GUTTER
             ) as ClassGutterMark
             return if (autoApply) {
@@ -661,30 +674,6 @@ object SourceMarkerUtils {
             }
         }
         return "$methodName($methodParams)"
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    fun convertPointToLineNumber(project: Project, p: Point): Int {
-        val myEditor = FileEditorManager.getInstance(project).selectedTextEditor
-        val document = myEditor!!.document
-        val line = EditorUtil.yPositionToLogicalLine(myEditor, p)
-        if (!isValidLine(document, line)) return -1
-        val startOffset = document.getLineStartOffset(line)
-        val region = myEditor.foldingModel.getCollapsedRegionAtOffset(startOffset)
-        return if (region != null) {
-            document.getLineNumber(region.endOffset)
-        } else line
-    }
-
-    private fun isValidLine(document: Document, line: Int): Boolean {
-        if (line < 0) return false
-        val lineCount = document.lineCount
-        return if (lineCount == 0) line == 0 else line < lineCount
     }
 
     private fun getArrayDimensions(s: String): Int {

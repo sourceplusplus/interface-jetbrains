@@ -1,9 +1,9 @@
-package com.sourceplusplus.sourcemarker.psi.sqlsource
+package com.sourceplusplus.marker.jvm.psi.sqlsource
 
 import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.util.PsiUtil
-import com.sourceplusplus.sourcemarker.psi.PluginSqlProducerSearch
-import com.sourceplusplus.sourcemarker.psi.PluginSqlProducerSearch.CalledMethod
+import com.sourceplusplus.marker.jvm.psi.PluginSqlProducerSearch
+import com.sourceplusplus.marker.jvm.psi.PluginSqlProducerSearch.CalledMethod
 import org.jooq.Query
 
 /**

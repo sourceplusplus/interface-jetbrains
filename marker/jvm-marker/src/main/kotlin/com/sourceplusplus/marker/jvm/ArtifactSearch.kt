@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.search
+package com.sourceplusplus.marker.jvm
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
@@ -9,8 +9,9 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector
 import io.vertx.core.Promise
+import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.idea.KotlinFileType
@@ -29,7 +30,7 @@ import java.util.*
 object ArtifactSearch {
 
     @Suppress("UnstableApiUsage")
-    suspend fun findArtifact(artifact: ArtifactQualifiedName): PsiElement? {
+    suspend fun findArtifact(vertx: Vertx, artifact: ArtifactQualifiedName): PsiElement? {
         val promise = Promise.promise<Optional<PsiElement>>()
         val project = ProjectManager.getInstance().openProjects[0]
 
@@ -69,7 +70,7 @@ object ArtifactSearch {
                     KotlinFileType.INSTANCE, GlobalSearchScope.projectScope(project)
                 )
 
-                val endpointDetector = EndpointDetector()
+                val endpointDetector = EndpointDetector(vertx)
                 var keepSearching = true
                 for (virtualFile in groovySourceFiles.union(javaSourceFiles).union(kotlinSourceFiles)) {
                     val file = PsiManager.getInstance(project).findFile(virtualFile)!!

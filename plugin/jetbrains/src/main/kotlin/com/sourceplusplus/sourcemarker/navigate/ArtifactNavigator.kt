@@ -17,7 +17,7 @@ import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.exception.sourceAsFilename
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
-import com.sourceplusplus.sourcemarker.search.ArtifactSearch
+import com.sourceplusplus.marker.jvm.ArtifactSearch
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
@@ -54,7 +54,7 @@ object ArtifactNavigator {
     fun navigateTo(project: Project, artifactQualifiedName: ArtifactQualifiedName) {
         if (artifactQualifiedName.type == ArtifactType.ENDPOINT) {
             GlobalScope.launch(vertx.dispatcher()) {
-                val artifactPsi = ArtifactSearch.findArtifact(artifactQualifiedName)
+                val artifactPsi = ArtifactSearch.findArtifact(vertx, artifactQualifiedName)
                 if (artifactPsi != null) {
                     ApplicationManager.getApplication().invokeLater {
                         PsiNavigateUtil.navigate(artifactPsi)

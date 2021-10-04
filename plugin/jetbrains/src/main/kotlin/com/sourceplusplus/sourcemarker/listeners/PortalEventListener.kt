@@ -65,7 +65,7 @@ import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
-import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
+import com.sourceplusplus.marker.jvm.ArtifactSearch.findArtifact
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
@@ -166,9 +166,9 @@ class PortalEventListener(
                 it.reply(sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
             } else {
                 GlobalScope.launch(vertx.dispatcher()) {
-                    val classArtifact = findArtifact(artifactQualifiedName.copy(type = ArtifactType.CLASS))
+                    val classArtifact = findArtifact(vertx, artifactQualifiedName.copy(type = ArtifactType.CLASS))
                     val fileMarker = SourceMarker.getSourceFileMarker((classArtifact as PsiClass).containingFile)!!
-                    val searchArtifact = findArtifact(artifactQualifiedName) as PsiNameIdentifierOwner
+                    val searchArtifact = findArtifact(vertx, artifactQualifiedName) as PsiNameIdentifierOwner
                     runReadAction {
                         val gutterMark = SourceMarkerUtils.getOrCreateMethodGutterMark(
                             fileMarker, searchArtifact.nameIdentifier!!

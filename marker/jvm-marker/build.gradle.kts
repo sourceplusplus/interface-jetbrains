@@ -3,22 +3,30 @@ plugins {
 }
 
 val kotlinVersion = ext.get("kotlinVersion")
+val vertxVersion = ext.get("vertxVersion")
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
     maven(url = "https://cache-redirector.jetbrains.com/intellij-dependencies/") { name = "intellij-dependencies" }
+    maven(url = "https://maven.google.com/") { name = "Google Repository" }
 }
 
 dependencies {
     compileOnly(project(":marker"))
+    compileOnly(project(":monitor:skywalking"))
+    compileOnly(project(":protocol"))
     val intellijVersion = "212.5284.40"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("org.jetbrains:annotations:22.0.0")
+    compileOnly("io.vertx:vertx-core:$vertxVersion")
+    compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
+    compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.slf4j:slf4j-api:1.7.32")
-    compileOnly("org.jetbrains.intellij.deps.jcef:jcef:89.0.12-g2b76680-chromium-89.0.4389.90-api-1.6")
+    compileOnly("org.jooq:jooq:3.15.3")
+    compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.2")
     compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:analysis:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-analysis:$intellijVersion") { isTransitive = false }
@@ -33,6 +41,7 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:code-style:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.groovy:groovy-psi:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:uast:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.java:java-uast:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-indexing:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-indexing-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:util:$intellijVersion") { isTransitive = false }

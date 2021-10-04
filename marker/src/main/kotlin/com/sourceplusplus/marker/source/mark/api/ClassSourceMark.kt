@@ -3,16 +3,14 @@ package com.sourceplusplus.marker.source.mark.api
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiInvalidElementAccessException
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
-import org.jetbrains.uast.UClass
 import java.util.*
 
 /**
@@ -24,8 +22,8 @@ import java.util.*
 @Suppress("TooManyFunctions")
 abstract class ClassSourceMark(
     override val sourceFileMarker: SourceFileMarker,
-    internal open var psiClass: UClass,
-    override var artifactQualifiedName: String = psiClass.qualifiedName!!
+    internal open var psiClass: PsiNameIdentifierOwner,
+    override var artifactQualifiedName: String = sourceFileMarker.namingService.getFullyQualifiedName(psiClass)
 ) : SourceMark {
 
     override var editor: Editor? = null
@@ -36,7 +34,7 @@ abstract class ClassSourceMark(
     override val isExpressionMark: Boolean = false
     override val valid: Boolean; get() {
         return try {
-            psiClass.isPsiValid && artifactQualifiedName == psiClass.qualifiedName!!
+            psiClass.isValid && artifactQualifiedName == namingService.getFullyQualifiedName(psiClass)
         } catch (ignore: PsiInvalidElementAccessException) {
             false
         }
@@ -61,7 +59,7 @@ abstract class ClassSourceMark(
 
     override val viewProviderBound: Boolean
         get() = try {
-            psiClass.nameIdentifier!!.containingFile.viewProvider.document
+            psiClass.containingFile.viewProvider.document
             true
         } catch (ignore: PsiInvalidElementAccessException) {
             false
@@ -94,17 +92,13 @@ abstract class ClassSourceMark(
 
     override fun hasUserData(): Boolean = userData.isNotEmpty()
 
-    fun getPsiClass(): UClass {
+    override fun getPsiElement(): PsiNameIdentifierOwner {
         return psiClass
     }
 
-    override fun getPsiElement(): PsiClass {
-        return psiClass.sourcePsi as PsiClass
-    }
-
-    fun updatePsiClass(psiClass: UClass): Boolean {
+    fun updatePsiClass(psiClass: PsiNameIdentifierOwner): Boolean {
         this.psiClass = psiClass
-        val newArtifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(psiClass)
+        val newArtifactQualifiedName = namingService.getFullyQualifiedName(psiClass)
         if (artifactQualifiedName != newArtifactQualifiedName) {
             check(sourceFileMarker.removeSourceMark(this, autoRefresh = false, autoDispose = false))
             val oldArtifactQualifiedName = artifactQualifiedName
