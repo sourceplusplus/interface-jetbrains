@@ -117,11 +117,6 @@ abstract class MethodSourceMark(
         return true
     }
 
-    fun isStaticMethod(): Boolean {
-        TODO()
-        //return psiMethod.isStatic
-    }
-
     private val eventListeners = ArrayList<SourceMarkEventListener>()
     override fun clearEventListeners() = eventListeners.clear()
     override fun getEventListeners(): List<SourceMarkEventListener> = eventListeners.toList()
