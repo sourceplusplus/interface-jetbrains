@@ -195,6 +195,7 @@ object SourceMarkerPlugin {
                 if (PluginManagerCore.getBuildNumber().productCode != "PY") {
                     val rootPackage = ArtifactSearch.detectRootPackage(project)
                     if (rootPackage != null) {
+                        log.info("Detected root source package: $rootPackage")
                         config.rootSourcePackage = rootPackage
                         projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
                     }
