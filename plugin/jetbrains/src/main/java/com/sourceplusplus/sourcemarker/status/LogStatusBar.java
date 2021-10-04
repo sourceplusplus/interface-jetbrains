@@ -6,7 +6,6 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
@@ -18,14 +17,12 @@ import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
-import com.sourceplusplus.protocol.instrument.ThrottleStep;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.marker.jvm.psi.LoggerDetector;
-import com.sourceplusplus.marker.jvm.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.service.log.LogHitColumnInfo;
 import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
@@ -64,8 +61,8 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     private final LiveSourceLocation sourceLocation;
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
-    private final Pattern VARIABLE_PATTERN;
     private final String placeHolderText;
+    private Pattern variablePattern;
     private EditorImpl editor;
     private LiveLog liveLog;
     private Instant latestTime;
@@ -126,15 +123,17 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 .limit(7)
                 .collect(Collectors.toList());
 
-        StringBuilder sb = new StringBuilder("(");
-        for (int i = 0; i < scopeVars.size(); i++) {
-            sb.append("\\$").append(scopeVars.get(i));
-            if (i + 1 < scopeVars.size()) {
-                sb.append("|");
+        if (!scopeVars.isEmpty()) {
+            StringBuilder sb = new StringBuilder("(");
+            for (int i = 0; i < scopeVars.size(); i++) {
+                sb.append("\\$").append(scopeVars.get(i));
+                if (i + 1 < scopeVars.size()) {
+                    sb.append("|");
+                }
             }
+            sb.append(")(?:\\s|$)");
+            variablePattern = Pattern.compile(sb.toString());
         }
-        sb.append(")(?:\\s|$)");
-        VARIABLE_PATTERN = Pattern.compile(sb.toString());
 
         this.inlayMark = inlayMark;
         this.liveLog = liveLog;
@@ -558,11 +557,13 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
 
         String logPattern = liveLogTextField.getText();
         ArrayList<String> varMatches = new ArrayList<>();
-        Matcher m = VARIABLE_PATTERN.matcher(logPattern);
-        while (m.find()) {
-            String var = m.group(1);
-            logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-            varMatches.add(var);
+        if (variablePattern != null) {
+            Matcher m = variablePattern.matcher(logPattern);
+            while (m.find()) {
+                String var = m.group(1);
+                logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+                varMatches.add(var);
+            }
         }
         final String finalLogPattern = logPattern;
 

@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.psi.PsiNameIdentifierOwner
+import com.sourceplusplus.marker.SourceMarker.namingService
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
@@ -23,7 +24,7 @@ import java.util.*
 abstract class ClassSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiClass: PsiNameIdentifierOwner,
-    override var artifactQualifiedName: String = sourceFileMarker.namingService.getFullyQualifiedName(psiClass)
+    override var artifactQualifiedName: String = namingService.getFullyQualifiedName(psiClass)
 ) : SourceMark {
 
     override var editor: Editor? = null

@@ -19,12 +19,13 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import com.sourceplusplus.marker.ArtifactCreationService
 import com.sourceplusplus.marker.SourceMarker
-import com.sourceplusplus.marker.jvm.ArtifactSearch
 import com.sourceplusplus.marker.jvm.JVMArtifactCreationService
+import com.sourceplusplus.marker.jvm.JVMArtifactNamingService
+import com.sourceplusplus.marker.jvm.JVMArtifactScopeService
 import com.sourceplusplus.marker.py.PythonArtifactCreationService
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.py.PythonArtifactNamingService
+import com.sourceplusplus.marker.py.PythonArtifactScopeService
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
@@ -149,12 +150,21 @@ object SourceMarkerPlugin {
         DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
-        val creationService = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
+        SourceMarker.creationService = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
             PythonArtifactCreationService()
         } else {
             JVMArtifactCreationService()
         }
-        SourceMarkerUtils.creationService = creationService
+        SourceMarker.namingService = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
+            PythonArtifactNamingService()
+        } else {
+            JVMArtifactNamingService()
+        }
+        SourceMarker.scopeService = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
+            PythonArtifactScopeService()
+        } else {
+            JVMArtifactScopeService()
+        }
     }
 
     suspend fun init(project: Project) {

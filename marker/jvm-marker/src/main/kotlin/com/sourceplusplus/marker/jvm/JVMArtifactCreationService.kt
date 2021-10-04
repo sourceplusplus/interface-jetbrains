@@ -18,11 +18,20 @@ class JVMArtifactCreationService : ArtifactCreationService {
     ): Optional<ExpressionInlayMark> {
         val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber)
         return if (element is PsiStatement) {
-            Optional.ofNullable(SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply = autoApply))
+            Optional.ofNullable(SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         } else if (element is PsiElement) {
-            Optional.ofNullable(SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply = autoApply))
+            Optional.ofNullable(SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         } else {
             Optional.empty()
         }
+    }
+
+    override fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean
+    ): ExpressionInlayMark {
+        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiStatement
+        return SourceMarkerUtils.createExpressionInlayMark(fileMarker, element, autoApply)
     }
 }

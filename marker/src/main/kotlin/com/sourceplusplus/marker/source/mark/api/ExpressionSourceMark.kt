@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
+import com.sourceplusplus.marker.SourceMarker.namingService
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
@@ -24,7 +25,7 @@ import kotlin.collections.HashMap
 abstract class ExpressionSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiExpression: PsiElement,
-    override var artifactQualifiedName: String = sourceFileMarker.namingService.getFullyQualifiedName(psiExpression)
+    override var artifactQualifiedName: String = namingService.getFullyQualifiedName(psiExpression)
 ) : SourceMark {
 
     override var editor: Editor? = null

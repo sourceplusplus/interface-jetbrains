@@ -23,6 +23,9 @@ object SourceMarker {
     @Volatile
     var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
+    lateinit var namingService: ArtifactNamingService
+    lateinit var creationService: ArtifactCreationService
+    lateinit var scopeService: ArtifactScopeService
     private val log = LoggerFactory.getLogger(javaClass)
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
@@ -85,8 +88,15 @@ object SourceMarker {
         check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.values.forEach { marker ->
-            if (marker.getClassQualifiedNames().contains(classQualifiedName)) {
-                return marker
+            if ("Python" != marker.psiFile.language.id) {
+                if (marker.getClassQualifiedNames().contains(classQualifiedName)) {
+                    return marker
+                }
+            } else {
+                //by location
+                if (marker.psiFile.virtualFile.path == classQualifiedName) {
+                    return marker
+                }
             }
         }
         return null

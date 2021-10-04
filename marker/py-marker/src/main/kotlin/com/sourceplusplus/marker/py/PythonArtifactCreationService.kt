@@ -23,6 +23,28 @@ class PythonArtifactCreationService : ArtifactCreationService {
         return Optional.empty()
     }
 
+    override fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean
+    ): ExpressionInlayMark {
+        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
+        val inlayMark = fileMarker.createExpressionSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as ExpressionInlayMark
+        return if (autoApply) {
+            if (inlayMark.canApply()) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                throw IllegalStateException("Could not apply inlay mark: $inlayMark")
+            }
+        } else {
+            inlayMark
+        }
+    }
+
     fun getOrCreateExpressionInlayMark(
         fileMarker: SourceFileMarker,
         element: PsiElement,

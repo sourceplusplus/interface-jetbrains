@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
+import com.sourceplusplus.marker.SourceMarker.scopeService
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
@@ -94,21 +95,14 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            //determine available vars
-            val scopeVars = mutableListOf<String>()
-//            val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
-//            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-//                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-//            }
-//            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-//            for (i in 0 until variablesProcessor.size()) {
-//                scopeVars.add(variablesProcessor.getResult(i).name!!)
-//            }
-
-            val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
+            val locationSource = if ("Python" != inlayMark.language.id) {
+                fileMarker.getClassQualifiedNames()[0]
+            } else {
+                fileMarker.psiFile.virtualFile.path //todo: ability to relative/translate
+            }
             val statusBar = BreakpointStatusBar(
-                LiveSourceLocation(qualifiedClassName, lineNumber),
-                scopeVars,
+                LiveSourceLocation(locationSource, lineNumber),
+                scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
             statusBar.setWrapperPanel(wrapperPanel)
@@ -147,21 +141,14 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            //determine available vars
-            val scopeVars = mutableListOf<String>()
-//            val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
-//            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-//                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-//            }
-//            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-//            for (i in 0 until variablesProcessor.size()) {
-//                scopeVars.add(variablesProcessor.getResult(i).name!!)
-//            }
-
-            val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
+            val locationSource = if ("Python" != inlayMark.language.id) {
+                fileMarker.getClassQualifiedNames()[0]
+            } else {
+                fileMarker.psiFile.virtualFile.path //todo: ability to relative/translate
+            }
             val statusBar = LogStatusBar(
-                LiveSourceLocation(qualifiedClassName, lineNumber),
-                scopeVars,
+                LiveSourceLocation(locationSource, lineNumber),
+                scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
             statusBar.setWrapperPanel(wrapperPanel)
@@ -203,21 +190,10 @@ object LiveStatusManager : SourceMarkEventListener {
                     val wrapperPanel = JPanel()
                     wrapperPanel.layout = BorderLayout()
 
-                    //determine available vars
-                    val scopeVars = mutableListOf<String>()
-//                    val minScope = SourceMarkerUtils.getElementAtLine(
-//                        fileMarker.psiFile, liveBreakpoint.location.line - 1
-//                    )!!
-//                    val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-//                        override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-//                    }
-//                    PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-//                    for (i in 0 until variablesProcessor.size()) {
-//                        scopeVars.add(variablesProcessor.getResult(i).name!!)
-//                    }
-
                     val statusBar = BreakpointStatusBar(
-                        liveBreakpoint.location, scopeVars, inlayMark, liveBreakpoint, editor
+                        liveBreakpoint.location,
+                        scopeService.getScopeVariables(fileMarker, liveBreakpoint.location.line),
+                        inlayMark, liveBreakpoint, editor
                     )
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
@@ -251,18 +227,11 @@ object LiveStatusManager : SourceMarkEventListener {
                     val wrapperPanel = JPanel()
                     wrapperPanel.layout = BorderLayout()
 
-                    //determine available vars
-                    val scopeVars = mutableListOf<String>()
-//                    val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, liveLog.location.line - 1)!!
-//                    val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-//                        override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-//                    }
-//                    PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-//                    for (i in 0 until variablesProcessor.size()) {
-//                        scopeVars.add(variablesProcessor.getResult(i).name!!)
-//                    }
-
-                    val statusBar = LogStatusBar(liveLog.location, scopeVars, inlayMark, liveLog, editor)
+                    val statusBar = LogStatusBar(
+                        liveLog.location,
+                        scopeService.getScopeVariables(fileMarker, liveLog.location.line),
+                        inlayMark, liveLog, editor
+                    )
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     editor.scrollingModel.addVisibleAreaListener(statusBar)

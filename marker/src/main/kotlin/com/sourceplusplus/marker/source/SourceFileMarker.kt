@@ -9,7 +9,6 @@ import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
-import com.sourceplusplus.marker.ArtifactNamingService
 import com.sourceplusplus.marker.source.mark.api.*
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
@@ -30,10 +29,7 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("TooManyFunctions")
-open class SourceFileMarker(
-    val psiFile: PsiFile,
-    val namingService: ArtifactNamingService
-) : SourceMarkProvider {
+open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     companion object {
         val KEY = Key.create<SourceFileMarker>("sm.SourceFileMarker")

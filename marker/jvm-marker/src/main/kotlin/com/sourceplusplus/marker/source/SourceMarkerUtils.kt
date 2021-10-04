@@ -3,7 +3,7 @@ package com.sourceplusplus.marker.source
 import com.intellij.lang.Language
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
-import com.sourceplusplus.marker.ArtifactCreationService
+import com.sourceplusplus.marker.SourceMarker.creationService
 import com.sourceplusplus.marker.Utils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
@@ -28,7 +28,6 @@ import java.util.*
 object SourceMarkerUtils {
 
     private val log = LoggerFactory.getLogger(SourceMarkerUtils::class.java)
-    lateinit var creationService: ArtifactCreationService
 
     /**
      * todo: description.
@@ -195,8 +194,7 @@ object SourceMarkerUtils {
         lineNumber: Int,
         autoApply: Boolean = false
     ): ExpressionInlayMark {
-        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiStatement
-        return createExpressionInlayMark(fileMarker, element, autoApply = autoApply)
+        return creationService.createExpressionInlayMark(fileMarker, lineNumber, autoApply)
     }
 
     /**

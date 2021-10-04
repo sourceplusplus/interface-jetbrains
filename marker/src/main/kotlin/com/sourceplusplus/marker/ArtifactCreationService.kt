@@ -11,4 +11,10 @@ interface ArtifactCreationService {
         lineNumber: Int,
         autoApply: Boolean = false
     ): Optional<ExpressionInlayMark>
+
+    fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark
 }

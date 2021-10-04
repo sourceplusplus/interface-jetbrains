@@ -95,8 +95,6 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val configuration: SourceMarkConfiguration
     var sourceMarkComponent: SourceMarkComponent
     val project: Project; get() = sourceFileMarker.project
-    val namingService: ArtifactNamingService
-        get() = sourceFileMarker.namingService
     val language: Language
         get() = getPsiElement().language
 
