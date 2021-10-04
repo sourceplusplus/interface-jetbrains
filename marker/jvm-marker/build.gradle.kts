@@ -26,13 +26,16 @@ dependencies {
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.slf4j:slf4j-api:1.7.32")
     compileOnly("org.jooq:jooq:3.15.3")
+    compileOnly("org.apache.commons:commons-lang3:3.12.0")
     compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.2")
     compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:analysis:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-analysis:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.java:java-analysis-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:ide-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.platform:core-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:core-ui:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:editor:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:indexing:$intellijVersion") { isTransitive = false }
@@ -46,7 +49,12 @@ dependencies {
     compileOnly("com.jetbrains.intellij.java:java-indexing:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-indexing-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:util:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.java:java-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-psi:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.java:java-debugger:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.java:java-debugger-impl:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.platform:debugger:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.platform:debugger-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:extensions:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:util-rt:$intellijVersion") { isTransitive = false }
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion") { isTransitive = false }

@@ -6,7 +6,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow
-import org.jetbrains.kotlin.idea.completion.smart.SmartCompletionItemPriority
+//import org.jetbrains.kotlin.idea.completion.smart.SmartCompletionItemPriority
 import java.awt.*
 import java.awt.event.*
 import java.util.function.Function
@@ -96,7 +96,7 @@ class AutocompleteField(
         sb.append(")(?:\\s|$)")
         variablePattern = Pattern.compile(sb.toString())
 
-        document.putProperty("filterNewlines", SmartCompletionItemPriority.TRUE)
+        //document.putProperty("filterNewlines", SmartCompletionItemPriority.TRUE)
 
         addNumberStyle(this)
 

@@ -2,6 +2,7 @@ package com.sourceplusplus.sourcemarker.service.breakpoint.tree
 
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.util.containers.hash.LinkedHashMap
+import com.sourceplusplus.marker.jvm.VariableSimpleNode
 import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
 
 /**

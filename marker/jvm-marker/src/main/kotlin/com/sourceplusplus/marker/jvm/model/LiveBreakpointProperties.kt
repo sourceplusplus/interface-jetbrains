@@ -1,6 +1,6 @@
-package com.sourceplusplus.sourcemarker.service.breakpoint.model
+package com.sourceplusplus.marker.jvm.model
 
-import com.intellij.util.xml.Attribute
+//import com.intellij.util.xml.Attribute
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import org.jetbrains.java.debugger.breakpoints.properties.JavaBreakpointProperties
 
@@ -19,62 +19,62 @@ class LiveBreakpointProperties : JavaBreakpointProperties<LiveBreakpointProperti
     private var breakpointId: String? = null
     private var breakpointCondition: String? = null
 
-    @Attribute("suspend")
+//    @Attribute("suspend")
     fun getSuspend(): Boolean {
         return suspend
     }
 
-    @Attribute("suspend")
+//    @Attribute("suspend")
     fun setSuspend(suspend: Boolean) {
         this.suspend = suspend
     }
 
-    @Attribute("active")
+//    @Attribute("active")
     fun getActive(): Boolean {
         return active
     }
 
-    @Attribute("active")
+//    @Attribute("active")
     fun setActive(active: Boolean) {
         this.active = active
     }
 
-    @Attribute("finished")
+//    @Attribute("finished")
     fun getFinished(): Boolean {
         return finished
     }
 
-    @Attribute("finished")
+//    @Attribute("finished")
     fun setFinished(finished: Boolean) {
         this.finished = finished
     }
 
-    @Attribute("location")
+//    @Attribute("location")
     fun getLocation(): LiveSourceLocation? {
         return location
     }
 
-    @Attribute("location")
+//    @Attribute("location")
     fun setLocation(location: LiveSourceLocation) {
         this.location = location
     }
 
-    @Attribute("breakpointId")
+//    @Attribute("breakpointId")
     fun getBreakpointId(): String? {
         return breakpointId
     }
 
-    @Attribute("breakpointId")
+//    @Attribute("breakpointId")
     fun setBreakpointId(breakpointId: String) {
         this.breakpointId = breakpointId
     }
 
-    @Attribute("breakpointCondition")
+//    @Attribute("breakpointCondition")
     fun getBreakpointCondition(): String? {
         return breakpointCondition
     }
 
-    @Attribute("breakpointCondition")
+//    @Attribute("breakpointCondition")
     fun setBreakpointCondition(breakpointCondition: String) {
         this.breakpointCondition = breakpointCondition
     }

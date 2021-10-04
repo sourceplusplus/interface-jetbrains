@@ -24,7 +24,7 @@ import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
 import com.sourceplusplus.sourcemarker.service.breakpoint.LiveBreakpointConstants.LIVE_BREAKPOINT_NAME
-import com.sourceplusplus.sourcemarker.service.breakpoint.model.LiveBreakpointProperties
+import com.sourceplusplus.marker.jvm.model.LiveBreakpointProperties
 import com.sourceplusplus.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
 import com.sourceplusplus.sourcemarker.service.breakpoint.ui.EventsWindow
 import org.slf4j.LoggerFactory
@@ -97,29 +97,30 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         XDebuggerManager.getInstance(project).breakpointManager.allBreakpoints.forEach {
             if (it.type.id == "live-breakpoint") {
                 val props = (it.properties as LiveBreakpointProperties?)
-                if (bpr.breakpointId == props?.getBreakpointId()) {
-                    props.setFinished(true)
-                    props.setActive(false)
-
-                    if (bpr.cause == null) {
-                        XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                            it as XLineBreakpoint<*>, SourceMarkerIcons.LIVE_BREAKPOINT_COMPLETE_ICON, null
-                        )
-                    } else if (bpr.cause != null) {
-                        XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
-                            it as XLineBreakpoint<*>, SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON, null
-                        )
-
-                        log.warn("Breakpoint failed: " + bpr.cause!!.message)
-                        Notifications.Bus.notify(
-                            Notification(
-                                PluginBundle.message("plugin_name"), "Live breakpoint failed",
-                                "Breakpoint failed: " + bpr.cause!!.message,
-                                NotificationType.ERROR
-                            )
-                        )
-                    }
-                }
+                TODO()
+//                if (bpr.breakpointId == props?.getBreakpointId()) {
+//                    props.setFinished(true)
+//                    props.setActive(false)
+//
+//                    if (bpr.cause == null) {
+//                        XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
+//                            it as XLineBreakpoint<*>, SourceMarkerIcons.LIVE_BREAKPOINT_COMPLETE_ICON, null
+//                        )
+//                    } else if (bpr.cause != null) {
+//                        XDebuggerManager.getInstance(project).breakpointManager.updateBreakpointPresentation(
+//                            it as XLineBreakpoint<*>, SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON, null
+//                        )
+//
+//                        log.warn("Breakpoint failed: " + bpr.cause!!.message)
+//                        Notifications.Bus.notify(
+//                            Notification(
+//                                PluginBundle.message("plugin_name"), "Live breakpoint failed",
+//                                "Breakpoint failed: " + bpr.cause!!.message,
+//                                NotificationType.ERROR
+//                            )
+//                        )
+//                    }
+//                }
             }
         }
     }

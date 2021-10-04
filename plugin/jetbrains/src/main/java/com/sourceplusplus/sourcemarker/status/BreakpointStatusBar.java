@@ -1,16 +1,11 @@
 package com.sourceplusplus.sourcemarker.status;
 
-import com.intellij.debugger.engine.evaluation.TextWithImports;
-import com.intellij.debugger.engine.evaluation.TextWithImportsImpl;
-import com.intellij.debugger.impl.DebuggerUtilsEx;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.psi.JavaCodeFragment;
-import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBIntSpinner;
 import com.intellij.ui.components.JBScrollPane;
@@ -34,7 +29,6 @@ import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService;
-import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import io.vertx.core.json.Json;
@@ -418,11 +412,11 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     private void saveLiveBreakpoint() {
         breakpointConditionField.setShowSaveButton(false);
 
-        TextWithImports expressionText = TextWithImportsImpl.fromXExpression(XExpressionImpl.fromText(breakpointConditionField.getText()));
-        PsiElement context = inlayMark.getPsiElement();
-        JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
-                .createCodeFragment(expressionText, context, inlayMark.getProject());
-        String condition = InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
+//        TextWithImports expressionText = TextWithImportsImpl.fromXExpression(XExpressionImpl.fromText(breakpointConditionField.getText()));
+//        PsiElement context = inlayMark.getPsiElement();
+//        JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
+//                .createCodeFragment(expressionText, context, inlayMark.getProject());
+        String condition = null;//InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
         InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
         JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) hitLimitSpinner.getEditor()).getTextField();

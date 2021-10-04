@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.breakpoint
+package com.sourceplusplus.marker.jvm
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*

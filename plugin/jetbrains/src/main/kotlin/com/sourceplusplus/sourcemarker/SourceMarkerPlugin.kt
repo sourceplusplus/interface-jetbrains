@@ -11,6 +11,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -18,10 +19,12 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import com.intellij.psi.JavaPsiFacade
-import com.intellij.psi.search.ProjectScope
-import com.intellij.xdebugger.breakpoints.XBreakpointListener
+import com.sourceplusplus.marker.ArtifactCreationService
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.jvm.ArtifactSearch
+import com.sourceplusplus.marker.jvm.JVMArtifactCreationService
+import com.sourceplusplus.marker.py.PythonArtifactCreationService
+import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
@@ -145,6 +148,13 @@ object SourceMarkerPlugin {
         DatabindCodec.mapper().registerModule(KotlinModule())
         DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
+
+        val creationService = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
+            PythonArtifactCreationService()
+        } else {
+            JVMArtifactCreationService()
+        }
+        SourceMarkerUtils.creationService = creationService
     }
 
     suspend fun init(project: Project) {
@@ -171,31 +181,11 @@ object SourceMarkerPlugin {
         val checkRootPackage = Promise.promise<Nothing>()
         if (config.rootSourcePackage.isNullOrBlank()) {
             ApplicationManager.getApplication().runReadAction {
-                var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
-                    ?.getSubPackages(ProjectScope.getProjectScope(project))
-
-                //remove non-code packages
-                basePackages = basePackages!!.filter {
-                    val dirs = it.directories
-                    dirs.isNotEmpty() && !dirs[0].virtualFile.path.contains("/src/main/resources/")
-                }.toTypedArray()
-                basePackages = basePackages.filter {
-                    it.qualifiedName != "asciidoc" && it.qualifiedName != "lib"
-                }.toTypedArray() //todo: probably shouldn't be necessary
-
-                //determine deepest common source package
-                if (basePackages.isNotEmpty()) {
-                    var rootPackage: String? = null
-                    while (basePackages!!.size == 1) {
-                        rootPackage = basePackages[0]!!.qualifiedName
-                        basePackages = basePackages[0]!!.getSubPackages(ProjectScope.getProjectScope(project))
-                    }
-                    if (rootPackage != null) {
-                        log.info("Detected root source package: $rootPackage")
-                        config.rootSourcePackage = rootPackage
-                        projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
-                    }
-                }
+//                val rootPackage = ArtifactSearch.detectRootPackage(project)
+//                if (rootPackage != null) {
+//                    config.rootSourcePackage = rootPackage
+//                    projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
+//                }
                 checkRootPackage.complete()
             }
         } else {
@@ -326,7 +316,6 @@ object SourceMarkerPlugin {
                 GlobalScope.launch(vertx.dispatcher()) {
                     deploymentIds.add(vertx.deployVerticle(breakpointListener).await())
                 }
-                project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, breakpointListener)
             } else {
                 log.warn("Live instruments unavailable")
             }

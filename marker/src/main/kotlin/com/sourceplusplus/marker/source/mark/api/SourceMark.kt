@@ -1,6 +1,7 @@
 package com.sourceplusplus.marker.source.mark.api
 
 import com.intellij.codeInsight.hints.InlayHintsPassFactory
+import com.intellij.lang.Language
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
@@ -96,6 +97,8 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val project: Project; get() = sourceFileMarker.project
     val namingService: ArtifactNamingService
         get() = sourceFileMarker.namingService
+    val language: Language
+        get() = getPsiElement().language
 
     fun getPsiElement(): PsiElement
 

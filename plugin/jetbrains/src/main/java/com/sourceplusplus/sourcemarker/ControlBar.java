@@ -171,14 +171,18 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
         String fullyQualified = inlayMark.getArtifactQualifiedName();
-        if (fullyQualified.contains("#")) {
-            fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"));
+        String location = fullyQualified;
+        if (!"Python".equals(inlayMark.getLanguage().getID())) {
+            if (fullyQualified.contains("#")) {
+                fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"));
+            }
+            String className = ArtifactNameUtils.INSTANCE.getClassName(fullyQualified);
+            String shortFuncName = ArtifactNameUtils.INSTANCE.getShortFunctionSignature(
+                    ArtifactNameUtils.INSTANCE.removePackageNames(fullyQualified));
+            location = className + "." + shortFuncName;
         }
-        String className = ArtifactNameUtils.INSTANCE.getClassName(fullyQualified);
-        String shortFuncName = ArtifactNameUtils.INSTANCE.getShortFunctionSignature(
-                ArtifactNameUtils.INSTANCE.removePackageNames(fullyQualified));
         textField1 = new AutocompleteField(
-                "Location: " + className + "." + shortFuncName + "#" + inlayMark.getLineNumber(),
+                "Location: " + location + "#" + inlayMark.getLineNumber(),
                 availableCommands, lookup, inlayMark.getLineNumber(), true, true, Color.decode("#e1483b"));
         textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();

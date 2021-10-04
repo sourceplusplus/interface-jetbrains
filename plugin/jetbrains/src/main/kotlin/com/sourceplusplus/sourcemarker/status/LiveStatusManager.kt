@@ -4,10 +4,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiVariable
-import com.intellij.psi.ResolveState
-import com.intellij.psi.scope.processor.VariablesProcessor
-import com.intellij.psi.scope.util.PsiScopesUtil
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
@@ -100,14 +96,14 @@ object LiveStatusManager : SourceMarkEventListener {
 
             //determine available vars
             val scopeVars = mutableListOf<String>()
-            val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
-            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-            }
-            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-            for (i in 0 until variablesProcessor.size()) {
-                scopeVars.add(variablesProcessor.getResult(i).name!!)
-            }
+//            val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
+//            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+//                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+//            }
+//            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+//            for (i in 0 until variablesProcessor.size()) {
+//                scopeVars.add(variablesProcessor.getResult(i).name!!)
+//            }
 
             val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
             val statusBar = BreakpointStatusBar(
@@ -153,14 +149,14 @@ object LiveStatusManager : SourceMarkEventListener {
 
             //determine available vars
             val scopeVars = mutableListOf<String>()
-            val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
-            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-            }
-            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-            for (i in 0 until variablesProcessor.size()) {
-                scopeVars.add(variablesProcessor.getResult(i).name!!)
-            }
+//            val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
+//            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+//                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+//            }
+//            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+//            for (i in 0 until variablesProcessor.size()) {
+//                scopeVars.add(variablesProcessor.getResult(i).name!!)
+//            }
 
             val qualifiedClassName = fileMarker.getClassQualifiedNames()[0]
             val statusBar = LogStatusBar(
@@ -209,16 +205,16 @@ object LiveStatusManager : SourceMarkEventListener {
 
                     //determine available vars
                     val scopeVars = mutableListOf<String>()
-                    val minScope = SourceMarkerUtils.getElementAtLine(
-                        fileMarker.psiFile, liveBreakpoint.location.line - 1
-                    )!!
-                    val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-                        override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-                    }
-                    PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-                    for (i in 0 until variablesProcessor.size()) {
-                        scopeVars.add(variablesProcessor.getResult(i).name!!)
-                    }
+//                    val minScope = SourceMarkerUtils.getElementAtLine(
+//                        fileMarker.psiFile, liveBreakpoint.location.line - 1
+//                    )!!
+//                    val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+//                        override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+//                    }
+//                    PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+//                    for (i in 0 until variablesProcessor.size()) {
+//                        scopeVars.add(variablesProcessor.getResult(i).name!!)
+//                    }
 
                     val statusBar = BreakpointStatusBar(
                         liveBreakpoint.location, scopeVars, inlayMark, liveBreakpoint, editor
@@ -257,14 +253,14 @@ object LiveStatusManager : SourceMarkEventListener {
 
                     //determine available vars
                     val scopeVars = mutableListOf<String>()
-                    val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, liveLog.location.line - 1)!!
-                    val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-                        override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
-                    }
-                    PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-                    for (i in 0 until variablesProcessor.size()) {
-                        scopeVars.add(variablesProcessor.getResult(i).name!!)
-                    }
+//                    val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, liveLog.location.line - 1)!!
+//                    val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+//                        override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+//                    }
+//                    PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+//                    for (i in 0 until variablesProcessor.size()) {
+//                        scopeVars.add(variablesProcessor.getResult(i).name!!)
+//                    }
 
                     val statusBar = LogStatusBar(liveLog.location, scopeVars, inlayMark, liveLog, editor)
                     statusBar.setWrapperPanel(wrapperPanel)

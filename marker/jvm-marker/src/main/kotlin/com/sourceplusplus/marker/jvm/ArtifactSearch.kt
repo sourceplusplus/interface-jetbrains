@@ -2,10 +2,12 @@ package com.sourceplusplus.marker.jvm
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.ProjectScope
 import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
@@ -19,6 +21,7 @@ import org.jetbrains.plugins.groovy.GroovyFileType
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
+import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
@@ -28,6 +31,37 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object ArtifactSearch {
+
+    private val log = LoggerFactory.getLogger(ArtifactSearch::class.java)
+
+    @JvmStatic
+    fun detectRootPackage(project: Project): String? {
+        var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
+            ?.getSubPackages(ProjectScope.getProjectScope(project))
+
+        //remove non-code packages
+        basePackages = basePackages!!.filter {
+            val dirs = it.directories
+            dirs.isNotEmpty() && !dirs[0].virtualFile.path.contains("/src/main/resources/")
+        }.toTypedArray()
+        basePackages = basePackages.filter {
+            it.qualifiedName != "asciidoc" && it.qualifiedName != "lib"
+        }.toTypedArray() //todo: probably shouldn't be necessary
+
+        //determine deepest common source package
+        if (basePackages.isNotEmpty()) {
+            var rootPackage: String? = null
+            while (basePackages!!.size == 1) {
+                rootPackage = basePackages[0]!!.qualifiedName
+                basePackages = basePackages[0]!!.getSubPackages(ProjectScope.getProjectScope(project))
+            }
+            if (rootPackage != null) {
+                log.info("Detected root source package: $rootPackage")
+                return rootPackage
+            }
+        }
+        return null
+    }
 
     @Suppress("UnstableApiUsage")
     suspend fun findArtifact(vertx: Vertx, artifact: ArtifactQualifiedName): PsiElement? {

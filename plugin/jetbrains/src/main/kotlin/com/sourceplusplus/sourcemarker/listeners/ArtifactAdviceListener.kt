@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.listeners
 
+import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
@@ -17,7 +18,6 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.SOURCE_PORTAL
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.kotlin.idea.util.application.runReadAction
 import org.slf4j.LoggerFactory
 
 /**
@@ -37,7 +37,8 @@ class ArtifactAdviceListener : AdviceListener, SourceMarkEventListener {
     override suspend fun advised(advice: ArtifactAdvice) {
         when (advice.artifact.type) {
             ArtifactType.ENDPOINT -> createEndpointAdvice(advice)
-            ArtifactType.STATEMENT -> runReadAction { createExpressionAdvice(advice) }
+            ArtifactType.STATEMENT -> ApplicationManager.getApplication()
+                .runReadAction { createExpressionAdvice(advice) }
             else -> TODO("impl")
         }
     }

@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.breakpoint.tree
+package com.sourceplusplus.marker.jvm
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.highlighter.JavaHighlightingColors

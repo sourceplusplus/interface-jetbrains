@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.mark
 
+import com.intellij.psi.PsiElement
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.SourceMarkerUtils.getOrCreateExpressionGutterMark
 import com.sourceplusplus.marker.source.SourceMarkerUtils.getOrCreateExpressionInlayMark
@@ -14,11 +15,10 @@ import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.PluginBundle.message
-import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.SOURCE_RED
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import kotlinx.datetime.Clock
-import org.jetbrains.uast.UThrowExpression
 import org.slf4j.LoggerFactory
 
 /**
@@ -102,16 +102,18 @@ object SourceMarkConstructor {
         when (advice) {
             is ActiveExceptionAdvice -> {
                 val expressionMark = inlayMark as ExpressionInlayMark
-                val prettyTimeAgo = if (expressionMark.getPsiExpression() is UThrowExpression) {
+                val prettyTimeAgo = if (isThrows(expressionMark.getPsiExpression())) {
                     {
-                        val occurred = (Clock.System.now().toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
+                        val occurred = (Clock.System.now()
+                            .toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
                                 " " + message("ago")
                         " //${message("last_occurred")} $occurred "
                     }
                 } else {
                     {
                         val exceptionType = advice.stackTrace.exceptionType.substringAfterLast(".")
-                        val occurred = (Clock.System.now().toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
+                        val occurred = (Clock.System.now()
+                            .toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
                                 " " + message("ago")
                         " //${message("threw")} $exceptionType $occurred "
                     }
@@ -136,5 +138,9 @@ object SourceMarkConstructor {
                 }
             }
         }
+    }
+
+    private fun isThrows(psiExpression: PsiElement): Boolean {
+        TODO()
     }
 }

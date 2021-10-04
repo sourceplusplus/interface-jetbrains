@@ -10,6 +10,7 @@ import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
+import com.sourceplusplus.marker.jvm.InstrumentConditionParser
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

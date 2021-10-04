@@ -10,12 +10,12 @@ import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
+import com.jetbrains.python.debugger.PyDebuggerEditorsProvider;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
-import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
+import com.sourceplusplus.marker.jvm.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -37,7 +37,7 @@ public class LiveLogConfigurationPanel extends JPanel {
                 psiFile.getVirtualFile(), inlayMark.getLineNumber()
         );
         comboBox = new XDebuggerExpressionComboBox(
-                psiFile.getProject(), new JavaDebuggerEditorsProvider(), "LiveLogCondition",
+                psiFile.getProject(), new PyDebuggerEditorsProvider(), "LiveLogCondition",
                 sourcePosition, false, false
         );
 

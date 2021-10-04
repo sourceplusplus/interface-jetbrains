@@ -3,6 +3,7 @@ package com.sourceplusplus.marker.py
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyFile
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.plugin.SourceLineMarkerProvider
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
@@ -25,6 +26,7 @@ class PythonLineMarkerProvider : SourceLineMarkerProvider() {
     }
 
     override fun getLineMarkerInfo(parent: PsiElement?, element: PsiElement): LineMarkerInfo<PsiElement>? {
+        val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)
         return null //todo: this
     }
 

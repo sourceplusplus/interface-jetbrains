@@ -1,12 +1,10 @@
 package com.sourceplusplus.marker.source
 
 import com.intellij.lang.Language
-import com.intellij.openapi.editor.Document
-import com.intellij.openapi.editor.ex.util.EditorUtil
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
+import com.sourceplusplus.marker.ArtifactCreationService
+import com.sourceplusplus.marker.Utils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
@@ -18,7 +16,6 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.*
 import org.slf4j.LoggerFactory
-import java.awt.Point
 import java.util.*
 
 /**
@@ -31,33 +28,7 @@ import java.util.*
 object SourceMarkerUtils {
 
     private val log = LoggerFactory.getLogger(SourceMarkerUtils::class.java)
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    fun getElementAtLine(file: PsiFile, line: Int): PsiElement? {
-        val document: Document = PsiDocumentManager.getInstance(file.project).getDocument(file)!!
-        if (document.lineCount == line - 1) {
-            return null
-        }
-
-        val offset = document.getLineStartOffset(line - 1)
-        var element = file.viewProvider.findElementAt(offset)
-        if (element != null) {
-            if (document.getLineNumber(element.textOffset) != line - 1) {
-                element = element.nextSibling
-            }
-        }
-
-        if (element != null && getLineNumber(element) != line) {
-            return null
-        }
-
-        return element
-    }
+    lateinit var creationService: ArtifactCreationService
 
     /**
      * todo: description.
@@ -66,22 +37,11 @@ object SourceMarkerUtils {
      */
     @JvmStatic
     fun isBlankLine(psiFile: PsiFile, lineNumber: Int): Boolean {
-        val element = getElementAtLine(psiFile, lineNumber)
+        val element = Utils.getElementAtLine(psiFile, lineNumber)
         if (element != null) {
-            return getLineNumber(element) != lineNumber
+            return Utils.getLineNumber(element) != lineNumber
         }
         return true
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.3.0
-     */
-    @JvmStatic
-    fun getLineNumber(element: PsiElement): Int {
-        val document = element.containingFile.viewProvider.document
-        return document!!.getLineNumber(element.textRange.startOffset) + 1
     }
 
     /**
@@ -96,14 +56,7 @@ object SourceMarkerUtils {
         lineNumber: Int,
         autoApply: Boolean = false
     ): Optional<ExpressionInlayMark> {
-        val element = getElementAtLine(fileMarker.psiFile, lineNumber)
-        return if (element is PsiStatement) {
-            Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply = autoApply))
-        } else if (element is PsiElement) {
-            Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply = autoApply))
-        } else {
-            Optional.empty()
-        }
+        return creationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber, autoApply)
     }
 
     /**
@@ -242,7 +195,7 @@ object SourceMarkerUtils {
         lineNumber: Int,
         autoApply: Boolean = false
     ): ExpressionInlayMark {
-        val element = getElementAtLine(fileMarker.psiFile, lineNumber) as PsiStatement
+        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiStatement
         return createExpressionInlayMark(fileMarker, element, autoApply = autoApply)
     }
 
@@ -289,7 +242,7 @@ object SourceMarkerUtils {
         lineNumber: Int,
         autoApply: Boolean = false
     ): Optional<ExpressionGutterMark> {
-        val element = getElementAtLine(fileMarker.psiFile, lineNumber)
+        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber)
         return if (element is PsiStatement) {
             Optional.ofNullable(getOrCreateExpressionGutterMark(fileMarker, element, autoApply = autoApply))
         } else Optional.empty()

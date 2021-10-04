@@ -1,9 +1,8 @@
-package com.sourceplusplus.sourcemarker.service.breakpoint.model
+package com.sourceplusplus.marker.jvm.model
 
 import com.intellij.debugger.ui.breakpoints.LineBreakpoint
 import com.intellij.openapi.project.Project
 import com.intellij.xdebugger.breakpoints.XBreakpoint
-import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import javax.swing.Icon
 
 /**
@@ -44,12 +43,13 @@ class LiveLineBreakpoint(project: Project, xBreakpoint: XBreakpoint<LiveBreakpoi
     }
 
     private fun determineIcon(): Icon {
-        val properties = xBreakpoint.properties
-        return when {
-            !properties.getSuspend() -> SourceMarkerIcons.LIVE_BREAKPOINT_PENDING_ICON
-            properties.getFinished() -> SourceMarkerIcons.LIVE_BREAKPOINT_COMPLETE_ICON
-            properties.getActive() -> SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
-            else -> SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
-        }
+        TODO()
+//        val properties = xBreakpoint.properties
+//        return when {
+//            !properties.getSuspend() -> SourceMarkerIcons.LIVE_BREAKPOINT_PENDING_ICON
+//            properties.getFinished() -> SourceMarkerIcons.LIVE_BREAKPOINT_COMPLETE_ICON
+//            properties.getActive() -> SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
+//            else -> SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
+//        }
     }
 }

@@ -1,15 +1,11 @@
 package com.sourceplusplus.sourcemarker.status;
 
-import com.intellij.debugger.engine.evaluation.TextWithImports;
-import com.intellij.debugger.engine.evaluation.TextWithImportsImpl;
-import com.intellij.debugger.impl.DebuggerUtilsEx;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.components.JBScrollPane;
@@ -29,7 +25,7 @@ import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.marker.jvm.psi.LoggerDetector;
-import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
+import com.sourceplusplus.marker.jvm.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.service.log.LogHitColumnInfo;
 import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
@@ -575,17 +571,17 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
         int hitLimit = 100;
         if (configurationPanel != null) {
-            TextWithImports expressionText = TextWithImportsImpl.fromXExpression(configurationPanel.getCondition());
-            PsiElement context = inlayMark.getPsiElement();
-            JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
-                    .createCodeFragment(expressionText, context, inlayMark.getProject());
-            condition = InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
-            expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
-            hitLimit = configurationPanel.getHitLimit();
-            throttle = new InstrumentThrottle(
-                    configurationPanel.getRateLimitCount(),
-                    ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
-            );
+//            TextWithImports expressionText = TextWithImportsImpl.fromXExpression(configurationPanel.getCondition());
+//            PsiElement context = inlayMark.getPsiElement();
+//            JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
+//                    .createCodeFragment(expressionText, context, inlayMark.getProject());
+//            condition = InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
+//            expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
+//            hitLimit = configurationPanel.getHitLimit();
+//            throttle = new InstrumentThrottle(
+//                    configurationPanel.getRateLimitCount(),
+//                    ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
+//            );
 
             configurationPanel.setNewDefaults();
         }

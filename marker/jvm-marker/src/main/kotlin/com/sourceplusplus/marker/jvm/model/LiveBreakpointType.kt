@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.breakpoint.model
+package com.sourceplusplus.marker.jvm.model
 
 import com.intellij.debugger.engine.DebuggerUtils
 import com.intellij.debugger.ui.breakpoints.Breakpoint
@@ -22,8 +22,6 @@ import com.intellij.xdebugger.breakpoints.ui.XBreakpointCustomPropertiesPanel
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
-import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
-import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider
 import org.jetbrains.java.debugger.breakpoints.JavaBreakpointFiltersPanel
 import javax.swing.Icon
@@ -57,11 +55,13 @@ class LiveBreakpointType : XLineBreakpointType<LiveBreakpointProperties>(
     }
 
     override fun getEnabledIcon(): Icon {
-        return SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
+        TODO()
+//        return SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
     }
 
     override fun getDisabledIcon(): Icon {
-        return SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON
+        TODO()
+//        return SourceMarkerIcons.LIVE_BREAKPOINT_ERROR_ICON
     }
 
     override fun createBreakpointProperties(file: VirtualFile, line: Int): LiveBreakpointProperties {
@@ -70,7 +70,7 @@ class LiveBreakpointType : XLineBreakpointType<LiveBreakpointProperties>(
             (PsiManager.getInstance(ProjectManager.getInstance().openProjects[0]).findFile(file) as PsiClassOwner)
         val qualifiedName = psiFile.classes[0].qualifiedName!!
         props.setLocation(LiveSourceLocation(qualifiedName, line + 1))
-        props.setSuspend(!BreakpointTriggerListener.shiftHeld)
+        //props.setSuspend(!BreakpointTriggerListener.shiftHeld)
         return props
     }
 
