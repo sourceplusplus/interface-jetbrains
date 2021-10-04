@@ -6,15 +6,15 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiManager
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
+import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.protocol.artifact.exception.qualifiedClassName
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import org.slf4j.LoggerFactory
 
 /**
- * todo: description.
+ * todo: probably don't need this as the breakpoint bar serves as the execution point indicator
  *
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -34,35 +34,31 @@ class ExecutionPointManager(
         val currentFrame = stackFrameManager.currentFrame
         var fromClass = currentFrame!!.qualifiedClassName()
 
-//        //check for inner class
-//        val indexOfDollarSign = fromClass.indexOf("$")
-//        if (indexOfDollarSign >= 0) {
-//            fromClass = fromClass.substring(0, indexOfDollarSign)
-//        }
-//        val containingClass = ClassUtil.findPsiClass(
-//            PsiManager.getInstance(
-//                project
-//            ), fromClass
-//        ) ?: return
-//        val virtualFile = containingClass.containingFile.virtualFile ?: return
-//        val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return
-//        val lineStartOffset = document.getLineStartOffset(currentFrame.sourceAsLineNumber()!!) - 1
-//
-//        ApplicationManager.getApplication().invokeLater {
-//            try {
-//                FileEditorManager.getInstance(project).openTextEditor(
-//                    OpenFileDescriptor(project, virtualFile, lineStartOffset), true
-//                )
-//                executionPointHighlighter.hide()
-//                executionPointHighlighter.show(
-//                    XDebuggerUtil.getInstance().createPositionByOffset(
-//                        virtualFile, lineStartOffset
-//                    )!!, false, null
-//                )
-//            } catch (e: Throwable) {
-//                log.error("Failed to set execution point", e)
-//            }
-//        }
+        //check for inner class
+        val indexOfDollarSign = fromClass.indexOf("$")
+        if (indexOfDollarSign >= 0) {
+            fromClass = fromClass.substring(0, indexOfDollarSign)
+        }
+        val fileMarker = SourceMarker.getSourceFileMarker(fromClass) ?: return
+        val virtualFile = fileMarker.psiFile.containingFile.virtualFile ?: return
+        val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return
+        val lineStartOffset = document.getLineStartOffset(currentFrame.sourceAsLineNumber()!!) - 1
+
+        ApplicationManager.getApplication().invokeLater {
+            try {
+                FileEditorManager.getInstance(project).openTextEditor(
+                    OpenFileDescriptor(project, virtualFile, lineStartOffset), true
+                )
+                executionPointHighlighter.hide()
+                executionPointHighlighter.show(
+                    XDebuggerUtil.getInstance().createPositionByOffset(
+                        virtualFile, lineStartOffset
+                    )!!, false, null
+                )
+            } catch (e: Throwable) {
+                log.error("Failed to set execution point", e)
+            }
+        }
     }
 
     override fun dispose() {
