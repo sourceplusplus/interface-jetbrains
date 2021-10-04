@@ -3,7 +3,11 @@ package com.sourceplusplus.sourcemarker.psi
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.JavaRecursiveElementVisitor
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.refactoring.suggested.endOffset
+import com.intellij.refactoring.suggested.startOffset
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
@@ -16,7 +20,6 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.kotlin.idea.refactoring.getLineNumber
 import org.jetbrains.plugins.groovy.lang.psi.impl.stringValue
 import org.jetbrains.uast.UMethod
 import org.slf4j.LoggerFactory
@@ -108,7 +111,7 @@ class LoggerDetector {
                             if (expression.argumentList.expressions.firstOrNull()?.stringValue() != null) {
                                 val logTemplate = expression.argumentList.expressions.first().stringValue()!!
                                 loggerStatements.add(
-                                    DetectedLogger(logTemplate, methodName, expression.getLineNumber() + 1)
+                                    DetectedLogger(logTemplate, methodName, getLineNumber(expression) + 1)
                                 )
                                 log.debug("Found log statement: $logTemplate")
                             } else {
@@ -121,6 +124,14 @@ class LoggerDetector {
             promise.complete(loggerStatements)
         }
         return promise.future()
+    }
+
+    private fun getLineNumber(element: PsiElement, start: Boolean = true): Int {
+        val document = element.containingFile.viewProvider.document
+            ?: PsiDocumentManager.getInstance(element.project).getDocument(element.containingFile)
+        val index = if (start) element.startOffset else element.endOffset
+        if (index > (document?.textLength ?: 0)) return 0
+        return document?.getLineNumber(index) ?: 0
     }
 
     /**
