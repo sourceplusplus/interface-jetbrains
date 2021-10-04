@@ -1,7 +1,5 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <xdebugger.breakpointType
-                implementation="com.sourceplusplus.marker.jvm.model.LiveBreakpointType"/>
         <codeInsight.lineMarkerProvider language="kotlin"
                                         implementationClass="com.sourceplusplus.marker.jvm.JVMLineMarkerProvider$KotlinDescriptor"/>
         <codeInsight.inlayProvider language="kotlin"

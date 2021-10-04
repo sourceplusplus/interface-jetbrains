@@ -136,7 +136,6 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
         val bpRemoved = Json.decodeValue(liveEvent.data, LiveBreakpointRemoved::class.java)
         ApplicationManager.getApplication().invokeLater {
             val project = ProjectManager.getInstance().openProjects[0]
-            BreakpointHitWindowService.getInstance(project).processRemoveBreakpoint(bpRemoved)
 
             val inlayMark = SourceMarkSearch.findByBreakpointId(bpRemoved.breakpointId)
             if (inlayMark != null) {
