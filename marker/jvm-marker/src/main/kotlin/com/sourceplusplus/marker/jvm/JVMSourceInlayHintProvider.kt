@@ -49,7 +49,7 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
         return null
     }
 
-    override fun doThing(
+    override fun displayVirtualText(
         element: PsiElement,
         virtualText: InlayMarkVirtualText,
         sink: InlayHintsSink,

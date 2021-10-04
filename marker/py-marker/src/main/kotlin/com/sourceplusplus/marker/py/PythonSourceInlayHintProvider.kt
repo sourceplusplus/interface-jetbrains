@@ -14,11 +14,12 @@ import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PythonSourceInlayHintProvider : SourceInlayHintProvider() {
+
     override fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? {
         TODO("Not yet implemented")
     }
 
-    override fun doThing(
+    override fun displayVirtualText(
         element: PsiElement,
         virtualText: InlayMarkVirtualText,
         sink: InlayHintsSink,

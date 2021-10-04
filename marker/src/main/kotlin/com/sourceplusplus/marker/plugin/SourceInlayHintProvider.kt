@@ -116,7 +116,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                     }
                 }
 
-                doThing(element, virtualText, sink, representation)
+                displayVirtualText(element, virtualText, sink, representation)
                 latestInlayMarkAddedAt = System.currentTimeMillis()
                 return true
             }
@@ -125,7 +125,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     abstract fun createInlayMarkIfNecessary(element: PsiElement): InlayMark?
 
-    abstract fun doThing(
+    abstract fun displayVirtualText(
         element: PsiElement,
         virtualText: InlayMarkVirtualText,
         sink: InlayHintsSink,
