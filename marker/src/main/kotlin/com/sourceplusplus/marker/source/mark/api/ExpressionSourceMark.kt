@@ -87,13 +87,6 @@ abstract class ExpressionSourceMark(
     }
 
     override fun getPsiElement(): PsiElement {
-        //todo: move to jvm
-//        if (psiExpression is UDeclarationsExpression) {
-//            //todo: support for multi-declaration statements
-//            return (psiExpression as UDeclarationsExpression).declarations[0].sourcePsi!!
-//        } else {
-//            return psiExpression.sourcePsi!!
-//        }
         return psiExpression
     }
 
