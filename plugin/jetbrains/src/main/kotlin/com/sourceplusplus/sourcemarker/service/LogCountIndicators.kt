@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.service
 
 import com.intellij.openapi.application.ApplicationManager
-import com.sourceplusplus.marker.source.JVMMarkerUtils
+import com.sourceplusplus.marker.SourceMarker.creationService
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.error.AccessDenied
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
@@ -43,7 +43,7 @@ class LogCountIndicators : CoroutineVerticle() {
                                     val logger = loggers.find { it.logPattern == logSummary.key }!!
 
                                     ApplicationManager.getApplication().runReadAction {
-                                        val logIndicator = JVMMarkerUtils.getOrCreateExpressionGutterMark(
+                                        val logIndicator = creationService.getOrCreateExpressionGutterMark(
                                             methodMark.sourceFileMarker,
                                             logger.lineLocation
                                         ).get()

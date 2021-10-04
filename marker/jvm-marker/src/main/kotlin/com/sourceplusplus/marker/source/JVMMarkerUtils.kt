@@ -221,24 +221,6 @@ object JVMMarkerUtils {
      */
     @JvmStatic
     @JvmOverloads
-    fun getOrCreateExpressionGutterMark(
-        fileMarker: SourceFileMarker,
-        lineNumber: Int,
-        autoApply: Boolean = false
-    ): Optional<ExpressionGutterMark> {
-        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
-        return if (element is PsiStatement) {
-            Optional.ofNullable(getOrCreateExpressionGutterMark(fileMarker, element, autoApply = autoApply))
-        } else Optional.empty()
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    @JvmOverloads
     @Synchronized
     fun getOrCreateExpressionGutterMark(
         fileMarker: SourceFileMarker,

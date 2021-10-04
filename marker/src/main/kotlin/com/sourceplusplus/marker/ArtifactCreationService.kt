@@ -1,6 +1,7 @@
 package com.sourceplusplus.marker
 
 import com.sourceplusplus.marker.source.SourceFileMarker
+import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import java.util.*
 
@@ -11,6 +12,12 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface ArtifactCreationService {
+
+    fun getOrCreateExpressionGutterMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean = false
+    ): Optional<ExpressionGutterMark>
 
     fun getOrCreateExpressionInlayMark(
         fileMarker: SourceFileMarker,

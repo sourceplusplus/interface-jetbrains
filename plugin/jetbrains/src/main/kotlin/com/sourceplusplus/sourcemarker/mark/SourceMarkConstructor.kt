@@ -1,9 +1,8 @@
 package com.sourceplusplus.sourcemarker.mark
 
 import com.intellij.psi.PsiElement
+import com.sourceplusplus.marker.SourceMarker.creationService
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.JVMMarkerUtils.getOrCreateExpressionGutterMark
-import com.sourceplusplus.marker.source.JVMMarkerUtils.getOrCreateExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
@@ -58,7 +57,7 @@ object SourceMarkConstructor {
     fun getOrSetupSourceMark(fileMarker: SourceFileMarker, advice: ArtifactAdvice): SourceMark? {
         when (advice.type) {
             AdviceType.RampDetectionAdvice -> {
-                val gutterMark = getOrCreateExpressionGutterMark(fileMarker, advice.artifact.lineNumber!!)
+                val gutterMark = creationService.getOrCreateExpressionGutterMark(fileMarker, advice.artifact.lineNumber!!)
                 return if (gutterMark.isPresent) {
                     if (!fileMarker.containsSourceMark(gutterMark.get())) {
                         attachAdvice(gutterMark.get(), advice)
@@ -71,7 +70,7 @@ object SourceMarkConstructor {
                 }
             }
             AdviceType.ActiveExceptionAdvice -> {
-                val inlayMark = getOrCreateExpressionInlayMark(fileMarker, advice.artifact.lineNumber!!)
+                val inlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, advice.artifact.lineNumber!!)
                 return if (inlayMark.isPresent) {
                     if (!fileMarker.containsSourceMark(inlayMark.get())) {
                         attachAdvice(inlayMark.get(), advice)
@@ -129,7 +128,7 @@ object SourceMarkConstructor {
                 })
 
                 //todo: shouldn't be creating gutter mark here
-                val gutterMark = getOrCreateExpressionGutterMark(
+                val gutterMark = creationService.getOrCreateExpressionGutterMark(
                     inlayMark.sourceFileMarker, advice.artifact.lineNumber!!
                 ).get()
                 if (!gutterMark.sourceFileMarker.containsSourceMark(gutterMark)) {
