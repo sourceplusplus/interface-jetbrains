@@ -35,6 +35,7 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:core-ui:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:editor:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.platform:indexing:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:lang:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:lang-impl:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:project-model:$intellijVersion") { isTransitive = false }
