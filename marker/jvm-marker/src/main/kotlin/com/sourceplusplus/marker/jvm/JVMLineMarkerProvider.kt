@@ -10,7 +10,7 @@ import com.intellij.psi.PsiMethod
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.plugin.SourceLineMarkerProvider
 import com.sourceplusplus.marker.source.SourceFileMarker.Companion.SUPPORTED_FILE_TYPES
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
@@ -50,13 +50,13 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
         if (parent is PsiClass && element === parent.nameIdentifier) {
             //class gutter marks
             val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
-            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
+            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
             if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
 
             //check by artifact name first due to user can erroneously name same class twice
             var gutterMark = fileMarker.getSourceMark(artifactQualifiedName, SourceMark.Type.GUTTER) as ClassGutterMark?
             if (gutterMark == null) {
-                gutterMark = SourceMarkerUtils.getOrCreateClassGutterMark(fileMarker, element) ?: return null
+                gutterMark = JVMMarkerUtils.getOrCreateClassGutterMark(fileMarker, element) ?: return null
             }
             if (!gutterMark.isVisible()) {
                 return null
@@ -87,7 +87,7 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
                 log.warn("Unable to transform to UMethod: {}", element.parent)
                 return null
             }
-            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
+            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
             if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
 
             //check by artifact name first due to user can erroneously name same method twice
@@ -96,7 +96,7 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
                 SourceMark.Type.GUTTER
             ) as MethodGutterMark?
             if (gutterMark == null) {
-                gutterMark = SourceMarkerUtils.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
+                gutterMark = JVMMarkerUtils.getOrCreateMethodGutterMark(fileMarker, element as PsiMethod) ?: return null
             }
             if (!gutterMark.isVisible()) {
                 return null

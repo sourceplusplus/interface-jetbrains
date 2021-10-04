@@ -8,7 +8,7 @@ import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.marker.jvm.psi.EndpointDetector
@@ -71,7 +71,7 @@ object ArtifactSearch {
         ApplicationManager.getApplication().runReadAction {
             if (artifact.type == ArtifactType.CLASS) {
                 val artifactQualifiedName = artifact.identifier
-                val classQualifiedName = SourceMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+                val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
                 val psiClass = JavaPsiFacade.getInstance(project).findClass(
                     classQualifiedName,
                     GlobalSearchScope.allScope(project)
@@ -79,14 +79,14 @@ object ArtifactSearch {
                 promise.complete(Optional.ofNullable(psiClass))
             } else if (artifact.type == ArtifactType.METHOD) {
                 val artifactQualifiedName = artifact.identifier
-                val classQualifiedName = SourceMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+                val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
                 val psiClass = JavaPsiFacade.getInstance(project).findClass(
                     classQualifiedName,
                     GlobalSearchScope.allScope(project)
                 )
                 for (theMethod in psiClass!!.methods) {
                     val uMethod = theMethod.toUElement() as UMethod
-                    val qualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
+                    val qualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
                     if (qualifiedName == artifactQualifiedName) {
                         promise.complete(Optional.of(theMethod))
                     }

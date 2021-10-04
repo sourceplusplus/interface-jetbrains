@@ -2,8 +2,8 @@ package com.sourceplusplus.sourcemarker.mark
 
 import com.intellij.psi.PsiElement
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.SourceMarkerUtils.getOrCreateExpressionGutterMark
-import com.sourceplusplus.marker.source.SourceMarkerUtils.getOrCreateExpressionInlayMark
+import com.sourceplusplus.marker.source.JVMMarkerUtils.getOrCreateExpressionGutterMark
+import com.sourceplusplus.marker.source.JVMMarkerUtils.getOrCreateExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark

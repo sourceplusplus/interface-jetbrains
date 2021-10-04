@@ -7,7 +7,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.sourceplusplus.marker.SourceMarker.namingService
 import com.sourceplusplus.marker.SourceMarker.scopeService
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
@@ -93,7 +93,7 @@ object LiveStatusManager : SourceMarkEventListener {
             return
         }
 
-        val inlayMark = SourceMarkerUtils.createExpressionInlayMark(fileMarker, lineNumber)
+        val inlayMark = JVMMarkerUtils.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
@@ -134,7 +134,7 @@ object LiveStatusManager : SourceMarkEventListener {
             return
         }
 
-        val inlayMark = SourceMarkerUtils.createExpressionInlayMark(fileMarker, lineNumber)
+        val inlayMark = JVMMarkerUtils.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
@@ -174,7 +174,7 @@ object LiveStatusManager : SourceMarkEventListener {
     fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
-            val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
+            val findInlayMark = JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
@@ -211,7 +211,7 @@ object LiveStatusManager : SourceMarkEventListener {
     fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
-            val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
+            val findInlayMark = JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {

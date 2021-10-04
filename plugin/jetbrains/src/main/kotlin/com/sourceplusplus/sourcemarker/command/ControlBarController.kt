@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocumentManager
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
@@ -102,7 +102,7 @@ object ControlBarController {
             return
         }
 
-        val findInlayMark = SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
+        val findInlayMark = JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
         if (findInlayMark.isPresent) {
             val inlayMark = findInlayMark.get()
             if (fileMarker.containsSourceMark(inlayMark)) {

@@ -2,7 +2,7 @@ package com.sourceplusplus.marker.py
 
 import com.intellij.psi.PsiElement
 import com.sourceplusplus.marker.ArtifactCreationService
-import com.sourceplusplus.marker.Utils
+import com.sourceplusplus.marker.SourceMarkerUtils
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
@@ -22,7 +22,7 @@ class PythonArtifactCreationService : ArtifactCreationService {
         lineNumber: Int,
         autoApply: Boolean
     ): Optional<ExpressionInlayMark> {
-        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber)
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
         if (element != null) {//PyExpressionStatement
             return Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         }
@@ -34,7 +34,7 @@ class PythonArtifactCreationService : ArtifactCreationService {
         lineNumber: Int,
         autoApply: Boolean
     ): ExpressionInlayMark {
-        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
         val inlayMark = fileMarker.createExpressionSourceMark(
             element,
             SourceMark.Type.INLAY

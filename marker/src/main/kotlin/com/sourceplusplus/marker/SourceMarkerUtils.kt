@@ -3,7 +3,21 @@ package com.sourceplusplus.marker
 import com.intellij.openapi.editor.Document
 import com.intellij.psi.*
 
-object Utils {
+object SourceMarkerUtils {
+
+    /**
+     * todo: description.
+     *
+     * @since 0.3.0
+     */
+    @JvmStatic
+    fun isBlankLine(psiFile: PsiFile, lineNumber: Int): Boolean {
+        val element = SourceMarkerUtils.getElementAtLine(psiFile, lineNumber)
+        if (element != null) {
+            return SourceMarkerUtils.getLineNumber(element) != lineNumber
+        }
+        return true
+    }
 
     /**
      * todo: description.

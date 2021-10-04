@@ -4,7 +4,7 @@ import com.intellij.lang.Language
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
 import com.sourceplusplus.marker.SourceMarker.creationService
-import com.sourceplusplus.marker.Utils
+import com.sourceplusplus.marker.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.ClassGutterMark
@@ -25,23 +25,9 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("TooManyFunctions")
-object SourceMarkerUtils {
+object JVMMarkerUtils {
 
-    private val log = LoggerFactory.getLogger(SourceMarkerUtils::class.java)
-
-    /**
-     * todo: description.
-     *
-     * @since 0.3.0
-     */
-    @JvmStatic
-    fun isBlankLine(psiFile: PsiFile, lineNumber: Int): Boolean {
-        val element = Utils.getElementAtLine(psiFile, lineNumber)
-        if (element != null) {
-            return Utils.getLineNumber(element) != lineNumber
-        }
-        return true
-    }
+    private val log = LoggerFactory.getLogger(JVMMarkerUtils::class.java)
 
     /**
      * todo: description.
@@ -240,7 +226,7 @@ object SourceMarkerUtils {
         lineNumber: Int,
         autoApply: Boolean = false
     ): Optional<ExpressionGutterMark> {
-        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber)
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
         return if (element is PsiStatement) {
             Optional.ofNullable(getOrCreateExpressionGutterMark(fileMarker, element, autoApply = autoApply))
         } else Optional.empty()

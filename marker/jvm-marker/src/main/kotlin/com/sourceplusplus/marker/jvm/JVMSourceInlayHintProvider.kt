@@ -8,7 +8,7 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.plugin.SourceInlayHintProvider
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
 import org.jetbrains.kotlin.psi.KtNamedFunction
@@ -33,17 +33,17 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
             || (parent is KtNamedFunction && element === parent.nameIdentifier)
         ) {
             val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
-            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(parent.toUElement() as UMethod)
+            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(parent.toUElement() as UMethod)
             return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
-                SourceMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
+                JVMMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
             }
         } else if (element is PsiStatement) {
             val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
-            val artifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(
-                SourceMarkerUtils.getUniversalExpression(element).toUElement() as UExpression
+            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(
+                JVMMarkerUtils.getUniversalExpression(element).toUElement() as UExpression
             )
             return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
-                SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
+                JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
             }
         }
         return null

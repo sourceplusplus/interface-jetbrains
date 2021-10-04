@@ -3,9 +3,9 @@ package com.sourceplusplus.marker.jvm
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiStatement
 import com.sourceplusplus.marker.ArtifactCreationService
-import com.sourceplusplus.marker.Utils
+import com.sourceplusplus.marker.SourceMarkerUtils
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import java.util.*
 
@@ -22,11 +22,11 @@ class JVMArtifactCreationService : ArtifactCreationService {
         lineNumber: Int,
         autoApply: Boolean
     ): Optional<ExpressionInlayMark> {
-        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber)
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
         return if (element is PsiStatement) {
-            Optional.ofNullable(SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
+            Optional.ofNullable(JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         } else if (element is PsiElement) {
-            Optional.ofNullable(SourceMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
+            Optional.ofNullable(JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         } else {
             Optional.empty()
         }
@@ -37,7 +37,7 @@ class JVMArtifactCreationService : ArtifactCreationService {
         lineNumber: Int,
         autoApply: Boolean
     ): ExpressionInlayMark {
-        val element = Utils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiStatement
-        return SourceMarkerUtils.createExpressionInlayMark(fileMarker, element, autoApply)
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiStatement
+        return JVMMarkerUtils.createExpressionInlayMark(fileMarker, element, autoApply)
     }
 }

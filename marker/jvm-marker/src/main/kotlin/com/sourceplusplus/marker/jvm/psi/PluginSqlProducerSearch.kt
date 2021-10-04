@@ -5,7 +5,7 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.search.searches.OverridingMethodsSearch
 import com.sourceplusplus.marker.jvm.ArtifactSearch
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.extend.SqlProducerSearch
@@ -65,7 +65,7 @@ class PluginSqlProducerSearch(val vertx: Vertx) : SqlProducerSearch {
                                 promise.complete(
                                     Optional.of(
                                         ArtifactQualifiedName(
-                                            SourceMarkerUtils.getFullyQualifiedName(method.method),
+                                            JVMMarkerUtils.getFullyQualifiedName(method.method),
                                             "todo",
                                             ArtifactType.METHOD
                                         )

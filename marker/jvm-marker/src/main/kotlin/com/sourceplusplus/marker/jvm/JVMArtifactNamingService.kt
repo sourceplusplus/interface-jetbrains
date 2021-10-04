@@ -4,7 +4,7 @@ import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.sourceplusplus.marker.ArtifactNamingService
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
@@ -20,9 +20,9 @@ class JVMArtifactNamingService : ArtifactNamingService {
 
     override fun getFullyQualifiedName(element: PsiElement): String {
         return when (val uElement = element.toUElement()) {
-            is UClass -> SourceMarkerUtils.getFullyQualifiedName(uElement)
-            is UMethod -> SourceMarkerUtils.getFullyQualifiedName(uElement)
-            is UExpression -> SourceMarkerUtils.getFullyQualifiedName(uElement)
+            is UClass -> JVMMarkerUtils.getFullyQualifiedName(uElement)
+            is UMethod -> JVMMarkerUtils.getFullyQualifiedName(uElement)
+            is UExpression -> JVMMarkerUtils.getFullyQualifiedName(uElement)
             else -> TODO("Not yet implemented")
         }
     }
