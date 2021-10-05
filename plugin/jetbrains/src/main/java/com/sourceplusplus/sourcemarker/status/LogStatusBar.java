@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.status;
 
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
@@ -12,17 +13,20 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
+import com.sourceplusplus.marker.jvm.JVMConditionParser;
+import com.sourceplusplus.marker.jvm.psi.LoggerDetector;
+import com.sourceplusplus.marker.py.PythonConditionParser;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
+import com.sourceplusplus.protocol.instrument.ThrottleStep;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
-import com.sourceplusplus.marker.jvm.psi.LoggerDetector;
 import com.sourceplusplus.sourcemarker.service.log.LogHitColumnInfo;
 import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
@@ -50,7 +54,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.*;
+import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG_HIT;
+import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class LogStatusBar extends JPanel implements VisibleAreaListener {
@@ -572,17 +577,24 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
         int hitLimit = 100;
         if (configurationPanel != null) {
-//            TextWithImports expressionText = TextWithImportsImpl.fromXExpression(configurationPanel.getCondition());
-//            PsiElement context = inlayMark.getPsiElement();
-//            JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
-//                    .createCodeFragment(expressionText, context, inlayMark.getProject());
-//            condition = InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
-//            expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
-//            hitLimit = configurationPanel.getHitLimit();
-//            throttle = new InstrumentThrottle(
-//                    configurationPanel.getRateLimitCount(),
-//                    ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
-//            );
+            if (configurationPanel.getCondition() != null) {
+                if ("PY".equals(PluginManagerCore.getBuildNumber().getProductCode())) {
+                    condition = PythonConditionParser.INSTANCE.getCondition(
+                            configurationPanel.getCondition().getExpression(), inlayMark.getPsiElement()
+                    );
+                } else {
+                    condition = JVMConditionParser.INSTANCE.getCondition(
+                            configurationPanel.getCondition().getExpression(), inlayMark.getPsiElement()
+                    );
+                }
+            }
+
+            expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
+            hitLimit = configurationPanel.getHitLimit();
+            throttle = new InstrumentThrottle(
+                    configurationPanel.getRateLimitCount(),
+                    ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
+            );
 
             configurationPanel.setNewDefaults();
         }

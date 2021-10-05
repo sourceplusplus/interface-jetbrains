@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.status;
 
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
@@ -13,7 +14,8 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
+import com.sourceplusplus.marker.jvm.JVMConditionParser;
+import com.sourceplusplus.marker.py.PythonConditionParser;
 import com.sourceplusplus.marker.source.mark.api.SourceMark;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
@@ -412,11 +414,19 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     private void saveLiveBreakpoint() {
         breakpointConditionField.setShowSaveButton(false);
 
-//        TextWithImports expressionText = TextWithImportsImpl.fromXExpression(XExpressionImpl.fromText(breakpointConditionField.getText()));
-//        PsiElement context = inlayMark.getPsiElement();
-//        JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
-//                .createCodeFragment(expressionText, context, inlayMark.getProject());
-        String condition = null;//InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
+        String condition = null;
+        if (!breakpointConditionField.getText().isEmpty()) {
+            if ("PY".equals(PluginManagerCore.getBuildNumber().getProductCode())) {
+                condition = PythonConditionParser.INSTANCE.getCondition(
+                        breakpointConditionField.getText(), inlayMark.getPsiElement()
+                );
+            } else {
+                condition = JVMConditionParser.INSTANCE.getCondition(
+                        breakpointConditionField.getText(), inlayMark.getPsiElement()
+                );
+            }
+        }
+
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
         InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
         JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) hitLimitSpinner.getEditor()).getTextField();
