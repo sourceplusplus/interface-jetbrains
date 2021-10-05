@@ -149,25 +149,16 @@ object SourceMarkerPlugin {
         DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
-        SourceMarker.creationService = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
-            PythonArtifactCreationService()
+        if (PluginManagerCore.getBuildNumber().productCode == "PY") {
+            SourceMarker.creationService = PythonArtifactCreationService()
+            SourceMarker.namingService = PythonArtifactNamingService()
+            SourceMarker.scopeService = PythonArtifactScopeService()
+            SourceMarker.conditionParser = PythonConditionParser()
         } else {
-            JVMArtifactCreationService()
-        }
-        SourceMarker.namingService = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
-            PythonArtifactNamingService()
-        } else {
-            JVMArtifactNamingService()
-        }
-        SourceMarker.scopeService = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
-            PythonArtifactScopeService()
-        } else {
-            JVMArtifactScopeService()
-        }
-        SourceMarker.conditionParser = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
-            PythonConditionParser()
-        } else {
-            JVMConditionParser()
+            SourceMarker.creationService = JVMArtifactCreationService()
+            SourceMarker.namingService = JVMArtifactNamingService()
+            SourceMarker.scopeService = JVMArtifactScopeService()
+            SourceMarker.conditionParser = JVMConditionParser()
         }
     }
 
