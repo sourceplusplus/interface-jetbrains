@@ -26,6 +26,7 @@ object SourceMarker {
     lateinit var namingService: ArtifactNamingService
     lateinit var creationService: ArtifactCreationService
     lateinit var scopeService: ArtifactScopeService
+    lateinit var conditionParser: InstrumentConditionParser
     private val log = LoggerFactory.getLogger(javaClass)
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()

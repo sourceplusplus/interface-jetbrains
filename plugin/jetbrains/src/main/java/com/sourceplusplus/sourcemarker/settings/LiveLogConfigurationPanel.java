@@ -13,7 +13,6 @@ import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
-import com.sourceplusplus.marker.jvm.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +21,8 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Objects;
+
+import static com.sourceplusplus.marker.SourceMarker.conditionParser;
 
 public class LiveLogConfigurationPanel extends JPanel {
 
@@ -90,7 +91,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         if (condition == null) {
             setCondition(null);
         } else {
-            setCondition(XExpressionImpl.fromText(InstrumentConditionParser.INSTANCE.fromLiveConditional(condition)));
+            setCondition(XExpressionImpl.fromText(conditionParser.fromLiveConditional(condition)));
         }
     }
 

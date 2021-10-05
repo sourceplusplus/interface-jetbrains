@@ -26,7 +26,7 @@ class PythonArtifactCreationService : ArtifactCreationService {
         autoApply: Boolean
     ): Optional<ExpressionGutterMark> {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
-        if (element != null) {//PyExpressionStatement
+        if (element != null) {
             return Optional.ofNullable(getOrCreateExpressionGutterMark(fileMarker, element, autoApply))
         }
         return Optional.empty()
@@ -91,7 +91,7 @@ class PythonArtifactCreationService : ArtifactCreationService {
         autoApply: Boolean
     ): Optional<ExpressionInlayMark> {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
-        if (element != null) {//PyExpressionStatement
+        if (element != null) {
             return Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         }
         return Optional.empty()
@@ -131,16 +131,11 @@ class PythonArtifactCreationService : ArtifactCreationService {
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark?
             if (inlayMark != null) {
-                TODO()
-//                    if (inlayMark.updatePsiExpression(
-//                            statementExpression,
-//                            getFullyQualifiedName(statementExpression.toUElement() as UExpression)
-//                        )
-//                    ) {
-//                        statementExpression.putUserData(SourceKey.InlayMark, inlayMark)
-//                    } else {
-//                        inlayMark = null
-//                    }
+                if (inlayMark.updatePsiExpression(element, namingService.getFullyQualifiedName(element))) {
+                    element.putUserData(SourceKey.InlayMark, inlayMark)
+                } else {
+                    inlayMark = null
+                }
             }
         }
 
@@ -166,7 +161,6 @@ class PythonArtifactCreationService : ArtifactCreationService {
             } else {
                 inlayMark
             }
-
         }
     }
 }

@@ -20,13 +20,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.sourceplusplus.marker.SourceMarker
-import com.sourceplusplus.marker.jvm.ArtifactSearch
-import com.sourceplusplus.marker.jvm.JVMArtifactCreationService
-import com.sourceplusplus.marker.jvm.JVMArtifactNamingService
-import com.sourceplusplus.marker.jvm.JVMArtifactScopeService
+import com.sourceplusplus.marker.jvm.*
 import com.sourceplusplus.marker.py.PythonArtifactCreationService
 import com.sourceplusplus.marker.py.PythonArtifactNamingService
 import com.sourceplusplus.marker.py.PythonArtifactScopeService
+import com.sourceplusplus.marker.py.PythonConditionParser
 import com.sourceplusplus.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import com.sourceplusplus.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
@@ -165,6 +163,11 @@ object SourceMarkerPlugin {
             PythonArtifactScopeService()
         } else {
             JVMArtifactScopeService()
+        }
+        SourceMarker.conditionParser = if (PluginManagerCore.getBuildNumber().productCode == "PY") {
+            PythonConditionParser()
+        } else {
+            JVMConditionParser()
         }
     }
 

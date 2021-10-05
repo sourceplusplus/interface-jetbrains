@@ -1,6 +1,7 @@
 package com.sourceplusplus.marker.py
 
 import com.intellij.psi.PsiElement
+import com.sourceplusplus.marker.InstrumentConditionParser
 
 /**
  * todo: description.
@@ -8,9 +9,9 @@ import com.intellij.psi.PsiElement
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object PythonConditionParser {
+class PythonConditionParser : InstrumentConditionParser() {
 
-    fun getCondition(condition: String, context: PsiElement): String {
-        return ""
+    override fun getCondition(condition: String, context: PsiElement): String {
+        return condition
     }
 }

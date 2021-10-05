@@ -1,6 +1,5 @@
 package com.sourceplusplus.sourcemarker.status;
 
-import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
@@ -14,8 +13,6 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import com.sourceplusplus.marker.jvm.JVMConditionParser;
-import com.sourceplusplus.marker.py.PythonConditionParser;
 import com.sourceplusplus.marker.source.mark.api.SourceMark;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
@@ -53,6 +50,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.sourceplusplus.marker.SourceMarker.conditionParser;
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
@@ -416,15 +414,9 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
 
         String condition = null;
         if (!breakpointConditionField.getText().isEmpty()) {
-            if ("PY".equals(PluginManagerCore.getBuildNumber().getProductCode())) {
-                condition = PythonConditionParser.INSTANCE.getCondition(
-                        breakpointConditionField.getText(), inlayMark.getPsiElement()
-                );
-            } else {
-                condition = JVMConditionParser.INSTANCE.getCondition(
-                        breakpointConditionField.getText(), inlayMark.getPsiElement()
-                );
-            }
+            condition = conditionParser.getCondition(
+                    breakpointConditionField.getText(), inlayMark.getPsiElement()
+            );
         }
 
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
