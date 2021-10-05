@@ -93,7 +93,7 @@ class VariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                     SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.NUMBER))
                 )
             }
-            presentation.setIcon(AllIcons.Debugger.Db_primitive) //AllIcons.Nodes.Parameter
+            presentation.setIcon(AllIcons.Debugger.Db_primitive)
         } else if (variable.liveClazz != null) {
             if (variable.liveClazz == "java.lang.Class") {
                 presentation.addText(
