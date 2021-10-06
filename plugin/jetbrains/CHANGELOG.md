@@ -3,6 +3,9 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+### Added
+- Added meta storage to live instruments
+- Refactored code for Python live instrument support
 
 ## [0.3.1] - 2021-10-02
 ### Fixed
