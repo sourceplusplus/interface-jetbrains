@@ -23,6 +23,10 @@ object SourceMarker {
     @Volatile
     var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
+    lateinit var namingService: ArtifactNamingService
+    lateinit var creationService: ArtifactCreationService
+    lateinit var scopeService: ArtifactScopeService
+    lateinit var conditionParser: InstrumentConditionParser
     private val log = LoggerFactory.getLogger(javaClass)
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
@@ -84,12 +88,9 @@ object SourceMarker {
     fun getSourceFileMarker(classQualifiedName: String): SourceFileMarker? {
         check(enabled) { "SourceMarker disabled" }
 
-        availableSourceFileMarkers.values.forEach { marker ->
-            if (marker.getClassQualifiedNames().contains(classQualifiedName)) {
-                return marker
-            }
+        return availableSourceFileMarkers.values.find {
+            namingService.getClassQualifiedNames(it.psiFile).contains(classQualifiedName)
         }
-        return null
     }
 
     fun getAvailableSourceFileMarkers(): List<SourceFileMarker> {
@@ -137,5 +138,9 @@ object SourceMarker {
     fun getSourceMarks(): List<SourceMark> {
         check(enabled) { "SourceMarker disabled" }
         return availableSourceFileMarkers.values.flatMap { it.getSourceMarks() }
+    }
+
+    fun getSourceMark(id: String): SourceMark? {
+        return getSourceMarks().find { it.id == id }
     }
 }

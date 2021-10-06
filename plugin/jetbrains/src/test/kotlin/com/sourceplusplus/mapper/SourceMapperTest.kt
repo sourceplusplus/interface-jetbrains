@@ -9,7 +9,7 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.sourceplusplus.mapper.extend.SourceCodeTokenizer
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import org.jetbrains.uast.UFile
@@ -50,7 +50,7 @@ abstract class SourceMapperTest : LightJavaCodeInsightFixtureTestCase() {
                             result.add(
                                 SourceCodeTokenizer.TokenizedMethod(
                                     ArtifactQualifiedName(
-                                        SourceMarkerUtils.getFullyQualifiedName(it),
+                                        JVMMarkerUtils.getFullyQualifiedName(it),
                                         "",
                                         ArtifactType.METHOD
                                     ), tokens

@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.service.breakpoint.tree
+package com.sourceplusplus.marker.jvm
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.highlighter.JavaHighlightingColors
@@ -93,7 +93,7 @@ class VariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                     SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.NUMBER))
                 )
             }
-            presentation.setIcon(AllIcons.Debugger.Db_primitive) //AllIcons.Nodes.Parameter
+            presentation.setIcon(AllIcons.Debugger.Db_primitive)
         } else if (variable.liveClazz != null) {
             if (variable.liveClazz == "java.lang.Class") {
                 presentation.addText(

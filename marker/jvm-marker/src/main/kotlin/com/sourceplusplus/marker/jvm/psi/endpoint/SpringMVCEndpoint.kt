@@ -1,9 +1,9 @@
-package com.sourceplusplus.sourcemarker.psi.endpoint
+package com.sourceplusplus.marker.jvm.psi.endpoint
 
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector.DetectedEndpoint
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector.DetectedEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUReferenceExpression
@@ -68,8 +68,21 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                                 promise.complete(detectedEndpoint)
                             }
                         }
+                        annotation.lang === Language.findLanguageByID("Scala") -> {
+                            val detectedEndpoint = handleScalaAnnotation(false, annotation, annotationName)
+                            val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
+                                ?.findAnnotation(requestMappingAnnotation)
+                            if (classRequestMapping != null) {
+                                val classEndpoint = handleScalaAnnotation(
+                                    true, classRequestMapping, requestMappingAnnotation
+                                )
+                                handleEndpointDetection(detectedEndpoint, classEndpoint, promise)
+                            } else {
+                                promise.complete(detectedEndpoint)
+                            }
+                        }
                         else -> throw UnsupportedOperationException(
-                            "Language ${annotation.lang} is not currently supported"
+                            "Language ${annotation.lang.displayName} is not currently supported"
                         )
                     }
                 }
@@ -190,6 +203,55 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
+            val value = if (valueExpr is KotlinUCollectionLiteralExpression) {
+                valueExpr.valueArguments[0].evaluate()
+            } else if (valueExpr != null) {
+                valueExpr.evaluate()
+            } else {
+                "/"
+            }
+            val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
+                .replace("Mapping", "").toUpperCase()
+            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
+        }
+    }
+
+    private fun handleScalaAnnotation(
+        isClass: Boolean,
+        annotation: UAnnotation,
+        annotationName: String
+    ): Optional<DetectedEndpoint> {
+        if (annotationName == requestMappingAnnotation) {
+            var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
+            if (endpointNameExpr == null) {
+                endpointNameExpr = annotation.attributeValues.find { it.name == "path" }?.expression
+            }
+            if (endpointNameExpr == null) {
+                endpointNameExpr = annotation.attributeValues.find { it.name == null }?.expression
+            }
+            if (isClass) {
+                val value = if (endpointNameExpr == null) {
+                    "/"
+                } else (endpointNameExpr as KotlinStringULiteralExpression).value
+                return Optional.of(DetectedEndpoint(value, false, value))
+            }
+
+            val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
+            val value = endpointNameExpr.getUCallExpression()!!.valueArguments[0].evaluate()
+            val valueArg = (methodExpr as UCallExpressionAdapter).valueArguments[0]
+            val method = if (valueArg is USimpleNameReferenceExpression) {
+                valueArg.resolvedName
+            } else if (valueArg is UQualifiedReferenceExpressionAdapter) {
+                valueArg.selector.asSourceString().substringAfter("RequestMethod.")
+            } else {
+                throw UnsupportedOperationException(valueArg.javaClass.name)
+            }
+            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
+        } else {
+            var valueExpr = annotation.findAttributeValue("value")
+            if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
+            if (valueExpr is UastEmptyExpression) valueExpr = annotation.findAttributeValue("path") //todo: have to call this twice???
+            if (valueExpr is UastEmptyExpression) valueExpr = null
             val value = if (valueExpr is KotlinUCollectionLiteralExpression) {
                 valueExpr.valueArguments[0].evaluate()
             } else if (valueExpr != null) {

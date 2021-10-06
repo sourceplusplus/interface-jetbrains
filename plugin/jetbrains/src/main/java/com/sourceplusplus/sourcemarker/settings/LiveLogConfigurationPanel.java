@@ -1,5 +1,6 @@
 package com.sourceplusplus.sourcemarker.settings;
 
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
@@ -8,19 +9,20 @@ import com.intellij.ui.EditorTextField;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
+import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
-import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Objects;
+
+import static com.sourceplusplus.marker.SourceMarker.conditionParser;
 
 public class LiveLogConfigurationPanel extends JPanel {
 
@@ -36,8 +38,27 @@ public class LiveLogConfigurationPanel extends JPanel {
         XSourcePosition sourcePosition = XDebuggerUtil.getInstance().createPosition(
                 psiFile.getVirtualFile(), inlayMark.getLineNumber()
         );
+
+        XDebuggerEditorsProvider editorsProvider;
+        if ("PY".equals(PluginManagerCore.getBuildNumber().getProductCode())) {
+            try {
+                editorsProvider = (XDebuggerEditorsProvider) Class.forName(
+                        "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"
+                ).newInstance();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        } else {
+            try {
+                editorsProvider = (XDebuggerEditorsProvider) Class.forName(
+                        "org.jetbrains.java.debugger.JavaDebuggerEditorsProvider"
+                ).newInstance();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
         comboBox = new XDebuggerExpressionComboBox(
-                psiFile.getProject(), new JavaDebuggerEditorsProvider(), "LiveLogCondition",
+                psiFile.getProject(), editorsProvider, "LiveLogCondition",
                 sourcePosition, false, false
         );
 
@@ -70,7 +91,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         if (condition == null) {
             setCondition(null);
         } else {
-            setCondition(XExpressionImpl.fromText(InstrumentConditionParser.INSTANCE.fromLiveConditional(condition)));
+            setCondition(XExpressionImpl.fromText(conditionParser.fromLiveConditional(condition)));
         }
     }
 

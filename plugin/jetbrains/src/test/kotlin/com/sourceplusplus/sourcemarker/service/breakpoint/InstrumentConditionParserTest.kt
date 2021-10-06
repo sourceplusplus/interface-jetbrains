@@ -10,6 +10,8 @@ import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
+import com.sourceplusplus.marker.InstrumentConditionParser
+import com.sourceplusplus.marker.jvm.JVMConditionParser
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -55,7 +57,7 @@ class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
                 .createCodeFragment(expressionText, context, project)
             assertEquals(
                 "staticFields[staticVar] == 1 && fields[instanceVar] == 2 && localVariables[localVar] == 3",
-                InstrumentConditionParser.toLiveConditional(codeFragment)
+                JVMConditionParser.toLiveConditional(codeFragment)
             )
         }
     }
@@ -87,7 +89,7 @@ class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
                 .createCodeFragment(expressionText, context, project)
             assertEquals(
                 "localVariables[s].startsWith(\"hi\")",
-                InstrumentConditionParser.toLiveConditional(codeFragment)
+                JVMConditionParser.toLiveConditional(codeFragment)
             )
         }
     }

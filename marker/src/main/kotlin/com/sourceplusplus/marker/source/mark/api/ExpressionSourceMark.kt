@@ -4,15 +4,13 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.SourceMarker.namingService
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.component.api.SourceMarkComponent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
-import org.jetbrains.uast.UDeclarationsExpression
-import org.jetbrains.uast.UExpression
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -26,8 +24,8 @@ import kotlin.collections.HashMap
 @Suppress("TooManyFunctions")
 abstract class ExpressionSourceMark(
     override val sourceFileMarker: SourceFileMarker,
-    internal open var psiExpression: UExpression,
-    override var artifactQualifiedName: String = SourceMarkerUtils.getFullyQualifiedName(psiExpression)
+    internal open var psiExpression: PsiElement,
+    override var artifactQualifiedName: String = namingService.getFullyQualifiedName(psiExpression)
 ) : SourceMark {
 
     override var editor: Editor? = null
@@ -38,7 +36,7 @@ abstract class ExpressionSourceMark(
     override val isExpressionMark: Boolean = true
     override val valid: Boolean; get() {
         return try {
-            psiExpression.isPsiValid && artifactQualifiedName == SourceMarkerUtils.getFullyQualifiedName(psiExpression)
+            psiExpression.isValid && artifactQualifiedName == namingService.getFullyQualifiedName(psiExpression)
         } catch (ignore: PsiInvalidElementAccessException) {
             false
         }
@@ -84,22 +82,16 @@ abstract class ExpressionSourceMark(
 
     override fun hasUserData(): Boolean = userData.isNotEmpty()
 
-    fun getPsiExpression(): UExpression {
+    fun getPsiExpression(): PsiElement {
         return psiExpression
     }
 
     override fun getPsiElement(): PsiElement {
-        if (psiExpression is UDeclarationsExpression) {
-            //todo: support for multi-declaration statements
-            return (psiExpression as UDeclarationsExpression).declarations[0].sourcePsi!!
-        } else {
-            return psiExpression.sourcePsi!!
-        }
+        return psiExpression
     }
 
-    fun updatePsiExpression(psiExpression: UExpression): Boolean {
+    fun updatePsiExpression(psiExpression: PsiElement, newArtifactQualifiedName: String): Boolean {
         this.psiExpression = psiExpression
-        val newArtifactQualifiedName = SourceMarkerUtils.getFullyQualifiedName(psiExpression)
         if (artifactQualifiedName != newArtifactQualifiedName) {
             check(sourceFileMarker.removeSourceMark(this, autoRefresh = false))
             val oldArtifactQualifiedName = artifactQualifiedName

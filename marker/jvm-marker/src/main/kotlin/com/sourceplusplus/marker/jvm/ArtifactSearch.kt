@@ -1,16 +1,19 @@
-package com.sourceplusplus.sourcemarker.search
+package com.sourceplusplus.marker.jvm
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.intellij.psi.search.ProjectScope
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector
 import io.vertx.core.Promise
+import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.idea.KotlinFileType
@@ -18,6 +21,7 @@ import org.jetbrains.plugins.groovy.GroovyFileType
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
+import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
@@ -28,15 +32,46 @@ import java.util.*
  */
 object ArtifactSearch {
 
+    private val log = LoggerFactory.getLogger(ArtifactSearch::class.java)
+
+    @JvmStatic
+    fun detectRootPackage(project: Project): String? {
+        var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
+            ?.getSubPackages(ProjectScope.getProjectScope(project))
+
+        //remove non-code packages
+        basePackages = basePackages!!.filter {
+            val dirs = it.directories
+            dirs.isNotEmpty() && !dirs[0].virtualFile.path.contains("/src/main/resources/")
+        }.toTypedArray()
+        basePackages = basePackages.filter {
+            it.qualifiedName != "asciidoc" && it.qualifiedName != "lib"
+        }.toTypedArray() //todo: probably shouldn't be necessary
+
+        //determine deepest common source package
+        if (basePackages.isNotEmpty()) {
+            var rootPackage: String? = null
+            while (basePackages!!.size == 1) {
+                rootPackage = basePackages[0]!!.qualifiedName
+                basePackages = basePackages[0]!!.getSubPackages(ProjectScope.getProjectScope(project))
+            }
+            if (rootPackage != null) {
+                log.info("Detected root source package: $rootPackage")
+                return rootPackage
+            }
+        }
+        return null
+    }
+
     @Suppress("UnstableApiUsage")
-    suspend fun findArtifact(artifact: ArtifactQualifiedName): PsiElement? {
+    suspend fun findArtifact(vertx: Vertx, artifact: ArtifactQualifiedName): PsiElement? {
         val promise = Promise.promise<Optional<PsiElement>>()
         val project = ProjectManager.getInstance().openProjects[0]
 
         ApplicationManager.getApplication().runReadAction {
             if (artifact.type == ArtifactType.CLASS) {
                 val artifactQualifiedName = artifact.identifier
-                val classQualifiedName = SourceMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+                val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
                 val psiClass = JavaPsiFacade.getInstance(project).findClass(
                     classQualifiedName,
                     GlobalSearchScope.allScope(project)
@@ -44,14 +79,14 @@ object ArtifactSearch {
                 promise.complete(Optional.ofNullable(psiClass))
             } else if (artifact.type == ArtifactType.METHOD) {
                 val artifactQualifiedName = artifact.identifier
-                val classQualifiedName = SourceMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+                val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
                 val psiClass = JavaPsiFacade.getInstance(project).findClass(
                     classQualifiedName,
                     GlobalSearchScope.allScope(project)
                 )
                 for (theMethod in psiClass!!.methods) {
                     val uMethod = theMethod.toUElement() as UMethod
-                    val qualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
+                    val qualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
                     if (qualifiedName == artifactQualifiedName) {
                         promise.complete(Optional.of(theMethod))
                     }
@@ -69,7 +104,7 @@ object ArtifactSearch {
                     KotlinFileType.INSTANCE, GlobalSearchScope.projectScope(project)
                 )
 
-                val endpointDetector = EndpointDetector()
+                val endpointDetector = EndpointDetector(vertx)
                 var keepSearching = true
                 for (virtualFile in groovySourceFiles.union(javaSourceFiles).union(kotlinSourceFiles)) {
                     val file = PsiManager.getInstance(project).findFile(virtualFile)!!

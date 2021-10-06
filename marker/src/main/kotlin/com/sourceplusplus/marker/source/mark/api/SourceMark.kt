@@ -1,6 +1,7 @@
 package com.sourceplusplus.marker.source.mark.api
 
 import com.intellij.codeInsight.hints.InlayHintsPassFactory
+import com.intellij.lang.Language
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
@@ -20,6 +21,7 @@ import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
+import com.sourceplusplus.marker.ArtifactNamingService
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.plugin.SourceInlayComponentProvider
 import com.sourceplusplus.marker.plugin.SourceInlayHintProvider
@@ -78,6 +80,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         }
     }
 
+    val id: String
     val type: Type
     val isClassMark: Boolean
     val isMethodMark: Boolean
@@ -93,6 +96,9 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val configuration: SourceMarkConfiguration
     var sourceMarkComponent: SourceMarkComponent
     val project: Project; get() = sourceFileMarker.project
+    val language: Language
+        get() = getPsiElement().language
+
     fun getPsiElement(): PsiElement
 
     fun isVisible(): Boolean
