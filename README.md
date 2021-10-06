@@ -4,8 +4,6 @@
 [![Version](https://img.shields.io/jetbrains/plugin/v/15407-sourcemarker.svg)](https://plugins.jetbrains.com/plugin/15407-sourcemarker)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/15407-sourcemarker.svg)](https://plugins.jetbrains.com/plugin/15407-sourcemarker)
 
-![](.github/media/misc/SM_IDE-APM.gif)
-
 ## Description
 
 <!-- Plugin description -->
