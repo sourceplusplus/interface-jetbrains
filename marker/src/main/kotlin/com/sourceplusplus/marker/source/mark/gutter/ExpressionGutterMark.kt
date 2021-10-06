@@ -7,6 +7,7 @@ import com.sourceplusplus.marker.source.mark.api.ExpressionSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.gutter.config.GutterMarkConfiguration
 import com.sourceplusplus.marker.source.mark.gutter.event.GutterMarkEventCode
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfiguration
 
@@ -21,6 +22,7 @@ open class ExpressionGutterMark(
     override var psiExpression: PsiElement
 ) : ExpressionSourceMark(sourceFileMarker, psiExpression), GutterMark {
 
+    override val id: String = UUID.randomUUID().toString()
     override val configuration: GutterMarkConfiguration = pluginConfiguration.gutterMarkConfiguration.copy()
     private var visible: AtomicBoolean = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
 

@@ -88,11 +88,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
                     eventListeners.forEach { it.accept(liveEvent) }
-                } else {
-                    LiveStatusManager.addPendingEvent(liveEvent, logRemoved.logId)
                 }
-            } else {
-                LiveStatusManager.addPendingEvent(liveEvent, logRemoved.logId)
             }
         }
     }
@@ -122,12 +118,12 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
         ApplicationManager.getApplication().invokeLater {
             val fileMarker = SourceMarker.getSourceFileMarker(bpAdded.location.source)
             if (fileMarker != null) {
+                println("fileMarker != null")
                 //add live breakpoint only if not already known
                 if (SourceMarkSearch.findByLogId(bpAdded.id!!) == null) {
+                    println("SourceMarkSearch.findByLogId(bpAdded.id!!) == null")
                     LiveStatusManager.showBreakpointStatusBar(bpAdded, fileMarker)
                 }
-            } else {
-                LiveStatusManager.addActiveLiveInstrument(bpAdded)
             }
         }
     }
@@ -142,11 +138,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
                     eventListeners.forEach { it.accept(liveEvent) }
-                } else {
-                    LiveStatusManager.addPendingEvent(liveEvent, bpRemoved.breakpointId)
                 }
-            } else {
-                LiveStatusManager.addPendingEvent(liveEvent, bpRemoved.breakpointId)
             }
         }
     }
@@ -162,11 +154,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
                     eventListeners.forEach { it.accept(liveEvent) }
-                } else {
-                    LiveStatusManager.addPendingEvent(liveEvent, bpHit.breakpointId)
                 }
-            } else {
-                LiveStatusManager.addPendingEvent(liveEvent, bpHit.breakpointId)
             }
         }
     }
@@ -185,8 +173,6 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
                     eventListeners.forEach { it.accept(liveEvent) }
-                } else {
-                    LiveStatusManager.addPendingEvent(liveEvent, logHit.logId)
                 }
 
                 SourceMarkSearch.findInheritedSourceMarks(inlayMark).forEach {
@@ -196,8 +182,6 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
                         logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
                     )
                 }
-            } else {
-                LiveStatusManager.addPendingEvent(liveEvent, logHit.logId)
             }
         }
     }

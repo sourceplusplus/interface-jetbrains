@@ -43,6 +43,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -80,11 +81,6 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             new ArrayList<>(), 0, SortOrder.DESCENDING);
 
     public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
-        this(sourceLocation, scopeVars, inlayMark, null, null);
-    }
-
-    public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
-                               LiveBreakpoint liveBreakpoint, Editor editor) {
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
@@ -120,15 +116,13 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 .collect(Collectors.toList());
 
         this.inlayMark = inlayMark;
-        this.liveBreakpoint = liveBreakpoint;
-        this.editor = (EditorImpl) editor;
 
         initComponents();
         setupComponents();
 
-        if (liveBreakpoint != null) {
-            setupAsActive();
-        }
+//        if (liveBreakpoint != null) {
+//            setupAsActive();
+//        }
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -433,6 +427,9 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             configurationPanel.setNewDefaults();
         }
 
+        HashMap<String, String> meta = new HashMap<>();
+        meta.put("original_source_mark", inlayMark.getId());
+
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
         LiveBreakpoint instrument = new LiveBreakpoint(
                 sourceLocation,
@@ -443,15 +440,13 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 false,
                 false,
                 false,
-                throttle
+                throttle,
+                meta
         );
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
                 liveBreakpoint = (LiveBreakpoint) it.result();
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveBreakpoint);
-
-                //dispose this bar; another will be created
-                ApplicationManager.getApplication().invokeLater(inlayMark::dispose);
             } else {
                 it.cause().printStackTrace();
             }

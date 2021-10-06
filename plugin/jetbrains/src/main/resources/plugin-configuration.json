@@ -1,18 +1,18 @@
 {
-  "plugin_name": "SourceMarker",
-  "plugin_id": "com.sourceplusplus.sourcemarker",
+  "plugin_name": "Source++",
+  "plugin_id": "com.sourceplusplus",
   "visible_settings": {
-    "apache_skywalking": true,
-    "service_discovery": false
+    "apache_skywalking": false,
+    "service_discovery": true
   },
-  "token_uri": null,
+  "token_uri": "/api/new-token",
   "certificate_pin": null,
-  "service_port": null,
-  "tcp_service_port": null,
+  "service_port": 5445,
+  "tcp_service_port": 5455,
   "services": {
     "local_tracing": false,
     "log_count_indicator": false,
-    "live_instrument": false,
-    "live_view": false
+    "live_instrument": true,
+    "live_view": true
   }
 }

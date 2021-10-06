@@ -47,7 +47,6 @@ object LiveStatusManager : SourceMarkEventListener {
 
     private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
-    private val pendingEvents = CopyOnWriteArrayList<PendingInstrumentEvent>()
 
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
@@ -176,6 +175,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
             val findInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
             if (findInlayMark.isPresent) {
+                println("findInlayMark.isPresent")
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
                     inlayMark.putUserData(BREAKPOINT_ID, liveBreakpoint.id)
@@ -196,7 +196,9 @@ object LiveStatusManager : SourceMarkEventListener {
                     inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
                         override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
                     }
+                    println("before-inlayMark.apply()")
                     inlayMark.apply()
+                    println("after-inlayMark.apply()")
 
                     val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
                     //sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
@@ -260,34 +262,6 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.putUserData(INSTRUMENT_EVENT_LISTENERS, ArrayList())
         }
         inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
-
-        val instrumentId = inlayMark.getUserData(BREAKPOINT_ID) ?: inlayMark.getUserData(LOG_ID)
-        pendingEvents.removeIf {
-            if (instrumentId == it.instrumentId) {
-                listener.accept(it.event)
-                true
-            } else {
-                false
-            }
-        }
-    }
-
-    fun addPendingEvent(event: LiveInstrumentEvent, instrumentId: String) {
-        pendingEvents.add(PendingInstrumentEvent(instrumentId, event))
-        pendingEvents.removeIf { event ->
-            val sourceMark = SourceMarkSearch.findByInstrumentId(event.instrumentId)
-            if (sourceMark != null) {
-                val eventListeners = sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS)
-                if (eventListeners?.isNotEmpty() == true) {
-                    eventListeners.forEach { it.accept(event.event) }
-                    true
-                } else {
-                    false
-                }
-            } else {
-                false
-            }
-        }
     }
 
     fun addActiveLiveInstrument(instrument: LiveInstrument) {
@@ -305,9 +279,4 @@ object LiveStatusManager : SourceMarkEventListener {
     fun removeActiveLiveInstrument(instrumentId: String) {
         activeStatusBars.removeIf { it.id == instrumentId }
     }
-
-    data class PendingInstrumentEvent(
-        val instrumentId: String,
-        val event: LiveInstrumentEvent
-    )
 }
