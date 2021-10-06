@@ -4,11 +4,10 @@ import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.sourceplusplus.marker.SourceMarker
+import com.sourceplusplus.marker.SourceMarker.creationService
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.SourceMarkerUtils
 import com.sourceplusplus.marker.source.mark.api.ClassSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
@@ -64,8 +63,8 @@ import com.sourceplusplus.protocol.view.LiveViewSubscription
 import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
-import com.sourceplusplus.sourcemarker.navigate.ArtifactNavigator
-import com.sourceplusplus.sourcemarker.search.ArtifactSearch.findArtifact
+import com.sourceplusplus.marker.jvm.ArtifactNavigator
+import com.sourceplusplus.marker.jvm.ArtifactSearch.findArtifact
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
@@ -166,11 +165,11 @@ class PortalEventListener(
                 it.reply(sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
             } else {
                 GlobalScope.launch(vertx.dispatcher()) {
-                    val classArtifact = findArtifact(artifactQualifiedName.copy(type = ArtifactType.CLASS))
-                    val fileMarker = SourceMarker.getSourceFileMarker((classArtifact as PsiClass).containingFile)!!
-                    val searchArtifact = findArtifact(artifactQualifiedName) as PsiNameIdentifierOwner
+                    val classArtifact = findArtifact(vertx, artifactQualifiedName.copy(type = ArtifactType.CLASS))
+                    val fileMarker = SourceMarker.getSourceFileMarker(classArtifact!!.containingFile)!!
+                    val searchArtifact = findArtifact(vertx, artifactQualifiedName) as PsiNameIdentifierOwner
                     runReadAction {
-                        val gutterMark = SourceMarkerUtils.getOrCreateMethodGutterMark(
+                        val gutterMark = creationService.getOrCreateMethodGutterMark(
                             fileMarker, searchArtifact.nameIdentifier!!
                         )!!
                         it.reply(gutterMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
@@ -347,7 +346,7 @@ class PortalEventListener(
             log.info("Clicked stack trace element: $element")
 
             val project = ProjectManager.getInstance().openProjects[0]
-            ArtifactNavigator.navigateTo(project, element)
+            ArtifactNavigator.navigateTo(vertx, project, element)
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(CanNavigateToArtifact) {
             val artifactQualifiedName = it.body()
@@ -359,7 +358,7 @@ class PortalEventListener(
         vertx.eventBus().consumer<ArtifactQualifiedName>(NavigateToArtifact) {
             val artifactQualifiedName = it.body()
             val project = ProjectManager.getInstance().openProjects[0]
-            ArtifactNavigator.navigateTo(project, artifactQualifiedName)
+            ArtifactNavigator.navigateTo(vertx, project, artifactQualifiedName)
         }
     }
 

@@ -16,7 +16,6 @@ val pluginGroup: String by project
 val pluginName: String by project
 val pluginVersion: String by project
 val pluginSinceBuild: String by project
-val pluginUntilBuild: String by project
 val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
@@ -32,7 +31,7 @@ intellij {
     version.set(platformVersion)
     type.set(platformType)
     downloadSources.set(platformDownloadSources.toBoolean())
-    updateSinceUntilBuild.set(true)
+    updateSinceUntilBuild.set(false)
 
     plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
 }
@@ -53,6 +52,8 @@ repositories {
 dependencies {
     implementation(project(":mapper"))
     implementation(project(":marker"))
+    implementation(project(":marker:jvm-marker"))
+    implementation(project(":marker:py-marker"))
     implementation(project(":monitor:skywalking"))
     implementation(project(":protocol"))
     implementation(project(":portal"))
@@ -90,7 +91,6 @@ tasks {
     patchPluginXml {
         version.set(pluginVersion)
         sinceBuild.set(pluginSinceBuild)
-        untilBuild.set(pluginUntilBuild)
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(

@@ -1,14 +1,14 @@
-package com.sourceplusplus.sourcemarker.psi
+package com.sourceplusplus.marker.jvm.psi
 
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.monitor.skywalking.bridge.EndpointBridge
-import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
-import com.sourceplusplus.sourcemarker.psi.endpoint.SkywalkingTraceEndpoint
-import com.sourceplusplus.sourcemarker.psi.endpoint.SpringMVCEndpoint
+import com.sourceplusplus.marker.jvm.psi.endpoint.SkywalkingTraceEndpoint
+import com.sourceplusplus.marker.jvm.psi.endpoint.SpringMVCEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import io.vertx.core.Vertx
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.kotlin.coroutines.await
@@ -16,6 +16,7 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -25,7 +26,7 @@ import java.util.*
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class EndpointDetector {
+class EndpointDetector(val vertx: Vertx) {
 
     companion object {
         private val log = LoggerFactory.getLogger(EndpointDetector::class.java)
@@ -100,7 +101,7 @@ class EndpointDetector {
     private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodSourceMark) {
         log.trace("Determining endpoint id")
         try {
-            val endpoint = EndpointBridge.searchExactEndpoint(endpointName, SourceMarkerPlugin.vertx)
+            val endpoint = EndpointBridge.searchExactEndpoint(endpointName, vertx)
             if (endpoint != null) {
                 sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
                 log.debug("Detected endpoint id: ${endpoint.id}")
@@ -117,12 +118,12 @@ class EndpointDetector {
     }
 
     private fun determineEndpointName(sourceMark: MethodSourceMark): Future<Optional<DetectedEndpoint>> {
-        return determineEndpointName(sourceMark.getPsiMethod())
+        return determineEndpointName(sourceMark.getPsiMethod().toUElement() as UMethod)
     }
 
     fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
         val promise = Promise.promise<Optional<DetectedEndpoint>>()
-        GlobalScope.launch(SourceMarkerPlugin.vertx.dispatcher()) {
+        GlobalScope.launch(vertx.dispatcher()) {
             detectorSet.forEach {
                 try {
                     val detectedEndpoint = it.determineEndpointName(uMethod).await()

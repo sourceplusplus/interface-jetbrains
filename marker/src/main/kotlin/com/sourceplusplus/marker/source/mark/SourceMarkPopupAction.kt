@@ -53,8 +53,8 @@ open class SourceMarkPopupAction : AnAction() {
                         if (it.configuration.activateOnKeyboardShortcut) {
                             //+1 on end offset so match is made even right after method end
                             val incTextRange = TextRange(
-                                it.psiMethod.sourcePsi!!.textRange.startOffset,
-                                it.psiMethod.sourcePsi!!.textRange.endOffset + 1
+                                it.psiMethod.textRange.startOffset,
+                                it.psiMethod.textRange.endOffset + 1
                             )
                             incTextRange.contains(editor.logicalPositionToOffset(editor.caretModel.logicalPosition))
                         } else {

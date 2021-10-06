@@ -1,10 +1,11 @@
 package com.sourceplusplus.marker.source.mark.inlay
 
+import com.intellij.psi.PsiElement
 import com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.ExpressionSourceMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkConfiguration
-import org.jetbrains.uast.UExpression
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfiguration
 
@@ -16,9 +17,11 @@ import com.sourceplusplus.marker.SourceMarker.configuration as pluginConfigurati
  */
 open class ExpressionInlayMark @JvmOverloads constructor(
     override val sourceFileMarker: SourceFileMarker,
-    override var psiExpression: UExpression,
+    override var psiExpression: PsiElement,
     override val configuration: InlayMarkConfiguration = pluginConfiguration.inlayMarkConfiguration.copy()
 ) : ExpressionSourceMark(sourceFileMarker, psiExpression), InlayMark {
+
+    override val id: String = UUID.randomUUID().toString()
     override var visible: AtomicBoolean = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
     var showAboveExpression = false
 }

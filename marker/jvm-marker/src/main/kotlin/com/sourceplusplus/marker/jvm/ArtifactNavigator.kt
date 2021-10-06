@@ -1,4 +1,4 @@
-package com.sourceplusplus.sourcemarker.navigate
+package com.sourceplusplus.marker.jvm
 
 import com.intellij.ide.util.PsiNavigationSupport
 import com.intellij.openapi.application.ApplicationManager
@@ -10,15 +10,14 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.search.FilenameIndex.getFilesByName
 import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.util.PsiNavigateUtil
-import com.sourceplusplus.marker.source.SourceMarkerUtils
+import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
 import com.sourceplusplus.protocol.artifact.exception.sourceAsFilename
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
-import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
-import com.sourceplusplus.sourcemarker.search.ArtifactSearch
 import io.vertx.core.Promise
+import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
@@ -39,7 +38,7 @@ object ArtifactNavigator {
 
     //todo: remove method from method names and support navigating to classes?
 
-    fun navigateTo(project: Project, element: JvmStackTraceElement) {
+    fun navigateTo(vertx: Vertx, project: Project, element: JvmStackTraceElement) {
         ApplicationManager.getApplication().invokeLater {
             val foundFiles = getFilesByName(project, element.sourceAsFilename()!!, allScope(project))
             if (foundFiles.isNotEmpty()) {
@@ -51,10 +50,10 @@ object ArtifactNavigator {
         }
     }
 
-    fun navigateTo(project: Project, artifactQualifiedName: ArtifactQualifiedName) {
+    fun navigateTo(vertx: Vertx, project: Project, artifactQualifiedName: ArtifactQualifiedName) {
         if (artifactQualifiedName.type == ArtifactType.ENDPOINT) {
             GlobalScope.launch(vertx.dispatcher()) {
-                val artifactPsi = ArtifactSearch.findArtifact(artifactQualifiedName)
+                val artifactPsi = ArtifactSearch.findArtifact(vertx, artifactQualifiedName)
                 if (artifactPsi != null) {
                     ApplicationManager.getApplication().invokeLater {
                         PsiNavigateUtil.navigate(artifactPsi)
@@ -71,14 +70,14 @@ object ArtifactNavigator {
     }
 
     fun navigateToMethod(project: Project, artifactQualifiedName: String): PsiElement {
-        val classQualifiedName = SourceMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
         val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName, allScope(project))
         for (theMethod in psiClass!!.methods) {
             val uMethod = theMethod.toUElement() as UMethod
-            val qualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
+            val qualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
             if (qualifiedName == artifactQualifiedName) {
                 PsiNavigateUtil.navigate(theMethod)
-                return SourceMarkerUtils.getNameIdentifier(theMethod)!!
+                return JVMMarkerUtils.getNameIdentifier(theMethod)!!
             }
         }
         throw IllegalArgumentException("Failed to find: $artifactQualifiedName")
@@ -93,11 +92,11 @@ object ArtifactNavigator {
     }
 
     fun canNavigateToMethod(project: Project, artifactQualifiedName: String): Boolean {
-        val classQualifiedName = SourceMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
         val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName, allScope(project))
         for (theMethod in psiClass!!.methods) {
             val uMethod = theMethod.toUElement() as UMethod
-            val qualifiedName = SourceMarkerUtils.getFullyQualifiedName(uMethod)
+            val qualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
             if (qualifiedName == artifactQualifiedName) {
                 return true
             }

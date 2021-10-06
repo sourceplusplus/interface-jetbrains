@@ -1,8 +1,8 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language="kotlin"
-                                        implementationClass="com.sourceplusplus.marker.plugin.SourceLineMarkerProvider$KotlinDescriptor"/>
+                                        implementationClass="com.sourceplusplus.marker.jvm.JVMLineMarkerProvider$KotlinDescriptor"/>
         <codeInsight.inlayProvider language="kotlin"
-                                   implementationClass="com.sourceplusplus.marker.plugin.SourceInlayHintProvider"/>
+                                   implementationClass="com.sourceplusplus.marker.jvm.JVMSourceInlayHintProvider"/>
     </extensions>
 </idea-plugin>

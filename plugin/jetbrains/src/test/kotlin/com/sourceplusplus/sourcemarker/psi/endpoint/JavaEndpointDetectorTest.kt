@@ -1,7 +1,8 @@
 package com.sourceplusplus.sourcemarker.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
@@ -27,7 +28,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}/doGet", result.get().name)
             }
@@ -51,7 +53,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}/doGet", result.get().name)
             }
@@ -75,7 +78,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}", result.get().name)
             }
@@ -100,7 +104,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}/todos", result.get().name)
             }
@@ -125,7 +130,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}/todos", result.get().name)
             }
@@ -150,7 +156,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}/todos/doGet", result.get().name)
             }
@@ -173,7 +180,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}/", result.get().name)
             }
@@ -196,7 +204,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}/doGet", result.get().name)
             }
@@ -219,7 +228,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("{GET}/doGet", result.get().name)
             }
@@ -242,7 +252,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("doGet", result.get().name)
             }
@@ -265,7 +276,8 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = EndpointDetector().determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = EndpointDetector(SourceMarkerPlugin.vertx)
+                    .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("TestController.doGet", result.get().name)
             }

@@ -1,16 +1,11 @@
 package com.sourceplusplus.sourcemarker.status;
 
-import com.intellij.debugger.engine.evaluation.TextWithImports;
-import com.intellij.debugger.engine.evaluation.TextWithImportsImpl;
-import com.intellij.debugger.impl.DebuggerUtilsEx;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.psi.JavaCodeFragment;
-import com.intellij.psi.PsiElement;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBIntSpinner;
 import com.intellij.ui.components.JBScrollPane;
@@ -18,14 +13,10 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.sourceplusplus.marker.source.mark.api.SourceMark;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
-import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent;
-import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
-import com.sourceplusplus.protocol.instrument.ThrottleStep;
+import com.sourceplusplus.protocol.instrument.*;
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint;
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit;
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
@@ -34,7 +25,6 @@ import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService;
-import com.sourceplusplus.sourcemarker.service.breakpoint.InstrumentConditionParser;
 import com.sourceplusplus.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import io.vertx.core.json.Json;
@@ -50,6 +40,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -57,11 +48,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.sourceplusplus.marker.SourceMarker.conditionParser;
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
+public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -86,11 +78,6 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             new ArrayList<>(), 0, SortOrder.DESCENDING);
 
     public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
-        this(sourceLocation, scopeVars, inlayMark, null, null);
-    }
-
-    public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
-                               LiveBreakpoint liveBreakpoint, Editor editor) {
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
@@ -126,15 +113,14 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 .collect(Collectors.toList());
 
         this.inlayMark = inlayMark;
-        this.liveBreakpoint = liveBreakpoint;
-        this.editor = (EditorImpl) editor;
 
         initComponents();
         setupComponents();
+    }
 
-        if (liveBreakpoint != null) {
-            setupAsActive();
-        }
+    public void setLiveInstrument(LiveInstrument liveInstrument) {
+        this.liveBreakpoint = (LiveBreakpoint) liveInstrument;
+        setupAsActive();
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -418,11 +404,13 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
     private void saveLiveBreakpoint() {
         breakpointConditionField.setShowSaveButton(false);
 
-        TextWithImports expressionText = TextWithImportsImpl.fromXExpression(XExpressionImpl.fromText(breakpointConditionField.getText()));
-        PsiElement context = inlayMark.getPsiElement();
-        JavaCodeFragment codeFragment = DebuggerUtilsEx.findAppropriateCodeFragmentFactory(expressionText, context)
-                .createCodeFragment(expressionText, context, inlayMark.getProject());
-        String condition = InstrumentConditionParser.INSTANCE.toLiveConditional(codeFragment);
+        String condition = null;
+        if (!breakpointConditionField.getText().isEmpty()) {
+            condition = conditionParser.getCondition(
+                    breakpointConditionField.getText(), inlayMark.getPsiElement()
+            );
+        }
+
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
         InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
         JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) hitLimitSpinner.getEditor()).getTextField();
@@ -437,6 +425,9 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
             configurationPanel.setNewDefaults();
         }
 
+        HashMap<String, String> meta = new HashMap<>();
+        meta.put("original_source_mark", inlayMark.getId());
+
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
         LiveBreakpoint instrument = new LiveBreakpoint(
                 sourceLocation,
@@ -447,15 +438,14 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
                 false,
                 false,
                 false,
-                throttle
+                throttle,
+                meta
         );
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
                 liveBreakpoint = (LiveBreakpoint) it.result();
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getBREAKPOINT_ID(), liveBreakpoint.getId());
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveBreakpoint);
-
-                //dispose this bar; another will be created
-                ApplicationManager.getApplication().invokeLater(inlayMark::dispose);
             } else {
                 it.cause().printStackTrace();
             }

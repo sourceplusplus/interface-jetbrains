@@ -14,8 +14,9 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkConstructor
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
-import com.sourceplusplus.sourcemarker.psi.EndpointDetector
-import com.sourceplusplus.sourcemarker.psi.LoggerDetector
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector
+import com.sourceplusplus.marker.jvm.psi.LoggerDetector
+import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -31,8 +32,8 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
 
     companion object {
         private val log = LoggerFactory.getLogger(PluginSourceMarkEventListener::class.java)
-        private val endpointDetector = EndpointDetector()
-        private val loggerDetector = LoggerDetector()
+        private val endpointDetector = EndpointDetector(vertx)
+        private val loggerDetector = LoggerDetector(vertx)
     }
 
     override fun handleEvent(event: SourceMarkEvent) {

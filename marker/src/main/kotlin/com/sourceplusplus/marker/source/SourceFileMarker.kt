@@ -6,10 +6,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.sourceplusplus.marker.source.mark.api.*
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
@@ -19,12 +18,6 @@ import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark
 import com.sourceplusplus.marker.source.mark.gutter.MethodGutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.inlay.MethodInlayMark
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
-import org.jetbrains.uast.UClass
-import org.jetbrains.uast.UExpression
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.getContainingUMethod
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -41,19 +34,11 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     companion object {
         val KEY = Key.create<SourceFileMarker>("sm.SourceFileMarker")
         private val log = LoggerFactory.getLogger(SourceFileMarker::class.java)
+        val SUPPORTED_FILE_TYPES = mutableListOf<Class<out PsiFile>>()
 
         @JvmStatic
         fun isFileSupported(psiFile: PsiFile): Boolean {
-            return try {
-                when (psiFile) {
-                    is GroovyFile -> true
-                    is PsiJavaFile -> true
-                    is KtFile -> true
-                    else -> false
-                }
-            } catch (ignore: NoClassDefFoundError) {
-                false
-            }
+            return SUPPORTED_FILE_TYPES.any { it.isInstance(psiFile) }
         }
     }
 
@@ -178,19 +163,19 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open fun getClassSourceMark(psiClass: PsiElement, type: SourceMark.Type): ClassSourceMark? {
         return sourceMarks.find {
-            it is ClassSourceMark && it.valid && it.psiClass.sourcePsi === psiClass && it.type == type
+            it is ClassSourceMark && it.valid && it.psiClass === psiClass && it.type == type
         } as ClassSourceMark?
     }
 
     open fun getMethodSourceMark(psiMethod: PsiElement, type: SourceMark.Type): MethodSourceMark? {
         return sourceMarks.find {
-            it is MethodSourceMark && it.valid && it.psiMethod.sourcePsi === psiMethod && it.type == type
+            it is MethodSourceMark && it.valid && it.psiMethod === psiMethod && it.type == type
         } as MethodSourceMark?
     }
 
     open fun getExpressionSourceMark(psiElement: PsiElement, type: SourceMark.Type): ExpressionSourceMark? {
         return sourceMarks.find {
-            it is ExpressionSourceMark && it.valid && it.psiExpression.sourcePsi === psiElement && it.type == type
+            it is ExpressionSourceMark && it.valid && it.psiExpression === psiElement && it.type == type
         } as ExpressionSourceMark?
     }
 
@@ -204,11 +189,11 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open fun getMethodExpressionSourceMark(methodSourceMark: MethodSourceMark): List<ExpressionSourceMark> {
         return sourceMarks.filterIsInstance<ExpressionSourceMark>().filter {
-            it.valid && it.psiExpression.getContainingUMethod() == methodSourceMark.psiMethod
+            it.valid && it.psiExpression == methodSourceMark.psiMethod
         }
     }
 
-    override fun createSourceMark(psiExpression: UExpression, type: SourceMark.Type): ExpressionSourceMark {
+    override fun createExpressionSourceMark(psiExpression: PsiElement, type: SourceMark.Type): ExpressionSourceMark {
         log.trace("Creating source mark. Expression: $psiExpression - Type: $type")
         return when (type) {
             SourceMark.Type.GUTTER -> {
@@ -220,8 +205,10 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         }
     }
 
-    override fun createSourceMark(psiMethod: UMethod, type: SourceMark.Type): MethodSourceMark {
-        log.trace("Creating source mark. Method: ${psiMethod.name} - Type: $type")
+    override fun createMethodSourceMark(
+        psiMethod: PsiNameIdentifierOwner, qualifiedName: String, type: SourceMark.Type
+    ): MethodSourceMark {
+        log.trace("Creating source mark. Method: $qualifiedName - Type: $type")
         return when (type) {
             SourceMark.Type.GUTTER -> {
                 MethodGutterMark(this, psiMethod)
@@ -232,8 +219,10 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         }
     }
 
-    override fun createSourceMark(psiClass: UClass, type: SourceMark.Type): ClassSourceMark {
-        log.trace("Creating source mark. Class: ${psiClass.qualifiedName} - Type: $type")
+    override fun createClassSourceMark(
+        psiClass: PsiNameIdentifierOwner, qualifiedName: String, type: SourceMark.Type
+    ): ClassSourceMark {
+        log.trace("Creating source mark. Class: $qualifiedName - Type: $type")
         return when (type) {
             SourceMark.Type.GUTTER -> {
                 ClassGutterMark(this, psiClass)
@@ -241,13 +230,6 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             SourceMark.Type.INLAY -> {
                 TODO("Not yet implemented")
             }
-        }
-    }
-
-    open fun getClassQualifiedNames(): List<String> {
-        return when (psiFile) {
-            is PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
-            else -> throw IllegalStateException("Unsupported file: $psiFile")
         }
     }
 

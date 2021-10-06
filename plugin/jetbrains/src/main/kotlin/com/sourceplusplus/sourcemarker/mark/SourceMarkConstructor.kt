@@ -1,8 +1,8 @@
 package com.sourceplusplus.sourcemarker.mark
 
+import com.intellij.psi.PsiElement
+import com.sourceplusplus.marker.SourceMarker.creationService
 import com.sourceplusplus.marker.source.SourceFileMarker
-import com.sourceplusplus.marker.source.SourceMarkerUtils.getOrCreateExpressionGutterMark
-import com.sourceplusplus.marker.source.SourceMarkerUtils.getOrCreateExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.marker.source.mark.gutter.GutterMark
@@ -14,11 +14,10 @@ import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
 import com.sourceplusplus.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.PluginBundle.message
-import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.SOURCE_RED
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import kotlinx.datetime.Clock
-import org.jetbrains.uast.UThrowExpression
 import org.slf4j.LoggerFactory
 
 /**
@@ -58,7 +57,7 @@ object SourceMarkConstructor {
     fun getOrSetupSourceMark(fileMarker: SourceFileMarker, advice: ArtifactAdvice): SourceMark? {
         when (advice.type) {
             AdviceType.RampDetectionAdvice -> {
-                val gutterMark = getOrCreateExpressionGutterMark(fileMarker, advice.artifact.lineNumber!!)
+                val gutterMark = creationService.getOrCreateExpressionGutterMark(fileMarker, advice.artifact.lineNumber!!)
                 return if (gutterMark.isPresent) {
                     if (!fileMarker.containsSourceMark(gutterMark.get())) {
                         attachAdvice(gutterMark.get(), advice)
@@ -71,7 +70,7 @@ object SourceMarkConstructor {
                 }
             }
             AdviceType.ActiveExceptionAdvice -> {
-                val inlayMark = getOrCreateExpressionInlayMark(fileMarker, advice.artifact.lineNumber!!)
+                val inlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, advice.artifact.lineNumber!!)
                 return if (inlayMark.isPresent) {
                     if (!fileMarker.containsSourceMark(inlayMark.get())) {
                         attachAdvice(inlayMark.get(), advice)
@@ -102,16 +101,18 @@ object SourceMarkConstructor {
         when (advice) {
             is ActiveExceptionAdvice -> {
                 val expressionMark = inlayMark as ExpressionInlayMark
-                val prettyTimeAgo = if (expressionMark.getPsiExpression() is UThrowExpression) {
+                val prettyTimeAgo = if (isThrows(expressionMark.getPsiExpression())) {
                     {
-                        val occurred = (Clock.System.now().toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
+                        val occurred = (Clock.System.now()
+                            .toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
                                 " " + message("ago")
                         " //${message("last_occurred")} $occurred "
                     }
                 } else {
                     {
                         val exceptionType = advice.stackTrace.exceptionType.substringAfterLast(".")
-                        val occurred = (Clock.System.now().toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
+                        val occurred = (Clock.System.now()
+                            .toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
                                 " " + message("ago")
                         " //${message("threw")} $exceptionType $occurred "
                     }
@@ -127,7 +128,7 @@ object SourceMarkConstructor {
                 })
 
                 //todo: shouldn't be creating gutter mark here
-                val gutterMark = getOrCreateExpressionGutterMark(
+                val gutterMark = creationService.getOrCreateExpressionGutterMark(
                     inlayMark.sourceFileMarker, advice.artifact.lineNumber!!
                 ).get()
                 if (!gutterMark.sourceFileMarker.containsSourceMark(gutterMark)) {
@@ -136,5 +137,9 @@ object SourceMarkConstructor {
                 }
             }
         }
+    }
+
+    private fun isThrows(psiExpression: PsiElement): Boolean {
+        TODO()
     }
 }
