@@ -139,4 +139,8 @@ object SourceMarker {
         check(enabled) { "SourceMarker disabled" }
         return availableSourceFileMarkers.values.flatMap { it.getSourceMarks() }
     }
+
+    fun getSourceMark(id: String): SourceMark? {
+        return getSourceMarks().find { it.id == id }
+    }
 }

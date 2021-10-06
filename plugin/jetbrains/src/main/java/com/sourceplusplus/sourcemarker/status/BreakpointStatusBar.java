@@ -16,10 +16,7 @@ import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.api.SourceMark;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
-import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent;
-import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
-import com.sourceplusplus.protocol.instrument.ThrottleStep;
+import com.sourceplusplus.protocol.instrument.*;
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint;
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit;
 import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
@@ -56,7 +53,7 @@ import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BRE
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
+public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -119,10 +116,11 @@ public class BreakpointStatusBar extends JPanel implements VisibleAreaListener {
 
         initComponents();
         setupComponents();
+    }
 
-//        if (liveBreakpoint != null) {
-//            setupAsActive();
-//        }
+    public void setLiveInstrument(LiveInstrument liveInstrument) {
+        this.liveBreakpoint = (LiveBreakpoint) liveInstrument;
+        setupAsActive();
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {

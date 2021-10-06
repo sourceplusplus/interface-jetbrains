@@ -17,6 +17,7 @@ import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
+import com.sourceplusplus.protocol.instrument.LiveInstrument;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.ThrottleStep;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
@@ -56,7 +57,7 @@ import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class LogStatusBar extends JPanel implements VisibleAreaListener {
+public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -134,29 +135,26 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         }
 
         this.inlayMark = inlayMark;
-//        this.liveLog = liveLog;
-//        this.editor = (EditorImpl) editor;
 
-//        if (liveLog != null) {
-//            placeHolderText = "Waiting for live log data...";
-//        } else {
-            placeHolderText = "Input log message (use $ for variables)";
-//        }
+        placeHolderText = "Input log message (use $ for variables)";
 
         initComponents();
         setupComponents();
 
-        if (liveLog != null) {
-            liveLogTextField.setEditMode(false);
-            removeActiveDecorations();
-            addTimeField();
-            addExpandButton();
-            setupAsActive();
-        } else {
-            liveLogTextField.setEditMode(true);
-        }
+        liveLogTextField.setEditMode(true);
 
         liveLogTextField.addSaveListener(this::saveLiveLog);
+    }
+
+    public void setLiveInstrument(LiveInstrument liveInstrument) {
+        this.liveLog = (LiveLog) liveInstrument;
+        liveLogTextField.setEditMode(false);
+        wrapper.grabFocus();
+        removeActiveDecorations();
+        addTimeField();
+        addExpandButton();
+        setupAsActive();
+        repaint();
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -391,7 +389,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             @Override
             public void focusLost(FocusEvent e) {
                 if (liveLog == null && liveLogTextField.getText().equals("")) {
-                    if (popup == null) {
+                    if (popup == null && liveLogTextField.getEditMode()) {
                         dispose();
                     }
                 } else if (!liveLogTextField.getEditMode() ||
@@ -604,6 +602,12 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 throttle,
                 meta
         );
+
+        liveLogTextField.setEditMode(false);
+        liveLogTextField.setText("");
+        liveLogTextField.setPlaceHolderText("Waiting for live log data...");
+        removeActiveDecorations();
+        wrapper.grabFocus();
 
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {

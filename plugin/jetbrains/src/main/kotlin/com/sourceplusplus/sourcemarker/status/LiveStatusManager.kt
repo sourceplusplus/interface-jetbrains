@@ -18,7 +18,6 @@ import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
 import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.instrument.LiveInstrument
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.log.LiveLog
@@ -28,7 +27,6 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
-import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
@@ -102,6 +100,7 @@ object LiveStatusManager : SourceMarkEventListener {
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
+            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -143,6 +142,7 @@ object LiveStatusManager : SourceMarkEventListener {
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
+            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -175,7 +175,6 @@ object LiveStatusManager : SourceMarkEventListener {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
             val findInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
             if (findInlayMark.isPresent) {
-                println("findInlayMark.isPresent")
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
                     inlayMark.putUserData(BREAKPOINT_ID, liveBreakpoint.id)
@@ -185,20 +184,20 @@ object LiveStatusManager : SourceMarkEventListener {
 
                     val statusBar = BreakpointStatusBar(
                         liveBreakpoint.location,
-                        scopeService.getScopeVariables(fileMarker, liveBreakpoint.location.line),
-                        inlayMark, liveBreakpoint, editor
+                        emptyList(),
+                        inlayMark
                     )
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
+                    statusBar.setEditor(editor)
+                    statusBar.setLiveInstrument(liveBreakpoint)
                     editor.scrollingModel.addVisibleAreaListener(statusBar)
 
                     inlayMark.configuration.showComponentInlay = true
                     inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
                         override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
                     }
-                    println("before-inlayMark.apply()")
                     inlayMark.apply()
-                    println("after-inlayMark.apply()")
 
                     val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
                     //sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
@@ -224,11 +223,13 @@ object LiveStatusManager : SourceMarkEventListener {
 
                     val statusBar = LogStatusBar(
                         liveLog.location,
-                        scopeService.getScopeVariables(fileMarker, liveLog.location.line),
-                        inlayMark, liveLog, editor
+                        emptyList(),
+                        inlayMark
                     )
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
+                    statusBar.setEditor(editor)
+                    statusBar.setLiveInstrument(liveLog)
                     editor.scrollingModel.addVisibleAreaListener(statusBar)
 
                     inlayMark.configuration.showComponentInlay = true
