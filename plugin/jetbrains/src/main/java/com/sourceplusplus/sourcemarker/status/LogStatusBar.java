@@ -607,16 +607,17 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.setText("");
         liveLogTextField.setPlaceHolderText("Waiting for live log data...");
         removeActiveDecorations();
+        addTimeField();
         wrapper.grabFocus();
 
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
-                LoggerDetector detector = inlayMark.getUserData(
-                        SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
-                );
-                detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
                 liveLog = (LiveLog) it.result();
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
+
+                inlayMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR())
+                        .addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
             } else {
                 it.cause().printStackTrace();
             }
