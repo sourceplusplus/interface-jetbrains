@@ -1,6 +1,6 @@
 <idea-plugin>
-    <id>com.sourceplusplus</id>
-    <name>Source++</name>
+    <id>com.sourceplusplus.sourcemarker</id>
+    <name>SourceMarker</name>
     <vendor email="support@sourceplusplus.com" url="https://github.com/sourceplusplus">Source++</vendor>
 
     <depends>com.intellij.modules.platform</depends>
@@ -19,8 +19,8 @@
         <applicationConfigurable
                 instance="com.sourceplusplus.sourcemarker.settings.SourceMarkerConfigurable"
                 groupId="tools"
-                id="Source++"
-                displayName="Source++"/>
+                id="SourceMarker"
+                displayName="SourceMarker"/>
         <postStartupActivity
                 implementation="com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity"/>
 
@@ -28,7 +28,7 @@
 
         <projectService
                 serviceImplementation="com.sourceplusplus.sourcemarker.console.SourceMarkerConsoleService"/>
-        <toolWindow id="Source++ Console"
+        <toolWindow id="SourceMarker Console"
                     factoryClass="com.sourceplusplus.sourcemarker.console.SourceMarkerToolWindowFactory"/>
     </extensions>
 
@@ -38,9 +38,9 @@
     </projectListeners>
 
     <actions>
-        <action id="com.sourceplusplus.sourcemarker.command.ControlBarAction"
-                class="com.sourceplusplus.sourcemarker.command.ControlBarAction"
-                text="SourceCommand Action" description="Source command action">
+        <action id="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
+                class="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
+                text="SourcePortal Popup Action" description="SourcePortal popup action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>
         <action id="com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction"
