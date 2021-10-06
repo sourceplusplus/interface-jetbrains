@@ -7,6 +7,7 @@ import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.marker.jvm.psi.EndpointDetector
 import com.sourceplusplus.marker.jvm.psi.LoggerDetector
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
+import com.sourceplusplus.sourcemarker.status.StatusBar
 
 /**
  * Used to associate custom data to [SourceMark]s.
@@ -23,4 +24,5 @@ object SourceMarkKeys {
     val BREAKPOINT_ID = SourceKey<String>("BREAKPOINT_ID")
     val GROUPED_MARKS = SourceKey<MutableList<SourceMark>>("GROUPED_MARKS")
     val INSTRUMENT_EVENT_LISTENERS = SourceKey<MutableList<InstrumentEventListener>>("INSTRUMENT_EVENT_LISTENERS")
+    val STATUS_BAR = SourceKey<StatusBar>("STATUS_BAR")
 }

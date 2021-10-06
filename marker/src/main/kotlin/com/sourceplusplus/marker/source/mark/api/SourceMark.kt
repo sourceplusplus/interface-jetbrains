@@ -80,6 +80,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         }
     }
 
+    val id: String
     val type: Type
     val isClassMark: Boolean
     val isMethodMark: Boolean

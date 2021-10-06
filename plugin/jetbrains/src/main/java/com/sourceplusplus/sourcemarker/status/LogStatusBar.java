@@ -17,6 +17,7 @@ import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.artifact.log.Log;
 import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
+import com.sourceplusplus.protocol.instrument.LiveInstrument;
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
 import com.sourceplusplus.protocol.instrument.ThrottleStep;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
@@ -29,6 +30,7 @@ import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import io.vertx.core.json.Json;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -41,9 +43,8 @@ import java.awt.event.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -56,7 +57,7 @@ import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class LogStatusBar extends JPanel implements VisibleAreaListener {
+public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -87,11 +88,6 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             new ArrayList<>(), 0, SortOrder.DESCENDING);
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
-        this(sourceLocation, scopeVars, inlayMark, null, null);
-    }
-
-    public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
-                        LiveLog liveLog, Editor editor) {
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
@@ -139,29 +135,26 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
         }
 
         this.inlayMark = inlayMark;
-        this.liveLog = liveLog;
-        this.editor = (EditorImpl) editor;
 
-        if (liveLog != null) {
-            placeHolderText = "Waiting for live log data...";
-        } else {
-            placeHolderText = "Input log message (use $ for variables)";
-        }
+        placeHolderText = "Input log message (use $ for variables)";
 
         initComponents();
         setupComponents();
 
-        if (liveLog != null) {
-            liveLogTextField.setEditMode(false);
-            removeActiveDecorations();
-            addTimeField();
-            addExpandButton();
-            setupAsActive();
-        } else {
-            liveLogTextField.setEditMode(true);
-        }
+        liveLogTextField.setEditMode(true);
 
         liveLogTextField.addSaveListener(this::saveLiveLog);
+    }
+
+    public void setLiveInstrument(LiveInstrument liveInstrument) {
+        this.liveLog = (LiveLog) liveInstrument;
+        liveLogTextField.setEditMode(false);
+        wrapper.grabFocus();
+        removeActiveDecorations();
+        addTimeField();
+        addExpandButton();
+        setupAsActive();
+        repaint();
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -169,7 +162,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
     }
 
     @Override
-    public void visibleAreaChanged(VisibleAreaEvent e) {
+    public void visibleAreaChanged(@NotNull VisibleAreaEvent e) {
         liveLogTextField.hideAutocompletePopup();
     }
 
@@ -396,7 +389,7 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             @Override
             public void focusLost(FocusEvent e) {
                 if (liveLog == null && liveLogTextField.getText().equals("")) {
-                    if (popup == null) {
+                    if (popup == null && liveLogTextField.getEditMode()) {
                         dispose();
                     }
                 } else if (!liveLogTextField.getEditMode() ||
@@ -591,6 +584,9 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
             configurationPanel.setNewDefaults();
         }
 
+        HashMap<String, String> meta = new HashMap<>();
+        meta.put("original_source_mark", inlayMark.getId());
+
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
         LiveLog instrument = new LiveLog(
                 finalLogPattern,
@@ -603,19 +599,25 @@ public class LogStatusBar extends JPanel implements VisibleAreaListener {
                 false,
                 false,
                 false,
-                throttle
+                throttle,
+                meta
         );
+
+        liveLogTextField.setEditMode(false);
+        liveLogTextField.setText("");
+        liveLogTextField.setPlaceHolderText("Waiting for live log data...");
+        removeActiveDecorations();
+        addTimeField();
+        wrapper.grabFocus();
+
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
-                LoggerDetector detector = inlayMark.getUserData(
-                        SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR()
-                );
-                detector.addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
                 liveLog = (LiveLog) it.result();
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
 
-                //dispose this bar; another will be created
-                ApplicationManager.getApplication().invokeLater(inlayMark::dispose);
+                inlayMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR())
+                        .addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
             } else {
                 it.cause().printStackTrace();
             }

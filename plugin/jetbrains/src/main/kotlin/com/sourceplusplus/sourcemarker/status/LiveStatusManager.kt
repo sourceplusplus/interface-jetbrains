@@ -18,7 +18,6 @@ import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
 import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.instrument.LiveInstrument
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.log.LiveLog
@@ -28,7 +27,6 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
-import com.sourceplusplus.sourcemarker.search.SourceMarkSearch
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
@@ -47,7 +45,6 @@ object LiveStatusManager : SourceMarkEventListener {
 
     private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
-    private val pendingEvents = CopyOnWriteArrayList<PendingInstrumentEvent>()
 
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
@@ -103,6 +100,7 @@ object LiveStatusManager : SourceMarkEventListener {
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
+            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -144,6 +142,7 @@ object LiveStatusManager : SourceMarkEventListener {
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
+            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -185,11 +184,13 @@ object LiveStatusManager : SourceMarkEventListener {
 
                     val statusBar = BreakpointStatusBar(
                         liveBreakpoint.location,
-                        scopeService.getScopeVariables(fileMarker, liveBreakpoint.location.line),
-                        inlayMark, liveBreakpoint, editor
+                        emptyList(),
+                        inlayMark
                     )
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
+                    statusBar.setEditor(editor)
+                    statusBar.setLiveInstrument(liveBreakpoint)
                     editor.scrollingModel.addVisibleAreaListener(statusBar)
 
                     inlayMark.configuration.showComponentInlay = true
@@ -222,11 +223,13 @@ object LiveStatusManager : SourceMarkEventListener {
 
                     val statusBar = LogStatusBar(
                         liveLog.location,
-                        scopeService.getScopeVariables(fileMarker, liveLog.location.line),
-                        inlayMark, liveLog, editor
+                        emptyList(),
+                        inlayMark
                     )
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
+                    statusBar.setEditor(editor)
+                    statusBar.setLiveInstrument(liveLog)
                     editor.scrollingModel.addVisibleAreaListener(statusBar)
 
                     inlayMark.configuration.showComponentInlay = true
@@ -260,34 +263,6 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.putUserData(INSTRUMENT_EVENT_LISTENERS, ArrayList())
         }
         inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
-
-        val instrumentId = inlayMark.getUserData(BREAKPOINT_ID) ?: inlayMark.getUserData(LOG_ID)
-        pendingEvents.removeIf {
-            if (instrumentId == it.instrumentId) {
-                listener.accept(it.event)
-                true
-            } else {
-                false
-            }
-        }
-    }
-
-    fun addPendingEvent(event: LiveInstrumentEvent, instrumentId: String) {
-        pendingEvents.add(PendingInstrumentEvent(instrumentId, event))
-        pendingEvents.removeIf { event ->
-            val sourceMark = SourceMarkSearch.findByInstrumentId(event.instrumentId)
-            if (sourceMark != null) {
-                val eventListeners = sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS)
-                if (eventListeners?.isNotEmpty() == true) {
-                    eventListeners.forEach { it.accept(event.event) }
-                    true
-                } else {
-                    false
-                }
-            } else {
-                false
-            }
-        }
     }
 
     fun addActiveLiveInstrument(instrument: LiveInstrument) {
@@ -305,9 +280,4 @@ object LiveStatusManager : SourceMarkEventListener {
     fun removeActiveLiveInstrument(instrumentId: String) {
         activeStatusBars.removeIf { it.id == instrumentId }
     }
-
-    data class PendingInstrumentEvent(
-        val instrumentId: String,
-        val event: LiveInstrumentEvent
-    )
 }
