@@ -12,19 +12,16 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import com.sourceplusplus.marker.jvm.psi.LoggerDetector;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.artifact.log.Log;
-import com.sourceplusplus.protocol.instrument.InstrumentThrottle;
-import com.sourceplusplus.protocol.instrument.LiveInstrument;
-import com.sourceplusplus.protocol.instrument.LiveSourceLocation;
-import com.sourceplusplus.protocol.instrument.ThrottleStep;
+import com.sourceplusplus.protocol.instrument.*;
 import com.sourceplusplus.protocol.instrument.log.LiveLog;
 import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
+import com.sourceplusplus.sourcemarker.service.InstrumentEventListener;
 import com.sourceplusplus.sourcemarker.service.log.LogHitColumnInfo;
 import com.sourceplusplus.sourcemarker.settings.LiveLogConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
@@ -57,7 +54,7 @@ import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
+public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener, InstrumentEventListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -149,12 +146,13 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     public void setLiveInstrument(LiveInstrument liveInstrument) {
         this.liveLog = (LiveLog) liveInstrument;
         liveLogTextField.setEditMode(false);
+        liveLogTextField.setPlaceHolderText("Waiting for live log data...");
         wrapper.grabFocus();
         removeActiveDecorations();
-        addTimeField();
+        displayTimeField();
         addExpandButton();
-        setupAsActive();
         repaint();
+        LiveStatusManager.INSTANCE.addStatusBar(inlayMark,this);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -211,38 +209,40 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.requestFocusInWindow();
     }
 
-    private void addTimeField() {
+    private void displayTimeField() {
         timeLabel.setVisible(true);
         separator1.setVisible(true);
     }
 
-    private void setupAsActive() {
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, event -> {
-            if (event.getEventType() == LOG_HIT) {
+    @Override
+    public void accept(@NotNull LiveInstrumentEvent event) {
+        if (event.getEventType() == LOG_HIT) {
+            commandModel.insertRow(0, event);
+        } else if (event.getEventType() == LOG_REMOVED) {
+            //configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
+
+            LiveLogRemoved removed = Json.decodeValue(event.getData(), LiveLogRemoved.class);
+            if (removed.getCause() != null) {
                 commandModel.insertRow(0, event);
-            } else if (event.getEventType() == LOG_REMOVED) {
-                //configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
 
-                LiveLogRemoved removed = Json.decodeValue(event.getData(), LiveLogRemoved.class);
-                if (removed.getCause() != null) {
-                    commandModel.insertRow(0, event);
-
-                    errored = true;
-                    liveLogTextField.setEditMode(false);
-                    liveLogTextField.setText("");
-                    liveLogTextField.setPlaceHolderText(removed.getCause().getMessage());
-                    liveLogTextField.setPlaceHolderTextColor(Color.decode("#e1483b"));
-                    configDropdownLabel.setVisible(false);
-                    removeActiveDecorations();
-                    remove(timeLabel);
-                    remove(separator1);
-                    repaint();
-                }
+                errored = true;
+                liveLogTextField.setEditMode(false);
+                liveLogTextField.setText("");
+                liveLogTextField.setPlaceHolderText(removed.getCause().getMessage());
+                liveLogTextField.setPlaceHolderTextColor(Color.decode("#e1483b"));
+                configDropdownLabel.setVisible(false);
+                removeActiveDecorations();
+                remove(timeLabel);
+                remove(separator1);
+                repaint();
             }
-        });
+        }
     }
 
     private void addExpandButton() {
+        if (expandLabel != null) {
+            remove(expandLabel);
+        }
         expandLabel = new JLabel();
         expandLabel.setCursor(Cursor.getDefaultCursor());
         expandLabel.addMouseMotionListener(new MouseAdapter() {
@@ -607,7 +607,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.setText("");
         liveLogTextField.setPlaceHolderText("Waiting for live log data...");
         removeActiveDecorations();
-        addTimeField();
+        displayTimeField();
         wrapper.grabFocus();
 
         instrumentService.addLiveInstrument(instrument, it -> {
