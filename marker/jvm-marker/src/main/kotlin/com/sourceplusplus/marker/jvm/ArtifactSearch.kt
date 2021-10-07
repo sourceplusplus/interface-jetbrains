@@ -4,18 +4,21 @@ import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.util.Computable
 import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
+import com.sourceplusplus.marker.jvm.psi.EndpointDetector
 import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.marker.jvm.psi.EndpointDetector
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.plugins.groovy.GroovyFileType
 import org.jetbrains.uast.UMethod
@@ -35,12 +38,16 @@ object ArtifactSearch {
     private val log = LoggerFactory.getLogger(ArtifactSearch::class.java)
 
     @JvmStatic
-    fun detectRootPackage(project: Project): String? {
-        var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
-            ?.getSubPackages(ProjectScope.getProjectScope(project))
+    suspend fun detectRootPackage(project: Project): String? {
+        var basePackages = withContext(Dispatchers.Default) {
+            ApplicationManager.getApplication().runReadAction(Computable<Array<PsiPackage>> {
+                JavaPsiFacade.getInstance(project).findPackage("")
+                    ?.getSubPackages(ProjectScope.getProjectScope(project))!!
+            })
+        }
 
         //remove non-code packages
-        basePackages = basePackages!!.filter {
+        basePackages = basePackages.filter {
             val dirs = it.directories
             dirs.isNotEmpty() && !dirs[0].virtualFile.path.contains("/src/main/resources/")
         }.toTypedArray()
@@ -51,9 +58,9 @@ object ArtifactSearch {
         //determine deepest common source package
         if (basePackages.isNotEmpty()) {
             var rootPackage: String? = null
-            while (basePackages!!.size == 1) {
-                rootPackage = basePackages[0]!!.qualifiedName
-                basePackages = basePackages[0]!!.getSubPackages(ProjectScope.getProjectScope(project))
+            while (basePackages.size == 1) {
+                rootPackage = basePackages[0].qualifiedName
+                basePackages = basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
             }
             if (rootPackage != null) {
                 log.info("Detected root source package: $rootPackage")
