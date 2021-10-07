@@ -70,13 +70,14 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private Log latestLog;
     private JWindow popup;
     private LiveLogConfigurationPanel configurationPanel;
-    private AtomicBoolean settingFormattedMessage = new AtomicBoolean(false);
+    private final AtomicBoolean settingFormattedMessage = new AtomicBoolean(false);
     private boolean disposed = false;
     private JLabel expandLabel;
     private boolean expanded;
     private JPanel panel;
     private JPanel wrapper;
     private boolean errored = false;
+    private boolean removed = false;
     private final ListTableModel commandModel = new ListTableModel<>(
             new ColumnInfo[]{
                     new LogHitColumnInfo("Message"),
@@ -219,23 +220,22 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         if (event.getEventType() == LOG_HIT) {
             commandModel.insertRow(0, event);
         } else if (event.getEventType() == LOG_REMOVED) {
-            //configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
+            removed = true;
 
             LiveLogRemoved removed = Json.decodeValue(event.getData(), LiveLogRemoved.class);
             if (removed.getCause() != null) {
                 commandModel.insertRow(0, event);
 
                 errored = true;
-                liveLogTextField.setEditMode(false);
                 liveLogTextField.setText("");
                 liveLogTextField.setPlaceHolderText(removed.getCause().getMessage());
                 liveLogTextField.setPlaceHolderTextColor(Color.decode("#e1483b"));
-                configDropdownLabel.setVisible(false);
-                removeActiveDecorations();
-                remove(timeLabel);
-                remove(separator1);
-                repaint();
             }
+
+            liveLogTextField.setEditMode(false);
+            configDropdownLabel.setVisible(false);
+            removeActiveDecorations();
+            repaint();
         }
     }
 
@@ -414,7 +414,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
-                if (!errored) showEditableMode();
+                if (!errored && !removed) showEditableMode();
             }
 
             @Override
@@ -463,7 +463,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!errored) configPanel.setBackground(Color.decode("#3C3C3C"));
+                if (!errored && !removed) configPanel.setBackground(Color.decode("#3C3C3C"));
             }
         });
 
@@ -471,7 +471,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         addRecursiveMouseListener(configPanel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (!errored && System.currentTimeMillis() - popupLastOpened.get() > 200) {
+                if (!errored && !removed && System.currentTimeMillis() - popupLastOpened.get() > 200) {
                     ApplicationManager.getApplication().runWriteAction(() -> showConfigurationPopup(popupLastOpened));
                 }
             }
