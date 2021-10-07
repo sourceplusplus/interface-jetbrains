@@ -3,6 +3,13 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+### Added
+- Use caret line position for control bar location
+
+### Fixed
+- S++ auto-generated bugs missing plugin name/version
+- Slow EDT warnings
+
 ## [0.4.0] - 2021-10-06
 ### Added
 - Added meta storage to live instruments
