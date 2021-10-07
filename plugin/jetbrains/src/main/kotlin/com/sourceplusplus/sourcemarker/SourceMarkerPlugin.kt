@@ -183,67 +183,59 @@ object SourceMarkerPlugin {
         }
 
         //attempt to determine root source package automatically (if necessary)
-        val checkRootPackage = Promise.promise<Nothing>()
         if (config.rootSourcePackage.isNullOrBlank()) {
-            ApplicationManager.getApplication().runReadAction {
-                if (PluginManagerCore.getBuildNumber().productCode != "PY") {
-                    val rootPackage = ArtifactSearch.detectRootPackage(project)
-                    if (rootPackage != null) {
-                        log.info("Detected root source package: $rootPackage")
-                        config.rootSourcePackage = rootPackage
-                        projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
-                    }
+            if (PluginManagerCore.getBuildNumber().productCode != "PY") {
+                val rootPackage = ArtifactSearch.detectRootPackage(project)
+                if (rootPackage != null) {
+                    log.info("Detected root source package: $rootPackage")
+                    config.rootSourcePackage = rootPackage
+                    projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
                 }
-                checkRootPackage.complete()
             }
-        } else {
-            checkRootPackage.complete()
         }
 
-        checkRootPackage.future().onComplete {
-            connectionJob?.cancel()
-            connectionJob = null
+        connectionJob?.cancel()
+        connectionJob = null
 
-            connectionJob = GlobalScope.launch(vertx.dispatcher()) {
-                var connectedMonitor = false
-                try {
-                    initServices(project, config)
-                    initMonitor(config)
-                    connectedMonitor = true
-                } catch (ignored: CancellationException) {
-                } catch (throwable: Throwable) {
-                    //todo: if first time bring up config panel automatically instead of notification
-                    val pluginName = message("plugin_name")
-                    if (throwable.message == "HTTP 401 Unauthorized") {
-                        Notifications.Bus.notify(
-                            Notification(
-                                pluginName, "Connection unauthorized",
-                                "Failed to authenticate with $pluginName. " +
-                                        "Please ensure the correct configuration " +
-                                        "is set at: Settings -> Tools -> $pluginName",
-                                NotificationType.ERROR
-                            )
+        connectionJob = GlobalScope.launch(vertx.dispatcher()) {
+            var connectedMonitor = false
+            try {
+                initServices(project, config)
+                initMonitor(config)
+                connectedMonitor = true
+            } catch (ignored: CancellationException) {
+            } catch (throwable: Throwable) {
+                //todo: if first time bring up config panel automatically instead of notification
+                val pluginName = message("plugin_name")
+                if (throwable.message == "HTTP 401 Unauthorized") {
+                    Notifications.Bus.notify(
+                        Notification(
+                            pluginName, "Connection unauthorized",
+                            "Failed to authenticate with $pluginName. " +
+                                    "Please ensure the correct configuration " +
+                                    "is set at: Settings -> Tools -> $pluginName",
+                            NotificationType.ERROR
                         )
-                    } else {
-                        Notifications.Bus.notify(
-                            Notification(
-                                pluginName, "Connection failed",
-                                "$pluginName failed to connect to Apache SkyWalking. " +
-                                        "Please ensure Apache SkyWalking is running and the correct configuration " +
-                                        "is set at: Settings -> Tools -> $pluginName",
-                                NotificationType.ERROR
-                            )
+                    )
+                } else {
+                    Notifications.Bus.notify(
+                        Notification(
+                            pluginName, "Connection failed",
+                            "$pluginName failed to connect to Apache SkyWalking. " +
+                                    "Please ensure Apache SkyWalking is running and the correct configuration " +
+                                    "is set at: Settings -> Tools -> $pluginName",
+                            NotificationType.ERROR
                         )
-                    }
-                    log.error("Connection failed. Reason: {}", throwable.message)
+                    )
                 }
+                log.error("Connection failed. Reason: {}", throwable.message)
+            }
 
-                discoverAvailableServices(config, project)
-                if (connectedMonitor) {
-                    initPortal(config)
-                    initMarker(config, project)
-                    initMapper()
-                }
+            discoverAvailableServices(config, project)
+            if (connectedMonitor) {
+                initPortal(config)
+                initMarker(config, project)
+                initMapper()
             }
         }
     }

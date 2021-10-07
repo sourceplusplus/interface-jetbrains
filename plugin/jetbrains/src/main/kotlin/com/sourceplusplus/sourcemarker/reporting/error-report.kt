@@ -113,13 +113,13 @@ private object AnonymousFeedback {
         buildString {
             val errorDescription = details.remove("error.description").orEmpty()
             val stackTrace = details.remove("error.stacktrace")?.takeIf(String::isNotBlank) ?: "invalid stacktrace"
-            if (errorDescription.isNotEmpty()) append(errorDescription).appendln("\n\n----------------------\n")
-            for ((key, value) in details) append("- ").append(key).append(": ").appendln(value)
+            if (errorDescription.isNotEmpty()) append(errorDescription).appendLine("\n\n----------------------\n")
+            for ((key, value) in details) append("- ").append(key).append(": ").appendLine(value)
             if (includeStacktrace)
-                appendln("<details><summary>Full StackTrace</summary>")
-                    .appendln("<pre><code>")
-                    .appendln(stackTrace)
-                    .appendln("</code></pre>\n</details>")
+                appendLine("<details><summary>Full StackTrace</summary>")
+                    .appendLine("<pre><code>")
+                    .appendLine(stackTrace)
+                    .appendLine("</code></pre>\n</details>")
         }
 }
 
