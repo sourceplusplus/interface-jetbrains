@@ -23,6 +23,6 @@ object SourceMarkKeys {
     val LOG_ID = SourceKey<String>("LOG_ID")
     val BREAKPOINT_ID = SourceKey<String>("BREAKPOINT_ID")
     val GROUPED_MARKS = SourceKey<MutableList<SourceMark>>("GROUPED_MARKS")
-    val INSTRUMENT_EVENT_LISTENERS = SourceKey<MutableList<InstrumentEventListener>>("INSTRUMENT_EVENT_LISTENERS")
+    val INSTRUMENT_EVENT_LISTENERS = SourceKey<MutableSet<InstrumentEventListener>>("INSTRUMENT_EVENT_LISTENERS")
     val STATUS_BAR = SourceKey<StatusBar>("STATUS_BAR")
 }

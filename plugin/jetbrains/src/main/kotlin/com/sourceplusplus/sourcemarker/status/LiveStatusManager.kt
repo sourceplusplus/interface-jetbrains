@@ -187,6 +187,7 @@ object LiveStatusManager : SourceMarkEventListener {
                         emptyList(),
                         inlayMark
                     )
+                    inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     statusBar.setEditor(editor)
@@ -226,6 +227,7 @@ object LiveStatusManager : SourceMarkEventListener {
                         emptyList(),
                         inlayMark
                     )
+                    inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     statusBar.setEditor(editor)
@@ -260,7 +262,7 @@ object LiveStatusManager : SourceMarkEventListener {
 
     fun addStatusBar(inlayMark: InlayMark, listener: InstrumentEventListener) {
         if (inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS) == null) {
-            inlayMark.putUserData(INSTRUMENT_EVENT_LISTENERS, ArrayList())
+            inlayMark.putUserData(INSTRUMENT_EVENT_LISTENERS, mutableSetOf())
         }
         inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
     }
