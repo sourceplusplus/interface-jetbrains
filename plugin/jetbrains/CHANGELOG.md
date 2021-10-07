@@ -3,6 +3,8 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+
+## [0.4.1] - 2021-10-07
 ### Added
 - Use caret line position for control bar location
 
