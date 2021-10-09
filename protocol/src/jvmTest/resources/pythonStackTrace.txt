@@ -1,0 +1,47 @@
+  File "/usr/lib/python3.8/threading.py", line 890, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.8/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.8/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.8/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/werkzeug/serving.py", line 342, in handle
+    BaseHTTPRequestHandler.handle(self)
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/skywalking/plugins/sw_http_server.py", line 38, in _sw_handle
+    _handle(handler)
+  File "/usr/lib/python3.8/http/server.py", line 427, in handle
+    self.handle_one_request()
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/werkzeug/serving.py", line 374, in handle_one_request
+    self.run_wsgi()
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/skywalking/plugins/sw_http_server.py", line 77, in _wrap_run_wsgi
+    return _run_wsgi()
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/werkzeug/serving.py", line 319, in run_wsgi
+    execute(self.server.app)
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/werkzeug/serving.py", line 308, in execute
+    application_iter = app(environ, start_response)
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/flask/app.py", line 2091, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/flask/app.py", line 2073, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/skywalking/plugins/sw_flask.py", line 56, in _sw_full_dispatch_request
+    resp = _full_dispatch_request(this)
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/flask/app.py", line 1516, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/brandon/PycharmProjects/probe-python/venv/lib/python3.8/site-packages/flask/app.py", line 1502, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/home/brandon/PycharmProjects/pythonProject1/FirstTest.py", line 19, in hello
+    return 'Hello ' + provider + '!'
+  File "/home/brandon/PycharmProjects/nopdb/nopdb/nopdb.py", line 125, in _trace_func
+    callback(frame, event, arg)
+  File "/home/brandon/PycharmProjects/nopdb/nopdb/breakpoint.py", line 185, in _callback
+    action(frame, event, arg)
+  File "/home/brandon/PycharmProjects/nopdb/nopdb/breakpoint.py", line 141, in _do_exec
+    exec(code, frame.f_globals, f_locals)
+  File "<string>", line 2, in <module>
+  File "/home/brandon/PycharmProjects/probe-python/ContextReceiver.py", line 37, in try_thing
+    tag = StringTag(''.join(traceback.format_stack()))

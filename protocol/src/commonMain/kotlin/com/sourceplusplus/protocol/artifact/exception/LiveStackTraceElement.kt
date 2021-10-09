@@ -11,10 +11,11 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-data class JvmStackTraceElement(
+data class LiveStackTraceElement(
     val method: String,
     val source: String,
-    val variables: MutableList<LiveVariable> = mutableListOf()
+    val variables: MutableList<LiveVariable> = mutableListOf(),
+    var sourceCode: String? = null
 ) {
     override fun toString(): String = toString(false)
 
@@ -33,7 +34,7 @@ data class JvmStackTraceElement(
     }
 }
 
-fun JvmStackTraceElement.sourceAsFilename(): String? {
+fun LiveStackTraceElement.sourceAsFilename(): String? {
     return if (source.contains(":")) {
         source.substring(0, source.indexOf(":"))
     } else {
@@ -41,7 +42,7 @@ fun JvmStackTraceElement.sourceAsFilename(): String? {
     }
 }
 
-fun JvmStackTraceElement.sourceAsLineNumber(): Int? {
+fun LiveStackTraceElement.sourceAsLineNumber(): Int? {
     return if (source.contains(":")) {
         source.substring(source.indexOf(":") + 1).toInt()
     } else {
@@ -49,15 +50,15 @@ fun JvmStackTraceElement.sourceAsLineNumber(): Int? {
     }
 }
 
-fun JvmStackTraceElement.qualifiedClassName(): String {
+fun LiveStackTraceElement.qualifiedClassName(): String {
     return method.substring(0, method.lastIndexOf("."))
 }
 
-fun JvmStackTraceElement.shortQualifiedClassName(): String {
+fun LiveStackTraceElement.shortQualifiedClassName(): String {
     return getShortQualifiedClassName(qualifiedClassName())
 }
 
-fun JvmStackTraceElement.methodName(): String {
+fun LiveStackTraceElement.methodName(): String {
     return if (method.contains("$")) {
         method.substring(method.lastIndexOf(".") + 1).substringBefore("$")
     } else {

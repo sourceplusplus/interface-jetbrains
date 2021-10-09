@@ -12,8 +12,8 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.content.Content
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTrace
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTraceElement
 import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.ExecutionPointManager
 import com.sourceplusplus.sourcemarker.service.breakpoint.LiveBreakpointConstants
@@ -102,7 +102,7 @@ class BreakpointHitWindow(
         }
     }
 
-    fun showFrames(stackTrace: JvmStackTrace, currentFrame: JvmStackTraceElement) {
+    fun showFrames(stackTrace: LiveStackTrace, currentFrame: LiveStackTraceElement) {
         stackFrameManager = StackFrameManager(stackTrace)
         stackFrameManager.currentFrame = currentFrame
 

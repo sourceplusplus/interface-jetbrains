@@ -4,7 +4,7 @@ import com.sourceplusplus.protocol.advice.AdviceCategory
 import com.sourceplusplus.protocol.advice.AdviceType
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTrace
 import kotlinx.datetime.Instant
 
 /**
@@ -15,23 +15,23 @@ import kotlinx.datetime.Instant
  */
 class ActiveExceptionAdvice(
     artifact: ArtifactQualifiedName,
-    stackTrace: JvmStackTrace,
+    stackTrace: LiveStackTrace,
     occurredAt: Instant
 ) : ArtifactAdvice(artifact, AdviceCategory.INFORMATIVE, AdviceType.ActiveExceptionAdvice) {
 
-    var stackTrace: JvmStackTrace = stackTrace
+    var stackTrace: LiveStackTrace = stackTrace
         private set
     var occurredAt: Instant = occurredAt
         private set
 
-    fun update(stackTrace: JvmStackTrace, occurredAt: Instant) {
+    fun update(stackTrace: LiveStackTrace, occurredAt: Instant) {
         this.stackTrace = stackTrace
         this.occurredAt = occurredAt
         triggerUpdated()
     }
 
     /**
-     * Compares everything except [JvmStackTrace.message] as the message may just contain timestamp differences
+     * Compares everything except [LiveStackTrace.message] as the message may just contain timestamp differences
      * even though everything else is equivalent.
      */
     override fun isSameArtifactAdvice(artifactAdvice: ArtifactAdvice): Boolean {

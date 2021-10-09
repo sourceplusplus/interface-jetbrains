@@ -22,7 +22,7 @@ import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
 import com.sourceplusplus.protocol.ProtocolAddress.Portal.UpdateTraceSpan
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTrace
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import com.sourceplusplus.protocol.artifact.log.LogOrderType.NEWEST_LOGS
 import com.sourceplusplus.protocol.artifact.trace.*
@@ -411,7 +411,7 @@ class TracesPage(
             }
 
             var logData: Node = document.getElementById("log_data_$logIndex")!!
-            val stackTrace = JvmStackTrace.fromString(log.data)
+            val stackTrace = LiveStackTrace.fromString(log.data)
             if (stackTrace != null) {
                 logData.appendChild(document.create.span {
                     h5("ui top attached header") {

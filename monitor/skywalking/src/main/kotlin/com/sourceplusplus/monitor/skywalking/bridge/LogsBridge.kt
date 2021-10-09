@@ -5,7 +5,7 @@ import com.apollographql.apollo.api.Input
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient.LocalMessageCodec
 import com.sourceplusplus.monitor.skywalking.model.ZonedDuration
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTrace
 import com.sourceplusplus.protocol.artifact.log.Log
 import com.sourceplusplus.protocol.artifact.log.LogOrderType
 import com.sourceplusplus.protocol.artifact.log.LogResult
@@ -67,7 +67,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                                     thread = it.tags.find { it.key == "thread" }?.value,
                                     arguments = it.tags.filter { it.key.startsWith("argument.") }
                                         .mapNotNull { it.value },
-                                    exception = if (exceptionStr != null) JvmStackTrace.fromString(exceptionStr) else null
+                                    exception = if (exceptionStr != null) LiveStackTrace.fromString(exceptionStr) else null
                                 )
                             })
                     )

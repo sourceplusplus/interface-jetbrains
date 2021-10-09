@@ -37,7 +37,7 @@ import com.sourceplusplus.protocol.SourceMarkerServices
 import com.sourceplusplus.protocol.SourceMarkerServices.Instance
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTraceElement
 import com.sourceplusplus.protocol.artifact.log.LogResult
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
 import com.sourceplusplus.protocol.artifact.trace.TraceResult
@@ -132,7 +132,7 @@ object SourceMarkerPlugin {
         vertx.eventBus().registerDefaultCodec(TraceStack::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(TraceSpanStackQueryResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(EndpointResult::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(JvmStackTraceElement::class.java, LocalMessageCodec())
+        vertx.eventBus().registerDefaultCodec(LiveStackTraceElement::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(LogResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(TraceSpan::class.java, LocalMessageCodec())

@@ -49,7 +49,7 @@ import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
 import com.sourceplusplus.protocol.artifact.endpoint.EndpointType
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTraceElement
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import com.sourceplusplus.protocol.artifact.metrics.ArtifactSummarizedResult
 import com.sourceplusplus.protocol.artifact.metrics.MetricType
@@ -341,7 +341,7 @@ class PortalEventListener(
 
             val element = Json.decodeValue(
                 message.getJsonObject("stackTraceElement").toString(),
-                JvmStackTraceElement::class.java
+                LiveStackTraceElement::class.java
             )
             log.info("Clicked stack trace element: $element")
 
