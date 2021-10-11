@@ -23,7 +23,7 @@ data class LiveBreakpoint(
     override val applied: Boolean = false,
     override val pending: Boolean = false,
     override val throttle: InstrumentThrottle = InstrumentThrottle.DEFAULT,
-    override val meta: Map<String, Any> = emptyMap()
+    override val meta: Map<String, String> = emptyMap()
 ) : LiveInstrument() {
     override val type: LiveInstrumentType = LiveInstrumentType.BREAKPOINT
 }
