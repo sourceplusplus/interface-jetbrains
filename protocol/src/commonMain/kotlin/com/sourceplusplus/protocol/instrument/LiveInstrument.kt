@@ -1,5 +1,6 @@
 package com.sourceplusplus.protocol.instrument
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 /**
@@ -20,7 +21,7 @@ abstract class LiveInstrument {
     abstract val applied: Boolean
     abstract val pending: Boolean
     abstract val throttle: InstrumentThrottle
-    abstract val meta: Map<String, Any>
+    abstract val meta: Map<String, @Contextual Any>
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
