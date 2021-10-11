@@ -20,7 +20,7 @@ abstract class LiveInstrument {
     abstract val applied: Boolean
     abstract val pending: Boolean
     abstract val throttle: InstrumentThrottle
-    abstract val meta: Map<String, String>
+    abstract val meta: Map<String, Any>
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
