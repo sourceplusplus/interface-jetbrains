@@ -27,4 +27,11 @@ data class LiveLog(
     override val throttle: InstrumentThrottle = InstrumentThrottle.DEFAULT
 ) : LiveInstrument() {
     override val type: LiveInstrumentType = LiveInstrumentType.LOG
+
+    /**
+     * Specify explicitly so Kotlin doesn't override.
+     */
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
 }
