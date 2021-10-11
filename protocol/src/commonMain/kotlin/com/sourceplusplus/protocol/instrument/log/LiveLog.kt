@@ -25,7 +25,7 @@ data class LiveLog(
     override val applied: Boolean = false,
     override val pending: Boolean = false,
     override val throttle: InstrumentThrottle = InstrumentThrottle.DEFAULT,
-    override val meta: Map<String, String> = emptyMap()
+    override val meta: Map<String, Any> = emptyMap()
 ) : LiveInstrument() {
     override val type: LiveInstrumentType = LiveInstrumentType.LOG
 }
