@@ -27,4 +27,11 @@ data class LiveBreakpoint(
     override val meta: Map<String, @Contextual Any> = emptyMap()
 ) : LiveInstrument() {
     override val type: LiveInstrumentType = LiveInstrumentType.BREAKPOINT
+
+    /**
+     * Specify explicitly so Kotlin doesn't override.
+     */
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
 }
