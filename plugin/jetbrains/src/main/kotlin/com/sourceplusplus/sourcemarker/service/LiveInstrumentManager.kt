@@ -103,7 +103,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
         ApplicationManager.getApplication().invokeLater {
             val fileMarker = SourceMarker.getSourceFileMarker(logAdded.location.source)
             if (fileMarker != null) {
-                val smId = logAdded.meta["original_source_mark"] ?: return@invokeLater
+                val smId = logAdded.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getSourceMark(smId) ?: return@invokeLater
                 inlayMark.putUserData(SourceMarkKeys.LOG_ID, logAdded.id)
                 inlayMark.getUserData(SourceMarkKeys.STATUS_BAR)!!.setLiveInstrument(logAdded)
@@ -118,7 +118,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
         ApplicationManager.getApplication().invokeLater {
             val fileMarker = SourceMarker.getSourceFileMarker(bpAdded.location.source)
             if (fileMarker != null) {
-                val smId = bpAdded.meta["original_source_mark"] ?: return@invokeLater
+                val smId = bpAdded.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getSourceMark(smId) ?: return@invokeLater
                 inlayMark.putUserData(SourceMarkKeys.BREAKPOINT_ID, bpAdded.id)
                 inlayMark.getUserData(SourceMarkKeys.STATUS_BAR)!!.setLiveInstrument(bpAdded)
