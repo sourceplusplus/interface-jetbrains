@@ -1,11 +1,13 @@
 package com.sourceplusplus.marker.jvm.psi
 
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.util.Computable
+import com.sourceplusplus.marker.jvm.psi.endpoint.SkywalkingTraceEndpoint
+import com.sourceplusplus.marker.jvm.psi.endpoint.SpringMVCEndpoint
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.key.SourceKey
 import com.sourceplusplus.monitor.skywalking.bridge.EndpointBridge
-import com.sourceplusplus.marker.jvm.psi.endpoint.SkywalkingTraceEndpoint
-import com.sourceplusplus.marker.jvm.psi.endpoint.SpringMVCEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -13,8 +15,10 @@ import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
@@ -117,8 +121,12 @@ class EndpointDetector(val vertx: Vertx) {
         }
     }
 
-    private fun determineEndpointName(sourceMark: MethodSourceMark): Future<Optional<DetectedEndpoint>> {
-        return determineEndpointName(sourceMark.getPsiMethod().toUElement() as UMethod)
+    private suspend fun determineEndpointName(sourceMark: MethodSourceMark): Future<Optional<DetectedEndpoint>> {
+        return withContext(Dispatchers.Default) {
+            ApplicationManager.getApplication().runReadAction(Computable {
+                determineEndpointName(sourceMark.getPsiMethod().toUElement() as UMethod)
+            })
+        }
     }
 
     fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
