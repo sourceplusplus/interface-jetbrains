@@ -92,6 +92,24 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                 if (e.getKeyChar() == KeyEvent.VK_TAB) {
                     //ignore tab; handled by auto-complete
                     e.consume();
+                } else if (e.getKeyCode() == KeyEvent.VK_UP && !textField1.isPopupVisible()) {
+                    int lineNumber = inlayMark.getLineNumber();
+                    while (--lineNumber > 0) {
+                        if (ControlBarController.INSTANCE.canShowControlBar(inlayMark.getSourceFileMarker(), lineNumber)) {
+                            dispose();
+                            ControlBarController.INSTANCE.showControlBar(editor, lineNumber, true);
+                            break;
+                        }
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_DOWN && !textField1.isPopupVisible()) {
+                    int lineNumber = inlayMark.getLineNumber();
+                    while (++lineNumber < editor.getDocument().getLineCount()) {
+                        if (ControlBarController.INSTANCE.canShowControlBar(inlayMark.getSourceFileMarker(), lineNumber)) {
+                            dispose();
+                            ControlBarController.INSTANCE.showControlBar(editor, lineNumber, true);
+                            break;
+                        }
+                    }
                 }
             }
 

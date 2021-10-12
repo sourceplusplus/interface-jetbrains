@@ -86,6 +86,10 @@ object ControlBarController {
         }
     }
 
+    fun canShowControlBar(fileMarker: SourceFileMarker, lineNumber: Int): Boolean {
+        return creationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber).isPresent
+    }
+
     /**
      * Attempts to display live control bar below [lineNumber].
      */

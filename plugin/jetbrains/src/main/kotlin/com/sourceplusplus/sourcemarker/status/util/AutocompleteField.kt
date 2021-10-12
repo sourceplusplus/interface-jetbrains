@@ -131,6 +131,10 @@ class AutocompleteField(
         addMouseMotionListener(this)
     }
 
+    fun isPopupVisible(): Boolean {
+        return popup.isVisible
+    }
+
     fun setCellRenderer(listCellRenderer: DefaultListCellRenderer) {
         list.cellRenderer = listCellRenderer
     }
