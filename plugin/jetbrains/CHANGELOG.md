@@ -3,6 +3,8 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+### Added
+- Ability to move control bar with arrow keys
 
 ## [0.4.1] - 2021-10-07
 ### Added
