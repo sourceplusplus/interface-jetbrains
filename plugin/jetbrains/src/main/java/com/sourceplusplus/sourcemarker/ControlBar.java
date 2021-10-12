@@ -88,13 +88,6 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
     private void setupComponents() {
         textField1.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    moveKeyHeld.set(false);
-                }
-            }
-
-            @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_TAB) {
                     //ignore tab; handled by auto-complete
