@@ -27,9 +27,6 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.math.BigInteger
-import java.net.NetworkInterface
-import java.security.MessageDigest
 import java.util.*
 
 /**
@@ -104,27 +101,6 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             socket!!.handler(FrameParser(TCPServiceFrameParser(vertx)))
 
             vertx.executeBlocking<Any> {
-                var hardwareId: String? = null
-                try {
-                    //optional mac-address identification
-                    val sb = StringBuilder()
-                    val networkInterfaces = NetworkInterface.getNetworkInterfaces()
-                    while (networkInterfaces.hasMoreElements()) {
-                        val ni = networkInterfaces.nextElement()
-                        val hardwareAddress = ni.hardwareAddress
-                        if (hardwareAddress != null) {
-                            val hexadecimalFormat = mutableListOf<String>()
-                            for (i in hardwareAddress.indices) {
-                                hexadecimalFormat.add(String.format(Locale.ENGLISH, "%02X", hardwareAddress[i]))
-                            }
-                            sb.append(java.lang.String.join("-", hexadecimalFormat))
-                        }
-                    }
-                    hardwareId = md5(sb.toString())
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
-
                 setupHandler(vertx, "get-records")
                 setupHandler(vertx, Utilize.LIVE_VIEW)
                 setupHandler(vertx, Utilize.LIVE_INSTRUMENT)
@@ -133,7 +109,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
                 //setup connection
                 val replyAddress = UUID.randomUUID().toString()
-                val pc = MarkerConnection(SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis(), hardwareId)
+                val pc = MarkerConnection(SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis())
                 val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer("local.$replyAddress")
 
                 val promise = Promise.promise<Void>()
@@ -221,9 +197,4 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     }
 
     override fun name() = "tcp-service-discovery"
-
-    private fun md5(input: String): String {
-        val md = MessageDigest.getInstance("MD5")
-        return BigInteger(1, md.digest(input.toByteArray())).toString(16).padStart(32, '0')
-    }
 }

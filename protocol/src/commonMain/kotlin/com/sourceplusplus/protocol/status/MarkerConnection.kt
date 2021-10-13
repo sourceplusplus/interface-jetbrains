@@ -11,6 +11,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MarkerConnection(
     var markerId: String,
-    var connectionTime: Long,
-    var hardwareId: String? = null
+    var connectionTime: Long
 )
