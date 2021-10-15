@@ -9,7 +9,7 @@ val kotlinVersion = ext.get("kotlinVersion")
 dependencies {
     implementation(project(":protocol"))
     implementation("org.slf4j:slf4j-api:1.7.32")
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.9")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.10")
     implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.9")
     api("com.apollographql.apollo:apollo-api:2.5.9")
 
