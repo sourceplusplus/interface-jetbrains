@@ -263,6 +263,8 @@ object SourceMarkerPlugin {
                     .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
             )
         )
+
+        log.info("Discovering available services")
         val availableRecords = discovery.getRecords { true }.await()
 
         //local tracing

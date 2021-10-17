@@ -1,7 +1,6 @@
 package com.sourceplusplus.marker.jvm
 
-import com.intellij.psi.PsiVariable
-import com.intellij.psi.ResolveState
+import com.intellij.psi.*
 import com.intellij.psi.scope.processor.VariablesProcessor
 import com.intellij.psi.scope.util.PsiScopesUtil
 import com.sourceplusplus.marker.ArtifactScopeService
@@ -15,6 +14,14 @@ import com.sourceplusplus.marker.source.SourceFileMarker
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactScopeService : ArtifactScopeService {
+
+    fun isMethodAtLine(psiFile: PsiFile, lineNumber: Int): Boolean {
+        var el =  SourceMarkerUtils.getElementAtLine(psiFile, lineNumber)
+        while (el is PsiKeyword || el is PsiModifierList) {
+            el = el.parent
+        }
+        return el is PsiMethod
+    }
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         //determine available vars
