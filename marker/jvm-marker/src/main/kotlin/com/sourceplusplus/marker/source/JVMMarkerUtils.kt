@@ -480,6 +480,12 @@ object JVMMarkerUtils {
                 }
             } else if (it.typeElement != null) {
                 methodParams += it.typeElement!!.text
+            } else if (it.type is PsiPrimitiveType) {
+                methodParams += if (it.language.id == "kotlin") {
+                    (it.type as PsiPrimitiveType).boxedTypeName
+                } else {
+                    it.type.canonicalText
+                }
             } else {
                 log.warn("Unable to detect element type: {}", it)
             }

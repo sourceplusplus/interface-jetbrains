@@ -3,6 +3,15 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+### Added
+- Ability to move control bar with arrow keys
+- Use caret line position for control bar location
+
+### Fixed
+- Read access thread warnings
+
+### Removed
+- Marker connection hardware id
 
 ## [0.4.1] - 2021-10-07
 ### Added

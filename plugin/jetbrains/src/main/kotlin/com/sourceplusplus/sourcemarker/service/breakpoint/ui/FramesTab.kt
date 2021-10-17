@@ -55,9 +55,8 @@ class FramesTab(
                 b1: Boolean
             ) {
                 this.icon = AllIcons.Debugger.Frame
-                if (config.rootSourcePackage != null && frame.method.startsWith(config.rootSourcePackage!!) &&
-                    frame.sourceAsLineNumber() != null
-                ) {
+                if (config.rootSourcePackages.any { frame.method.startsWith(it) } &&
+                    frame.sourceAsLineNumber() != null) {
                     this.append(frame.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES)
                 } else {
                     this.append(frame.toString(), SimpleTextAttributes.GRAY_ATTRIBUTES)

@@ -1,5 +1,6 @@
 package com.sourceplusplus.protocol.status
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,5 +13,5 @@ import kotlinx.serialization.Serializable
 data class MarkerConnection(
     var markerId: String,
     var connectionTime: Long,
-    var hardwareId: String? = null
+    val meta: MutableMap<String, @Contextual Any> = mutableMapOf()
 )

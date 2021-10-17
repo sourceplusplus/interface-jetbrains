@@ -15,7 +15,7 @@ dependencies {
     compileOnly(project(":marker"))
     compileOnly(project(":monitor:skywalking"))
     compileOnly(project(":protocol"))
-    val intellijVersion = "212.5284.40"
+    val intellijVersion = "212.5457.46"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -27,7 +27,7 @@ dependencies {
     compileOnly("org.slf4j:slf4j-api:1.7.32")
     compileOnly("org.jooq:jooq:3.15.3")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
-    compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.2")
+    compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.3")
     compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:analysis:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-analysis:$intellijVersion") { isTransitive = false }

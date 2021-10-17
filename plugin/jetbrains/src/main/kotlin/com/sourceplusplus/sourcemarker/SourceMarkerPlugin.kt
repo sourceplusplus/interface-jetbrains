@@ -183,12 +183,12 @@ object SourceMarkerPlugin {
         }
 
         //attempt to determine root source package automatically (if necessary)
-        if (config.rootSourcePackage.isNullOrBlank()) {
+        if (config.rootSourcePackages.isEmpty()) {
             if (PluginManagerCore.getBuildNumber().productCode != "PY") {
                 val rootPackage = ArtifactSearch.detectRootPackage(project)
                 if (rootPackage != null) {
                     log.info("Detected root source package: $rootPackage")
-                    config.rootSourcePackage = rootPackage
+                    config.rootSourcePackages = listOf(rootPackage)
                     projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
                 }
             }
@@ -558,9 +558,9 @@ object SourceMarkerPlugin {
         SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
         SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true
 
-        if (config.rootSourcePackage != null) {
+        if (config.rootSourcePackages.isNotEmpty()) {
             SourceMarker.configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->
-                artifactQualifiedName.startsWith(config.rootSourcePackage!!)
+                config.rootSourcePackages.any { artifactQualifiedName.startsWith(it) }
             }
         } else {
             log.warn("Could not determine root source package. Skipped adding create source mark filter...")
