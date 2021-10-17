@@ -6,7 +6,10 @@ import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.*;
+import com.intellij.ui.IdeBorderFactory;
+import com.intellij.ui.ListUtil;
+import com.intellij.ui.ScrollingUtil;
+import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.sourceplusplus.sourcemarker.PluginBundle.message;
 
@@ -82,7 +86,7 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(skywalkingOapTextField.getText(), config.getSkywalkingOapUrl())) {
             return true;
         }
-        if (!Objects.equals(rootSourcePackageTextField.getText(), config.getRootSourcePackage())) {
+        if (!Arrays.equals(rootSourcePackageTextField.getText().split(","), config.getRootSourcePackages().toArray())) {
             return true;
         }
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {
@@ -109,7 +113,8 @@ public class PluginConfigurationPanel {
     public SourceMarkerConfig getPluginConfig() {
         return new SourceMarkerConfig(
                 skywalkingOapTextField.getText(),
-                rootSourcePackageTextField.getText(),
+                Arrays.stream(rootSourcePackageTextField.getText().split(","))
+                        .map(String::trim).collect(Collectors.toList()),
                 autoResolveEndpointNamesCheckBox.isSelected(),
                 true, consoleCheckBox.isSelected(),
                 portalRefreshModel.getNumber().intValue(),
@@ -123,7 +128,7 @@ public class PluginConfigurationPanel {
     public void applySourceMarkerConfig(SourceMarkerConfig config) {
         this.config = config;
         skywalkingOapTextField.setText(config.getSkywalkingOapUrl());
-        rootSourcePackageTextField.setText(config.getRootSourcePackage());
+        rootSourcePackageTextField.setText(String.join(",", config.getRootSourcePackages()));
         autoResolveEndpointNamesCheckBox.setSelected(config.getAutoResolveEndpointNames());
         consoleCheckBox.setSelected(config.getPluginConsoleEnabled());
         portalRefreshModel.setValue(config.getPortalRefreshIntervalMs());
