@@ -52,7 +52,7 @@ object ArtifactSearch {
             dirs.isNotEmpty() && !dirs[0].virtualFile.path.contains("/src/main/resources/")
         }.toTypedArray()
         basePackages = basePackages.filter {
-            it.qualifiedName != "asciidoc" && it.qualifiedName != "lib"
+            it.qualifiedName != "asciidoc" && it.qualifiedName != "lib" && it.qualifiedName != "META-INF"
         }.toTypedArray() //todo: probably shouldn't be necessary
 
         //determine deepest common source package
@@ -67,6 +67,27 @@ object ArtifactSearch {
                 return rootPackage
             }
         }
+
+        //look explicitly for /src/main/ pattern
+        var srcMains = basePackages.flatMap { it.directories.toList() }
+            .filter { it.toString().contains("/src/main/") }
+            .filterNot { it.toString().contains("/META-INF") }
+        val genPackage = StringBuilder()
+        var commonSuffix = commonSuffix(srcMains.map { it.toString() }).replace("/", "")
+        while (commonSuffix.isNotEmpty()) {
+            genPackage.append(commonSuffix)
+
+            srcMains = srcMains.flatMap { it.subdirectories.toList() }
+            commonSuffix = commonSuffix(srcMains.map { it.toString() }).replace("/", "")
+            if (commonSuffix.isNotEmpty()) {
+                genPackage.append(".")
+            }
+        }
+        if (genPackage.isNotEmpty()) {
+            log.info("Detected root source package: $genPackage")
+            return genPackage.toString()
+        }
+
         return null
     }
 
@@ -140,5 +161,38 @@ object ArtifactSearch {
             }
         }
         return promise.future().await().orElse(null)
+    }
+
+    //taken from: https://rosettacode.org/wiki/Longest_common_suffix#Kotlin
+    private fun commonSuffix(a: List<String>): String {
+        val le = a.size
+        if (le == 0) {
+            return ""
+        }
+        if (le == 1) {
+            return a[0]
+        }
+        val le0 = a[0].length
+        var minLen = le0
+        for (i in 1 until le) {
+            if (a[i].length < minLen) {
+                minLen = a[i].length
+            }
+        }
+        if (minLen == 0) {
+            return ""
+        }
+        var res = ""
+        val a1 = a.subList(1, a.size)
+        for (i in 1..minLen) {
+            val suffix = a[0].substring(le0 - i)
+            for (e in a1) {
+                if (!e.endsWith(suffix)) {
+                    return res
+                }
+            }
+            res = suffix
+        }
+        return ""
     }
 }
