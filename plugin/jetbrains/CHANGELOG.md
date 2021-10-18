@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 ### Added
+- Improved root source package detection
+- Support multiple root source packages
+
+## [0.4.2] - 2021-10-12
+### Added
 - Ability to move control bar with arrow keys
 - Use caret line position for control bar location
 
