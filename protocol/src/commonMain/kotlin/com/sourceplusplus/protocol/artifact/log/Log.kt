@@ -1,7 +1,7 @@
 package com.sourceplusplus.protocol.artifact.log
 
 import com.sourceplusplus.protocol.Serializers
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTrace
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -19,7 +19,7 @@ data class Log(
     val level: String,
     val logger: String? = null,
     val thread: String? = null,
-    val exception: JvmStackTrace? = null,
+    val exception: LiveStackTrace? = null,
     val arguments: List<String> = listOf()
 ) {
     fun getFormattedMessage(): String {

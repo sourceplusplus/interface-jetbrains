@@ -6,6 +6,7 @@ package com.sourceplusplus.sourcemarker.icons
  * @since 0.2.1
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MagicNumber", "MaxLineLength")
 data class NumericSvgIcon(val number: Int, val color: String) {
 
     private val numerals = mapOf(

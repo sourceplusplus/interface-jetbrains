@@ -7,7 +7,7 @@ import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTraceElement
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
@@ -30,7 +30,7 @@ class FramesTab(
 ) : DebugStackFrameListener, Disposable {
 
     val component: JPanel = JPanel(BorderLayout())
-    private val stackFrameList: JList<JvmStackTraceElement>
+    private val stackFrameList: JList<LiveStackTraceElement>
 
     init {
         stackFrameList = JBList()
@@ -46,10 +46,10 @@ class FramesTab(
     }
 
     private fun addListeners() {
-        stackFrameList.cellRenderer = object : ColoredListCellRenderer<JvmStackTraceElement>() {
+        stackFrameList.cellRenderer = object : ColoredListCellRenderer<LiveStackTraceElement>() {
             override fun customizeCellRenderer(
-                jList: JList<out JvmStackTraceElement>,
-                frame: JvmStackTraceElement,
+                jList: JList<out LiveStackTraceElement>,
+                frame: LiveStackTraceElement,
                 i: Int,
                 b: Boolean,
                 b1: Boolean

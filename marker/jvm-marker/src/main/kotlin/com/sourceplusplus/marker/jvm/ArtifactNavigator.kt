@@ -13,7 +13,7 @@ import com.intellij.util.PsiNavigateUtil
 import com.sourceplusplus.marker.source.JVMMarkerUtils
 import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
 import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTraceElement
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTraceElement
 import com.sourceplusplus.protocol.artifact.exception.sourceAsFilename
 import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
 import io.vertx.core.Promise
@@ -38,7 +38,7 @@ object ArtifactNavigator {
 
     //todo: remove method from method names and support navigating to classes?
 
-    fun navigateTo(vertx: Vertx, project: Project, element: JvmStackTraceElement) {
+    fun navigateTo(vertx: Vertx, project: Project, element: LiveStackTraceElement) {
         ApplicationManager.getApplication().invokeLater {
             val foundFiles = getFilesByName(project, element.sourceAsFilename()!!, allScope(project))
             if (foundFiles.isNotEmpty()) {
