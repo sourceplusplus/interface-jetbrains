@@ -43,12 +43,6 @@ jobs:
           PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH_PLUGIN_TOKEN }}
         run: ./gradlew publishPlugin
 
-      # Upload artifact as a release asset
-      - name: Upload Release Asset
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.event.release.tag_name }} ./plugin/jetbrains/build/distributions/*
-
       # Create pull request
       - name: Create Pull Request
         env:
