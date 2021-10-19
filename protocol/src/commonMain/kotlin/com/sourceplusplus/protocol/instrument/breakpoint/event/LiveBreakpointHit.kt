@@ -1,7 +1,7 @@
 package com.sourceplusplus.protocol.instrument.breakpoint.event
 
 import com.sourceplusplus.protocol.Serializers
-import com.sourceplusplus.protocol.artifact.exception.JvmStackTrace
+import com.sourceplusplus.protocol.artifact.exception.LiveStackTrace
 import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
 import com.sourceplusplus.protocol.instrument.TrackedLiveEvent
 import kotlinx.datetime.Instant
@@ -21,7 +21,7 @@ data class LiveBreakpointHit(
     override val occurredAt: Instant,
     val host: String,
     val application: String,
-    val stackTrace: JvmStackTrace
+    val stackTrace: LiveStackTrace
 ) : TrackedLiveEvent {
     val eventType: LiveInstrumentEventType = LiveInstrumentEventType.BREAKPOINT_HIT
 }

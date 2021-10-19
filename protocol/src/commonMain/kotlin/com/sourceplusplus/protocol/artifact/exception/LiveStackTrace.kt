@@ -9,17 +9,17 @@ import kotlinx.serialization.Serializable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Serializable
-class JvmStackTrace(
+class LiveStackTrace(
     var exceptionType: String,
     var message: String?,
-    val elements: MutableList<JvmStackTraceElement>,
-    val causedBy: JvmStackTrace? = null
-) : Iterable<JvmStackTraceElement> {
+    val elements: MutableList<LiveStackTraceElement>,
+    val causedBy: LiveStackTrace? = null
+) : Iterable<LiveStackTraceElement> {
 
-    fun getElements(hideApacheSkywalking: Boolean): List<JvmStackTraceElement> {
+    fun getElements(hideApacheSkywalking: Boolean): List<LiveStackTraceElement> {
         if (hideApacheSkywalking) {
             //skip skywalking interceptor element(s) and accompanying $original/$auxiliary elements
-            val finalElements = mutableListOf<JvmStackTraceElement>()
+            val finalElements = mutableListOf<LiveStackTraceElement>()
             var skipTo = 0
             val reversedElements = elements.reversed()
             for (i in reversedElements.indices) {
@@ -41,7 +41,11 @@ class JvmStackTrace(
                     finalElements.add(el)
                 }
             }
-            return finalElements.reversed()
+            return finalElements.reversed().filterNot {
+                it.source.contains("/skywalking/plugins/")
+                        || it.source.contains("/nopdb/nopdb/")
+                        || it.source.contains("/probe-python/ContextReceiver.py")
+            }
         } else {
             return elements
         }
@@ -51,15 +55,34 @@ class JvmStackTrace(
         private const val skywalkingInterceptor =
             "org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstMethodsInter.intercept"
         private val frameRegex = Regex(
-            "(?:\\s*at\\s+)((?:[\\w\\s](?:\\\$+|\\.|\\/)?)+)" +
-                    "\\.([\\w|_|\\\$|\\s|<|>]+)\\s*\\(([^\\(\\)]+(?:\\([^\\)]*\\))?)\\)"
+            "\\s*at\\s+((?:[\\w\\s](?:\\\$+|\\.|/)?)+)" +
+                    "\\.([\\w|_$\\s<>]+)\\s*\\(([^()]+(?:\\([^)]*\\))?)\\)"
+        )
+        private val pythonFrameRegex = Regex(
+            " {2}File \"(.+)\", line ([0-9]+), in (.+)\\n {4}(.+)"
         )
 
-        fun fromString(data: String): JvmStackTrace? {
-            if (!frameRegex.containsMatchIn(data)) {
-                return null
+        fun fromString(data: String): LiveStackTrace? {
+            return when {
+                frameRegex.containsMatchIn(data) -> extractJvmStackTrace(data)
+                pythonFrameRegex.containsMatchIn(data) -> extractPythonStackTrace(data)
+                else -> null
             }
+        }
 
+        private fun extractPythonStackTrace(data: String): LiveStackTrace {
+            val elements = mutableListOf<LiveStackTraceElement>()
+            for (el in pythonFrameRegex.findAll(data).toList().reversed()) {
+                val file = el.groupValues[1]
+                val lineNumber = el.groupValues[2]
+                val inLocation = el.groupValues[3]
+                val sourceCode = el.groupValues[4]
+                elements.add(LiveStackTraceElement(inLocation, "$file:$lineNumber", sourceCode = sourceCode))
+            }
+            return LiveStackTrace("n/a", "n/a", elements)
+        }
+
+        private fun extractJvmStackTrace(data: String): LiveStackTrace {
             val logLines = data.split("\n")
             var message: String? = null
             val exceptionClass = if (logLines[0].contains(":")) {
@@ -68,18 +91,18 @@ class JvmStackTrace(
             } else {
                 logLines[0]
             }
-            val elements = mutableListOf<JvmStackTraceElement>()
+            val elements = mutableListOf<LiveStackTraceElement>()
             for (el in frameRegex.findAll(data)) {
                 val clazz = el.groupValues[1]
                 val method = el.groupValues[2]
                 val source = el.groupValues[3]
-                elements.add(JvmStackTraceElement("$clazz.$method", source))
+                elements.add(LiveStackTraceElement("$clazz.$method", source))
             }
-            return JvmStackTrace(exceptionClass, message, elements)
+            return LiveStackTrace(exceptionClass, message, elements)
         }
     }
 
-    override fun iterator(): Iterator<JvmStackTraceElement> {
+    override fun iterator(): Iterator<LiveStackTraceElement> {
         return elements.iterator()
     }
 
@@ -103,7 +126,7 @@ class JvmStackTrace(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is JvmStackTrace) return false
+        if (other !is LiveStackTrace) return false
         if (exceptionType != other.exceptionType) return false
         if (message != other.message) return false
         if (elements != other.elements) return false
