@@ -17,19 +17,6 @@
 
 ## [0.4.4]
 ### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
-## [0.4.4]
-### Added
 - Improved root source package detection
 - Support multiple root source packages
 
