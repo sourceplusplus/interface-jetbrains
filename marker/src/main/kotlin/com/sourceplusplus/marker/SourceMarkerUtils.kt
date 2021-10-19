@@ -19,9 +19,9 @@ object SourceMarkerUtils {
      */
     @JvmStatic
     fun isBlankLine(psiFile: PsiFile, lineNumber: Int): Boolean {
-        val element = SourceMarkerUtils.getElementAtLine(psiFile, lineNumber)
+        val element = getElementAtLine(psiFile, lineNumber)
         if (element != null) {
-            return SourceMarkerUtils.getLineNumber(element) != lineNumber
+            return getLineNumber(element) != lineNumber
         }
         return true
     }

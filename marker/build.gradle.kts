@@ -5,14 +5,14 @@ plugins {
 
 val kotlinVersion = ext.get("kotlinVersion")
 val pluginGroup: String by project
-val markerVersion: String by project
+val pluginVersion: String by project
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = pluginGroup
             artifactId = "marker"
-            version = markerVersion
+            version = pluginVersion
 
             from(components["java"])
         }

@@ -4,13 +4,13 @@ plugins {
 }
 
 val pluginGroup: String by project
-val mapperVersion: String by project
+val pluginVersion: String by project
 publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = pluginGroup
             artifactId = "mapper"
-            version = mapperVersion
+            version = pluginVersion
 
             from(components["java"])
         }

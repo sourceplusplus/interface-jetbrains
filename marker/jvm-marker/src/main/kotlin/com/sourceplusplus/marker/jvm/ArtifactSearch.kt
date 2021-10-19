@@ -63,7 +63,6 @@ object ArtifactSearch {
                 basePackages = basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
             }
             if (rootPackage != null) {
-                log.info("Detected root source package: $rootPackage")
                 return rootPackage
             }
         }
@@ -84,7 +83,6 @@ object ArtifactSearch {
             }
         }
         if (genPackage.isNotEmpty()) {
-            log.info("Detected root source package: $genPackage")
             return genPackage.toString()
         }
 

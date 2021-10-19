@@ -7,7 +7,6 @@ import com.intellij.util.ui.JBImageIcon
 import com.sourceplusplus.protocol.advice.ArtifactAdvice
 import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
 import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
-import com.sourceplusplus.protocol.icon.NumericSvgIcon
 import java.io.ByteArrayInputStream
 import javax.swing.Icon
 

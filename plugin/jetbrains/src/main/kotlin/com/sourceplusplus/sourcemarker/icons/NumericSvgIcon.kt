@@ -1,4 +1,4 @@
-package com.sourceplusplus.protocol.icon
+package com.sourceplusplus.sourcemarker.icons
 
 /**
  * todo: description.
