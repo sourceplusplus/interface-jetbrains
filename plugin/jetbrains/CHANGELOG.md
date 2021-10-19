@@ -3,6 +3,8 @@
 # SourceMarker Changelog
 
 ## [Unreleased]
+
+## [0.4.4] - 2021-10-19
 ### Added
 - Improved root source package detection
 - Support multiple root source packages
