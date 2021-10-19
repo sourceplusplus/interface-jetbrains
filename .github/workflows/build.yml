@@ -25,6 +25,7 @@ on:
     paths-ignore:
       - "**.md"
       - ".github/media/**"
+  workflow_dispatch:
 
 jobs:
 
