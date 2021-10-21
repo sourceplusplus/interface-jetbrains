@@ -16,14 +16,6 @@
 ### Security
 
 ## [0.4.5] - 2021-10-21
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
 ### Fixed
 - IntelliJ compatibility fix
 
