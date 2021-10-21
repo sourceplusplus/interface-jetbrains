@@ -15,7 +15,7 @@
 
 ### Security
 
-## [0.4.5]
+## [0.4.5] - 2021-10-21
 ### Added
 
 ### Changed
@@ -25,12 +25,11 @@
 ### Removed
 
 ### Fixed
+- IntelliJ compatibility fix
 
 ### Security
 
-## [0.4.5]
-
-## [0.4.4]
+## [0.4.4] - 2021-10-19
 ### Added
 - Improved root source package detection
 - Support multiple root source packages
