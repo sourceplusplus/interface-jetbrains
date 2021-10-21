@@ -140,4 +140,6 @@ class VariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
             }
         }
     }
+
+    override fun getEqualityObjects(): Array<Any> = arrayOf(variable)
 }
