@@ -11,11 +11,11 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
-import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
@@ -149,7 +149,7 @@ object SourceMarkerPlugin {
         DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
-        if (PluginManagerCore.getBuildNumber().productCode == "PY") {
+        if (ApplicationInfo.getInstance().build.productCode == "PY") {
             SourceMarker.creationService = PythonArtifactCreationService()
             SourceMarker.namingService = PythonArtifactNamingService()
             SourceMarker.scopeService = PythonArtifactScopeService()
@@ -184,7 +184,7 @@ object SourceMarkerPlugin {
 
         //attempt to determine root source package automatically (if necessary)
         if (config.rootSourcePackages.isEmpty()) {
-            if (PluginManagerCore.getBuildNumber().productCode != "PY") {
+            if (ApplicationInfo.getInstance().build.productCode != "PY") {
                 val rootPackage = ArtifactSearch.detectRootPackage(project)
                 if (rootPackage != null) {
                     log.info("Detected root source package: $rootPackage")

@@ -1,6 +1,6 @@
 package com.sourceplusplus.sourcemarker.settings;
 
-import com.intellij.ide.plugins.PluginManagerCore;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
@@ -40,7 +40,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         );
 
         XDebuggerEditorsProvider editorsProvider;
-        if ("PY".equals(PluginManagerCore.getBuildNumber().getProductCode())) {
+        if ("PY".equals(ApplicationInfo.getInstance().getBuild().getProductCode())) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"
