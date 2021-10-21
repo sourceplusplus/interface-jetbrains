@@ -15,6 +15,21 @@
 
 ### Security
 
+## [0.4.5]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.4.5]
+
 ## [0.4.4]
 ### Added
 - Improved root source package detection
@@ -25,8 +40,10 @@
 - Ability to move control bar with arrow keys
 - Use caret line position for control bar location
 
+
 ### Fixed
 - Read access thread warnings
+
 
 ### Removed
 - Marker connection hardware id
@@ -34,6 +51,7 @@
 ## [0.4.1] - 2021-10-07
 ### Added
 - Use caret line position for control bar location
+
 
 ### Fixed
 - S++ auto-generated bugs missing plugin name/version
@@ -54,6 +72,7 @@
 - Hide/show global source marks shortcut (Ctrl+Shift+D)
 - Various dependency upgrades
 
+
 ### Fixed
 - Issue determining endpoint name ([#358](https://github.com/sourceplusplus/SourceMarker/issues/358))
 
@@ -64,15 +83,19 @@
 - Ability to configure portal refresh interval
 - Added debug console (hidden by default)
 
+
 ### Fixed
 - Portal popup race condition ([#350](https://github.com/sourceplusplus/SourceMarker/issues/350))
 - Issue with determining active service ([#285](https://github.com/sourceplusplus/SourceMarker/issues/285))
 
+
 ### Changed
 - More intuitive portal default views
 
+
 ### Removed
 - Local mentor module
+
 
 ### Upgraded
 - Kotlin (1.4.30 -> 1.4.32)
@@ -100,11 +123,13 @@
 - Anonymous error reporting ([#115](https://github.com/sourceplusplus/SourceMarker/issues/115))
 - Mentor task retry logic
 
+
 ### Changed
 - Single page portal ([#254](https://github.com/sourceplusplus/SourceMarker/issues/254))
 - Persist current view between internal portals ([#302](https://github.com/sourceplusplus/SourceMarker/issues/302))
 - Dynamic portal host ports
 - Refactored activity portal
+
 
 ### Upgraded
 - Apache SkyWalking (8.2.0 -> 8.4.0)
