@@ -23,7 +23,7 @@ import java.awt.*;
 import java.util.Objects;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
-import static com.sourceplusplus.sourcemarker.SourceMarkerPlugin.PYCHARM_PRODUCT_CODES;
+import static com.sourceplusplus.sourcemarker.SourceMarkerPlugin.*;
 
 public class LiveLogConfigurationPanel extends JPanel {
 
@@ -49,7 +49,7 @@ public class LiveLogConfigurationPanel extends JPanel {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-        } else {
+        } else if (INTELLIJ_PRODUCT_CODES.contains(ApplicationInfo.getInstance().getBuild().getProductCode())) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "org.jetbrains.java.debugger.JavaDebuggerEditorsProvider"

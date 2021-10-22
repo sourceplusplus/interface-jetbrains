@@ -107,7 +107,10 @@ object SourceMarkerPlugin {
 
     @JvmField
     val PYCHARM_PRODUCT_CODES = setOf("PY", "PC", "PE")
+
+    @JvmField
     val INTELLIJ_PRODUCT_CODES = setOf("IC", "IU")
+
     val SOURCE_RED = Color(225, 72, 59)
     val INSTANCE_ID = UUID.randomUUID().toString()
 
