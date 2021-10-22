@@ -20,13 +20,17 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
-import static com.sourceplusplus.sourcemarker.SourceMarkerPlugin.PYCHARM_PRODUCT_CODES;
 
 public class LiveLogConfigurationPanel extends JPanel {
 
+    private final static Set<String> PYCHARM_PRODUCT_CODES = new HashSet<>(Arrays.asList("PY", "PC", "PE"));
+    private final static Set<String> INTELLIJ_PRODUCT_CODES = new HashSet<>(Arrays.asList("IC", "IU"));
     private final XDebuggerExpressionComboBox comboBox;
     private XExpression condition;
     private int hitLimit = 100;
@@ -41,7 +45,8 @@ public class LiveLogConfigurationPanel extends JPanel {
         );
 
         XDebuggerEditorsProvider editorsProvider;
-        if (PYCHARM_PRODUCT_CODES.contains(ApplicationInfo.getInstance().getBuild().getProductCode())) {
+        String productCode = ApplicationInfo.getInstance().getBuild().getProductCode();
+        if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"
@@ -49,7 +54,7 @@ public class LiveLogConfigurationPanel extends JPanel {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-        } else {
+        } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "org.jetbrains.java.debugger.JavaDebuggerEditorsProvider"
@@ -57,6 +62,8 @@ public class LiveLogConfigurationPanel extends JPanel {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
+        } else {
+            throw new UnsupportedOperationException("Unsupported product code: " + productCode);
         }
         comboBox = new XDebuggerExpressionComboBox(
                 psiFile.getProject(), editorsProvider, "LiveLogCondition",
