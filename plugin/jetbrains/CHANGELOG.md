@@ -15,11 +15,24 @@
 
 ### Security
 
+## [0.4.6]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.4.6]
+
 ## [0.4.5] - 2021-10-21
 ### Fixed
 - IntelliJ compatibility fix
-
-### Security
 
 ## [0.4.4] - 2021-10-19
 ### Added
@@ -32,8 +45,10 @@
 - Use caret line position for control bar location
 
 
+
 ### Fixed
 - Read access thread warnings
+
 
 
 ### Removed
@@ -42,6 +57,7 @@
 ## [0.4.1] - 2021-10-07
 ### Added
 - Use caret line position for control bar location
+
 
 
 ### Fixed
@@ -64,6 +80,7 @@
 - Various dependency upgrades
 
 
+
 ### Fixed
 - Issue determining endpoint name ([#358](https://github.com/sourceplusplus/SourceMarker/issues/358))
 
@@ -75,17 +92,21 @@
 - Added debug console (hidden by default)
 
 
+
 ### Fixed
 - Portal popup race condition ([#350](https://github.com/sourceplusplus/SourceMarker/issues/350))
 - Issue with determining active service ([#285](https://github.com/sourceplusplus/SourceMarker/issues/285))
+
 
 
 ### Changed
 - More intuitive portal default views
 
 
+
 ### Removed
 - Local mentor module
+
 
 
 ### Upgraded
@@ -115,11 +136,13 @@
 - Mentor task retry logic
 
 
+
 ### Changed
 - Single page portal ([#254](https://github.com/sourceplusplus/SourceMarker/issues/254))
 - Persist current view between internal portals ([#302](https://github.com/sourceplusplus/SourceMarker/issues/302))
 - Dynamic portal host ports
 - Refactored activity portal
+
 
 
 ### Upgraded
