@@ -152,16 +152,28 @@ object SourceMarkerPlugin {
         DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
-        if (PYCHARM_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
+        val productCode = ApplicationInfo.getInstance().build.productCode
+        if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
             SourceMarker.creationService = PythonArtifactCreationService()
             SourceMarker.namingService = PythonArtifactNamingService()
             SourceMarker.scopeService = PythonArtifactScopeService()
             SourceMarker.conditionParser = PythonConditionParser()
-        } else if (INTELLIJ_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
+        } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
             SourceMarker.creationService = JVMArtifactCreationService()
             SourceMarker.namingService = JVMArtifactNamingService()
             SourceMarker.scopeService = JVMArtifactScopeService()
             SourceMarker.conditionParser = JVMConditionParser()
+        } else {
+            val pluginName = message("plugin_name")
+            Notifications.Bus.notify(
+                Notification(
+                    pluginName,
+                    "Unsupported product code",
+                    "Unsupported product code: $productCode.",
+                    NotificationType.ERROR
+                )
+            )
+            throw IllegalStateException("Unsupported product code: $productCode")
         }
     }
 
