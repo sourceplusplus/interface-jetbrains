@@ -157,7 +157,7 @@ object SourceMarkerPlugin {
             SourceMarker.namingService = PythonArtifactNamingService()
             SourceMarker.scopeService = PythonArtifactScopeService()
             SourceMarker.conditionParser = PythonConditionParser()
-        } else {
+        } else if (INTELLIJ_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
             SourceMarker.creationService = JVMArtifactCreationService()
             SourceMarker.namingService = JVMArtifactNamingService()
             SourceMarker.scopeService = JVMArtifactScopeService()
