@@ -23,6 +23,7 @@ import java.awt.*;
 import java.util.Objects;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
+import static com.sourceplusplus.sourcemarker.SourceMarkerPlugin.*;
 
 public class LiveLogConfigurationPanel extends JPanel {
 
@@ -40,7 +41,8 @@ public class LiveLogConfigurationPanel extends JPanel {
         );
 
         XDebuggerEditorsProvider editorsProvider;
-        if ("PY".equals(ApplicationInfo.getInstance().getBuild().getProductCode())) {
+        String productCode = ApplicationInfo.getInstance().getBuild().getProductCode();
+        if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"
@@ -48,7 +50,7 @@ public class LiveLogConfigurationPanel extends JPanel {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-        } else {
+        } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "org.jetbrains.java.debugger.JavaDebuggerEditorsProvider"
@@ -56,6 +58,8 @@ public class LiveLogConfigurationPanel extends JPanel {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
+        } else {
+            throw new UnsupportedOperationException("Unsupported product code: " + productCode);
         }
         comboBox = new XDebuggerExpressionComboBox(
                 psiFile.getProject(), editorsProvider, "LiveLogCondition",

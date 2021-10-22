@@ -105,6 +105,12 @@ import java.util.*
 @Suppress("MagicNumber")
 object SourceMarkerPlugin {
 
+    @JvmField
+    val PYCHARM_PRODUCT_CODES = setOf("PY", "PC", "PE")
+
+    @JvmField
+    val INTELLIJ_PRODUCT_CODES = setOf("IC", "IU")
+
     val SOURCE_RED = Color(225, 72, 59)
     val INSTANCE_ID = UUID.randomUUID().toString()
 
@@ -149,16 +155,28 @@ object SourceMarkerPlugin {
         DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
-        if (ApplicationInfo.getInstance().build.productCode == "PY") {
+        val productCode = ApplicationInfo.getInstance().build.productCode
+        if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
             SourceMarker.creationService = PythonArtifactCreationService()
             SourceMarker.namingService = PythonArtifactNamingService()
             SourceMarker.scopeService = PythonArtifactScopeService()
             SourceMarker.conditionParser = PythonConditionParser()
-        } else {
+        } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
             SourceMarker.creationService = JVMArtifactCreationService()
             SourceMarker.namingService = JVMArtifactNamingService()
             SourceMarker.scopeService = JVMArtifactScopeService()
             SourceMarker.conditionParser = JVMConditionParser()
+        } else {
+            val pluginName = message("plugin_name")
+            Notifications.Bus.notify(
+                Notification(
+                    pluginName,
+                    "Unsupported product code",
+                    "Unsupported product code: $productCode.",
+                    NotificationType.ERROR
+                )
+            )
+            throw IllegalStateException("Unsupported product code: $productCode")
         }
     }
 
@@ -184,7 +202,7 @@ object SourceMarkerPlugin {
 
         //attempt to determine root source package automatically (if necessary)
         if (config.rootSourcePackages.isEmpty()) {
-            if (ApplicationInfo.getInstance().build.productCode != "PY") {
+            if (INTELLIJ_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
                 val rootPackage = ArtifactSearch.detectRootPackage(project)
                 if (rootPackage != null) {
                     log.info("Detected root source package: $rootPackage")
