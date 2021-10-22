@@ -105,6 +105,7 @@ import java.util.*
 @Suppress("MagicNumber")
 object SourceMarkerPlugin {
 
+    @JvmField
     val PYCHARM_PRODUCT_CODES = setOf("PY", "PC", "PE")
     val INTELLIJ_PRODUCT_CODES = setOf("IC", "IU")
     val SOURCE_RED = Color(225, 72, 59)
