@@ -23,6 +23,7 @@ import java.awt.*;
 import java.util.Objects;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
+import static com.sourceplusplus.sourcemarker.SourceMarkerPlugin.PYCHARM_PRODUCT_CODES;
 
 public class LiveLogConfigurationPanel extends JPanel {
 
@@ -40,7 +41,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         );
 
         XDebuggerEditorsProvider editorsProvider;
-        if ("PY".equals(ApplicationInfo.getInstance().getBuild().getProductCode())) {
+        if (PYCHARM_PRODUCT_CODES.contains(ApplicationInfo.getInstance().getBuild().getProductCode())) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"

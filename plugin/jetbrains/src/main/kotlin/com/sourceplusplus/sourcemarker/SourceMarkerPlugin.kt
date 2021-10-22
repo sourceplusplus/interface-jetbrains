@@ -105,6 +105,9 @@ import java.util.*
 @Suppress("MagicNumber")
 object SourceMarkerPlugin {
 
+    @JvmField
+    val PYCHARM_PRODUCT_CODES = setOf("PY", "PC", "PE")
+    val INTELLIJ_PRODUCT_CODES = setOf("IC", "IU")
     val SOURCE_RED = Color(225, 72, 59)
     val INSTANCE_ID = UUID.randomUUID().toString()
 
@@ -149,7 +152,7 @@ object SourceMarkerPlugin {
         DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
-        if (ApplicationInfo.getInstance().build.productCode == "PY") {
+        if (PYCHARM_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
             SourceMarker.creationService = PythonArtifactCreationService()
             SourceMarker.namingService = PythonArtifactNamingService()
             SourceMarker.scopeService = PythonArtifactScopeService()
@@ -184,7 +187,7 @@ object SourceMarkerPlugin {
 
         //attempt to determine root source package automatically (if necessary)
         if (config.rootSourcePackages.isEmpty()) {
-            if (ApplicationInfo.getInstance().build.productCode != "PY") {
+            if (INTELLIJ_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
                 val rootPackage = ArtifactSearch.detectRootPackage(project)
                 if (rootPackage != null) {
                     log.info("Detected root source package: $rootPackage")
