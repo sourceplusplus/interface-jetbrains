@@ -14,7 +14,7 @@ repositories {
 dependencies {
     compileOnly(project(":marker"))
     compileOnly(project(":monitor:skywalking"))
-    compileOnly("com.github.sourceplusplus.protocol:protocol-jvm:0.1.21")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:0.1.21")
     val intellijVersion = "212.5457.46"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
