@@ -72,7 +72,6 @@ SourceMarker (alpha) is an APM-powered IDE-based plugin. Inspired by the Feedbac
 | :mapper                       | Tracks source code artifact refactoring                              |
 | :marker                       | Used to tie visual marks & popups to source code artifacts           |
 | :portal                       | Used to visually display contextualized artifact data/advice         |
-| :protocol                     | Common communication data models                                     |
 
 ### Implementation
 
