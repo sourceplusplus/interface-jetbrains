@@ -23,7 +23,7 @@ import java.awt.*;
 import java.util.Objects;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
-import static com.sourceplusplus.sourcemarker.SourceMarkerPlugin.*;
+import static com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.*;
 
 public class LiveLogConfigurationPanel extends JPanel {
 
