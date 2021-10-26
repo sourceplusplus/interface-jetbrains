@@ -41,8 +41,8 @@ class FileActivityListener : FileEditorManagerListener {
             log.debug("Ignoring file closed: $file")
         } else {
             log.debug("File closed: $file")
-            val psiFile = PsiManager.getInstance(source.project).findFile(file)!!
-            val fileMarker = psiFile.getUserData(SourceFileMarker.KEY)
+            val psiFile = PsiManager.getInstance(source.project).findFile(file)
+            val fileMarker = psiFile?.getUserData(SourceFileMarker.KEY)
             if (fileMarker != null) {
                 SourceMarker.deactivateSourceFileMarker(fileMarker)
             }
