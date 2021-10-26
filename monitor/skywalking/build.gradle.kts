@@ -8,7 +8,7 @@ val kotlinVersion = ext.get("kotlinVersion")
 val apolloVersion: String by project
 
 dependencies {
-    implementation(project(":protocol"))
+    implementation("com.github.sourceplusplus.protocol:protocol-jvm:0.1.21")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("com.apollographql.apollo:apollo-runtime:$apolloVersion")
     implementation("com.apollographql.apollo:apollo-coroutines-support:$apolloVersion")

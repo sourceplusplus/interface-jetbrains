@@ -55,9 +55,9 @@ dependencies {
     implementation(project(":marker:jvm-marker"))
     implementation(project(":marker:py-marker"))
     implementation(project(":monitor:skywalking"))
-    implementation(project(":protocol"))
     implementation(project(":portal"))
 
+    implementation("com.github.sourceplusplus.protocol:protocol-jvm:0.1.21")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
