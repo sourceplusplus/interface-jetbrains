@@ -1,8 +1,13 @@
 package com.sourceplusplus.sourcemarker.activities
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.sourceplusplus.marker.plugin.SourceMarkerStartupActivity
+import com.sourceplusplus.sourcemarker.PluginBundle
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import kotlinx.coroutines.runBlocking
 import org.apache.log4j.FileAppender
@@ -17,6 +22,15 @@ import org.apache.log4j.PatternLayout
  */
 class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
 
+    companion object {
+        @JvmField
+        val PYCHARM_PRODUCT_CODES = setOf("PY", "PC", "PE")
+
+        @JvmField
+        val INTELLIJ_PRODUCT_CODES = setOf("IC", "IU")
+        val SUPPORTED_PRODUCT_CODES = PYCHARM_PRODUCT_CODES + INTELLIJ_PRODUCT_CODES
+    }
+
     init {
         if (System.getProperty("sourcemarker.debug.capture_logs", "false")!!.toBoolean()) {
             val fa = FileAppender()
@@ -30,6 +44,17 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
     override fun runActivity(project: Project) {
         if (ApplicationManager.getApplication().isUnitTestMode) {
             return //tests manually set up necessary components
+        } else if (!SUPPORTED_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
+            val pluginName = PluginBundle.message("plugin_name")
+            Notifications.Bus.notify(
+                Notification(
+                    pluginName,
+                    "Unsupported product code",
+                    "Unsupported product code: ${ApplicationInfo.getInstance().build.productCode}",
+                    NotificationType.ERROR
+                )
+            )
+            return
         }
 
         //setup plugin

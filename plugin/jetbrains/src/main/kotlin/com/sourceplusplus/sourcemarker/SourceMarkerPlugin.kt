@@ -49,6 +49,8 @@ import com.sourceplusplus.protocol.service.live.LiveViewService
 import com.sourceplusplus.protocol.service.logging.LogCountIndicatorService
 import com.sourceplusplus.protocol.service.tracing.LocalTracingService
 import com.sourceplusplus.sourcemarker.PluginBundle.message
+import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
+import com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend
 import com.sourceplusplus.sourcemarker.listeners.PluginSourceMarkEventListener
 import com.sourceplusplus.sourcemarker.listeners.PortalEventListener
@@ -104,12 +106,6 @@ import java.util.*
  */
 @Suppress("MagicNumber")
 object SourceMarkerPlugin {
-
-    @JvmField
-    val PYCHARM_PRODUCT_CODES = setOf("PY", "PC", "PE")
-
-    @JvmField
-    val INTELLIJ_PRODUCT_CODES = setOf("IC", "IU")
 
     val SOURCE_RED = Color(225, 72, 59)
     val INSTANCE_ID = UUID.randomUUID().toString()
