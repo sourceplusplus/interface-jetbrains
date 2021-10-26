@@ -3,6 +3,7 @@ package com.sourceplusplus.sourcemarker.reporting
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
 import com.intellij.diagnostic.AbstractMessage
+import com.intellij.diagnostic.LogMessage
 import com.intellij.diagnostic.ReportMessages
 import com.intellij.ide.DataManager
 import com.intellij.ide.plugins.PluginManagerCore
@@ -146,11 +147,18 @@ class GitHubErrorReporter : ErrorReportSubmitter() {
         description: String?
     ): Boolean {
         val dataContext = DataManager.getInstance().getDataContext(parent)
+        val errorMessage = if (event.data is LogMessage) {
+            (event.data as LogMessage).throwable.message
+        } else if (event.throwable != null) {
+            event.throwable.message
+        } else {
+            event.message
+        }
         val bean = GitHubErrorBean(
             event.throwable,
             IdeaLogger.ourLastActionId,
             description ?: "<No description>",
-            event.message ?: event.throwable.message.toString()
+            errorMessage ?: ""
         )
         PluginUtil.getInstance().findPluginId(event.throwable)?.let { pluginId ->
             PluginManagerCore.getPlugin(pluginId)?.let { ideaPluginDescriptor ->
