@@ -34,7 +34,7 @@ kotlin {
                 implementation(kotlin("stdlib-jdk8"))
                 implementation("com.github.sourceplusplus.protocol:protocol:0.1.21")
                 implementation("org.slf4j:slf4j-api:1.7.32")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
                 implementation("io.vertx:vertx-core:$vertxVersion")
                 implementation("io.vertx:vertx-web:$vertxVersion")
@@ -62,7 +62,7 @@ kotlin {
                 implementation(kotlin("stdlib-common"))
                 implementation(kotlin("stdlib-js"))
                 implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.7.3")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
                 implementation("com.github.bfergerson:kotlin-vertx3-eventbus-bridge:bacec93ae1")
             }
