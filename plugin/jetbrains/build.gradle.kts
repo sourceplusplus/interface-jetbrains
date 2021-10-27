@@ -57,7 +57,7 @@ dependencies {
     implementation(project(":monitor:skywalking"))
     implementation(project(":portal"))
 
-    implementation("com.github.sourceplusplus.protocol:protocol:0.1.21")
+    implementation("com.github.sourceplusplus.protocol:protocol:0.1.23")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
