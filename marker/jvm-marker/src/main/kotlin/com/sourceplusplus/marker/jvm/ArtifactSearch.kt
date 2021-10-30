@@ -60,7 +60,11 @@ object ArtifactSearch {
             var rootPackage: String? = null
             while (basePackages.size == 1) {
                 rootPackage = basePackages[0].qualifiedName
-                basePackages = basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
+                basePackages = withContext(Dispatchers.Default) {
+                    ApplicationManager.getApplication().runReadAction(Computable<Array<PsiPackage>> {
+                        basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
+                    })
+                }
             }
             if (rootPackage != null) {
                 return rootPackage
