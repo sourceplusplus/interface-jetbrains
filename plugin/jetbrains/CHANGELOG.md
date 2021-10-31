@@ -6,18 +6,23 @@
 ### Added
 
 ### Changed
-- Removed protocol module to its own repo
-- Dependency upgrades
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
-- Slow EDT warnings
-- Auto-generated error titles
 
 ### Security
+
+## [0.4.7] - 2021-10-31
+### Changed
+- Removed protocol module to its own repo
+- Dependency upgrades
+
+### Fixed
+- Slow EDT warnings
+- Auto-generated error titles
 
 ## [0.4.6] - 2021-10-22
 ### Fixed
