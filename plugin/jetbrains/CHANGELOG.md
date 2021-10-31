@@ -6,12 +6,16 @@
 ### Added
 
 ### Changed
+- Removed protocol module to its own repo
+- Dependency upgrades
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- Slow EDT warnings
+- Auto-generated error titles
 
 ### Security
 
