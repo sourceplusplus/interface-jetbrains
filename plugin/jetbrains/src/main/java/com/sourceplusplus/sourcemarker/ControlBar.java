@@ -34,6 +34,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
     private final List<LiveControlCommand> availableCommands = Arrays.asList(
             LiveControlCommand.ADD_LIVE_BREAKPOINT,
             LiveControlCommand.ADD_LIVE_LOG,
+            LiveControlCommand.ADD_LIVE_METER,
             LiveControlCommand.CLEAR_LIVE_INSTRUMENTS
     );
     private final Function<String, List<AutocompleteFieldRow>> lookup = text -> availableCommands.stream()

@@ -52,6 +52,16 @@ object ControlBarController {
                     LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
+            LiveControlCommand.ADD_LIVE_METER.command -> {
+                //replace command inlay with meter status inlay
+                val prevCommandBar = previousControlBar!!
+                previousControlBar!!.dispose()
+                previousControlBar = null
+
+                ApplicationManager.getApplication().runWriteAction {
+                    LiveStatusManager.showMeterStatusBar(editor, prevCommandBar.lineNumber)
+                }
+            }
             LiveControlCommand.CLEAR_LIVE_BREAKPOINTS.command -> {
                 previousControlBar!!.dispose()
                 previousControlBar = null

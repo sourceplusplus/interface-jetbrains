@@ -21,12 +21,14 @@ import com.sourceplusplus.protocol.instrument.LiveInstrument
 import com.sourceplusplus.protocol.instrument.LiveSourceLocation
 import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint
 import com.sourceplusplus.protocol.instrument.log.LiveLog
+import com.sourceplusplus.protocol.instrument.meter.LiveMeter
 import com.sourceplusplus.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
+import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.METER_ID
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
@@ -70,6 +72,7 @@ object LiveStatusManager : SourceMarkEventListener {
                             when (it) {
                                 is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
                                 is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
+                                is LiveMeter -> showMeterStatusBar(it, event.sourceMark.sourceFileMarker)
                                 else -> throw UnsupportedOperationException(it.javaClass.simpleName)
                             }
                         }
@@ -170,6 +173,45 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
+    fun showMeterStatusBar(editor: Editor, lineNumber: Int) {
+        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
+            .getUserData(SourceFileMarker.KEY)
+        if (fileMarker == null) {
+            log.warn("Could not find file marker for file: {}", editor.document)
+            return
+        }
+
+        val inlayMark = creationService.createExpressionInlayMark(fileMarker, lineNumber)
+        if (!fileMarker.containsSourceMark(inlayMark)) {
+            val wrapperPanel = JPanel()
+            wrapperPanel.layout = BorderLayout()
+
+            val statusBar = MeterStatusBar(
+                LiveSourceLocation(namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber),
+                scopeService.getScopeVariables(fileMarker, lineNumber),
+                inlayMark
+            )
+            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+            statusBar.setWrapperPanel(wrapperPanel)
+            wrapperPanel.add(statusBar)
+            statusBar.setEditor(editor)
+            editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+            inlayMark.configuration.showComponentInlay = true
+            inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+            }
+            inlayMark.visible.set(true)
+            inlayMark.apply()
+
+            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+//            sourcePortal.configuration.currentPage = PageType.METERS
+            sourcePortal.configuration.statusBar = true
+
+            statusBar.focus()
+        }
+    }
+
     fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
@@ -256,6 +298,46 @@ object LiveStatusManager : SourceMarkEventListener {
                 }
             } else {
                 log.warn("No detected expression at line {}. Inlay mark ignored", liveLog.location.line)
+            }
+        }
+    }
+
+    fun showMeterStatusBar(liveMeter: LiveMeter, fileMarker: SourceFileMarker) {
+        ApplicationManager.getApplication().invokeLater {
+            val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
+            val findInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, liveMeter.location.line)
+            if (findInlayMark.isPresent) {
+                val inlayMark = findInlayMark.get()
+                if (!fileMarker.containsSourceMark(inlayMark)) {
+                    inlayMark.putUserData(METER_ID, liveMeter.id)
+
+                    val wrapperPanel = JPanel()
+                    wrapperPanel.layout = BorderLayout()
+
+                    val statusBar = MeterStatusBar(
+                        liveMeter.location,
+                        emptyList(),
+                        inlayMark
+                    )
+                    inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+                    statusBar.setWrapperPanel(wrapperPanel)
+                    wrapperPanel.add(statusBar)
+                    statusBar.setEditor(editor)
+                    statusBar.setLiveInstrument(liveMeter)
+                    editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+                    inlayMark.configuration.showComponentInlay = true
+                    inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                        override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+                    }
+                    inlayMark.apply()
+
+                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+//                    sourcePortal.configuration.currentPage = PageType.METERS
+                    sourcePortal.configuration.statusBar = true
+                }
+            } else {
+                log.warn("No detected expression at line {}. Inlay mark ignored", liveMeter.location.line)
             }
         }
     }
