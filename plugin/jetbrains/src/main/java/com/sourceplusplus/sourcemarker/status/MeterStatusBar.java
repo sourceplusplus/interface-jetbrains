@@ -14,6 +14,9 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.api.SourceMark;
+import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration;
+import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider;
+import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
 import com.sourceplusplus.protocol.SourceMarkerServices;
 import com.sourceplusplus.protocol.instrument.*;
@@ -24,33 +27,31 @@ import com.sourceplusplus.protocol.instrument.meter.MetricValueType;
 import com.sourceplusplus.protocol.instrument.meter.event.LiveMeterRemoved;
 import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import com.sourceplusplus.sourcemarker.settings.LiveMeterConfigurationPanel;
 import com.sourceplusplus.sourcemarker.status.util.AutocompleteField;
 import io.vertx.core.json.Json;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
-import javax.swing.plaf.basic.BasicComboBoxEditor;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
+import static com.sourceplusplus.marker.SourceMarker.creationService;
 import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
@@ -182,7 +183,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         SwingUtilities.invokeLater(() -> {
             mainPanel.removeAll();
             mainPanel.setLayout(new BorderLayout());
-            statusPanel.setExpires(liveMeter.getExpiresAt());
+            //statusPanel.setExpires(liveMeter.getExpiresAt());
             mainPanel.add(statusPanel);
 
             remove(closeLabel);
@@ -377,21 +378,17 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         String condition = null;
         if (!meterConditionField.getText().isEmpty()) {
-            condition = conditionParser.getCondition(
-                    meterConditionField.getText(), inlayMark.getPsiElement()
-            );
+            condition = conditionParser.getCondition(meterConditionField.getText(), inlayMark.getPsiElement());
         }
 
-        long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
-        InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
-//        JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) meterTypeSpinner.getEditor()).getTextField();
-//        int hitLimit = Integer.parseInt(spinnerTextField.getText());
+        Long expirationDate = null;
+        InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT(); //todo: no throttle
+        int hitLimit = -1;
         if (configurationPanel != null) {
-            expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
-            throttle = new InstrumentThrottle(
-                    configurationPanel.getRateLimitCount(),
-                    ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
-            );
+            if (configurationPanel.getExpirationInMinutes() != -1) {
+                expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
+            }
+            hitLimit = configurationPanel.getHitLimit();
 
             configurationPanel.setNewDefaults();
         }
@@ -407,7 +404,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 sourceLocation,
                 condition,
                 expirationDate,
-                -1,
+                hitLimit,
                 null,
                 false,
                 false,
@@ -420,6 +417,45 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 liveMeter = (LiveMeter) it.result();
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getMETER_ID(), liveMeter.getId());
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveMeter);
+
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    inlayMark.dispose(); //dispose this bar
+
+                    //create gutter popup
+                    ApplicationManager.getApplication().runReadAction(() -> {
+                        Optional<ExpressionGutterMark> gutterMark = creationService.getOrCreateExpressionGutterMark(
+                                inlayMark.getSourceFileMarker(), liveMeter.getLocation().getLine(), false);
+                        if (gutterMark.isPresent()) {
+                            gutterMark.get().getConfiguration().setIcon(SourceMarkerIcons.INSTANCE.getLIVE_METER_ICON());
+                            gutterMark.get().getConfiguration().setActivateOnMouseHover(false);
+                            gutterMark.get().getConfiguration().setActivateOnMouseClick(true);
+
+                            JPanel panel = new JPanel(new GridBagLayout());
+                            panel.setBackground(new Color(43, 43, 43));
+                            LiveMeterStatusPanel statusBar = new LiveMeterStatusPanel();
+                            panel.add(statusBar, new GridBagConstraints());
+                            panel.setPreferredSize(new Dimension(385, 70));
+                            gutterMark.get().getConfiguration().setComponentProvider(new SwingSourceMarkComponentProvider() {
+                                @NotNull
+                                @Override
+                                public SourceMarkComponentConfiguration getDefaultConfiguration() {
+                                    SourceMarkComponentConfiguration config = super.getDefaultConfiguration();
+                                    config.setShowAboveExpression(true);
+                                    return config;
+                                }
+
+                                @NotNull
+                                @Override
+                                public JComponent makeSwingComponent(@NotNull SourceMark sourceMark) {
+                                    return panel;
+                                }
+                            });
+                            gutterMark.get().apply(true);
+                        } else {
+                            //log.error("Could not create gutter mark for live meter");
+                        }
+                    });
+                });
             } else {
                 it.cause().printStackTrace();
             }

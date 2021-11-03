@@ -52,7 +52,12 @@ abstract class ExpressionSourceMark(
         }
 
     override val viewProviderBound: Boolean
-        get() = TODO("viewProviderBound")
+        get() = try {
+            psiExpression.containingFile.viewProvider.document
+            true
+        } catch (ignore: PsiInvalidElementAccessException) {
+            false
+        }
 
     @Synchronized
     override fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean) {

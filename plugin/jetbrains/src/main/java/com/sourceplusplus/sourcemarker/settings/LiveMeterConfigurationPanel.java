@@ -6,7 +6,6 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.util.Objects;
 
 public class LiveMeterConfigurationPanel extends JPanel {
 
@@ -16,6 +15,7 @@ public class LiveMeterConfigurationPanel extends JPanel {
     public LiveMeterConfigurationPanel(AutocompleteField autocompleteField) {
         initComponents();
 
+        expirationNeverButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
         expiration15MinButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
         expiration30MinButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
         expiration1HrButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
@@ -37,7 +37,9 @@ public class LiveMeterConfigurationPanel extends JPanel {
     }
 
     public int getExpirationInMinutes() {
-        if (expiration15MinButton.isSelected()) {
+        if (expirationNeverButton.isSelected()) {
+            return -1;
+        } else if (expiration15MinButton.isSelected()) {
             return 15;
         } else if (expiration30MinButton.isSelected()) {
             return 30;
@@ -59,7 +61,9 @@ public class LiveMeterConfigurationPanel extends JPanel {
     public void setExpirationInMinutes(int value) {
         this.expirationInMinutes = value;
 
-        if (value == 15) {
+        if (value == -1) {
+            expirationNeverButton.setSelected(true);
+        } else if (value == 15) {
             expiration15MinButton.setSelected(true);
         } else if (value == 30) {
             expiration30MinButton.setSelected(true);
@@ -78,15 +82,6 @@ public class LiveMeterConfigurationPanel extends JPanel {
         }
     }
 
-    public int getRateLimitCount() {
-        return (int) rateLimitCountSpinner.getValue();
-    }
-
-
-    public String getRateLimitStep() {
-        return (String) rateLimitStepCombobox.getSelectedItem();
-    }
-
     public boolean isChanged() {
         return hitLimit != getHitLimit() || expirationInMinutes != getExpirationInMinutes();
     }
@@ -99,17 +94,10 @@ public class LiveMeterConfigurationPanel extends JPanel {
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
-        panel4 = new JPanel();
-        label1 = new JLabel();
-        conditionPanel = new JPanel();
-        separator2 = new JSeparator();
-        panel6 = new JPanel();
-        label5 = new JLabel();
-        hitLimitSpinner = new JSpinner();
-        separator1 = new JSeparator();
         panel3 = new JPanel();
         label3 = new JLabel();
         panel1 = new JPanel();
+        expirationNeverButton = new JRadioButton();
         expiration15MinButton = new JRadioButton();
         expiration30MinButton = new JRadioButton();
         expiration1HrButton = new JRadioButton();
@@ -117,94 +105,35 @@ public class LiveMeterConfigurationPanel extends JPanel {
         expiration6HrsButton = new JRadioButton();
         expiration12HrsButton = new JRadioButton();
         expiration24HrsButton = new JRadioButton();
-        separator3 = new JSeparator();
-        panel5 = new JPanel();
-        label6 = new JLabel();
-        panel2 = new JPanel();
-        rateLimitCountSpinner = new JSpinner();
-        label7 = new JLabel();
-        rateLimitStepCombobox = new JComboBox<>();
+        separator2 = new JSeparator();
+        panel6 = new JPanel();
+        label5 = new JLabel();
+        hitLimitSpinner = new JSpinner();
 
         //======== this ========
         setBackground(new Color(43, 43, 43));
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "[grow,fill]" +
-                        "[fill]" +
-                        "[100,fill]",
-                // rows
-                "[]" +
-                        "[]" +
-                        "[]"));
-
-        //======== panel4 ========
-        {
-            panel4.setBackground(null);
-            panel4.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[100,grow,fill]",
-                    // rows
-                    "[]" +
-                            "[]"));
-
-            //---- label1 ----
-            label1.setText("Condtion");
-            label1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            panel4.add(label1, "cell 0 0");
-
-            //======== conditionPanel ========
-            {
-                conditionPanel.setMinimumSize(new Dimension(0, 27));
-                conditionPanel.setLayout(new BorderLayout());
-            }
-            panel4.add(conditionPanel, "cell 0 1");
-        }
-        add(panel4, "cell 0 0");
-
-        //---- separator2 ----
-        separator2.setOrientation(SwingConstants.VERTICAL);
-        separator2.setPreferredSize(new Dimension(3, 50));
-        add(separator2, "cell 1 0");
-
-        //======== panel6 ========
-        {
-            panel6.setBackground(null);
-            panel6.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[grow,fill]",
-                    // rows
-                    "[]" +
-                            "[grow]"));
-
-            //---- label5 ----
-            label5.setText("Hit Limit");
-            label5.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            panel6.add(label5, "cell 0 0");
-
-            //---- hitLimitSpinner ----
-            hitLimitSpinner.setBackground(null);
-            hitLimitSpinner.setModel(new SpinnerNumberModel(100, 1, null, 1));
-            panel6.add(hitLimitSpinner, "cell 0 1");
-        }
-        add(panel6, "cell 2 0");
-        add(separator1, "cell 0 1 3 1");
+            "hidemode 3",
+            // columns
+            "[grow,fill]" +
+            "[fill]" +
+            "[100,fill]",
+            // rows
+            "[]"));
 
         //======== panel3 ========
         {
             panel3.setBackground(null);
             panel3.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[150,fill]" +
-                            "[fill]" +
-                            "[150,fill]",
-                    // rows
-                    "[]" +
-                            "[]"));
+                "hidemode 3",
+                // columns
+                "[150,fill]" +
+                "[fill]" +
+                "[150,fill]",
+                // rows
+                "[]" +
+                "[]"));
 
             //---- label3 ----
             label3.setText("Expiration Date");
@@ -215,22 +144,28 @@ public class LiveMeterConfigurationPanel extends JPanel {
             {
                 panel1.setBackground(null);
                 panel1.setLayout(new MigLayout(
-                        "hidemode 3",
-                        // columns
-                        "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]",
-                        // rows
-                        "[]"));
+                    "hidemode 3",
+                    // columns
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]",
+                    // rows
+                    "[]"));
+
+                //---- expirationNeverButton ----
+                expirationNeverButton.setText("Never");
+                expirationNeverButton.setSelected(true);
+                expirationNeverButton.setBackground(null);
+                expirationNeverButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                panel1.add(expirationNeverButton, "cell 0 0");
 
                 //---- expiration15MinButton ----
                 expiration15MinButton.setText("15 Minutes");
-                expiration15MinButton.setSelected(true);
                 expiration15MinButton.setBackground(null);
                 expiration15MinButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                 panel1.add(expiration15MinButton, "cell 0 0");
@@ -273,64 +208,39 @@ public class LiveMeterConfigurationPanel extends JPanel {
             }
             panel3.add(panel1, "cell 0 1 3 1");
         }
-        add(panel3, "cell 0 2");
+        add(panel3, "cell 0 0");
 
-        //---- separator3 ----
-        separator3.setOrientation(SwingConstants.VERTICAL);
-        separator3.setPreferredSize(new Dimension(3, 50));
-        add(separator3, "cell 1 2");
+        //---- separator2 ----
+        separator2.setOrientation(SwingConstants.VERTICAL);
+        separator2.setPreferredSize(new Dimension(3, 50));
+        add(separator2, "cell 1 0");
 
-        //======== panel5 ========
+        //======== panel6 ========
         {
-            panel5.setBackground(null);
-            panel5.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[fill]",
-                    // rows
-                    "[]" +
-                            "[grow]"));
+            panel6.setBackground(null);
+            panel6.setLayout(new MigLayout(
+                "hidemode 3",
+                // columns
+                "[grow,fill]",
+                // rows
+                "[]" +
+                "[grow]"));
 
-            //---- label6 ----
-            label6.setText("Hit Throttle");
-            label6.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            panel5.add(label6, "cell 0 0");
+            //---- label5 ----
+            label5.setText("Hit Limit");
+            label5.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            panel6.add(label5, "cell 0 0");
 
-            //======== panel2 ========
-            {
-                panel2.setBackground(new Color(43, 43, 43));
-                panel2.setLayout(new MigLayout(
-                        "hidemode 3",
-                        // columns
-                        "0[fill]" +
-                                "[fill]" +
-                                "[fill]",
-                        // rows
-                        "[]"));
-
-                //---- rateLimitCountSpinner ----
-                rateLimitCountSpinner.setModel(new SpinnerNumberModel(1, 1, null, 1));
-                rateLimitCountSpinner.setBackground(null);
-                panel2.add(rateLimitCountSpinner, "cell 0 0");
-
-                //---- label7 ----
-                label7.setText("per");
-                panel2.add(label7, "cell 1 0");
-
-                //---- rateLimitStepCombobox ----
-                rateLimitStepCombobox.setModel(new DefaultComboBoxModel<>(new String[]{
-                        "second",
-                        "minute",
-                        "hour"
-                }));
-                panel2.add(rateLimitStepCombobox, "cell 2 0");
-            }
-            panel5.add(panel2, "cell 0 1,grow");
+            //---- hitLimitSpinner ----
+            hitLimitSpinner.setBackground(null);
+            hitLimitSpinner.setModel(new SpinnerNumberModel(-1, -1, null, 1));
+            panel6.add(hitLimitSpinner, "cell 0 1");
         }
-        add(panel5, "cell 2 2");
+        add(panel6, "cell 2 0");
 
         //---- expirationButtonGroup ----
         ButtonGroup expirationButtonGroup = new ButtonGroup();
+        expirationButtonGroup.add(expirationNeverButton);
         expirationButtonGroup.add(expiration15MinButton);
         expirationButtonGroup.add(expiration30MinButton);
         expirationButtonGroup.add(expiration1HrButton);
@@ -343,17 +253,10 @@ public class LiveMeterConfigurationPanel extends JPanel {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
-    private JPanel panel4;
-    private JLabel label1;
-    private JPanel conditionPanel;
-    private JSeparator separator2;
-    private JPanel panel6;
-    private JLabel label5;
-    private JSpinner hitLimitSpinner;
-    private JSeparator separator1;
     private JPanel panel3;
     private JLabel label3;
     private JPanel panel1;
+    private JRadioButton expirationNeverButton;
     private JRadioButton expiration15MinButton;
     private JRadioButton expiration30MinButton;
     private JRadioButton expiration1HrButton;
@@ -361,13 +264,10 @@ public class LiveMeterConfigurationPanel extends JPanel {
     private JRadioButton expiration6HrsButton;
     private JRadioButton expiration12HrsButton;
     private JRadioButton expiration24HrsButton;
-    private JSeparator separator3;
-    private JPanel panel5;
-    private JLabel label6;
-    private JPanel panel2;
-    private JSpinner rateLimitCountSpinner;
-    private JLabel label7;
-    private JComboBox<String> rateLimitStepCombobox;
+    private JSeparator separator2;
+    private JPanel panel6;
+    private JLabel label5;
+    private JSpinner hitLimitSpinner;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
 }

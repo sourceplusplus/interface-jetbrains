@@ -21,6 +21,7 @@ object SourceMarkerIcons {
     val exclamationTriangle = IconLoader.getIcon("/icons/exclamation-triangle.svg")
     val performanceRamp = IconLoader.getIcon("/icons/sort-amount-up.svg")
     val activeException = IconLoader.getIcon("/icons/map-marker-exclamation.svg")
+    val LIVE_METER_ICON = IconLoader.getIcon("/icons/tally.svg")
     val LIVE_BREAKPOINT_ACTIVE_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-active.svg")
     val LIVE_BREAKPOINT_DISABLED_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-disabled.svg")
     val LIVE_BREAKPOINT_COMPLETE_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-complete.svg")
