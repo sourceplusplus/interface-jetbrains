@@ -1,15 +1,15 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.FindAndOpenPortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.NavigateToArtifact
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshOverview
-import com.sourceplusplus.protocol.ProtocolAddress.Global.SetOverviewTimeFrame
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.portal.PageType
+import spp.protocol.ProtocolAddress.Global.ClickedEndpointArtifact
+import spp.protocol.ProtocolAddress.Global.ClosePortal
+import spp.protocol.ProtocolAddress.Global.FindAndOpenPortal
+import spp.protocol.ProtocolAddress.Global.NavigateToArtifact
+import spp.protocol.ProtocolAddress.Global.RefreshOverview
+import spp.protocol.ProtocolAddress.Global.SetOverviewTimeFrame
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.QueryTimeFrame
+import spp.protocol.portal.PageType
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory

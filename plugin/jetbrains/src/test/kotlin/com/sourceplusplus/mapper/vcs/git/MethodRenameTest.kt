@@ -3,8 +3,8 @@ package com.sourceplusplus.mapper.vcs.git
 import com.sourceplusplus.mapper.SourceMapperTest
 import com.sourceplusplus.mapper.api.impl.SourceMapperImpl
 import com.sourceplusplus.mapper.vcs.git.GitRepositoryMapper.Companion.originalCommitIdPattern
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.AnyObjectId

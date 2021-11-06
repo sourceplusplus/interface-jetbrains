@@ -3,8 +3,8 @@ package com.sourceplusplus.mapper.integration
 import com.sourceplusplus.mapper.api.impl.SourceMapperImpl
 import com.sourceplusplus.mapper.extend.SourceCodeTokenizer
 import com.sourceplusplus.mapper.vcs.git.GitRepositoryMapper
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.Constants

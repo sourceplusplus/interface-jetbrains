@@ -6,9 +6,9 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.OpenPortal
-import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.protocol.portal.PageType
+import spp.protocol.ProtocolAddress.Global.OpenPortal
+import spp.protocol.artifact.ArtifactType
+import spp.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
 import com.sourceplusplus.sourcemarker.mark.SourceMarkConstructor
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys

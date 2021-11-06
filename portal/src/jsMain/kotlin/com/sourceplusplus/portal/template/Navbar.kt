@@ -2,8 +2,8 @@ package com.sourceplusplus.portal.template
 
 import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.model.TraceStackHeaderType
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType.LATEST_TRACES
+import spp.protocol.artifact.QueryTimeFrame
+import spp.protocol.artifact.trace.TraceOrderType.LATEST_TRACES
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.HTMLElement

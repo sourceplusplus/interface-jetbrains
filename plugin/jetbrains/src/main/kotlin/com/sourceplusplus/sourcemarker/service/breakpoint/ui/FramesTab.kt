@@ -7,8 +7,8 @@ import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
-import com.sourceplusplus.protocol.artifact.exception.LiveStackTraceElement
-import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
+import spp.protocol.artifact.exception.LiveStackTraceElement
+import spp.protocol.artifact.exception.sourceAsLineNumber
 import com.sourceplusplus.sourcemarker.service.breakpoint.DebugStackFrameListener
 import com.sourceplusplus.sourcemarker.service.breakpoint.StackFrameManager
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig

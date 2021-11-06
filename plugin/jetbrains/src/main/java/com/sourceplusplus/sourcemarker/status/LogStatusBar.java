@@ -13,12 +13,12 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
-import com.sourceplusplus.protocol.SourceMarkerServices;
-import com.sourceplusplus.protocol.artifact.log.Log;
-import com.sourceplusplus.protocol.instrument.*;
-import com.sourceplusplus.protocol.instrument.log.LiveLog;
-import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved;
-import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
+import spp.protocol.SourceMarkerServices;
+import spp.protocol.artifact.log.Log;
+import spp.protocol.instrument.*;
+import spp.protocol.instrument.log.LiveLog;
+import spp.protocol.instrument.log.event.LiveLogRemoved;
+import spp.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener;
@@ -50,8 +50,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
-import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG_HIT;
-import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
+import static spp.protocol.instrument.LiveInstrumentEventType.LOG_HIT;
+import static spp.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener, InstrumentEventListener {

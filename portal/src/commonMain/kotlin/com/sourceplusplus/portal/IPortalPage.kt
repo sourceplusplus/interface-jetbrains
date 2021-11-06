@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal
 
-import com.sourceplusplus.protocol.portal.PortalConfiguration
+import spp.protocol.portal.PortalConfiguration
 
 /**
  * todo: description.
