@@ -3,9 +3,9 @@ package com.sourceplusplus.monitor.skywalking.bridge
 import com.sourceplusplus.monitor.skywalking.SkywalkingClient
 import com.sourceplusplus.monitor.skywalking.model.GetEndpointTraces
 import com.sourceplusplus.monitor.skywalking.toProtocol
-import com.sourceplusplus.protocol.artifact.trace.Trace
-import com.sourceplusplus.protocol.artifact.trace.TraceResult
-import com.sourceplusplus.protocol.artifact.trace.TraceSpanStackQueryResult
+import spp.protocol.artifact.trace.Trace
+import spp.protocol.artifact.trace.TraceResult
+import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await

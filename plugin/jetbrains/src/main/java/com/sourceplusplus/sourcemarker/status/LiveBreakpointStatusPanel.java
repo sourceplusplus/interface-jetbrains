@@ -3,7 +3,7 @@ package com.sourceplusplus.sourcemarker.status;
 import com.codahale.metrics.Meter;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
-import com.sourceplusplus.protocol.utils.TimeUtilsKt;
+import spp.protocol.utils.TimeUtilsKt;
 
 import javax.swing.*;
 import java.awt.*;

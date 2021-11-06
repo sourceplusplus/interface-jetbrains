@@ -1,11 +1,11 @@
 package com.sourceplusplus.sourcemarker.service.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
-import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
-import com.sourceplusplus.protocol.utils.toPrettyDuration
+import spp.protocol.instrument.LiveInstrumentEvent
+import spp.protocol.instrument.LiveInstrumentEventType
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
+import spp.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import io.vertx.core.json.Json
 import kotlinx.datetime.Clock

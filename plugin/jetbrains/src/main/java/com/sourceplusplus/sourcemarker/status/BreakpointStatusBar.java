@@ -15,12 +15,12 @@ import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.api.SourceMark;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
-import com.sourceplusplus.protocol.SourceMarkerServices;
-import com.sourceplusplus.protocol.instrument.*;
-import com.sourceplusplus.protocol.instrument.breakpoint.LiveBreakpoint;
-import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit;
-import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
-import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
+import spp.protocol.SourceMarkerServices;
+import spp.protocol.instrument.*;
+import spp.protocol.instrument.breakpoint.LiveBreakpoint;
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit;
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
+import spp.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
 import com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
@@ -49,8 +49,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
-import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
-import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
+import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
+import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAreaListener {

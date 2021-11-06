@@ -1,9 +1,9 @@
 package com.sourceplusplus.portal.display.views
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.artifact.log.LogOrderType
-import com.sourceplusplus.protocol.artifact.log.LogResult
-import com.sourceplusplus.protocol.artifact.log.LogViewType
+import spp.protocol.artifact.log.LogOrderType
+import spp.protocol.artifact.log.LogResult
+import spp.protocol.artifact.log.LogViewType
 
 /**
  * Holds the current view for the Logs portal tab.

@@ -1,10 +1,10 @@
 package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.IPortalPage
-import com.sourceplusplus.protocol.artifact.trace.TraceResult
-import com.sourceplusplus.protocol.artifact.trace.TraceSpan
-import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
-import com.sourceplusplus.protocol.portal.PortalConfiguration
+import spp.protocol.artifact.trace.TraceResult
+import spp.protocol.artifact.trace.TraceSpan
+import spp.protocol.artifact.trace.TraceStackPath
+import spp.protocol.portal.PortalConfiguration
 
 /**
  * todo: description.

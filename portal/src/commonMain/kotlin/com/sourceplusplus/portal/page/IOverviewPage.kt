@@ -1,9 +1,9 @@
 package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.IPortalPage
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.artifact.endpoint.EndpointResult
-import com.sourceplusplus.protocol.portal.PortalConfiguration
+import spp.protocol.artifact.QueryTimeFrame
+import spp.protocol.artifact.endpoint.EndpointResult
+import spp.protocol.portal.PortalConfiguration
 
 /**
  * todo: description.

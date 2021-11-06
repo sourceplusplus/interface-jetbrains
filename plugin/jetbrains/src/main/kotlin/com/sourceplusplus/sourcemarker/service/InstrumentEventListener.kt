@@ -1,6 +1,6 @@
 package com.sourceplusplus.sourcemarker.service
 
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
+import spp.protocol.instrument.LiveInstrumentEvent
 
 /**
  * todo: description.

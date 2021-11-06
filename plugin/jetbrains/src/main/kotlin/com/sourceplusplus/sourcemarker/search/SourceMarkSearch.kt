@@ -4,8 +4,8 @@ import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.ExpressionSourceMark
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 
 /**

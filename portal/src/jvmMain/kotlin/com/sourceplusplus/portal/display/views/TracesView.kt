@@ -2,10 +2,10 @@ package com.sourceplusplus.portal.display.views
 
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.model.TraceDisplayType
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
-import com.sourceplusplus.protocol.artifact.trace.TraceResult
-import com.sourceplusplus.protocol.artifact.trace.TraceStack
-import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
+import spp.protocol.artifact.trace.TraceOrderType
+import spp.protocol.artifact.trace.TraceResult
+import spp.protocol.artifact.trace.TraceStack
+import spp.protocol.artifact.trace.TraceStackPath
 import java.util.concurrent.ConcurrentHashMap
 
 /**

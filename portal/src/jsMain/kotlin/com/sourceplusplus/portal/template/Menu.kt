@@ -2,8 +2,8 @@ package com.sourceplusplus.portal.template
 
 import com.sourceplusplus.portal.PortalBundle.translate
 import com.sourceplusplus.portal.toggleSidebar
-import com.sourceplusplus.protocol.artifact.OrderType
-import com.sourceplusplus.protocol.portal.PageType
+import spp.protocol.artifact.OrderType
+import spp.protocol.portal.PageType
 import kotlinx.html.FlowContent
 import kotlinx.html.a
 import kotlinx.html.div

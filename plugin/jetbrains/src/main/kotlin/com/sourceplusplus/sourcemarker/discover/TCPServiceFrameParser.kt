@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.discover
 
-import com.sourceplusplus.protocol.error.*
-import com.sourceplusplus.protocol.error.LiveInstrumentException.ErrorType
+import spp.protocol.error.*
+import spp.protocol.error.LiveInstrumentException.ErrorType
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.Vertx

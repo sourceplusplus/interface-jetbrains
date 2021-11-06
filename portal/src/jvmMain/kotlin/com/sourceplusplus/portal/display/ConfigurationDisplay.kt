@@ -1,9 +1,9 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe
-import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdateArtifactEntryMethod
-import com.sourceplusplus.protocol.portal.PageType
+import spp.protocol.ProtocolAddress.Global.UpdateArtifactAutoSubscribe
+import spp.protocol.ProtocolAddress.Global.UpdateArtifactEntryMethod
+import spp.protocol.portal.PageType
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
 
