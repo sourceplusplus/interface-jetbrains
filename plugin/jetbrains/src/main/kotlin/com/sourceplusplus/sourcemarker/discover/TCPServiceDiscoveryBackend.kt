@@ -1,8 +1,8 @@
 package com.sourceplusplus.sourcemarker.discover
 
-import com.sourceplusplus.protocol.SourceMarkerServices
-import com.sourceplusplus.protocol.SourceMarkerServices.Utilize
-import com.sourceplusplus.protocol.status.MarkerConnection
+import spp.protocol.SourceMarkerServices
+import spp.protocol.SourceMarkerServices.Utilize
+import spp.protocol.status.MarkerConnection
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig
 import com.sourceplusplus.sourcemarker.settings.isSsl

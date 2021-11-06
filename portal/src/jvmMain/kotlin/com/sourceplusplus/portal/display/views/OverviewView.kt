@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.display.views
 
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
+import spp.protocol.artifact.QueryTimeFrame
 
 /**
  * Holds the current view for the Overview portal tab.

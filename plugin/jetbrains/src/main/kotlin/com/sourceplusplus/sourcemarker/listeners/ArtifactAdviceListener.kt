@@ -7,9 +7,9 @@ import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
-import com.sourceplusplus.protocol.advice.AdviceListener
-import com.sourceplusplus.protocol.advice.ArtifactAdvice
-import com.sourceplusplus.protocol.artifact.ArtifactType
+import spp.protocol.advice.AdviceListener
+import spp.protocol.advice.ArtifactAdvice
+import spp.protocol.artifact.ArtifactType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.mark.SourceMarkConstructor
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.ARTIFACT_ADVICE

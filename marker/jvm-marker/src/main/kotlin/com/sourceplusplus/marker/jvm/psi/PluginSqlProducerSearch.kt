@@ -6,9 +6,9 @@ import com.intellij.psi.impl.compiled.ClsMethodImpl
 import com.intellij.psi.search.searches.OverridingMethodsSearch
 import com.sourceplusplus.marker.jvm.ArtifactSearch
 import com.sourceplusplus.marker.source.JVMMarkerUtils
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.protocol.extend.SqlProducerSearch
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
+import spp.protocol.extend.SqlProducerSearch
 import com.sourceplusplus.marker.jvm.psi.sqlsource.SpringDataSqlSource
 import io.vertx.core.Promise
 import io.vertx.core.Vertx

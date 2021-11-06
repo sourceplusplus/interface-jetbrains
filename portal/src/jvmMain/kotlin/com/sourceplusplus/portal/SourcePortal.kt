@@ -4,8 +4,8 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import com.sourceplusplus.portal.display.views.*
-import com.sourceplusplus.protocol.advice.ArtifactAdvice
-import com.sourceplusplus.protocol.portal.PortalConfiguration
+import spp.protocol.advice.ArtifactAdvice
+import spp.protocol.portal.PortalConfiguration
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.util.*

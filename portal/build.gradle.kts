@@ -26,13 +26,13 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("com.github.sourceplusplus.protocol:protocol:0.1.25")
+                implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-1")
             }
         }
         val jvmMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-jdk8"))
-                implementation("com.github.sourceplusplus.protocol:protocol:0.1.25")
+                implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-1")
                 implementation("org.slf4j:slf4j-api:1.7.32")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
@@ -58,7 +58,7 @@ kotlin {
                 implementation(npm("moment", "2.29.1", generateExternals = true))
                 //implementation(npm("fomantic-ui-less", "2.8.6"))
 
-                implementation("com.github.sourceplusplus.protocol:protocol:0.1.25")
+                implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-1")
                 implementation(kotlin("stdlib-common"))
                 implementation(kotlin("stdlib-js"))
                 implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.7.3")

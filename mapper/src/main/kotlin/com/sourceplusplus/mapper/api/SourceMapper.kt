@@ -1,6 +1,6 @@
 package com.sourceplusplus.mapper.api
 
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 
 /**

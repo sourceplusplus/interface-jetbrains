@@ -2,8 +2,8 @@ package com.sourceplusplus.sourcemarker.service
 
 import com.intellij.openapi.application.ApplicationManager
 import com.sourceplusplus.marker.SourceMarker.creationService
-import com.sourceplusplus.protocol.SourceMarkerServices.Instance
-import com.sourceplusplus.protocol.error.AccessDenied
+import spp.protocol.SourceMarkerServices.Instance
+import spp.protocol.error.AccessDenied
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import com.sourceplusplus.sourcemarker.search.SourceMarkSearch

@@ -11,8 +11,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
 import com.sourceplusplus.marker.jvm.psi.EndpointDetector
 import com.sourceplusplus.marker.source.JVMMarkerUtils
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await

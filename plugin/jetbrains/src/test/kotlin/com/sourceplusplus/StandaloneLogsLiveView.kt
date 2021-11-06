@@ -14,9 +14,9 @@ import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshLogs
-import com.sourceplusplus.protocol.portal.PageType
-import com.sourceplusplus.protocol.portal.PortalConfiguration
+import spp.protocol.ProtocolAddress.Global.RefreshLogs
+import spp.protocol.portal.PageType
+import spp.protocol.portal.PortalConfiguration
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
 import com.sourceplusplus.sourcemarker.settings.SourceMarkerConfig

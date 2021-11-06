@@ -13,7 +13,7 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
 import com.sourceplusplus.sourcemarker.service.breakpoint.LiveBreakpointConstants.LIVE_BREAKPOINT_NAME
 import com.sourceplusplus.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
