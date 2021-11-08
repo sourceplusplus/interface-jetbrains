@@ -33,7 +33,6 @@ class EndpointTracesBridge(private val skywalkingClient: SkywalkingClient) : Cor
                 }
                 it.reply(
                     TraceResult(
-                        appUuid = request.appUuid,
                         artifactQualifiedName = request.artifactQualifiedName,
                         orderType = request.orderType,
                         start = Instant.fromEpochMilliseconds(request.zonedDuration.start.toInstant().toEpochMilli()),

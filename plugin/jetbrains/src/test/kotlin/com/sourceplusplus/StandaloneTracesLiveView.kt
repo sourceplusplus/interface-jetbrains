@@ -91,7 +91,6 @@ class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                "null",
                 artifactName,
                 PortalConfiguration(
                     currentPage = PageType.TRACES,
