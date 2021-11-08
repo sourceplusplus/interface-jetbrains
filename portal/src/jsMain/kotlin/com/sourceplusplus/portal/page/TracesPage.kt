@@ -166,7 +166,6 @@ class TracesPage(
                 td {
                     onClickFunction = {
                         clickedDisplayTraceStack(
-                            traceResult.appUuid,
                             traceResult.artifactQualifiedName,
                             globalTraceId
                         )
@@ -267,14 +266,12 @@ class TracesPage(
                     onClickFunction = {
                         if (segment.hasChildren(span) && span.spanId > 0 && span !== traceStackPath.getCurrentRoot()) {
                             clickedDisplayInnerTraceStack(
-                                span.getMetaString("appUuid"),
                                 span.traceId,
                                 span.segmentId,
                                 span.spanId
                             )
                         } else {
                             clickedDisplaySpanInfo(
-                                span.getMetaString("appUuid"),
                                 span.getMetaString("rootArtifactQualifiedName"),
                                 span.traceId,
                                 span.segmentId,
@@ -588,24 +585,22 @@ class TracesPage(
         eb.send(ClickedDisplayTraceStack, json("portalUuid" to portalUuid))
     }
 
-    private fun clickedDisplayTraceStack(appUuid: String, artifactQualifiedName: String, globalTraceId: String) {
+    private fun clickedDisplayTraceStack(artifactQualifiedName: String, globalTraceId: String) {
         eb.send(
             ClickedDisplayTraceStack,
             json(
                 "portalUuid" to portalUuid,
-                "appUuid" to appUuid,
                 "artifactQualifiedName" to artifactQualifiedName,
                 "traceId" to globalTraceId
             )
         )
     }
 
-    private fun clickedDisplayInnerTraceStack(appUuid: String, traceId: String, segmentId: String, spanId: Int) {
+    private fun clickedDisplayInnerTraceStack(traceId: String, segmentId: String, spanId: Int) {
         eb.send(
             ClickedDisplayInnerTraceStack,
             json(
                 "portalUuid" to portalUuid,
-                "appUuid" to appUuid,
                 "traceId" to traceId,
                 "segmentId" to segmentId,
                 "spanId" to spanId
@@ -614,7 +609,6 @@ class TracesPage(
     }
 
     private fun clickedDisplaySpanInfo(
-        appUuid: String,
         rootArtifactQualifiedName: String,
         traceId: String,
         segmentId: String,
@@ -624,7 +618,6 @@ class TracesPage(
             ClickedDisplaySpanInfo,
             json(
                 "portalUuid" to portalUuid,
-                "appUuid" to appUuid,
                 "artifactQualifiedName" to rootArtifactQualifiedName,
                 "traceId" to traceId,
                 "segmentId" to segmentId,

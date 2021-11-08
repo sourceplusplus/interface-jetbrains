@@ -16,7 +16,6 @@ import monitor.skywalking.protocol.type.TraceState
 import java.math.BigDecimal
 
 fun toProtocol(
-    appUuid: String,
     artifactQualifiedName: String,
     timeFrame: QueryTimeFrame,
     focus: MetricType,
@@ -24,7 +23,6 @@ fun toProtocol(
     metrics: List<GetLinearIntValuesQuery.Result>
 ): ArtifactMetricResult {
     return ArtifactMetricResult(
-        appUuid = appUuid,
         artifactQualifiedName = artifactQualifiedName,
         timeFrame = timeFrame,
         focus = focus,

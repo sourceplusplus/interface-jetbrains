@@ -193,7 +193,6 @@ function portalConnected() {
     console.log("Portal successfully connected. Portal UUID: " + portalUuid);
     if (requiresRegistration) {
         eb.send("REGISTER_PORTAL", {
-            'appUuid': findGetParameter("appUuid"),
             'artifactQualifiedName': findGetParameter("artifactQualifiedName")
         }, function (error, message) {
             window.open(window.location.href.split('?')[0] + '?portalUuid=' + message.body.portalUuid, '_self');

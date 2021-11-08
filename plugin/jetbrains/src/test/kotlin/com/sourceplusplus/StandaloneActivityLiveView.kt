@@ -98,7 +98,6 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                "null",
                 artifactName,
                 PortalConfiguration(external = true)
             )
