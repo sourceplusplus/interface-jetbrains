@@ -26,7 +26,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-1")
+                implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-2")
             }
         }
         val jvmMain by getting {
