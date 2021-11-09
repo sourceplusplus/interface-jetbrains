@@ -9,10 +9,10 @@ import com.sourceplusplus.marker.source.mark.gutter.GutterMark
 import com.sourceplusplus.marker.source.mark.inlay.ExpressionInlayMark
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import com.sourceplusplus.marker.source.mark.inlay.config.InlayMarkVirtualText
-import com.sourceplusplus.protocol.advice.AdviceType
-import com.sourceplusplus.protocol.advice.ArtifactAdvice
-import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
-import com.sourceplusplus.protocol.utils.toPrettyDuration
+import spp.protocol.advice.AdviceType
+import spp.protocol.advice.ArtifactAdvice
+import spp.protocol.advice.informative.ActiveExceptionAdvice
+import spp.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.SOURCE_RED

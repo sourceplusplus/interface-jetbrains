@@ -8,8 +8,8 @@ import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
-import com.sourceplusplus.protocol.SourceMarkerServices
-import com.sourceplusplus.protocol.portal.PageType
+import spp.protocol.SourceMarkerServices
+import spp.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.ControlBar
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.status.LiveStatusManager

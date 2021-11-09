@@ -1,6 +1,6 @@
 package com.sourceplusplus.sourcemarker.status
 
-import com.sourceplusplus.protocol.instrument.LiveInstrument
+import spp.protocol.instrument.LiveInstrument
 
 /**
  * todo: description.

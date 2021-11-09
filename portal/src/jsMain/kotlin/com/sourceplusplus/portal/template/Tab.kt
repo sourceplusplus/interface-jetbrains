@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.template
 
 import com.sourceplusplus.portal.PortalBundle.translate
-import com.sourceplusplus.protocol.portal.PageType
+import spp.protocol.portal.PageType
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event

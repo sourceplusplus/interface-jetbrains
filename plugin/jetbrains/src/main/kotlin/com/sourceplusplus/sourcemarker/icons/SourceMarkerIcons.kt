@@ -4,9 +4,9 @@ import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.scale.ScaleContext
 import com.intellij.util.SVGLoader
 import com.intellij.util.ui.JBImageIcon
-import com.sourceplusplus.protocol.advice.ArtifactAdvice
-import com.sourceplusplus.protocol.advice.cautionary.RampDetectionAdvice
-import com.sourceplusplus.protocol.advice.informative.ActiveExceptionAdvice
+import spp.protocol.advice.ArtifactAdvice
+import spp.protocol.advice.cautionary.RampDetectionAdvice
+import spp.protocol.advice.informative.ActiveExceptionAdvice
 import java.io.ByteArrayInputStream
 import javax.swing.Icon
 

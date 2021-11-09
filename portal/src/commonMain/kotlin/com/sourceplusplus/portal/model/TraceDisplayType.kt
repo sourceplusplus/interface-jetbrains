@@ -1,6 +1,6 @@
 package com.sourceplusplus.portal.model
 
-import com.sourceplusplus.protocol.artifact.trace.Trace
+import spp.protocol.artifact.trace.Trace
 
 /**
  * Represents the layers of a [Trace].

@@ -1,11 +1,11 @@
 package com.sourceplusplus.portal
 
-import com.sourceplusplus.protocol.ProtocolAddress.Global.CanOpenPortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ChangedPortalArtifact
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ClosePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.KeepAlivePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.UpdatePortalArtifact
+import spp.protocol.ProtocolAddress.Global.CanOpenPortal
+import spp.protocol.ProtocolAddress.Global.ChangedPortalArtifact
+import spp.protocol.ProtocolAddress.Global.ClickedViewAsExternalPortal
+import spp.protocol.ProtocolAddress.Global.ClosePortal
+import spp.protocol.ProtocolAddress.Global.KeepAlivePortal
+import spp.protocol.ProtocolAddress.Global.UpdatePortalArtifact
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.slf4j.LoggerFactory

@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
-import com.sourceplusplus.protocol.utils.ArtifactNameUtils;
+import spp.protocol.utils.ArtifactNameUtils;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.command.LiveControlCommand;
 import com.sourceplusplus.sourcemarker.command.ControlBarController;

@@ -1,11 +1,11 @@
 package com.sourceplusplus.portal.display.views
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetrics
-import com.sourceplusplus.protocol.artifact.metrics.MetricType
-import com.sourceplusplus.protocol.portal.PortalConfiguration
+import spp.protocol.artifact.QueryTimeFrame
+import spp.protocol.artifact.metrics.ArtifactMetricResult
+import spp.protocol.artifact.metrics.ArtifactMetrics
+import spp.protocol.artifact.metrics.MetricType
+import spp.protocol.portal.PortalConfiguration
 import kotlinx.datetime.toKotlinInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

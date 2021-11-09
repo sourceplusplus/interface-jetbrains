@@ -1,8 +1,8 @@
 package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshPortal
-import com.sourceplusplus.protocol.portal.PageType
+import spp.protocol.ProtocolAddress.Global.RefreshPortal
+import spp.protocol.portal.PageType
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.slf4j.LoggerFactory
 

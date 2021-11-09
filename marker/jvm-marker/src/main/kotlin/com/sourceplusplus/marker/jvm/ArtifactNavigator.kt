@@ -11,11 +11,11 @@ import com.intellij.psi.search.FilenameIndex.getFilesByName
 import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.util.PsiNavigateUtil
 import com.sourceplusplus.marker.source.JVMMarkerUtils
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.protocol.artifact.exception.LiveStackTraceElement
-import com.sourceplusplus.protocol.artifact.exception.sourceAsFilename
-import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
+import spp.protocol.artifact.exception.LiveStackTraceElement
+import spp.protocol.artifact.exception.sourceAsFilename
+import spp.protocol.artifact.exception.sourceAsLineNumber
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await

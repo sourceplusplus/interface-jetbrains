@@ -18,14 +18,14 @@ import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider;
 import com.sourceplusplus.marker.source.mark.gutter.ExpressionGutterMark;
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark;
-import com.sourceplusplus.protocol.SourceMarkerServices;
-import com.sourceplusplus.protocol.instrument.*;
-import com.sourceplusplus.protocol.instrument.meter.LiveMeter;
-import com.sourceplusplus.protocol.instrument.meter.MeterType;
-import com.sourceplusplus.protocol.instrument.meter.MetricValue;
-import com.sourceplusplus.protocol.instrument.meter.MetricValueType;
-import com.sourceplusplus.protocol.instrument.meter.event.LiveMeterRemoved;
-import com.sourceplusplus.protocol.service.live.LiveInstrumentService;
+import spp.protocol.SourceMarkerServices;
+import spp.protocol.instrument.*;
+import spp.protocol.instrument.meter.LiveMeter;
+import spp.protocol.instrument.meter.MeterType;
+import spp.protocol.instrument.meter.MetricValue;
+import spp.protocol.instrument.meter.MetricValueType;
+import spp.protocol.instrument.meter.event.LiveMeterRemoved;
+import spp.protocol.service.live.LiveInstrumentService;
 import com.sourceplusplus.sourcemarker.command.AutocompleteFieldRow;
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons;
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys;
@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 
 import static com.sourceplusplus.marker.SourceMarker.conditionParser;
 import static com.sourceplusplus.marker.SourceMarker.creationService;
-import static com.sourceplusplus.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
+import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {

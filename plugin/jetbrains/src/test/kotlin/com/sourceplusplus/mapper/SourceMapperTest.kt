@@ -10,8 +10,8 @@ import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.sourceplusplus.mapper.extend.SourceCodeTokenizer
 import com.sourceplusplus.marker.source.JVMMarkerUtils
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import org.junit.jupiter.api.AfterEach

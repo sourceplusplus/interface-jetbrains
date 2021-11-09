@@ -1,7 +1,7 @@
 package com.sourceplusplus.sourcemarker.service.breakpoint
 
-import com.sourceplusplus.protocol.artifact.exception.LiveStackTrace
-import com.sourceplusplus.protocol.artifact.exception.LiveStackTraceElement
+import spp.protocol.artifact.exception.LiveStackTrace
+import spp.protocol.artifact.exception.LiveStackTraceElement
 
 /**
  * todo: description.

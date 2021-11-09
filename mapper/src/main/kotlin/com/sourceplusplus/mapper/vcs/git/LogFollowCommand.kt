@@ -1,9 +1,9 @@
 package com.sourceplusplus.mapper.vcs.git
 
 import com.sourceplusplus.mapper.api.impl.SourceMapperImpl
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.ArtifactType
-import com.sourceplusplus.protocol.artifact.LocalArtifact
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
+import spp.protocol.artifact.LocalArtifact
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.diff.DiffEntry

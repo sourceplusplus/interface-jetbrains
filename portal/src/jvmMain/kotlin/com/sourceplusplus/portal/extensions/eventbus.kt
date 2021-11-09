@@ -1,16 +1,15 @@
 package com.sourceplusplus.portal.extensions
 
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayActivity
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLog
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayLogs
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplaySpanInfo
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraceStack
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.DisplayTraces
-import com.sourceplusplus.protocol.artifact.log.Log
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
-import com.sourceplusplus.protocol.artifact.trace.TraceResult
-import com.sourceplusplus.protocol.artifact.trace.TraceSpan
-import com.sourceplusplus.protocol.artifact.trace.TraceStackPath
+import spp.protocol.ProtocolAddress.Portal.DisplayActivity
+import spp.protocol.ProtocolAddress.Portal.DisplayLog
+import spp.protocol.ProtocolAddress.Portal.DisplaySpanInfo
+import spp.protocol.ProtocolAddress.Portal.DisplayTraceStack
+import spp.protocol.ProtocolAddress.Portal.DisplayTraces
+import spp.protocol.artifact.log.Log
+import spp.protocol.artifact.metrics.ArtifactMetricResult
+import spp.protocol.artifact.trace.TraceResult
+import spp.protocol.artifact.trace.TraceSpan
+import spp.protocol.artifact.trace.TraceStackPath
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject

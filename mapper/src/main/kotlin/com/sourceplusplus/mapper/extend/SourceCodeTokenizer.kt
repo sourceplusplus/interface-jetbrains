@@ -1,6 +1,6 @@
 package com.sourceplusplus.mapper.extend
 
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
  * Used to tokenize source code.

@@ -2,17 +2,17 @@ package com.sourceplusplus.portal.display
 
 import com.sourceplusplus.portal.SourcePortal
 import com.sourceplusplus.portal.extensions.displayActivity
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ActivityTabOpened
-import com.sourceplusplus.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
-import com.sourceplusplus.protocol.ProtocolAddress.Global.SetActiveChartMetric
-import com.sourceplusplus.protocol.ProtocolAddress.Global.SetMetricTimeFrame
-import com.sourceplusplus.protocol.ProtocolAddress.Portal.ClearActivity
-import com.sourceplusplus.protocol.artifact.QueryTimeFrame
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
-import com.sourceplusplus.protocol.artifact.metrics.MetricType.valueOf
-import com.sourceplusplus.protocol.portal.PageType
-import com.sourceplusplus.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
+import spp.protocol.ProtocolAddress.Global.ActivityTabOpened
+import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
+import spp.protocol.ProtocolAddress.Global.RefreshActivity
+import spp.protocol.ProtocolAddress.Global.SetActiveChartMetric
+import spp.protocol.ProtocolAddress.Global.SetMetricTimeFrame
+import spp.protocol.ProtocolAddress.Portal.ClearActivity
+import spp.protocol.artifact.QueryTimeFrame
+import spp.protocol.artifact.metrics.ArtifactMetricResult
+import spp.protocol.artifact.metrics.MetricType.valueOf
+import spp.protocol.portal.PageType
+import spp.protocol.utils.ArtifactNameUtils.getShortQualifiedFunctionName
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
 

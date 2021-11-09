@@ -3,8 +3,8 @@ package com.sourceplusplus.mapper.api.impl
 import com.sourceplusplus.mapper.api.SourceMapper
 import com.sourceplusplus.mapper.vcs.git.GitRepositoryMapper
 import com.sourceplusplus.mapper.vcs.git.LogFollowCommand
-import com.sourceplusplus.protocol.artifact.ArtifactQualifiedName
-import com.sourceplusplus.protocol.artifact.LocalArtifact
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.LocalArtifact
 import org.slf4j.LoggerFactory
 import java.util.*
 

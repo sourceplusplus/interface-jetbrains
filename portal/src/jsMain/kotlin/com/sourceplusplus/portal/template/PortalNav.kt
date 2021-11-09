@@ -1,7 +1,7 @@
 package com.sourceplusplus.portal.template
 
-import com.sourceplusplus.protocol.artifact.OrderType
-import com.sourceplusplus.protocol.portal.PageType
+import spp.protocol.artifact.OrderType
+import spp.protocol.portal.PageType
 import kotlinx.html.FlowContent
 import kotlinx.html.TagConsumer
 import kotlinx.html.div

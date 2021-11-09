@@ -1,8 +1,8 @@
 package com.sourceplusplus.portal.page
 
 import com.sourceplusplus.portal.IPortalPage
-import com.sourceplusplus.protocol.artifact.metrics.ArtifactMetricResult
-import com.sourceplusplus.protocol.portal.PortalConfiguration
+import spp.protocol.artifact.metrics.ArtifactMetricResult
+import spp.protocol.portal.PortalConfiguration
 
 /**
  * todo: description.

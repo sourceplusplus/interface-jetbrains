@@ -1,6 +1,6 @@
 package com.sourceplusplus.monitor.skywalking.model
 
-import com.sourceplusplus.protocol.artifact.trace.TraceOrderType
+import spp.protocol.artifact.trace.TraceOrderType
 
 /**
  * todo: description.

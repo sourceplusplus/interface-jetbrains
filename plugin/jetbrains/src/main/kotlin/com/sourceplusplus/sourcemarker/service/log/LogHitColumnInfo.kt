@@ -1,11 +1,11 @@
 package com.sourceplusplus.sourcemarker.service.log
 
 import com.intellij.util.ui.ColumnInfo
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEvent
-import com.sourceplusplus.protocol.instrument.LiveInstrumentEventType
-import com.sourceplusplus.protocol.instrument.log.event.LiveLogHit
-import com.sourceplusplus.protocol.instrument.log.event.LiveLogRemoved
-import com.sourceplusplus.protocol.utils.toPrettyDuration
+import spp.protocol.instrument.LiveInstrumentEvent
+import spp.protocol.instrument.LiveInstrumentEventType
+import spp.protocol.instrument.log.event.LiveLogHit
+import spp.protocol.instrument.log.event.LiveLogRemoved
+import spp.protocol.utils.toPrettyDuration
 import com.sourceplusplus.sourcemarker.PluginBundle.message
 import io.vertx.core.json.Json
 import kotlinx.datetime.Clock

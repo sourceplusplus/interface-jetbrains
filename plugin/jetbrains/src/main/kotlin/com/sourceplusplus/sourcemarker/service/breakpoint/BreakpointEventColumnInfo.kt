@@ -2,11 +2,11 @@ package com.sourceplusplus.sourcemarker.service.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.table.IconTableCellRenderer
-import com.sourceplusplus.protocol.artifact.exception.methodName
-import com.sourceplusplus.protocol.artifact.exception.qualifiedClassName
-import com.sourceplusplus.protocol.artifact.exception.shortQualifiedClassName
-import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
-import com.sourceplusplus.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import spp.protocol.artifact.exception.methodName
+import spp.protocol.artifact.exception.qualifiedClassName
+import spp.protocol.artifact.exception.shortQualifiedClassName
+import spp.protocol.artifact.exception.sourceAsLineNumber
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons
 import kotlinx.datetime.toJavaInstant
 import java.time.ZoneId

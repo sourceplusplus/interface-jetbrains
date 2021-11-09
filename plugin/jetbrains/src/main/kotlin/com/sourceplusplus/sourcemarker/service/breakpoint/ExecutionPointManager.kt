@@ -9,8 +9,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import com.sourceplusplus.marker.SourceMarker
-import com.sourceplusplus.protocol.artifact.exception.qualifiedClassName
-import com.sourceplusplus.protocol.artifact.exception.sourceAsLineNumber
+import spp.protocol.artifact.exception.qualifiedClassName
+import spp.protocol.artifact.exception.sourceAsLineNumber
 import org.slf4j.LoggerFactory
 
 /**

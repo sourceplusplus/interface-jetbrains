@@ -16,11 +16,11 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.sourceplusplus.marker.SourceMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.portal.SourcePortal
-import com.sourceplusplus.protocol.ProtocolAddress.Global.RefreshActivity
-import com.sourceplusplus.protocol.SourceMarkerServices
-import com.sourceplusplus.protocol.portal.PortalConfiguration
-import com.sourceplusplus.protocol.view.LiveViewConfig
-import com.sourceplusplus.protocol.view.LiveViewSubscription
+import spp.protocol.ProtocolAddress.Global.RefreshActivity
+import spp.protocol.SourceMarkerServices
+import spp.protocol.portal.PortalConfiguration
+import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewSubscription
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.vertx
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
