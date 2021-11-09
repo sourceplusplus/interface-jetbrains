@@ -19,7 +19,6 @@ import spp.protocol.artifact.trace.Trace
 import spp.protocol.artifact.trace.TraceOrderType
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
-import spp.protocol.instrument.meter.MeterType
 import spp.protocol.view.LiveViewEvent
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin.INSTANCE_ID
 import com.sourceplusplus.sourcemarker.discover.TCPServiceDiscoveryBackend

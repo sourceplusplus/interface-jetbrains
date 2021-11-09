@@ -17,7 +17,6 @@ import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
-import spp.protocol.SourceMarkerServices
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.instrument.LiveInstrument
 import spp.protocol.instrument.LiveSourceLocation
@@ -25,8 +24,6 @@ import spp.protocol.instrument.breakpoint.LiveBreakpoint
 import spp.protocol.instrument.log.LiveLog
 import spp.protocol.instrument.meter.LiveMeter
 import spp.protocol.portal.PageType
-import spp.protocol.view.LiveViewConfig
-import spp.protocol.view.LiveViewSubscription
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
 import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_ICON
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys

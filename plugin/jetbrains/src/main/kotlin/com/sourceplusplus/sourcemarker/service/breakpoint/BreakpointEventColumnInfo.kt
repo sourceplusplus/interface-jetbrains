@@ -57,8 +57,8 @@ class BreakpointEventColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, St
     override fun valueOf(item: LiveBreakpointHit): String {
         return when (name) {
             "Time" -> formatter.format(item.occurredAt.toJavaInstant())
-            "Host Name" -> item.host
-            "Application Name" -> item.application
+            "Host Name" -> item.serviceInstance.substringAfter("@")
+            "Service" -> item.service
             "Class Name" -> item.stackTrace.first().shortQualifiedClassName()
             "Method Name" -> item.stackTrace.first().methodName()
             "Line No" -> item.stackTrace.first().sourceAsLineNumber()!!.toString()

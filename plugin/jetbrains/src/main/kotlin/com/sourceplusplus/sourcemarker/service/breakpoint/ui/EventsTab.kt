@@ -31,7 +31,7 @@ class EventsTab : Disposable {
         arrayOf(
             BreakpointEventColumnInfo("Time"),
             BreakpointEventColumnInfo("Host Name"),
-            BreakpointEventColumnInfo("Application Name"),
+            BreakpointEventColumnInfo("Service"),
             BreakpointEventColumnInfo("Class Name"),
             BreakpointEventColumnInfo("Method Name"),
             BreakpointEventColumnInfo("Line No"),
