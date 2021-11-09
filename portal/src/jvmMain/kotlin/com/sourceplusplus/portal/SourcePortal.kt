@@ -18,7 +18,6 @@ import java.util.*
  */
 class SourcePortal(
     val portalUuid: String,
-    val appUuid: String,
     val configuration: PortalConfiguration
 ) : Closeable {
 
@@ -48,9 +47,7 @@ class SourcePortal(
     }
 
     fun createExternalPortal(): SourcePortal {
-        val portalClone = getPortal(
-            register(appUuid, viewingPortalArtifact, configuration.copy(external = true))
-        )!!
+        val portalClone = getPortal(register(viewingPortalArtifact, configuration.copy(external = true)))!!
         portalClone.cloneViews(this)
         return portalClone
     }
@@ -83,16 +80,15 @@ class SourcePortal(
             log.debug("Active portals: " + portalMap.size())
         }
 
-        fun getInternalPortal(appUuid: String, artifactQualifiedName: String): Optional<SourcePortal> {
+        fun getInternalPortal(artifactQualifiedName: String): Optional<SourcePortal> {
             return Optional.ofNullable(portalMap.asMap().values.find {
-                it.appUuid == appUuid && it.viewingPortalArtifact == artifactQualifiedName
-                        && !it.configuration.external
+                it.viewingPortalArtifact == artifactQualifiedName && !it.configuration.external
             })
         }
 
         fun getSimilarPortals(portal: SourcePortal): List<SourcePortal> {
             return portalMap.asMap().values.filter {
-                it.appUuid == portal.appUuid && it.viewingPortalArtifact == portal.viewingPortalArtifact &&
+                it.viewingPortalArtifact == portal.viewingPortalArtifact &&
                         it.configuration.currentPage == portal.configuration.currentPage
             }
         }
@@ -101,46 +97,37 @@ class SourcePortal(
             return portalMap.asMap().values.filter { it.configuration.external }
         }
 
-        fun getExternalPortals(appUuid: String): List<SourcePortal> {
+        fun getExternalPortals(artifactQualifiedName: String): List<SourcePortal> {
             return portalMap.asMap().values.filter {
-                it.appUuid == appUuid && it.configuration.external
+                it.viewingPortalArtifact == artifactQualifiedName && it.configuration.external
             }
         }
 
-        fun getExternalPortals(appUuid: String, artifactQualifiedName: String): List<SourcePortal> {
+        fun getPortals(artifactQualifiedName: String): List<SourcePortal> {
             return portalMap.asMap().values.filter {
-                it.appUuid == appUuid && it.viewingPortalArtifact == artifactQualifiedName
-                        && it.configuration.external
+                it.viewingPortalArtifact == artifactQualifiedName
             }
         }
 
-        fun getPortals(appUuid: String, artifactQualifiedName: String): List<SourcePortal> {
-            return portalMap.asMap().values.filter {
-                it.appUuid == appUuid && it.viewingPortalArtifact == artifactQualifiedName
-            }
-        }
-
-        fun register(appUuid: String, artifactQualifiedName: String, external: Boolean): String {
+        fun register(artifactQualifiedName: String, external: Boolean): String {
             return register(
-                UUID.randomUUID().toString(), appUuid, artifactQualifiedName, PortalConfiguration(external = external)
+                UUID.randomUUID().toString(), artifactQualifiedName, PortalConfiguration(external = external)
             )
         }
 
         fun register(
-            appUuid: String,
             artifactQualifiedName: String,
             configuration: PortalConfiguration = PortalConfiguration()
         ): String {
-            return register(UUID.randomUUID().toString(), appUuid, artifactQualifiedName, configuration)
+            return register(UUID.randomUUID().toString(), artifactQualifiedName, configuration)
         }
 
         fun register(
             portalUuid: String,
-            appUuid: String,
             artifactQualifiedName: String,
             configuration: PortalConfiguration = PortalConfiguration()
         ): String {
-            val portal = SourcePortal(portalUuid, Objects.requireNonNull(appUuid), configuration)
+            val portal = SourcePortal(portalUuid, configuration)
             portal.viewingPortalArtifact = Objects.requireNonNull(artifactQualifiedName)
 
             portalMap.put(portalUuid, portal)

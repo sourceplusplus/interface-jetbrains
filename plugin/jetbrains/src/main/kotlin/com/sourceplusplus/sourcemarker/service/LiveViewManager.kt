@@ -122,7 +122,6 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
         traces.add(trace)
 
         val traceResult = TraceResult(
-            "null",
             sourceMark.artifactQualifiedName,
             null,
             TraceOrderType.LATEST_TRACES,
@@ -182,7 +181,6 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
         }
 
         val metricResult = ArtifactMetricResult(
-            "null",
             sourceMark.artifactQualifiedName,
             QueryTimeFrame.valueOf(1),
             portal.activityView.activeChartMetric, //todo: assumes activity view

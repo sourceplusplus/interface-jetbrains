@@ -23,7 +23,6 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                "null",
                 artifactName,
                 PortalConfiguration(external = true)
             )
@@ -34,7 +33,6 @@ class ActivityViewTest {
         val endTime = now.plusSeconds(60).toInstant()
         val startTime = now.toInstant()
         val pushResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
@@ -68,7 +66,6 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                "null",
                 artifactName,
                 PortalConfiguration(external = true)
             )
@@ -79,7 +76,6 @@ class ActivityViewTest {
         val endTime = now.plusSeconds(60).toInstant()
         val startTime = now.toInstant()
         val pushResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
@@ -97,7 +93,6 @@ class ActivityViewTest {
         portal.activityView.cacheMetricResult(pushResult)
 
         val pushResult2 = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
@@ -131,7 +126,6 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                "null",
                 artifactName,
                 PortalConfiguration(external = true)
             )
@@ -142,7 +136,6 @@ class ActivityViewTest {
         val endTime = now.plusSeconds(60).toInstant()
         val startTime = now.toInstant()
         val pushResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
@@ -160,7 +153,6 @@ class ActivityViewTest {
         portal.activityView.cacheMetricResult(pushResult)
 
         val pushResult2 = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
@@ -194,7 +186,6 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                "null",
                 artifactName,
                 PortalConfiguration(external = true)
             )
@@ -205,7 +196,6 @@ class ActivityViewTest {
         val endTime = now.toInstant()
         val startTime = now.minusMinutes(portal.activityView.timeFrame.minutes.toLong()).toInstant()
         val originalResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_5_MINUTES,
             MetricType.Throughput_Average,
@@ -223,7 +213,6 @@ class ActivityViewTest {
 
         val updatedStartTime = now.plusMinutes(1).toInstant()
         val pushResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
@@ -256,7 +245,6 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                "null",
                 artifactName,
                 PortalConfiguration(external = true)
             )
@@ -267,7 +255,6 @@ class ActivityViewTest {
         val endTime = now.toInstant()
         val startTime = now.minusMinutes(portal.activityView.timeFrame.minutes.toLong()).toInstant()
         val originalResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_5_MINUTES,
             MetricType.Throughput_Average,
@@ -285,7 +272,6 @@ class ActivityViewTest {
 
         val updatedStartTime = startTime.plusSeconds(60)
         val pushResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
@@ -318,7 +304,6 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                "null",
                 artifactName,
                 PortalConfiguration(external = true)
             )
@@ -329,7 +314,6 @@ class ActivityViewTest {
         val endTime = now.toInstant()
         val startTime = now.minusMinutes(portal.activityView.timeFrame.minutes.toLong()).toInstant()
         val originalResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_5_MINUTES,
             MetricType.Throughput_Average,
@@ -347,7 +331,6 @@ class ActivityViewTest {
 
         val updatedEndTime = startTime.minusSeconds(60)
         val pushResult = ArtifactMetricResult(
-            "null",
             portal.viewingPortalArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,

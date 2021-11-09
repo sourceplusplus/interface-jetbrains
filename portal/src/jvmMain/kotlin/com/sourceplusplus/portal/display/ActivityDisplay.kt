@@ -68,7 +68,7 @@ class ActivityDisplay(
         }
         vertx.eventBus().consumer<ArtifactMetricResult>(ArtifactMetricsUpdated) {
             val artifactMetricResult = it.body()
-            SourcePortal.getPortals(artifactMetricResult.appUuid, artifactMetricResult.artifactQualifiedName)
+            SourcePortal.getPortals(artifactMetricResult.artifactQualifiedName)
                 .forEach { portal ->
                     portal.activityView.cacheMetricResult(artifactMetricResult)
                     updateUI(portal)

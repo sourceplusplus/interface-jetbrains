@@ -299,18 +299,13 @@ class TracesDisplay(
 
     private fun handleArtifactTraceResult(artifactTraceResult: TraceResult) {
         handleArtifactTraceResult(
-            SourcePortal.getPortals(
-                artifactTraceResult.appUuid,
-                artifactTraceResult.artifactQualifiedName
-            ).toList(), artifactTraceResult
+            SourcePortal.getPortals(artifactTraceResult.artifactQualifiedName).toList(),
+            artifactTraceResult
         )
     }
 
     private fun handleTraceSpanUpdated(traceSpan: TraceSpan) {
-        SourcePortal.getPortals(
-            "null",
-            traceSpan.artifactQualifiedName!!
-        ).toList().forEach {
+        SourcePortal.getPortals(traceSpan.artifactQualifiedName!!).toList().forEach {
             it.tracesView.resolvedEndpointNames[traceSpan.traceId] = traceSpan.endpointName!!
             vertx.eventBus().publish(UpdateTraceSpan(it.portalUuid), JsonObject(Json.encode(traceSpan)))
         }
@@ -336,7 +331,6 @@ class TracesDisplay(
     }
 
     private fun handleTraceStack(
-        appUuid: String,
         rootArtifactQualifiedName: String,
         spanQueryResult: TraceSpanStackQueryResult
     ): TraceStack {
@@ -361,7 +355,6 @@ class TracesDisplay(
 
             spanInfos.add(
                 finalSpan.apply {
-                    putMetaString("appUuid", appUuid)
                     putMetaString("rootArtifactQualifiedName", rootArtifactQualifiedName)
                     putMetaString("operationName", operationName)
                     putMetaDouble(
@@ -377,7 +370,6 @@ class TracesDisplay(
     private fun getTraceStack(messageHandler: Message<JsonObject>) {
         val request = messageHandler.body() as JsonObject
         val portalUuid = request.getString("portalUuid")
-        val appUuid = request.getString("appUuid")
         val artifactQualifiedName = request.getString("artifactQualifiedName")
         val globalTraceId = request.getString("traceId")
         log.trace(
@@ -398,7 +390,7 @@ class TracesDisplay(
                 } else {
                     representation.cacheTraceStack(
                         globalTraceId,
-                        handleTraceStack(appUuid, artifactQualifiedName, it.result().body())
+                        handleTraceStack(artifactQualifiedName, it.result().body())
                     )
                     messageHandler.reply(representation.getTraceStack(globalTraceId))
                 }

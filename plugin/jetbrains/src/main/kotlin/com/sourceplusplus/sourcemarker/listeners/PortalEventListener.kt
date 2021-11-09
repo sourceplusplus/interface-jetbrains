@@ -370,7 +370,6 @@ class PortalEventListener(
                 GlobalScope.launch(vertx.dispatcher()) {
                     val traceResult = EndpointTracesBridge.getTraces(
                         GetEndpointTraces(
-                            appUuid = portal.appUuid,
                             artifactQualifiedName = portal.viewingPortalArtifact,
                             endpointId = endpointId,
                             zonedDuration = ZonedDuration(
@@ -541,7 +540,7 @@ class PortalEventListener(
             JsonObject(
                 Json.encode(
                     EndpointResult(
-                        portal.appUuid, portal.overviewView.timeFrame,
+                        portal.overviewView.timeFrame,
                         start = Instant.fromEpochMilliseconds(requestDuration.start.toInstant().toEpochMilli()),
                         stop = Instant.fromEpochMilliseconds(requestDuration.stop.toInstant().toEpochMilli()),
                         step = requestDuration.step.name,
@@ -566,7 +565,6 @@ class PortalEventListener(
                 )
                 val metrics = EndpointMetricsBridge.getMetrics(metricsRequest, vertx)
                 val metricResult = toProtocol(
-                    portal.appUuid,
                     portal.viewingPortalArtifact,
                     portal.activityView.timeFrame,
                     portal.activityView.activeChartMetric,

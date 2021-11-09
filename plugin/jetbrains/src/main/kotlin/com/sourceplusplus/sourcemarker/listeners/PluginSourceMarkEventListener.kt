@@ -54,7 +54,7 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
 
             //register portal for source mark
             val sourcePortal = SourcePortal.getPortal(
-                SourcePortal.register("null", sourceMark.artifactQualifiedName, false) //todo: appUuid
+                SourcePortal.register(sourceMark.artifactQualifiedName, false)
             )
             sourceMark.putUserData(SourceMarkKeys.SOURCE_PORTAL, sourcePortal!!)
             sourceMark.addEventListener {
