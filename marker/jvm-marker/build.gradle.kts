@@ -12,8 +12,13 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":marker"))
-    compileOnly(project(":monitor:skywalking"))
+    if (findProject(":interfaces:jetbrains") != null) {
+        compileOnly(project(":interfaces:jetbrains:marker"))
+        compileOnly(project(":interfaces:jetbrains:monitor:skywalking"))
+    } else {
+        compileOnly(project(":marker"))
+        compileOnly(project(":monitor:skywalking"))
+    }
     compileOnly("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-2")
     val intellijVersion = "212.5457.46"
 

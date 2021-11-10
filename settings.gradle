@@ -1,5 +1,17 @@
-rootProject.buildFileName = "build.gradle.kts"
-rootProject.name = 'SourceMarker'
+pluginManagement {
+    plugins {
+        String kotlinVersion = "1.5.31"
+        id 'org.jetbrains.kotlin.jvm' version kotlinVersion apply false
+        id 'org.jetbrains.kotlin.multiplatform' version kotlinVersion apply false
+        id 'org.jetbrains.kotlin.js' version kotlinVersion apply false
+        id 'org.jetbrains.kotlin.plugin.serialization' version kotlinVersion apply false
+        id 'com.avast.gradle.docker-compose' version "0.14.9" apply false
+        id 'io.gitlab.arturbosch.detekt' version "1.18.1" apply false
+    }
+}
+//
+//rootProject.buildFileName = "build.gradle.kts"
+//rootProject.name = 'SourceMarker'
 
 //framework
 include 'mapper'
@@ -8,9 +20,6 @@ include 'marker:jvm-marker'
 include 'marker:py-marker'
 include 'monitor'
 include 'plugin'
-include 'portal'
-include 'portal'
-include 'protocol'
 
 //implementations
 include 'plugin:jetbrains'

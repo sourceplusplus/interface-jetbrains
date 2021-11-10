@@ -10,7 +10,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":marker"))
+    if (findProject(":interfaces:jetbrains") != null) {
+        compileOnly(project(":interfaces:jetbrains:marker"))
+    } else {
+        compileOnly(project(":marker"))
+    }
     val intellijVersion = "212.5457.46"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")

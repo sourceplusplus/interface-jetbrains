@@ -19,7 +19,7 @@ val pluginSinceBuild: String by project
 val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
-val platformVersion: String by project
+val ideVersion: String by project
 val platformPlugins: String by project
 val platformDownloadSources: String by project
 
@@ -28,7 +28,7 @@ version = pluginVersion
 
 intellij {
     pluginName.set("SourceMarker")
-    version.set(platformVersion)
+    version.set(ideVersion)
     type.set(platformType)
     downloadSources.set(platformDownloadSources.toBoolean())
     updateSinceUntilBuild.set(false)
@@ -50,12 +50,21 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":mapper"))
-    implementation(project(":marker"))
-    implementation(project(":marker:jvm-marker"))
-    implementation(project(":marker:py-marker"))
-    implementation(project(":monitor:skywalking"))
-    implementation(project(":portal"))
+    if (findProject(":interfaces:jetbrains") != null) {
+        implementation(project(":interfaces:jetbrains:mapper"))
+        implementation(project(":interfaces:jetbrains:marker"))
+        implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
+        implementation(project(":interfaces:jetbrains:marker:py-marker"))
+        implementation(project(":interfaces:jetbrains:monitor:skywalking"))
+        implementation(project(":interfaces:portal"))
+    } else {
+        implementation(project(":mapper"))
+        implementation(project(":marker"))
+        implementation(project(":marker:jvm-marker"))
+        implementation(project(":marker:py-marker"))
+        implementation(project(":monitor:skywalking"))
+        //implementation(project(":portal"))
+    }
 
     implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-2")
     implementation("com.github.sh5i:git-stein:v0.5.0")
@@ -94,7 +103,7 @@ tasks {
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
-            File(rootProject.projectDir, "./README.md").readText().lines().run {
+            File(file(projectDir).parentFile.parent, "./README.md").readText().lines().run {
                 val start = "<!-- Plugin description -->"
                 val end = "<!-- Plugin description end -->"
 
@@ -120,23 +129,24 @@ tasks {
 
     //todo: should be a way to just add implementation() to dependencies
     getByName("processResources") {
-        dependsOn(":portal:build")
+        if (findProject(":interfaces:jetbrains") != null) {
+            dependsOn(":interfaces:portal:build")
+        } else {
+            //dependsOn(":portal:build")
+        }
+
         doLast {
             copy {
-                from(file("$rootDir/portal/build/distributions/portal.js"))
-                into(file("$rootDir/plugin/jetbrains/build/resources/main"))
+                from(file("$rootDir/interfaces/portal/build/distributions/portal.js"))
+                into(file("$projectDir/build/resources/main"))
             }
             copy {
-                from(file("$rootDir/portal/build/distributions/portal.js.map"))
-                into(file("$rootDir/plugin/jetbrains/build/resources/main"))
+                from(file("$rootDir/interfaces/portal/build/distributions/portal.js.map"))
+                into(file("$projectDir/build/resources/main"))
             }
         }
     }
 }
-
-sourceSets.main.get().java.srcDirs(
-    sourceSets.main.get().java.srcDirs, "$rootDir/protocol/build/generated/source/kapt/main"
-)
 
 tasks {
     test {
