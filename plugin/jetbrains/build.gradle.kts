@@ -11,6 +11,7 @@ plugins {
 val vertxVersion = ext.get("vertxVersion")
 val kotlinVersion = ext.get("kotlinVersion")
 val protocolVersion: String by project
+val portalVersion: String by project
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
@@ -57,16 +58,15 @@ dependencies {
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
         implementation(project(":interfaces:jetbrains:monitor:skywalking"))
-        implementation(project(":interfaces:portal"))
     } else {
         implementation(project(":mapper"))
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor:skywalking"))
-        //implementation(project(":portal"))
     }
 
+    implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$portalVersion")
     implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
@@ -126,26 +126,6 @@ tasks {
     }
     runPluginVerifier {
         ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })
-    }
-
-    //todo: should be a way to just add implementation() to dependencies
-    getByName("processResources") {
-        if (findProject(":interfaces:jetbrains") != null) {
-            dependsOn(":interfaces:portal:build")
-        } else {
-            //dependsOn(":portal:build")
-        }
-
-        doLast {
-            copy {
-                from(file("$rootDir/interfaces/portal/build/distributions/portal.js"))
-                into(file("$projectDir/build/resources/main"))
-            }
-            copy {
-                from(file("$rootDir/interfaces/portal/build/distributions/portal.js.map"))
-                into(file("$projectDir/build/resources/main"))
-            }
-        }
     }
 }
 
