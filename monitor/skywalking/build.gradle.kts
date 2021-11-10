@@ -6,9 +6,10 @@ plugins {
 val vertxVersion = ext.get("vertxVersion")
 val kotlinVersion = ext.get("kotlinVersion")
 val apolloVersion: String by project
+val protocolVersion: String by project
 
 dependencies {
-    implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-2")
+    implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("com.apollographql.apollo:apollo-runtime:$apolloVersion")
     implementation("com.apollographql.apollo:apollo-coroutines-support:$apolloVersion")

@@ -4,6 +4,7 @@ plugins {
 
 val kotlinVersion = ext.get("kotlinVersion")
 val vertxVersion = ext.get("vertxVersion")
+val protocolVersion: String by project
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
@@ -19,7 +20,7 @@ dependencies {
         compileOnly(project(":marker"))
         compileOnly(project(":monitor:skywalking"))
     }
-    compileOnly("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-2")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     val intellijVersion = "212.5457.46"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")

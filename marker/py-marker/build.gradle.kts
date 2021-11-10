@@ -3,6 +3,7 @@ plugins {
 }
 
 val kotlinVersion = ext.get("kotlinVersion")
+val protocolVersion: String by project
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }

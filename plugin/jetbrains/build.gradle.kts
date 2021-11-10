@@ -10,6 +10,7 @@ plugins {
 
 val vertxVersion = ext.get("vertxVersion")
 val kotlinVersion = ext.get("kotlinVersion")
+val protocolVersion: String by project
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
@@ -66,7 +67,7 @@ dependencies {
         //implementation(project(":portal"))
     }
 
-    implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-2")
+    implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
