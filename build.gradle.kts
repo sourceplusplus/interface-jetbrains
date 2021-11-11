@@ -1,12 +1,9 @@
 plugins {
-    id("com.avast.gradle.docker-compose") version "0.14.9"
+    id("com.avast.gradle.docker-compose")
 
-    val kotlinVersion = "1.5.10"
-    kotlin("jvm") version kotlinVersion apply false
-    kotlin("multiplatform") version kotlinVersion apply false
-    kotlin("js") version kotlinVersion apply false
+    id("org.jetbrains.kotlin.jvm") apply false
 
-    id("io.gitlab.arturbosch.detekt") version "1.18.1"
+    id("io.gitlab.arturbosch.detekt")
     id("maven-publish")
 }
 
@@ -16,7 +13,6 @@ val pluginVersion: String by project
 val pluginSinceBuild: String by project
 
 val platformType: String by project
-val platformVersion: String by project
 val platformDownloadSources: String by project
 
 group = pluginGroup

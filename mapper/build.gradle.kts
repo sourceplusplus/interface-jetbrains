@@ -5,6 +5,8 @@ plugins {
 
 val pluginGroup: String by project
 val pluginVersion: String by project
+val protocolVersion: String by project
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
@@ -22,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-2")
+    implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
