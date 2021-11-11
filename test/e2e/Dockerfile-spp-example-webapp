@@ -3,7 +3,7 @@ ADD ./spp-example-webapp-boot-1.0-SNAPSHOT.zip /spp-example-webapp-boot-1.0-SNAP
 
 COPY ./apache-skywalking-apm-8.8.1.tar.gz /apache-skywalking-apm-8.8.1.tar.gz
 RUN tar -xzf ./apache-skywalking-apm-8.8.1.tar.gz
-RUN mv /apache-skywalking-apm-bin/agent/activations/apm-toolkit-trace-activation-8.7.0.jar /apache-skywalking-apm-bin/agent/plugins/
+#RUN mv /apache-skywalking-apm-bin/agent/activations/apm-toolkit-trace-activation-8.7.0.jar /apache-skywalking-apm-bin/agent/plugins/
 
 ADD ./agent.config /apache-skywalking-apm-bin/agent/config/agent.config
 #ADD ./customize_enhance.xml /apache-skywalking-apm-bin/agent/config/customize_enhance.xml
