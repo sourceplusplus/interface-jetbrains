@@ -15,10 +15,10 @@ repositories {
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
         compileOnly(project(":interfaces:jetbrains:marker"))
-        compileOnly(project(":interfaces:jetbrains:monitor:skywalking"))
+        compileOnly(project(":interfaces:jetbrains:monitor"))
     } else {
         compileOnly(project(":marker"))
-        compileOnly(project(":monitor:skywalking"))
+        compileOnly(project(":monitor"))
     }
     compileOnly("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     val intellijVersion = "212.5457.46"

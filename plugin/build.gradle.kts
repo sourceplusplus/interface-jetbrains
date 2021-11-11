@@ -57,13 +57,13 @@ dependencies {
         implementation(project(":interfaces:jetbrains:marker"))
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
-        implementation(project(":interfaces:jetbrains:monitor:skywalking"))
+        implementation(project(":interfaces:jetbrains:monitor"))
     } else {
         implementation(project(":mapper"))
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
-        implementation(project(":monitor:skywalking"))
+        implementation(project(":monitor"))
     }
 
     implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$portalVersion")
