@@ -10,6 +10,8 @@ plugins {
 
 val vertxVersion = ext.get("vertxVersion")
 val kotlinVersion = ext.get("kotlinVersion")
+val protocolVersion: String by project
+val portalVersion: String by project
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
@@ -19,7 +21,7 @@ val pluginSinceBuild: String by project
 val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
-val platformVersion: String by project
+val ideVersion: String by project
 val platformPlugins: String by project
 val platformDownloadSources: String by project
 
@@ -28,7 +30,7 @@ version = pluginVersion
 
 intellij {
     pluginName.set("SourceMarker")
-    version.set(platformVersion)
+    version.set(ideVersion)
     type.set(platformType)
     downloadSources.set(platformDownloadSources.toBoolean())
     updateSinceUntilBuild.set(false)
@@ -50,14 +52,22 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":mapper"))
-    implementation(project(":marker"))
-    implementation(project(":marker:jvm-marker"))
-    implementation(project(":marker:py-marker"))
-    implementation(project(":monitor:skywalking"))
-    implementation(project(":portal"))
+    if (findProject(":interfaces:jetbrains") != null) {
+        implementation(project(":interfaces:jetbrains:mapper"))
+        implementation(project(":interfaces:jetbrains:marker"))
+        implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
+        implementation(project(":interfaces:jetbrains:marker:py-marker"))
+        implementation(project(":interfaces:jetbrains:monitor:skywalking"))
+    } else {
+        implementation(project(":mapper"))
+        implementation(project(":marker"))
+        implementation(project(":marker:jvm-marker"))
+        implementation(project(":marker:py-marker"))
+        implementation(project(":monitor:skywalking"))
+    }
 
-    implementation("com.github.sourceplusplus.protocol:protocol:0.2.0-alpha-2")
+    implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$portalVersion")
+    implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
@@ -94,7 +104,7 @@ tasks {
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
-            File(rootProject.projectDir, "./README.md").readText().lines().run {
+            File(file(projectDir).parentFile.parent, "./README.md").readText().lines().run {
                 val start = "<!-- Plugin description -->"
                 val end = "<!-- Plugin description end -->"
 
@@ -117,26 +127,7 @@ tasks {
     runPluginVerifier {
         ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })
     }
-
-    //todo: should be a way to just add implementation() to dependencies
-    getByName("processResources") {
-        dependsOn(":portal:build")
-        doLast {
-            copy {
-                from(file("$rootDir/portal/build/distributions/portal.js"))
-                into(file("$rootDir/plugin/jetbrains/build/resources/main"))
-            }
-            copy {
-                from(file("$rootDir/portal/build/distributions/portal.js.map"))
-                into(file("$rootDir/plugin/jetbrains/build/resources/main"))
-            }
-        }
-    }
 }
-
-sourceSets.main.get().java.srcDirs(
-    sourceSets.main.get().java.srcDirs, "$rootDir/protocol/build/generated/source/kapt/main"
-)
 
 tasks {
     test {
