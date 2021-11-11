@@ -10,18 +10,11 @@ pluginManagement {
         id 'com.apollographql.apollo' version "2.5.10" apply false
     }
 }
-//
-//rootProject.buildFileName = "build.gradle.kts"
-//rootProject.name = 'SourceMarker'
 
-//framework
 include 'mapper'
 include 'marker'
 include 'marker:jvm-marker'
 include 'marker:py-marker'
 include 'monitor'
 include 'plugin'
-
-//implementations
-include 'plugin:jetbrains'
 include 'monitor:skywalking'
