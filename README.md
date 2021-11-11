@@ -6,4 +6,8 @@
 
 ## What is this?
 
+<!-- Plugin description -->
+
 This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/live-platform), the open-source live coding platform.
+
+<!-- Plugin description end -->

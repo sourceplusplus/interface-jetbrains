@@ -104,7 +104,7 @@ tasks {
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
-            File(file(projectDir).parentFile.parent, "./README.md").readText().lines().run {
+            File(file(projectDir).parent, "./README.md").readText().lines().run {
                 val start = "<!-- Plugin description -->"
                 val end = "<!-- Plugin description end -->"
 
