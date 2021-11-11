@@ -105,11 +105,12 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
 
             val endpointName = buildString {
-                append("{")
                 append(detectedEndpoint.get().type)
-                append("}")
+                append(":")
                 append(classEndpointPath)
-                append(detectedEndpoint.get().path)
+                if (detectedEndpoint.get().path != "/") {
+                    append(detectedEndpoint.get().path)
+                }
             }
             promise.complete(Optional.of(DetectedEndpoint(endpointName, false)))
         } else {
@@ -138,7 +139,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
-            val value = if (endpointNameExpr == null) "" else (endpointNameExpr as UInjectionHost).evaluateToString()
+            var value = if (endpointNameExpr == null) "" else (endpointNameExpr as UInjectionHost).evaluateToString()
             val method = if (methodExpr is UQualifiedReferenceExpression) {
                 methodExpr.selector.toString()
             } else {
@@ -148,11 +149,12 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                     else -> throw UnsupportedOperationException(methodExpr.javaClass.name)
                 }
             }
-            return Optional.of(DetectedEndpoint("{$method}$value", false, value, method))
+            if (value.isNullOrEmpty()) value = "/"
+            return Optional.of(DetectedEndpoint("$method:$value", false, value, method))
         } else {
             var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }
             if (endpointNameExpr == null) endpointNameExpr = annotation.attributeValues.find { it.name == "path" }
-            val value = if (endpointNameExpr is UInjectionHost) {
+            var value = if (endpointNameExpr is UInjectionHost) {
                 endpointNameExpr.evaluateToString()
             } else if (endpointNameExpr != null) {
                 endpointNameExpr.evaluate()
@@ -161,7 +163,8 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             } as String
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
-            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
+            if (value.isNullOrEmpty()) value = "/"
+            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
         }
     }
 
@@ -186,7 +189,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
-            val value = if (endpointNameExpr is KotlinUCollectionLiteralExpression) {
+            var value = if (endpointNameExpr is KotlinUCollectionLiteralExpression) {
                 endpointNameExpr!!.valueArguments[0].evaluate()
             } else {
                 endpointNameExpr?.evaluate() ?: ""
@@ -199,11 +202,12 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             } else {
                 throw UnsupportedOperationException(valueArg.javaClass.name)
             }
-            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
+            if (value?.toString().isNullOrEmpty()) value = "/"
+            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
-            val value = if (valueExpr is KotlinUCollectionLiteralExpression) {
+            var value = if (valueExpr is KotlinUCollectionLiteralExpression) {
                 valueExpr.valueArguments[0].evaluate()
             } else if (valueExpr != null) {
                 valueExpr.evaluate()
@@ -212,7 +216,8 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
-            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
+            if (value?.toString().isNullOrEmpty()) value = "/"
+            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
         }
     }
 
@@ -237,7 +242,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
-            val value = endpointNameExpr.getUCallExpression()!!.valueArguments[0].evaluate()
+            var value = endpointNameExpr.getUCallExpression()!!.valueArguments[0].evaluate()
             val valueArg = (methodExpr as UCallExpressionAdapter).valueArguments[0]
             val method = if (valueArg is USimpleNameReferenceExpression) {
                 valueArg.resolvedName
@@ -246,13 +251,15 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             } else {
                 throw UnsupportedOperationException(valueArg.javaClass.name)
             }
-            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
+            if (value?.toString().isNullOrEmpty()) value = "/"
+            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
-            if (valueExpr is UastEmptyExpression) valueExpr = annotation.findAttributeValue("path") //todo: have to call this twice???
+            if (valueExpr is UastEmptyExpression) valueExpr =
+                annotation.findAttributeValue("path") //todo: have to call this twice???
             if (valueExpr is UastEmptyExpression) valueExpr = null
-            val value = if (valueExpr is KotlinUCollectionLiteralExpression) {
+            var value = if (valueExpr is KotlinUCollectionLiteralExpression) {
                 valueExpr.valueArguments[0].evaluate()
             } else if (valueExpr != null) {
                 valueExpr.evaluate()
@@ -261,7 +268,8 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
-            return Optional.of(DetectedEndpoint("{$method}$value", false, value.toString(), method))
+            if (value?.toString().isNullOrEmpty()) value = "/"
+            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
         }
     }
 }

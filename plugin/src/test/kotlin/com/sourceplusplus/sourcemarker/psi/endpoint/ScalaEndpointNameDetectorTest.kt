@@ -31,7 +31,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
                 val result = EndpointDetector(SourceMarkerPlugin.vertx)
                     .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
-                assertEquals("{GET}/doGet", result.get().name)
+                assertEquals("GET:/doGet", result.get().name)
             }
         }
     }
@@ -55,7 +55,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
                 val result = EndpointDetector(SourceMarkerPlugin.vertx)
                     .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
-                assertEquals("{GET}/", result.get().name)
+                assertEquals("GET:/", result.get().name)
             }
         }
     }
@@ -79,7 +79,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
                 val result = EndpointDetector(SourceMarkerPlugin.vertx)
                     .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
-                assertEquals("{GET}/doGet", result.get().name)
+                assertEquals("GET:/doGet", result.get().name)
             }
         }
     }
@@ -103,7 +103,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
                 val result = EndpointDetector(SourceMarkerPlugin.vertx)
                     .determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
-                assertEquals("{GET}/doGet", result.get().name)
+                assertEquals("GET:/doGet", result.get().name)
             }
         }
     }
