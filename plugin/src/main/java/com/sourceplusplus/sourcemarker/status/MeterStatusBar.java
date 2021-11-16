@@ -7,7 +7,6 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.DocumentAdapter;
-import com.intellij.ui.JBIntSpinner;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
@@ -399,8 +398,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
         LiveMeter instrument = new LiveMeter(
                 "tester",
-                MeterType.COUNTER,
-                new MetricValue(MetricValueType.NUMBER, "1", ""),
+                MeterType.valueOf(meterTypeComboBox.getSelectedItem().toString().toUpperCase()),
+                new MetricValue(MetricValueType.NUMBER, "1"),
                 sourceLocation,
                 condition,
                 expirationDate,
@@ -415,7 +414,6 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
                 liveMeter = (LiveMeter) it.result();
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getMETER_ID(), liveMeter.getId());
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveMeter);
 
                 ApplicationManager.getApplication().invokeLater(() -> {
@@ -426,33 +424,9 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                         Optional<ExpressionGutterMark> gutterMark = creationService.getOrCreateExpressionGutterMark(
                                 inlayMark.getSourceFileMarker(), liveMeter.getLocation().getLine(), false);
                         if (gutterMark.isPresent()) {
-                            gutterMark.get().getConfiguration().setIcon(SourceMarkerIcons.INSTANCE.getLIVE_METER_ICON());
-                            gutterMark.get().getConfiguration().setActivateOnMouseHover(false);
-                            gutterMark.get().getConfiguration().setActivateOnMouseClick(true);
-
-                            JPanel panel = new JPanel(new GridBagLayout());
-                            panel.setBackground(new Color(43, 43, 43));
-                            LiveMeterStatusPanel statusBar = new LiveMeterStatusPanel();
-                            panel.add(statusBar, new GridBagConstraints());
-                            panel.setPreferredSize(new Dimension(385, 70));
-                            gutterMark.get().getConfiguration().setComponentProvider(new SwingSourceMarkComponentProvider() {
-                                @NotNull
-                                @Override
-                                public SourceMarkComponentConfiguration getDefaultConfiguration() {
-                                    SourceMarkComponentConfiguration config = super.getDefaultConfiguration();
-                                    config.setShowAboveExpression(true);
-                                    return config;
-                                }
-
-                                @NotNull
-                                @Override
-                                public JComponent makeSwingComponent(@NotNull SourceMark sourceMark) {
-                                    return panel;
-                                }
-                            });
-                            gutterMark.get().apply(true);
+                            LiveStatusManager.showMeterStatusIcon(liveMeter, gutterMark.get());
                         } else {
-                            //log.error("Could not create gutter mark for live meter");
+                            it.cause().printStackTrace();
                         }
                     });
                 });

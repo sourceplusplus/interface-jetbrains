@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.12" encoding: "UTF-8"
+JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.13" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -20,26 +20,18 @@ new FormModel {
 				name: "panel4"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
-					"$columnSpecs": "default, labelcompgap, default, labelcompgap, center:4dlu, labelcompgap, default, labelcompgap, default, labelcompgap, default, labelcompgap, default, labelcompgap, right:default:grow"
+					"$columnSpecs": "default, labelcompgap, center:4dlu, labelcompgap, default, labelcompgap, default, labelcompgap, default, labelcompgap, default, labelcompgap, left:default:grow"
 					"$rowSpecs": "fill:default:grow"
 				} ) {
 					name: "panel1"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					"font": #Font0
 					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "statusLabel"
+						name: "meterTypeValueLabel"
 						"text": "Count"
-						"font": #Font0
-						"foreground": sfield java.awt.Color gray
-					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
-					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "statusValueLabel"
-						"text": "Daily"
 						"font": new java.awt.Font( "Roboto Light", 0, 16 )
-						"foreground": new java.awt.Color( 106, 135, 89, 255 )
-					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-						"gridX": 3
-					} )
+						"foreground": new java.awt.Color( 152, 118, 170, 255 )
+					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
 					add( new FormComponent( "javax.swing.JSeparator" ) {
 						name: "separator1"
 						"orientation": 1
@@ -48,38 +40,38 @@ new FormModel {
 						"preferredSize": new java.awt.Dimension( 2, 1 )
 						"foreground": sfield java.awt.Color darkGray
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-						"gridX": 5
+						"gridX": 3
 						"insets": new java.awt.Insets( 5, 0, 5, 0 )
 					} )
 					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "hitsLabel"
-						"text": "Value"
+						name: "minuteLabel"
+						"text": "Minute"
 						"foreground": sfield java.awt.Color gray
 						"font": &Font1 new java.awt.Font( "Roboto Light", 0, 15 )
+					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+						"gridX": 5
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "minuteValueLabel"
+						"text": "n/a"
+						"font": new java.awt.Font( "Roboto Light", 0, 16 )
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 7
 					} )
 					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "hitsValueLabel"
-						"text": "n/a"
-						"font": new java.awt.Font( "Roboto Light", 0, 16 )
+						name: "hourLabel"
+						"text": "Hour"
+						"foreground": sfield java.awt.Color gray
+						"font": #Font1
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 9
 					} )
 					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "rateLabel"
-						"text": "Rate"
-						"foreground": sfield java.awt.Color gray
-						"font": #Font1
-					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-						"gridX": 11
-					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "rateValueLabel"
+						name: "hourValueLabel"
 						"text": "n/a"
 						"font": new java.awt.Font( "Roboto Light", 0, 16 )
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-						"gridX": 13
+						"gridX": 11
 					} )
 					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
 						"$columnSpecs": "default, labelcompgap, default"
@@ -88,20 +80,20 @@ new FormModel {
 						name: "panel3"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						add( new FormComponent( "javax.swing.JLabel" ) {
-							name: "expiresLabel"
-							"text": "Resets"
+							name: "dayLabel"
+							"text": "Day"
 							"foreground": sfield java.awt.Color gray
 							"font": #Font1
 						}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
 						add( new FormComponent( "javax.swing.JLabel" ) {
-							name: "expiresValueLabel"
+							name: "dayValueLabel"
 							"text": "n/a"
 							"font": new java.awt.Font( "Roboto Light", 0, 16 )
 						}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 							"gridX": 3
 						} )
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-						"gridX": 15
+						"gridX": 13
 					} )
 				}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 					"insets": new java.awt.Insets( 2, 4, 2, 2 )
@@ -113,13 +105,14 @@ new FormModel {
 					name: "panel2"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					add( new FormComponent( "javax.swing.JTextField" ) {
-						name: "textField1"
+						name: "meterDescriptionTextField"
 						"editable": false
-						"text": "Tester test"
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
 					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "label1"
-						"text": "text"
+						name: "configurationLabel"
+						auxiliary() {
+							"JavaCodeGenerator.preInitCode": "${field}.setIcon(IconLoader.getIcon(\"/icons/configIcon.svg\"));"
+						}
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 3
 					} )
@@ -135,3 +128,4 @@ new FormModel {
 		} )
 	}
 }
+

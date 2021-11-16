@@ -15,7 +15,6 @@ import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
-import com.sourceplusplus.marker.source.mark.inlay.InlayMark
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.instrument.LiveInstrument
@@ -32,6 +31,9 @@ import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LIST
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 import org.slf4j.LoggerFactory
+import spp.protocol.SourceMarkerServices
+import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewSubscription
 import java.awt.*
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
@@ -73,7 +75,7 @@ object LiveStatusManager : SourceMarkEventListener {
                             when (it) {
                                 is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
                                 is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
-                                is LiveMeter -> showMeterStatusIcon(it, event.sourceMark.sourceFileMarker)
+                                is LiveMeter -> showMeterStatusIcon(it, event.sourceMark)
                                 else -> throw UnsupportedOperationException(it.javaClass.simpleName)
                             }
                         }
@@ -303,20 +305,40 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
-    fun showMeterStatusIcon(liveMeter: LiveMeter, fileMarker: SourceFileMarker) {
+    @JvmStatic
+    fun showMeterStatusIcon(liveMeter: LiveMeter, sourceMark: SourceMark) {
+        SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
+            LiveViewSubscription(
+                null,
+                listOf(liveMeter.toMetricId()),
+                sourceMark.artifactQualifiedName,
+                LiveViewConfig(
+                    "LIVE_METER",
+                    true,
+                    listOf("last_minute", "last_hour", "last_day"),
+                    0
+                )
+            )
+        ) {
+            if (it.failed()) {
+                log.error("Failed to add live view subscription", it.cause())
+            }
+        }
+
         //create gutter popup
         ApplicationManager.getApplication().runReadAction {
             val gutterMark = creationService.getOrCreateExpressionGutterMark(
-                fileMarker, liveMeter.location.line, false
+                sourceMark.sourceFileMarker, liveMeter.location.line, false
             )
             if (gutterMark.isPresent) {
+                gutterMark.get().putUserData(SourceMarkKeys.METER_ID, liveMeter.id!!)
                 gutterMark.get().configuration.icon = LIVE_METER_ICON
                 gutterMark.get().configuration.activateOnMouseHover = false
                 gutterMark.get().configuration.activateOnMouseClick = true
 
                 val panel = JPanel(GridBagLayout())
                 panel.background = Color(43, 43, 43)
-                val statusBar = LiveMeterStatusPanel()
+                val statusBar = LiveMeterStatusPanel(liveMeter)
                 panel.add(statusBar, GridBagConstraints())
                 panel.preferredSize = Dimension(385, 70)
                 gutterMark.get().configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
@@ -326,55 +348,19 @@ object LiveStatusManager : SourceMarkEventListener {
                     override fun makeSwingComponent(sourceMark: SourceMark): JComponent = panel
                 }
                 gutterMark.get().apply(true)
+                addStatusBar(gutterMark.get(), statusBar)
             } else {
-                //log.error("Could not create gutter mark for live meter");
+                log.error("Could not create gutter mark for live meter")
             }
         }
-
-//        ApplicationManager.getApplication().invokeLater {
-//            val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
-//            val findInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, liveMeter.location.line)
-//            if (findInlayMark.isPresent) {
-//                val inlayMark = findInlayMark.get()
-//                if (!fileMarker.containsSourceMark(inlayMark)) {
-//                    inlayMark.putUserData(METER_ID, liveMeter.id)
-//
-//                    val wrapperPanel = JPanel()
-//                    wrapperPanel.layout = BorderLayout()
-//
-//                    val statusBar = MeterStatusBar(
-//                        liveMeter.location,
-//                        emptyList(),
-//                        inlayMark
-//                    )
-//                    inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
-//                    statusBar.setWrapperPanel(wrapperPanel)
-//                    wrapperPanel.add(statusBar)
-//                    statusBar.setEditor(editor)
-//                    statusBar.setLiveInstrument(liveMeter)
-//                    editor.scrollingModel.addVisibleAreaListener(statusBar)
-//
-//                    inlayMark.configuration.showComponentInlay = true
-//                    inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
-//                        override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
-//                    }
-//                    inlayMark.apply()
-//
-//                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-////                    sourcePortal.configuration.currentPage = PageType.METERS
-//                    sourcePortal.configuration.statusBar = true
-//                }
-//            } else {
-//                log.warn("No detected expression at line {}. Inlay mark ignored", liveMeter.location.line)
-//            }
-//        }
     }
 
-    fun addStatusBar(inlayMark: InlayMark, listener: InstrumentEventListener) {
-        if (inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS) == null) {
-            inlayMark.putUserData(INSTRUMENT_EVENT_LISTENERS, mutableSetOf())
+    @JvmStatic
+    fun addStatusBar(sourceMark: SourceMark, listener: InstrumentEventListener) {
+        if (sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS) == null) {
+            sourceMark.putUserData(INSTRUMENT_EVENT_LISTENERS, mutableSetOf())
         }
-        inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
+        sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
     }
 
     fun addActiveLiveInstrument(instrument: LiveInstrument) {
