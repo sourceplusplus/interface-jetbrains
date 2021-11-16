@@ -3,7 +3,7 @@ import org.jetbrains.changelog.markdownToHTML
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "1.2.1"
+    id("org.jetbrains.intellij") version "1.3.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("maven-publish")
 }
@@ -90,8 +90,8 @@ dependencies {
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
-    implementation("ch.qos.logback:logback-core:1.2.6")
-    implementation("ch.qos.logback:logback-classic:1.2.6")
+    implementation("ch.qos.logback:logback-core:1.2.7")
+    implementation("ch.qos.logback:logback-classic:1.2.7")
     implementation("info.debatty:java-string-similarity:2.0.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
