@@ -1,16 +1,44 @@
-JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.12" encoding: "UTF-8"
+JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.13" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
 			"$layoutConstraints": "hidemode 3"
-			"$columnConstraints": "[grow,fill][fill][100,fill]"
-			"$rowConstraints": "[]"
+			"$columnConstraints": "[grow,fill]"
+			"$rowConstraints": "[][][]"
 		} ) {
 			name: "this"
 			"background": new java.awt.Color( 43, 43, 43, 255 )
 			"border": new javax.swing.border.LineBorder( new java.awt.Color( 85, 85, 85, 255 ), 1, false )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
+				"$columnConstraints": "[100,grow,fill]"
+				"$rowConstraints": "[][]"
+				"$layoutConstraints": "hidemode 3"
+			} ) {
+				name: "panel4"
+				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label1"
+					"text": "Condtion"
+					"font": &Font0 new java.awt.Font( "Roboto Light", 0, 15 )
+				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+					"value": "cell 0 0"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "conditionPanel"
+					"minimumSize": new java.awt.Dimension( 0, 27 )
+				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+					"value": "cell 0 1"
+				} )
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 0 0"
+			} )
+			add( new FormComponent( "javax.swing.JSeparator" ) {
+				name: "separator1"
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 0 1"
+			} )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
 				"$columnConstraints": "[150,fill][fill][150,fill]"
 				"$rowConstraints": "[][]"
@@ -21,35 +49,35 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label3"
 					"text": "Expiration Date"
-					"font": &Font0 new java.awt.Font( "Roboto Light", 0, 15 )
+					"font": #Font0
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"
 				} )
 				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
 					"$layoutConstraints": "hidemode 3"
-					"$columnConstraints": "[fill][fill][fill][fill][fill][fill][fill][fill]"
-					"$rowConstraints": "[]"
+					"$columnConstraints": "[fill][fill][fill][fill][fill][fill][fill][fill][fill]"
+					"$rowConstraints": "[][]"
 				} ) {
 					name: "panel1"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
 						name: "expirationNeverButton"
 						"text": "Never"
-						"selected": true
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-						"font": &Font1 new java.awt.Font( "Roboto Light", 0, 15 )
-						"$buttonGroup": &FormReference0 new FormReference( "expirationButtonGroup" )
+						"font": new java.awt.Font( "Roboto Light", 0, 15 )
+						"selected": true
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-						"value": "cell 0 0"
+						"value": "cell 0 0,alignx center,growx 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
 						name: "expiration15MinButton"
 						"text": "15 Minutes"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-						"font": #Font1
-						"$buttonGroup": #FormReference0
+						"font": new java.awt.Font( "Roboto Light", 0, 15 )
+						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-						"value": "cell 0 0"
+						"value": "cell 1 0,alignx center,growx 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
 						name: "expiration30MinButton"
@@ -58,7 +86,7 @@ new FormModel {
 						"font": #Font0
 						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-						"value": "cell 1 0"
+						"value": "cell 2 0,alignx center,growx 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
 						name: "expiration1HrButton"
@@ -67,7 +95,7 @@ new FormModel {
 						"font": #Font0
 						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-						"value": "cell 2 0"
+						"value": "cell 3 0,alignx center,growx 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
 						name: "expiration3HrsButton"
@@ -76,7 +104,7 @@ new FormModel {
 						"font": #Font0
 						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-						"value": "cell 3 0"
+						"value": "cell 4 0,alignx center,growx 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
 						name: "expiration6HrsButton"
@@ -85,7 +113,7 @@ new FormModel {
 						"font": #Font0
 						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-						"value": "cell 4 0"
+						"value": "cell 5 0,alignx center,growx 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
 						name: "expiration12HrsButton"
@@ -94,7 +122,7 @@ new FormModel {
 						"font": #Font0
 						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-						"value": "cell 5 0"
+						"value": "cell 6 0,alignx center,growx 0"
 					} )
 					add( new FormComponent( "javax.swing.JRadioButton" ) {
 						name: "expiration24HrsButton"
@@ -103,56 +131,22 @@ new FormModel {
 						"font": new java.awt.Font( "Roboto Light", 0, 15 )
 						"$buttonGroup": new FormReference( "expirationButtonGroup" )
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-						"value": "cell 6 0"
+						"value": "cell 7 0,alignx center,growx 0"
 					} )
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 1 3 1"
 				} )
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-				"value": "cell 0 0"
-			} )
-			add( new FormComponent( "javax.swing.JSeparator" ) {
-				name: "separator2"
-				"orientation": 1
-				"preferredSize": new java.awt.Dimension( 3, 50 )
-			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-				"value": "cell 1 0"
-			} )
-			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
-				"$columnConstraints": "[grow,fill]"
-				"$rowConstraints": "[][grow]"
-				"$layoutConstraints": "hidemode 3"
-			} ) {
-				name: "panel6"
-				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label5"
-					"text": "Hit Limit"
-					"font": #Font0
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 0"
-				} )
-				add( new FormComponent( "javax.swing.JSpinner" ) {
-					name: "hitLimitSpinner"
-					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-					"model": new javax.swing.SpinnerNumberModel {
-						minimum: -1
-						value: -1
-					}
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 1"
-				} )
-			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-				"value": "cell 2 0"
+				"value": "cell 0 2"
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
-			"size": new java.awt.Dimension( 930, 85 )
+			"size": new java.awt.Dimension( 735, 175 )
 		} )
 		add( new FormNonVisual( "javax.swing.ButtonGroup" ) {
 			name: "expirationButtonGroup"
 		}, new FormLayoutConstraints( null ) {
-			"location": new java.awt.Point( 0, 110 )
+			"location": new java.awt.Point( 0, 191 )
 		} )
 	}
 }

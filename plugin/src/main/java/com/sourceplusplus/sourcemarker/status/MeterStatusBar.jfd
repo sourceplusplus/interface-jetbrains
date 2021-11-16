@@ -72,8 +72,8 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JComboBox" ) {
 					name: "meterTypeComboBox"
 					"model": new javax.swing.DefaultComboBoxModel {
-						selectedItem: "Counter"
-						addElement( "Counter" )
+						selectedItem: "Count"
+						addElement( "Count" )
 						addElement( "Gauge" )
 						addElement( "Histogram" )
 					}

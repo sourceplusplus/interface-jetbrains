@@ -149,7 +149,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                     RowSpec.decodeSpecs("fill:default:grow")));
 
                 //---- meterTypeValueLabel ----
-                meterTypeValueLabel.setText("Counter");
+                meterTypeValueLabel.setText("Count");
                 meterTypeValueLabel.setFont(new Font("Roboto Light", Font.PLAIN, 16));
                 meterTypeValueLabel.setForeground(new Color(152, 118, 170));
                 meterTypeValueLabel.setMinimumSize(new Dimension(46, 25));

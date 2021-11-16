@@ -64,7 +64,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     private boolean disposed = false;
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
-    private final String placeHolderText = "Meter Condition";
+    private final String placeHolderText = "Meter Description";
     private LiveMeter liveMeter;
     private LiveBreakpointStatusPanel statusPanel;
     private JPanel wrapper;
@@ -255,6 +255,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             }
         });
         meterTypeComboBox.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+
+        meterConditionField.setCanShowSaveButton(false);
         meterConditionField.getDocument().addDocumentListener(new DocumentAdapter() {
             @Override
             protected void textChanged(DocumentEvent e) {
@@ -348,7 +350,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         popup.setAlwaysOnTop(true);
 
         if (configurationPanel == null) {
-            configurationPanel = new LiveMeterConfigurationPanel(meterConditionField);
+            configurationPanel = new LiveMeterConfigurationPanel(meterConditionField, inlayMark);
         }
 
         popup.add(configurationPanel);
@@ -381,13 +383,11 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         }
 
         Long expirationDate = null;
-        InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT(); //todo: no throttle
         int hitLimit = -1;
         if (configurationPanel != null) {
             if (configurationPanel.getExpirationInMinutes() != -1) {
                 expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
             }
-            hitLimit = configurationPanel.getHitLimit();
 
             configurationPanel.setNewDefaults();
         }
@@ -408,7 +408,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 false,
                 false,
                 false,
-                throttle,
+                null,
                 meta
         );
         instrumentService.addLiveInstrument(instrument, it -> {
@@ -545,7 +545,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
             //---- meterTypeComboBox ----
             meterTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
-                "Counter",
+                "Count",
                 "Gauge",
                 "Histogram"
             }));

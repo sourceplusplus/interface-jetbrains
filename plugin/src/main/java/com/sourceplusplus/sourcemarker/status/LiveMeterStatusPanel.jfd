@@ -28,7 +28,7 @@ new FormModel {
 					"font": #Font0
 					add( new FormComponent( "javax.swing.JLabel" ) {
 						name: "meterTypeValueLabel"
-						"text": "Counter"
+						"text": "Count"
 						"font": new java.awt.Font( "Roboto Light", 0, 16 )
 						"foreground": new java.awt.Color( 152, 118, 170, 255 )
 						"minimumSize": new java.awt.Dimension( 46, 25 )
