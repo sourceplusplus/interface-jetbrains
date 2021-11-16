@@ -15,7 +15,7 @@ new FormModel {
 			"preferredSize": new java.awt.Dimension( 385, 70 )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
 				"$columnSpecs": "default:grow"
-				"$rowSpecs": "fill:default:grow, linegap, default"
+				"$rowSpecs": "fill:default:grow, 1dlu, default"
 			} ) {
 				name: "panel4"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -28,9 +28,10 @@ new FormModel {
 					"font": #Font0
 					add( new FormComponent( "javax.swing.JLabel" ) {
 						name: "meterTypeValueLabel"
-						"text": "Count"
+						"text": "Counter"
 						"font": new java.awt.Font( "Roboto Light", 0, 16 )
 						"foreground": new java.awt.Color( 152, 118, 170, 255 )
+						"minimumSize": new java.awt.Dimension( 46, 25 )
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
 					add( new FormComponent( "javax.swing.JSeparator" ) {
 						name: "separator1"
@@ -128,4 +129,3 @@ new FormModel {
 		} )
 	}
 }
-

@@ -116,46 +116,43 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
         setMinimumSize(new Dimension(385, 70));
         setPreferredSize(new Dimension(385, 70));
         setLayout(new FormLayout(
-                "default:grow",
-                "fill:default:grow"));
+            "default:grow",
+            "fill:default:grow"));
 
         //======== panel4 ========
         {
             panel4.setBackground(null);
             panel4.setLayout(new FormLayout(
-                    ColumnSpec.decodeSpecs("default:grow"),
-                    new RowSpec[]{
-                            new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
-                            FormFactory.LINE_GAP_ROWSPEC,
-                            FormFactory.DEFAULT_ROWSPEC
-                    }));
+                "default:grow",
+                "fill:default:grow, 1dlu, default"));
 
             //======== panel1 ========
             {
                 panel1.setBackground(null);
                 panel1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                 panel1.setLayout(new FormLayout(
-                        new ColumnSpec[]{
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                new ColumnSpec(ColumnSpec.CENTER, Sizes.DLUX4, FormSpec.NO_GROW),
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                new ColumnSpec(ColumnSpec.LEFT, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
-                        },
-                        RowSpec.decodeSpecs("fill:default:grow")));
+                    new ColumnSpec[] {
+                        FormFactory.DEFAULT_COLSPEC,
+                        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                        new ColumnSpec(ColumnSpec.CENTER, Sizes.DLUX4, FormSpec.NO_GROW),
+                        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                        FormFactory.DEFAULT_COLSPEC,
+                        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                        FormFactory.DEFAULT_COLSPEC,
+                        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                        FormFactory.DEFAULT_COLSPEC,
+                        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                        FormFactory.DEFAULT_COLSPEC,
+                        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                        new ColumnSpec(ColumnSpec.LEFT, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
+                    },
+                    RowSpec.decodeSpecs("fill:default:grow")));
 
                 //---- meterTypeValueLabel ----
-                meterTypeValueLabel.setText("Count");
+                meterTypeValueLabel.setText("Counter");
                 meterTypeValueLabel.setFont(new Font("Roboto Light", Font.PLAIN, 16));
                 meterTypeValueLabel.setForeground(new Color(152, 118, 170));
+                meterTypeValueLabel.setMinimumSize(new Dimension(46, 25));
                 panel1.add(meterTypeValueLabel, cc.xy(1, 1));
 
                 //---- separator1 ----
@@ -192,12 +189,12 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                 {
                     panel3.setBackground(null);
                     panel3.setLayout(new FormLayout(
-                            new ColumnSpec[]{
-                                    FormFactory.DEFAULT_COLSPEC,
-                                    FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                    FormFactory.DEFAULT_COLSPEC
-                            },
-                            RowSpec.decodeSpecs("fill:default:grow")));
+                        new ColumnSpec[] {
+                            FormFactory.DEFAULT_COLSPEC,
+                            FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                            FormFactory.DEFAULT_COLSPEC
+                        },
+                        RowSpec.decodeSpecs("fill:default:grow")));
 
                     //---- dayLabel ----
                     dayLabel.setText("Day");
@@ -218,12 +215,12 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
             {
                 panel2.setBackground(null);
                 panel2.setLayout(new FormLayout(
-                        new ColumnSpec[]{
-                                new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC
-                        },
-                        RowSpec.decodeSpecs("default")));
+                    new ColumnSpec[] {
+                        new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
+                        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                        FormFactory.DEFAULT_COLSPEC
+                    },
+                    RowSpec.decodeSpecs("default")));
 
                 //---- meterDescriptionTextField ----
                 meterDescriptionTextField.setEditable(false);
