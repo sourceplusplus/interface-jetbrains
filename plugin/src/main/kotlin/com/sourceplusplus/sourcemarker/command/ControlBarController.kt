@@ -139,7 +139,7 @@ object ControlBarController {
                 )
                 if (fileMarker.psiFile.language.id.toLowerCase() != "python") {
                     //todo: remove when python supports live meters
-                    availableCommands.add(ADD_LIVE_METER)
+                    //availableCommands.add(ADD_LIVE_METER)
                 }
 
                 val controlBar = ControlBar(editor, inlayMark, availableCommands)
