@@ -15,23 +15,26 @@ import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMark
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
-import spp.protocol.ProtocolAddress.Portal.DisplayLogs
-import spp.protocol.artifact.log.LogResult
-import spp.protocol.instrument.LiveInstrument
-import spp.protocol.instrument.LiveSourceLocation
-import spp.protocol.instrument.breakpoint.LiveBreakpoint
-import spp.protocol.instrument.log.LiveLog
-import spp.protocol.instrument.meter.LiveMeter
-import spp.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
-import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_ICON
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 import org.slf4j.LoggerFactory
+import spp.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.SourceMarkerServices
+import spp.protocol.artifact.log.LogResult
+import spp.protocol.instrument.LiveInstrument
+import spp.protocol.instrument.LiveSourceLocation
+import spp.protocol.instrument.breakpoint.LiveBreakpoint
+import spp.protocol.instrument.log.LiveLog
+import spp.protocol.instrument.meter.LiveMeter
+import spp.protocol.instrument.meter.MeterType
+import spp.protocol.portal.PageType
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
 import java.awt.*
@@ -332,7 +335,11 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             if (gutterMark.isPresent) {
                 gutterMark.get().putUserData(SourceMarkKeys.METER_ID, liveMeter.id!!)
-                gutterMark.get().configuration.icon = LIVE_METER_ICON
+                when (liveMeter.meterType) {
+                    MeterType.COUNT -> gutterMark.get().configuration.icon = LIVE_METER_COUNT_ICON
+                    MeterType.GAUGE -> gutterMark.get().configuration.icon = LIVE_METER_GAUGE_ICON
+                    MeterType.HISTOGRAM -> gutterMark.get().configuration.icon = LIVE_METER_HISTOGRAM_ICON
+                }
                 gutterMark.get().configuration.activateOnMouseHover = false
                 gutterMark.get().configuration.activateOnMouseClick = true
 
