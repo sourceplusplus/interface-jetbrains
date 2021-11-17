@@ -21,7 +21,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,12 +30,17 @@ import static com.sourceplusplus.sourcemarker.status.util.ViewUtils.addRecursive
 public class ControlBar extends JPanel implements VisibleAreaListener {
 
     private static final JaroWinkler sift4 = new JaroWinkler(1.0d);
-    private final List<LiveControlCommand> availableCommands = Arrays.asList(
-            LiveControlCommand.ADD_LIVE_BREAKPOINT,
-            LiveControlCommand.ADD_LIVE_LOG,
-            LiveControlCommand.CLEAR_LIVE_INSTRUMENTS
-    );
-    private final Function<String, List<AutocompleteFieldRow>> lookup = text -> availableCommands.stream()
+    private final List<LiveControlCommand> availableCommands;
+    private final Function<String, List<AutocompleteFieldRow>> lookup;
+    private final Editor editor;
+    private final InlayMark inlayMark;
+    private boolean disposed = false;
+
+    public ControlBar(Editor editor, InlayMark inlayMark, List<LiveControlCommand> availableCommands) {
+        this.editor = editor;
+        this.inlayMark = inlayMark;
+        this.availableCommands = availableCommands;
+        this.lookup = text -> availableCommands.stream()
             .sorted((c1, c2) -> {
                 String c1Command = c1.getCommand().replace("_", "").toLowerCase();
                 String c2Command = c2.getCommand().replace("_", "").toLowerCase();
@@ -51,14 +55,6 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                 return Double.compare(c1Distance, c2Distance);
             })
             .collect(Collectors.toList());
-
-    private final Editor editor;
-    private final InlayMark inlayMark;
-    private boolean disposed = false;
-
-    public ControlBar(Editor editor, InlayMark inlayMark) {
-        this.editor = editor;
-        this.inlayMark = inlayMark;
 
         initComponents();
         setupComponents();

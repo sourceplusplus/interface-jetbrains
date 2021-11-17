@@ -10,26 +10,34 @@ import com.sourceplusplus.marker.SourceMarker.scopeService
 import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.MethodSourceMark
 import com.sourceplusplus.marker.source.mark.api.SourceMark
+import com.sourceplusplus.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEvent
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventCode
 import com.sourceplusplus.marker.source.mark.api.event.SourceMarkEventListener
-import com.sourceplusplus.marker.source.mark.inlay.InlayMark
-import spp.protocol.ProtocolAddress.Portal.DisplayLogs
-import spp.protocol.artifact.log.LogResult
-import spp.protocol.instrument.LiveInstrument
-import spp.protocol.instrument.LiveSourceLocation
-import spp.protocol.instrument.breakpoint.LiveBreakpoint
-import spp.protocol.instrument.log.LiveLog
-import spp.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.SourceMarkerPlugin
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
+import com.sourceplusplus.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import com.sourceplusplus.sourcemarker.service.InstrumentEventListener
 import org.slf4j.LoggerFactory
-import java.awt.BorderLayout
+import spp.protocol.ProtocolAddress.Portal.DisplayLogs
+import spp.protocol.SourceMarkerServices
+import spp.protocol.artifact.log.LogResult
+import spp.protocol.instrument.LiveInstrument
+import spp.protocol.instrument.LiveSourceLocation
+import spp.protocol.instrument.breakpoint.LiveBreakpoint
+import spp.protocol.instrument.log.LiveLog
+import spp.protocol.instrument.meter.LiveMeter
+import spp.protocol.instrument.meter.MeterType
+import spp.protocol.portal.PageType
+import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewSubscription
+import java.awt.*
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
@@ -70,6 +78,7 @@ object LiveStatusManager : SourceMarkEventListener {
                             when (it) {
                                 is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
                                 is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
+                                is LiveMeter -> showMeterStatusIcon(it, event.sourceMark)
                                 else -> throw UnsupportedOperationException(it.javaClass.simpleName)
                             }
                         }
@@ -170,6 +179,45 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
+    fun showMeterStatusBar(editor: Editor, lineNumber: Int) {
+        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
+            .getUserData(SourceFileMarker.KEY)
+        if (fileMarker == null) {
+            log.warn("Could not find file marker for file: {}", editor.document)
+            return
+        }
+
+        val inlayMark = creationService.createExpressionInlayMark(fileMarker, lineNumber)
+        if (!fileMarker.containsSourceMark(inlayMark)) {
+            val wrapperPanel = JPanel()
+            wrapperPanel.layout = BorderLayout()
+
+            val statusBar = MeterStatusBar(
+                LiveSourceLocation(namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber),
+                scopeService.getScopeVariables(fileMarker, lineNumber),
+                inlayMark
+            )
+            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+            statusBar.setWrapperPanel(wrapperPanel)
+            wrapperPanel.add(statusBar)
+            statusBar.setEditor(editor)
+            editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+            inlayMark.configuration.showComponentInlay = true
+            inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+            }
+            inlayMark.visible.set(true)
+            inlayMark.apply()
+
+            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+//            sourcePortal.configuration.currentPage = PageType.METERS
+            sourcePortal.configuration.statusBar = true
+
+            statusBar.focus()
+        }
+    }
+
     fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
@@ -260,11 +308,66 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
-    fun addStatusBar(inlayMark: InlayMark, listener: InstrumentEventListener) {
-        if (inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS) == null) {
-            inlayMark.putUserData(INSTRUMENT_EVENT_LISTENERS, mutableSetOf())
+    @JvmStatic
+    fun showMeterStatusIcon(liveMeter: LiveMeter, sourceMark: SourceMark) {
+        SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
+            LiveViewSubscription(
+                null,
+                listOf(liveMeter.toMetricId()),
+                sourceMark.artifactQualifiedName,
+                LiveViewConfig(
+                    "LIVE_METER",
+                    true,
+                    listOf("last_minute", "last_hour", "last_day"),
+                    0
+                )
+            )
+        ) {
+            if (it.failed()) {
+                log.error("Failed to add live view subscription", it.cause())
+            }
         }
-        inlayMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
+
+        //create gutter popup
+        ApplicationManager.getApplication().runReadAction {
+            val gutterMark = creationService.getOrCreateExpressionGutterMark(
+                sourceMark.sourceFileMarker, liveMeter.location.line, false
+            )
+            if (gutterMark.isPresent) {
+                gutterMark.get().putUserData(SourceMarkKeys.METER_ID, liveMeter.id!!)
+                when (liveMeter.meterType) {
+                    MeterType.COUNT -> gutterMark.get().configuration.icon = LIVE_METER_COUNT_ICON
+                    MeterType.GAUGE -> gutterMark.get().configuration.icon = LIVE_METER_GAUGE_ICON
+                    MeterType.HISTOGRAM -> gutterMark.get().configuration.icon = LIVE_METER_HISTOGRAM_ICON
+                }
+                gutterMark.get().configuration.activateOnMouseHover = false
+                gutterMark.get().configuration.activateOnMouseClick = true
+
+                val panel = JPanel(GridBagLayout())
+                panel.background = Color(43, 43, 43)
+                val statusBar = LiveMeterStatusPanel(liveMeter)
+                panel.add(statusBar, GridBagConstraints())
+                panel.preferredSize = Dimension(385, 70)
+                gutterMark.get().configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                    override val defaultConfiguration: SourceMarkComponentConfiguration
+                        get() = super.defaultConfiguration.apply { showAboveExpression = true }
+
+                    override fun makeSwingComponent(sourceMark: SourceMark): JComponent = panel
+                }
+                gutterMark.get().apply(true)
+                addStatusBar(gutterMark.get(), statusBar)
+            } else {
+                log.error("Could not create gutter mark for live meter")
+            }
+        }
+    }
+
+    @JvmStatic
+    fun addStatusBar(sourceMark: SourceMark, listener: InstrumentEventListener) {
+        if (sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS) == null) {
+            sourceMark.putUserData(INSTRUMENT_EVENT_LISTENERS, mutableSetOf())
+        }
+        sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
     }
 
     fun addActiveLiveInstrument(instrument: LiveInstrument) {

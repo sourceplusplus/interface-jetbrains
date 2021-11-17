@@ -8,12 +8,13 @@ import com.sourceplusplus.marker.source.SourceFileMarker
 import com.sourceplusplus.marker.source.mark.api.SourceMark
 import com.sourceplusplus.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import com.sourceplusplus.marker.source.mark.inlay.InlayMark
-import spp.protocol.SourceMarkerServices
-import spp.protocol.portal.PageType
 import com.sourceplusplus.sourcemarker.ControlBar
+import com.sourceplusplus.sourcemarker.command.LiveControlCommand.*
 import com.sourceplusplus.sourcemarker.mark.SourceMarkKeys
 import com.sourceplusplus.sourcemarker.status.LiveStatusManager
 import org.slf4j.LoggerFactory
+import spp.protocol.SourceMarkerServices
+import spp.protocol.portal.PageType
 import java.awt.BorderLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -32,7 +33,7 @@ object ControlBarController {
     fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
         when (input) {
-            LiveControlCommand.ADD_LIVE_BREAKPOINT.command -> {
+            ADD_LIVE_BREAKPOINT.command -> {
                 //replace command inlay with breakpoint status inlay
                 val prevCommandBar = previousControlBar!!
                 previousControlBar!!.dispose()
@@ -42,7 +43,7 @@ object ControlBarController {
                     LiveStatusManager.showBreakpointStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
-            LiveControlCommand.ADD_LIVE_LOG.command -> {
+            ADD_LIVE_LOG.command -> {
                 //replace command inlay with log status inlay
                 val prevCommandBar = previousControlBar!!
                 previousControlBar!!.dispose()
@@ -52,7 +53,17 @@ object ControlBarController {
                     LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
-            LiveControlCommand.CLEAR_LIVE_BREAKPOINTS.command -> {
+            ADD_LIVE_METER.command -> {
+                //replace command inlay with meter status inlay
+                val prevCommandBar = previousControlBar!!
+                previousControlBar!!.dispose()
+                previousControlBar = null
+
+                ApplicationManager.getApplication().runWriteAction {
+                    LiveStatusManager.showMeterStatusBar(editor, prevCommandBar.lineNumber)
+                }
+            }
+            CLEAR_LIVE_BREAKPOINTS.command -> {
                 previousControlBar!!.dispose()
                 previousControlBar = null
 
@@ -62,7 +73,7 @@ object ControlBarController {
                     }
                 }
             }
-            LiveControlCommand.CLEAR_LIVE_LOGS.command -> {
+            CLEAR_LIVE_LOGS.command -> {
                 previousControlBar!!.dispose()
                 previousControlBar = null
 
@@ -72,7 +83,7 @@ object ControlBarController {
                     }
                 }
             }
-            LiveControlCommand.CLEAR_LIVE_INSTRUMENTS.command -> {
+            CLEAR_LIVE_INSTRUMENTS.command -> {
                 previousControlBar!!.dispose()
                 previousControlBar = null
 
@@ -120,7 +131,18 @@ object ControlBarController {
 
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
-                val controlBar = ControlBar(editor, inlayMark)
+
+                val availableCommands = mutableListOf(
+                    ADD_LIVE_BREAKPOINT,
+                    ADD_LIVE_LOG,
+                    CLEAR_LIVE_INSTRUMENTS
+                )
+                if (fileMarker.psiFile.language.id.toLowerCase() != "python") {
+                    //todo: remove when python supports live meters
+                    //availableCommands.add(ADD_LIVE_METER)
+                }
+
+                val controlBar = ControlBar(editor, inlayMark, availableCommands)
                 wrapperPanel.add(controlBar)
                 editor.scrollingModel.addVisibleAreaListener(controlBar)
 

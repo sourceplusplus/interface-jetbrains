@@ -23,6 +23,13 @@ object SourceMarkSearch {
             }
     }
 
+    fun findByMeterId(meterId: String): SourceMark? {
+        return SourceMarker.getSourceMarks()
+            .firstOrNull {
+                it.getUserData(SourceMarkKeys.METER_ID) == meterId
+            }
+    }
+
     fun findByLogId(logId: String): SourceMark? {
         return SourceMarker.getSourceMarks()
             .firstOrNull {
@@ -42,6 +49,7 @@ object SourceMarkSearch {
             .firstOrNull {
                 it.getUserData(SourceMarkKeys.BREAKPOINT_ID) == instrumentId
                         || it.getUserData(SourceMarkKeys.LOG_ID) == instrumentId
+                        || it.getUserData(SourceMarkKeys.METER_ID) == instrumentId
             }
     }
 

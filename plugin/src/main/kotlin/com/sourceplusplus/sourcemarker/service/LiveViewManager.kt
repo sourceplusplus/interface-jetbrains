@@ -36,6 +36,9 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
+import spp.protocol.instrument.LiveInstrumentEvent
+import spp.protocol.instrument.LiveInstrumentEventType.METER_UPDATED
+import spp.protocol.instrument.meter.MeterType
 import java.net.URI
 import java.time.Instant
 import java.time.ZoneOffset
@@ -57,6 +60,7 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
 
             when (event.viewConfig.viewName) {
+                "LIVE_METER" -> GlobalScope.launch(vertx.dispatcher()) { consumeLiveMeterEvent(event) }
                 "LOGS" -> GlobalScope.launch(vertx.dispatcher()) { consumeLogsViewEvent(event) }
                 "TRACES" -> {
                     val sourceMark = SourceMarkSearch.findByEndpointName(event.entityId)
@@ -84,6 +88,23 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
             JsonObject(),
             TCPServiceDiscoveryBackend.socket!!
         )
+    }
+
+    private suspend fun consumeLiveMeterEvent(event: LiveViewEvent) {
+        val meterTypeStr = event.entityId.substringAfter("spp_").substringBefore("_").toUpperCase()
+        val meterType = MeterType.valueOf(meterTypeStr)
+        val meterId = event.entityId.substringAfter(meterType.name.toLowerCase() + "_").replace("_", "-")
+        val meterMark = SourceMarkSearch.findByMeterId(meterId)
+        if (meterMark == null) {
+            log.info("Could not find source mark for: " + event.entityId)
+            return
+        }
+
+        //todo: event listener that works with LiveViewEvent and LiveInstrumentEvent
+        val eventListeners = meterMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
+        if (eventListeners?.isNotEmpty() == true) {
+            eventListeners.forEach { it.accept(LiveInstrumentEvent(METER_UPDATED, Json.encode(event))) }
+        }
     }
 
     private suspend fun consumeLogsViewEvent(event: LiveViewEvent) {
