@@ -44,6 +44,7 @@ class AutocompleteField(
     var saveOnSuggestionDoubleClick: Boolean = false
     var addOnSuggestionDoubleClick: Boolean = true
     var placeHolderTextColor: Color = Color(85, 85, 85, 200)
+    var canShowSaveButton = true
 
     init {
         foreground = Color.decode("#A9B7C6")
@@ -302,7 +303,7 @@ class AutocompleteField(
         super.paintComponent(pG)
         val g = pG as Graphics2D
         val paintIcon = icon
-        if (showSaveButton && paintIcon != null) {
+        if (canShowSaveButton && showSaveButton && paintIcon != null) {
             iconX = width - paintIcon.iconWidth - 3
             iconY = 4
             iconWidth = paintIcon.iconWidth
