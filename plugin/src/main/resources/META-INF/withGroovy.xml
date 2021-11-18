@@ -1,8 +1,8 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language="Groovy"
-                                        implementationClass="com.sourceplusplus.marker.jvm.JVMLineMarkerProvider$GroovyDescriptor"/>
+                                        implementationClass="spp.jetbrains.marker.jvm.JVMLineMarkerProvider$GroovyDescriptor"/>
         <codeInsight.inlayProvider language="Groovy"
-                                   implementationClass="com.sourceplusplus.marker.jvm.JVMSourceInlayHintProvider"/>
+                                   implementationClass="spp.jetbrains.marker.jvm.JVMSourceInlayHintProvider"/>
     </extensions>
 </idea-plugin>

@@ -5,16 +5,16 @@
             <pattern>%d{HH:mm:ss.SSS} %-5level %logger{5} - %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="debug-console" class="com.sourceplusplus.sourcemarker.console.SourceMarkerAppender">
+    <appender name="debug-console" class="spp.jetbrains.sourcemarker.console.SourceMarkerAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} %-5level %logger{5} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="com.sourceplusplus" level="INFO">
+    <logger name="spp.jetbrains" level="INFO">
         <appender-ref ref="debug-console"/>
     </logger>
-    <logger name="com.sourceplusplus" level="DEBUG">
+    <logger name="spp.jetbrains" level="DEBUG">
         <appender-ref ref="STDOUT"/>
     </logger>
 
