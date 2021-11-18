@@ -75,8 +75,6 @@ open class SourceMarkPopupAction : AnAction() {
     }
 
     open fun performPopupAction(sourceMark: SourceMark, editor: Editor) {
-        sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.PORTAL_OPENING)) {
-            sourceMark.displayPopup(editor)
-        }
+        sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.PORTAL_OPENING))
     }
 }
