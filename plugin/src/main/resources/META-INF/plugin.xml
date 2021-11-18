@@ -13,38 +13,38 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService
-                serviceImplementation="com.sourceplusplus.sourcemarker.service.breakpoint.BreakpointHitWindowService"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService"/>
         <editor.linePainter
-                implementation="com.sourceplusplus.sourcemarker.service.breakpoint.painter.VariableEditorLinePainter"/>
+                implementation="spp.jetbrains.sourcemarker.service.breakpoint.painter.VariableEditorLinePainter"/>
         <applicationConfigurable
-                instance="com.sourceplusplus.sourcemarker.settings.SourceMarkerConfigurable"
+                instance="spp.jetbrains.sourcemarker.settings.SourceMarkerConfigurable"
                 groupId="tools"
                 id="Source++"
                 displayName="Source++"/>
         <postStartupActivity
-                implementation="com.sourceplusplus.sourcemarker.activities.PluginSourceMarkerStartupActivity"/>
+                implementation="spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity"/>
 
-        <errorHandler implementation="com.sourceplusplus.sourcemarker.reporting.GitHubErrorReporter"/>
+        <errorHandler implementation="spp.jetbrains.sourcemarker.reporting.GitHubErrorReporter"/>
 
         <projectService
-                serviceImplementation="com.sourceplusplus.sourcemarker.console.SourceMarkerConsoleService"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.console.SourceMarkerConsoleService"/>
         <toolWindow id="Source++ Console"
-                    factoryClass="com.sourceplusplus.sourcemarker.console.SourceMarkerToolWindowFactory"/>
+                    factoryClass="spp.jetbrains.sourcemarker.console.SourceMarkerToolWindowFactory"/>
     </extensions>
 
     <projectListeners>
-        <listener class="com.sourceplusplus.marker.plugin.FileActivityListener"
+        <listener class="spp.jetbrains.marker.plugin.FileActivityListener"
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </projectListeners>
 
     <actions>
-        <action id="com.sourceplusplus.sourcemarker.command.ControlBarAction"
-                class="com.sourceplusplus.sourcemarker.command.ControlBarAction"
+        <action id="spp.jetbrains.sourcemarker.command.ControlBarAction"
+                class="spp.jetbrains.sourcemarker.command.ControlBarAction"
                 text="SourceCommand Action" description="Source command action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>
-        <action id="com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction"
-                class="com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction"
+        <action id="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
+                class="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
                 text="SourceMarkVisibility Action" description="SourceMark visibility action">
             <keyboard-shortcut first-keystroke="control shift D" keymap="$default"/>
         </action>
