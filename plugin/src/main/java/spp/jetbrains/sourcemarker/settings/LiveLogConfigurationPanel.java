@@ -16,7 +16,6 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
-import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -43,7 +42,7 @@ public class LiveLogConfigurationPanel extends JPanel {
 
         XDebuggerEditorsProvider editorsProvider;
         String productCode = ApplicationInfo.getInstance().getBuild().getProductCode();
-        if (PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES.contains(productCode)) {
+        if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"
@@ -51,7 +50,7 @@ public class LiveLogConfigurationPanel extends JPanel {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-        } else if (PluginSourceMarkerStartupActivity.INTELLIJ_PRODUCT_CODES.contains(productCode)) {
+        } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "org.jetbrains.java.debugger.JavaDebuggerEditorsProvider"
