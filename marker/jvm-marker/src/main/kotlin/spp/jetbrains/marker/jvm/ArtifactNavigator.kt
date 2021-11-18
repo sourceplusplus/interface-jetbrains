@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory
  */
 object ArtifactNavigator {
 
-    private val log = LoggerFactory.getLogger(spp.jetbrains.marker.jvm.ArtifactNavigator::class.java)
+    private val log = LoggerFactory.getLogger(ArtifactNavigator::class.java)
 
     //todo: remove method from method names and support navigating to classes?
 
@@ -53,18 +53,18 @@ object ArtifactNavigator {
     fun navigateTo(vertx: Vertx, project: Project, artifactQualifiedName: ArtifactQualifiedName) {
         if (artifactQualifiedName.type == ArtifactType.ENDPOINT) {
             GlobalScope.launch(vertx.dispatcher()) {
-                val artifactPsi = spp.jetbrains.marker.jvm.ArtifactSearch.findArtifact(vertx, artifactQualifiedName)
+                val artifactPsi = ArtifactSearch.findArtifact(vertx, artifactQualifiedName)
                 if (artifactPsi != null) {
                     ApplicationManager.getApplication().invokeLater {
                         PsiNavigateUtil.navigate(artifactPsi)
                     }
                 } else {
-                    spp.jetbrains.marker.jvm.ArtifactNavigator.log.warn("Could not find artifact: {}", artifactQualifiedName)
+                    log.warn("Could not find artifact: {}", artifactQualifiedName)
                 }
             }
         } else {
             ApplicationManager.getApplication().invokeLater {
-                spp.jetbrains.marker.jvm.ArtifactNavigator.navigateToMethod(project, artifactQualifiedName.identifier)
+                navigateToMethod(project, artifactQualifiedName.identifier)
             }
         }
     }
@@ -87,7 +87,7 @@ object ArtifactNavigator {
         val promise = Promise.promise<Boolean>()
         ApplicationManager.getApplication().invokeLater {
             promise.complete(
-                spp.jetbrains.marker.jvm.ArtifactNavigator.canNavigateToMethod(
+                canNavigateToMethod(
                     project,
                     artifactQualifiedName.identifier
                 )

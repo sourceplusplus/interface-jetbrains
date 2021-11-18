@@ -346,19 +346,19 @@ class PortalEventListener(
             log.info("Clicked stack trace element: $element")
 
             val project = ProjectManager.getInstance().openProjects[0]
-            spp.jetbrains.marker.jvm.ArtifactNavigator.navigateTo(vertx, project, element)
+            ArtifactNavigator.navigateTo(vertx, project, element)
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(CanNavigateToArtifact) {
             val artifactQualifiedName = it.body()
             val project = ProjectManager.getInstance().openProjects[0]
             GlobalScope.launch(vertx.dispatcher()) {
-                it.reply(spp.jetbrains.marker.jvm.ArtifactNavigator.canNavigateTo(project, artifactQualifiedName))
+                it.reply(ArtifactNavigator.canNavigateTo(project, artifactQualifiedName))
             }
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(NavigateToArtifact) {
             val artifactQualifiedName = it.body()
             val project = ProjectManager.getInstance().openProjects[0]
-            spp.jetbrains.marker.jvm.ArtifactNavigator.navigateTo(vertx, project, artifactQualifiedName)
+            ArtifactNavigator.navigateTo(vertx, project, artifactQualifiedName)
         }
     }
 
