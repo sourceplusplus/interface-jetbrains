@@ -37,7 +37,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
             fa.file = "/tmp/sourcemarker.log"
             fa.layout = PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n")
             fa.activateOptions()
-            Logger.getLogger("com.sourceplusplus").addAppender(fa)
+            Logger.getLogger("spp.jetbrains").addAppender(fa)
         }
     }
 

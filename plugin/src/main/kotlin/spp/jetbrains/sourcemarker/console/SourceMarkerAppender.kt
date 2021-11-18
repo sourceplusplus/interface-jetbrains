@@ -28,7 +28,7 @@ class SourceMarkerAppender<E> : AppenderBase<E>() {
             if (message.toString().startsWith("[PORTAL]")) {
                 consoleView!!.print("$message\n", ConsoleViewContentType.ERROR_OUTPUT)
             } else {
-                var module = loggingEvent.loggerName.replace("com.sourceplusplus.", "")
+                var module = loggingEvent.loggerName.replace("spp.jetbrains.", "")
                 module = module.substring(0, module.indexOf(".")).toUpperCase()
                 if (loggingEvent.throwableProxy != null) {
                     consoleView!!.print(
@@ -43,7 +43,7 @@ class SourceMarkerAppender<E> : AppenderBase<E>() {
             if (message.toString().startsWith("[PORTAL]")) {
                 consoleView!!.print("$message\n", ConsoleViewContentType.NORMAL_OUTPUT)
             } else {
-                var module = loggingEvent.loggerName.replace("com.sourceplusplus.", "")
+                var module = loggingEvent.loggerName.replace("spp.jetbrains.", "")
                 module = module.substring(0, module.indexOf(".")).toUpperCase()
                 consoleView!!.print("[$module] - $message\n", ConsoleViewContentType.NORMAL_OUTPUT)
             }
