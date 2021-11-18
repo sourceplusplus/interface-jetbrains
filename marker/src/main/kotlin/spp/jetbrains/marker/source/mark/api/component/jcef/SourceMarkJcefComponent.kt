@@ -7,7 +7,6 @@ import com.intellij.ui.jcef.JBCefBrowser
 import com.intellij.ui.jcef.JBCefClient
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
-import org.slf4j.LoggerFactory
 import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JComponent

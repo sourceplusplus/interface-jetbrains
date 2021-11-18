@@ -2,7 +2,6 @@ package spp.jetbrains.monitor.skywalking
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
-import spp.jetbrains.monitor.skywalking.bridge.*
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle

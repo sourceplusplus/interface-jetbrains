@@ -21,7 +21,9 @@ import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
-import spp.jetbrains.marker.ArtifactNamingService
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -39,9 +41,6 @@ import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_HIDDEN
 import spp.jetbrains.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_VISIBLE
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import java.awt.event.ComponentEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener

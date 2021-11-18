@@ -1,26 +1,25 @@
 package spp.jetbrains.sourcemarker.listeners
 
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.jvm.psi.EndpointDetector
+import spp.jetbrains.marker.jvm.psi.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.portal.SourcePortal
-import spp.protocol.ProtocolAddress.Global.OpenPortal
-import spp.protocol.artifact.ArtifactType
-import spp.protocol.portal.PageType
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.mark.SourceMarkConstructor
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
-import spp.jetbrains.marker.jvm.psi.LoggerDetector
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
+import spp.protocol.ProtocolAddress.Global.OpenPortal
+import spp.protocol.artifact.ArtifactType
+import spp.protocol.portal.PageType
 
 /**
  * todo: description.
