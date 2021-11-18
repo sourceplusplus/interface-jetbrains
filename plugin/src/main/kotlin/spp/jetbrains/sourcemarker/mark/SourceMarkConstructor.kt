@@ -1,0 +1,145 @@
+package spp.jetbrains.sourcemarker.mark
+
+import com.intellij.psi.PsiElement
+import spp.jetbrains.marker.SourceMarker.creationService
+import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
+import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
+import spp.protocol.advice.AdviceType
+import spp.protocol.advice.ArtifactAdvice
+import spp.protocol.advice.informative.ActiveExceptionAdvice
+import spp.protocol.utils.toPrettyDuration
+import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin.SOURCE_RED
+import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons
+import kotlinx.datetime.Clock
+import org.slf4j.LoggerFactory
+
+/**
+ * Sets up the appropriate [SourceMark] display configuration based on [AdviceType].
+ *
+ * @since 0.1.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
+object SourceMarkConstructor {
+
+    private val log = LoggerFactory.getLogger(SourceMarkConstructor::class.java)
+    private val ADVICE_TIMER = SourceKey<Long>("ADVICE_TIMER")
+
+    fun tearDownSourceMark(sourceMark: SourceMark) {
+        val artifactAdvice = sourceMark.getUserData(SourceMarkKeys.ARTIFACT_ADVICE)
+        if (artifactAdvice == null || artifactAdvice.isEmpty()) {
+            return
+        }
+
+        artifactAdvice.forEach {
+            when (it.type) {
+                AdviceType.ActiveExceptionAdvice -> {
+                    val timerId = sourceMark.getUserData(ADVICE_TIMER)
+                    if (timerId != null) {
+                        SourceMarkerPlugin.vertx.cancelTimer(timerId)
+                        sourceMark.putUserData(ADVICE_TIMER, null)
+                    }
+                }
+                else -> {
+                    //no additional tear down necessary
+                }
+            }
+        }
+        artifactAdvice.clear()
+    }
+
+    fun getOrSetupSourceMark(fileMarker: SourceFileMarker, advice: ArtifactAdvice): SourceMark? {
+        when (advice.type) {
+            AdviceType.RampDetectionAdvice -> {
+                val gutterMark = creationService.getOrCreateExpressionGutterMark(fileMarker, advice.artifact.lineNumber!!)
+                return if (gutterMark.isPresent) {
+                    if (!fileMarker.containsSourceMark(gutterMark.get())) {
+                        attachAdvice(gutterMark.get(), advice)
+                        gutterMark.get().apply()
+                    }
+                    gutterMark.get()
+                } else {
+                    log.warn("No detected expression at line {}. Gutter mark ignored", advice.artifact.lineNumber!!)
+                    null
+                }
+            }
+            AdviceType.ActiveExceptionAdvice -> {
+                val inlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, advice.artifact.lineNumber!!)
+                return if (inlayMark.isPresent) {
+                    if (!fileMarker.containsSourceMark(inlayMark.get())) {
+                        attachAdvice(inlayMark.get(), advice)
+                        inlayMark.get().apply()
+                    }
+                    inlayMark.get()
+                } else {
+                    log.warn("No detected expression at line {}. Inlay mark ignored", advice.artifact.lineNumber!!)
+                    null
+                }
+            }
+        }
+    }
+
+    fun attachAdvice(sourceMark: SourceMark, advice: ArtifactAdvice) = when (sourceMark.type) {
+        SourceMark.Type.GUTTER -> attachAdvice(sourceMark as GutterMark, advice)
+        SourceMark.Type.INLAY -> attachAdvice(sourceMark as InlayMark, advice)
+    }
+
+    private fun attachAdvice(gutterMark: GutterMark, advice: ArtifactAdvice) {
+        gutterMark.configuration.icon = SourceMarkerIcons.getGutterMarkIcon(advice)
+        gutterMark.setVisible(true)
+        gutterMark.sourceFileMarker.refresh()
+    }
+
+    @Suppress("MagicNumber")
+    private fun attachAdvice(inlayMark: InlayMark, advice: ArtifactAdvice) {
+        when (advice) {
+            is ActiveExceptionAdvice -> {
+                val expressionMark = inlayMark as ExpressionInlayMark
+                val prettyTimeAgo = if (isThrows(expressionMark.getPsiExpression())) {
+                    {
+                        val occurred = (Clock.System.now()
+                            .toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
+                                " " + message("ago")
+                        " //${message("last_occurred")} $occurred "
+                    }
+                } else {
+                    {
+                        val exceptionType = advice.stackTrace.exceptionType.substringAfterLast(".")
+                        val occurred = (Clock.System.now()
+                            .toEpochMilliseconds() - advice.occurredAt.toEpochMilliseconds()).toPrettyDuration() +
+                                " " + message("ago")
+                        " //${message("threw")} $exceptionType $occurred "
+                    }
+                }
+
+                inlayMark.configuration.virtualText = InlayMarkVirtualText(inlayMark, prettyTimeAgo.invoke())
+                inlayMark.configuration.virtualText!!.textAttributes.foregroundColor = SOURCE_RED
+                inlayMark.configuration.virtualText!!.useInlinePresentation = true
+                inlayMark.configuration.activateOnMouseClick = false
+
+                inlayMark.putUserData(ADVICE_TIMER, SourceMarkerPlugin.vertx.setPeriodic(1000) {
+                    inlayMark.configuration.virtualText!!.updateVirtualText(prettyTimeAgo.invoke())
+                })
+
+                //todo: shouldn't be creating gutter mark here
+                val gutterMark = creationService.getOrCreateExpressionGutterMark(
+                    inlayMark.sourceFileMarker, advice.artifact.lineNumber!!
+                ).get()
+                if (!gutterMark.sourceFileMarker.containsSourceMark(gutterMark)) {
+                    gutterMark.configuration.icon = SourceMarkerIcons.activeException
+                    gutterMark.apply()
+                }
+            }
+        }
+    }
+
+    private fun isThrows(psiExpression: PsiElement): Boolean {
+        TODO()
+    }
+}

@@ -33,7 +33,7 @@
     </extensions>
 
     <projectListeners>
-        <listener class="com.sourceplusplus.marker.plugin.FileActivityListener"
+        <listener class="spp.jetbrains.marker.plugin.FileActivityListener"
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </projectListeners>
 
@@ -43,8 +43,8 @@
                 text="SourceCommand Action" description="Source command action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>
-        <action id="com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction"
-                class="com.sourceplusplus.marker.plugin.SourceMarkerVisibilityAction"
+        <action id="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
+                class="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
                 text="SourceMarkVisibility Action" description="SourceMark visibility action">
             <keyboard-shortcut first-keystroke="control shift D" keymap="$default"/>
         </action>
