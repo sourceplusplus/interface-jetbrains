@@ -54,7 +54,7 @@ private object AnonymousFeedback {
 
     private val log = LoggerFactory.getLogger(AnonymousFeedback::class.java)
     private const val gitRepoUser = "sourceplusplus"
-    private const val gitRepo = "sourcemarker"
+    private const val gitRepo = "interface-jetbrains"
 
     /**
      * Makes a connection to GitHub. Checks if there is an issue that is a duplicate and based on this, creates either a
