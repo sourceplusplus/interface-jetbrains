@@ -190,7 +190,7 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
             var value = if (endpointNameExpr is KotlinUCollectionLiteralExpression) {
-                endpointNameExpr!!.valueArguments[0].evaluate()
+                endpointNameExpr.valueArguments[0].evaluate()
             } else {
                 endpointNameExpr?.evaluate() ?: ""
             }
