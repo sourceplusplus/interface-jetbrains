@@ -11,3 +11,8 @@
 This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/live-platform), the open-source live coding platform.
 
 <!-- Plugin description end -->
+
+## Features
+
+- [Live Breakpoint](https://github.com/sourceplusplus/processor-live-instrument#live-breakpoint)
+- [Live Log](https://github.com/sourceplusplus/processor-live-instrument#live-log)
