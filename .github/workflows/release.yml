@@ -35,8 +35,6 @@ jobs:
           ${{ github.event.release.body }}
           EOM`"
 
-      - run: ./gradlew buildPlugin
-
       # Publish the plugin to the Marketplace
       - name: Publish Plugin
         env:
