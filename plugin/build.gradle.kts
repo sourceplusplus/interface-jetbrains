@@ -29,7 +29,7 @@ group = pluginGroup
 version = pluginVersion
 
 intellij {
-    pluginName.set("SourceMarker")
+    pluginName.set("interface-jetbrains")
     version.set(ideVersion)
     type.set(platformType)
     downloadSources.set(platformDownloadSources.toBoolean())
