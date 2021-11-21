@@ -28,12 +28,12 @@ jobs:
           java-version: 11
           cache: gradle
 
-      # Update Unreleased section with the current release note
-      - name: Patch Changelog
-        run: |
-          ./gradlew patchChangelog --release-note="`cat << EOM
-          ${{ github.event.release.body }}
-          EOM`"
+#       # Update Unreleased section with the current release note
+#       - name: Patch Changelog
+#         run: |
+#           ./gradlew patchChangelog --release-note="`cat << EOM
+#           ${{ github.event.release.body }}
+#           EOM`"
 
       # Publish the plugin to the Marketplace
       - name: Publish Plugin
