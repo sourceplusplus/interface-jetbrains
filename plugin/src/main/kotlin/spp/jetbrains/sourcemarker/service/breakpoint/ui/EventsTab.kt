@@ -1,22 +1,25 @@
 package spp.jetbrains.sourcemarker.service.breakpoint.ui
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity
+import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointEventColumnInfo
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
 import java.awt.BorderLayout
 import java.awt.Point
-import javax.swing.*
-
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import javax.swing.Icon
+import javax.swing.JPanel
+import javax.swing.SortOrder
 
 /**
  * todo: description.
@@ -32,7 +35,14 @@ class EventsTab : Disposable {
             BreakpointEventColumnInfo("Time"),
             BreakpointEventColumnInfo("Host Name"),
             BreakpointEventColumnInfo("Service"),
-            BreakpointEventColumnInfo("Class Name"),
+            let {
+                val productCode = ApplicationInfo.getInstance().build.productCode
+                if (PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES.contains(productCode)) {
+                    BreakpointEventColumnInfo("File Name")
+                } else {
+                    BreakpointEventColumnInfo("Class Name")
+                }
+            },
             BreakpointEventColumnInfo("Method Name"),
             BreakpointEventColumnInfo("Line No"),
             BreakpointEventColumnInfo("Breakpoint Data")

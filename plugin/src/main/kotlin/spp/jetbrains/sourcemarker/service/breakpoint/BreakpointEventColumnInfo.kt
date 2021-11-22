@@ -47,6 +47,9 @@ class BreakpointEventColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, St
             "Class Name" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.stackTrace.first().qualifiedClassName().compareTo(t2.stackTrace.first().qualifiedClassName())
             }
+            "File Name" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
+                t.stackTrace.first().source.compareTo(t2.stackTrace.first().source)
+            }
             "Line No" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.stackTrace.first().sourceAsLineNumber()!!.compareTo(t2.stackTrace.first().sourceAsLineNumber()!!)
             }
@@ -60,6 +63,7 @@ class BreakpointEventColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, St
             "Host Name" -> item.serviceInstance.substringAfter("@")
             "Service" -> item.service
             "Class Name" -> item.stackTrace.first().shortQualifiedClassName()
+            "File Name" -> item.stackTrace.first().source
             "Method Name" -> item.stackTrace.first().methodName()
             "Line No" -> item.stackTrace.first().sourceAsLineNumber()!!.toString()
             "Breakpoint Data" -> "View Frames/Variables"

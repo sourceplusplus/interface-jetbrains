@@ -3,6 +3,7 @@ plugins {
 }
 
 val kotlinVersion = ext.get("kotlinVersion")
+val vertxVersion = ext.get("vertxVersion")
 val protocolVersion: String by project
 
 repositories {
@@ -16,6 +17,7 @@ dependencies {
     } else {
         compileOnly(project(":marker"))
     }
+    compileOnly("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     val intellijVersion = "212.5457.46"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
@@ -39,4 +41,8 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:util-rt:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.python:python-psi:211.7628.21") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.python:python-community:211.7628.21") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.platform:debugger:$intellijVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.platform:debugger-impl:$intellijVersion") { isTransitive = false }
+
+    compileOnly("io.vertx:vertx-core:$vertxVersion")
 }

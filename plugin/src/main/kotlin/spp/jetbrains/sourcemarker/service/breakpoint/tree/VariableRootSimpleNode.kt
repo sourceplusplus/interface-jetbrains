@@ -1,8 +1,11 @@
 package spp.jetbrains.sourcemarker.service.breakpoint.tree
 
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.util.containers.hash.LinkedHashMap
-import spp.jetbrains.marker.jvm.VariableSimpleNode
+import spp.jetbrains.marker.jvm.JVMVariableSimpleNode
+import spp.jetbrains.marker.py.PythonVariableSimpleNode
+import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
 
 /**
@@ -27,20 +30,30 @@ class VariableRootSimpleNode : SimpleNode() {
         return if (stackFrameManager.currentFrame?.variables.isNullOrEmpty()) {
             NO_CHILDREN
         } else {
+            val productCode = ApplicationInfo.getInstance().build.productCode
             val vars = stackFrameManager.currentFrame!!.variables
-            val simpleNodeMap: MutableMap<String, VariableSimpleNode> = LinkedHashMap()
+            val simpleNodeMap: MutableMap<String, SimpleNode> = LinkedHashMap()
             vars.forEach {
                 if (it.name.isNotEmpty()) {
-                    simpleNodeMap[it.name] = VariableSimpleNode(it)
+                    if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
+                        simpleNodeMap[it.name] = PythonVariableSimpleNode(it)
+                    } else {
+                        simpleNodeMap[it.name] = JVMVariableSimpleNode(it)
+                    }
                 }
             }
-            simpleNodeMap.values.sortedWith { p0, p1 ->
-                when {
-                    p0.variable.name == "this" -> -1
-                    p1.variable.name == "this" -> 1
-                    else -> 0
-                }
-            }.toTypedArray()
+
+            if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
+                return simpleNodeMap.values.toTypedArray()
+            } else {
+                (simpleNodeMap.values as Collection<JVMVariableSimpleNode>).sortedWith { p0, p1 ->
+                    when {
+                        p0.variable.name == "this" -> -1
+                        p1.variable.name == "this" -> 1
+                        else -> 0
+                    }
+                }.toTypedArray()
+            }
         }
     }
 }
