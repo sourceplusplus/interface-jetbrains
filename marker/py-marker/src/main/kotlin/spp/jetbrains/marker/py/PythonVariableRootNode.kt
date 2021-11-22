@@ -8,6 +8,12 @@ import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import spp.protocol.instrument.LiveVariable
 import spp.protocol.instrument.LiveVariableScope
 
+/**
+ * todo: description.
+ *
+ * @since 0.2.1
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class PythonVariableRootNode(val variables: List<LiveVariable>, val scope: LiveVariableScope) : SimpleNode() {
 
     private val scheme = DebuggerUIUtil.getColorScheme(null)
