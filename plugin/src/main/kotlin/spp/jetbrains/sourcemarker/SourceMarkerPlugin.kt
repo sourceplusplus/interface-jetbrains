@@ -579,7 +579,10 @@ object SourceMarkerPlugin {
                 config.rootSourcePackages.any { artifactQualifiedName.startsWith(it) }
             }
         } else {
-            log.warn("Could not determine root source package. Skipped adding create source mark filter...")
+            val productCode = ApplicationInfo.getInstance().build.productCode
+            if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
+                log.warn("Could not determine root source package. Skipped adding create source mark filter...")
+            }
         }
         SourceMarker.enabled = true
 
