@@ -2,18 +2,8 @@
 
 # SourceMarker Changelog
 
-## [Unreleased]
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+## [0.2.1] - 2021-11-22
+- Improved Python live breakpoint display
 
 ## [0.2.0] - 2021-11-20
 ### Added
