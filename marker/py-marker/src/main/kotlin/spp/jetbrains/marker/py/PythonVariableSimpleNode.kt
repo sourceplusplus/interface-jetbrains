@@ -16,7 +16,7 @@ import spp.protocol.instrument.LiveVariable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class PythonVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
+class PythonVariableSimpleNode(private val variable: LiveVariable) : SimpleNode() {
 
     private val scheme = DebuggerUIUtil.getColorScheme(null)
 
@@ -29,22 +29,7 @@ class PythonVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
             }
             return children.toTypedArray()
         }
-        return if (variable.value is List<*>) {
-            (variable.value as List<Map<*, *>>).map {
-                PythonVariableSimpleNode(
-                    LiveVariable(
-                        name = it["name"] as String,
-                        value = it["value"] as Any,
-                        lineNumber = it["lineNumber"] as Int,
-                        scope = null, //EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
-                        liveClazz = it["liveClazz"] as String?,
-                        liveIdentity = it["liveIdentity"] as String?
-                    )
-                )
-            }.toList().toTypedArray()
-        } else {
-            emptyArray()
-        }
+        return emptyArray()
     }
 
     override fun update(presentation: PresentationData) {
