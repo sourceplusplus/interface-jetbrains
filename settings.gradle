@@ -7,7 +7,7 @@ pluginManagement {
         id 'org.jetbrains.kotlin.plugin.serialization' version kotlinVersion apply false
         id 'com.avast.gradle.docker-compose' version "0.14.9" apply false
         id 'io.gitlab.arturbosch.detekt' version "1.18.1" apply false
-        id 'com.apollographql.apollo' version "2.5.10" apply false
+        id 'com.apollographql.apollo' version "2.5.11" apply false
     }
 }
 
