@@ -19,50 +19,6 @@ import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.jvm.*
-import spp.jetbrains.marker.py.PythonArtifactCreationService
-import spp.jetbrains.marker.py.PythonArtifactNamingService
-import spp.jetbrains.marker.py.PythonArtifactScopeService
-import spp.jetbrains.marker.py.PythonConditionParser
-import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
-import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
-import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
-import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
-import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
-import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
-import spp.jetbrains.portal.SourcePortal
-import spp.jetbrains.portal.backend.PortalServer
-import spp.protocol.SourceMarkerServices
-import spp.protocol.SourceMarkerServices.Instance
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.endpoint.EndpointResult
-import spp.protocol.artifact.exception.LiveStackTraceElement
-import spp.protocol.artifact.log.LogResult
-import spp.protocol.artifact.metrics.ArtifactMetricResult
-import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpan
-import spp.protocol.artifact.trace.TraceSpanStackQueryResult
-import spp.protocol.artifact.trace.TraceStack
-import spp.protocol.service.live.LiveInstrumentService
-import spp.protocol.service.live.LiveViewService
-import spp.protocol.service.logging.LogCountIndicatorService
-import spp.protocol.service.tracing.LocalTracingService
-import spp.jetbrains.sourcemarker.PluginBundle.message
-import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
-import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
-import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
-import spp.jetbrains.sourcemarker.listeners.PluginSourceMarkEventListener
-import spp.jetbrains.sourcemarker.listeners.PortalEventListener
-import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
-import spp.jetbrains.sourcemarker.service.LiveViewManager
-import spp.jetbrains.sourcemarker.service.LogCountIndicators
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
-import spp.jetbrains.sourcemarker.settings.isSsl
-import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
-import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.Promise
@@ -93,6 +49,50 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.jvm.*
+import spp.jetbrains.marker.py.PythonArtifactCreationService
+import spp.jetbrains.marker.py.PythonArtifactNamingService
+import spp.jetbrains.marker.py.PythonArtifactScopeService
+import spp.jetbrains.marker.py.PythonConditionParser
+import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
+import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
+import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
+import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
+import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
+import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
+import spp.jetbrains.portal.SourcePortal
+import spp.jetbrains.portal.backend.PortalServer
+import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
+import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
+import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
+import spp.jetbrains.sourcemarker.listeners.PluginSourceMarkEventListener
+import spp.jetbrains.sourcemarker.listeners.PortalEventListener
+import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
+import spp.jetbrains.sourcemarker.service.LiveViewManager
+import spp.jetbrains.sourcemarker.service.LogCountIndicators
+import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
+import spp.jetbrains.sourcemarker.settings.isSsl
+import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
+import spp.jetbrains.sourcemarker.status.LiveStatusManager
+import spp.protocol.SourceMarkerServices
+import spp.protocol.SourceMarkerServices.Instance
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.endpoint.EndpointResult
+import spp.protocol.artifact.exception.LiveStackTraceElement
+import spp.protocol.artifact.log.LogResult
+import spp.protocol.artifact.metrics.ArtifactMetricResult
+import spp.protocol.artifact.trace.TraceResult
+import spp.protocol.artifact.trace.TraceSpan
+import spp.protocol.artifact.trace.TraceSpanStackQueryResult
+import spp.protocol.artifact.trace.TraceStack
+import spp.protocol.service.live.LiveInstrumentService
+import spp.protocol.service.live.LiveViewService
+import spp.protocol.service.logging.LogCountIndicatorService
+import spp.protocol.service.tracing.LocalTracingService
 import java.awt.Color
 import java.awt.Dimension
 import java.io.IOException
@@ -579,7 +579,10 @@ object SourceMarkerPlugin {
                 config.rootSourcePackages.any { artifactQualifiedName.startsWith(it) }
             }
         } else {
-            log.warn("Could not determine root source package. Skipped adding create source mark filter...")
+            val productCode = ApplicationInfo.getInstance().build.productCode
+            if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
+                log.warn("Could not determine root source package. Skipped adding create source mark filter...")
+            }
         }
         SourceMarker.enabled = true
 

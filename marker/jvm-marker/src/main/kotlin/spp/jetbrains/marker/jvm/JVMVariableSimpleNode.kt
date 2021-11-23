@@ -18,7 +18,7 @@ import org.apache.commons.lang3.EnumUtils
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class VariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
+class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
 
     private val primitives = setOf(
         "java.lang.String",
@@ -48,7 +48,7 @@ class VariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
     override fun getChildren(): Array<SimpleNode> {
         return if (variable.value is List<*>) {
             (variable.value as List<Map<*, *>>).map {
-                VariableSimpleNode(
+                JVMVariableSimpleNode(
                     LiveVariable(
                         name = it["name"] as String,
                         value = it["value"] as Any,
