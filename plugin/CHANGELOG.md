@@ -4,7 +4,7 @@
 
 ## [Unreleased]
 
-## [0.2.1] - 2021-11-22
+## [0.2.2] - 2021-11-23
 - Improved Python live breakpoint display
 
 ## [0.2.0] - 2021-11-20
