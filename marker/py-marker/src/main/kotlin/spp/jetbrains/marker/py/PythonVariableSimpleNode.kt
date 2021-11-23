@@ -22,7 +22,10 @@ class PythonVariableSimpleNode(private val variable: LiveVariable) : SimpleNode(
 
     override fun getChildren(): Array<SimpleNode> {
         if (variable.liveClazz == "<class 'dict'>") {
-            val dict = JsonObject((variable.value as String).replace("'", "\""))
+            val dict = JsonObject(
+                (variable.value as String).replace("'", "\"")
+                    .replace(": True", ": true").replace(": False", ": false")
+            )
             val children = mutableListOf<SimpleNode>()
             dict.map.forEach {
                 children.add(PythonVariableSimpleNode(LiveVariable("'" + it.key + "'", it.value)))
@@ -46,29 +49,29 @@ class PythonVariableSimpleNode(private val variable: LiveVariable) : SimpleNode(
             )
         }
 
-        when (variable.liveClazz) {
-            "<class 'dict'>" -> {
+        when {
+            variable.liveClazz == "<class 'int'>" || variable.value is Number -> {
                 presentation.addText(
                     variable.value.toString(),
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.IDENTIFIER))
+                    SimpleTextAttributes.fromTextAttributes(
+                        scheme.getAttributes(DefaultLanguageHighlighterColors.NUMBER)
+                    )
                 )
             }
-            "<class 'str'>" -> {
+            variable.liveClazz == "<class 'str'>" -> {
                 presentation.addText(
                     "\"" + variable.value + "\"",
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.STRING))
-                )
-            }
-            "<class 'NoneType'>" -> {
-                presentation.addText(
-                    variable.value.toString(),
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.IDENTIFIER))
+                    SimpleTextAttributes.fromTextAttributes(
+                        scheme.getAttributes(DefaultLanguageHighlighterColors.STRING)
+                    )
                 )
             }
             else -> {
                 presentation.addText(
                     variable.value.toString(),
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.CONSTANT))
+                    SimpleTextAttributes.fromTextAttributes(
+                        scheme.getAttributes(DefaultLanguageHighlighterColors.IDENTIFIER)
+                    )
                 )
             }
         }
