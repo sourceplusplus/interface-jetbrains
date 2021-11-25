@@ -20,6 +20,7 @@ import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.*
 import org.slf4j.LoggerFactory
+import spp.protocol.util.LocalMessageCodec
 import java.io.IOException
 import java.time.ZoneOffset.ofHours
 import java.time.ZonedDateTime
@@ -260,22 +261,5 @@ class SkywalkingClient(
         HOUR(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
         MINUTE(DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")),
         SECOND(DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss"))
-    }
-
-    /**
-     * Used to transmit Apache SkyWalking messages.
-     *
-     * @since 0.1.0
-     */
-    class LocalMessageCodec<T> : MessageCodec<T, T> {
-        override fun encodeToWire(buffer: Buffer, o: T): Unit =
-            throw UnsupportedOperationException("Not supported yet.")
-
-        override fun decodeFromWire(pos: Int, buffer: Buffer): T =
-            throw UnsupportedOperationException("Not supported yet.")
-
-        override fun transform(o: T): T = o
-        override fun name(): String = UUID.randomUUID().toString()
-        override fun systemCodecID(): Byte = -1
     }
 }

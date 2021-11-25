@@ -1,7 +1,5 @@
 package spp.jetbrains.sourcemarker
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.guava.GuavaModule
@@ -93,6 +91,7 @@ import spp.protocol.service.live.LiveInstrumentService
 import spp.protocol.service.live.LiveViewService
 import spp.protocol.service.logging.LogCountIndicatorService
 import spp.protocol.service.tracing.LocalTracingService
+import spp.protocol.util.KSerializers
 import java.awt.Color
 import java.awt.Dimension
 import java.io.IOException
@@ -588,49 +587,5 @@ object SourceMarkerPlugin {
 
         //force marker re-processing
         DaemonCodeAnalyzer.getInstance(project).restart()
-    }
-
-    /**
-     * Used to transmit protocol messages.
-     *
-     * @since 0.1.0
-     */
-    class LocalMessageCodec<T> : MessageCodec<T, T> {
-        override fun encodeToWire(buffer: Buffer, o: T): Unit =
-            throw UnsupportedOperationException("Not supported yet.")
-
-        override fun decodeFromWire(pos: Int, buffer: Buffer): T =
-            throw UnsupportedOperationException("Not supported yet.")
-
-        override fun transform(o: T): T = o
-        override fun name(): String = UUID.randomUUID().toString()
-        override fun systemCodecID(): Byte = -1
-    }
-
-    /**
-     * Used to serialize/deserialize Kotlin classes.
-     *
-     * @since 0.1.0
-     */
-    class KSerializers {
-        /**
-         * Used to serialize [Instant] classes.
-         *
-         * @since 0.1.0
-         */
-        class KotlinInstantSerializer : JsonSerializer<Instant>() {
-            override fun serialize(value: Instant, jgen: JsonGenerator, provider: SerializerProvider) =
-                jgen.writeNumber(value.toEpochMilliseconds())
-        }
-
-        /**
-         * Used to deserialize [Instant] classes.
-         *
-         * @since 0.1.0
-         */
-        class KotlinInstantDeserializer : JsonDeserializer<Instant>() {
-            override fun deserialize(p: JsonParser, p1: DeserializationContext): Instant =
-                Instant.fromEpochMilliseconds((p.codec.readTree(p) as JsonNode).longValue())
-        }
     }
 }
