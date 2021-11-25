@@ -3,7 +3,6 @@ package spp.jetbrains.monitor.skywalking.bridge
 import com.apollographql.apollo.api.BigDecimal
 import com.apollographql.apollo.api.Input
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
-import spp.jetbrains.monitor.skywalking.SkywalkingClient.LocalMessageCodec
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.artifact.exception.LiveStackTrace
 import spp.protocol.artifact.log.Log
@@ -20,6 +19,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.type.LogQueryCondition
 import monitor.skywalking.protocol.type.Pagination
+import spp.protocol.util.LocalMessageCodec
 
 /**
  * todo: description.
