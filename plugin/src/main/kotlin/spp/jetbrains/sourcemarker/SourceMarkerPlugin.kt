@@ -1,6 +1,7 @@
 package spp.jetbrains.sourcemarker
 
-import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
@@ -22,8 +23,6 @@ import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
-import io.vertx.core.buffer.Buffer
-import io.vertx.core.eventbus.MessageCodec
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.DecodeException
@@ -92,6 +91,7 @@ import spp.protocol.service.live.LiveViewService
 import spp.protocol.service.logging.LogCountIndicatorService
 import spp.protocol.service.tracing.LocalTracingService
 import spp.protocol.util.KSerializers
+import spp.protocol.util.LocalMessageCodec
 import java.awt.Color
 import java.awt.Dimension
 import java.io.IOException
