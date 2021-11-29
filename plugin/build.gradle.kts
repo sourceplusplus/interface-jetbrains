@@ -94,7 +94,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.7")
     implementation("info.debatty:java-string-similarity:2.0.0")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 }
 
 tasks {
