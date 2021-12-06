@@ -16,7 +16,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
 class JVMArtifactScopeService : ArtifactScopeService {
 
     fun isMethodAtLine(psiFile: PsiFile, lineNumber: Int): Boolean {
-        var el =  SourceMarkerUtils.getElementAtLine(psiFile, lineNumber)
+        var el = SourceMarkerUtils.getElementAtLine(psiFile, lineNumber)
         while (el is PsiKeyword || el is PsiModifierList) {
             el = el.parent
         }
@@ -25,8 +25,12 @@ class JVMArtifactScopeService : ArtifactScopeService {
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         //determine available vars
+        var checkLine = lineNumber
         val scopeVars = mutableListOf<String>()
-        val minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber - 1)!!
+        var minScope: PsiElement? = null
+        while (minScope == null) {
+            minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, --checkLine)
+        }
         val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
             override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
         }
