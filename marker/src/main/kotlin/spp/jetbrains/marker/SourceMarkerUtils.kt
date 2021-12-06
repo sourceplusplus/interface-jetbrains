@@ -1,7 +1,9 @@
 package spp.jetbrains.marker
 
 import com.intellij.openapi.editor.Document
-import com.intellij.psi.*
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import spp.jetbrains.marker.source.mark.api.SourceMark
 
 /**
@@ -36,6 +38,8 @@ object SourceMarkerUtils {
         val document: Document = PsiDocumentManager.getInstance(file.project).getDocument(file)!!
         if (document.lineCount == line - 1) {
             return null
+        } else if (line < 0) {
+            throw IllegalArgumentException("Line number must be greater than 0")
         }
 
         val offset = document.getLineStartOffset(line - 1)
