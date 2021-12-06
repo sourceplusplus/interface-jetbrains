@@ -1,8 +1,8 @@
 FROM openjdk:11-jre
 ADD ./spp-example-webapp-boot-1.0-SNAPSHOT.zip /spp-example-webapp-boot-1.0-SNAPSHOT.zip
 
-COPY ./apache-skywalking-apm-8.8.1.tar.gz /apache-skywalking-apm-8.8.1.tar.gz
-RUN tar -xzf ./apache-skywalking-apm-8.8.1.tar.gz
+COPY ./apache-skywalking-apm-8.7.0.tar.gz /apache-skywalking-apm-8.7.0.tar.gz
+RUN tar -xzf ./apache-skywalking-apm-8.7.0.tar.gz
 #RUN mv /apache-skywalking-apm-bin/agent/activations/apm-toolkit-trace-activation-8.7.0.jar /apache-skywalking-apm-bin/agent/plugins/
 
 ADD ./agent.config /apache-skywalking-apm-bin/agent/config/agent.config
