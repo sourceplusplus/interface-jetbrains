@@ -1,11 +1,5 @@
 package spp.jetbrains.sourcemarker.discover
 
-import spp.protocol.SourceMarkerServices
-import spp.protocol.SourceMarkerServices.Utilize
-import spp.protocol.status.MarkerConnection
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.settings.isSsl
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
@@ -27,6 +21,13 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.settings.isSsl
+import spp.protocol.SourceMarkerServices
+import spp.protocol.SourceMarkerServices.Utilize
+import spp.protocol.extend.TCPServiceFrameParser
+import spp.protocol.status.MarkerConnection
 import java.util.*
 
 /**
@@ -98,7 +99,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 setupPromise.fail(throwable)
                 return@launch
             }
-            socket!!.handler(FrameParser(TCPServiceFrameParser(vertx)))
+            socket!!.handler(FrameParser(TCPServiceFrameParser(vertx, socket!!)))
 
             vertx.executeBlocking<Any> {
                 setupHandler(vertx, "get-records")
