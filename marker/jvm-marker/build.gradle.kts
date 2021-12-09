@@ -33,7 +33,7 @@ dependencies {
     compileOnly("org.slf4j:slf4j-api:1.7.32")
     compileOnly("org.jooq:jooq:3.15.4")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
-    compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.3")
+    compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.4")
     compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:analysis:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.java:java-analysis:$intellijVersion") { isTransitive = false }
