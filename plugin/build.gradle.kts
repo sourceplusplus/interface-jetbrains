@@ -91,7 +91,7 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
     implementation("ch.qos.logback:logback-core:1.2.9")
-    implementation("ch.qos.logback:logback-classic:1.2.8")
+    implementation("ch.qos.logback:logback-classic:1.2.9")
     implementation("info.debatty:java-string-similarity:2.0.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
