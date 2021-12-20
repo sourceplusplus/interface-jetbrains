@@ -86,6 +86,7 @@ import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import spp.protocol.artifact.trace.TraceStack
+import spp.protocol.service.LiveService
 import spp.protocol.service.live.LiveInstrumentService
 import spp.protocol.service.live.LiveViewService
 import spp.protocol.service.logging.LogCountIndicatorService
@@ -279,6 +280,18 @@ object SourceMarkerPlugin {
 
         log.info("Discovering available services")
         val availableRecords = discovery.getRecords { true }.await()
+
+        //live service
+        if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_SERVICE }) {
+            log.info("Live service available")
+
+            Instance.liveService = ServiceProxyBuilder(vertx)
+                .setToken(config.serviceToken!!)
+                .setAddress(SourceMarkerServices.Utilize.LIVE_SERVICE)
+                .build(LiveService::class.java)
+        } else {
+            log.warn("Live service unavailable")
+        }
 
         //local tracing
         if (hardcodedConfig.getJsonObject("services").getBoolean("local_tracing")) {

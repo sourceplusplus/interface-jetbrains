@@ -3,6 +3,10 @@ package spp.jetbrains.sourcemarker.command
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocumentManager
+import io.vertx.core.Promise
+import io.vertx.kotlin.coroutines.await
+import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker.creationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -12,8 +16,8 @@ import spp.jetbrains.sourcemarker.ControlBar
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import org.slf4j.LoggerFactory
 import spp.protocol.SourceMarkerServices
+import spp.protocol.developer.SelfInfo
 import spp.protocol.portal.PageType
 import java.awt.BorderLayout
 import javax.swing.JComponent
@@ -29,6 +33,16 @@ object ControlBarController {
 
     private val log = LoggerFactory.getLogger(ControlBarController::class.java)
     private var previousControlBar: InlayMark? = null
+    private val availableCommands by lazy {
+        runBlocking {
+            val future = Promise.promise<SelfInfo>()
+            SourceMarkerServices.Instance.liveService!!.getSelf(future)
+            val selfInfo = future.future().await()
+            LiveControlCommand.values().toList().filter {
+                selfInfo.permissions.map { it.name }.contains(it.name)
+            }
+        }
+    }
 
     fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
@@ -132,16 +146,6 @@ object ControlBarController {
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
 
-                val availableCommands = mutableListOf(
-                    ADD_LIVE_BREAKPOINT,
-                    ADD_LIVE_LOG,
-                    CLEAR_LIVE_INSTRUMENTS
-                )
-                if (fileMarker.psiFile.language.id.toLowerCase() != "python") {
-                    //todo: remove when python supports live meters
-                    //availableCommands.add(ADD_LIVE_METER)
-                }
-
                 val controlBar = ControlBar(editor, inlayMark, availableCommands)
                 wrapperPanel.add(controlBar)
                 editor.scrollingModel.addVisibleAreaListener(controlBar)
@@ -161,7 +165,7 @@ object ControlBarController {
             }
         } else if (tryingAboveLine) {
             log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
-        } else if (!tryingAboveLine) {
+        } else {
             showControlBar(editor, lineNumber - 1, true)
         }
     }
