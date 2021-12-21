@@ -39,5 +39,5 @@ class VariableTab : DebugStackFrameListener, Disposable {
         treeModel.invalidate()
     }
 
-    override fun dispose() {}
+    override fun dispose() = Unit
 }

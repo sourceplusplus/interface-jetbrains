@@ -71,5 +71,5 @@ class EventsTab : Disposable {
         component.add(JBScrollPane(table), "Center")
     }
 
-    override fun dispose() {}
+    override fun dispose() = Unit
 }
