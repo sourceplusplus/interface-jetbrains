@@ -7,16 +7,15 @@ package spp.jetbrains.sourcemarker.settings
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class SourceMarkerConfig(
-    val skywalkingOapUrl: String = "http://localhost:12800/graphql",
     var rootSourcePackages: List<String> = emptyList(),
     var autoResolveEndpointNames: Boolean = false,
     var localMentorEnabled: Boolean = true,
     var pluginConsoleEnabled: Boolean = false,
-    var portalRefreshIntervalMs: Int = 5000,
     var serviceHost: String? = null,
     var accessToken: String? = null,
     var certificatePins: List<String> = emptyList(),
-    var serviceToken: String? = null
+    var serviceToken: String? = null,
+    var verifyHost: Boolean = true
 )
 
 val SourceMarkerConfig.serviceHostNormalized: String?

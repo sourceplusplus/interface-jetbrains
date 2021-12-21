@@ -1,7 +1,5 @@
 package spp.jetbrains.sourcemarker.settings;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -13,12 +11,10 @@ import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
-import io.vertx.core.json.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,55 +22,37 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
+import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
 
 public class PluginConfigurationPanel {
     private JPanel myWholePanel;
-    private JPanel myProjectSettingsPanel;
     private JPanel myGlobalSettingsPanel;
-    private JTextField skywalkingOapTextField;
     private JTextField rootSourcePackageTextField;
-    private JComboBox<String> skywalkingVersionComboBox;
     private JCheckBox autoResolveEndpointNamesCheckBox;
-    private JSpinner portalRefreshSpinner;
     private JCheckBox consoleCheckBox;
     private JPanel myServiceSettingsPanel;
     private JTextField serviceHostTextField;
     private JTextField accessTokenTextField;
     private JPanel testPanel;
-    private JLabel portalRefreshLabel;
+    private JComboBox comboBox1;
+    private JCheckBox verifyHostCheckBox;
+    private JLabel verifyHostLabel;
     private SourceMarkerConfig config;
-    private final SpinnerNumberModel portalRefreshModel;
     private CertificatePinPanel myCertificatePins;
 
     public PluginConfigurationPanel() {
-        JsonObject configuration;
-        try {
-            configuration = new JsonObject(Resources.toString(Resources.getResource(getClass(),
-                    "/plugin-configuration.json"), Charsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (configuration.getJsonObject("visible_settings").getBoolean("apache_skywalking")) {
-            myProjectSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("apache_skywalking_settings")));
-        } else {
-            myProjectSettingsPanel.setVisible(false);
-        }
-        if (configuration.getJsonObject("visible_settings").getBoolean("service_discovery")) {
-            myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
-        } else {
-            myServiceSettingsPanel.setVisible(false);
-        }
+        myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
-        portalRefreshModel = new SpinnerNumberModel();
-        portalRefreshModel.setMinimum(0);
-        portalRefreshSpinner.setModel(portalRefreshModel);
 
-        boolean serviceDiscoveryEnabled = configuration.getJsonObject("visible_settings")
-                .getBoolean("service_discovery");
-        if (serviceDiscoveryEnabled) {
-            portalRefreshLabel.setVisible(false);
-            portalRefreshSpinner.setVisible(false);
+        if (INSTANCE.getLiveService() != null) {
+            INSTANCE.getLiveService().getServices(it -> {
+                if (it.succeeded()) {
+                    //todo: add to combo box
+
+                } else {
+                    it.cause().printStackTrace();
+                }
+            });
         }
     }
 
@@ -83,16 +61,10 @@ public class PluginConfigurationPanel {
     }
 
     boolean isModified() {
-        if (!Objects.equals(skywalkingOapTextField.getText(), config.getSkywalkingOapUrl())) {
-            return true;
-        }
         if (!Arrays.equals(rootSourcePackageTextField.getText().split(","), config.getRootSourcePackages().toArray())) {
             return true;
         }
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {
-            return true;
-        }
-        if (!Objects.equals(portalRefreshModel.getNumber().intValue(), config.getPortalRefreshIntervalMs())) {
             return true;
         }
         if (!Objects.equals(consoleCheckBox.isSelected(), config.getPluginConsoleEnabled())) {
@@ -107,33 +79,34 @@ public class PluginConfigurationPanel {
         if (!Arrays.equals(myCertificatePins.listModel.toArray(), config.getCertificatePins().toArray())) {
             return true;
         }
+        if (!Objects.equals(verifyHostCheckBox.isSelected(), config.getVerifyHost())) {
+            return true;
+        }
         return false;
     }
 
     public SourceMarkerConfig getPluginConfig() {
         return new SourceMarkerConfig(
-                skywalkingOapTextField.getText(),
                 Arrays.stream(rootSourcePackageTextField.getText().split(","))
                         .map(String::trim).collect(Collectors.toList()),
                 autoResolveEndpointNamesCheckBox.isSelected(),
                 true, consoleCheckBox.isSelected(),
-                portalRefreshModel.getNumber().intValue(),
                 serviceHostTextField.getText(),
                 accessTokenTextField.getText(),
                 new ArrayList<>(Collections.list(myCertificatePins.listModel.elements())),
-                null
+                null,
+                verifyHostCheckBox.isSelected()
         );
     }
 
     public void applySourceMarkerConfig(SourceMarkerConfig config) {
         this.config = config;
-        skywalkingOapTextField.setText(config.getSkywalkingOapUrl());
         rootSourcePackageTextField.setText(String.join(",", config.getRootSourcePackages()));
         autoResolveEndpointNamesCheckBox.setSelected(config.getAutoResolveEndpointNames());
         consoleCheckBox.setSelected(config.getPluginConsoleEnabled());
-        portalRefreshModel.setValue(config.getPortalRefreshIntervalMs());
         serviceHostTextField.setText(config.getServiceHost());
         accessTokenTextField.setText(config.getAccessToken());
+        verifyHostCheckBox.setSelected(config.getVerifyHost());
 
         myCertificatePins = new CertificatePinPanel();
         myCertificatePins.listModel.addAll(config.getCertificatePins());
