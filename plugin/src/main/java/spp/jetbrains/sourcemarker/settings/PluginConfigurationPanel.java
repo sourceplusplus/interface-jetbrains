@@ -34,26 +34,28 @@ public class PluginConfigurationPanel {
     private JTextField serviceHostTextField;
     private JTextField accessTokenTextField;
     private JPanel testPanel;
-    private JComboBox comboBox1;
+    private JComboBox serviceComboBox;
     private JCheckBox verifyHostCheckBox;
     private JLabel verifyHostLabel;
     private SourceMarkerConfig config;
     private CertificatePinPanel myCertificatePins;
 
-    public PluginConfigurationPanel() {
+    public PluginConfigurationPanel(SourceMarkerConfig config) {
+        this.config = config;
         myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
 
-        if (INSTANCE.getLiveService() != null) {
-            INSTANCE.getLiveService().getServices(it -> {
-                if (it.succeeded()) {
-                    //todo: add to combo box
+        Objects.requireNonNull(INSTANCE.getLiveService()).getServices(it -> {
+            if (it.succeeded()) {
+                it.result().forEach(service -> serviceComboBox.addItem(service.getName()));
 
-                } else {
-                    it.cause().printStackTrace();
+                if (config.getServiceName() != null) {
+                    serviceComboBox.setSelectedItem(config.getServiceName());
                 }
-            });
-        }
+            } else {
+                it.cause().printStackTrace();
+            }
+        });
     }
 
     public JComponent getContentPane() {
@@ -82,10 +84,18 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(verifyHostCheckBox.isSelected(), config.getVerifyHost())) {
             return true;
         }
+        if (!Objects.equals(serviceComboBox.getSelectedItem(), config.getServiceName())) {
+            return config.getServiceName() != null || serviceComboBox.getSelectedItem() != "All Services";
+        }
         return false;
     }
 
     public SourceMarkerConfig getPluginConfig() {
+        String currentService = serviceComboBox.getSelectedItem().toString();
+        if ("All Services".equals(currentService)) {
+            currentService = null;
+        }
+
         return new SourceMarkerConfig(
                 Arrays.stream(rootSourcePackageTextField.getText().split(","))
                         .map(String::trim).collect(Collectors.toList()),
@@ -95,7 +105,8 @@ public class PluginConfigurationPanel {
                 accessTokenTextField.getText(),
                 new ArrayList<>(Collections.list(myCertificatePins.listModel.elements())),
                 null,
-                verifyHostCheckBox.isSelected()
+                verifyHostCheckBox.isSelected(),
+                currentService
         );
     }
 

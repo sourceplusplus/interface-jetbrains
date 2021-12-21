@@ -60,7 +60,7 @@ class SourceMarkerConfigurable : Configurable {
             } else {
                 SourceMarkerConfig()
             }
-            form = PluginConfigurationPanel()
+            form = PluginConfigurationPanel(config)
             form!!.applySourceMarkerConfig(config)
         }
         return form!!.contentPane as JComponent

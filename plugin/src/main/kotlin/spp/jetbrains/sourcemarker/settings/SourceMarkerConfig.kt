@@ -15,7 +15,8 @@ data class SourceMarkerConfig(
     var accessToken: String? = null,
     var certificatePins: List<String> = emptyList(),
     var serviceToken: String? = null,
-    var verifyHost: Boolean = true
+    var verifyHost: Boolean = true,
+    val serviceName: String? = null
 )
 
 val SourceMarkerConfig.serviceHostNormalized: String?
