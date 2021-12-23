@@ -1,10 +1,6 @@
 {
   "plugin_name": "Source++",
   "plugin_id": "com.sourceplusplus.plugin.intellij",
-  "visible_settings": {
-    "apache_skywalking": false,
-    "service_discovery": true
-  },
   "token_uri": "/api/new-token",
   "certificate_pin": null,
   "service_port": 5445,

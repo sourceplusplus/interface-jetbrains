@@ -56,14 +56,14 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
 
         _toolWindow!!.contentManager.addContentManagerListener(object : ContentManagerListener {
-            override fun contentAdded(contentManagerEvent: ContentManagerEvent) {}
+            override fun contentAdded(contentManagerEvent: ContentManagerEvent) = Unit
             override fun contentRemoved(event: ContentManagerEvent) {
                 if (_toolWindow!!.contentManager.contentCount == 0) {
                     _toolWindow!!.setAvailable(false, null)
                 }
             }
 
-            override fun contentRemoveQuery(contentManagerEvent: ContentManagerEvent) {}
+            override fun contentRemoveQuery(contentManagerEvent: ContentManagerEvent) = Unit
             override fun selectionChanged(event: ContentManagerEvent) {
                 val disposable = event.content.disposer
                 if (disposable is BreakpointHitWindow) {
@@ -127,5 +127,5 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
     }
 
-    override fun dispose() {}
+    override fun dispose() = Unit
 }

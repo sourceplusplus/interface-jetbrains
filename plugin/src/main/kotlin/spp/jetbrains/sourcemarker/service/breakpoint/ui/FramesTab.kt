@@ -76,5 +76,5 @@ class FramesTab(
         }
     }
 
-    override fun dispose() {}
+    override fun dispose() = Unit
 }
