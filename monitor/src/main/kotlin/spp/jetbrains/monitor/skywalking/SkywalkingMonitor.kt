@@ -10,6 +10,11 @@ import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.bridge.*
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /**
  * todo: description.
@@ -20,7 +25,8 @@ import spp.jetbrains.monitor.skywalking.bridge.*
 class SkywalkingMonitor(
     private val serverUrl: String,
     private val jwtToken: String? = null,
-    private val certificatePins: List<String> = emptyList()
+    private val certificatePins: List<String> = emptyList(),
+    private val verifyHost: Boolean
 ) : CoroutineVerticle() {
 
     companion object {
@@ -47,7 +53,17 @@ class SkywalkingMonitor(
                 )
             }
         }
-        if (certificatePins.isNotEmpty()) {
+        if (serverUrl.startsWith("https") && !verifyHost) {
+            val naiveTrustManager = object : X509TrustManager {
+                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) = Unit
+                override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) = Unit
+            }
+            httpBuilder.sslSocketFactory(SSLContext.getInstance("TLSv1.2").apply {
+                val trustAllCerts = arrayOf<TrustManager>(naiveTrustManager)
+                init(null, trustAllCerts, SecureRandom())
+            }.socketFactory, naiveTrustManager)
+        } else if (certificatePins.isNotEmpty()) {
             httpBuilder.sslSocketFactory(
                 JavaPinning.forPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") }).socketFactory,
                 JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })

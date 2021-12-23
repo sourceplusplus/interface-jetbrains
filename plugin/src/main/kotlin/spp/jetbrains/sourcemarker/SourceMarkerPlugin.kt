@@ -264,9 +264,6 @@ object SourceMarkerPlugin {
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-        if (!hardcodedConfig.getJsonObject("visible_settings").getBoolean("service_discovery")) {
-            return
-        }
 
         val discovery: ServiceDiscovery = DiscoveryImpl(
             vertx,
@@ -291,40 +288,6 @@ object SourceMarkerPlugin {
                 .build(LiveService::class.java)
         } else {
             log.warn("Live service unavailable")
-        }
-
-        //local tracing
-        if (hardcodedConfig.getJsonObject("services").getBoolean("local_tracing")) {
-            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOCAL_TRACING }) {
-                log.info("Local tracing available")
-                Instance.localTracing = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
-                    .setAddress(SourceMarkerServices.Utilize.LOCAL_TRACING)
-                    .build(LocalTracingService::class.java)
-            } else {
-                log.warn("Local tracing unavailable")
-            }
-        } else {
-            log.info("Local tracing disabled")
-        }
-
-        //log count indicator
-        if (hardcodedConfig.getJsonObject("services").getBoolean("log_count_indicator")) {
-            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR }) {
-                log.info("Log count indicator available")
-                Instance.logCountIndicator = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
-                    .setAddress(SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR)
-                    .build(LogCountIndicatorService::class.java)
-
-                GlobalScope.launch(vertx.dispatcher()) {
-                    deploymentIds.add(vertx.deployVerticle(LogCountIndicators()).await())
-                }
-            } else {
-                log.warn("Log count indicator unavailable")
-            }
-        } else {
-            log.info("Log count indicator disabled")
         }
 
         //live instrument
@@ -370,6 +333,40 @@ object SourceMarkerPlugin {
         } else {
             log.info("Live views disabled")
         }
+
+        //local tracing
+        if (hardcodedConfig.getJsonObject("services").getBoolean("local_tracing")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOCAL_TRACING }) {
+                log.info("Local tracing available")
+                Instance.localTracing = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LOCAL_TRACING)
+                    .build(LocalTracingService::class.java)
+            } else {
+                log.warn("Local tracing unavailable")
+            }
+        } else {
+            log.info("Local tracing disabled")
+        }
+
+        //log count indicator
+        if (hardcodedConfig.getJsonObject("services").getBoolean("log_count_indicator")) {
+            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR }) {
+                log.info("Log count indicator available")
+                Instance.logCountIndicator = ServiceProxyBuilder(vertx)
+                    .setToken(config.serviceToken!!)
+                    .setAddress(SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR)
+                    .build(LogCountIndicatorService::class.java)
+
+                GlobalScope.launch(vertx.dispatcher()) {
+                    deploymentIds.add(vertx.deployVerticle(LogCountIndicators()).await())
+                }
+            } else {
+                log.warn("Log count indicator unavailable")
+            }
+        } else {
+            log.info("Log count indicator disabled")
+        }
     }
 
     private suspend fun restartIfNecessary() {
@@ -401,9 +398,7 @@ object SourceMarkerPlugin {
             throw RuntimeException(e)
         }
 
-        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
-            .getBoolean("service_discovery")
-        if (serviceDiscoveryEnabled && !config.serviceHost.isNullOrBlank()) {
+        if (!config.serviceHost.isNullOrBlank()) {
             val servicePort = config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!
             val certificatePins = mutableListOf<String>()
             certificatePins.addAll(config.certificatePins)
@@ -420,7 +415,13 @@ object SourceMarkerPlugin {
                     )
                     .setVerifyHost(false)
             } else {
-                HttpClientOptions()
+                HttpClientOptions().apply {
+                    if (config.isSsl()) {
+                        isSsl = config.isSsl()
+                        isVerifyHost = false
+                        isTrustAll = true
+                    }
+                }
             }
 
             val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=" + config.accessToken
@@ -448,20 +449,25 @@ object SourceMarkerPlugin {
                     )
                 )
             }
-        } else if (serviceDiscoveryEnabled) {
+        } else {
             //try default local access
-            val req = vertx.createHttpClient().request(
-                RequestOptions()
-                    .setHost("localhost")
-                    .setPort(hardcodedConfig.getInteger("service_port"))
-                    .setURI(hardcodedConfig.getString("token_uri"))
-            ).await()
+            val defaultAccessToken = "change-me"
+            val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=$defaultAccessToken"
+            val req = vertx.createHttpClient(HttpClientOptions().setSsl(true).setVerifyHost(false).setTrustAll(true))
+                .request(
+                    RequestOptions()
+                        .setHost("localhost")
+                        .setPort(hardcodedConfig.getInteger("service_port"))
+                        .setURI(tokenUri)
+                ).await()
             req.end().await()
             val resp = req.response().await()
             if (resp.statusCode() in 200..299) {
                 val body = resp.body().await().toString()
                 config.serviceToken = body
-                config.serviceHost = "localhost"
+                config.serviceHost = "https://localhost:" + hardcodedConfig.getInteger("service_port")
+                config.accessToken = defaultAccessToken
+                config.verifyHost = false
 
                 val projectSettings = PropertiesComponent.getInstance(project)
                 projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
@@ -489,15 +495,10 @@ object SourceMarkerPlugin {
             throw RuntimeException(e)
         }
 
-        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
-            .getBoolean("service_discovery")
-        var skywalkingHost = config.skywalkingOapUrl
-        if (serviceDiscoveryEnabled && !config.serviceHost.isNullOrBlank()) {
-            val scheme = if (config.isSsl()) "https" else "http"
-            skywalkingHost = "$scheme://${config.serviceHostNormalized}:" +
-                    "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}" +
-                    "/graphql/skywalking"
-        }
+        val scheme = if (config.isSsl()) "https" else "http"
+        val skywalkingHost = "$scheme://${config.serviceHostNormalized}:" +
+                "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}" +
+                "/graphql/skywalking"
 
         val certificatePins = mutableListOf<String>()
         certificatePins.addAll(config.certificatePins)
@@ -508,7 +509,7 @@ object SourceMarkerPlugin {
 
         deploymentIds.add(
             vertx.deployVerticle(
-                SkywalkingMonitor(skywalkingHost, config.serviceToken, certificatePins)
+                SkywalkingMonitor(skywalkingHost, config.serviceToken, certificatePins, config.verifyHost)
             ).await()
         )
     }
@@ -527,8 +528,6 @@ object SourceMarkerPlugin {
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings")
-            .getBoolean("service_discovery")
 
         //todo: portal should be connected to event bus without bridge
         val sockJSHandler = SockJSHandler.create(vertx)
@@ -547,15 +546,7 @@ object SourceMarkerPlugin {
         val bridgeServer = vertx.createHttpServer().requestHandler(router).listen(bridgePort, "localhost").await()
 
         //todo: load portal config (custom themes, etc)
-        deploymentIds.add(
-            vertx.deployVerticle(
-                PortalServer(
-                    bridgeServer.actualPort(),
-                    config.portalRefreshIntervalMs,
-                    !serviceDiscoveryEnabled
-                )
-            ).await()
-        )
+        deploymentIds.add(vertx.deployVerticle(PortalServer(bridgeServer.actualPort())).await())
         deploymentIds.add(vertx.deployVerticle(PortalEventListener(config)).await())
     }
 

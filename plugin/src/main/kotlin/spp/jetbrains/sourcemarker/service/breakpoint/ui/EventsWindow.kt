@@ -39,7 +39,7 @@ class EventsWindow(project: Project) : Disposable {
     val layoutComponent: JComponent
         get() = layoutUi.component
 
-    override fun dispose() {}
+    override fun dispose() = Unit
 
     init {
         listeners = CopyOnWriteArrayList()

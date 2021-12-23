@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
+import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.protocol.SourceMarkerServices
 import spp.protocol.SourceMarkerServices.Utilize
 import spp.protocol.extend.TCPServiceFrameParser
@@ -53,21 +54,12 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         this.vertx = vertx
 
         val hardcodedConfig = config.getJsonObject("hardcoded_config")
-        val serviceDiscoveryEnabled = hardcodedConfig.getJsonObject("visible_settings").getBoolean("service_discovery")
         val pluginConfig = Json.decodeValue(
             config.getJsonObject("sourcemarker_plugin_config").toString(), SourceMarkerConfig::class.java
         )
-        if (!serviceDiscoveryEnabled || pluginConfig.serviceHost.isNullOrBlank()) {
-            log.warn("Service discovery disabled")
-            return
-        }
 
-        var serviceHost = pluginConfig.serviceHost!!.substringAfter("https://").substringAfter("http://")
+        val serviceHost = pluginConfig.serviceHostNormalized!!
         val servicePort = hardcodedConfig.getInteger("tcp_service_port")
-        if (serviceHost.contains(":")) {
-            serviceHost = serviceHost.split(":")[0]
-        }
-
         val certificatePins = mutableListOf<String>()
         certificatePins.addAll(pluginConfig.certificatePins)
         val hardcodedPin = hardcodedConfig.getString("certificate_pin")
@@ -91,12 +83,17 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                     val options = NetClientOptions()
                         .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
                         .setSsl(pluginConfig.isSsl())
+                        .apply {
+                            if (!pluginConfig.verifyHost) {
+                                isTrustAll = true
+                            }
+                        }
                     vertx.createNetClient(options)
                 }
                 socket = client.connect(servicePort, serviceHost).await()
-            } catch (throwable: Throwable) {
-                log.warn("Failed to connect to service discovery server")
-                setupPromise.fail(throwable)
+            } catch (ex: Exception) {
+                log.error("Failed to connect to service discovery server", ex)
+                setupPromise.fail(ex)
                 return@launch
             }
             socket!!.handler(FrameParser(TCPServiceFrameParser(vertx, socket!!)))

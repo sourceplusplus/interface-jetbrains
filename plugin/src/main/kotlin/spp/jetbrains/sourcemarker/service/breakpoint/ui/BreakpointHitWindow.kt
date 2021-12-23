@@ -119,5 +119,5 @@ class BreakpointHitWindow(
         }.submit(AppExecutorUtil.getAppExecutorService())
     }
 
-    override fun dispose() {}
+    override fun dispose() = Unit
 }

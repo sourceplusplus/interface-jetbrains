@@ -84,7 +84,6 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
         assumeTrue((System.getenv("STANDALONE_ENABLED")?.toBoolean() ?: false))
         val projectSettings = PropertiesComponent.getInstance(project)
         val pluginConfig = SourceMarkerConfig(
-            serviceHost = "https://localhost:5445",
             accessToken = "change-me",
             certificatePins = listOf(
                 "47:09:B8:64:03:06:5C:1A:25:D5:9B:95:CD:0F:8B:DD:5C:BA:7C:89:48:F0:37:14:E2:21:9D:E1:45:64:11:2C"

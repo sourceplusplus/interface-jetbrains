@@ -1,9 +1,12 @@
 package spp.jetbrains.sourcemarker.status
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
+import io.vertx.core.json.Json
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker.creationService
 import spp.jetbrains.marker.SourceMarker.namingService
 import spp.jetbrains.marker.SourceMarker.scopeService
@@ -16,15 +19,15 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
-import org.slf4j.LoggerFactory
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.SourceMarkerServices
 import spp.protocol.artifact.log.LogResult
@@ -104,8 +107,15 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val config = Json.decodeValue(
+                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
             val statusBar = BreakpointStatusBar(
-                LiveSourceLocation(namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber),
+                LiveSourceLocation(
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    service = config.serviceName
+                ),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
@@ -146,8 +156,15 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val config = Json.decodeValue(
+                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
             val statusBar = LogStatusBar(
-                LiveSourceLocation(namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber),
+                LiveSourceLocation(
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    service = config.serviceName
+                ),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
@@ -192,8 +209,15 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val config = Json.decodeValue(
+                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
             val statusBar = MeterStatusBar(
-                LiveSourceLocation(namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber),
+                LiveSourceLocation(
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    service = config.serviceName
+                ),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
