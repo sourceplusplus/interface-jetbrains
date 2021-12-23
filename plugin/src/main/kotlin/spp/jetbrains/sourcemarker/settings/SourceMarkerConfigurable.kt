@@ -4,12 +4,16 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
+import io.vertx.core.Promise
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import spp.protocol.SourceMarkerServices.Instance
+import spp.protocol.general.Service
 import javax.swing.JComponent
 
 /**
@@ -43,7 +47,7 @@ class SourceMarkerConfigurable : Configurable {
         }
     }
 
-    override fun createComponent(): JComponent {
+    override fun createComponent(): JComponent = runBlocking {
         if (form == null) {
             val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
             val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
@@ -60,10 +64,13 @@ class SourceMarkerConfigurable : Configurable {
             } else {
                 SourceMarkerConfig()
             }
-            form = PluginConfigurationPanel(config)
+
+            val servicesPromise = Promise.promise<List<Service>>()
+            Instance.liveService!!.getServices(servicesPromise)
+            form = PluginConfigurationPanel(config, servicesPromise.future().await())
             form!!.applySourceMarkerConfig(config)
         }
-        return form!!.contentPane as JComponent
+        return@runBlocking form!!.contentPane as JComponent
     }
 
     override fun disposeUIResources() {

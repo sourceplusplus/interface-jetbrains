@@ -12,6 +12,7 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.Nullable;
+import spp.protocol.general.Service;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +23,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
 
 public class PluginConfigurationPanel {
     private JPanel myWholePanel;
@@ -40,22 +40,15 @@ public class PluginConfigurationPanel {
     private SourceMarkerConfig config;
     private CertificatePinPanel myCertificatePins;
 
-    public PluginConfigurationPanel(SourceMarkerConfig config) {
+    public PluginConfigurationPanel(SourceMarkerConfig config, java.util.List<Service> services) {
         this.config = config;
         myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
 
-        Objects.requireNonNull(INSTANCE.getLiveService()).getServices(it -> {
-            if (it.succeeded()) {
-                it.result().forEach(service -> serviceComboBox.addItem(service.getName()));
-
-                if (config.getServiceName() != null) {
-                    serviceComboBox.setSelectedItem(config.getServiceName());
-                }
-            } else {
-                it.cause().printStackTrace();
-            }
-        });
+        services.forEach(service -> serviceComboBox.addItem(service.getName()));
+        if (config.getServiceName() != null) {
+            serviceComboBox.setSelectedItem(config.getServiceName());
+        }
     }
 
     public JComponent getContentPane() {
