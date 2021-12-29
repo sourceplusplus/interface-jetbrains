@@ -20,7 +20,6 @@ version = pluginVersion
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 subprojects {
@@ -31,7 +30,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-        jcenter()
         maven(url = "https://jitpack.io")
     }
 
