@@ -1,15 +1,12 @@
 package spp.jetbrains.monitor.skywalking
 
-import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.Input
-import com.apollographql.apollo.coroutines.await
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.Optional
 import com.codahale.metrics.MetricRegistry
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
 import io.vertx.core.Vertx
-import io.vertx.core.buffer.Buffer
-import io.vertx.core.eventbus.MessageCodec
 import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
@@ -72,7 +69,7 @@ class SkywalkingClient(
         metricRegistry.timer("queryTraceStack").time().use {
             if (log.isTraceEnabled) log.trace("Query trace stack request. Trace: {}", traceId)
 
-            val response = apolloClient.query(QueryTraceQuery(traceId)).await()
+            val response = apolloClient.query(QueryTraceQuery(traceId)).execute()
             if (response.hasErrors()) {
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)
@@ -90,17 +87,17 @@ class SkywalkingClient(
             val response = apolloClient.query(
                 QueryBasicTracesQuery(
                     TraceQueryCondition(
-                        serviceId = Input.optional(request.serviceId),
-                        serviceInstanceId = Input.optional(request.serviceInstanceId),
-                        endpointId = Input.optional(request.endpointId),
-                        endpointName = Input.optional(request.endpointName),
-                        queryDuration = Input.optional(request.zonedDuration.toDuration(this)),
+                        serviceId = Optional.presentIfNotNull(request.serviceId),
+                        serviceInstanceId = Optional.presentIfNotNull(request.serviceInstanceId),
+                        endpointId = Optional.presentIfNotNull(request.endpointId),
+                        endpointName = Optional.presentIfNotNull(request.endpointName),
+                        queryDuration = Optional.Present(request.zonedDuration.toDuration(this)),
                         queryOrder = request.orderType.toQueryOrder(),
                         traceState = request.orderType.toTraceState(),
-                        paging = Pagination(Input.optional(request.pageNumber), request.pageSize)
+                        paging = Pagination(Optional.Present(request.pageNumber), request.pageSize)
                     )
                 )
-            ).await()
+            ).execute()
             if (response.hasErrors()) {
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)
@@ -125,8 +122,8 @@ class SkywalkingClient(
             }
 
             val response = apolloClient.query(
-                GetLinearIntValuesQuery(MetricCondition(metricName, Input.optional(endpointId)), duration)
-            ).await()
+                GetLinearIntValuesQuery(MetricCondition(metricName, Optional.Present(endpointId)), duration)
+            ).execute()
             if (response.hasErrors()) {
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)
@@ -153,11 +150,11 @@ class SkywalkingClient(
 
             val response = apolloClient.query(
                 GetMultipleLinearIntValuesQuery(
-                    MetricCondition(metricName, Input.optional(endpointId)),
+                    MetricCondition(metricName, Optional.Present(endpointId)),
                     numOfLinear,
                     duration
                 )
-            ).await()
+            ).execute()
             if (response.hasErrors()) {
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)
@@ -178,7 +175,7 @@ class SkywalkingClient(
 
             val response = apolloClient.query(
                 SearchEndpointQuery(keyword, serviceId, limit)
-            ).await()
+            ).execute()
             if (response.hasErrors()) {
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)
@@ -194,8 +191,8 @@ class SkywalkingClient(
             if (log.isTraceEnabled) log.trace("Query logs request. Condition: {}", condition)
 
             val response = apolloClient.query(
-                QueryLogsQuery(Input.optional(condition))
-            ).await()
+                QueryLogsQuery(Optional.Present(condition))
+            ).execute()
             if (response.hasErrors()) {
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)
@@ -212,7 +209,7 @@ class SkywalkingClient(
 
             val response = apolloClient.query(
                 GetAllServicesQuery(duration)
-            ).await()
+            ).execute()
             if (response.hasErrors()) {
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)
@@ -231,7 +228,7 @@ class SkywalkingClient(
 
             val response = apolloClient.query(
                 GetServiceInstancesQuery(serviceId, duration)
-            ).await()
+            ).execute()
             if (response.hasErrors()) {
                 response.errors!!.forEach { log.error(it.message) }
                 throw IOException(response.errors!![0].message)

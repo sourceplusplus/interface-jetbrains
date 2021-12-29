@@ -1,6 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("com.apollographql.apollo")
+    id("com.apollographql.apollo3")
 }
 
 val vertxVersion = ext.get("vertxVersion")
@@ -11,9 +11,8 @@ val protocolVersion: String by project
 dependencies {
     implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     implementation("org.slf4j:slf4j-api:1.7.32")
-    implementation("com.apollographql.apollo:apollo-runtime:$apolloVersion")
-    implementation("com.apollographql.apollo:apollo-coroutines-support:$apolloVersion")
-    api("com.apollographql.apollo:apollo-api:$apolloVersion")
+    implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
+    api("com.apollographql.apollo3:apollo-api:$apolloVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
@@ -25,6 +24,5 @@ dependencies {
 }
 
 apollo {
-    generateKotlinModels.set(true)
-    rootPackageName.set("monitor.skywalking.protocol")
+    packageNamesFromFilePaths("monitor.skywalking.protocol")
 }

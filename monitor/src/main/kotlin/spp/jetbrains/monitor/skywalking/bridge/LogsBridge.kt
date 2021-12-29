@@ -1,7 +1,6 @@
 package spp.jetbrains.monitor.skywalking.bridge
 
-import com.apollographql.apollo.api.BigDecimal
-import com.apollographql.apollo.api.Input
+import com.apollographql.apollo3.api.Optional
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.artifact.exception.LiveStackTrace
@@ -42,9 +41,9 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                 val request = it.body()
                 val logs = skywalkingClient.queryLogs(
                     LogQueryCondition(
-                        serviceId = Input.optional(request.serviceId),
-                        queryDuration = Input.optional(request.zonedDuration.toDuration(skywalkingClient)),
-                        paging = Pagination(Input.optional(request.pageNumber), request.pageSize)
+                        serviceId = Optional.presentIfNotNull(request.serviceId),
+                        queryDuration = Optional.Present(request.zonedDuration.toDuration(skywalkingClient)),
+                        paging = Pagination(Optional.Present(request.pageNumber), request.pageSize)
                     )
                 )
                 if (logs != null) {
@@ -57,7 +56,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                                 val epoch = if (it.timestamp is String) {
                                     it.timestamp.toString().toLong()
                                 } else {
-                                    (it.timestamp as BigDecimal).toLong()
+                                    it.timestamp as Long
                                 }
                                 Log(
                                     Instant.fromEpochMilliseconds(epoch),

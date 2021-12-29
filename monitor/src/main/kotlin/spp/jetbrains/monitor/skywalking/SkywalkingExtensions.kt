@@ -36,7 +36,7 @@ fun toProtocol(
 fun GetLinearIntValuesQuery.Result.toProtocol(metricType: String): ArtifactMetrics {
     return ArtifactMetrics(
         metricType = MetricType.realValueOf(metricType),
-        values = values.map { (it.value as BigDecimal).toDouble() }
+        values = values.map { (it.value as Int).toDouble() }
     )
 }
 
@@ -83,15 +83,15 @@ fun QueryTraceQuery.Span.toProtocol(): TraceSpan {
         refs = refs.map { it.toProtocol() },
         serviceCode = serviceCode,
         //serviceInstanceName = serviceInstanceName, //todo: this
-        startTime = Instant.fromEpochMilliseconds((startTime as BigDecimal).toLong()),
-        endTime = Instant.fromEpochMilliseconds((endTime as BigDecimal).toLong()),
+        startTime = Instant.fromEpochMilliseconds(startTime as Long),
+        endTime = Instant.fromEpochMilliseconds(endTime as Long),
         endpointName = endpointName,
         type = type,
         peer = peer,
         component = component,
         error = isError,
         layer = layer,
-        tags = tags.map { it.key to it.value!! }.toMap(),
+        tags = tags.associate { it.key to it.value!! },
         logs = logs.map { it.toProtocol() }
     )
 }

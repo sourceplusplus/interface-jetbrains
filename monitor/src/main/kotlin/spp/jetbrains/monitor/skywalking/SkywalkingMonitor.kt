@@ -1,7 +1,7 @@
 package spp.jetbrains.monitor.skywalking
 
-import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.coroutines.await
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.network.okHttpClient
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -69,12 +69,12 @@ class SkywalkingMonitor(
                 JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
             )
         }
-        val client = ApolloClient.builder()
+        val client = ApolloClient.Builder()
             .serverUrl(serverUrl)
             .okHttpClient(httpBuilder.build())
             .build()
 
-        val response = client.query(GetTimeInfoQuery()).await()
+        val response = client.query(GetTimeInfoQuery()).execute()
         if (response.hasErrors()) {
             response.errors!!.forEach { log.error(it.message) }
             throw RuntimeException("Failed to get Apache SkyWalking time info")
