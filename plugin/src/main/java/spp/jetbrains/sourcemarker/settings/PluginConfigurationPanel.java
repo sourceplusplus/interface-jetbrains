@@ -45,17 +45,19 @@ public class PluginConfigurationPanel {
         myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
 
-        Objects.requireNonNull(INSTANCE.getLiveService()).getServices(it -> {
-            if (it.succeeded()) {
-                it.result().forEach(service -> serviceComboBox.addItem(service.getName()));
+        if (INSTANCE.getLiveService() != null) {
+            INSTANCE.getLiveService().getServices(it -> {
+                if (it.succeeded()) {
+                    it.result().forEach(service -> serviceComboBox.addItem(service.getName()));
 
-                if (config.getServiceName() != null) {
-                    serviceComboBox.setSelectedItem(config.getServiceName());
+                    if (config.getServiceName() != null) {
+                        serviceComboBox.setSelectedItem(config.getServiceName());
+                    }
+                } else {
+                    it.cause().printStackTrace();
                 }
-            } else {
-                it.cause().printStackTrace();
-            }
-        });
+            });
+        }
     }
 
     public JComponent getContentPane() {
