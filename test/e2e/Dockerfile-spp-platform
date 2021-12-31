@@ -1,4 +1,4 @@
-FROM sourceplusplus/spp-platform:0.2.1
+FROM sourceplusplus/spp-platform:latest
 
 ADD ./config/spp-platform.crt /opt/sourceplusplus/config
 ADD ./config/spp-platform.key /opt/sourceplusplus/config
