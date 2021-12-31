@@ -1,14 +1,20 @@
-FROM openjdk:11-jre
+FROM azul/zulu-openjdk-alpine:11
+
 ADD ./spp-example-webapp-boot-1.0-SNAPSHOT.zip /spp-example-webapp-boot-1.0-SNAPSHOT.zip
 
-COPY ./apache-skywalking-apm-8.7.0.tar.gz /apache-skywalking-apm-8.7.0.tar.gz
-RUN tar -xzf ./apache-skywalking-apm-8.7.0.tar.gz
-#RUN mv /apache-skywalking-apm-bin/agent/activations/apm-toolkit-trace-activation-8.7.0.jar /apache-skywalking-apm-bin/agent/plugins/
+RUN apk --no-cache add curl
 
-ADD ./agent.config /apache-skywalking-apm-bin/agent/config/agent.config
-#ADD ./customize_enhance.xml /apache-skywalking-apm-bin/agent/config/customize_enhance.xml
+RUN mkdir -p /tmp/spp-probe/ca
+ADD ./config/spp-platform.crt /tmp/spp-probe/ca/ca.crt
 
-ENV JAVA_OPTS="-javaagent:/apache-skywalking-apm-bin/agent/skywalking-agent.jar"
+ADD ./spp-probe.yml /tmp/spp-probe
+
+RUN curl -LJO https://github.com/sourceplusplus/probe-jvm/releases/download/0.2.1/spp-probe-0.2.1.jar
+RUN mv spp-probe-0.2.1.jar /tmp/spp-probe
+
+ENV SPP_DELETE_PROBE_DIRECTORY_ON_BOOT=false
+
+ENV JAVA_OPTS="-javaagent:/tmp/spp-probe/spp-probe-0.2.1.jar"
 ENV SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
 
 RUN unzip *.zip

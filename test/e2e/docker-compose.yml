@@ -1,24 +1,65 @@
 version: '3.3'
 services:
+  spp-platform:
+    container_name: spp-platform
+    build:
+      context: .
+      dockerfile: Dockerfile-spp-platform
+    hostname: spp-platform
+    ports:
+      - "5445:5445"
+      - "5450:5450"
+      - "5455:5455"
+    depends_on:
+      - redis
+    links:
+      - redis
+    environment:
+      - SPP_REDIS_HOST=redis
+      - SPP_SKYWALKING_HOST=skywalking-oap
+      - SPP_SYSTEM_ACCESS_TOKEN=change-me
+  redis:
+    image: redis:6.2.1
+    container_name: redis
+    hostname: redis
   skywalking-oap:
     container_name: skywalking-oap
+    build:
+      context: .
+      dockerfile: Dockerfile-spp-oap-server
     hostname: skywalking-oap
     ports:
       - "11800:11800"
-      - "12800:12800"
-    build:
-      context: .
-      dockerfile: Dockerfile-skywalking-oap
+    depends_on:
+      - spp-platform
+    links:
+      - spp-platform
+    environment:
+      - SPP_PLATFORM_HOST=spp-platform
+      - SPP_PLATFORM_PORT=5460
+      - SPP_PLATFORM_CERTIFICATE_FILE=/skywalking/spp-platform.crt
+      - SW_CORE_GRPC_SSL_ENABLED=true
+      - SW_CORE_GRPC_SSL_KEY_PATH=/skywalking/spp-platform.key
+      - SW_CORE_GRPC_SSL_CERT_CHAIN_PATH=/skywalking/spp-platform.crt
+      - SW_CORE_GRPC_SSL_TRUSTED_CA_PATH=/skywalking/spp-platform.crt
+      - SW_RECEIVER_GRPC_SSL_ENABLED=true
+      - SW_RECEIVER_GRPC_SSL_KEY_PATH=/skywalking/spp-platform.key
+      - SW_RECEIVER_GRPC_SSL_CERT_CHAIN_PATH=/skywalking/spp-platform.crt
   spp-example-webapp:
     container_name: spp-example-webapp
     hostname: spp-example-webapp
     depends_on:
+      - spp-platform
       - skywalking-oap
     links:
+      - spp-platform
       - skywalking-oap
     build:
       context: .
       dockerfile: Dockerfile-spp-example-webapp
+    environment:
+      - SPP_PLATFORM_HOST=spp-platform
+      - SPP_SKYWALKING_HOST=skywalking-oap
 #  skywalking-ui:
 #    image: apache/skywalking-ui:8.6.0
 #    container_name: skywalking-ui
