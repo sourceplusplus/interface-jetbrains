@@ -5,6 +5,8 @@ import com.intellij.openapi.util.ScalableIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
+import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import java.awt.*
 import java.awt.event.*
@@ -71,7 +73,7 @@ class AutocompleteField(
         list.font = Font("Roboto Light", Font.PLAIN, 14)
         list.setCellRenderer(AutoCompleteCellRenderer(lineNumber))
 
-        list.setBackground(JBColor.decode("#252525"))
+        list.setBackground(UIUtil.getListSelectionBackground(true))
         list.setBorder(JBUI.Borders.empty())
         val scroll: JScrollPane = object : JScrollPane(list) {
             override fun getPreferredSize(): Dimension {
@@ -286,11 +288,11 @@ class AutocompleteField(
         fun updateView() = fireContentsChanged(this@AutocompleteField, 0, size)
     }
 
-    private val saveIcon = (IconLoader.findIcon("/icons/instrument/live-log/save.svg") as ScalableIcon)
+    private val saveIcon = (PluginIcons.Instrument.save as ScalableIcon)
         .scale(0.40f)
-    private val saveHoveredIcon = (IconLoader.findIcon("/icons/instrument/live-log/saveHovered.svg") as ScalableIcon)
+    private val saveHoveredIcon = (PluginIcons.Instrument.saveHovered as ScalableIcon)
         .scale(0.40f)
-    private val savePressedIcon = (IconLoader.findIcon("/icons/instrument/live-log/savePressed.svg") as ScalableIcon)
+    private val savePressedIcon = (PluginIcons.Instrument.savePressed as ScalableIcon)
         .scale(0.40f)
     private var icon: Icon? = saveIcon
     private var iconX: Int = 0

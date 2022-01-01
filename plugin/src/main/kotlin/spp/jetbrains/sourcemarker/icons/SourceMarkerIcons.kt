@@ -4,6 +4,7 @@ import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.scale.ScaleContext
 import com.intellij.util.SVGLoader
 import com.intellij.util.ui.JBImageIcon
+import spp.jetbrains.sourcemarker.PluginIcons
 import spp.protocol.advice.ArtifactAdvice
 import spp.protocol.advice.cautionary.RampDetectionAdvice
 import spp.protocol.advice.informative.ActiveExceptionAdvice
@@ -18,17 +19,17 @@ import javax.swing.Icon
  */
 object SourceMarkerIcons {
 
-    val exclamationTriangle = IconLoader.getIcon("/icons/exclamation-triangle.svg")
-    val performanceRamp = IconLoader.getIcon("/icons/sort-amount-up.svg")
-    val activeException = IconLoader.getIcon("/icons/map-marker-exclamation.svg")
-    val LIVE_METER_COUNT_ICON = IconLoader.getIcon("/icons/count.svg")
-    val LIVE_METER_GAUGE_ICON = IconLoader.getIcon("/icons/gauge.svg")
-    val LIVE_METER_HISTOGRAM_ICON = IconLoader.getIcon("/icons/histogram.svg")
-    val LIVE_BREAKPOINT_ACTIVE_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-active.svg")
-    val LIVE_BREAKPOINT_DISABLED_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-disabled.svg")
-    val LIVE_BREAKPOINT_COMPLETE_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-complete.svg")
-    val LIVE_BREAKPOINT_PENDING_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-pending.svg")
-    val LIVE_BREAKPOINT_ERROR_ICON = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-error.svg")
+    val exclamationTriangle = PluginIcons.exclmationTriangle
+    val performanceRamp = PluginIcons.performanceRamp
+    val activeException = PluginIcons.activeException
+    val LIVE_METER_COUNT_ICON = PluginIcons.count
+    val LIVE_METER_GAUGE_ICON = PluginIcons.gauge
+    val LIVE_METER_HISTOGRAM_ICON = PluginIcons.histogram
+    val LIVE_BREAKPOINT_ACTIVE_ICON = PluginIcons.Breakpoint.active
+    val LIVE_BREAKPOINT_DISABLED_ICON = PluginIcons.Breakpoint.disabled
+    val LIVE_BREAKPOINT_COMPLETE_ICON = PluginIcons.Breakpoint.complete
+    val LIVE_BREAKPOINT_PENDING_ICON = PluginIcons.Breakpoint.pending
+    val LIVE_BREAKPOINT_ERROR_ICON = PluginIcons.Breakpoint.error
 
     fun getGutterMarkIcon(advice: ArtifactAdvice): Icon? {
         return when (advice) {

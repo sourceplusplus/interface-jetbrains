@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.EditorTextField;
+import com.intellij.util.ui.UIUtil;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
@@ -197,15 +198,15 @@ public class LiveLogConfigurationPanel extends JPanel {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
         panel4 = new JPanel();
-        label1 = new JLabel();
+        lblCondition = new JLabel();
         conditionPanel = new JPanel();
         separator2 = new JSeparator();
         panel6 = new JPanel();
-        label5 = new JLabel();
+        lblHint = new JLabel();
         hitLimitSpinner = new JSpinner();
         separator1 = new JSeparator();
         panel3 = new JPanel();
-        label3 = new JLabel();
+        lblExpirationDate = new JLabel();
         panel1 = new JPanel();
         expiration15MinButton = new JRadioButton();
         expiration30MinButton = new JRadioButton();
@@ -223,7 +224,6 @@ public class LiveLogConfigurationPanel extends JPanel {
         rateLimitStepCombobox = new JComboBox<>();
 
         //======== this ========
-        setBackground(new Color(43, 43, 43));
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setLayout(new MigLayout(
             "hidemode 3",
@@ -247,10 +247,10 @@ public class LiveLogConfigurationPanel extends JPanel {
                 "[]" +
                 "[]"));
 
-            //---- label1 ----
-            label1.setText("Condtion");
-            label1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            panel4.add(label1, "cell 0 0");
+            //---- lblCondition ----
+            lblCondition.setText("Condtion");
+            lblCondition.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            panel4.add(lblCondition, "cell 0 0");
 
             //======== conditionPanel ========
             {
@@ -277,10 +277,10 @@ public class LiveLogConfigurationPanel extends JPanel {
                 "[]" +
                 "[grow]"));
 
-            //---- label5 ----
-            label5.setText("Hit Limit");
-            label5.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            panel6.add(label5, "cell 0 0");
+            //---- lblHint ----
+            lblHint.setText("Hit Limit");
+            lblHint.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            panel6.add(lblHint, "cell 0 0");
 
             //---- hitLimitSpinner ----
             hitLimitSpinner.setBackground(null);
@@ -303,10 +303,10 @@ public class LiveLogConfigurationPanel extends JPanel {
                 "[]" +
                 "[]"));
 
-            //---- label3 ----
-            label3.setText("Expiration Date");
-            label3.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            panel3.add(label3, "cell 0 0");
+            //---- lblExpirationDate ----
+            lblExpirationDate.setText("Expiration Date");
+            lblExpirationDate.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            panel3.add(lblExpirationDate, "cell 0 0");
 
             //======== panel1 ========
             {
@@ -395,7 +395,6 @@ public class LiveLogConfigurationPanel extends JPanel {
 
             //======== panel2 ========
             {
-                panel2.setBackground(new Color(43, 43, 43));
                 panel2.setLayout(new MigLayout(
                     "hidemode 3",
                     // columns
@@ -441,15 +440,15 @@ public class LiveLogConfigurationPanel extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
     private JPanel panel4;
-    private JLabel label1;
+    private JLabel lblCondition;
     private JPanel conditionPanel;
     private JSeparator separator2;
     private JPanel panel6;
-    private JLabel label5;
+    private JLabel lblHint;
     private JSpinner hitLimitSpinner;
     private JSeparator separator1;
     private JPanel panel3;
-    private JLabel label3;
+    private JLabel lblExpirationDate;
     private JPanel panel1;
     private JRadioButton expiration15MinButton;
     private JRadioButton expiration30MinButton;

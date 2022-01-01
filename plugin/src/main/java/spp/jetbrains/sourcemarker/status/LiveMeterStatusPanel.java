@@ -3,6 +3,7 @@ package spp.jetbrains.sourcemarker.status;
 import com.intellij.openapi.util.IconLoader;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
 import io.vertx.core.json.JsonObject;
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +58,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
     private void removeActiveDecorations() {
         SwingUtilities.invokeLater(() -> {
-            configurationLabel.setIcon(IconLoader.getIcon("/icons/configIcon.svg"));
+            configurationLabel.setIcon(PluginIcons.config);
         });
     }
 
@@ -66,7 +67,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
         configurationLabel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                configurationLabel.setIcon(IconLoader.getIcon("/icons/configIconHovered.svg"));
+                configurationLabel.setIcon(PluginIcons.configHovered);
             }
         });
         addRecursiveMouseListener(configurationLabel, new MouseAdapter() {
@@ -77,12 +78,12 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
             @Override
             public void mousePressed(MouseEvent e) {
-                configurationLabel.setIcon(IconLoader.getIcon("/icons/configIconPressed.svg"));
+                configurationLabel.setIcon(PluginIcons.configPressed);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                configurationLabel.setIcon(IconLoader.getIcon("/icons/configIconHovered.svg"));
+                configurationLabel.setIcon(PluginIcons.configHovered);
             }
         }, () -> {
             removeActiveDecorations();
@@ -110,11 +111,16 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
-        setBackground(new Color(43, 43, 43));
         setBorder(new EtchedBorder());
         setFont(new Font("Roboto Light", Font.PLAIN, 15));
         setMinimumSize(new Dimension(385, 70));
         setPreferredSize(new Dimension(385, 70));
+        setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder
+        (0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion",javax.swing.border.TitledBorder.CENTER,javax.swing.border
+        .TitledBorder.BOTTOM,new java.awt.Font("Dia\u006cog",java.awt.Font.BOLD,12),java.awt
+        .Color.red), getBorder())); addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override public void
+        propertyChange(java.beans.PropertyChangeEvent e){if("bord\u0065r".equals(e.getPropertyName()))throw new RuntimeException()
+        ;}});
         setLayout(new FormLayout(
             "default:grow",
             "fill:default:grow"));
@@ -165,7 +171,6 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
                 //---- minuteLabel ----
                 minuteLabel.setText("Minute");
-                minuteLabel.setForeground(Color.gray);
                 minuteLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                 panel1.add(minuteLabel, cc.xy(5, 1));
 
@@ -176,7 +181,6 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
                 //---- hourLabel ----
                 hourLabel.setText("Hour");
-                hourLabel.setForeground(Color.gray);
                 hourLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                 panel1.add(hourLabel, cc.xy(9, 1));
 
@@ -198,7 +202,6 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
                     //---- dayLabel ----
                     dayLabel.setText("Day");
-                    dayLabel.setForeground(Color.gray);
                     dayLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                     panel3.add(dayLabel, cc.xy(1, 1));
 

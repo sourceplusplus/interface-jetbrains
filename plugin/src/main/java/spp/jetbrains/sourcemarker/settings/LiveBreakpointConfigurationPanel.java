@@ -123,7 +123,6 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
         rateLimitStepCombobox = new JComboBox<>();
 
         //======== this ========
-        setBackground(new Color(43, 43, 43));
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setLayout(new MigLayout(
             "hidemode 3",
@@ -239,7 +238,6 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
             //======== panel2 ========
             {
-                panel2.setBackground(new Color(43, 43, 43));
                 panel2.setLayout(new MigLayout(
                     "hidemode 3",
                     // columns
