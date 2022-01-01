@@ -1,0 +1,20 @@
+spp-platform:
+  host: 0.0.0.0
+  port: 5445
+  access_token: "change-me"
+  logging:
+    level: trace
+  probe:
+    bridge_port: 5450
+  marker:
+    bridge_port: 5455
+  processor:
+    bridge_port: 5460
+
+redis:
+  host: redis
+  port: 6379
+
+skywalking-oap:
+  host: skywalking-oap
+  port: 12800

@@ -1,0 +1,4 @@
+FROM sourceplusplus/spp-oap-server:latest
+
+ADD ./config/spp-platform.crt /skywalking
+ADD ./config/spp-platform.key /skywalking
