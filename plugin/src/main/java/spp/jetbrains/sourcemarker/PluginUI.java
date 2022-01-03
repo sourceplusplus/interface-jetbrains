@@ -36,13 +36,6 @@ public class PluginUI {
         }
     }
 
-    /*public static final Font ROBOTO_LIGHT_BOLD_14 = new Font("Roboto Light", Font.BOLD, 14);
-    public static final Font ROBOTO_LIGHT_PLAIN_14 = new Font("Roboto Light", Font.PLAIN, 14);
-    public static final Font ROBOTO_LIGHT_PLAIN_15 = new Font("Roboto Light", Font.PLAIN, 15);
-    public static final Font ROBOTO_LIGHT_PLAIN_16 = new Font("Roboto Light", Font.PLAIN, 16);
-    public static final Font ROBOTO_PLAIN_15 = new Font("Roboto", Font.PLAIN, 15);
-    public static final Font ROBOTO_PLAIN_11 = new Font("Roboto", Font.PLAIN, 11);*/
-
     public static final Color PANEL_BACKGROUND_COLOR = new Color(37, 37, 37);
     public static final Color LABEL_FOREGROUND_COLOR = new Color(152, 118, 170);
     public static final Color LABEL_FOREGROUND_COLOR1 = new Color(106, 135, 89);

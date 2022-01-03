@@ -168,13 +168,13 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
+            configPanel.setBackground(PluginUI.getBackgroundDefaultColor());
 
             if (!breakpointConditionField.getEditMode()) {
                 breakpointConditionField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                breakpointConditionField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditCompleteColor());
+                breakpointConditionField.setBackground(PluginUI.getEditCompleteColor());
                 breakpointConditionField.setEditable(false);
             }
         });
@@ -260,7 +260,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                             }
                         }));
 
-                        table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
+                        table.setBackground(PluginUI.getBackgroundDefaultColor());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -371,7 +371,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocusColor());
+                    configPanel.setBackground(PluginUI.getBackgroundFocusColor());
                 }
             }
         });

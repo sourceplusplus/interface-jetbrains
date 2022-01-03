@@ -286,7 +286,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     table.setStriped(true);
                     table.setShowColumns(true);
 
-                    table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
+                    table.setBackground(PluginUI.getBackgroundDefaultColor());
                     panel.add(scrollPane);
                     panel.setPreferredSize(new Dimension(0, 250));
                     wrapper.add(panel, BorderLayout.NORTH);
@@ -323,13 +323,13 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
+            configPanel.setBackground(PluginUI.getBackgroundDefaultColor());
 
             if (!liveLogTextField.getEditMode()) {
                 liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(UIUtil.getBoundsColor(), 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                liveLogTextField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditCompleteColor());
+                liveLogTextField.setBackground(PluginUI.getEditCompleteColor());
                 liveLogTextField.setEditable(false);
             }
         });
@@ -482,7 +482,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!errored && !removed) configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocusColor());
+                if (!errored && !removed) configPanel.setBackground(PluginUI.getBackgroundFocusColor());
             }
         });
 

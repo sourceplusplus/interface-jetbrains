@@ -154,13 +154,13 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
+            configPanel.setBackground(PluginUI.getBackgroundDefaultColor());
 
             if (!meterConditionField.getEditMode()) {
                 meterConditionField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                meterConditionField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditCompleteColor());
+                meterConditionField.setBackground(PluginUI.getEditCompleteColor());
                 meterConditionField.setEditable(false);
             }
         });
@@ -221,7 +221,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                         table.setStriped(true);
                         table.setShowColumns(true);
 
-                        table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
+                        table.setBackground(PluginUI.getBackgroundDefaultColor());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -329,7 +329,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocusColor());
+                    configPanel.setBackground(PluginUI.getBackgroundFocusColor());
                 }
             }
         });
