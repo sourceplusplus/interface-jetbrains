@@ -545,7 +545,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             //---- label1 ----
             label1.setText("Type");
             label1.setForeground(Color.gray);
-            label1.setFont(ROBOTO_LIGHT_PLAIN_14);
+            label1.setFont(ROBOTO_LIGHT_PLAIN_15);
             mainPanel.add(label1, "cell 1 0");
 
             //---- meterTypeComboBox ----
