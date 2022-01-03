@@ -5,7 +5,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBIntSpinner;
 import com.intellij.ui.components.JBScrollPane;
@@ -13,25 +12,29 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
+import io.vertx.core.json.Json;
+import net.miginfocom.swing.MigLayout;
+import org.apache.commons.lang.StringUtils;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginColors;
 import spp.jetbrains.sourcemarker.PluginIcons;
-import spp.protocol.SourceMarkerServices;
-import spp.protocol.instrument.*;
-import spp.protocol.instrument.breakpoint.LiveBreakpoint;
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit;
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
-import spp.protocol.service.live.LiveInstrumentService;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService;
 import spp.jetbrains.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import io.vertx.core.json.Json;
-import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang.StringUtils;
+import spp.protocol.SourceMarkerServices;
+import spp.protocol.instrument.InstrumentThrottle;
+import spp.protocol.instrument.LiveInstrument;
+import spp.protocol.instrument.LiveInstrumentEvent;
+import spp.protocol.instrument.LiveSourceLocation;
+import spp.protocol.instrument.ThrottleStep;
+import spp.protocol.instrument.breakpoint.LiveBreakpoint;
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit;
+import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
+import spp.protocol.service.live.LiveInstrumentService;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -39,7 +42,13 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,9 +60,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
@@ -199,7 +208,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
             remove(closeLabel);
 //                    JLabel searchLabel = new JLabel();
-//                    searchLabel.setIcon(IconLoader.getIcon("/icons/search.svg"));
+//                    searchLabel.setIcon(PluginIcons.search);
 //                    add(searchLabel, "cell 2 0");
             expandLabel = new JLabel();
             expandLabel.setCursor(Cursor.getDefaultCursor());
@@ -532,11 +541,11 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(IconLoader.getIcon("/icons/eye.svg"));
+            configLabel.setIcon(PluginIcons.eye);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----
-            configDropdownLabel.setIcon(IconLoader.getIcon("/icons/angle-down.svg"));
+            configDropdownLabel.setIcon(PluginIcons.angleDown);
             configPanel.add(configDropdownLabel, "cell 1 0");
         }
         add(configPanel, "cell 0 0, grow");
@@ -572,7 +581,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             mainPanel.add(hitLimitSpinner, "cell 1 0");
 
             //---- timeLabel ----
-            timeLabel.setIcon(IconLoader.getIcon("/icons/clock.svg"));
+            timeLabel.setIcon(PluginIcons.clock);
             timeLabel.setFont(new Font("Roboto Light", Font.PLAIN, 14));
             timeLabel.setIconTextGap(8);
             timeLabel.setVisible(false);
@@ -589,7 +598,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         add(separator1, "cell 1 0");
 
         //---- closeLabel ----
-        closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+        closeLabel.setIcon(PluginIcons.close);
         add(closeLabel, "cell 2 0");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }

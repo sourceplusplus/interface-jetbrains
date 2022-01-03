@@ -1,6 +1,5 @@
 package spp.jetbrains.sourcemarker.status;
 
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
@@ -234,7 +233,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                 panel2.add(meterDescriptionTextField, cc.xy(1, 1));
 
                 //---- configurationLabel ----
-                configurationLabel.setIcon(IconLoader.getIcon("/icons/configIcon.svg"));
+                configurationLabel.setIcon(PluginIcons.config);
                 panel2.add(configurationLabel, cc.xy(3, 1));
             }
             panel4.add(panel2, cc.xy(1, 3));

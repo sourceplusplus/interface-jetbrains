@@ -5,7 +5,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
@@ -193,7 +192,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
             remove(closeLabel);
 //                    JLabel searchLabel = new JLabel();
-//                    searchLabel.setIcon(IconLoader.getIcon("/icons/search.svg"));
+//                    searchLabel.setIcon(PluginIcons.search);
 //                    add(searchLabel, "cell 2 0");
             expandLabel = new JLabel();
             expandLabel.setCursor(Cursor.getDefaultCursor());
@@ -512,11 +511,11 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(IconLoader.getIcon("/icons/eye.svg"));
+            configLabel.setIcon(PluginIcons.eye);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----
-            configDropdownLabel.setIcon(IconLoader.getIcon("/icons/angle-down.svg"));
+            configDropdownLabel.setIcon(PluginIcons.angleDown);
             configPanel.add(configDropdownLabel, "cell 1 0");
         }
         add(configPanel, "cell 0 0, grow");
@@ -555,7 +554,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             mainPanel.add(meterTypeComboBox, "cell 1 0");
 
             //---- timeLabel ----
-            timeLabel.setIcon(IconLoader.getIcon("/icons/clock.svg"));
+            timeLabel.setIcon(PluginIcons.clock);
             timeLabel.setFont(new Font("Roboto Light", Font.PLAIN, 14));
             timeLabel.setIconTextGap(8);
             timeLabel.setVisible(false);
@@ -572,7 +571,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         add(separator1, "cell 1 0");
 
         //---- closeLabel ----
-        closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+        closeLabel.setIcon(PluginIcons.close);
         add(closeLabel, "cell 2 0");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }

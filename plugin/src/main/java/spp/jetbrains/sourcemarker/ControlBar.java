@@ -3,24 +3,28 @@ package spp.jetbrains.sourcemarker;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
+import info.debatty.java.stringsimilarity.JaroWinkler;
+import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.protocol.utils.ArtifactNameUtils;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
-import spp.jetbrains.sourcemarker.command.LiveControlCommand;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
+import spp.jetbrains.sourcemarker.command.LiveControlCommand;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
-import info.debatty.java.stringsimilarity.*;
-import net.miginfocom.swing.MigLayout;
+import spp.protocol.utils.ArtifactNameUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -236,7 +240,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         add(textField1, "cell 1 0");
 
         //---- label2 ----
-        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+        label2.setIcon(PluginIcons.close);
         add(label2, "cell 2 0");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }

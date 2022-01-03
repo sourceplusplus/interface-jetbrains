@@ -1,6 +1,5 @@
 package spp.jetbrains.sourcemarker.command
 
-import com.intellij.openapi.util.IconLoader
 import spp.jetbrains.sourcemarker.PluginIcons
 import javax.swing.Icon
 
