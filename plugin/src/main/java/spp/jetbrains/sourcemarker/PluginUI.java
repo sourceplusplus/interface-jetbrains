@@ -4,16 +4,44 @@ import com.intellij.util.ui.UIUtil;
 
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 public class PluginUI {
 
     public static final LineBorder PANEL_BORDER = new LineBorder(new Color(85, 85, 85));
-    public static final Font ROBOTO_LIGHT_BOLD_14 = new Font("Roboto Light", Font.BOLD, 14);
+
+    public static Font ROBOTO_PLAIN_15;
+    public static Font ROBOTO_PLAIN_11;
+    public static Font ROBOTO_LIGHT_BOLD_14;
+    public static Font ROBOTO_LIGHT_PLAIN_14;
+    public static Font ROBOTO_LIGHT_PLAIN_15;
+    public static Font ROBOTO_LIGHT_PLAIN_16;
+
+    static {
+        try {
+            Font ROBORTO = Font.createFont(Font.TRUETYPE_FONT, PluginUI.class.getResourceAsStream("/fonts/Roboto-Regular.ttf"));
+            Font ROBOTO_LIGHT = Font.createFont(Font.TRUETYPE_FONT, PluginUI.class.getResourceAsStream("/fonts/Roboto-Light.ttf"));
+
+            ROBOTO_PLAIN_15 = ROBORTO.deriveFont(Font.PLAIN).deriveFont(15f);
+            ROBOTO_PLAIN_11 = ROBORTO.deriveFont(Font.PLAIN).deriveFont(11f);
+            ROBOTO_LIGHT_BOLD_14 = ROBOTO_LIGHT.deriveFont(Font.BOLD).deriveFont(14f);
+            ROBOTO_LIGHT_PLAIN_14 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(14f);
+            ROBOTO_LIGHT_PLAIN_15 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(15f);
+            ROBOTO_LIGHT_PLAIN_16 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(16f);
+        } catch (FontFormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*public static final Font ROBOTO_LIGHT_BOLD_14 = new Font("Roboto Light", Font.BOLD, 14);
     public static final Font ROBOTO_LIGHT_PLAIN_14 = new Font("Roboto Light", Font.PLAIN, 14);
     public static final Font ROBOTO_LIGHT_PLAIN_15 = new Font("Roboto Light", Font.PLAIN, 15);
     public static final Font ROBOTO_LIGHT_PLAIN_16 = new Font("Roboto Light", Font.PLAIN, 16);
     public static final Font ROBOTO_PLAIN_15 = new Font("Roboto", Font.PLAIN, 15);
-    public static final Font ROBOTO_PLAIN_11 = new Font("Roboto", Font.PLAIN, 11);
+    public static final Font ROBOTO_PLAIN_11 = new Font("Roboto", Font.PLAIN, 11);*/
 
     public static final Color PANEL_BACKGROUND_COLOR = new Color(37, 37, 37);
     public static final Color LABEL_FOREGROUND_COLOR = new Color(152, 118, 170);
