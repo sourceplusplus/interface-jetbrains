@@ -1,6 +1,7 @@
 package spp.jetbrains.sourcemarker.status;
 
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import spp.jetbrains.sourcemarker.PluginIcons;
@@ -24,6 +25,16 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
     public LiveMeterStatusPanel(LiveMeter liveMeter) {
         initComponents();
         setupComponents();
+
+        UIManager.addPropertyChangeListener(propertyChangeEvent -> {
+            setBackground(UIUtil.getPanelBackground());
+            minuteLabel.setForeground(UIUtil.getLabelForeground());
+            minuteValueLabel.setForeground(UIUtil.getLabelForeground());
+            hourLabel.setForeground(UIUtil.getLabelForeground());
+            hourValueLabel.setForeground(UIUtil.getLabelForeground());
+            dayLabel.setForeground(UIUtil.getLabelForeground());
+            dayValueLabel.setForeground(UIUtil.getLabelForeground());
+        });
 
         String meterType = liveMeter.getMeterType().name().toLowerCase();
         meterType = meterType.substring(0, 1).toUpperCase() + meterType.substring(1);
@@ -93,7 +104,6 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         panel4 = new JPanel();
         panel1 = new JPanel();
         meterTypeValueLabel = new JLabel();
@@ -234,7 +244,6 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JPanel panel4;
     private JPanel panel1;
     private JLabel meterTypeValueLabel;
