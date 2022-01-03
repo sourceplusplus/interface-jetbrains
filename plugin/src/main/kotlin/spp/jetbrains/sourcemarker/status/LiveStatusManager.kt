@@ -367,9 +367,8 @@ object LiveStatusManager : SourceMarkEventListener {
                 gutterMark.get().configuration.activateOnMouseHover = false
                 gutterMark.get().configuration.activateOnMouseClick = true
 
-                val panel = JPanel(GridBagLayout())
-                panel.background = Color(43, 43, 43)
                 val statusBar = LiveMeterStatusPanel(liveMeter)
+                val panel = JPanel(GridBagLayout())
                 panel.add(statusBar, GridBagConstraints())
                 panel.preferredSize = Dimension(385, 70)
                 gutterMark.get().configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
