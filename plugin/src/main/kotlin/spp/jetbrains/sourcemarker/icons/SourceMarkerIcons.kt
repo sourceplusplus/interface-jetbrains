@@ -1,6 +1,5 @@
 package spp.jetbrains.sourcemarker.icons
 
-import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.scale.ScaleContext
 import com.intellij.util.SVGLoader
 import com.intellij.util.ui.JBImageIcon
