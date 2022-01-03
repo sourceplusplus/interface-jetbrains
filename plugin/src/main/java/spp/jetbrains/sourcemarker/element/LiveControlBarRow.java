@@ -1,11 +1,11 @@
 package spp.jetbrains.sourcemarker.element;
 
-import java.awt.*;
-import javax.swing.*;
-
 import com.intellij.util.ui.UIUtil;
-import com.jgoodies.forms.factories.*;
+import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class LiveControlBarRow extends JPanel {
 
@@ -19,19 +19,19 @@ public class LiveControlBarRow extends JPanel {
         String[] inputWords = input.split(" ");
         Color selectColor = Color.decode("#e1483b");
         Color defaultColor = UIUtil.getTextAreaForeground();
-        String selectHex = "#"+Integer.toHexString(selectColor.getRGB()).substring(2);
-        String defaultHex = "#"+Integer.toHexString(defaultColor.getRGB()).substring(2);
+        String selectHex = "#" + Integer.toHexString(selectColor.getRGB()).substring(2);
+        String defaultHex = "#" + Integer.toHexString(defaultColor.getRGB()).substring(2);
 
         for (String commandWord : commandName.split(" ")) {
 
             boolean hasMatch = false;
-            for (String inputWord: inputWords) {
+            for (String inputWord : inputWords) {
                 if (commandWord.toLowerCase().startsWith(inputWord)) {
                     commandHtml.append(" ")
-                            .append("<span style=\"color: "+selectHex+"\">")
+                            .append("<span style=\"color: " + selectHex + "\">")
                             .append(commandWord, 0, inputWord.length())
                             .append("</span>")
-                            .append("<span style=\"color: "+defaultHex+"\">")
+                            .append("<span style=\"color: " + defaultHex + "\">")
                             .append(commandWord.substring(inputWord.length()))
                             .append("</span>");
                     hasMatch = true;
@@ -39,7 +39,7 @@ public class LiveControlBarRow extends JPanel {
                 }
             }
             if (!hasMatch) {
-                commandHtml.append(" ").append("<span style=\"color: "+defaultHex+"\">").append(commandWord).append("</span>");
+                commandHtml.append(" ").append("<span style=\"color: " + defaultHex + "\">").append(commandWord).append("</span>");
             }
         }
 
