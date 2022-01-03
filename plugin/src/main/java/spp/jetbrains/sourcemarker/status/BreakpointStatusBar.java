@@ -118,6 +118,14 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
         initComponents();
         setupComponents();
+        paintComponents();
+    }
+
+    private void paintComponents() {
+        breakpointConditionField.setBackground(UIUtil.getTextFieldBackground());
+        breakpointConditionField.setBorder(new CompoundBorder(
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {

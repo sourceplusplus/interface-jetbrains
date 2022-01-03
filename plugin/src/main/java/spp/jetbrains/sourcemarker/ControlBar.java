@@ -171,11 +171,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
     }
 
     private void paintComponents() {
-        setBackground(UIUtil.getEditorPaneBackground());
-        setBorder(UIUtil.getTextFieldBorder());
-
         textField1.setBackground(UIUtil.getTextFieldBackground());
-        textField1.setForeground(UIUtil.getErrorForeground());
         textField1.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));

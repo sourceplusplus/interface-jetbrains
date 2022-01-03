@@ -1,8 +1,6 @@
 package spp.jetbrains.sourcemarker.status.util
 
-import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.ScalableIcon
-import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
@@ -45,11 +43,11 @@ class AutocompleteField(
     private var hasControlHeld = false
     var saveOnSuggestionDoubleClick: Boolean = false
     var addOnSuggestionDoubleClick: Boolean = true
-    var placeHolderTextColor: Color = Color(85, 85, 85, 200)
+    var placeHolderTextColor: Color? = null
     var canShowSaveButton = true
 
     init {
-        foreground = Color.decode("#A9B7C6")
+        foreground = UIUtil.getTextFieldForeground()
 
         results = ArrayList()
         popup = JWindow(SwingUtilities.getWindowAncestor(this))
@@ -320,7 +318,12 @@ class AutocompleteField(
             val textLength = pG.getFontMetrics().stringWidth(placeHolderText)
             val fieldLength = width
 
-            g.color = placeHolderTextColor
+            g.color = placeHolderTextColor ?: Color(
+                UIUtil.getTextFieldForeground().red,
+                UIUtil.getTextFieldForeground().green,
+                UIUtil.getTextFieldForeground().blue,
+                100
+            )
             g.drawString(
                 placeHolderText,
                 insets.left + (fieldLength / 2) - (textLength / 2),

@@ -115,6 +115,14 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         initComponents();
         setupComponents();
+        paintComponents();
+    }
+
+    private void paintComponents() {
+        meterConditionField.setBackground(UIUtil.getTextFieldBackground());
+        meterConditionField.setBorder(new CompoundBorder(
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {

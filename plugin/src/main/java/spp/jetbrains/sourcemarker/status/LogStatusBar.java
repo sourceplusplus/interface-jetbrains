@@ -140,7 +140,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         initComponents();
         setupComponents();
-        paintComponents();
+        showEditableMode();
 
         liveLogTextField.setEditMode(true);
 
@@ -311,7 +311,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
             if (!liveLogTextField.getEditMode()) {
                 liveLogTextField.setBorder(new CompoundBorder(
-                        new LineBorder(Color.darkGray, 0, true),
+                        new LineBorder(UIUtil.getBoundsColor(), 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
                 liveLogTextField.setBackground(PluginColors.getEditComplete());
                 liveLogTextField.setEditable(false);
@@ -321,9 +321,9 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
     private void showEditableMode() {
         liveLogTextField.setBorder(new CompoundBorder(
-                new LineBorder(Color.darkGray, 1, true),
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-        liveLogTextField.setBackground(PluginColors.getBackgroundDefault());
+        liveLogTextField.setBackground(UIUtil.getTextFieldBackground());
         liveLogTextField.setEditable(true);
     }
 
@@ -652,16 +652,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         int index = value.lastIndexOf(delimiter);
         if (index == -1) return value;
         else return value.substring(index + delimiter.length());
-    }
-
-    private void paintComponents() {
-        setBackground(UIUtil.getLabelBackground());
-        setBorder(UIUtil.getTextFieldBorder());
-
-        liveLogTextField.setBackground(UIUtil.getTextFieldBackground());
-        liveLogTextField.setBorder(new CompoundBorder(
-                new LineBorder(UIUtil.getBoundsColor(), 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
     }
 
     private void initComponents() {
