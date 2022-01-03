@@ -17,8 +17,8 @@ import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.StringUtils;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.PluginColors;
 import spp.jetbrains.sourcemarker.PluginIcons;
+import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
@@ -60,6 +60,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
@@ -164,13 +166,13 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(PluginColors.getBackgroundDefault());
+            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
 
             if (!breakpointConditionField.getEditMode()) {
                 breakpointConditionField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                breakpointConditionField.setBackground(PluginColors.getEditComplete());
+                breakpointConditionField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditComplete());
                 breakpointConditionField.setEditable(false);
             }
         });
@@ -256,7 +258,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                             }
                         }));
 
-                        table.setBackground(PluginColors.getBackgroundDefault());
+                        table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -367,7 +369,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(PluginColors.getBackgroundFocus());
+                    configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocus());
                 }
             }
         });
@@ -517,7 +519,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(new LineBorder(new Color(85, 85, 85)));
+        setBorder(PluginUI.PANEL_BORDER);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -565,14 +567,14 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             breakpointConditionField.setBorder(new CompoundBorder(
                 new LineBorder(Color.darkGray, 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-            breakpointConditionField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+            breakpointConditionField.setFont(ROBOTO_LIGHT_PLAIN_14);
             breakpointConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(breakpointConditionField, "cell 0 0");
 
             //---- label1 ----
             label1.setText("Hit Limit");
             label1.setForeground(Color.gray);
-            label1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            label1.setFont(ROBOTO_LIGHT_PLAIN_15);
             mainPanel.add(label1, "cell 1 0");
 
             //---- hitLimitSpinner ----
@@ -582,7 +584,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
             //---- timeLabel ----
             timeLabel.setIcon(PluginIcons.clock);
-            timeLabel.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+            timeLabel.setFont(ROBOTO_LIGHT_PLAIN_14);
             timeLabel.setIconTextGap(8);
             timeLabel.setVisible(false);
             mainPanel.add(timeLabel, "cell 1 0,gapx null 8");

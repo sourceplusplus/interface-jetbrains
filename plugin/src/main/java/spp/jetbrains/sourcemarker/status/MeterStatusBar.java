@@ -14,8 +14,8 @@ import com.intellij.util.ui.UIUtil;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.PluginColors;
 import spp.jetbrains.sourcemarker.PluginIcons;
+import spp.jetbrains.sourcemarker.PluginUI;
 import spp.protocol.SourceMarkerServices;
 import spp.protocol.instrument.*;
 import spp.protocol.instrument.meter.LiveMeter;
@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.marker.SourceMarker.creationService;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
 import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
@@ -151,13 +152,13 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(PluginColors.getBackgroundDefault());
+            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
 
             if (!meterConditionField.getEditMode()) {
                 meterConditionField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                meterConditionField.setBackground(PluginColors.getEditComplete());
+                meterConditionField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditComplete());
                 meterConditionField.setEditable(false);
             }
         });
@@ -218,7 +219,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                         table.setStriped(true);
                         table.setShowColumns(true);
 
-                        table.setBackground(PluginColors.getBackgroundDefault());
+                        table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -326,7 +327,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(PluginColors.getBackgroundFocus());
+                    configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocus());
                 }
             }
         });
@@ -487,7 +488,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(new LineBorder(new Color(85, 85, 85)));
+        setBorder(PluginUI.PANEL_BORDER);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -535,14 +536,14 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             meterConditionField.setBorder(new CompoundBorder(
                 new LineBorder(Color.darkGray, 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-            meterConditionField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+            meterConditionField.setFont(ROBOTO_LIGHT_PLAIN_14);
             meterConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(meterConditionField, "cell 0 0");
 
             //---- label1 ----
             label1.setText("Type");
             label1.setForeground(Color.gray);
-            label1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            label1.setFont(ROBOTO_LIGHT_PLAIN_14);
             mainPanel.add(label1, "cell 1 0");
 
             //---- meterTypeComboBox ----
@@ -555,7 +556,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
             //---- timeLabel ----
             timeLabel.setIcon(PluginIcons.clock);
-            timeLabel.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+            timeLabel.setFont(ROBOTO_LIGHT_PLAIN_14);
             timeLabel.setIconTextGap(8);
             timeLabel.setVisible(false);
             mainPanel.add(timeLabel, "cell 1 0,gapx null 8");

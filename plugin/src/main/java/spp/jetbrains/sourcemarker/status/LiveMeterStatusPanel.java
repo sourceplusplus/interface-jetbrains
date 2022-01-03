@@ -4,6 +4,7 @@ import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import spp.jetbrains.sourcemarker.PluginIcons;
+import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
 import io.vertx.core.json.JsonObject;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener {
@@ -121,7 +123,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
         //======== this ========
         setBorder(new EtchedBorder());
-        setFont(new Font("Roboto Light", Font.PLAIN, 15));
+        setFont(ROBOTO_LIGHT_PLAIN_15);
         setMinimumSize(new Dimension(385, 70));
         setPreferredSize(new Dimension(385, 70));
         setLayout(new FormLayout(
@@ -138,7 +140,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
             //======== panel1 ========
             {
                 panel1.setBackground(null);
-                panel1.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                panel1.setFont(ROBOTO_LIGHT_PLAIN_15);
                 panel1.setLayout(new FormLayout(
                     new ColumnSpec[] {
                         FormFactory.DEFAULT_COLSPEC,
@@ -159,7 +161,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
                 //---- meterTypeValueLabel ----
                 meterTypeValueLabel.setText("Count");
-                meterTypeValueLabel.setFont(new Font("Roboto Light", Font.PLAIN, 16));
+                meterTypeValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
                 meterTypeValueLabel.setForeground(new Color(152, 118, 170));
                 meterTypeValueLabel.setMinimumSize(new Dimension(46, 25));
                 panel1.add(meterTypeValueLabel, cc.xy(1, 1));
@@ -174,22 +176,22 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
                 //---- minuteLabel ----
                 minuteLabel.setText("Minute");
-                minuteLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                minuteLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(minuteLabel, cc.xy(5, 1));
 
                 //---- minuteValueLabel ----
                 minuteValueLabel.setText("n/a");
-                minuteValueLabel.setFont(new Font("Roboto Light", Font.PLAIN, 16));
+                minuteValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
                 panel1.add(minuteValueLabel, cc.xy(7, 1));
 
                 //---- hourLabel ----
                 hourLabel.setText("Hour");
-                hourLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                hourLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(hourLabel, cc.xy(9, 1));
 
                 //---- hourValueLabel ----
                 hourValueLabel.setText("n/a");
-                hourValueLabel.setFont(new Font("Roboto Light", Font.PLAIN, 16));
+                hourValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
                 panel1.add(hourValueLabel, cc.xy(11, 1));
 
                 //======== panel3 ========
@@ -205,12 +207,12 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
                     //---- dayLabel ----
                     dayLabel.setText("Day");
-                    dayLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                    dayLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
                     panel3.add(dayLabel, cc.xy(1, 1));
 
                     //---- dayValueLabel ----
                     dayValueLabel.setText("n/a");
-                    dayValueLabel.setFont(new Font("Roboto Light", Font.PLAIN, 16));
+                    dayValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
                     panel3.add(dayValueLabel, cc.xy(3, 1));
                 }
                 panel1.add(panel3, cc.xy(13, 1));

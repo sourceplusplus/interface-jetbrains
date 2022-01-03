@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class ControlBar extends JPanel implements VisibleAreaListener {
@@ -216,7 +217,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(new LineBorder(new Color(85, 85, 85)));
+        setBorder(PluginUI.PANEL_BORDER);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -235,7 +236,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         textField1.setBorder(new CompoundBorder(
             new LineBorder(Color.darkGray, 1, true),
             new EmptyBorder(2, 6, 0, 0)));
-        textField1.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+        textField1.setFont(ROBOTO_LIGHT_PLAIN_14);
         textField1.setMinimumSize(new Dimension(0, 27));
         add(textField1, "cell 1 0");
 

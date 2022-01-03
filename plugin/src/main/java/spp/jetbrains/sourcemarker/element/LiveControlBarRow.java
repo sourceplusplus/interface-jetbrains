@@ -2,10 +2,18 @@ package spp.jetbrains.sourcemarker.element;
 
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.*;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.layout.Sizes;
 
 import javax.swing.*;
 import java.awt.*;
+
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_11;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_15;
 
 public class LiveControlBarRow extends JPanel {
 
@@ -99,7 +107,7 @@ public class LiveControlBarRow extends JPanel {
             //---- commandLabel ----
             commandLabel.setBackground(null);
             commandLabel.setEditable(false);
-            commandLabel.setFont(new Font("Roboto", Font.PLAIN, 15));
+            commandLabel.setFont(ROBOTO_PLAIN_15);
             commandLabel.setText("<html><span style=\"color: gray; font-size: 15%\">Manual Tracing \u279b Watched Variables \u279b Scope: Local</span></html>");
             commandLabel.setContentType("text/html");
             commandLabel.setMaximumSize(new Dimension(2147483647, 12));
@@ -108,7 +116,7 @@ public class LiveControlBarRow extends JPanel {
             //---- descriptionLabel ----
             descriptionLabel.setText("<html><span style=\"color: gray; font-size: 15%\">Manual Tracing \u279b Watched Variables \u279b Scope: Local</span></html>");
             descriptionLabel.setBackground(null);
-            descriptionLabel.setFont(new Font("Roboto", Font.PLAIN, 11));
+            descriptionLabel.setFont(ROBOTO_PLAIN_11);
             descriptionLabel.setForeground(Color.gray);
             descriptionLabel.setContentType("text/html");
             descriptionLabel.setEditable(false);

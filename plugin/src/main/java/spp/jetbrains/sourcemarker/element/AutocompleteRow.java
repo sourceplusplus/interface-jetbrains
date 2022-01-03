@@ -2,6 +2,7 @@ package spp.jetbrains.sourcemarker.element;
 
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
+import spp.jetbrains.sourcemarker.PluginUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,7 +52,7 @@ public class AutocompleteRow extends JPanel {
         //---- commandLabel ----
         commandLabel.setText("");
         commandLabel.setForeground(new Color(152, 118, 170));
-        commandLabel.setFont(new Font("Roboto Light", Font.BOLD, 14));
+        commandLabel.setFont(PluginUI.ROBOTO_LIGHT_BOLD_14);
         add(commandLabel, "cell 0 0");
 
         //---- descriptionLabel ----
