@@ -50,6 +50,7 @@ import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.marker.SourceMarker.creationService;
 import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
