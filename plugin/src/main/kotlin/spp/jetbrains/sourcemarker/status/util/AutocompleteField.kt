@@ -5,6 +5,7 @@ import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginIcons
+import spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import java.awt.*
 import java.awt.event.*
@@ -29,7 +30,7 @@ class AutocompleteField(
     internal val lineNumber: Int = 0,
     private val replaceCommandOnTab: Boolean = false,
     private val autocompleteOnEnter: Boolean = true,
-    private val varColor: Color = Color.decode("#9876AA")
+    private val varColor: Color = COMPLETE_COLOR_PURPLE
 ) : JTextPane(), FocusListener, DocumentListener, KeyListener, MouseMotionListener, MouseListener {
 
     private val results: MutableList<AutocompleteFieldRow>

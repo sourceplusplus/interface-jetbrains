@@ -108,7 +108,7 @@ new FormModel {
 					add( new FormComponent( "javax.swing.JLabel" ) {
 						name: "configurationLabel"
 						auxiliary() {
-							"JavaCodeGenerator.preInitCode": "${field}.setIcon(IconLoader.getIcon(\"/icons/configIcon.svg\"));"
+							"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.config);"
 						}
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 3

@@ -1,5 +1,6 @@
 package spp.jetbrains.sourcemarker.status.util
 
+import spp.jetbrains.sourcemarker.PluginUI.AUTO_COMPLETE_SELECT_BACKGROUND
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.AutocompleteRow
@@ -33,7 +34,7 @@ class AutoCompleteCellRenderer(private val lineNumber: Int) : DefaultListCellRen
         }
 
         if (isSelected) {
-            row.background = Color.decode("#1C1C1C")
+            row.background = AUTO_COMPLETE_SELECT_BACKGROUND
             if (entry is LiveControlCommand) {
                 row.setCommandIcon(entry.selectedIcon)
             }

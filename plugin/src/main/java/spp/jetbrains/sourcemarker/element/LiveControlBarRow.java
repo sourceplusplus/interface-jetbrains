@@ -2,10 +2,20 @@ package spp.jetbrains.sourcemarker.element;
 
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.*;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.layout.Sizes;
 
 import javax.swing.*;
 import java.awt.*;
+
+import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_11;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_15;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 
 public class LiveControlBarRow extends JPanel {
 
@@ -17,9 +27,8 @@ public class LiveControlBarRow extends JPanel {
     public void setCommandName(String commandName, String input) {
         StringBuilder commandHtml = new StringBuilder();
         String[] inputWords = input.split(" ");
-        Color selectColor = Color.decode("#e1483b");
         Color defaultColor = UIUtil.getTextAreaForeground();
-        String selectHex = "#" + Integer.toHexString(selectColor.getRGB()).substring(2);
+        String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
         String defaultHex = "#" + Integer.toHexString(defaultColor.getRGB()).substring(2);
 
         for (String commandWord : commandName.split(" ")) {
@@ -69,7 +78,7 @@ public class LiveControlBarRow extends JPanel {
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
-        setBackground(new Color(37, 37, 37));
+        setBackground(PANEL_BACKGROUND_COLOR);
         setMinimumSize(new Dimension(219, 45));
         setMaximumSize(new Dimension(2147483647, 45));
         setPreferredSize(new Dimension(370, 45));
@@ -98,7 +107,7 @@ public class LiveControlBarRow extends JPanel {
             //---- commandLabel ----
             commandLabel.setBackground(null);
             commandLabel.setEditable(false);
-            commandLabel.setFont(new Font("Roboto", Font.PLAIN, 15));
+            commandLabel.setFont(ROBOTO_PLAIN_15);
             commandLabel.setText("<html><span style=\"color: gray; font-size: 15%\">Manual Tracing \u279b Watched Variables \u279b Scope: Local</span></html>");
             commandLabel.setContentType("text/html");
             commandLabel.setMaximumSize(new Dimension(2147483647, 12));
@@ -107,7 +116,7 @@ public class LiveControlBarRow extends JPanel {
             //---- descriptionLabel ----
             descriptionLabel.setText("<html><span style=\"color: gray; font-size: 15%\">Manual Tracing \u279b Watched Variables \u279b Scope: Local</span></html>");
             descriptionLabel.setBackground(null);
-            descriptionLabel.setFont(new Font("Roboto", Font.PLAIN, 11));
+            descriptionLabel.setFont(ROBOTO_PLAIN_11);
             descriptionLabel.setForeground(Color.gray);
             descriptionLabel.setContentType("text/html");
             descriptionLabel.setEditable(false);

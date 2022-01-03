@@ -24,7 +24,7 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "configLabel"
 					auxiliary() {
-						"JavaCodeGenerator.preInitCode": "${field}.setIcon(IconLoader.getIcon(\"/icons/eye.svg\"));"
+						"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.eye);"
 					}
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"
@@ -32,7 +32,7 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "configDropdownLabel"
 					auxiliary() {
-						"JavaCodeGenerator.preInitCode": "${field}.setIcon(IconLoader.getIcon(\"/icons/angle-down.svg\"));"
+						"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.angleDown);"
 					}
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 1 0"
@@ -82,7 +82,7 @@ new FormModel {
 					"iconTextGap": 8
 					"visible": false
 					auxiliary() {
-						"JavaCodeGenerator.preInitCode": "${field}.setIcon(IconLoader.getIcon(\"/icons/clock.svg\"));"
+						"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.clock);"
 					}
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 1 0,gapx null 8"
@@ -103,7 +103,7 @@ new FormModel {
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "closeLabel"
 				auxiliary() {
-					"JavaCodeGenerator.preInitCode": "${field}.setIcon(IconLoader.getIcon(\"/icons/closeIcon.svg\"));"
+					"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.close);"
 				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 2 0"
