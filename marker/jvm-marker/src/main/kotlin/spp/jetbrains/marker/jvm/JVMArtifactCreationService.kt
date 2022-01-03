@@ -3,6 +3,8 @@ package spp.jetbrains.marker.jvm
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiStatement
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.toUElement
 import spp.jetbrains.marker.ArtifactCreationService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.JVMMarkerUtils
@@ -12,8 +14,6 @@ import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.toUElement
 import java.util.*
 
 /**
@@ -106,7 +106,11 @@ class JVMArtifactCreationService : ArtifactCreationService {
         lineNumber: Int,
         autoApply: Boolean
     ): ExpressionInlayMark {
-        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiStatement
-        return JVMMarkerUtils.createExpressionInlayMark(fileMarker, element, autoApply)
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiElement
+        return if (element is PsiStatement) {
+            JVMMarkerUtils.createExpressionInlayMark(fileMarker, element, autoApply)
+        } else {
+            JVMMarkerUtils.createExpressionInlayMark(fileMarker, element, autoApply)
+        }
     }
 }
