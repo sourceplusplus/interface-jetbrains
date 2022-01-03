@@ -18,6 +18,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
@@ -162,7 +163,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                 //---- meterTypeValueLabel ----
                 meterTypeValueLabel.setText("Count");
                 meterTypeValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
-                meterTypeValueLabel.setForeground(new Color(152, 118, 170));
+                meterTypeValueLabel.setForeground(LABEL_FOREGROUND_COLOR);
                 meterTypeValueLabel.setMinimumSize(new Dimension(46, 25));
                 panel1.add(meterTypeValueLabel, cc.xy(1, 1));
 

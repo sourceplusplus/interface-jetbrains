@@ -17,7 +17,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static spp.jetbrains.sourcemarker.PluginUI.EXPIRY_FOREGROUND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR1;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 
 public class LiveBreakpointStatusPanel extends JPanel {
 
@@ -88,10 +91,10 @@ public class LiveBreakpointStatusPanel extends JPanel {
         long min = diffSec / 60;
         long sec = diffSec % 60;
         if (min > 0) {
-            expiresValueLabel.setForeground(Color.decode("#BBBBBB"));
+            expiresValueLabel.setForeground(EXPIRY_FOREGROUND_COLOR);
             expiresValueLabel.setText(min + "min " + sec + "s");
         } else {
-            expiresValueLabel.setForeground(Color.decode("#e1483b"));
+            expiresValueLabel.setForeground(SELECT_COLOR_RED);
             expiresValueLabel.setText(sec + "s");
         }
     }
@@ -153,7 +156,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
             //---- statusValueLabel ----
             statusValueLabel.setText("Active");
             statusValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
-            statusValueLabel.setForeground(new Color(106, 135, 89));
+            statusValueLabel.setForeground(LABEL_FOREGROUND_COLOR1);
             panel1.add(statusValueLabel, cc.xy(3, 1));
 
             //---- separator1 ----

@@ -65,7 +65,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
@@ -246,7 +248,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 errored = true;
                 liveLogTextField.setText("");
                 liveLogTextField.setPlaceHolderText(removed.getCause().getMessage());
-                liveLogTextField.setPlaceHolderTextColor(Color.decode("#e1483b"));
+                liveLogTextField.setPlaceHolderTextColor(SELECT_COLOR_RED);
             }
 
             liveLogTextField.setEditMode(false);
@@ -284,7 +286,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     table.setStriped(true);
                     table.setShowColumns(true);
 
-                    table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
+                    table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
                     panel.add(scrollPane);
                     panel.setPreferredSize(new Dimension(0, 250));
                     wrapper.add(panel, BorderLayout.NORTH);
@@ -321,13 +323,13 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
+            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
 
             if (!liveLogTextField.getEditMode()) {
                 liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(UIUtil.getBoundsColor(), 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                liveLogTextField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditComplete());
+                liveLogTextField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditCompleteColor());
                 liveLogTextField.setEditable(false);
             }
         });
@@ -480,7 +482,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!errored && !removed) configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocus());
+                if (!errored && !removed) configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocusColor());
             }
         });
 
@@ -676,7 +678,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configDropdownLabel = new JLabel();
         timeLabel = new JLabel();
         separator1 = new JSeparator();
-        liveLogTextField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
+        liveLogTextField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);
         closeLabel = new JLabel();
 
         //======== this ========

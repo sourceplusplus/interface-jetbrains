@@ -48,7 +48,9 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.marker.SourceMarker.creationService;
+import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
@@ -152,13 +154,13 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
+            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
 
             if (!meterConditionField.getEditMode()) {
                 meterConditionField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                meterConditionField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditComplete());
+                meterConditionField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditCompleteColor());
                 meterConditionField.setEditable(false);
             }
         });
@@ -172,10 +174,10 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
                 LiveMeterRemoved removed = Json.decodeValue(event.getData(), LiveMeterRemoved.class);
                 if (removed.getCause() == null) {
-                    statusPanel.setStatus("Complete", Color.decode("#9876AA"));
+                    statusPanel.setStatus("Complete", COMPLETE_COLOR_PURPLE);
                 } else {
                     commandModel.insertRow(0, event);
-                    statusPanel.setStatus("Error", Color.decode("#e1483b"));
+                    statusPanel.setStatus("Error", SELECT_COLOR_RED);
                 }
             }
         });
@@ -219,7 +221,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                         table.setStriped(true);
                         table.setShowColumns(true);
 
-                        table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
+                        table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -327,7 +329,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocus());
+                    configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocusColor());
                 }
             }
         });
@@ -478,7 +480,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        meterConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
+        meterConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);
         label1 = new JLabel();
         meterTypeComboBox = new JComboBox<>();
         timeLabel = new JLabel();

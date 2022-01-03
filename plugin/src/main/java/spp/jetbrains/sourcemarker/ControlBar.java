@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class ControlBar extends JPanel implements VisibleAreaListener {
@@ -210,7 +212,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         }
         textField1 = new AutocompleteField(
                 "Location: " + location + "#" + inlayMark.getLineNumber(),
-                availableCommands, lookup, inlayMark.getLineNumber(), true, true, Color.decode("#e1483b"));
+                availableCommands, lookup, inlayMark.getLineNumber(), true, true, SELECT_COLOR_RED);
         textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();
 
@@ -232,7 +234,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         add(label1, "cell 0 0");
 
         //---- textField1 ----
-        textField1.setBackground(new Color(37, 37, 37));
+        textField1.setBackground(PANEL_BACKGROUND_COLOR);
         textField1.setBorder(new CompoundBorder(
             new LineBorder(Color.darkGray, 1, true),
             new EmptyBorder(2, 6, 0, 0)));

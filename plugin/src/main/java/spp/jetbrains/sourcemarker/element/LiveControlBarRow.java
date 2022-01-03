@@ -12,8 +12,10 @@ import com.jgoodies.forms.layout.Sizes;
 import javax.swing.*;
 import java.awt.*;
 
+import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_11;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_15;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 
 public class LiveControlBarRow extends JPanel {
 
@@ -25,9 +27,8 @@ public class LiveControlBarRow extends JPanel {
     public void setCommandName(String commandName, String input) {
         StringBuilder commandHtml = new StringBuilder();
         String[] inputWords = input.split(" ");
-        Color selectColor = Color.decode("#e1483b");
         Color defaultColor = UIUtil.getTextAreaForeground();
-        String selectHex = "#" + Integer.toHexString(selectColor.getRGB()).substring(2);
+        String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
         String defaultHex = "#" + Integer.toHexString(defaultColor.getRGB()).substring(2);
 
         for (String commandWord : commandName.split(" ")) {
@@ -78,7 +79,7 @@ public class LiveControlBarRow extends JPanel {
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
-        setBackground(new Color(37, 37, 37));
+        setBackground(PANEL_BACKGROUND_COLOR);
         setMinimumSize(new Dimension(219, 45));
         setMaximumSize(new Dimension(2147483647, 45));
         setPreferredSize(new Dimension(370, 45));

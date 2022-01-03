@@ -60,8 +60,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
@@ -166,13 +168,13 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
+            configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
 
             if (!breakpointConditionField.getEditMode()) {
                 breakpointConditionField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                breakpointConditionField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditComplete());
+                breakpointConditionField.setBackground(spp.jetbrains.sourcemarker.PluginUI.getEditCompleteColor());
                 breakpointConditionField.setEditable(false);
             }
         });
@@ -189,10 +191,10 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
                 LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
                 if (removed.getCause() == null) {
-                    statusPanel.setStatus("Complete", Color.decode("#9876AA"));
+                    statusPanel.setStatus("Complete", COMPLETE_COLOR_PURPLE);
                 } else {
                     commandModel.insertRow(0, event);
-                    statusPanel.setStatus("Error", Color.decode("#e1483b"));
+                    statusPanel.setStatus("Error", SELECT_COLOR_RED);
                 }
             }
         });
@@ -258,7 +260,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                             }
                         }));
 
-                        table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefault());
+                        table.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundDefaultColor());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -369,7 +371,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocus());
+                    configPanel.setBackground(spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocusColor());
                 }
             }
         });
@@ -509,7 +511,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        breakpointConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode("#9876AA"));
+        breakpointConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);
         label1 = new JLabel();
         hitLimitSpinner = new JBIntSpinner(1, 1, 10_000);
         timeLabel = new JLabel();
