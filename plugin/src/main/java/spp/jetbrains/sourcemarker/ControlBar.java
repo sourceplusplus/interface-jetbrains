@@ -190,7 +190,6 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         label1 = new JLabel();
         String fullyQualified = inlayMark.getArtifactQualifiedName();
         String location = fullyQualified;
@@ -242,7 +241,6 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JLabel label1;
     private AutocompleteField textField1;
     private JLabel label2;

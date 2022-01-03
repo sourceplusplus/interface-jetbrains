@@ -91,7 +91,6 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         panel1 = new JPanel();
         statusLabel = new JLabel();
         statusValueLabel = new JLabel();
@@ -192,7 +191,6 @@ public class LiveBreakpointStatusPanel extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JPanel panel1;
     private JLabel statusLabel;
     private JLabel statusValueLabel;

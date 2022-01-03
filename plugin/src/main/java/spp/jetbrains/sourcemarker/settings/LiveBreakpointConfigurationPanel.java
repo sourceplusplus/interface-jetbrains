@@ -103,7 +103,6 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         panel3 = new JPanel();
         label3 = new JLabel();
         panel1 = new JPanel();
@@ -281,7 +280,6 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JPanel panel3;
     private JLabel label3;
     private JPanel panel1;

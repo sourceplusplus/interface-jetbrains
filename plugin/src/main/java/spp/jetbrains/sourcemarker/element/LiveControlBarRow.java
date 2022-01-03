@@ -62,7 +62,6 @@ public class LiveControlBarRow extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         panel1 = new JPanel();
         commandLabel = new JTextPane();
         descriptionLabel = new JTextPane();
@@ -120,7 +119,6 @@ public class LiveControlBarRow extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JPanel panel1;
     private JTextPane commandLabel;
     private JTextPane descriptionLabel;
