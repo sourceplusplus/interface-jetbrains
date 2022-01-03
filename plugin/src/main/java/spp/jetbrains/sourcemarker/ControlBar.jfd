@@ -36,7 +36,7 @@ new FormModel {
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label2"
 				auxiliary() {
-					"JavaCodeGenerator.preInitCode": "label2.setIcon(IconLoader.getIcon(\"/icons/closeIcon.svg\"));"
+					"JavaCodeGenerator.preInitCode": "label2.setIcon(PluginIcons.close);"
 				}
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 2 0"
