@@ -473,7 +473,6 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
@@ -578,7 +577,6 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JPanel configPanel;
     private JLabel configLabel;
     private JLabel configDropdownLabel;

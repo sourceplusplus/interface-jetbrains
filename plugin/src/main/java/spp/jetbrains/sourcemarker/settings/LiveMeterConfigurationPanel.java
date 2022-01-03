@@ -159,7 +159,6 @@ public class LiveMeterConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         panel4 = new JPanel();
         label1 = new JLabel();
         conditionPanel = new JPanel();
@@ -317,7 +316,6 @@ public class LiveMeterConfigurationPanel extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JPanel panel4;
     private JLabel label1;
     private JPanel conditionPanel;

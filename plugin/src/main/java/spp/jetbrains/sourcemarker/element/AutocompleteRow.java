@@ -33,7 +33,6 @@ public class AutocompleteRow extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         commandLabel = new JLabel();
         descriptionLabel = new JLabel();
 
@@ -62,7 +61,6 @@ public class AutocompleteRow extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JLabel commandLabel;
     private JLabel descriptionLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables

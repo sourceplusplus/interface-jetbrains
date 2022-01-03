@@ -196,7 +196,6 @@ public class LiveLogConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - unknown
         panel4 = new JPanel();
         lblCondition = new JLabel();
         conditionPanel = new JPanel();
@@ -438,7 +437,6 @@ public class LiveLogConfigurationPanel extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
     private JPanel panel4;
     private JLabel lblCondition;
     private JPanel conditionPanel;
