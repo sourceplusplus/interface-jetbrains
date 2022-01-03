@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.13" encoding: "UTF-8"
+JFDML JFormDesigner: "7.0.5.1.409" Java: "11.0.7" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -8,7 +8,6 @@ new FormModel {
 			"$rowSpecs": "fill:default:grow"
 		} ) {
 			name: "this"
-			"background": new java.awt.Color( 43, 43, 43, 255 )
 			"border": new javax.swing.border.EtchedBorder( 1, null, null )
 			"font": &Font0 new java.awt.Font( "Roboto Light", 0, 15 )
 			"minimumSize": new java.awt.Dimension( 385, 70 )
@@ -47,7 +46,6 @@ new FormModel {
 					add( new FormComponent( "javax.swing.JLabel" ) {
 						name: "minuteLabel"
 						"text": "Minute"
-						"foreground": sfield java.awt.Color gray
 						"font": &Font1 new java.awt.Font( "Roboto Light", 0, 15 )
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 5
@@ -62,7 +60,6 @@ new FormModel {
 					add( new FormComponent( "javax.swing.JLabel" ) {
 						name: "hourLabel"
 						"text": "Hour"
-						"foreground": sfield java.awt.Color gray
 						"font": #Font1
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 9
@@ -83,7 +80,6 @@ new FormModel {
 						add( new FormComponent( "javax.swing.JLabel" ) {
 							name: "dayLabel"
 							"text": "Day"
-							"foreground": sfield java.awt.Color gray
 							"font": #Font1
 						}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
 						add( new FormComponent( "javax.swing.JLabel" ) {

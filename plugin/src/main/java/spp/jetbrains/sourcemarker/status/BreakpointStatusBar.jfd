@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.11" encoding: "UTF-8"
+JFDML JFormDesigner: "7.0.5.1.409" Java: "11.0.7" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -12,14 +12,12 @@ new FormModel {
 			"preferredSize": new java.awt.Dimension( 500, 40 )
 			"minimumSize": new java.awt.Dimension( 500, 40 )
 			"border": new javax.swing.border.LineBorder( new java.awt.Color( 85, 85, 85, 255 ), 1, false )
-			"background": new java.awt.Color( 43, 43, 43, 255 )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
 				"$columnConstraints": "5[fill][fill]4"
 				"$rowConstraints": "[grow]"
 				"$layoutConstraints": "fill,insets 0,hidemode 3"
 			} ) {
 				name: "configPanel"
-				"background": new java.awt.Color( 37, 37, 37, 255 )
 				"preferredSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				"minimumSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				"maximumSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -51,7 +49,6 @@ new FormModel {
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				add( new FormComponent( "javax.swing.JTextPane" ) {
 					name: "breakpointConditionField"
-					"background": new java.awt.Color( 37, 37, 37, 255 )
 					"border": new javax.swing.border.CompoundBorder( new javax.swing.border.LineBorder( sfield java.awt.Color darkGray, 1, true ), new javax.swing.border.EmptyBorder( 2, 6, 0, 0 ) )
 					"font": new java.awt.Font( "Roboto Light", 0, 14 )
 					"minimumSize": new java.awt.Dimension( 0, 27 )

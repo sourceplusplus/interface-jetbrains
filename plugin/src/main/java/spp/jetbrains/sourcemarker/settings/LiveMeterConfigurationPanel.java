@@ -177,7 +177,6 @@ public class LiveMeterConfigurationPanel extends JPanel {
         expiration24HrsButton = new JRadioButton();
 
         //======== this ========
-        setBackground(new Color(43, 43, 43));
         setBorder(new LineBorder(new Color(85, 85, 85)));
         setLayout(new MigLayout(
             "hidemode 3",

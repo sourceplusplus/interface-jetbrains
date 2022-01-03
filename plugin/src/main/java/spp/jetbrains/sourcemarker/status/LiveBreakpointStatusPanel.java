@@ -1,5 +1,6 @@
 package spp.jetbrains.sourcemarker.status;
 
+import javax.swing.border.*;
 import com.codahale.metrics.Meter;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
@@ -104,7 +105,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
-        setBackground(new Color(43, 43, 43));
+
         //setBorder(new LineBorder(new Color(85, 85, 85)));
         setFont(new Font("Roboto Light", Font.PLAIN, 15));
         setLayout(new FormLayout(
@@ -140,7 +141,6 @@ public class LiveBreakpointStatusPanel extends JPanel {
             //---- statusLabel ----
             statusLabel.setText("Status");
             statusLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
-            statusLabel.setForeground(Color.gray);
             panel1.add(statusLabel, cc.xy(1, 1));
 
             //---- statusValueLabel ----
@@ -159,7 +159,6 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- hitsLabel ----
             hitsLabel.setText("Hits");
-            hitsLabel.setForeground(Color.gray);
             hitsLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
             panel1.add(hitsLabel, cc.xy(7, 1));
 
@@ -170,7 +169,6 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- rateLabel ----
             rateLabel.setText("Rate");
-            rateLabel.setForeground(Color.gray);
             rateLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
             panel1.add(rateLabel, cc.xy(11, 1));
 
@@ -181,7 +179,6 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- expiresLabel ----
             expiresLabel.setText("Expires");
-            expiresLabel.setForeground(Color.gray);
             expiresLabel.setFont(new Font("Roboto Light", Font.PLAIN, 15));
             panel1.add(expiresLabel, cc.xy(15, 1));
 

@@ -58,6 +58,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
 
         initComponents();
         setupComponents();
+        paintComponents();
         setCursor(Cursor.getDefaultCursor());
 
         textField1.setSaveOnSuggestionDoubleClick(true);
@@ -145,7 +146,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         label2.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                label2.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
+                label2.setIcon(PluginIcons.closeHovered);
             }
         });
         addRecursiveMouseListener(label2, new MouseAdapter() {
@@ -156,17 +157,24 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                label2.setIcon(IconLoader.getIcon("/icons/closeIconPressed.svg"));
+                label2.setIcon(PluginIcons.closePressed);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                label2.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
+                label2.setIcon(PluginIcons.closeHovered);
             }
         }, () -> {
             removeActiveDecorations();
             return null;
         });
+    }
+
+    private void paintComponents() {
+        textField1.setBackground(UIUtil.getTextFieldBackground());
+        textField1.setBorder(new CompoundBorder(
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
     }
 
     private void dispose() {
@@ -177,7 +185,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
     }
 
     private void removeActiveDecorations() {
-        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+        label2.setIcon(PluginIcons.close);
     }
 
     private void initComponents() {
@@ -205,7 +213,6 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
         setBorder(new LineBorder(new Color(85, 85, 85)));
-        setBackground(new Color(43, 43, 43));
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -216,7 +223,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
             "0[grow]0"));
 
         //---- label1 ----
-        label1.setIcon(IconLoader.getIcon("/icons/command/logo.svg"));
+        label1.setIcon(PluginIcons.Command.logo);
         add(label1, "cell 0 0");
 
         //---- textField1 ----
