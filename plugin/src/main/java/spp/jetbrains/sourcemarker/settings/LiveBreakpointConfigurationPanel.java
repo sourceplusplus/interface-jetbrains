@@ -1,5 +1,6 @@
 package spp.jetbrains.sourcemarker.settings;
 
+import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import net.miginfocom.swing.MigLayout;
 
@@ -123,7 +124,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
         rateLimitStepCombobox = new JComboBox<>();
 
         //======== this ========
-        setBorder(new LineBorder(new Color(85, 85, 85)));
+        setBorder(PluginUI.PANEL_BORDER);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -148,7 +149,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
             //---- label3 ----
             label3.setText("Expiration Date");
-            label3.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            label3.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
             panel3.add(label3, "cell 0 0");
 
             //======== panel1 ========
@@ -172,43 +173,43 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                 expiration15MinButton.setText("15 Minutes");
                 expiration15MinButton.setSelected(true);
                 expiration15MinButton.setBackground(null);
-                expiration15MinButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                expiration15MinButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(expiration15MinButton, "cell 0 0");
 
                 //---- expiration30MinButton ----
                 expiration30MinButton.setText("30 Minutes");
                 expiration30MinButton.setBackground(null);
-                expiration30MinButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                expiration30MinButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(expiration30MinButton, "cell 1 0");
 
                 //---- expiration1HrButton ----
                 expiration1HrButton.setText("1 Hour");
                 expiration1HrButton.setBackground(null);
-                expiration1HrButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                expiration1HrButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(expiration1HrButton, "cell 2 0");
 
                 //---- expiration3HrsButton ----
                 expiration3HrsButton.setText("3 Hours");
                 expiration3HrsButton.setBackground(null);
-                expiration3HrsButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                expiration3HrsButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(expiration3HrsButton, "cell 3 0");
 
                 //---- expiration6HrsButton ----
                 expiration6HrsButton.setText("6 Hours");
                 expiration6HrsButton.setBackground(null);
-                expiration6HrsButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                expiration6HrsButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(expiration6HrsButton, "cell 4 0");
 
                 //---- expiration12HrsButton ----
                 expiration12HrsButton.setText("12 Hours");
                 expiration12HrsButton.setBackground(null);
-                expiration12HrsButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                expiration12HrsButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(expiration12HrsButton, "cell 5 0");
 
                 //---- expiration24HrsButton ----
                 expiration24HrsButton.setText("24 Hours");
                 expiration24HrsButton.setBackground(null);
-                expiration24HrsButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+                expiration24HrsButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
                 panel1.add(expiration24HrsButton, "cell 6 0");
             }
             panel3.add(panel1, "cell 0 1 3 1");
@@ -233,7 +234,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
             //---- label6 ----
             label6.setText("Hit Throttle");
-            label6.setFont(new Font("Roboto Light", Font.PLAIN, 15));
+            label6.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
             panel5.add(label6, "cell 0 0");
 
             //======== panel2 ========

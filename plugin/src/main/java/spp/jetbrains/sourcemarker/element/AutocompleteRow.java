@@ -2,9 +2,13 @@ package spp.jetbrains.sourcemarker.element;
 
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
+import spp.jetbrains.sourcemarker.PluginUI;
 
 import javax.swing.*;
 import java.awt.*;
+
+import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
 
 public class AutocompleteRow extends JPanel {
 
@@ -38,7 +42,7 @@ public class AutocompleteRow extends JPanel {
         descriptionLabel = new JLabel();
 
         //======== this ========
-        setBackground(new Color(37, 37, 37));
+        setBackground(PANEL_BACKGROUND_COLOR);
         setMaximumSize(new Dimension(2147483647, 38));
         setLayout(new MigLayout(
             "hidemode 3",
@@ -50,8 +54,8 @@ public class AutocompleteRow extends JPanel {
 
         //---- commandLabel ----
         commandLabel.setText("");
-        commandLabel.setForeground(new Color(152, 118, 170));
-        commandLabel.setFont(new Font("Roboto Light", Font.BOLD, 14));
+        commandLabel.setForeground(LABEL_FOREGROUND_COLOR);
+        commandLabel.setFont(PluginUI.ROBOTO_LIGHT_BOLD_14);
         add(commandLabel, "cell 0 0");
 
         //---- descriptionLabel ----

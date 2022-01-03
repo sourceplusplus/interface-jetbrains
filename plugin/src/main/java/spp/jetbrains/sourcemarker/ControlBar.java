@@ -3,28 +3,35 @@ package spp.jetbrains.sourcemarker;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ui.UIUtil;
+import info.debatty.java.stringsimilarity.JaroWinkler;
+import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.protocol.utils.ArtifactNameUtils;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
-import spp.jetbrains.sourcemarker.command.LiveControlCommand;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
+import spp.jetbrains.sourcemarker.command.LiveControlCommand;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
-import info.debatty.java.stringsimilarity.*;
-import net.miginfocom.swing.MigLayout;
+import spp.protocol.utils.ArtifactNameUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class ControlBar extends JPanel implements VisibleAreaListener {
@@ -205,14 +212,14 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         }
         textField1 = new AutocompleteField(
                 "Location: " + location + "#" + inlayMark.getLineNumber(),
-                availableCommands, lookup, inlayMark.getLineNumber(), true, true, Color.decode("#e1483b"));
+                availableCommands, lookup, inlayMark.getLineNumber(), true, true, SELECT_COLOR_RED);
         textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();
 
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(new LineBorder(new Color(85, 85, 85)));
+        setBorder(PluginUI.PANEL_BORDER);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -227,16 +234,16 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         add(label1, "cell 0 0");
 
         //---- textField1 ----
-        textField1.setBackground(new Color(37, 37, 37));
+        textField1.setBackground(PANEL_BACKGROUND_COLOR);
         textField1.setBorder(new CompoundBorder(
             new LineBorder(Color.darkGray, 1, true),
             new EmptyBorder(2, 6, 0, 0)));
-        textField1.setFont(new Font("Roboto Light", Font.PLAIN, 14));
+        textField1.setFont(ROBOTO_LIGHT_PLAIN_14);
         textField1.setMinimumSize(new Dimension(0, 27));
         add(textField1, "cell 1 0");
 
         //---- label2 ----
-        label2.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
+        label2.setIcon(PluginIcons.close);
         add(label2, "cell 2 0");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
