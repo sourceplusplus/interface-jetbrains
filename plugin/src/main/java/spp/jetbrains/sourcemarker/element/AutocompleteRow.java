@@ -1,5 +1,6 @@
 package spp.jetbrains.sourcemarker.element;
 
+import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -9,6 +10,7 @@ public class AutocompleteRow extends JPanel {
 
     public AutocompleteRow() {
         initComponents();
+        paintComponent();
     }
 
     public void setCommandName(String commandName) {
@@ -21,6 +23,12 @@ public class AutocompleteRow extends JPanel {
 
     public void setDescription(String description) {
         descriptionLabel.setText(description);
+    }
+
+    private void paintComponent() {
+        setBackground(UIUtil.getLabelBackground());
+        commandLabel.setForeground(UIUtil.getTextFieldForeground());
+        descriptionLabel.setForeground(UIUtil.getTextFieldForeground());
     }
 
     private void initComponents() {

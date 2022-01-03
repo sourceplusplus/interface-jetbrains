@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "7.0.4.0.360" Java: "11.0.11" encoding: "UTF-8"
+JFDML JFormDesigner: "7.0.5.1.409" Java: "11.0.7" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -8,7 +8,6 @@ new FormModel {
 			"$rowSpecs": "fill:default:grow"
 		} ) {
 			name: "this"
-			"background": new java.awt.Color( 43, 43, 43, 255 )
 			"border": new javax.swing.border.LineBorder( new java.awt.Color( 85, 85, 85, 255 ), 1, false )
 			"font": &Font0 new java.awt.Font( "Roboto Light", 0, 15 )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
@@ -22,7 +21,6 @@ new FormModel {
 					name: "statusLabel"
 					"text": "Status"
 					"font": #Font0
-					"foreground": sfield java.awt.Color gray
 				}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "statusValueLabel"
@@ -46,7 +44,6 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "hitsLabel"
 					"text": "Hits"
-					"foreground": sfield java.awt.Color gray
 					"font": &Font1 new java.awt.Font( "Roboto Light", 0, 15 )
 				}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 					"gridX": 7
@@ -61,7 +58,6 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "rateLabel"
 					"text": "Rate"
-					"foreground": sfield java.awt.Color gray
 					"font": #Font1
 				}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 					"gridX": 11
@@ -76,7 +72,6 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "expiresLabel"
 					"text": "Expires"
-					"foreground": sfield java.awt.Color gray
 					"font": #Font1
 				}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 					"gridX": 15

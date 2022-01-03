@@ -1,5 +1,6 @@
 package spp.jetbrains.sourcemarker.status.util
 
+import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
@@ -16,7 +17,7 @@ import javax.swing.JList
  */
 class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) : DefaultListCellRenderer() {
     init {
-        isOpaque = true
+        isOpaque = false
     }
 
     override fun getListCellRendererComponent(
@@ -33,7 +34,7 @@ class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) :
         }
 
         if (isSelected) {
-            row.background = Color.decode("#1C1C1C")
+            row.background = UIUtil.getListSelectionBackground(true)
             if (entry is LiveControlCommand) {
                 row.setCommandIcon(entry.selectedIcon)
             }

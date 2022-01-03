@@ -1,6 +1,7 @@
 package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.util.IconLoader
+import spp.jetbrains.sourcemarker.PluginIcons
 import javax.swing.Icon
 
 /**
@@ -32,44 +33,44 @@ enum class LiveControlCommand(
     ADD_LIVE_BREAKPOINT(
         "Add Breakpoint",
         "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
-        IconLoader.findIcon("/icons/command/live-breakpoint_selected.svg"),
-        IconLoader.findIcon("/icons/command/live-breakpoint_unselected.svg")
+        PluginIcons.Command.liveBreakpointSelected,
+        PluginIcons.Command.liveBreakpointUnSelected
     ),
     ADD_LIVE_LOG(
         "Add Log",
         "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
-        IconLoader.findIcon("/icons/command/live-log_selected.svg"),
-        IconLoader.findIcon("/icons/command/live-log_unselected.svg")
+        PluginIcons.Command.livelogSelected,
+        PluginIcons.Command.livelogUnSelected
     ),
     ADD_LIVE_METER(
         "Add Meter",
         "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
-        IconLoader.findIcon("/icons/command/live-meter_selected.svg"),
-        IconLoader.findIcon("/icons/command/live-meter_unselected.svg")
+        PluginIcons.Command.liveMeterSelected,
+        PluginIcons.Command.liveMeterUnSelected
     ),
     CLEAR_LIVE_INSTRUMENTS(
         "Clear Instruments",
         "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Clear All</span></html>",
-        IconLoader.findIcon("/icons/command/clear-instruments_selected.svg"),
-        IconLoader.findIcon("/icons/command/clear-instruments_unselected.svg")
+        PluginIcons.Command.clearInstrumentSelected,
+        PluginIcons.Command.clearInstrumentUnSelected
     ),
     CLEAR_LIVE_BREAKPOINTS(
         "Clear Breakpoints",
         "Clear all self-created live breakpoints",
-        IconLoader.findIcon("/icons/command/clear-instruments_selected.svg"),
-        IconLoader.findIcon("/icons/command/clear-instruments_unselected.svg")
+        PluginIcons.Command.clearInstrumentSelected,
+        PluginIcons.Command.clearInstrumentUnSelected
     ),
     CLEAR_LIVE_LOGS(
         "Clear Logs",
         "Clear all self-created live logs",
-        IconLoader.findIcon("/icons/command/clear-instruments_selected.svg"),
-        IconLoader.findIcon("/icons/command/clear-instruments_unselected.svg")
+        PluginIcons.Command.clearInstrumentSelected,
+        PluginIcons.Command.clearInstrumentUnSelected
     ),
     CLEAR_LIVE_METERS(
         "Clear Meters",
         "Clear all self-created live meters",
-        IconLoader.findIcon("/icons/command/clear-instruments_selected.svg"),
-        IconLoader.findIcon("/icons/command/clear-instruments_unselected.svg")
+        PluginIcons.Command.clearInstrumentSelected,
+        PluginIcons.Command.clearInstrumentUnSelected
     );
 
     override fun getText(): String {

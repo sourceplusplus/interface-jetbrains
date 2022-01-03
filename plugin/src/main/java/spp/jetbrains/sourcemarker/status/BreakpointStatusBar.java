@@ -15,6 +15,8 @@ import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
+import spp.jetbrains.sourcemarker.PluginColors;
+import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.protocol.SourceMarkerServices;
 import spp.protocol.instrument.*;
 import spp.protocol.instrument.breakpoint.LiveBreakpoint;
@@ -89,7 +91,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             }
 
             public Icon getIcon() {
-                return IconLoader.getIcon("/nodes/variable.png");
+                return PluginIcons.Nodes.variable;
             }
         }).collect(Collectors.toList());
         lookup = text -> scopeVars.stream()
@@ -106,7 +108,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                     }
 
                     public Icon getIcon() {
-                        return IconLoader.getIcon("/nodes/variable.png");
+                        return PluginIcons.Nodes.variable;
                     }
                 })
                 .limit(7)
@@ -116,6 +118,14 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
         initComponents();
         setupComponents();
+        paintComponents();
+    }
+
+    private void paintComponents() {
+        breakpointConditionField.setBackground(UIUtil.getTextFieldBackground());
+        breakpointConditionField.setBorder(new CompoundBorder(
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
@@ -143,15 +153,15 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
     private void removeActiveDecorations() {
         SwingUtilities.invokeLater(() -> {
-            if (expandLabel != null) expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
-            closeLabel.setIcon(IconLoader.getIcon("/icons/closeIcon.svg"));
-            configPanel.setBackground(Color.decode("#252525"));
+            if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
+            closeLabel.setIcon(PluginIcons.close);
+            configPanel.setBackground(PluginColors.getBackgroundDefault());
 
             if (!breakpointConditionField.getEditMode()) {
                 breakpointConditionField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                breakpointConditionField.setBackground(Color.decode("#2B2B2B"));
+                breakpointConditionField.setBackground(PluginColors.getEditComplete());
                 breakpointConditionField.setEditable(false);
             }
         });
@@ -164,7 +174,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                 commandModel.insertRow(0, event);
                 statusPanel.incrementHits();
             } else if (event.getEventType() == BREAKPOINT_REMOVED) {
-                configLabel.setIcon(IconLoader.getIcon("/icons/eye-slash.svg"));
+                configLabel.setIcon(PluginIcons.eyeSlash);
 
                 LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
                 if (removed.getCause() == null) {
@@ -196,7 +206,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             expandLabel.addMouseMotionListener(new MouseAdapter() {
                 @Override
                 public void mouseMoved(MouseEvent e) {
-                    expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
+                    expandLabel.setIcon(PluginIcons.expandHovered);
                 }
             });
             addRecursiveMouseListener(expandLabel, new MouseAdapter() {
@@ -237,7 +247,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                             }
                         }));
 
-                        table.setBackground(Color.decode("#252525"));
+                        table.setBackground(PluginColors.getBackgroundDefault());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -252,18 +262,18 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    expandLabel.setIcon(IconLoader.getIcon("/icons/expandPressed.svg"));
+                    expandLabel.setIcon(PluginIcons.expandPressed);
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    expandLabel.setIcon(IconLoader.getIcon("/icons/expandHovered.svg"));
+                    expandLabel.setIcon(PluginIcons.expandHovered);
                 }
             }, () -> {
                 removeActiveDecorations();
                 return null;
             });
-            expandLabel.setIcon(IconLoader.getIcon("/icons/expand.svg"));
+            expandLabel.setIcon(PluginIcons.expand);
             add(expandLabel, "cell 2 0");
             add(closeLabel);
         });
@@ -320,7 +330,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         closeLabel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                closeLabel.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
+                closeLabel.setIcon(PluginIcons.closeHovered);
             }
         });
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
@@ -331,12 +341,12 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
             @Override
             public void mousePressed(MouseEvent e) {
-                closeLabel.setIcon(IconLoader.getIcon("/icons/closeIconPressed.svg"));
+                closeLabel.setIcon(PluginIcons.closePressed);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                closeLabel.setIcon(IconLoader.getIcon("/icons/closeIconHovered.svg"));
+                closeLabel.setIcon(PluginIcons.closeHovered);
             }
         }, () -> {
             removeActiveDecorations();
@@ -348,7 +358,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(Color.decode("#3C3C3C"));
+                    configPanel.setBackground(PluginColors.getBackgroundFocus());
                 }
             }
         });
@@ -499,29 +509,27 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
         setBorder(new LineBorder(new Color(85, 85, 85)));
-        setBackground(new Color(43, 43, 43));
         setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "0[fill]" +
-                        "[grow,fill]" +
-                        "[fill]",
-                // rows
-                "0[grow]0"));
+            "hidemode 3",
+            // columns
+            "0[fill]" +
+            "[grow,fill]" +
+            "[fill]",
+            // rows
+            "0[grow]0"));
 
         //======== configPanel ========
         {
-            configPanel.setBackground(new Color(37, 37, 37));
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
             configPanel.setLayout(new MigLayout(
-                    "fill,insets 0,hidemode 3",
-                    // columns
-                    "5[fill]" +
-                            "[fill]4",
-                    // rows
-                    "[grow]"));
+                "fill,insets 0,hidemode 3",
+                // columns
+                "5[fill]" +
+                "[fill]4",
+                // rows
+                "[grow]"));
 
             //---- configLabel ----
             configLabel.setIcon(IconLoader.getIcon("/icons/eye.svg"));
@@ -537,18 +545,17 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         {
             mainPanel.setBackground(null);
             mainPanel.setLayout(new MigLayout(
-                    "novisualpadding,hidemode 3",
-                    // columns
-                    "[grow,fill]" +
-                            "[fill]",
-                    // rows
-                    "0[grow]0"));
+                "novisualpadding,hidemode 3",
+                // columns
+                "[grow,fill]" +
+                "[fill]",
+                // rows
+                "0[grow]0"));
 
             //---- breakpointConditionField ----
-            breakpointConditionField.setBackground(new Color(37, 37, 37));
             breakpointConditionField.setBorder(new CompoundBorder(
-                    new LineBorder(Color.darkGray, 1, true),
-                    new EmptyBorder(2, 6, 0, 0)));
+                new LineBorder(Color.darkGray, 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
             breakpointConditionField.setFont(new Font("Roboto Light", Font.PLAIN, 14));
             breakpointConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(breakpointConditionField, "cell 0 0");
