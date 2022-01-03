@@ -17,7 +17,7 @@ public class LiveControlBarRow extends JPanel {
     public void setCommandName(String commandName, String input) {
         StringBuilder commandHtml = new StringBuilder();
         String[] inputWords = input.split(" ");
-        Color selectColor = UIUtil.getSearchMatchGradientEndColor();
+        Color selectColor = Color.decode("#e1483b");
         Color defaultColor = UIUtil.getTextAreaForeground();
         String selectHex = "#"+Integer.toHexString(selectColor.getRGB()).substring(2);
         String defaultHex = "#"+Integer.toHexString(defaultColor.getRGB()).substring(2);
