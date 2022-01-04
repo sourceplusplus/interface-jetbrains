@@ -19,18 +19,12 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_17;
 import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
@@ -229,7 +223,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         textField1.setBorder(new CompoundBorder(
             new LineBorder(UIUtil.getBoundsColor(), 1, true),
             new EmptyBorder(2, 6, 0, 0)));
-        textField1.setFont(ROBOTO_LIGHT_PLAIN_14);
+        textField1.setFont(ROBOTO_LIGHT_PLAIN_17);
         textField1.setMinimumSize(new Dimension(0, 27));
         add(textField1, "cell 1 0");
 
