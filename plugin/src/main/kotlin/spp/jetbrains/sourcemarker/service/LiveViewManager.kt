@@ -1,8 +1,24 @@
 package spp.jetbrains.sourcemarker.service
 
 import com.intellij.openapi.project.Project
+import io.vertx.core.json.Json
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
+import io.vertx.ext.bridge.BridgeEventType
+import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
+import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.toKotlinInstant
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.portal.SourcePortal
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin.INSTANCE_ID
+import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
+import spp.jetbrains.sourcemarker.search.SourceMarkSearch
 import spp.protocol.ProtocolAddress
 import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
@@ -19,26 +35,10 @@ import spp.protocol.artifact.trace.Trace
 import spp.protocol.artifact.trace.TraceOrderType
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
-import spp.protocol.view.LiveViewEvent
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin.INSTANCE_ID
-import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
-import spp.jetbrains.sourcemarker.search.SourceMarkSearch
-import io.vertx.core.json.Json
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.bridge.BridgeEventType
-import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
-import io.vertx.kotlin.coroutines.CoroutineVerticle
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.datetime.toJavaInstant
-import kotlinx.datetime.toKotlinInstant
-import org.slf4j.LoggerFactory
 import spp.protocol.instrument.LiveInstrumentEvent
 import spp.protocol.instrument.LiveInstrumentEventType.METER_UPDATED
 import spp.protocol.instrument.meter.MeterType
+import spp.protocol.view.LiveViewEvent
 import java.net.URI
 import java.time.Instant
 import java.time.ZoneOffset
@@ -175,15 +175,16 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
         val rawMetrics = mutableListOf<Int>()
         if (event.viewConfig.viewMetrics.size > 1) {
             val multiMetrics = JsonArray(event.metricsData)
-            event.viewConfig.viewMetrics.forEachIndexed { i, it ->
-                val value = when (val metricType = MetricType.realValueOf(it)) {
+            for (i in 0 until multiMetrics.size()) {
+                val metricsName = multiMetrics.getJsonObject(i).getJsonObject("meta").getString("metricsName")
+                val value = when (MetricType.realValueOf(metricsName)) {
                     MetricType.Throughput_Average -> multiMetrics.getJsonObject(i)
                         .getInteger("value")
                     MetricType.ResponseTime_Average -> multiMetrics.getJsonObject(i)
                         .getInteger("value")
                     MetricType.ServiceLevelAgreement_Average -> multiMetrics.getJsonObject(i)
                         .getInteger("percentage")
-                    else -> TODO(metricType.name)
+                    else -> TODO(metricsName)
                 }
                 rawMetrics.add(value)
             }
