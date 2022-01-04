@@ -65,7 +65,6 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
 
         initComponents();
         setupComponents();
-        paintComponents();
         setCursor(Cursor.getDefaultCursor());
 
         textField1.setSaveOnSuggestionDoubleClick(true);
@@ -177,13 +176,6 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         });
     }
 
-    private void paintComponents() {
-        textField1.setBackground(UIUtil.getTextFieldBackground());
-        textField1.setBorder(new CompoundBorder(
-                new LineBorder(UIUtil.getBoundsColor(), 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
-    }
-
     private void dispose() {
         if (disposed) return;
         disposed = true;
@@ -233,9 +225,9 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         add(label1, "cell 0 0");
 
         //---- textField1 ----
-        textField1.setBackground(PANEL_BACKGROUND_COLOR);
+        textField1.setBackground(UIUtil.getTextFieldBackground());
         textField1.setBorder(new CompoundBorder(
-            new LineBorder(Color.darkGray, 1, true),
+            new LineBorder(UIUtil.getBoundsColor(), 1, true),
             new EmptyBorder(2, 6, 0, 0)));
         textField1.setFont(ROBOTO_LIGHT_PLAIN_14);
         textField1.setMinimumSize(new Dimension(0, 27));
