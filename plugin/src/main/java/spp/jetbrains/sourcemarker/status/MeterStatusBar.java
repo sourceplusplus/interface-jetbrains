@@ -11,26 +11,27 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
+import io.vertx.core.json.Json;
+import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
+import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
+import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
+import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
+import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.SourceMarkerServices;
-import spp.protocol.instrument.*;
+import spp.protocol.instrument.LiveInstrument;
+import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.meter.LiveMeter;
 import spp.protocol.instrument.meter.MeterType;
 import spp.protocol.instrument.meter.MetricValue;
 import spp.protocol.instrument.meter.MetricValueType;
 import spp.protocol.instrument.meter.event.LiveMeterRemoved;
 import spp.protocol.service.live.LiveInstrumentService;
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
-import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import io.vertx.core.json.Json;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -40,20 +41,17 @@ import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.marker.SourceMarker.creationService;
-import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
-import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
-import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
+import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
@@ -118,14 +116,6 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         initComponents();
         setupComponents();
-        paintComponents();
-    }
-
-    private void paintComponents() {
-        meterConditionField.setBackground(UIUtil.getTextFieldBackground());
-        meterConditionField.setBorder(new CompoundBorder(
-                new LineBorder(UIUtil.getBoundsColor(), 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
@@ -514,7 +504,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(PluginIcons.eye);
+            configLabel.setIcon(PluginIcons.analytics);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----
@@ -535,10 +525,11 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 "0[grow]0"));
 
             //---- meterConditionField ----
+            meterConditionField.setBackground(UIUtil.getTextFieldBackground());
             meterConditionField.setBorder(new CompoundBorder(
-                new LineBorder(Color.darkGray, 1, true),
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-            meterConditionField.setFont(ROBOTO_LIGHT_PLAIN_14);
+            meterConditionField.setFont(ROBOTO_LIGHT_PLAIN_17);
             meterConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(meterConditionField, "cell 0 0");
 

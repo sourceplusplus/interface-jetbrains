@@ -60,10 +60,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
-import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
-import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
+import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
@@ -131,14 +128,6 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
         initComponents();
         setupComponents();
-        paintComponents();
-    }
-
-    private void paintComponents() {
-        breakpointConditionField.setBackground(UIUtil.getTextFieldBackground());
-        breakpointConditionField.setBorder(new CompoundBorder(
-                new LineBorder(UIUtil.getBoundsColor(), 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
@@ -565,10 +554,11 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                 "0[grow]0"));
 
             //---- breakpointConditionField ----
+            breakpointConditionField.setBackground(UIUtil.getTextFieldBackground());
             breakpointConditionField.setBorder(new CompoundBorder(
-                new LineBorder(Color.darkGray, 1, true),
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-            breakpointConditionField.setFont(ROBOTO_LIGHT_PLAIN_14);
+            breakpointConditionField.setFont(ROBOTO_LIGHT_PLAIN_17);
             breakpointConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(breakpointConditionField, "cell 0 0");
 

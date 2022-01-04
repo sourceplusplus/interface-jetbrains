@@ -25,11 +25,7 @@ import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.SourceMarkerServices;
 import spp.protocol.artifact.log.Log;
-import spp.protocol.instrument.InstrumentThrottle;
-import spp.protocol.instrument.LiveInstrument;
-import spp.protocol.instrument.LiveInstrumentEvent;
-import spp.protocol.instrument.LiveSourceLocation;
-import spp.protocol.instrument.ThrottleStep;
+import spp.protocol.instrument.*;
 import spp.protocol.instrument.log.LiveLog;
 import spp.protocol.instrument.log.event.LiveLogRemoved;
 import spp.protocol.service.live.LiveInstrumentService;
@@ -41,15 +37,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.awt.event.ComponentEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -65,9 +53,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
-import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
-import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
+import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
@@ -733,10 +719,11 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         add(separator1, "cell 1 0");
 
         //---- liveLogTextField ----
+        liveLogTextField.setBackground(UIUtil.getTextFieldBackground());
         liveLogTextField.setBorder(new CompoundBorder(
-            new LineBorder(Color.darkGray, 1, true),
+            new LineBorder(UIUtil.getBoundsColor(), 1, true),
             new EmptyBorder(2, 6, 0, 0)));
-        liveLogTextField.setFont(ROBOTO_LIGHT_PLAIN_14);
+        liveLogTextField.setFont(ROBOTO_LIGHT_PLAIN_17);
         liveLogTextField.setMinimumSize(new Dimension(0, 27));
         add(liveLogTextField, "cell 2 0");
 
