@@ -57,9 +57,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-spp-example-webapp
-    environment:
-      - SPP_PLATFORM_HOST=spp-platform
-      - SPP_SKYWALKING_HOST=skywalking-oap
 #  skywalking-ui:
 #    image: apache/skywalking-ui:8.6.0
 #    container_name: skywalking-ui
