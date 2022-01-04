@@ -6,6 +6,7 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE
+import spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import java.awt.*
 import java.awt.event.*
@@ -69,7 +70,7 @@ class AutocompleteField(
             }
         })
 
-        list.font = Font("Roboto Light", Font.PLAIN, 14)
+        list.font = ROBOTO_LIGHT_PLAIN_14
         list.setCellRenderer(AutoCompleteCellRenderer(lineNumber))
 
         list.setBackground(UIUtil.getListSelectionBackground(true))
@@ -90,6 +91,9 @@ class AutocompleteField(
         val sb = StringBuilder("(")
         for (i in allLookup.indices) {
             sb.append(Regex.escape(allLookup[i].getText()))
+            sb.append("|")
+            sb.append("\\$\\{").append(allLookup[i].getText().substring(1)).append("\\}")
+
             if (i + 1 < allLookup.size) {
                 sb.append("|")
             }
