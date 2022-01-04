@@ -16,6 +16,7 @@ public class PluginUI {
     public static Font ROBOTO_LIGHT_PLAIN_14;
     public static Font ROBOTO_LIGHT_PLAIN_15;
     public static Font ROBOTO_LIGHT_PLAIN_16;
+    public static Font ROBOTO_LIGHT_PLAIN_17;
 
     static {
         try {
@@ -28,6 +29,7 @@ public class PluginUI {
             ROBOTO_LIGHT_PLAIN_14 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(14f);
             ROBOTO_LIGHT_PLAIN_15 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(15f);
             ROBOTO_LIGHT_PLAIN_16 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(16f);
+            ROBOTO_LIGHT_PLAIN_17 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(17f);
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }

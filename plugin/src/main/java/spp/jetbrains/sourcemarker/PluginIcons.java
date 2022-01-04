@@ -20,11 +20,13 @@ public interface PluginIcons {
     Icon eye = IconLoader.getIcon("/icons/eye.svg", PluginIcons.class);
     Icon eyeSlash = IconLoader.getIcon("/icons/eye-slash.svg", PluginIcons.class);
 
+    Icon analytics = IconLoader.getIcon("/icons/analytics.svg", PluginIcons.class);
+
     Icon config = IconLoader.getIcon("/icons/configIcon.svg", PluginIcons.class);
     Icon configHovered = IconLoader.getIcon("/icons/configIconHovered.svg", PluginIcons.class);
     Icon configPressed = IconLoader.getIcon("/icons/configIconPressed.svg", PluginIcons.class);
 
-    Icon exclmationTriangle = IconLoader.getIcon("/icons/exclamation-triangle.svg", PluginIcons.class);
+    Icon exclamationTriangle = IconLoader.getIcon("/icons/exclamation-triangle.svg", PluginIcons.class);
     Icon performanceRamp = IconLoader.getIcon("/icons/sort-amount-up.svg", PluginIcons.class);
     Icon activeException = IconLoader.getIcon("/icons/map-marker-exclamation.svg", PluginIcons.class);
     Icon count = IconLoader.getIcon("/icons/count.svg", PluginIcons.class);
