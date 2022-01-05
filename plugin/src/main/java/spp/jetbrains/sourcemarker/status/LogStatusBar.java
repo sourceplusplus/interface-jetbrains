@@ -5,7 +5,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
@@ -77,7 +76,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
-    private static final String DOLLOR = "$";
+    private static final String DOLLAR = "$";
     private static final String EMPTY = "";
     private static final String MESSAGE = "Message";
     private static final String TIME = "Time";
@@ -117,7 +116,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
-                return DOLLOR + it;
+                return DOLLAR + it;
             }
 
             public String getDescription() {
@@ -132,11 +131,11 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 .filter(v -> {
                     String var = substringAfterLast(SPACE, text.toLowerCase());
 
-                    return var.startsWith(DOLLOR) && !var.substring(1).equals(v) && v.toLowerCase().contains(var.substring(1)) ||
+                    return var.startsWith(DOLLAR) && !var.substring(1).equals(v) && v.toLowerCase().contains(var.substring(1)) ||
                            var.startsWith("${") && !var.substring(2).equals(v) && v.toLowerCase().contains(var.substring(2));
                 }).map(it -> new AutocompleteFieldRow() {
                     public String getText() {
-                        return DOLLOR + it;
+                        return DOLLAR + it;
                     }
 
                     public String getDescription() {
@@ -367,7 +366,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     for (String var : liveLog.getLogArguments()) {
                         originalMessage = originalMessage.replaceFirst(
                                 QUOTE_CURLY_BRACES,
-                                Matcher.quoteReplacement(DOLLOR + var)
+                                Matcher.quoteReplacement(DOLLAR + var)
                         );
                     }
 
@@ -410,7 +409,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     for (String var : liveLog.getLogArguments()) {
                         originalMessage = originalMessage.replaceFirst(
                                 QUOTE_CURLY_BRACES,
-                                Matcher.quoteReplacement(DOLLOR + var)
+                                Matcher.quoteReplacement(DOLLAR + var)
                         );
                     }
                     settingFormattedMessage.set(true);
