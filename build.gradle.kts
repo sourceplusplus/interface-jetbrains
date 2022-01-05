@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id("com.avast.gradle.docker-compose")
 
@@ -83,6 +85,21 @@ tasks {
             println("Downloaded Apache SkyWalking")
         }
     }
+
+    register<Exec>("buildExampleWebApp") {
+        workingDir = File("./test/e2e/example-web-app")
+
+        if (Os.isFamily(Os.FAMILY_UNIX)) {
+            commandLine("./gradlew", "build")
+        } else {
+            commandLine("cmd", "/c", "gradlew.bat", "build")
+        }
+    }
+
+    register("assembleUp") {
+        dependsOn("buildExampleWebApp", "composeUp")
+    }
+    getByName("composeUp").shouldRunAfter("buildExampleWebApp")
 }
 
 dockerCompose {
