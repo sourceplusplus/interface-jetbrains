@@ -77,6 +77,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private final Function<String, List<AutocompleteFieldRow>> lookup;
     private final String placeHolderText;
     private Pattern variablePattern;
+    private Pattern templateVariablePattern;
     private EditorImpl editor;
     private LiveLog liveLog;
     private Instant latestTime;
@@ -139,16 +140,19 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         if (!scopeVars.isEmpty()) {
             StringBuilder sb = new StringBuilder("(");
+            StringBuilder sbt = new StringBuilder("(");
             for (int i = 0; i < scopeVars.size(); i++) {
                 sb.append("\\$").append(scopeVars.get(i));
-                sb.append("|");
-                sb.append("\\$\\{").append(scopeVars.get(i)).append("\\}");
+                sbt.append("\\$\\{").append(scopeVars.get(i)).append("\\}");
                 if (i + 1 < scopeVars.size()) {
                     sb.append("|");
+                    sbt.append("|");
                 }
             }
             sb.append(")(?:\\s|$)");
+            sbt.append(")(?:|$)");
             variablePattern = Pattern.compile(sb.toString());
+            templateVariablePattern = Pattern.compile(sbt.toString());
         }
 
         this.inlayMark = inlayMark;
@@ -578,10 +582,20 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             while (m.find()) {
                 String var = m.group(1);
                 logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+                varMatches.add(var);
+            }
+        }
+        logPattern = liveLogTextField.getText();
+        if (templateVariablePattern != null) {
+            Matcher m = templateVariablePattern.matcher(logPattern);
+            while (m.find()) {
+                String var = m.group(1);
+                logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
                 var = var.replaceAll(PATTERN_CURLY_BRACES, EMPTY);
                 varMatches.add(var);
             }
         }
+
         final String finalLogPattern = logPattern;
 
         String condition = null;

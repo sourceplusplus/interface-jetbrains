@@ -41,7 +41,7 @@ public class PluginUI {
     public static final Color EXPIRY_FOREGROUND_COLOR = Color.decode("#BBBBBB");
     public static final Color SELECT_COLOR_RED = Color.decode("#e1483b");
     public static final Color COMPLETE_COLOR_PURPLE = Color.decode("#9876AA");
-    public static final Color AUTO_COMPLETE_SELECT_BACKGROUND = Color.decode("#1C1C1C");
+    //public static final Color AUTO_COMPLETE_SELECT_BACKGROUND = Color.decode("#1C1C1C");
 
     public static Color getBackgroundDefaultColor() {
         return UIUtil.getLabelBackground();//Color.decode("#252525");

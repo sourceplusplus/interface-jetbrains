@@ -1,10 +1,9 @@
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.sourcemarker.PluginUI.AUTO_COMPLETE_SELECT_BACKGROUND
+import spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocusColor
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.AutocompleteRow
-import java.awt.Color
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
@@ -34,7 +33,7 @@ class AutoCompleteCellRenderer(private val lineNumber: Int) : DefaultListCellRen
         }
 
         if (isSelected) {
-            row.background = AUTO_COMPLETE_SELECT_BACKGROUND
+            row.background = getBackgroundFocusColor();
             if (entry is LiveControlCommand) {
                 row.setCommandIcon(entry.selectedIcon)
             }
