@@ -31,5 +31,5 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 <details>
   <summary>Screencast</summary>
 
-  ![live-log](https://user-images.githubusercontent.com/3278877/136304738-d46c2796-4dd3-45a3-81bb-5692547c1c71.gif)  
+  ![live-log](https://user-images.githubusercontent.com/3278877/136304738-d46c2796-4dd3-45a3-81bb-5692547c1c71.gif)
 </details>
