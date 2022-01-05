@@ -117,8 +117,10 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 .filter(v -> {
                     String var = substringAfterLast(SPACE, text.toLowerCase());
 
-                    return var.startsWith(DOLLAR) && !var.substring(1).equals(v) && v.toLowerCase().contains(var.substring(1)) ||
-                           var.startsWith("${") && !var.substring(2).equals(v) && v.toLowerCase().contains(var.substring(2));
+                    return (var.startsWith(DOLLAR) && !var.substring(1).equals(v)
+                                && v.toLowerCase().contains(var.substring(1)))
+                            || (var.startsWith("${") && !var.substring(2).equals(v)
+                            && v.toLowerCase().contains(var.substring(2)));
                 }).map(it -> new AutocompleteFieldRow() {
                     public String getText() {
                         return DOLLAR + it;

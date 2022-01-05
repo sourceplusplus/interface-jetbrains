@@ -11,6 +11,7 @@ import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import java.awt.*
 import java.awt.event.*
 import java.util.function.Function
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.swing.*
 import javax.swing.event.DocumentEvent
@@ -39,6 +40,7 @@ class AutocompleteField(
     private val list: JList<AutocompleteFieldRow>
     private val model: ListModel<AutocompleteFieldRow>
     private val variablePattern: Pattern
+    private val templateVariablePattern: Pattern
     var editMode: Boolean = true
     private var showSaveButton: Boolean = false
     private val listeners: MutableList<SaveListener> = mutableListOf()
@@ -89,17 +91,19 @@ class AutocompleteField(
         addKeyListener(this)
 
         val sb = StringBuilder("(")
+        val sbt = StringBuilder("(")
         for (i in allLookup.indices) {
             sb.append(Regex.escape(allLookup[i].getText()))
-            sb.append("|")
-            sb.append("\\$\\{").append(allLookup[i].getText().substring(1)).append("\\}")
-
+            sbt.append(Regex.escape("\${"+allLookup[i].getText().substring(1)+"}"))
             if (i + 1 < allLookup.size) {
                 sb.append("|")
+                sbt.append("|")
             }
         }
         sb.append(")(?:\\s|$)")
+        sbt.append(")(?:|$)")
         variablePattern = Pattern.compile(sb.toString())
+        templateVariablePattern = Pattern.compile(sbt.toString())
 
         document.putProperty("filterNewlines", true)
 
@@ -168,8 +172,14 @@ class AutocompleteField(
             true
         )
 
+        var m = variablePattern.matcher(text)
+        matchAndApplyStyle(m)
+        m = templateVariablePattern.matcher(text)
+        matchAndApplyStyle(m)
+    }
+
+    private fun matchAndApplyStyle(m: Matcher) {
         var minIndex = 0
-        val m = variablePattern.matcher(text)
         while (m.find()) {
             val variable: String = m.group(1)
             val varIndex = text.indexOf(variable, minIndex)
