@@ -4,7 +4,6 @@ import com.intellij.util.ui.UIUtil;
 
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 
 public class PluginUI {
@@ -17,21 +16,21 @@ public class PluginUI {
     public static Font ROBOTO_LIGHT_PLAIN_14;
     public static Font ROBOTO_LIGHT_PLAIN_15;
     public static Font ROBOTO_LIGHT_PLAIN_16;
+    public static Font ROBOTO_LIGHT_PLAIN_17;
 
     static {
         try {
-            Font ROBORTO = Font.createFont(Font.TRUETYPE_FONT, PluginUI.class.getResourceAsStream("/fonts/Roboto-Regular.ttf"));
+            Font ROBOTO = Font.createFont(Font.TRUETYPE_FONT, PluginUI.class.getResourceAsStream("/fonts/Roboto-Regular.ttf"));
             Font ROBOTO_LIGHT = Font.createFont(Font.TRUETYPE_FONT, PluginUI.class.getResourceAsStream("/fonts/Roboto-Light.ttf"));
 
-            ROBOTO_PLAIN_15 = ROBORTO.deriveFont(Font.PLAIN).deriveFont(15f);
-            ROBOTO_PLAIN_11 = ROBORTO.deriveFont(Font.PLAIN).deriveFont(11f);
+            ROBOTO_PLAIN_15 = ROBOTO.deriveFont(Font.PLAIN).deriveFont(15f);
+            ROBOTO_PLAIN_11 = ROBOTO.deriveFont(Font.PLAIN).deriveFont(11f);
             ROBOTO_LIGHT_BOLD_14 = ROBOTO_LIGHT.deriveFont(Font.BOLD).deriveFont(14f);
             ROBOTO_LIGHT_PLAIN_14 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(14f);
             ROBOTO_LIGHT_PLAIN_15 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(15f);
             ROBOTO_LIGHT_PLAIN_16 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(16f);
-        } catch (FontFormatException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            ROBOTO_LIGHT_PLAIN_17 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(17f);
+        } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
     }

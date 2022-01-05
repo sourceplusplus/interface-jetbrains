@@ -18,7 +18,7 @@ import javax.swing.Icon
  */
 object SourceMarkerIcons {
 
-    val exclamationTriangle = PluginIcons.exclmationTriangle
+    val exclamationTriangle = PluginIcons.exclamationTriangle
     val performanceRamp = PluginIcons.performanceRamp
     val activeException = PluginIcons.activeException
     val LIVE_METER_COUNT_ICON = PluginIcons.count
