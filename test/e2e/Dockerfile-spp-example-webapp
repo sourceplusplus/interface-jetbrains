@@ -1,6 +1,6 @@
 FROM azul/zulu-openjdk-alpine:11
 
-ADD ./spp-example-webapp-boot-1.0-SNAPSHOT.zip /spp-example-webapp-boot-1.0-SNAPSHOT.zip
+ADD ./example-web-app/build/distributions/spp-example-webapp-boot-1.0-SNAPSHOT.zip /spp-example-webapp-boot-1.0-SNAPSHOT.zip
 
 RUN apk --no-cache add curl
 
