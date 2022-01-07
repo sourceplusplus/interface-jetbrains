@@ -86,7 +86,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("io.dropwizard.metrics:metrics-core:4.2.7")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
-    implementation("org.jooq:jooq:3.16.0")
+    implementation("org.jooq:jooq:3.16.1")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
