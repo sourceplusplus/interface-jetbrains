@@ -8,9 +8,15 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.layout.Sizes;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_11;
@@ -25,34 +31,42 @@ public class LiveControlBarRow extends JPanel {
     }
 
     public void setCommandName(String commandName, String input) {
-        StringBuilder commandHtml = new StringBuilder();
-        String[] inputWords = input.split(" ");
+        Set<String> inputWords = new HashSet<>(Arrays.asList(input.toLowerCase().split(" ")));
         Color defaultColor = UIUtil.getTextAreaForeground();
         String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
         String defaultHex = "#" + Integer.toHexString(defaultColor.getRGB()).substring(2);
+        Map<Integer, Integer> matches = new HashMap<>();
 
-        for (String commandWord : commandName.split(" ")) {
-
-            boolean hasMatch = false;
-            for (String inputWord : inputWords) {
-                if (commandWord.toLowerCase().startsWith(inputWord)) {
-                    commandHtml.append(" ")
-                            .append("<span style=\"color: " + selectHex + "\">")
-                            .append(commandWord, 0, inputWord.length())
-                            .append("</span>")
-                            .append("<span style=\"color: " + defaultHex + "\">")
-                            .append(commandWord.substring(inputWord.length()))
-                            .append("</span>");
-                    hasMatch = true;
-                    break;
-                }
-            }
-            if (!hasMatch) {
-                commandHtml.append(" ").append("<span style=\"color: " + defaultHex + "\">").append(commandWord).append("</span>");
+        for (String inputWord : inputWords) {
+            int startIndex = commandName.toLowerCase().indexOf(inputWord);
+            if (startIndex > -1) {
+                matches.put(startIndex, inputWord.length());
             }
         }
 
-        commandLabel.setText("<html>" + commandHtml + "</html>");
+        if(!matches.isEmpty()) {
+            int diff = 0;
+            String updatedCommand = commandName;
+            for (Map.Entry<Integer, Integer> entry : matches.entrySet()) {
+                String colored = colorMatchingString(updatedCommand, selectHex, entry.getKey() + diff, entry.getValue());
+                diff = colored.length() - updatedCommand.length();
+                updatedCommand = colored;
+            }
+            commandName = updatedCommand;
+        }
+        commandLabel.setText("<html> <span style=\"color: +"+ defaultHex + "\">" + commandName + "</span></html>");
+    }
+
+    @NotNull
+    private String colorMatchingString(String commandName, String selectHex, int startIndex, int length) {
+        int endIndex = startIndex + length;
+        StringBuilder sb = new StringBuilder(commandName.substring(0, startIndex));
+        sb.append("<span style=\"color: " + selectHex + "\">");
+        sb.append(commandName.substring(startIndex, endIndex));
+        sb.append("</span>");
+        sb.append(commandName.substring(endIndex));
+        commandName = sb.toString();
+        return commandName;
     }
 
     public void setCommandIcon(Icon icon) {

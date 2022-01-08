@@ -653,7 +653,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 logPattern = logPattern.substring(0, m.start() - matchLength)
                         + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
                 //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-                matchLength = matchLength + var.length() -1;
+                matchLength = matchLength + var.length() - 1;
                 varMatches.add(var);
             }
         }
@@ -666,7 +666,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 logPattern = logPattern.substring(0, m.start() - matchLength)
                         + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
                 //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-                matchLength = matchLength + var.length() -1;
+                matchLength = matchLength + var.length() - 1;
                 var = var.replaceAll(PATTERN_CURLY_BRACES, EMPTY);
                 varMatches.add(var);
             }
