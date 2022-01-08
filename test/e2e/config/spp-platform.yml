@@ -11,9 +11,11 @@ spp-platform:
   processor:
     bridge_port: 5460
 
-redis:
-  host: redis
-  port: 6379
+storage:
+  selector: redis
+  redis:
+    host: redis
+    port: 6379
 
 skywalking-oap:
   host: skywalking-oap
