@@ -579,18 +579,23 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         ArrayList<String> varMatches = new ArrayList<>();
         if (variablePattern != null) {
             Matcher m = variablePattern.matcher(logPattern);
+            int matchCount = 0;
             while (m.find()) {
                 String var = m.group(1);
-                logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+                logPattern = logPattern.substring(0, m.start() - matchCount)
+                        + logPattern.substring(m.start() - matchCount).replaceFirst(Pattern.quote(var), "{}");
+                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
                 varMatches.add(var);
+                matchCount++;
             }
         }
-        logPattern = liveLogTextField.getText();
+
         if (templateVariablePattern != null) {
             Matcher m = templateVariablePattern.matcher(logPattern);
             while (m.find()) {
                 String var = m.group(1);
-                logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+                logPattern = logPattern.substring(0, m.start())+logPattern.substring(m.start()).replaceFirst(Pattern.quote(var), "{}");
+                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
                 var = var.replaceAll(PATTERN_CURLY_BRACES, EMPTY);
                 varMatches.add(var);
             }

@@ -182,7 +182,7 @@ class AutocompleteField(
         var minIndex = 0
         while (m.find()) {
             val variable: String = m.group(1)
-            val varIndex = text.indexOf(variable, minIndex)
+            val varIndex = m.start()
             minIndex = varIndex + variable.length
             styledDocument.setCharacterAttributes(varIndex, variable.length, getStyle("numbers"), true)
         }
