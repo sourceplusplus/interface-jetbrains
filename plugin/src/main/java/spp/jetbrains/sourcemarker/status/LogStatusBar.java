@@ -13,6 +13,7 @@ import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.Json;
 import net.miginfocom.swing.MigLayout;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
@@ -575,31 +576,9 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             });
         }
 
-        String logPattern = liveLogTextField.getText();
         ArrayList<String> varMatches = new ArrayList<>();
-        if (variablePattern != null) {
-            Matcher m = variablePattern.matcher(logPattern);
-            int matchCount = 0;
-            while (m.find()) {
-                String var = m.group(1);
-                logPattern = logPattern.substring(0, m.start() - matchCount)
-                        + logPattern.substring(m.start() - matchCount).replaceFirst(Pattern.quote(var), "{}");
-                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-                varMatches.add(var);
-                matchCount++;
-            }
-        }
 
-        if (templateVariablePattern != null) {
-            Matcher m = templateVariablePattern.matcher(logPattern);
-            while (m.find()) {
-                String var = m.group(1);
-                logPattern = logPattern.substring(0, m.start())+logPattern.substring(m.start()).replaceFirst(Pattern.quote(var), "{}");
-                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-                var = var.replaceAll(PATTERN_CURLY_BRACES, EMPTY);
-                varMatches.add(var);
-            }
-        }
+        String logPattern = extractVariables(varMatches);
 
         final String finalLogPattern = logPattern;
 
@@ -662,6 +641,37 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 it.cause().printStackTrace();
             }
         });
+    }
+
+    private String extractVariables(ArrayList<String> varMatches) {
+        String logPattern = liveLogTextField.getText();
+        if (variablePattern != null) {
+            Matcher m = variablePattern.matcher(logPattern);
+            int matchLength = 0;
+            while (m.find()) {
+                String var = m.group(1);
+                logPattern = logPattern.substring(0, m.start() - matchLength)
+                        + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
+                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+                matchLength = matchLength + var.length() -1;
+                varMatches.add(var);
+            }
+        }
+
+        if (templateVariablePattern != null) {
+            Matcher m = templateVariablePattern.matcher(logPattern);
+            int matchLength = 0;
+            while (m.find()) {
+                String var = m.group(1);
+                logPattern = logPattern.substring(0, m.start() - matchLength)
+                        + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
+                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
+                matchLength = matchLength + var.length() -1;
+                var = var.replaceAll(PATTERN_CURLY_BRACES, EMPTY);
+                varMatches.add(var);
+            }
+        }
+        return logPattern;
     }
 
     private void dispose() {
