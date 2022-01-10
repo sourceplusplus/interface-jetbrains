@@ -13,11 +13,11 @@ import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.Json;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
+import spp.jetbrains.sourcemarker.VariableParser;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
@@ -70,7 +70,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private static final String SPACE = " ";
     private static final String WAITING_FOR_LIVE_LOG_DATA = "Waiting for live log data...";
     private static final String QUOTE_CURLY_BRACES = Pattern.quote("{}");
-    private static final String PATTERN_CURLY_BRACES = "\\{|\\}";
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -578,7 +577,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         ArrayList<String> varMatches = new ArrayList<>();
 
-        String logPattern = extractVariables(varMatches);
+        String logPattern = VariableParser.extractVariables(variablePattern, templateVariablePattern, varMatches, liveLogTextField.getText());
 
         final String finalLogPattern = logPattern;
 
@@ -641,37 +640,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 it.cause().printStackTrace();
             }
         });
-    }
-
-    private String extractVariables(ArrayList<String> varMatches) {
-        String logPattern = liveLogTextField.getText();
-        if (variablePattern != null) {
-            Matcher m = variablePattern.matcher(logPattern);
-            int matchLength = 0;
-            while (m.find()) {
-                String var = m.group(1);
-                logPattern = logPattern.substring(0, m.start() - matchLength)
-                        + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
-                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-                matchLength = matchLength + var.length() - 1;
-                varMatches.add(var);
-            }
-        }
-
-        if (templateVariablePattern != null) {
-            Matcher m = templateVariablePattern.matcher(logPattern);
-            int matchLength = 0;
-            while (m.find()) {
-                String var = m.group(1);
-                logPattern = logPattern.substring(0, m.start() - matchLength)
-                        + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
-                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
-                matchLength = matchLength + var.length() - 1;
-                var = var.replaceAll(PATTERN_CURLY_BRACES, EMPTY);
-                varMatches.add(var);
-            }
-        }
-        return logPattern;
     }
 
     private void dispose() {
