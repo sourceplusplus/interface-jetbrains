@@ -1,22 +1,22 @@
 spp-platform:
-  host: 0.0.0.0
-  port: 5445
-  access_token: "change-me"
+  host: ${SPP_PLATFORM_HOST:-0.0.0.0}
+  port: ${SPP_PLATFORM_PORT:-5445}
+  access_token: ${SPP_SYSTEM_ACCESS_TOKEN:-change-me}
   logging:
-    level: trace
+    level: ${SPP_LOGGING_LEVEL:-trace}
   probe:
-    bridge_port: 5450
+    bridge_port: ${SPP_PROBE_BRIDGE_PORT:-5450}
   marker:
-    bridge_port: 5455
+    bridge_port: ${SPP_MARKER_BRIDGE_PORT:-5455}
   processor:
-    bridge_port: 5460
+    bridge_port: ${SPP_PROCESSOR_BRIDGE_PORT:-5460}
 
 storage:
-  selector: redis
+  selector: ${SPP_STORAGE:-memory}
   redis:
-    host: redis
-    port: 6379
+    host: ${SPP_REDIS_HOST:-redis}
+    port: ${SPP_REDIS_PORT:-6379}
 
 skywalking-oap:
-  host: skywalking-oap
-  port: 12800
+  host: ${SPP_OAP_HOST:-skywalking-oap}
+  port: ${SPP_OAP_PORT:-12800}
