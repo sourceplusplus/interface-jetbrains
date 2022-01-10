@@ -8,16 +8,17 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static spp.jetbrains.sourcemarker.Constants.EMPTY;
-import static spp.jetbrains.sourcemarker.Constants.PATTERN_CURLY_BRACES;
-
 public class VariableParser {
+
+    public static final String PATTERN_CURLY_BRACES = "\\{|\\}";
+    public static final String EMPTY = "";
+    public static final String SPACE = " ";
+    public static final String DOLLAR = "$";
 
     private Pattern variablePattern;
     private Pattern templateVariablePattern;
 
     public void createPattern(List<String> scopeVars) {
-
         if (!scopeVars.isEmpty()) {
             StringBuilder sb = new StringBuilder("(");
             StringBuilder sbt = new StringBuilder("(");
@@ -37,7 +38,6 @@ public class VariableParser {
     }
 
     public Pair<String, List<String>> extractVariables(String logPattern) {
-
         List<String> varMatches = new ArrayList<>();
         if (variablePattern != null) {
             Matcher m = variablePattern.matcher(logPattern);
@@ -67,15 +67,30 @@ public class VariableParser {
         return Pair.create(logPattern, varMatches);
     }
 
-    public void matchVariables(String input, Function<Matcher, Object> function ) {
-        if(variablePattern != null) {
+    public void matchVariables(String input, Function<Matcher, Object> function) {
+        if (variablePattern != null) {
             Matcher match = variablePattern.matcher(input);
             function.apply(match);
         }
 
-        if(templateVariablePattern != null) {
+        if (templateVariablePattern != null) {
             Matcher match = templateVariablePattern.matcher(input);
             function.apply(match);
         }
+    }
+
+    public static boolean isVariable(String text, String v) {
+        String var = substringAfterLast(SPACE, text.toLowerCase());
+
+        return (var.startsWith(DOLLAR) && !var.substring(1).equals(v)
+                && v.toLowerCase().contains(var.substring(1)))
+                || (var.startsWith("${") && !var.substring(2).equals(v)
+                && v.toLowerCase().contains(var.substring(2)));
+    }
+
+    public static String substringAfterLast(String delimiter, String value) {
+        int index = value.lastIndexOf(delimiter);
+        if (index == -1) return value;
+        else return value.substring(index + delimiter.length());
     }
 }
