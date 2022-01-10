@@ -9,9 +9,12 @@ import java.util.regex.Pattern
 internal class VariableParserTest {
 
     var variablePattern =
-        Pattern.compile("(\\\$tt|\\\$deleteDate|\\\$executorService|\\\$FIVE_MINUTES_MILLIS|\\\$mapTodos|\\\$GET|\\\$HEAD|\\\$POST|\\\$PUT|\\\$PATCH|\\\$DELETE|\\\$OPTIONS|\\\$TRACE)(?:\\s|$)")
+        Pattern.compile("(\\\$tt|\\\$deleteDate|\\\$executorService|\\\$FIVE_MINUTES_MILLIS|\\\$mapTodos|\\\$GET" +
+                "|\\\$HEAD|\\\$POST|\\\$PUT|\\\$PATCH|\\\$DELETE|\\\$OPTIONS|\\\$TRACE)(?:\\s|$)")
     var templateVariablePattern =
-        Pattern.compile("(\\\$\\{tt}|\\\$\\{deleteDate}|\\\$\\{executorService}|\\\$\\{FIVE_MINUTES_MILLIS}|\\\$\\{mapTodos}|\\\$\\{GET}|\\\$\\{HEAD}|\\\$\\{POST}|\\\$\\{PUT}|\\\$\\{PATCH}|\\\$\\{DELETE}|\\\$\\{OPTIONS}|\\\$\\{TRACE})(?:|$)")
+        Pattern.compile("(\\\$\\{tt}|\\\$\\{deleteDate}|\\\$\\{executorService}|\\\$\\{FIVE_MINUTES_MILLIS}" +
+                "|\\\$\\{mapTodos}|\\\$\\{GET}|\\\$\\{HEAD}|\\\$\\{POST}|\\\$\\{PUT}|\\\$\\{PATCH}|\\\$\\{DELETE}" +
+                "|\\\$\\{OPTIONS}|\\\$\\{TRACE})(?:|$)")
 
     @Test
     fun extractVariablesPattern1() {
