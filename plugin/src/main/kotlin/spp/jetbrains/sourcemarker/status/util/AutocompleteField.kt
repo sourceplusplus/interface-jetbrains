@@ -7,12 +7,12 @@ import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE
 import spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14
+import spp.jetbrains.sourcemarker.VariableParser
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import java.awt.*
 import java.awt.event.*
 import java.util.function.Function
 import java.util.regex.Matcher
-import java.util.regex.Pattern
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
@@ -39,8 +39,6 @@ class AutocompleteField(
     private val popup: JWindow
     private val list: JList<AutocompleteFieldRow>
     private val model: ListModel<AutocompleteFieldRow>
-    private val variablePattern: Pattern
-    private val templateVariablePattern: Pattern
     var editMode: Boolean = true
     private var showSaveButton: Boolean = false
     private val listeners: MutableList<SaveListener> = mutableListOf()
@@ -49,6 +47,15 @@ class AutocompleteField(
     var addOnSuggestionDoubleClick: Boolean = true
     var placeHolderTextColor: Color? = null
     var canShowSaveButton = true
+    private val variableParser = VariableParser()
+
+    val matchAndApplyStyle = { m: Matcher ->
+        while (m.find()) {
+            val variable: String = m.group(1)
+            val varIndex = m.start()
+            styledDocument.setCharacterAttributes(varIndex, variable.length, getStyle("numbers"), true)
+        }
+    }
 
     init {
         foreground = UIUtil.getTextFieldForeground()
@@ -90,20 +97,7 @@ class AutocompleteField(
         document.addDocumentListener(this)
         addKeyListener(this)
 
-        val sb = StringBuilder("(")
-        val sbt = StringBuilder("(")
-        for (i in allLookup.indices) {
-            sb.append(Regex.escape(allLookup[i].getText()))
-            sbt.append(Regex.escape("\${"+allLookup[i].getText().substring(1)+"}"))
-            if (i + 1 < allLookup.size) {
-                sb.append("|")
-                sbt.append("|")
-            }
-        }
-        sb.append(")(?:\\s|$)")
-        sbt.append(")(?:|$)")
-        variablePattern = Pattern.compile(sb.toString())
-        templateVariablePattern = Pattern.compile(sbt.toString())
+        variableParser.createPattern(allLookup.map { a->a.getText().substring(1)})
 
         document.putProperty("filterNewlines", true)
 
@@ -172,18 +166,7 @@ class AutocompleteField(
             true
         )
 
-        var m = variablePattern.matcher(text)
-        matchAndApplyStyle(m)
-        m = templateVariablePattern.matcher(text)
-        matchAndApplyStyle(m)
-    }
-
-    private fun matchAndApplyStyle(m: Matcher) {
-        while (m.find()) {
-            val variable: String = m.group(1)
-            val varIndex = m.start()
-            styledDocument.setCharacterAttributes(varIndex, variable.length, getStyle("numbers"), true)
-        }
+        variableParser.matchVariables(text, matchAndApplyStyle)
     }
 
     private fun addNumberStyle(pn: JTextPane) {

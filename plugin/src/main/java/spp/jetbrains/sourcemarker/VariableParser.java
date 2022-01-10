@@ -1,15 +1,44 @@
 package spp.jetbrains.sourcemarker;
 
+import com.intellij.openapi.util.Pair;
+
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class VariableParser {
-    private static final String PATTERN_CURLY_BRACES = "\\{|\\}";
-    private static final String EMPTY = "";
+import static spp.jetbrains.sourcemarker.Constants.EMPTY;
+import static spp.jetbrains.sourcemarker.Constants.PATTERN_CURLY_BRACES;
 
-    public static String extractVariables(Pattern variablePattern, Pattern templateVariablePattern,
-                                    ArrayList<String> varMatches, String logPattern) {
+public class VariableParser {
+
+    private Pattern variablePattern;
+    private Pattern templateVariablePattern;
+
+    public void createPattern(List<String> scopeVars) {
+
+        if (!scopeVars.isEmpty()) {
+            StringBuilder sb = new StringBuilder("(");
+            StringBuilder sbt = new StringBuilder("(");
+            for (int i = 0; i < scopeVars.size(); i++) {
+                sb.append("\\$").append(scopeVars.get(i));
+                sbt.append("\\$\\{").append(scopeVars.get(i)).append("\\}");
+                if (i + 1 < scopeVars.size()) {
+                    sb.append("|");
+                    sbt.append("|");
+                }
+            }
+            sb.append(")(?:\\s|$)");
+            sbt.append(")(?:|$)");
+            variablePattern = Pattern.compile(sb.toString());
+            templateVariablePattern = Pattern.compile(sbt.toString());
+        }
+    }
+
+    public Pair<String, List<String>> extractVariables(String logPattern) {
+
+        List<String> varMatches = new ArrayList<>();
         if (variablePattern != null) {
             Matcher m = variablePattern.matcher(logPattern);
             int matchLength = 0;
@@ -17,7 +46,6 @@ public class VariableParser {
                 String var = m.group(1);
                 logPattern = logPattern.substring(0, m.start() - matchLength)
                         + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
-                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
                 matchLength = matchLength + var.length() - 1;
                 varMatches.add(var);
             }
@@ -36,6 +64,18 @@ public class VariableParser {
                 varMatches.add(var);
             }
         }
-        return logPattern;
+        return Pair.create(logPattern, varMatches);
+    }
+
+    public void matchVariables(String input, Function<Matcher, Object> function ) {
+        if(variablePattern != null) {
+            Matcher match = variablePattern.matcher(input);
+            function.apply(match);
+        }
+
+        if(templateVariablePattern != null) {
+            Matcher match = templateVariablePattern.matcher(input);
+            function.apply(match);
+        }
     }
 }
