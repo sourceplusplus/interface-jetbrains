@@ -10,18 +10,6 @@ services:
       - "5445:5445"
       - "5450:5450"
       - "5455:5455"
-    depends_on:
-      - redis
-    links:
-      - redis
-    environment:
-      - SPP_REDIS_HOST=redis
-      - SPP_SKYWALKING_HOST=skywalking-oap
-      - SPP_SYSTEM_ACCESS_TOKEN=change-me
-  redis:
-    image: redis:6.2.1
-    container_name: redis
-    hostname: redis
   skywalking-oap:
     container_name: skywalking-oap
     build:
