@@ -58,7 +58,6 @@ public class VariableParser {
                 String var = m.group(1);
                 logPattern = logPattern.substring(0, m.start() - matchLength)
                         + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
-                //logPattern = logPattern.replaceFirst(Pattern.quote(var), "{}");
                 matchLength = matchLength + var.length() - 1;
                 var = var.replaceAll(PATTERN_CURLY_BRACES, EMPTY);
                 varMatches.add(var);
