@@ -314,9 +314,10 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                     )
                 )
             }
-            displayPoint.y -= popupComponentSize.height + 4
 
             if (sourceMarkComponent.configuration.useHeavyPopup) {
+                displayPoint.y -= popupComponentSize.height + 4
+
                 popup = JBPopupFactory.getInstance()
                     .createComponentPopupBuilder(popupComponent, popupComponent)
                     .setShowBorder(false)
@@ -329,8 +330,9 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             } else {
                 val width = (popupComponentSize.width / 2) + 10
                 val height = popupComponentSize.height / 2
-                displayPoint.x = (displayPoint.getX() + width).toInt()
+                displayPoint.x = (displayPoint.getX() + width).toInt() + 10
                 displayPoint.y = (displayPoint.getY() - height).toInt()
+
                 popup = JBPopupFactory.getInstance()
                     .createBalloonBuilder(popupComponent)
                     .setBorderInsets(JBUI.emptyInsets())

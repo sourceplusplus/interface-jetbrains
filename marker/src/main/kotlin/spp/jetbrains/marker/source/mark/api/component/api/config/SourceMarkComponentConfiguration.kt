@@ -12,7 +12,7 @@ import java.awt.Dimension
  */
 open class SourceMarkComponentConfiguration {
 
-    var useHeavyPopup = true
+    var useHeavyPopup = false
     var hideOnMouseMotion = false
     var hideOnScroll = true
     var showAboveClass: Boolean = false
