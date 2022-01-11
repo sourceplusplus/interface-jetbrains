@@ -1,95 +1,89 @@
-package spp.jetbrains.sourcemarker;
+package spp.jetbrains.sourcemarker.service.log
 
-import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.Pair
+import java.util.function.Function
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+object VariableParser {
 
-public class VariableParser {
+    const val PATTERN_CURLY_BRACES = "\\{|\\}"
+    const val EMPTY = ""
+    const val SPACE = " "
+    const val DOLLAR = "$"
 
-    public static final String PATTERN_CURLY_BRACES = "\\{|\\}";
-    public static final String EMPTY = "";
-    public static final String SPACE = " ";
-    public static final String DOLLAR = "$";
-
-    public static Pair<Pattern, Pattern> createPattern(List<String> scopeVars) {
-        Pattern variablePattern = null;
-        Pattern templateVariablePattern = null;
-        if (!scopeVars.isEmpty()) {
-            StringBuilder sb = new StringBuilder("(");
-            StringBuilder sbt = new StringBuilder("(");
-            for (int i = 0; i < scopeVars.size(); i++) {
-                sb.append("\\$").append(scopeVars.get(i));
-                sbt.append("\\$\\{").append(scopeVars.get(i)).append("\\}");
-                if (i + 1 < scopeVars.size()) {
-                    sb.append("|");
-                    sbt.append("|");
+    @JvmStatic
+    fun createPattern(scopeVars: List<String>): Pair<Pattern?, Pattern?> {
+        var variablePattern: Pattern? = null
+        var templateVariablePattern: Pattern? = null
+        if (scopeVars.isNotEmpty()) {
+            val sb = StringBuilder("(")
+            val sbt = StringBuilder("(")
+            for (i in scopeVars.indices) {
+                sb.append("\\$").append(scopeVars[i])
+                sbt.append("\\$\\{").append(scopeVars[i]).append("\\}")
+                if (i + 1 < scopeVars.size) {
+                    sb.append("|")
+                    sbt.append("|")
                 }
             }
-            sb.append(")(?:\\s|$)");
-            sbt.append(")(?:|$)");
-            variablePattern = Pattern.compile(sb.toString());
-            templateVariablePattern = Pattern.compile(sbt.toString());
+            sb.append(")(?:\\s|$)")
+            sbt.append(")(?:|$)")
+            variablePattern = Pattern.compile(sb.toString())
+            templateVariablePattern = Pattern.compile(sbt.toString())
         }
-        return Pair.create(variablePattern, templateVariablePattern);
+        return Pair.create(variablePattern, templateVariablePattern)
     }
 
-    public static Pair<String, List<String>> extractVariables(Pair<Pattern, Pattern> patternPair, String logPattern) {
-        List<String> varMatches = new ArrayList<>();
+    @JvmStatic
+    fun extractVariables(patternPair: Pair<Pattern?, Pattern?>, logText: String): Pair<String, List<String>> {
+        var logTemplate = logText
+        val varMatches: MutableList<String> = ArrayList()
         if (patternPair.first != null) {
-            Matcher m = patternPair.first.matcher(logPattern);
-            int matchLength = 0;
+            val m = patternPair.first!!.matcher(logTemplate)
+            var matchLength = 0
             while (m.find()) {
-                String var = m.group(1);
-                logPattern = logPattern.substring(0, m.start() - matchLength)
-                        + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
-                matchLength = matchLength + var.length() - 1;
-                varMatches.add(var);
+                val variable = m.group(1)
+                logTemplate = (logTemplate.substring(0, m.start() - matchLength)
+                        + logTemplate.substring(m.start() - matchLength)
+                    .replaceFirst(Pattern.quote(variable).toRegex(), "{}"))
+                matchLength = matchLength + variable.length - 1
+                varMatches.add(variable)
             }
         }
-
         if (patternPair.second != null) {
-            Matcher m = patternPair.second.matcher(logPattern);
-            int matchLength = 0;
+            val m = patternPair.second!!.matcher(logTemplate)
+            var matchLength = 0
             while (m.find()) {
-                String var = m.group(1);
-                logPattern = logPattern.substring(0, m.start() - matchLength)
-                        + logPattern.substring(m.start() - matchLength).replaceFirst(Pattern.quote(var), "{}");
-                matchLength = matchLength + var.length() - 1;
-                var = var.replaceAll(PATTERN_CURLY_BRACES, EMPTY);
-                varMatches.add(var);
+                var variable = m.group(1)
+                logTemplate = (logTemplate.substring(0, m.start() - matchLength)
+                        + logTemplate.substring(m.start() - matchLength)
+                    .replaceFirst(Pattern.quote(variable).toRegex(), "{}"))
+                matchLength = matchLength + variable.length - 1
+                variable = variable.replace(PATTERN_CURLY_BRACES.toRegex(), EMPTY)
+                varMatches.add(variable)
             }
         }
-        return Pair.create(logPattern, varMatches);
+        return Pair.create(logTemplate, varMatches)
     }
 
-    public static void matchVariables(Pair<Pattern, Pattern> patternPair, String input, Function<Matcher, Object> function) {
+    fun matchVariables(patternPair: Pair<Pattern?, Pattern?>, input: String, function: Function<Matcher, Any>) {
         if (patternPair.first != null) {
-            Matcher match = patternPair.first.matcher(input);
-            function.apply(match);
+            val match = patternPair.first!!.matcher(input)
+            function.apply(match)
         }
-
         if (patternPair.second != null) {
-            Matcher match = patternPair.second.matcher(input);
-            function.apply(match);
+            val match = patternPair.second!!.matcher(input)
+            function.apply(match)
         }
     }
 
-    public static boolean isVariable(String text, String v) {
-        String var = substringAfterLast(SPACE, text.toLowerCase());
-
-        return (var.startsWith(DOLLAR) && !var.substring(1).equals(v)
-                && v.toLowerCase().contains(var.substring(1)))
-                || (var.startsWith("${") && !var.substring(2).equals(v)
-                && v.toLowerCase().contains(var.substring(2)));
-    }
-
-    public static String substringAfterLast(String delimiter, String value) {
-        int index = value.lastIndexOf(delimiter);
-        if (index == -1) return value;
-        else return value.substring(index + delimiter.length());
+    @JvmStatic
+    fun isVariable(text: String, v: String): Boolean {
+        val variable = text.toLowerCase().substringAfterLast(SPACE)
+        return ((variable.startsWith(DOLLAR) && variable.substring(1) != v
+                && v.toLowerCase().contains(variable.substring(1)))
+                || (variable.startsWith("\${") && variable.substring(2) != v
+                && v.toLowerCase().contains(variable.substring(2))))
     }
 }

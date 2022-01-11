@@ -31,12 +31,12 @@ public class LiveControlBarRow extends JPanel {
     }
 
     public void setCommandName(String commandName, String input) {
-        Set<String> inputWords = new HashSet<>(Arrays.asList(input.toLowerCase().split(" ")));
         Color defaultColor = UIUtil.getTextAreaForeground();
         String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
         String defaultHex = "#" + Integer.toHexString(defaultColor.getRGB()).substring(2);
-        Map<Integer, Integer> matches = new HashMap<>();
 
+        Map<Integer, Integer> matches = new HashMap<>();
+        Set<String> inputWords = new HashSet<>(Arrays.asList(input.toLowerCase().split(" ")));
         for (String inputWord : inputWords) {
             int startIndex = commandName.toLowerCase().indexOf(inputWord);
             if (startIndex > -1) {

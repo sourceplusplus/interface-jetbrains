@@ -8,7 +8,7 @@ import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE
 import spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14
-import spp.jetbrains.sourcemarker.VariableParser
+import spp.jetbrains.sourcemarker.service.log.VariableParser
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import java.awt.*
 import java.awt.event.*
@@ -49,7 +49,7 @@ class AutocompleteField(
     var addOnSuggestionDoubleClick: Boolean = true
     var placeHolderTextColor: Color? = null
     var canShowSaveButton = true
-    var patternPair: Pair<Pattern, Pattern> = Pair.empty();
+    var patternPair: Pair<Pattern?, Pattern?> = Pair.empty();
 
     val matchAndApplyStyle = { m: Matcher ->
         while (m.find()) {

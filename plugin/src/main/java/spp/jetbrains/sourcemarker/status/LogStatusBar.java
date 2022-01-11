@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
-import spp.jetbrains.sourcemarker.VariableParser;
+import spp.jetbrains.sourcemarker.service.log.VariableParser;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
@@ -109,7 +109,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     new LogHitColumnInfo(TIME)
             },
             new ArrayList<>(), 0, SortOrder.DESCENDING);
-    private Pair<Pattern, Pattern> patternPair = Pair.empty();
+    private final Pair<Pattern, Pattern> patternPair;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this.sourceLocation = sourceLocation;
@@ -567,7 +567,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         }
 
         Pair<String, List<String>> resp = VariableParser.extractVariables(patternPair, liveLogTextField.getText());
-
         final String finalLogPattern = resp.first;
 
         String condition = null;
