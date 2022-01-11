@@ -109,7 +109,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     new LogHitColumnInfo(TIME)
             },
             new ArrayList<>(), 0, SortOrder.DESCENDING);
-    private VariableParser variableParser = new VariableParser();
+    private Pair<Pattern, Pattern> patternPair = Pair.empty();
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this.sourceLocation = sourceLocation;
@@ -144,7 +144,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 .limit(7)
                 .collect(Collectors.toList());
 
-        variableParser.createPattern(scopeVars);
+        patternPair = VariableParser.createPattern(scopeVars);
 
         this.inlayMark = inlayMark;
 
@@ -566,7 +566,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             });
         }
 
-        Pair<String, List<String>> resp = variableParser.extractVariables(liveLogTextField.getText());
+        Pair<String, List<String>> resp = VariableParser.extractVariables(patternPair, liveLogTextField.getText());
 
         final String finalLogPattern = resp.first;
 

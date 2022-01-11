@@ -1,5 +1,6 @@
 package spp.jetbrains.sourcemarker.status.util
 
+import com.intellij.openapi.util.Pair
 import com.intellij.openapi.util.ScalableIcon
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
@@ -13,6 +14,7 @@ import java.awt.*
 import java.awt.event.*
 import java.util.function.Function
 import java.util.regex.Matcher
+import java.util.regex.Pattern
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
@@ -47,7 +49,7 @@ class AutocompleteField(
     var addOnSuggestionDoubleClick: Boolean = true
     var placeHolderTextColor: Color? = null
     var canShowSaveButton = true
-    private val variableParser = VariableParser()
+    var patternPair: Pair<Pattern, Pattern> = Pair.empty();
 
     val matchAndApplyStyle = { m: Matcher ->
         while (m.find()) {
@@ -97,7 +99,7 @@ class AutocompleteField(
         document.addDocumentListener(this)
         addKeyListener(this)
 
-        variableParser.createPattern(allLookup.map { a->a.getText().substring(1)})
+        patternPair = VariableParser.createPattern(allLookup.map { a->a.getText().substring(1)})
 
         document.putProperty("filterNewlines", true)
 
@@ -166,7 +168,7 @@ class AutocompleteField(
             true
         )
 
-        variableParser.matchVariables(text, matchAndApplyStyle)
+        VariableParser.matchVariables(patternPair, text, matchAndApplyStyle)
     }
 
     private fun addNumberStyle(pn: JTextPane) {

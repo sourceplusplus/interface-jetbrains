@@ -15,10 +15,9 @@ public class VariableParser {
     public static final String SPACE = " ";
     public static final String DOLLAR = "$";
 
-    private Pattern variablePattern;
-    private Pattern templateVariablePattern;
-
-    public void createPattern(List<String> scopeVars) {
+    public static Pair<Pattern, Pattern> createPattern(List<String> scopeVars) {
+        Pattern variablePattern = null;
+        Pattern templateVariablePattern = null;
         if (!scopeVars.isEmpty()) {
             StringBuilder sb = new StringBuilder("(");
             StringBuilder sbt = new StringBuilder("(");
@@ -35,12 +34,13 @@ public class VariableParser {
             variablePattern = Pattern.compile(sb.toString());
             templateVariablePattern = Pattern.compile(sbt.toString());
         }
+        return Pair.create(variablePattern, templateVariablePattern);
     }
 
-    public Pair<String, List<String>> extractVariables(String logPattern) {
+    public static Pair<String, List<String>> extractVariables(Pair<Pattern, Pattern> patternPair, String logPattern) {
         List<String> varMatches = new ArrayList<>();
-        if (variablePattern != null) {
-            Matcher m = variablePattern.matcher(logPattern);
+        if (patternPair.first != null) {
+            Matcher m = patternPair.first.matcher(logPattern);
             int matchLength = 0;
             while (m.find()) {
                 String var = m.group(1);
@@ -51,8 +51,8 @@ public class VariableParser {
             }
         }
 
-        if (templateVariablePattern != null) {
-            Matcher m = templateVariablePattern.matcher(logPattern);
+        if (patternPair.second != null) {
+            Matcher m = patternPair.second.matcher(logPattern);
             int matchLength = 0;
             while (m.find()) {
                 String var = m.group(1);
@@ -67,14 +67,14 @@ public class VariableParser {
         return Pair.create(logPattern, varMatches);
     }
 
-    public void matchVariables(String input, Function<Matcher, Object> function) {
-        if (variablePattern != null) {
-            Matcher match = variablePattern.matcher(input);
+    public static void matchVariables(Pair<Pattern, Pattern> patternPair, String input, Function<Matcher, Object> function) {
+        if (patternPair.first != null) {
+            Matcher match = patternPair.first.matcher(input);
             function.apply(match);
         }
 
-        if (templateVariablePattern != null) {
-            Matcher match = templateVariablePattern.matcher(input);
+        if (patternPair.second != null) {
+            Matcher match = patternPair.second.matcher(input);
             function.apply(match);
         }
     }
