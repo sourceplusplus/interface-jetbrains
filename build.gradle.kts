@@ -70,22 +70,6 @@ subprojects {
 }
 
 tasks {
-    register("downloadSkywalking") {
-        doLast {
-            println("Downloading Apache SkyWalking")
-            val f = File(projectDir, "test/e2e/apache-skywalking-apm-8.9.0.tar.gz")
-            if (!f.exists()) {
-                java.net.URL("https://downloads.apache.org/skywalking/8.9.0/apache-skywalking-apm-8.9.0.tar.gz")
-                    .openStream().use { input ->
-                        java.io.FileOutputStream(f).use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-            }
-            println("Downloaded Apache SkyWalking")
-        }
-    }
-
     register<Exec>("buildExampleWebApp") {
         workingDir = File("./test/e2e/example-web-app")
 
