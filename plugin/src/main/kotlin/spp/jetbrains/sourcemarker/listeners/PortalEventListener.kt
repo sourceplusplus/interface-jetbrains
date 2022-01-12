@@ -5,8 +5,22 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.psi.PsiNameIdentifierOwner
+import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
+import io.vertx.core.eventbus.ReplyException
+import io.vertx.core.eventbus.ReplyFailure
+import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
+import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toKotlinInstant
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarker.creationService
+import spp.jetbrains.marker.jvm.ArtifactNavigator
+import spp.jetbrains.marker.jvm.ArtifactSearch.findArtifact
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
@@ -23,6 +37,11 @@ import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
 import spp.jetbrains.portal.SourcePortal
+import spp.jetbrains.sourcemarker.PluginBundle
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
+import spp.jetbrains.sourcemarker.search.SourceMarkSearch
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
@@ -60,25 +79,6 @@ import spp.protocol.portal.PageType
 import spp.protocol.utils.ArtifactNameUtils.getQualifiedClassName
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
-import spp.jetbrains.sourcemarker.PluginBundle
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
-import spp.jetbrains.marker.jvm.ArtifactNavigator
-import spp.jetbrains.marker.jvm.ArtifactSearch.findArtifact
-import spp.jetbrains.sourcemarker.search.SourceMarkSearch
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
-import io.vertx.core.eventbus.ReplyException
-import io.vertx.core.eventbus.ReplyFailure
-import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.coroutines.CoroutineVerticle
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toKotlinInstant
-import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -123,14 +123,33 @@ class PortalEventListener(
                 PageType.CONFIGURATION -> TODO()
             }
         }
-        vertx.eventBus().consumer<JsonObject>(SetCurrentPage) {
-            val portalUuid = it.body().getString("portalUuid")
-            val pageType = PageType.valueOf(it.body().getString("pageType"))
-            val portal = SourcePortal.getPortal(portalUuid)!!
-            portal.configuration.currentPage = pageType
-            it.reply(JsonObject.mapFrom(portal.configuration))
-            log.info("Set portal ${portal.portalUuid} page type to $pageType")
-            vertx.eventBus().publish(RefreshPortal, portal)
+        vertx.eventBus().consumer<Any>(SetCurrentPage) {
+            if (it is JsonObject) {
+                val body = (it.body() as JsonObject)
+                val portalUuid = body.getString("portalUuid")
+                val pageType = PageType.valueOf(body.getString("pageType"))
+                val portal = SourcePortal.getPortal(portalUuid)!!
+                portal.configuration.currentPage = pageType
+                it.reply(JsonObject.mapFrom(portal.configuration))
+                log.info("Set portal ${portal.portalUuid} page type to $pageType")
+                vertx.eventBus().publish(RefreshPortal, portal)
+            } else {
+                val portal = it.body() as SourcePortal
+                if (lastDisplayedInternalPortal == null) {
+                    configureDisplayedPortal(portal)
+                } else {
+                    val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+                    val jcefComponent = sourceMark!!.sourceMarkComponent as SourceMarkJcefComponent
+                    val port = vertx.sharedData().getLocalMap<String, Int>("portal")["http.port"]!!
+                    val host = "http://localhost:$port"
+                    val currentUrl = "$host/?portalUuid=${portal.portalUuid}"
+                    jcefComponent.getBrowser().cefBrowser.executeJavaScript(
+                        "window.location.href = '$currentUrl';", currentUrl, 0
+                    )
+                }
+                it.reply(JsonObject.mapFrom(portal.configuration))
+                log.info("Updated portal ${portal.portalUuid} current page")
+            }
         }
         vertx.eventBus().consumer<String>(GetPortalConfiguration) {
             val portalUuid = it.body()
@@ -608,6 +627,14 @@ class PortalEventListener(
     private fun openPortal(portal: SourcePortal) {
         val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null) {
+            configureDisplayedPortal(portal)
+            ApplicationManager.getApplication().invokeLater(sourceMark::displayPopup)
+        }
+    }
+
+    private fun configureDisplayedPortal(portal: SourcePortal) {
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+        if (sourceMark != null) {
             val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
             if (portal != lastDisplayedInternalPortal) {
                 val externalEndpoint = sourceMark.getUserData(ENDPOINT_DETECTOR)?.isExternalEndpoint(sourceMark) == true
@@ -658,8 +685,6 @@ class PortalEventListener(
                 }
                 lastDisplayedInternalPortal = portal
             }
-
-            ApplicationManager.getApplication().invokeLater(sourceMark::displayPopup)
         }
     }
 

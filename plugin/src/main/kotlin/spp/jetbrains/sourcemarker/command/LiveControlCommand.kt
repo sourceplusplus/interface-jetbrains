@@ -18,8 +18,22 @@ enum class LiveControlCommand(
 ) : AutocompleteFieldRow {
 
     VIEW_ACTIVITY(
-        "view-activity",
-        "View method activity"
+        "View Activity",
+        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Activity ➛ Scope: Method</span></html>",
+        PluginIcons.Command.viewActivitySelected,
+        PluginIcons.Command.viewActivityUnSelected
+    ),
+    VIEW_TRACES(
+        "View Traces",
+        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Traces ➛ Scope: Method</span></html>",
+        PluginIcons.Command.viewTracesSelected,
+        PluginIcons.Command.viewTracesUnSelected
+    ),
+    VIEW_LOGS(
+        "View Logs",
+        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Logs ➛ Scope: Method</span></html>",
+        PluginIcons.Command.viewLogsSelected,
+        PluginIcons.Command.viewLogsUnSelected
     ),
     WATCH_VARIABLE(
         "watch",

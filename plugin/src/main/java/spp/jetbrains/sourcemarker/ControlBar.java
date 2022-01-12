@@ -55,6 +55,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                 }
                 return Double.compare(c1Distance, c2Distance);
             })
+            .limit(3)
             .collect(Collectors.toList());
 
         initComponents();
