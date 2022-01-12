@@ -14,6 +14,16 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 ## Features
 
+### Live Views
+
+> Contextual popups for displaying live operational data on the code currently in view.
+
+<details>
+  <summary>Screencast</summary>
+
+  ![screencast](https://github.com/sourceplusplus/interface-portal/blob/master/.github/media/screencast-2021-11-18%2015-37.gif)
+</details>
+
 ### Live Breakpoint
 
 > Live Breakpoints (a.k.a non-breaking breakpoints) are useful debugging instruments for gaining insight into the live variables available in production at a given scope.
