@@ -156,7 +156,7 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
         val url = trace.meta["url"]
         val httpMethod = trace.meta["http.method"]
         if (url != null && httpMethod != null) {
-            val updatedEndpointName = "{$httpMethod}${URI(url).path}"
+            val updatedEndpointName = "$httpMethod:${URI(url).path}"
             val entrySpan = Json.decodeValue(trace.meta["entrySpan"], TraceSpan::class.java)
             vertx.eventBus().send(
                 TraceSpanUpdated, entrySpan.copy(
