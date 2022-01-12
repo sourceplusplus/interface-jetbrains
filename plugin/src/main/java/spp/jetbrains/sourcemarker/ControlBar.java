@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_17;
 import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
+import static spp.jetbrains.sourcemarker.PluginUI.STATUS_BAR_TXT_BG_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class ControlBar extends JPanel implements VisibleAreaListener {
@@ -184,6 +186,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        setBackground(DFLT_BGND_COLOR);
         label1 = new JLabel();
         String fullyQualified = inlayMark.getArtifactQualifiedName();
         String location = fullyQualified;
@@ -220,7 +223,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         add(label1, "cell 0 0");
 
         //---- textField1 ----
-        textField1.setBackground(UIUtil.getTextFieldBackground());
+        textField1.setBackground(STATUS_BAR_TXT_BG_COLOR);
         textField1.setBorder(new CompoundBorder(
             new LineBorder(UIUtil.getBoundsColor(), 1, true),
             new EmptyBorder(2, 6, 0, 0)));

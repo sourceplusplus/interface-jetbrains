@@ -67,10 +67,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_17;
 import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
+import static spp.jetbrains.sourcemarker.PluginUI.STATUS_BAR_TXT_BG_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
@@ -282,7 +285,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     table.setStriped(true);
                     table.setShowColumns(true);
 
-                    table.setBackground(PluginUI.getBackgroundDefaultColor());
+                    table.setBackground(DFLT_BGND_COLOR);
                     panel.add(scrollPane);
                     panel.setPreferredSize(new Dimension(0, 250));
                     wrapper.add(panel, BorderLayout.NORTH);
@@ -319,13 +322,13 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(PluginUI.getBackgroundDefaultColor());
+            configPanel.setBackground(DFLT_BGND_COLOR);
 
             if (!liveLogTextField.getEditMode()) {
                 liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(UIUtil.getBoundsColor(), 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                liveLogTextField.setBackground(PluginUI.getEditCompleteColor());
+                liveLogTextField.setBackground(STATUS_BAR_TXT_BG_COLOR);
                 liveLogTextField.setEditable(false);
             }
         });
@@ -335,7 +338,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-        liveLogTextField.setBackground(UIUtil.getTextFieldBackground());
+        liveLogTextField.setBackground(STATUS_BAR_TXT_BG_COLOR);
         liveLogTextField.setEditable(true);
     }
 
@@ -478,7 +481,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!errored && !removed) configPanel.setBackground(PluginUI.getBackgroundFocusColor());
+                if (!errored && !removed) configPanel.setBackground(BGND_FOCUS_COLOR);
             }
         });
 
@@ -653,6 +656,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        setBackground(DFLT_BGND_COLOR);
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
@@ -677,6 +681,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         //======== configPanel ========
         {
+            configPanel.setBackground(BGND_FOCUS_COLOR);
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
