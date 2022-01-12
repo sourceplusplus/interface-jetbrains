@@ -41,6 +41,7 @@ tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out ho
 tasks.getByName<JavaExec>("runIde") {
     systemProperty("sourcemarker.debug.capture_logs", true)
     systemProperty("ide.enable.slow.operations.in.edt", false)
+    systemProperty("ide.browser.jcef.contextMenu.devTools.enabled", true)
 }
 
 changelog {
