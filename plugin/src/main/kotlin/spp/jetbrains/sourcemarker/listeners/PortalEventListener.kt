@@ -105,8 +105,16 @@ class PortalEventListener(
     override suspend fun start() {
         //listen for theme changes
         UIManager.addPropertyChangeListener {
-            val darkMode = (it.newValue !is IntelliJLaf)
-            //todo: update existing portals
+            if (lastDisplayedInternalPortal != null) {
+                lastDisplayedInternalPortal!!.configuration.darkMode = (it.newValue !is IntelliJLaf)
+                val sourceMark = SourceMarker.getSourceMark(
+                    lastDisplayedInternalPortal!!.viewingPortalArtifact, SourceMark.Type.GUTTER
+                )
+                if (sourceMark != null) {
+                    val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
+                    jcefComponent.getBrowser().cefBrowser.reload()
+                }
+            }
         }
 
         vertx.eventBus().consumer<Any>(RefreshPortal) {
@@ -637,6 +645,8 @@ class PortalEventListener(
         if (sourceMark != null) {
             val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
             if (portal != lastDisplayedInternalPortal) {
+                portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
+
                 val externalEndpoint = sourceMark.getUserData(ENDPOINT_DETECTOR)?.isExternalEndpoint(sourceMark) == true
                 if (externalEndpoint) {
                     portal.configuration.visibleActivity = true
@@ -665,12 +675,6 @@ class PortalEventListener(
                         }
                     }
                 }
-
-                val lastViewedPage = lastDisplayedInternalPortal?.configuration?.currentPage
-                if (lastViewedPage != null && portal.configuration.isViewable(lastViewedPage)) {
-                    portal.configuration.currentPage = lastViewedPage
-                }
-                portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
 
                 val port = vertx.sharedData().getLocalMap<String, Int>("portal")["http.port"]!!
                 val host = "http://localhost:$port"
