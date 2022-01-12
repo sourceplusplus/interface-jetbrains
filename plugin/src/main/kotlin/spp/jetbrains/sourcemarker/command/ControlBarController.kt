@@ -2,6 +2,7 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
@@ -9,13 +10,19 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker.creationService
 import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.api.ClassSourceMark
+import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
+import spp.protocol.ProtocolAddress.Global.SetCurrentPage
 import spp.protocol.SourceMarkerServices
 import spp.protocol.developer.SelfInfo
 import spp.protocol.portal.PageType
@@ -47,6 +54,9 @@ object ControlBarController {
     fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
         when (input) {
+            VIEW_ACTIVITY.command -> handleViewPortalCommand(editor, VIEW_ACTIVITY)
+            VIEW_TRACES.command -> handleViewPortalCommand(editor, VIEW_TRACES)
+            VIEW_LOGS.command -> handleViewPortalCommand(editor, VIEW_LOGS)
             ADD_LIVE_BREAKPOINT.command -> {
                 //replace command inlay with breakpoint status inlay
                 val prevCommandBar = previousControlBar!!
@@ -109,6 +119,58 @@ object ControlBarController {
             }
             else -> throw UnsupportedOperationException("Command input: $input")
         }
+    }
+
+    private fun handleViewPortalCommand(editor: Editor, command: LiveControlCommand) {
+        var classSourceMark: ClassSourceMark? = null
+        val sourceMark = previousControlBar!!.sourceFileMarker.getSourceMarks().find {
+            if (it is ClassSourceMark) {
+                classSourceMark = it //todo: probably doesn't handle inner classes well
+                false
+            } else if (it is MethodSourceMark) {
+                if (it.configuration.activateOnKeyboardShortcut) {
+                    //+1 on end offset so match is made even right after method end
+                    val incTextRange = TextRange(
+                        it.getPsiMethod().textRange.startOffset,
+                        it.getPsiMethod().textRange.endOffset + 1
+                    )
+                    incTextRange.contains(editor.logicalPositionToOffset(editor.caretModel.logicalPosition))
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        }
+
+        if (sourceMark != null) {
+            val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+            when (command) {
+                VIEW_ACTIVITY -> portal.configuration.currentPage = PageType.ACTIVITY
+                VIEW_TRACES -> portal.configuration.currentPage = PageType.TRACES
+                VIEW_LOGS -> portal.configuration.currentPage = PageType.LOGS
+                else -> throw UnsupportedOperationException("Command input: $command")
+            }
+            SourceMarkerPlugin.vertx.eventBus().request<Any>(SetCurrentPage, portal) {
+                sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.PORTAL_OPENING))
+            }
+        } else if (classSourceMark != null) {
+            val portal = classSourceMark!!.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+            when (command) {
+                VIEW_ACTIVITY -> portal.configuration.currentPage = PageType.ACTIVITY
+                VIEW_TRACES -> portal.configuration.currentPage = PageType.TRACES
+                VIEW_LOGS -> portal.configuration.currentPage = PageType.LOGS
+                else -> throw UnsupportedOperationException("Command input: $command")
+            }
+            SourceMarkerPlugin.vertx.eventBus().request<Any>(SetCurrentPage, portal) {
+                classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, SourceMarkEventCode.PORTAL_OPENING))
+            }
+        } else {
+            log.warn("No source mark found for command: {}", command)
+        }
+
+        previousControlBar!!.dispose()
+        previousControlBar = null
     }
 
     fun canShowControlBar(fileMarker: SourceFileMarker, lineNumber: Int): Boolean {

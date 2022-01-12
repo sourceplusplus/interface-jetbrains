@@ -32,6 +32,8 @@ public interface PluginIcons {
     Icon count = IconLoader.getIcon("/icons/count.svg", PluginIcons.class);
     Icon gauge = IconLoader.getIcon("/icons/gauge.svg", PluginIcons.class);
     Icon histogram = IconLoader.getIcon("/icons/histogram.svg", PluginIcons.class);
+    Icon code = IconLoader.getIcon("/icons/code.svg", PluginIcons.class);
+    Icon tachometer = IconLoader.getIcon("/icons/tachometer-alt.svg", PluginIcons.class);
 
     interface Nodes {
         Icon variable = IconLoader.getIcon("/nodes/variable.png", PluginIcons.class);
@@ -50,6 +52,13 @@ public interface PluginIcons {
 
         Icon liveMeterSelected = IconLoader.getIcon("/icons/command/live-meter_selected.svg", PluginIcons.class);
         Icon liveMeterUnSelected = IconLoader.getIcon("/icons/command/live-meter_unselected.svg", PluginIcons.class);
+
+        Icon viewActivitySelected = IconLoader.getIcon("/icons/command/view-activity_selected.svg", PluginIcons.class);
+        Icon viewActivityUnSelected = IconLoader.getIcon("/icons/command/view-activity_unselected.svg", PluginIcons.class);
+        Icon viewTracesSelected = IconLoader.getIcon("/icons/command/view-traces_selected.svg", PluginIcons.class);
+        Icon viewTracesUnSelected = IconLoader.getIcon("/icons/command/view-traces_unselected.svg", PluginIcons.class);
+        Icon viewLogsSelected = IconLoader.getIcon("/icons/command/view-logs_selected.svg", PluginIcons.class);
+        Icon viewLogsUnSelected = IconLoader.getIcon("/icons/command/view-logs_unselected.svg", PluginIcons.class);
     }
 
     interface Instrument {
