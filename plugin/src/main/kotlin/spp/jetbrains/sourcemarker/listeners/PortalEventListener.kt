@@ -132,7 +132,7 @@ class PortalEventListener(
             }
         }
         vertx.eventBus().consumer<Any>(SetCurrentPage) {
-            if (it is JsonObject) {
+            if (it.body() is JsonObject) {
                 val body = (it.body() as JsonObject)
                 val portalUuid = body.getString("portalUuid")
                 val pageType = PageType.valueOf(body.getString("pageType"))

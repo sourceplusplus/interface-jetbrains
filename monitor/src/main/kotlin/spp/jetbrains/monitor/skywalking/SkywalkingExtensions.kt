@@ -55,12 +55,12 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
 fun QueryTraceQuery.Log.toProtocol(): TraceSpanLogEntry {
     if (data!!.find { it.key == "stack" } != null) {
         return TraceSpanLogEntry(
-            time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()),
+            time = Instant.fromEpochMilliseconds(time as Long),
             data = data.find { it.key == "stack" }!!.value!! //todo: correctly
         )
     }
     return TraceSpanLogEntry(
-        time = Instant.fromEpochMilliseconds((time as BigDecimal).toLong()),
+        time = Instant.fromEpochMilliseconds(time as Long),
         data = data.joinToString(separator = "\n") { it.key + " : " + it.value!! }
     )
 }
@@ -111,9 +111,9 @@ fun TraceOrderType.toTraceState(): TraceState {
 }
 
 fun Iterable<GetLinearIntValuesQuery.Value>.average(): Double {
-    return map { (it.value as BigDecimal).toInt() }.average()
+    return map { it.value as Int }.average()
 }
 
 fun GetMultipleLinearIntValuesQuery.Value.toProtocol(): Double {
-    return (value as BigDecimal).toDouble()
+    return (value as Int).toDouble()
 }
