@@ -21,7 +21,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 <details>
   <summary>Screencast</summary>
 
-  ![screencast](https://github.com/sourceplusplus/interface-portal/blob/master/.github/media/screencast-2021-11-18%2015-37.gif)
+  ![screencast](https://user-images.githubusercontent.com/3278877/149158868-135568d5-20cc-44d4-886a-2202195b594b.gif)
 </details>
 
 ### Live Breakpoint
