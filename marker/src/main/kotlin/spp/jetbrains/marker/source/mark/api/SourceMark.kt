@@ -243,7 +243,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     fun closePopup() {
         if (openedMarks.remove(this)) {
-            log.debug("Closing popup")
+            log.trace("Closing popup")
             try {
                 if (sourceMarkComponent.configuration.addedMouseMotionListener) {
                     editor?.contentComponent?.removeMouseMotionListener(this)
@@ -277,7 +277,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             log.trace("Ignore display popup")
             return
         } else {
-            log.debug("Displaying popup")
+            log.trace("Displaying popup")
 
             //todo: only close marks which are necessary to close
             closeOpenPopups()
@@ -365,7 +365,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     @JvmDefault
     override fun beforeShown(event: LightweightWindowEvent) {
-        log.debug("Before popup shown")
+        log.trace("Before popup shown")
 
         //delay prevents component stains when mark is closed and opened quickly
         //todo: open intellij bug
