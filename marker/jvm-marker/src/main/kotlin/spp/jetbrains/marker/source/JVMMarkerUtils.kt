@@ -433,14 +433,15 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getQualifiedClassName(qualifiedName: String): String {
-        var withoutArgs = qualifiedName.substring(0, qualifiedName.indexOf("("))
-        return if (withoutArgs.contains("<")) {
+    fun getQualifiedClassName(qualifiedName: ArtifactQualifiedName): ArtifactQualifiedName {
+        var withoutArgs = qualifiedName.identifier.substring(0, qualifiedName.identifier.indexOf("("))
+        val classQualifiedName = if (withoutArgs.contains("<")) {
             withoutArgs = withoutArgs.substring(0, withoutArgs.indexOf("<"))
             withoutArgs.substring(withoutArgs.lastIndexOf("?") + 1, withoutArgs.lastIndexOf("."))
         } else {
             withoutArgs.substring(withoutArgs.lastIndexOf("?") + 1, withoutArgs.lastIndexOf("."))
         }
+        return ArtifactQualifiedName(classQualifiedName, type = ArtifactType.CLASS)
     }
 
     /**

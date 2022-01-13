@@ -100,18 +100,13 @@ object ArtifactSearch {
 
         ApplicationManager.getApplication().runReadAction {
             if (artifact.type == ArtifactType.CLASS) {
-                val artifactQualifiedName = artifact.identifier
-                val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
                 val psiClass = JavaPsiFacade.getInstance(project).findClass(
-                    classQualifiedName,
-                    GlobalSearchScope.allScope(project)
+                    artifact.identifier, GlobalSearchScope.allScope(project)
                 )
                 promise.complete(Optional.ofNullable(psiClass))
             } else if (artifact.type == ArtifactType.METHOD) {
-                val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifact.identifier)
                 val psiClass = JavaPsiFacade.getInstance(project).findClass(
-                    classQualifiedName,
-                    GlobalSearchScope.allScope(project)
+                    artifact.identifier, GlobalSearchScope.allScope(project)
                 )
                 for (theMethod in psiClass!!.methods) {
                     val uMethod = theMethod.toUElement() as UMethod

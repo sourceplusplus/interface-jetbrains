@@ -70,8 +70,8 @@ object ArtifactNavigator {
     }
 
     fun navigateToMethod(project: Project, artifactQualifiedName: ArtifactQualifiedName): PsiElement {
-        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName.identifier)
-        val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName, allScope(project))
+        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+        val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName.identifier, allScope(project))
         for (theMethod in psiClass!!.methods) {
             val uMethod = theMethod.toUElement() as UMethod
             val qualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
@@ -92,8 +92,8 @@ object ArtifactNavigator {
     }
 
     fun canNavigateToMethod(project: Project, artifactQualifiedName: ArtifactQualifiedName): Boolean {
-        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName.identifier)
-        val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName, allScope(project))
+        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+        val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName.identifier, allScope(project))
         for (theMethod in psiClass!!.methods) {
             val uMethod = theMethod.toUElement() as UMethod
             val qualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
