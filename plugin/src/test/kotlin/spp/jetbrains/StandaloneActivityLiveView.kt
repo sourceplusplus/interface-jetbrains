@@ -13,18 +13,6 @@ import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.portal.SourcePortal
-import spp.protocol.ProtocolAddress.Global.RefreshActivity
-import spp.protocol.SourceMarkerServices
-import spp.protocol.portal.PortalConfiguration
-import spp.protocol.view.LiveViewConfig
-import spp.protocol.view.LiveViewSubscription
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.json.Json
 import io.vertx.kotlin.coroutines.await
@@ -36,6 +24,21 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.portal.SourcePortal
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.protocol.ProtocolAddress.Global.RefreshActivity
+import spp.protocol.SourceMarkerServices
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
+import spp.protocol.instrument.LiveSourceLocation
+import spp.protocol.portal.PortalConfiguration
+import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewSubscription
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -97,7 +100,7 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                artifactName,
+                ArtifactQualifiedName(artifactName, type = ArtifactType.METHOD),
                 PortalConfiguration(external = true)
             )
         )
@@ -120,7 +123,7 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
             delay(5000)
 
             val sourceMark = SourceMarker.getSourceMark(
-                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                portal.viewingArtifact, SourceMark.Type.GUTTER
             ) ?: return@launch
             val endpointName = sourceMark.getUserData(
                 SourceMarkKeys.ENDPOINT_DETECTOR
@@ -130,6 +133,7 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
                     null,
                     listOf(endpointName),
                     sourceMark.artifactQualifiedName,
+                    LiveSourceLocation(sourceMark.artifactQualifiedName.identifier, -1),
                     LiveViewConfig(
                         "ACTIVITY",
                         false,

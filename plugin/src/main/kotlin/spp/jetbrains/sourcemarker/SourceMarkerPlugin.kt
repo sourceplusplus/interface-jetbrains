@@ -569,7 +569,7 @@ object SourceMarkerPlugin {
 
         if (config.rootSourcePackages.isNotEmpty()) {
             SourceMarker.configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->
-                config.rootSourcePackages.any { artifactQualifiedName.startsWith(it) }
+                config.rootSourcePackages.any { artifactQualifiedName.identifier.startsWith(it) }
             }
         } else {
             val productCode = ApplicationInfo.getInstance().build.productCode

@@ -10,6 +10,8 @@ import kotlinx.datetime.toKotlinInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
@@ -23,7 +25,7 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                artifactName,
+                ArtifactQualifiedName(artifactName, type = ArtifactType.METHOD),
                 PortalConfiguration(external = true)
             )
         )
@@ -33,7 +35,7 @@ class ActivityViewTest {
         val endTime = now.plusSeconds(60).toInstant()
         val startTime = now.toInstant()
         val pushResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
             startTime.toKotlinInstant(),
@@ -50,7 +52,7 @@ class ActivityViewTest {
         portal.activityView.cacheMetricResult(pushResult)
 
         val metricResult = portal.activityView.metricResultCache
-            .get(portal.viewingPortalArtifact)!!.get(QueryTimeFrame.LAST_MINUTE)
+            .get(portal.viewingArtifact)!!.get(QueryTimeFrame.LAST_MINUTE)
         assertNotNull(metricResult)
         assertEquals(1, metricResult!!.artifactMetrics.size)
         assertEquals(listOf(1.0), metricResult.artifactMetrics.first().values)
@@ -66,7 +68,7 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                artifactName,
+                ArtifactQualifiedName(artifactName, type = ArtifactType.METHOD),
                 PortalConfiguration(external = true)
             )
         )
@@ -76,7 +78,7 @@ class ActivityViewTest {
         val endTime = now.plusSeconds(60).toInstant()
         val startTime = now.toInstant()
         val pushResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
             startTime.toKotlinInstant(),
@@ -93,7 +95,7 @@ class ActivityViewTest {
         portal.activityView.cacheMetricResult(pushResult)
 
         val pushResult2 = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
             startTime.toKotlinInstant(),
@@ -110,7 +112,7 @@ class ActivityViewTest {
         portal.activityView.cacheMetricResult(pushResult2)
 
         val metricResult = portal.activityView.metricResultCache
-            .get(portal.viewingPortalArtifact)!!.get(QueryTimeFrame.LAST_MINUTE)
+            .get(portal.viewingArtifact)!!.get(QueryTimeFrame.LAST_MINUTE)
         assertNotNull(metricResult)
         assertEquals(1, metricResult!!.artifactMetrics.size)
         assertEquals(listOf(2.0), metricResult.artifactMetrics.first().values)
@@ -126,7 +128,7 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                artifactName,
+                ArtifactQualifiedName(artifactName, type = ArtifactType.METHOD),
                 PortalConfiguration(external = true)
             )
         )
@@ -136,7 +138,7 @@ class ActivityViewTest {
         val endTime = now.plusSeconds(60).toInstant()
         val startTime = now.toInstant()
         val pushResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
             startTime.toKotlinInstant(),
@@ -153,7 +155,7 @@ class ActivityViewTest {
         portal.activityView.cacheMetricResult(pushResult)
 
         val pushResult2 = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
             startTime.plusSeconds(60).toKotlinInstant(),
@@ -170,7 +172,7 @@ class ActivityViewTest {
         portal.activityView.cacheMetricResult(pushResult2)
 
         val metricResult = portal.activityView.metricResultCache
-            .get(portal.viewingPortalArtifact)!!.get(QueryTimeFrame.LAST_MINUTE)
+            .get(portal.viewingArtifact)!!.get(QueryTimeFrame.LAST_MINUTE)
         assertNotNull(metricResult)
         assertEquals(1, metricResult!!.artifactMetrics.size)
         assertEquals(listOf(2.0), metricResult.artifactMetrics.first().values)
@@ -186,7 +188,7 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                artifactName,
+                ArtifactQualifiedName(artifactName, type = ArtifactType.METHOD),
                 PortalConfiguration(external = true)
             )
         )
@@ -196,7 +198,7 @@ class ActivityViewTest {
         val endTime = now.toInstant()
         val startTime = now.minusMinutes(portal.activityView.timeFrame.minutes.toLong()).toInstant()
         val originalResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_5_MINUTES,
             MetricType.Throughput_Average,
             startTime.toKotlinInstant(),
@@ -213,7 +215,7 @@ class ActivityViewTest {
 
         val updatedStartTime = now.plusMinutes(1).toInstant()
         val pushResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
             endTime.toKotlinInstant(),
@@ -245,7 +247,7 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                artifactName,
+                ArtifactQualifiedName(artifactName, type = ArtifactType.METHOD),
                 PortalConfiguration(external = true)
             )
         )
@@ -255,7 +257,7 @@ class ActivityViewTest {
         val endTime = now.toInstant()
         val startTime = now.minusMinutes(portal.activityView.timeFrame.minutes.toLong()).toInstant()
         val originalResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_5_MINUTES,
             MetricType.Throughput_Average,
             startTime.toKotlinInstant(),
@@ -272,7 +274,7 @@ class ActivityViewTest {
 
         val updatedStartTime = startTime.plusSeconds(60)
         val pushResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
             startTime.toKotlinInstant(),
@@ -304,7 +306,7 @@ class ActivityViewTest {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                artifactName,
+                ArtifactQualifiedName(artifactName, type = ArtifactType.METHOD),
                 PortalConfiguration(external = true)
             )
         )
@@ -314,7 +316,7 @@ class ActivityViewTest {
         val endTime = now.toInstant()
         val startTime = now.minusMinutes(portal.activityView.timeFrame.minutes.toLong()).toInstant()
         val originalResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_5_MINUTES,
             MetricType.Throughput_Average,
             startTime.toKotlinInstant(),
@@ -331,7 +333,7 @@ class ActivityViewTest {
 
         val updatedEndTime = startTime.minusSeconds(60)
         val pushResult = ArtifactMetricResult(
-            portal.viewingPortalArtifact,
+            portal.viewingArtifact,
             QueryTimeFrame.LAST_MINUTE,
             MetricType.Throughput_Average,
             updatedEndTime.toKotlinInstant(),

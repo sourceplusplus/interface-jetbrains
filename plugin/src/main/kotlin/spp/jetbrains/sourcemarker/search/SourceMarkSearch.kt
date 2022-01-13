@@ -4,9 +4,9 @@ import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 
 /**
  * todo: description.
@@ -78,7 +78,11 @@ object SourceMarkSearch {
     fun findInheritedSourceMarks(rootMark: SourceMark): List<SourceMark> {
         return if (rootMark.isExpressionMark) {
             val methodMark = SourceMarker.getSourceMark(
-                rootMark.artifactQualifiedName.substringBefore("#"), SourceMark.Type.GUTTER
+                rootMark.artifactQualifiedName.copy(
+                    identifier = rootMark.artifactQualifiedName.identifier.substringBefore("#"),
+                    type = ArtifactType.METHOD
+                ),
+                SourceMark.Type.GUTTER
             )
             //todo: proper class crawl
             listOfNotNull(rootMark, methodMark) + rootMark.sourceFileMarker.getClassSourceMarks()

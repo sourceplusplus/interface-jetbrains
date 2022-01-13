@@ -3,16 +3,18 @@ package spp.jetbrains.marker.source
 import com.intellij.lang.Language
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
+import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
+import org.jetbrains.uast.*
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
-import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
-import org.jetbrains.uast.*
-import org.slf4j.LoggerFactory
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import java.util.*
 
 /**
@@ -431,14 +433,15 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getQualifiedClassName(qualifiedName: String): String {
-        var withoutArgs = qualifiedName.substring(0, qualifiedName.indexOf("("))
-        return if (withoutArgs.contains("<")) {
+    fun getQualifiedClassName(qualifiedName: ArtifactQualifiedName): ArtifactQualifiedName {
+        var withoutArgs = qualifiedName.identifier.substring(0, qualifiedName.identifier.indexOf("("))
+        val classQualifiedName = if (withoutArgs.contains("<")) {
             withoutArgs = withoutArgs.substring(0, withoutArgs.indexOf("<"))
             withoutArgs.substring(withoutArgs.lastIndexOf("?") + 1, withoutArgs.lastIndexOf("."))
         } else {
             withoutArgs.substring(withoutArgs.lastIndexOf("?") + 1, withoutArgs.lastIndexOf("."))
         }
+        return ArtifactQualifiedName(classQualifiedName, type = ArtifactType.CLASS)
     }
 
     /**
@@ -447,9 +450,12 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(expression: UExpression): String {
+    fun getFullyQualifiedName(expression: UExpression): ArtifactQualifiedName {
         val qualifiedMethodName = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
-        return """$qualifiedMethodName#${Base64.getEncoder().encodeToString(expression.toString().toByteArray())}"""
+        return ArtifactQualifiedName(
+            """${qualifiedMethodName!!.identifier}#${Base64.getEncoder().encodeToString(expression.toString().toByteArray())}""",
+            type = ArtifactType.EXPRESSION
+        )
     }
 
     /**
@@ -458,7 +464,7 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(method: PsiMethod): String {
+    fun getFullyQualifiedName(method: PsiMethod): ArtifactQualifiedName {
         return getFullyQualifiedName(method.toUElement() as UMethod)
     }
 
@@ -468,9 +474,12 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(method: UMethod): String {
+    fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
         //todo: PsiUtil.getMemberQualifiedName(method)!!
-        return "${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}"
+        return ArtifactQualifiedName(
+            "${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}",
+            type = ArtifactType.METHOD
+        )
     }
 
     /**
@@ -479,9 +488,9 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(theClass: UClass): String {
+    fun getFullyQualifiedName(theClass: UClass): ArtifactQualifiedName {
         //todo: PsiUtil.getMemberQualifiedName(method)!!
-        return "${theClass.qualifiedName}"
+        return ArtifactQualifiedName("${theClass.qualifiedName}", type = ArtifactType.CLASS)
     }
 
     /**

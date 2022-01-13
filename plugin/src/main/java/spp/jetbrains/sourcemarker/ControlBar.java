@@ -185,7 +185,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         label1 = new JLabel();
-        String fullyQualified = inlayMark.getArtifactQualifiedName();
+        String fullyQualified = inlayMark.getArtifactQualifiedName().getIdentifier();
         String location = fullyQualified;
         if (!"Python".equals(inlayMark.getLanguage().getID())) {
             if (fullyQualified.contains("#")) {
