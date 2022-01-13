@@ -14,11 +14,9 @@ import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.Json;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
-import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
@@ -44,11 +42,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
-import static spp.jetbrains.marker.SourceMarker.creationService;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
@@ -61,8 +56,6 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     private JWindow popup;
     private LiveMeterConfigurationPanel configurationPanel;
     private boolean disposed = false;
-    private final List<AutocompleteFieldRow> scopeVars;
-    private final Function<String, List<AutocompleteFieldRow>> lookup;
     private final String placeHolderText = "Meter Description";
     private LiveMeter liveMeter;
     private LiveBreakpointStatusPanel statusPanel;
@@ -77,41 +70,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             },
             new ArrayList<>(), 0, SortOrder.DESCENDING);
 
-    public MeterStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
+    public MeterStatusBar(LiveSourceLocation sourceLocation, InlayMark inlayMark) {
         this.sourceLocation = sourceLocation;
-        this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
-            public String getText() {
-                return it;
-            }
-
-            public String getDescription() {
-                return null;
-            }
-
-            public Icon getIcon() {
-                return PluginIcons.Nodes.variable;
-            }
-        }).collect(Collectors.toList());
-        lookup = text -> scopeVars.stream()
-                .filter(v -> {
-                    String var = substringAfterLast(" ", text.toLowerCase());
-                    return !var.isEmpty() && !var.equalsIgnoreCase(v) && v.toLowerCase().contains(var);
-                }).map(it -> new AutocompleteFieldRow() {
-                    public String getText() {
-                        return it;
-                    }
-
-                    public String getDescription() {
-                        return null;
-                    }
-
-                    public Icon getIcon() {
-                        return PluginIcons.Nodes.variable;
-                    }
-                })
-                .limit(7)
-                .collect(Collectors.toList());
-
         this.inlayMark = inlayMark;
 
         initComponents();
@@ -129,7 +89,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
-        meterConditionField.hideAutocompletePopup();
+        meterNameField.hideAutocompletePopup();
     }
 
     public void setEditor(Editor editor) {
@@ -137,8 +97,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     public void focus() {
-        meterConditionField.grabFocus();
-        meterConditionField.requestFocusInWindow();
+        meterNameField.grabFocus();
+        meterNameField.requestFocusInWindow();
     }
 
     private void removeActiveDecorations() {
@@ -147,12 +107,12 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             closeLabel.setIcon(PluginIcons.close);
             configPanel.setBackground(PluginUI.getBackgroundDefaultColor());
 
-            if (!meterConditionField.getEditMode()) {
-                meterConditionField.setBorder(new CompoundBorder(
+            if (!meterNameField.getEditMode()) {
+                meterNameField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                meterConditionField.setBackground(PluginUI.getEditCompleteColor());
-                meterConditionField.setEditable(false);
+                meterNameField.setBackground(PluginUI.getEditCompleteColor());
+                meterNameField.setEditable(false);
             }
         });
     }
@@ -175,7 +135,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         statusPanel = new LiveBreakpointStatusPanel();
         statusPanel.setHitLimit(liveMeter.getHitLimit());
 
-        meterConditionField.setEditMode(false);
+        meterNameField.setEditMode(false);
         removeActiveDecorations();
         configDropdownLabel.setVisible(false);
         SwingUtilities.invokeLater(() -> {
@@ -255,13 +215,13 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         });
         meterTypeComboBox.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
 
-        meterConditionField.setCanShowSaveButton(false);
-        meterConditionField.getDocument().addDocumentListener(new DocumentAdapter() {
+        meterNameField.setCanShowSaveButton(false);
+        meterNameField.getDocument().addDocumentListener(new DocumentAdapter() {
             @Override
             protected void textChanged(DocumentEvent e) {
             }
         });
-        meterConditionField.addKeyListener(new KeyAdapter() {
+        meterNameField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_TAB) {
@@ -279,7 +239,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 }
             }
         });
-        meterConditionField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+        meterNameField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
 
         addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -349,7 +309,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         popup.setAlwaysOnTop(true);
 
         if (configurationPanel == null) {
-            configurationPanel = new LiveMeterConfigurationPanel(meterConditionField, inlayMark);
+            configurationPanel = new LiveMeterConfigurationPanel(meterNameField, inlayMark);
         }
 
         popup.add(configurationPanel);
@@ -374,16 +334,17 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     private void saveLiveMeter() {
-        meterConditionField.setShowSaveButton(false);
+        meterNameField.setShowSaveButton(false);
 
         String condition = null;
-        if (!meterConditionField.getText().isEmpty()) {
-            condition = conditionParser.getCondition(meterConditionField.getText(), inlayMark.getPsiElement());
-        }
-
         Long expirationDate = null;
         int hitLimit = -1;
         if (configurationPanel != null) {
+            if (configurationPanel.getCondition() != null) {
+                condition = conditionParser.getCondition(
+                        configurationPanel.getCondition().getExpression(), inlayMark.getPsiElement()
+                );
+            }
             if (configurationPanel.getExpirationInMinutes() != -1) {
                 expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
             }
@@ -396,7 +357,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
         LiveMeter instrument = new LiveMeter(
-                "tester",
+                meterNameField.getText(),
                 MeterType.valueOf(meterTypeComboBox.getSelectedItem().toString().toUpperCase()),
                 new MetricValue(MetricValueType.NUMBER, "1"),
                 sourceLocation,
@@ -419,15 +380,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                     inlayMark.dispose(); //dispose this bar
 
                     //create gutter popup
-                    ApplicationManager.getApplication().runReadAction(() -> {
-                        Optional<ExpressionGutterMark> gutterMark = creationService.getOrCreateExpressionGutterMark(
-                                inlayMark.getSourceFileMarker(), liveMeter.getLocation().getLine(), false);
-                        if (gutterMark.isPresent()) {
-                            LiveStatusManager.showMeterStatusIcon(liveMeter, gutterMark.get());
-                        } else {
-                            it.cause().printStackTrace();
-                        }
-                    });
+                    ApplicationManager.getApplication().runReadAction(()
+                            -> LiveStatusManager.showMeterStatusIcon(liveMeter, inlayMark.getSourceFileMarker()));
                 });
             } else {
                 it.cause().printStackTrace();
@@ -458,19 +412,13 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         }
     }
 
-    public static String substringAfterLast(String delimiter, String value) {
-        int index = value.lastIndexOf(delimiter);
-        if (index == -1) return value;
-        else return value.substring(index + delimiter.length());
-    }
-
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        meterConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);
+        meterNameField = new AutocompleteField(placeHolderText, Collections.emptyList(), null, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);
         label1 = new JLabel();
         meterTypeComboBox = new JComboBox<>();
         timeLabel = new JLabel();
@@ -525,13 +473,13 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 "0[grow]0"));
 
             //---- meterConditionField ----
-            meterConditionField.setBackground(UIUtil.getTextFieldBackground());
-            meterConditionField.setBorder(new CompoundBorder(
+            meterNameField.setBackground(UIUtil.getTextFieldBackground());
+            meterNameField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-            meterConditionField.setFont(ROBOTO_LIGHT_PLAIN_17);
-            meterConditionField.setMinimumSize(new Dimension(0, 27));
-            mainPanel.add(meterConditionField, "cell 0 0");
+            meterNameField.setFont(ROBOTO_LIGHT_PLAIN_17);
+            meterNameField.setMinimumSize(new Dimension(0, 27));
+            mainPanel.add(meterNameField, "cell 0 0");
 
             //---- label1 ----
             label1.setText("Type");
@@ -575,7 +523,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     private JLabel configLabel;
     private JLabel configDropdownLabel;
     private JPanel mainPanel;
-    private AutocompleteField meterConditionField;
+    private AutocompleteField meterNameField;
     private JLabel label1;
     private JComboBox<String> meterTypeComboBox;
     private JLabel timeLabel;

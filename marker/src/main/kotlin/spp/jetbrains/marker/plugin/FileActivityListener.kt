@@ -89,7 +89,7 @@ class FileActivityListener : FileEditorManagerListener {
                             if (it is GutterMark) {
                                 if (it.configuration.activateOnMouseHover && it.configuration.icon != null) {
                                     if (it.viewProviderBound) {
-                                        it.lineNumber == lineNumber
+                                         it.lineNumber == lineNumber + 1
                                     } else {
                                         syncViewProvider = true
                                         false

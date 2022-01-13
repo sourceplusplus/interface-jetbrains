@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "7.0.5.1.409" Java: "11.0.7" encoding: "UTF-8"
+JFDML JFormDesigner: "7.0.5.2.410" Java: "11.0.13" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -53,7 +53,7 @@ new FormModel {
 					"font": new java.awt.Font( "Roboto Light", 0, 14 )
 					"minimumSize": new java.awt.Dimension( 0, 27 )
 					auxiliary() {
-						"JavaCodeGenerator.customCreateCode": "new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, Color.decode(\"#9876AA\"));"
+						"JavaCodeGenerator.customCreateCode": "new AutocompleteField(placeHolderText, Collections.emptyList(), null, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);"
 					}
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"

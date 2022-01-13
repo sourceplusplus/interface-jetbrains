@@ -47,7 +47,7 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 
 /**
- * todo: description.
+ * Displays and manages the live status bars inside the editor.
  *
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -81,7 +81,7 @@ object LiveStatusManager : SourceMarkEventListener {
                             when (it) {
                                 is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
                                 is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
-                                is LiveMeter -> showMeterStatusIcon(it, event.sourceMark)
+                                is LiveMeter -> showMeterStatusIcon(it, event.sourceMark.sourceFileMarker)
                                 else -> throw UnsupportedOperationException(it.javaClass.simpleName)
                             }
                         }
@@ -218,7 +218,6 @@ object LiveStatusManager : SourceMarkEventListener {
                     namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
                     service = config.serviceName
                 ),
-                scopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
@@ -333,12 +332,13 @@ object LiveStatusManager : SourceMarkEventListener {
     }
 
     @JvmStatic
-    fun showMeterStatusIcon(liveMeter: LiveMeter, sourceMark: SourceMark) {
+    fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
         SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
             LiveViewSubscription(
                 null,
                 listOf(liveMeter.toMetricId()),
-                sourceMark.artifactQualifiedName,
+                liveMeter.location.source,
+                liveMeter.location,
                 LiveViewConfig(
                     "LIVE_METER",
                     true,
@@ -355,7 +355,7 @@ object LiveStatusManager : SourceMarkEventListener {
         //create gutter popup
         ApplicationManager.getApplication().runReadAction {
             val gutterMark = creationService.getOrCreateExpressionGutterMark(
-                sourceMark.sourceFileMarker, liveMeter.location.line, false
+                sourceFileMarker, liveMeter.location.line, false
             )
             if (gutterMark.isPresent) {
                 gutterMark.get().putUserData(SourceMarkKeys.METER_ID, liveMeter.id!!)
@@ -364,7 +364,7 @@ object LiveStatusManager : SourceMarkEventListener {
                     MeterType.GAUGE -> gutterMark.get().configuration.icon = LIVE_METER_GAUGE_ICON
                     MeterType.HISTOGRAM -> gutterMark.get().configuration.icon = LIVE_METER_HISTOGRAM_ICON
                 }
-                gutterMark.get().configuration.activateOnMouseHover = false
+                gutterMark.get().configuration.activateOnMouseHover = true
                 gutterMark.get().configuration.activateOnMouseClick = true
 
                 val statusBar = LiveMeterStatusPanel(liveMeter)
