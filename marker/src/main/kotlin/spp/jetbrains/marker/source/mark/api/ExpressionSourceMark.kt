@@ -11,10 +11,10 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 /**
  * Represents a [SourceMark] associated to an expression artifact.
@@ -26,7 +26,7 @@ import kotlin.collections.HashMap
 abstract class ExpressionSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiExpression: PsiElement,
-    override var artifactQualifiedName : ArtifactQualifiedName = namingService.getFullyQualifiedName(psiExpression)
+    override var artifactQualifiedName: ArtifactQualifiedName = namingService.getFullyQualifiedName(psiExpression)
 ) : SourceMark {
 
     override var editor: Editor? = null
@@ -71,8 +71,11 @@ abstract class ExpressionSourceMark(
     }
 
     override fun dispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
-        getPsiElement().putUserData(SourceKey.GutterMark, null)
-        getPsiElement().putUserData(SourceKey.InlayMark, null)
+        when (this) {
+            is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
+            is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
+            else -> throw IllegalStateException("ExpressionSourceMark is not a GutterMark or InlayMark")
+        }
         super.dispose(removeFromMarker, assertRemoval)
     }
 
