@@ -3,16 +3,16 @@ package spp.jetbrains.marker.source
 import com.intellij.lang.Language
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
+import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
+import org.jetbrains.uast.*
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
-import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
-import org.jetbrains.uast.*
-import org.slf4j.LoggerFactory
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import java.util.*
@@ -476,7 +476,8 @@ object JVMMarkerUtils {
     @JvmStatic
     fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
         //todo: PsiUtil.getMemberQualifiedName(method)!!
-        return ArtifactQualifiedName("${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}",
+        return ArtifactQualifiedName(
+            "${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}",
             type = ArtifactType.METHOD
         )
     }
@@ -489,9 +490,7 @@ object JVMMarkerUtils {
     @JvmStatic
     fun getFullyQualifiedName(theClass: UClass): ArtifactQualifiedName {
         //todo: PsiUtil.getMemberQualifiedName(method)!!
-        return ArtifactQualifiedName("${theClass.qualifiedName}",
-            type = ArtifactType.CLASS
-        )
+        return ArtifactQualifiedName("${theClass.qualifiedName}", type = ArtifactType.CLASS)
     }
 
     /**
