@@ -15,15 +15,13 @@ import spp.protocol.artifact.ArtifactType
 class PythonArtifactNamingService : ArtifactNamingService {
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
-        TODO()
-//        return ArtifactQualifiedName(
-//            element.containingFile.name, null, ArtifactType.CLASS
-//        ) //todo: include method name when possible?
+        return ArtifactQualifiedName(
+            element.containingFile.name, null, ArtifactType.CLASS
+        ) //todo: include method name when possible?
     }
 
     //todo: method name could be better
     override fun getClassQualifiedNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
-        TODO()
-        //return listOf(psiFile.virtualFile.path)
+        return listOf(ArtifactQualifiedName(psiFile.virtualFile.path, type = ArtifactType.CLASS))
     }
 }
