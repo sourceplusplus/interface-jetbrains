@@ -30,6 +30,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import java.io.File
 
 class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
@@ -90,7 +92,7 @@ class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {
         println(
             "Portal UUID: " + SourcePortal.register(
                 portalUuid,
-                artifactName,
+                ArtifactQualifiedName(artifactName, type = ArtifactType.METHOD),
                 PortalConfiguration(
                     currentPage = PageType.TRACES,
                     external = true

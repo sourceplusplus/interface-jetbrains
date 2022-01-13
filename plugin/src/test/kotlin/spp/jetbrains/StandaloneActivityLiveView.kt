@@ -123,7 +123,7 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
             delay(5000)
 
             val sourceMark = SourceMarker.getSourceMark(
-                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                portal.viewingArtifact, SourceMark.Type.GUTTER
             ) ?: return@launch
             val endpointName = sourceMark.getUserData(
                 SourceMarkKeys.ENDPOINT_DETECTOR
