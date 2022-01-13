@@ -33,7 +33,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.0.1-jre")
     compileOnly("org.jetbrains:annotations:23.0.0")
-    compileOnly("org.slf4j:slf4j-api:1.7.32")
+    compileOnly("org.slf4j:slf4j-api:1.7.33")
     compileOnly("org.jetbrains.intellij.deps.jcef:jcef:97.2.22-g6779618-chromium-97.0.4692.45-api-1.6")
     compileOnly("com.jetbrains.intellij.platform:util-strings:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }

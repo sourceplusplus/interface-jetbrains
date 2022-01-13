@@ -10,7 +10,7 @@ val protocolVersion: String by project
 
 dependencies {
     implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
-    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("org.slf4j:slf4j-api:1.7.33")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")
 
@@ -18,7 +18,7 @@ dependencies {
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
     implementation("io.dropwizard.metrics:metrics-core:4.2.7")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 }
