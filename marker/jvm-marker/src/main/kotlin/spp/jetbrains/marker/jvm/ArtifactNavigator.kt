@@ -64,13 +64,13 @@ object ArtifactNavigator {
             }
         } else {
             ApplicationManager.getApplication().invokeLater {
-                navigateToMethod(project, artifactQualifiedName.identifier)
+                navigateToMethod(project, artifactQualifiedName)
             }
         }
     }
 
-    fun navigateToMethod(project: Project, artifactQualifiedName: String): PsiElement {
-        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+    fun navigateToMethod(project: Project, artifactQualifiedName: ArtifactQualifiedName): PsiElement {
+        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName.identifier)
         val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName, allScope(project))
         for (theMethod in psiClass!!.methods) {
             val uMethod = theMethod.toUElement() as UMethod
@@ -86,18 +86,13 @@ object ArtifactNavigator {
     suspend fun canNavigateTo(project: Project, artifactQualifiedName: ArtifactQualifiedName): Boolean {
         val promise = Promise.promise<Boolean>()
         ApplicationManager.getApplication().invokeLater {
-            promise.complete(
-                canNavigateToMethod(
-                    project,
-                    artifactQualifiedName.identifier
-                )
-            )
+            promise.complete(canNavigateToMethod(project, artifactQualifiedName))
         }
         return promise.future().await()
     }
 
-    fun canNavigateToMethod(project: Project, artifactQualifiedName: String): Boolean {
-        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
+    fun canNavigateToMethod(project: Project, artifactQualifiedName: ArtifactQualifiedName): Boolean {
+        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName.identifier)
         val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName, allScope(project))
         for (theMethod in psiClass!!.methods) {
             val uMethod = theMethod.toUElement() as UMethod

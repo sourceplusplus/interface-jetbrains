@@ -6,6 +6,7 @@ plugins {
 val kotlinVersion = ext.get("kotlinVersion")
 val pluginGroup: String by project
 val pluginVersion: String by project
+val protocolVersion: String by project
 
 publishing {
     publications {
@@ -27,10 +28,11 @@ repositories {
 dependencies {
     val intellijVersion = "212.5457.46"
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.google.guava:guava:31.0.1-jre")
-    implementation("org.jetbrains:annotations:23.0.0")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compileOnly("com.google.guava:guava:31.0.1-jre")
+    compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("org.slf4j:slf4j-api:1.7.32")
     compileOnly("org.jetbrains.intellij.deps.jcef:jcef:97.2.22-g6779618-chromium-97.0.4692.45-api-1.6")
     compileOnly("com.jetbrains.intellij.platform:util-strings:$intellijVersion") { isTransitive = false }

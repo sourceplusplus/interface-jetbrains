@@ -13,6 +13,8 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.*
 import org.slf4j.LoggerFactory
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import java.util.*
 
 /**
@@ -447,9 +449,12 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(expression: UExpression): String {
+    fun getFullyQualifiedName(expression: UExpression): ArtifactQualifiedName {
         val qualifiedMethodName = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
-        return """$qualifiedMethodName#${Base64.getEncoder().encodeToString(expression.toString().toByteArray())}"""
+        return ArtifactQualifiedName(
+            """${qualifiedMethodName!!.identifier}#${Base64.getEncoder().encodeToString(expression.toString().toByteArray())}""",
+            type = ArtifactType.EXPRESSION
+        )
     }
 
     /**
@@ -458,7 +463,7 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(method: PsiMethod): String {
+    fun getFullyQualifiedName(method: PsiMethod): ArtifactQualifiedName {
         return getFullyQualifiedName(method.toUElement() as UMethod)
     }
 
@@ -468,9 +473,11 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(method: UMethod): String {
+    fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
         //todo: PsiUtil.getMemberQualifiedName(method)!!
-        return "${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}"
+        return ArtifactQualifiedName("${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}",
+            type = ArtifactType.METHOD
+        )
     }
 
     /**
@@ -479,9 +486,11 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(theClass: UClass): String {
+    fun getFullyQualifiedName(theClass: UClass): ArtifactQualifiedName {
         //todo: PsiUtil.getMemberQualifiedName(method)!!
-        return "${theClass.qualifiedName}"
+        return ArtifactQualifiedName("${theClass.qualifiedName}",
+            type = ArtifactType.CLASS
+        )
     }
 
     /**

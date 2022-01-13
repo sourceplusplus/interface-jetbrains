@@ -19,6 +19,7 @@ import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import org.slf4j.LoggerFactory
+import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 
 /**
@@ -153,11 +154,11 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         return sourceMarks.find { it.getPsiElement() === psiElement } != null
     }
 
-    open fun getSourceMark(artifactQualifiedName: String, type: SourceMark.Type): SourceMark? {
+    open fun getSourceMark(artifactQualifiedName: ArtifactQualifiedName, type: SourceMark.Type): SourceMark? {
         return sourceMarks.find { it.artifactQualifiedName == artifactQualifiedName && it.type == type }
     }
 
-    open fun getSourceMarks(artifactQualifiedName: String): List<SourceMark> {
+    open fun getSourceMarks(artifactQualifiedName: ArtifactQualifiedName): List<SourceMark> {
         return sourceMarks.filter { it.artifactQualifiedName == artifactQualifiedName }
     }
 
@@ -206,7 +207,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     }
 
     override fun createMethodSourceMark(
-        psiMethod: PsiNameIdentifierOwner, qualifiedName: String, type: SourceMark.Type
+        psiMethod: PsiNameIdentifierOwner, qualifiedName: ArtifactQualifiedName, type: SourceMark.Type
     ): MethodSourceMark {
         log.trace("Creating source mark. Method: $qualifiedName - Type: $type")
         return when (type) {
@@ -220,7 +221,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     }
 
     override fun createClassSourceMark(
-        psiClass: PsiNameIdentifierOwner, qualifiedName: String, type: SourceMark.Type
+        psiClass: PsiNameIdentifierOwner, qualifiedName: ArtifactQualifiedName, type: SourceMark.Type
     ): ClassSourceMark {
         log.trace("Creating source mark. Class: $qualifiedName - Type: $type")
         return when (type) {

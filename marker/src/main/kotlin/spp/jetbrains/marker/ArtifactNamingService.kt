@@ -2,6 +2,7 @@ package spp.jetbrains.marker
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
  * todo: description.
@@ -11,7 +12,7 @@ import com.intellij.psi.PsiFile
  */
 interface ArtifactNamingService {
 
-    fun getFullyQualifiedName(element: PsiElement): String
+    fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
 
-    fun getClassQualifiedNames(psiFile: PsiFile): List<String>
+    fun getClassQualifiedNames(psiFile: PsiFile): List<ArtifactQualifiedName>
 }

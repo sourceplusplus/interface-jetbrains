@@ -13,10 +13,11 @@ import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.QueryOrder
 import monitor.skywalking.protocol.type.TraceState
+import spp.protocol.artifact.ArtifactQualifiedName
 import java.math.BigDecimal
 
 fun toProtocol(
-    artifactQualifiedName: String,
+    artifactQualifiedName: ArtifactQualifiedName,
     timeFrame: QueryTimeFrame,
     focus: MetricType,
     metricsRequest: GetEndpointMetrics,

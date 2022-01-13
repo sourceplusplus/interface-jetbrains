@@ -77,9 +77,7 @@ object SourceMarkSearch {
 
     fun findInheritedSourceMarks(rootMark: SourceMark): List<SourceMark> {
         return if (rootMark.isExpressionMark) {
-            val methodMark = SourceMarker.getSourceMark(
-                rootMark.artifactQualifiedName.substringBefore("#"), SourceMark.Type.GUTTER
-            )
+            val methodMark = SourceMarker.getSourceMark(rootMark.artifactQualifiedName, SourceMark.Type.GUTTER)
             //todo: proper class crawl
             listOfNotNull(rootMark, methodMark) + rootMark.sourceFileMarker.getClassSourceMarks()
         } else if (rootMark.isMethodMark) {

@@ -30,6 +30,8 @@ import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.SourceMarkerServices
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.instrument.LiveInstrument
 import spp.protocol.instrument.LiveSourceLocation
@@ -40,7 +42,10 @@ import spp.protocol.instrument.meter.MeterType
 import spp.protocol.portal.PageType
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
@@ -68,7 +73,7 @@ object LiveStatusManager : SourceMarkEventListener {
                     val methodSourceMark = event.sourceMark as MethodSourceMark
                     val qualifiedClassName = namingService.getClassQualifiedNames(
                         methodSourceMark.sourceFileMarker.psiFile
-                    )[0]
+                    )[0].identifier
 
                     val textRange = methodSourceMark.getPsiElement().textRange
                     val document = PsiDocumentManager.getInstance(methodSourceMark.project)
@@ -113,7 +118,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = BreakpointStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
@@ -162,7 +167,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
@@ -215,7 +220,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
                 inlayMark
@@ -337,7 +342,7 @@ object LiveStatusManager : SourceMarkEventListener {
             LiveViewSubscription(
                 null,
                 listOf(liveMeter.toMetricId()),
-                liveMeter.location.source,
+                ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
                 liveMeter.location,
                 LiveViewConfig(
                     "LIVE_METER",

@@ -9,6 +9,8 @@ import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 
 /**
  * todo: description.
@@ -18,7 +20,7 @@ import org.jetbrains.uast.toUElement
  */
 class JVMArtifactNamingService : ArtifactNamingService {
 
-    override fun getFullyQualifiedName(element: PsiElement): String {
+    override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return when (val uElement = element.toUElement()) {
             is UClass -> JVMMarkerUtils.getFullyQualifiedName(uElement)
             is UMethod -> JVMMarkerUtils.getFullyQualifiedName(uElement)
@@ -27,9 +29,11 @@ class JVMArtifactNamingService : ArtifactNamingService {
         }
     }
 
-    override fun getClassQualifiedNames(psiFile: PsiFile): List<String> {
+    override fun getClassQualifiedNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
         return when (psiFile) {
-            is PsiClassOwner -> psiFile.classes.map { it.qualifiedName!! }.toList()
+            is PsiClassOwner -> psiFile.classes.map {
+                ArtifactQualifiedName(it.qualifiedName!!, type = ArtifactType.CLASS)
+            }.toList()
             else -> throw IllegalStateException("Unsupported file: $psiFile")
         }
     }

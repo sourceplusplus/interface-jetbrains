@@ -12,6 +12,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 
 /**
@@ -24,7 +25,7 @@ import java.util.*
 abstract class ClassSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiClass: PsiNameIdentifierOwner,
-    override var artifactQualifiedName: String = namingService.getFullyQualifiedName(psiClass)
+    override var artifactQualifiedName: ArtifactQualifiedName = namingService.getFullyQualifiedName(psiClass)
 ) : SourceMark {
 
     override var editor: Editor? = null
