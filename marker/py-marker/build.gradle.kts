@@ -24,7 +24,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("org.jetbrains:annotations:23.0.0")
-    compileOnly("org.slf4j:slf4j-api:1.7.32")
+    compileOnly("org.slf4j:slf4j-api:1.7.33")
     compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:analysis:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion") { isTransitive = false }
