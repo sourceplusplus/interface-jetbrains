@@ -67,7 +67,7 @@ dependencies {
         implementation(project(":monitor"))
     }
 
-    implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$portalVersion")
+    implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$portalVersion") { isTransitive = false }
     implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
