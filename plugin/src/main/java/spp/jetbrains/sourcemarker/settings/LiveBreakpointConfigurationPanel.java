@@ -9,6 +9,8 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Objects;
 
+import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
+
 public class LiveBreakpointConfigurationPanel extends JPanel {
 
     private int expirationInMinutes = 15;
@@ -104,6 +106,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        setBackground(DFLT_BGND_COLOR);
         panel3 = new JPanel();
         label3 = new JLabel();
         panel1 = new JPanel();
@@ -238,6 +241,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
             //======== panel2 ========
             {
+                panel2.setBackground(null);
                 panel2.setLayout(new MigLayout(
                     "hidemode 3",
                     // columns

@@ -1,6 +1,6 @@
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.sourcemarker.PluginUI.getBackgroundFocusColor
+import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.AutocompleteRow
@@ -33,7 +33,7 @@ class AutoCompleteCellRenderer(private val lineNumber: Int) : DefaultListCellRen
         }
 
         if (isSelected) {
-            row.background = getBackgroundFocusColor();
+            row.background = BGND_FOCUS_COLOR;
             if (entry is LiveControlCommand) {
                 row.setCommandIcon(entry.selectedIcon)
             }

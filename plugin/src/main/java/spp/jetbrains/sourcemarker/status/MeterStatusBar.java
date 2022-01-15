@@ -105,7 +105,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(PluginUI.getBackgroundDefaultColor());
+            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
 
             if (!meterNameField.getEditMode()) {
                 meterNameField.setBorder(new CompoundBorder(
@@ -172,7 +172,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                         table.setStriped(true);
                         table.setShowColumns(true);
 
-                        table.setBackground(PluginUI.getBackgroundDefaultColor());
+                        table.setBackground(DFLT_BGND_COLOR);
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -280,7 +280,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(PluginUI.getBackgroundFocusColor());
+                    configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
                 }
             }
         });
@@ -414,6 +414,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        setBackground(DFLT_BGND_COLOR);
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
@@ -440,6 +441,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         //======== configPanel ========
         {
+            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
@@ -463,7 +465,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         //======== mainPanel ========
         {
-            mainPanel.setBackground(null);
+            mainPanel.setBackground(DFLT_BGND_COLOR);
             mainPanel.setLayout(new MigLayout(
                 "novisualpadding,hidemode 3",
                 // columns
@@ -473,7 +475,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 "0[grow]0"));
 
             //---- meterConditionField ----
-            meterNameField.setBackground(UIUtil.getTextFieldBackground());
+            meterNameField.setBackground(STATUS_BAR_TXT_BG_COLOR);
             meterNameField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));

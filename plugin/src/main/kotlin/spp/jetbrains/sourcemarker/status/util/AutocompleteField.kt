@@ -6,8 +6,7 @@ import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginIcons
-import spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE
-import spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14
+import spp.jetbrains.sourcemarker.PluginUI.*
 import spp.jetbrains.sourcemarker.service.log.VariableParser
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import java.awt.*
@@ -84,7 +83,7 @@ class AutocompleteField(
         list.font = ROBOTO_LIGHT_PLAIN_14
         list.setCellRenderer(AutoCompleteCellRenderer(lineNumber))
 
-        list.setBackground(UIUtil.getListSelectionBackground(true))
+        list.setBackground(AUTO_COMPLETE_HIGHLIGHT_COLOR)
         list.setBorder(JBUI.Borders.empty())
         val scroll: JScrollPane = object : JScrollPane(list) {
             override fun getPreferredSize(): Dimension {
