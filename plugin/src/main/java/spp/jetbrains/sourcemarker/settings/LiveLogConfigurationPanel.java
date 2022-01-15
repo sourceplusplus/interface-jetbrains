@@ -25,6 +25,7 @@ import java.awt.*;
 import java.util.Objects;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.*;
 
@@ -198,6 +199,7 @@ public class LiveLogConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        setBackground(DFLT_BGND_COLOR);
         panel4 = new JPanel();
         lblCondition = new JLabel();
         conditionPanel = new JPanel();
@@ -396,6 +398,7 @@ public class LiveLogConfigurationPanel extends JPanel {
 
             //======== panel2 ========
             {
+                panel2.setBackground(null);
                 panel2.setLayout(new MigLayout(
                     "hidemode 3",
                     // columns
