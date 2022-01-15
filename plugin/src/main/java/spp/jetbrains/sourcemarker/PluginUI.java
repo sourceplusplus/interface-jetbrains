@@ -1,5 +1,6 @@
 package spp.jetbrains.sourcemarker;
 
+import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 
 import javax.swing.border.LineBorder;
@@ -41,14 +42,13 @@ public class PluginUI {
     public static final Color EXPIRY_FOREGROUND_COLOR = Color.decode("#BBBBBB");
     public static final Color SELECT_COLOR_RED = Color.decode("#e1483b");
     public static final Color COMPLETE_COLOR_PURPLE = Color.decode("#9876AA");
-
-    public static Color getBackgroundDefaultColor() {
-        return UIUtil.getLabelBackground();//Color.decode("#252525");
-    }
-
-    public static Color getBackgroundFocusColor() {
-        return UIUtil.getListSelectionBackground(true);//Color.decode("#3C3C3C");
-    }
+    public static final JBColor STATUS_BAR_TXT_BG_COLOR = new JBColor(Color.white, new Color(37, 37, 37));
+    public static final JBColor AUTO_COMPLETE_HIGHLIGHT_COLOR = new JBColor(new Color(10, 108, 161), new Color(25, 25, 25));
+    public static final JBColor CONTROL_BAR_CMD_FOREGROUND = new JBColor(Color.black, Color.gray);
+    public static final JBColor DFLT_BGND_COLOR = new JBColor(new Color(242, 242, 242), new Color(50, 50, 50));
+    public static final JBColor CNFG_PANEL_BGND_COLOR = new JBColor(new Color(242, 242, 242), new Color(37, 37, 37));
+    public static final JBColor CNFG_PANEL_FOCUS_COLOR = new JBColor(new Color(10, 108, 161), new Color(0, 0, 0));
+    public static final JBColor BGND_FOCUS_COLOR = new JBColor(new Color(10, 108, 161), new Color(25, 25, 25));
 
     public static Color getEditCompleteColor() {
         return UIUtil.getWindowColor();//Color.decode("#2B2B2B");

@@ -23,6 +23,7 @@ import java.awt.*;
 import java.util.Objects;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.INTELLIJ_PRODUCT_CODES;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES;
@@ -161,6 +162,7 @@ public class LiveMeterConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        setBackground(DFLT_BGND_COLOR);
         panel4 = new JPanel();
         label1 = new JLabel();
         conditionPanel = new JPanel();

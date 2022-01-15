@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static spp.jetbrains.sourcemarker.PluginUI.CONTROL_BAR_CMD_FOREGROUND;
 import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_11;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_15;
@@ -31,9 +32,8 @@ public class LiveControlBarRow extends JPanel {
     }
 
     public void setCommandName(String commandName, String input) {
-        Color defaultColor = UIUtil.getTextAreaForeground();
         String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
-        String defaultHex = "#" + Integer.toHexString(defaultColor.getRGB()).substring(2);
+        String defaultHex = "#" + Integer.toHexString(CONTROL_BAR_CMD_FOREGROUND.getRGB()).substring(2);
 
         Map<Integer, Integer> matches = new HashMap<>();
         Set<String> inputWords = new HashSet<>(Arrays.asList(input.toLowerCase().split(" ")));
@@ -54,7 +54,7 @@ public class LiveControlBarRow extends JPanel {
             }
             commandName = updatedCommand;
         }
-        commandLabel.setText("<html> <span style=\"color: +"+ defaultHex + "\">" + commandName + "</span></html>");
+        commandLabel.setText("<html> <span style=\"color: "+ defaultHex + "\">" + commandName + "</span></html>");
     }
 
     @NotNull
