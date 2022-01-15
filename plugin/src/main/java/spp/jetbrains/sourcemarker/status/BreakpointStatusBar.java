@@ -157,7 +157,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(DFLT_BGND_COLOR);
+            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
 
             if (!breakpointConditionField.getEditMode()) {
                 breakpointConditionField.setBorder(new CompoundBorder(
@@ -360,7 +360,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(BGND_FOCUS_COLOR);
+                    configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
                 }
             }
         });
@@ -522,7 +522,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
         //======== configPanel ========
         {
-            configPanel.setBackground(BGND_FOCUS_COLOR);
+            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);

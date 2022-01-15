@@ -46,6 +46,8 @@ public class PluginUI {
     public static final JBColor AUTO_COMPLETE_HIGHLIGHT_COLOR = new JBColor(new Color(10, 108, 161), new Color(25, 25, 25));
     public static final JBColor CONTROL_BAR_CMD_FOREGROUND = new JBColor(Color.black, Color.gray);
     public static final JBColor DFLT_BGND_COLOR = new JBColor(new Color(242, 242, 242), new Color(50, 50, 50));
+    public static final JBColor CNFG_PANEL_BGND_COLOR = new JBColor(new Color(242, 242, 242), new Color(37, 37, 37));
+    public static final JBColor CNFG_PANEL_FOCUS_COLOR = new JBColor(new Color(10, 108, 161), new Color(0, 0, 0));
     public static final JBColor BGND_FOCUS_COLOR = new JBColor(new Color(10, 108, 161), new Color(25, 25, 25));
 
     public static Color getEditCompleteColor() {

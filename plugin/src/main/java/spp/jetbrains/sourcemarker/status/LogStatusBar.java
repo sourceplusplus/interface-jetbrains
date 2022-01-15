@@ -68,6 +68,8 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.CNFG_PANEL_BGND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.CNFG_PANEL_FOCUS_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_17;
@@ -322,7 +324,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(DFLT_BGND_COLOR);
+            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
 
             if (!liveLogTextField.getEditMode()) {
                 liveLogTextField.setBorder(new CompoundBorder(
@@ -481,7 +483,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!errored && !removed) configPanel.setBackground(BGND_FOCUS_COLOR);
+                if (!errored && !removed) configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
             }
         });
 
@@ -681,7 +683,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         //======== configPanel ========
         {
-            configPanel.setBackground(BGND_FOCUS_COLOR);
+            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
