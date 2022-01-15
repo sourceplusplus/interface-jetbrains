@@ -178,6 +178,10 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     @Override
     public void visibleAreaChanged(@NotNull VisibleAreaEvent e) {
         liveLogTextField.hideAutocompletePopup();
+        if(popup != null) {
+            popup.dispose();
+            popup = null;
+        }
     }
 
     public void setLatestLog(Instant time, Log latestLog) {

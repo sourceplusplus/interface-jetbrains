@@ -39,6 +39,7 @@ public class LiveLogConfigurationPanel extends JPanel {
 
     public LiveLogConfigurationPanel(AutocompleteField autocompleteField, InlayMark inlayMark) {
         PsiFile psiFile = inlayMark.getSourceFileMarker().getPsiFile();
+
         XSourcePosition sourcePosition = XDebuggerUtil.getInstance().createPosition(
                 psiFile.getVirtualFile(), inlayMark.getLineNumber()
         );
@@ -49,7 +50,7 @@ public class LiveLogConfigurationPanel extends JPanel {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"
-                ).newInstance();
+                ).getDeclaredConstructor().newInstance();
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -57,7 +58,7 @@ public class LiveLogConfigurationPanel extends JPanel {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "org.jetbrains.java.debugger.JavaDebuggerEditorsProvider"
-                ).newInstance();
+                ).getDeclaredConstructor().newInstance();
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
