@@ -20,6 +20,7 @@ class SourceMarkJcefComponentConfiguration : SourceMarkComponentConfiguration() 
     var componentWidth: Int = 400
     var componentHeight: Int = 300
     var autoDisposeBrowser: Boolean = true
+    var zoomLevel = 0.8
     var browserLoadingListener: BrowserLoadingListener = BrowserLoadingListener()
 
     fun setComponentSize(size: Dimension) {
