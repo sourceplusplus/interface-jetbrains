@@ -39,7 +39,6 @@ public class LiveLogConfigurationPanel extends JPanel {
 
     public LiveLogConfigurationPanel(AutocompleteField autocompleteField, InlayMark inlayMark) {
         PsiFile psiFile = inlayMark.getSourceFileMarker().getPsiFile();
-
         XSourcePosition sourcePosition = XDebuggerUtil.getInstance().createPosition(
                 psiFile.getVirtualFile(), inlayMark.getLineNumber()
         );
