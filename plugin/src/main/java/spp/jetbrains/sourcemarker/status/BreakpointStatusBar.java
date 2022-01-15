@@ -142,6 +142,10 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
         breakpointConditionField.hideAutocompletePopup();
+        if(popup != null) {
+            popup.dispose();
+            popup = null;
+        }
     }
 
     public void setEditor(Editor editor) {
