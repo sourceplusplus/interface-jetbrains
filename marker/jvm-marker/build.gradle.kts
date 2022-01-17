@@ -21,7 +21,7 @@ dependencies {
         compileOnly(project(":monitor"))
     }
     compileOnly("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
-    val intellijVersion = "212.5457.46"
+    val intellijVersion = "213.6461.79"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -34,35 +34,21 @@ dependencies {
     compileOnly("org.jooq:jooq:3.16.2")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
     compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.4")
-    compileOnly("com.jetbrains.intellij.platform:util-ui:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:analysis:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-analysis:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-analysis-impl:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:ide-impl:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:core-impl:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:core-ui:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:editor:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:indexing:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:lang:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:lang-impl:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:project-model:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:code-style:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.groovy:groovy-psi:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:uast:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-uast:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-indexing:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-indexing-impl:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:util:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-impl:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-psi:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-debugger:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.java:java-debugger-impl:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:debugger:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:debugger-impl:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:extensions:$intellijVersion") { isTransitive = false }
-    compileOnly("com.jetbrains.intellij.platform:util-rt:$intellijVersion") { isTransitive = false }
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion") { isTransitive = false }
-    compileOnly("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion") { isTransitive = false }
+    compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:ide-impl:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:core-impl:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:core-ui:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:code-style:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:lang:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:lang-impl:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.groovy:groovy-psi:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:util:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.java:java-impl:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.java:java-psi:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.java:java-debugger:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.java:java-debugger-impl:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.platform:debugger-impl:$intellijVersion")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    compileOnly("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
 }
