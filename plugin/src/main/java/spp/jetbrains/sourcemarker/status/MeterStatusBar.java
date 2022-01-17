@@ -90,6 +90,10 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
         meterNameField.hideAutocompletePopup();
+        if(popup != null) {
+            popup.dispose();
+            popup = null;
+        }
     }
 
     public void setEditor(Editor editor) {
