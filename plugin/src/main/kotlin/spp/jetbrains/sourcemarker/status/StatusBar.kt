@@ -11,4 +11,6 @@ import spp.protocol.instrument.LiveInstrument
 interface StatusBar {
 
     fun setLiveInstrument(liveInstrument: LiveInstrument)
+    fun isActive() : Boolean
+    fun dispose()
 }

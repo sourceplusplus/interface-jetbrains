@@ -123,6 +123,11 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         setupAsActive();
     }
 
+    @Override
+    public boolean isActive() {
+        return this.liveMeter != null;
+    }
+
     public void setWrapperPanel(JPanel wrapperPanel) {
         this.wrapper = wrapperPanel;
     }
@@ -278,6 +283,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
+                    LiveStatusManager.INSTANCE.removeStatusBar(MeterStatusBar.this);
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     meterTypeComboBox.requestFocus();
                 }
@@ -303,6 +309,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             @Override
             public void mouseClicked(MouseEvent e) {
                 dispose();
+                LiveStatusManager.INSTANCE.removeStatusBar(MeterStatusBar.this);
             }
 
             @Override
@@ -439,7 +446,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         });
     }
 
-    private void dispose() {
+    @Override
+    public void dispose() {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);
@@ -460,6 +468,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 }
             });
         }
+        wrapper.getParent().remove(wrapper);
     }
 
     public static String substringAfterLast(String delimiter, String value) {

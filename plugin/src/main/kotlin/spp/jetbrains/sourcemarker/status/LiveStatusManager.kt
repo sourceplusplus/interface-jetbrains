@@ -56,6 +56,7 @@ object LiveStatusManager : SourceMarkEventListener {
 
     private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
+    private val allStatusBars = CopyOnWriteArrayList<StatusBar>()
 
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
@@ -137,6 +138,7 @@ object LiveStatusManager : SourceMarkEventListener {
             sourcePortal.configuration.statusBar = true
 
             statusBar.focus()
+            allStatusBars.add(statusBar)
         }
     }
 
@@ -193,6 +195,7 @@ object LiveStatusManager : SourceMarkEventListener {
             }
 
             statusBar.focus()
+            allStatusBars.add(statusBar)
         }
     }
 
@@ -239,6 +242,7 @@ object LiveStatusManager : SourceMarkEventListener {
             sourcePortal.configuration.statusBar = true
 
             statusBar.focus()
+            allStatusBars.add(statusBar)
         }
     }
 
@@ -407,5 +411,20 @@ object LiveStatusManager : SourceMarkEventListener {
 
     fun removeActiveLiveInstrument(instrumentId: String) {
         activeStatusBars.removeIf { it.id == instrumentId }
+    }
+
+    fun removeInactiveStatusBars() {
+        allStatusBars.removeIf {
+            if (!it.isActive()) {
+                it.dispose()
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    fun removeStatusBar(statusBar: StatusBar) {
+        allStatusBars.remove(statusBar)
     }
 }

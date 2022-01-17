@@ -176,6 +176,11 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         LiveStatusManager.INSTANCE.addStatusBar(inlayMark,this);
     }
 
+    @Override
+    public boolean isActive() {
+        return this.liveLog != null;
+    }
+
     public void setWrapperPanel(JPanel wrapperPanel) {
         this.wrapper = wrapperPanel;
     }
@@ -384,6 +389,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
+                    LiveStatusManager.INSTANCE.removeStatusBar(LogStatusBar.this);
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     saveLiveLog();
                 }
@@ -415,6 +421,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 if (liveLog == null && liveLogTextField.getText().equals(VariableParser.EMPTY)) {
                     if (popup == null && liveLogTextField.getEditMode()) {
                         dispose();
+                        LiveStatusManager.INSTANCE.removeStatusBar(LogStatusBar.this);
                     }
                 } else if (!liveLogTextField.getEditMode() ||
                         (liveLogTextField.getEditMode() && !liveLogTextField.isShowingSaveButton())) {
@@ -467,6 +474,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             @Override
             public void mouseClicked(MouseEvent e) {
                 dispose();
+                LiveStatusManager.INSTANCE.removeStatusBar(LogStatusBar.this);
             }
 
             @Override
@@ -639,7 +647,8 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         });
     }
 
-    private void dispose() {
+    @Override
+    public void dispose() {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);
@@ -658,6 +667,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 }
             });
         }
+        wrapper.getParent().remove(wrapper);
     }
 
     private void initComponents() {

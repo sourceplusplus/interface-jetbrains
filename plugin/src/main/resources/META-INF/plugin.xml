@@ -43,6 +43,11 @@
                 text="SourceCommand Action" description="Source command action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>
+        <action id="spp.jetbrains.sourcemarker.command.EscapeAction"
+                class="spp.jetbrains.sourcemarker.command.EscapeAction"
+                text="EscapeCommand Action" description="Escape command action">
+            <keyboard-shortcut first-keystroke="ESCAPE" keymap="$default"/>
+        </action>
         <action id="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
                 class="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
                 text="SourceMarkVisibility Action" description="SourceMark visibility action">

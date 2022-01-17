@@ -135,6 +135,11 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         setupAsActive();
     }
 
+    @Override
+    public boolean isActive() {
+        return this.liveBreakpoint != null;
+    }
+
     public void setWrapperPanel(JPanel wrapperPanel) {
         this.wrapper = wrapperPanel;
     }
@@ -318,6 +323,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
+                    LiveStatusManager.INSTANCE.removeStatusBar(BreakpointStatusBar.this);
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     spinnerTextField.requestFocus();
                 }
@@ -343,6 +349,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             @Override
             public void mouseClicked(MouseEvent e) {
                 dispose();
+                LiveStatusManager.INSTANCE.removeStatusBar(BreakpointStatusBar.this);
             }
 
             @Override
@@ -468,7 +475,8 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         });
     }
 
-    private void dispose() {
+    @Override
+    public void dispose() {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);
@@ -489,6 +497,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                 }
             });
         }
+        wrapper.getParent().remove(wrapper);
     }
 
     public static String substringAfterLast(String delimiter, String value) {
