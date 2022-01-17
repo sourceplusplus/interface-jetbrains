@@ -48,10 +48,6 @@ changelog {
     version.set(pluginVersion)
 }
 
-repositories {
-    maven(url = "https://jitpack.io") { name = "jitpack" }
-}
-
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
         implementation(project(":interfaces:jetbrains:mapper"))
@@ -59,16 +55,18 @@ dependencies {
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
         implementation(project(":interfaces:jetbrains:monitor"))
+        implementation(project(":interfaces:portal"))
+        implementation(project(":protocol"))
     } else {
         implementation(project(":mapper"))
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
+        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$portalVersion") { isTransitive = false }
+        implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     }
 
-    implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$portalVersion") { isTransitive = false }
-    implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
