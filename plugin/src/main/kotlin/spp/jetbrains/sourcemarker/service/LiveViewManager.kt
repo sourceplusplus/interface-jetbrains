@@ -172,6 +172,21 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
         sourceMark: SourceMark,
         portal: SourcePortal
     ) {
+        val artifactMetrics = toArtifactMetrics(event)
+        val metricResult = ArtifactMetricResult(
+            sourceMark.artifactQualifiedName,
+            QueryTimeFrame.valueOf(1),
+            portal.activityView.activeChartMetric, //todo: assumes activity view
+            formatter.parse(event.timeBucket, Instant::from).toKotlinInstant(),
+            formatter.parse(event.timeBucket, Instant::from).plusSeconds(60).toKotlinInstant(),
+            "minute",
+            artifactMetrics,
+            true
+        )
+        vertx.eventBus().send(ArtifactMetricsUpdated, metricResult)
+    }
+
+    private fun toArtifactMetrics(event: LiveViewEvent): List<ArtifactMetrics> {
         val rawMetrics = mutableListOf<Int>()
         if (event.viewConfig.viewMetrics.size > 1) {
             val multiMetrics = JsonArray(event.metricsData)
@@ -200,17 +215,6 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
         val artifactMetrics = rawMetrics.mapIndexed { i: Int, it: Int ->
             ArtifactMetrics(MetricType.realValueOf(event.viewConfig.viewMetrics[i]), listOf(it.toDouble()))
         }
-
-        val metricResult = ArtifactMetricResult(
-            sourceMark.artifactQualifiedName,
-            QueryTimeFrame.valueOf(1),
-            portal.activityView.activeChartMetric, //todo: assumes activity view
-            formatter.parse(event.timeBucket, Instant::from).toKotlinInstant(),
-            formatter.parse(event.timeBucket, Instant::from).plusSeconds(60).toKotlinInstant(),
-            "minute",
-            artifactMetrics,
-            true
-        )
-        vertx.eventBus().send(ArtifactMetricsUpdated, metricResult)
+        return artifactMetrics
     }
 }
