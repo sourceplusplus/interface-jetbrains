@@ -25,6 +25,7 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
 import org.slf4j.LoggerFactory
+import spp.protocol.utils.ArtifactNameUtils
 import java.util.*
 
 /**
@@ -106,7 +107,8 @@ object ArtifactSearch {
                 promise.complete(Optional.ofNullable(psiClass))
             } else if (artifact.type == ArtifactType.METHOD) {
                 val psiClass = JavaPsiFacade.getInstance(project).findClass(
-                    artifact.identifier, GlobalSearchScope.allScope(project)
+                    ArtifactNameUtils.getQualifiedClassName(artifact.identifier)!!,
+                    GlobalSearchScope.allScope(project)
                 )
                 for (theMethod in psiClass!!.methods) {
                     val uMethod = theMethod.toUElement() as UMethod

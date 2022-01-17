@@ -6,25 +6,19 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
 import com.intellij.psi.search.FilenameIndex.getFilesByName
 import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.util.PsiNavigateUtil
-import spp.jetbrains.marker.source.JVMMarkerUtils
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
-import spp.protocol.artifact.exception.LiveStackTraceElement
-import spp.protocol.artifact.exception.sourceAsFilename
-import spp.protocol.artifact.exception.sourceAsLineNumber
-import io.vertx.core.Promise
-import io.vertx.core.Vertx
+import io.vertx.core.*
 import io.vertx.kotlin.coroutines.await
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.source.JVMMarkerUtils
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.exception.LiveStackTraceElement
+import spp.protocol.artifact.exception.sourceAsFilename
+import spp.protocol.artifact.exception.sourceAsLineNumber
 
 /**
  * todo: description.
@@ -38,7 +32,7 @@ object ArtifactNavigator {
 
     //todo: remove method from method names and support navigating to classes?
 
-    fun navigateTo(vertx: Vertx, project: Project, element: LiveStackTraceElement) {
+    fun navigateTo(project: Project, element: LiveStackTraceElement) {
         ApplicationManager.getApplication().invokeLater {
             val foundFiles = getFilesByName(project, element.sourceAsFilename()!!, allScope(project))
             if (foundFiles.isNotEmpty()) {
@@ -50,37 +44,22 @@ object ArtifactNavigator {
         }
     }
 
-    fun navigateTo(vertx: Vertx, project: Project, artifactQualifiedName: ArtifactQualifiedName) {
-        if (artifactQualifiedName.type == ArtifactType.ENDPOINT) {
-            GlobalScope.launch(vertx.dispatcher()) {
-                val artifactPsi = ArtifactSearch.findArtifact(vertx, artifactQualifiedName)
-                if (artifactPsi != null) {
-                    ApplicationManager.getApplication().invokeLater {
-                        PsiNavigateUtil.navigate(artifactPsi)
-                    }
-                } else {
-                    log.warn("Could not find artifact: {}", artifactQualifiedName)
-                }
+    suspend fun navigateTo(
+        vertx: Vertx,
+        artifactQualifiedName: ArtifactQualifiedName,
+        handler: Handler<AsyncResult<Boolean>>
+    ) {
+        val artifactPsi = ArtifactSearch.findArtifact(vertx, artifactQualifiedName)
+        if (artifactPsi != null) {
+            ApplicationManager.getApplication().invokeLater {
+                PsiNavigateUtil.navigate(artifactPsi)
+                log.info("Navigated to artifact: $artifactQualifiedName")
+                handler.handle(Future.succeededFuture(true))
             }
         } else {
-            ApplicationManager.getApplication().invokeLater {
-                navigateToMethod(project, artifactQualifiedName)
-            }
+            log.warn("Could not find artifact: {}", artifactQualifiedName)
+            handler.handle(Future.succeededFuture(false))
         }
-    }
-
-    fun navigateToMethod(project: Project, artifactQualifiedName: ArtifactQualifiedName): PsiElement {
-        val classQualifiedName = JVMMarkerUtils.getQualifiedClassName(artifactQualifiedName)
-        val psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName.identifier, allScope(project))
-        for (theMethod in psiClass!!.methods) {
-            val uMethod = theMethod.toUElement() as UMethod
-            val qualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
-            if (qualifiedName == artifactQualifiedName) {
-                PsiNavigateUtil.navigate(theMethod)
-                return JVMMarkerUtils.getNameIdentifier(theMethod)!!
-            }
-        }
-        throw IllegalArgumentException("Failed to find: $artifactQualifiedName")
     }
 
     suspend fun canNavigateTo(project: Project, artifactQualifiedName: ArtifactQualifiedName): Boolean {
