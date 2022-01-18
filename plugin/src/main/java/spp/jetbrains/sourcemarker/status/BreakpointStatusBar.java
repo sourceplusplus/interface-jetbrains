@@ -504,7 +504,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        breakpointConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);
+        breakpointConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE);
         label1 = new JLabel();
         hitLimitSpinner = new JBIntSpinner(1, 1, 10_000);
         timeLabel = new JLabel();

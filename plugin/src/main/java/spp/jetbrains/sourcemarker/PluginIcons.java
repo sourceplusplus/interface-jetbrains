@@ -53,6 +53,9 @@ public interface PluginIcons {
         Icon liveMeterSelected = IconLoader.getIcon("/icons/command/live-meter_selected.svg", PluginIcons.class);
         Icon liveMeterUnSelected = IconLoader.getIcon("/icons/command/live-meter_unselected.svg", PluginIcons.class);
 
+        Icon liveSpanSelected = IconLoader.getIcon("/icons/command/live-span_selected.svg", PluginIcons.class);
+        Icon liveSpanUnSelected = IconLoader.getIcon("/icons/command/live-span_unselected.svg", PluginIcons.class);
+
         Icon viewActivitySelected = IconLoader.getIcon("/icons/command/view-activity_selected.svg", PluginIcons.class);
         Icon viewActivityUnSelected = IconLoader.getIcon("/icons/command/view-activity_unselected.svg", PluginIcons.class);
         Icon viewTracesSelected = IconLoader.getIcon("/icons/command/view-traces_selected.svg", PluginIcons.class);

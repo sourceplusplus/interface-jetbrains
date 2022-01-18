@@ -423,7 +423,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        meterNameField = new AutocompleteField(placeHolderText, Collections.emptyList(), null, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);
+        meterNameField = new AutocompleteField(placeHolderText, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE);
         label1 = new JLabel();
         meterTypeComboBox = new JComboBox<>();
         timeLabel = new JLabel();

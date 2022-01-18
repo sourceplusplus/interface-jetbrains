@@ -201,7 +201,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         }
         textField1 = new AutocompleteField(
                 "Location: " + location + "#" + inlayMark.getLineNumber(),
-                availableCommands, lookup, inlayMark.getLineNumber(), true, true, SELECT_COLOR_RED);
+                availableCommands, lookup, inlayMark.getArtifactQualifiedName(), true, true, SELECT_COLOR_RED);
         textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();
 

@@ -9,6 +9,7 @@ import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.*
 import spp.jetbrains.sourcemarker.service.log.VariableParser
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
+import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*
 import java.awt.event.*
 import java.util.function.Function
@@ -30,7 +31,7 @@ class AutocompleteField(
     var placeHolderText: String?,
     private val allLookup: List<AutocompleteFieldRow>,
     private val lookup: Function<String, List<AutocompleteFieldRow>>? = null,
-    internal val lineNumber: Int = 0,
+    internal val artifactQualifiedName: ArtifactQualifiedName,
     private val replaceCommandOnTab: Boolean = false,
     private val autocompleteOnEnter: Boolean = true,
     private val varColor: Color = COMPLETE_COLOR_PURPLE
@@ -81,7 +82,7 @@ class AutocompleteField(
         })
 
         list.font = ROBOTO_LIGHT_PLAIN_14
-        list.setCellRenderer(AutoCompleteCellRenderer(lineNumber))
+        list.setCellRenderer(AutoCompleteCellRenderer(artifactQualifiedName))
 
         list.setBackground(AUTO_COMPLETE_HIGHLIGHT_COLOR)
         list.setBorder(JBUI.Borders.empty())

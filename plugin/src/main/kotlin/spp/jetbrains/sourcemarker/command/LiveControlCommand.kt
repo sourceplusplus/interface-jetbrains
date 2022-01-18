@@ -61,6 +61,12 @@ enum class LiveControlCommand(
         PluginIcons.Command.liveMeterSelected,
         PluginIcons.Command.liveMeterUnSelected
     ),
+    ADD_LIVE_SPAN(
+        "Add Span",
+        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On method *methodName*</span></html>",
+        PluginIcons.Command.liveSpanSelected,
+        PluginIcons.Command.liveSpanUnSelected
+    ),
     CLEAR_LIVE_INSTRUMENTS(
         "Clear Instruments",
         "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Clear All</span></html>",
