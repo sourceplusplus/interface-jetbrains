@@ -1,5 +1,6 @@
 package spp.jetbrains.monitor.skywalking.model
 
+import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.trace.TraceOrderType
 
 /**
@@ -9,7 +10,7 @@ import spp.protocol.artifact.trace.TraceOrderType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class GetEndpointTraces(
-    val artifactQualifiedName: String,
+    val artifactQualifiedName: ArtifactQualifiedName,
     val serviceId: String? = null,
     val serviceInstanceId: String? = null,
     val endpointId: String? = null,

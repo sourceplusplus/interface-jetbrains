@@ -188,7 +188,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(DFLT_BGND_COLOR);
         label1 = new JLabel();
-        String fullyQualified = inlayMark.getArtifactQualifiedName();
+        String fullyQualified = inlayMark.getArtifactQualifiedName().getIdentifier();
         String location = fullyQualified;
         if (!"Python".equals(inlayMark.getLanguage().getID())) {
             if (fullyQualified.contains("#")) {
@@ -201,7 +201,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         }
         textField1 = new AutocompleteField(
                 "Location: " + location + "#" + inlayMark.getLineNumber(),
-                availableCommands, lookup, inlayMark.getLineNumber(), true, true, SELECT_COLOR_RED);
+                availableCommands, lookup, inlayMark.getArtifactQualifiedName(), true, true, SELECT_COLOR_RED);
         textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();
 

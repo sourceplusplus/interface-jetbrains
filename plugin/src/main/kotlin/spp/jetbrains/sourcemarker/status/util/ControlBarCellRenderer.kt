@@ -1,11 +1,10 @@
 package spp.jetbrains.sourcemarker.status.util
 
-import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginUI
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
-import java.awt.Color
+import spp.protocol.utils.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
@@ -30,7 +29,15 @@ class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) :
         row.setCommandIcon(entry.getIcon())
         if (entry.getDescription() != null) {
             row.setDescription(
-                entry.getDescription()!!.replace("*lineNumber*", autocompleteField.lineNumber.toString())
+                entry.getDescription()!!
+                    .replace(
+                        "*lineNumber*",
+                        autocompleteField.artifactQualifiedName.lineNumber.toString()
+                    )
+                    .replace(
+                        "*methodName*",
+                        getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
+                    )
             )
         }
 

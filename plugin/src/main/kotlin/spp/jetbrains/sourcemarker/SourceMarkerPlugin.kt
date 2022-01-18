@@ -323,7 +323,7 @@ object SourceMarkerPlugin {
                     .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
                     .build(LiveViewService::class.java)
 
-                val viewListener = LiveViewManager(project)
+                val viewListener = LiveViewManager(config)
                 GlobalScope.launch(vertx.dispatcher()) {
                     deploymentIds.add(vertx.deployVerticle(viewListener).await())
                 }
@@ -569,7 +569,7 @@ object SourceMarkerPlugin {
 
         if (config.rootSourcePackages.isNotEmpty()) {
             SourceMarker.configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->
-                config.rootSourcePackages.any { artifactQualifiedName.startsWith(it) }
+                config.rootSourcePackages.any { artifactQualifiedName.identifier.startsWith(it) }
             }
         } else {
             val productCode = ApplicationInfo.getInstance().build.productCode

@@ -1,9 +1,9 @@
 package spp.jetbrains.sourcemarker.service
 
-import com.intellij.openapi.project.Project
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -15,10 +15,10 @@ import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.portal.SourcePortal
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin.INSTANCE_ID
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.search.SourceMarkSearch
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.ProtocolAddress
 import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
@@ -44,7 +44,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatterBuilder
 
-class LiveViewManager(private val project: Project) : CoroutineVerticle() {
+class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle() {
 
     private val log = LoggerFactory.getLogger(LiveViewManager::class.java)
 
@@ -55,7 +55,13 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
 
     override suspend fun start() {
         //register listener
-        vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_VIEW_SUBSCRIBER + "." + INSTANCE_ID) {
+        var developer = "system"
+        if (markerConfig.serviceToken != null) {
+            val json = JWT.parse(markerConfig.serviceToken)
+            developer = json.getJsonObject("payload").getString("developer_id")
+        }
+
+        vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_VIEW_SUBSCRIBER + "." + developer) {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
 
@@ -84,7 +90,7 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
 
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            Provide.LIVE_VIEW_SUBSCRIBER + "." + INSTANCE_ID,
+            Provide.LIVE_VIEW_SUBSCRIBER + "." + developer,
             JsonObject(),
             TCPServiceDiscoveryBackend.socket!!
         )
@@ -172,6 +178,21 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
         sourceMark: SourceMark,
         portal: SourcePortal
     ) {
+        val artifactMetrics = toArtifactMetrics(event)
+        val metricResult = ArtifactMetricResult(
+            sourceMark.artifactQualifiedName,
+            QueryTimeFrame.valueOf(1),
+            portal.activityView.activeChartMetric, //todo: assumes activity view
+            formatter.parse(event.timeBucket, Instant::from).toKotlinInstant(),
+            formatter.parse(event.timeBucket, Instant::from).plusSeconds(60).toKotlinInstant(),
+            "minute",
+            artifactMetrics,
+            true
+        )
+        vertx.eventBus().send(ArtifactMetricsUpdated, metricResult)
+    }
+
+    private fun toArtifactMetrics(event: LiveViewEvent): List<ArtifactMetrics> {
         val rawMetrics = mutableListOf<Int>()
         if (event.viewConfig.viewMetrics.size > 1) {
             val multiMetrics = JsonArray(event.metricsData)
@@ -200,17 +221,6 @@ class LiveViewManager(private val project: Project) : CoroutineVerticle() {
         val artifactMetrics = rawMetrics.mapIndexed { i: Int, it: Int ->
             ArtifactMetrics(MetricType.realValueOf(event.viewConfig.viewMetrics[i]), listOf(it.toDouble()))
         }
-
-        val metricResult = ArtifactMetricResult(
-            sourceMark.artifactQualifiedName,
-            QueryTimeFrame.valueOf(1),
-            portal.activityView.activeChartMetric, //todo: assumes activity view
-            formatter.parse(event.timeBucket, Instant::from).toKotlinInstant(),
-            formatter.parse(event.timeBucket, Instant::from).plusSeconds(60).toKotlinInstant(),
-            "minute",
-            artifactMetrics,
-            true
-        )
-        vertx.eventBus().send(ArtifactMetricsUpdated, metricResult)
+        return artifactMetrics
     }
 }

@@ -41,6 +41,7 @@ import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_HIDDEN
 import spp.jetbrains.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_VISIBLE
+import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.event.ComponentEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
@@ -85,7 +86,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val isMethodMark: Boolean
     val isExpressionMark: Boolean
     val moduleName: String
-    val artifactQualifiedName: String
+    val artifactQualifiedName: ArtifactQualifiedName
     val sourceFileMarker: SourceFileMarker
     val valid: Boolean
     val lineNumber: Int
@@ -243,7 +244,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     fun closePopup() {
         if (openedMarks.remove(this)) {
-            log.debug("Closing popup")
+            log.trace("Closing popup")
             try {
                 if (sourceMarkComponent.configuration.addedMouseMotionListener) {
                     editor?.contentComponent?.removeMouseMotionListener(this)
@@ -277,7 +278,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             log.trace("Ignore display popup")
             return
         } else {
-            log.debug("Displaying popup")
+            log.trace("Displaying popup")
 
             //todo: only close marks which are necessary to close
             closeOpenPopups()
@@ -365,7 +366,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     @JvmDefault
     override fun beforeShown(event: LightweightWindowEvent) {
-        log.debug("Before popup shown")
+        log.trace("Before popup shown")
 
         //delay prevents component stains when mark is closed and opened quickly
         //todo: open intellij bug

@@ -14,10 +14,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
-import org.slf4j.LoggerFactory
 import java.awt.Point
 
 /**
@@ -89,7 +89,7 @@ class FileActivityListener : FileEditorManagerListener {
                             if (it is GutterMark) {
                                 if (it.configuration.activateOnMouseHover && it.configuration.icon != null) {
                                     if (it.viewProviderBound) {
-                                        it.lineNumber == lineNumber
+                                        it.lineNumber == lineNumber + 1
                                     } else {
                                         syncViewProvider = true
                                         false

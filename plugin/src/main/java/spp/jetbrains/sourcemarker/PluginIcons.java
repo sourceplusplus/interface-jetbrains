@@ -22,6 +22,8 @@ public interface PluginIcons {
 
     Icon analytics = IconLoader.getIcon("/icons/analytics.svg", PluginIcons.class);
 
+    Icon mapMarkedAlt = IconLoader.getIcon("/icons/map-marked-alt.svg", PluginIcons.class);
+
     Icon config = IconLoader.getIcon("/icons/configIcon.svg", PluginIcons.class);
     Icon configHovered = IconLoader.getIcon("/icons/configIconHovered.svg", PluginIcons.class);
     Icon configPressed = IconLoader.getIcon("/icons/configIconPressed.svg", PluginIcons.class);
@@ -52,6 +54,9 @@ public interface PluginIcons {
 
         Icon liveMeterSelected = IconLoader.getIcon("/icons/command/live-meter_selected.svg", PluginIcons.class);
         Icon liveMeterUnSelected = IconLoader.getIcon("/icons/command/live-meter_unselected.svg", PluginIcons.class);
+
+        Icon liveSpanSelected = IconLoader.getIcon("/icons/command/live-span_selected.svg", PluginIcons.class);
+        Icon liveSpanUnSelected = IconLoader.getIcon("/icons/command/live-span_unselected.svg", PluginIcons.class);
 
         Icon viewActivitySelected = IconLoader.getIcon("/icons/command/view-activity_selected.svg", PluginIcons.class);
         Icon viewActivityUnSelected = IconLoader.getIcon("/icons/command/view-activity_unselected.svg", PluginIcons.class);
