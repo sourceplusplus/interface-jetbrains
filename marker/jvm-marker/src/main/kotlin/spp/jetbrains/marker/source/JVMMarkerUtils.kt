@@ -453,8 +453,24 @@ object JVMMarkerUtils {
     fun getFullyQualifiedName(expression: UExpression): ArtifactQualifiedName {
         val qualifiedMethodName = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
         return ArtifactQualifiedName(
-            """${qualifiedMethodName!!.identifier}#${Base64.getEncoder().encodeToString(expression.toString().toByteArray())}""",
-            type = ArtifactType.EXPRESSION
+            """${qualifiedMethodName!!.identifier}#${
+                Base64.getEncoder().encodeToString(expression.toString().toByteArray())
+            }""",
+            type = ArtifactType.EXPRESSION,
+            lineNumber = getLineNumber(expression.sourcePsi!!)
+        )
+    }
+
+    @JvmStatic
+    fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
+        val expression = element.toUElement()!!
+        val qualifiedMethodName = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
+        return ArtifactQualifiedName(
+            """${qualifiedMethodName!!.identifier}#${
+                Base64.getEncoder().encodeToString(expression.toString().toByteArray())
+            }""",
+            type = ArtifactType.EXPRESSION,
+            lineNumber = getLineNumber(element)
         )
     }
 
@@ -540,5 +556,10 @@ object JVMMarkerUtils {
             }
         }
         return arrayDimensions
+    }
+
+    fun getLineNumber(element: PsiElement): Int {
+        val document = element.containingFile.viewProvider.document
+        return document!!.getLineNumber(element.textRange.startOffset) + 1
     }
 }

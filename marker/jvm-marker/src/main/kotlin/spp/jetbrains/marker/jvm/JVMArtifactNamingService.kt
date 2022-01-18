@@ -24,7 +24,7 @@ class JVMArtifactNamingService : ArtifactNamingService {
         return when (val uElement = element.toUElement()) {
             is UClass -> JVMMarkerUtils.getFullyQualifiedName(uElement)
             is UMethod -> JVMMarkerUtils.getFullyQualifiedName(uElement)
-            is UExpression -> JVMMarkerUtils.getFullyQualifiedName(uElement)
+            is UExpression -> JVMMarkerUtils.getFullyQualifiedName(element)
             else -> TODO("Not yet implemented")
         }
     }
