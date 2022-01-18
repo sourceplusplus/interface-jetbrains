@@ -4,6 +4,8 @@ import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.AutocompleteRow
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.utils.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
@@ -14,7 +16,7 @@ import javax.swing.JList
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class AutoCompleteCellRenderer(private val lineNumber: Int) : DefaultListCellRenderer() {
+class AutoCompleteCellRenderer(private val artifactQualifiedName: ArtifactQualifiedName) : DefaultListCellRenderer() {
     init {
         isOpaque = true
     }
@@ -28,7 +30,9 @@ class AutoCompleteCellRenderer(private val lineNumber: Int) : DefaultListCellRen
         row.setCommandIcon(entry.getIcon())
         if (entry.getDescription() != null) {
             row.setDescription(
-                entry.getDescription()!!.replace("*lineNumber*", lineNumber.toString())
+                entry.getDescription()!!
+                    .replace("*lineNumber*", artifactQualifiedName.lineNumber.toString())
+                    .replace("*methodName*", getShortFunctionSignature(artifactQualifiedName.identifier))
             )
         }
 

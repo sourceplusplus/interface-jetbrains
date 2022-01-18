@@ -1,19 +1,23 @@
 package spp.jetbrains.sourcemarker.service
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.ProjectManager
+import io.vertx.core.json.Json
+import io.vertx.kotlin.coroutines.CoroutineVerticle
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.minus
+import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarker.creationService
-import spp.protocol.SourceMarkerServices.Instance
-import spp.protocol.error.AccessDenied
+import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
-import spp.jetbrains.sourcemarker.search.SourceMarkSearch
-import io.vertx.core.eventbus.ReplyException
-import io.vertx.core.eventbus.ReplyFailure
-import io.vertx.kotlin.coroutines.CoroutineVerticle
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.protocol.SourceMarkerServices.Instance
+import spp.protocol.instrument.DurationStep
 
 /**
  * todo: description.
@@ -31,26 +35,41 @@ class LogCountIndicators : CoroutineVerticle() {
         log.info("Log count indicators started")
         vertx.setPeriodic(5000) {
             if (Instance.logCountIndicator != null) {
-                Instance.logCountIndicator!!.getLogCountSummary {
-                    if (it.succeeded()) {
-                        GlobalScope.launch(vertx.dispatcher()) {
-                            val logCounts = it.result().logCounts
-                            logCounts.forEach { logSummary ->
-                                val methodMark = SourceMarkSearch.findSourceMark(logSummary.key)
-                                if (methodMark != null) {
-                                    val loggers = methodMark.getUserData(LOGGER_DETECTOR)!!
-                                        .getOrFindLoggerStatements(methodMark)
-                                    val logger = loggers.find { it.logPattern == logSummary.key }!!
+                val project = ProjectManager.getInstance().openProjects[0]
+                val config = Json.decodeValue(
+                    PropertiesComponent.getInstance(project).getValue("sourcemarker_plugin_config"),
+                    SourceMarkerConfig::class.java
+                )
 
-                                    ApplicationManager.getApplication().runReadAction {
+                SourceMarker.getAvailableSourceFileMarkers().forEach { fileMarker ->
+                    launch {
+                        val fileLogPatterns = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>().flatMap {
+                            it.getUserData(LOGGER_DETECTOR)!!.getOrFindLoggerStatements(it)
+                        }
+                        Instance.logCountIndicator!!.getPatternOccurrences(
+                            fileLogPatterns.map { it.logPattern },
+                            config.serviceName,
+                            Clock.System.now().minus(15, DateTimeUnit.MINUTE),
+                            Clock.System.now(),
+                            DurationStep.MINUTE
+                        ) {
+                            if (it.succeeded()) {
+                                val occurrences = it.result()
+                                //log.info("Found ${occurrences} occurrences of log patterns")
+
+                                ApplicationManager.getApplication().runReadAction {
+                                    fileLogPatterns.forEach { logger ->
+                                        val sumValue = occurrences.getJsonObject(logger.logPattern)
+                                            .getJsonArray("values").list.sumOf { it as Int? ?: 0 }
+
                                         val logIndicator = creationService.getOrCreateExpressionGutterMark(
-                                            methodMark.sourceFileMarker,
+                                            fileMarker,
                                             logger.lineLocation
                                         ).get()
-                                        if (!methodMark.sourceFileMarker.containsSourceMark(logIndicator)) {
+                                        if (!fileMarker.containsSourceMark(logIndicator)) {
                                             logIndicator.configuration.icon =
                                                 SourceMarkerIcons.getNumericGutterMarkIcon(
-                                                    logSummary.value,
+                                                    sumValue,
                                                     if (logger.level == "warn" || logger.level == "error") "#e1483b"
                                                     else "#182d34"
                                                 )
@@ -58,29 +77,17 @@ class LogCountIndicators : CoroutineVerticle() {
                                         } else {
                                             logIndicator.configuration.icon =
                                                 SourceMarkerIcons.getNumericGutterMarkIcon(
-                                                    logSummary.value,
+                                                    sumValue,
                                                     if (logger.level == "warn" || logger.level == "error") "#e1483b"
                                                     else "#182d34"
                                                 )
                                             //todo: should just be updating rendering, not all analysis
-                                            methodMark.sourceFileMarker.refresh()
+                                            fileMarker.refresh()
                                         }
                                     }
                                 }
-                            }
-                        }
-                    } else {
-                        //todo: use circuit breaker
-                        val replyException = it.cause() as ReplyException
-                        if (replyException.failureType() == ReplyFailure.TIMEOUT) {
-                            log.warn("Timed out getting log count summary")
-                        } else {
-                            val actualException = replyException.cause!!
-                            if (actualException is AccessDenied) {
-                                log.error("Access denied. Reason: " + actualException.reason)
                             } else {
-                                it.cause().printStackTrace()
-                                log.error("Failed to get log count summary", it.cause())
+                                log.error("Failed to get log pattern occurrences", it.cause())
                             }
                         }
                     }

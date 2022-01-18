@@ -4,10 +4,11 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.intellij.psi.PsiFile
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
-import org.slf4j.LoggerFactory
+import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
  * todo: description.
@@ -89,6 +90,14 @@ object SourceMarker {
         check(enabled) { "SourceMarker disabled" }
 
         return availableSourceFileMarkers.values.find {
+            namingService.getClassQualifiedNames(it.psiFile).find { it.identifier.contains(classQualifiedName) } != null
+        }
+    }
+
+    fun getSourceFileMarker(classQualifiedName: ArtifactQualifiedName): SourceFileMarker? {
+        check(enabled) { "SourceMarker disabled" }
+
+        return availableSourceFileMarkers.values.find {
             namingService.getClassQualifiedNames(it.psiFile).contains(classQualifiedName)
         }
     }
@@ -111,7 +120,7 @@ object SourceMarker {
         globalSourceMarkEventListeners.clear()
     }
 
-    fun getSourceMark(artifactQualifiedName: String, type: SourceMark.Type): SourceMark? {
+    fun getSourceMark(artifactQualifiedName: ArtifactQualifiedName, type: SourceMark.Type): SourceMark? {
         check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.values.forEach {
@@ -123,7 +132,7 @@ object SourceMarker {
         return null
     }
 
-    fun getSourceMarks(artifactQualifiedName: String): List<SourceMark> {
+    fun getSourceMarks(artifactQualifiedName: ArtifactQualifiedName): List<SourceMark> {
         check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.values.forEach {

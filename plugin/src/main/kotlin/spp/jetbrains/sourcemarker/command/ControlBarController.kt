@@ -46,7 +46,8 @@ object ControlBarController {
             SourceMarkerServices.Instance.liveService!!.getSelf(future)
             val selfInfo = future.future().await()
             LiveControlCommand.values().toList().filter {
-                selfInfo.permissions.map { it.name }.contains(it.name)
+                @Suppress("UselessCallOnCollection") //unknown enums are null
+                selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
             }
         }
     }
@@ -85,6 +86,16 @@ object ControlBarController {
 
                 ApplicationManager.getApplication().runWriteAction {
                     LiveStatusManager.showMeterStatusBar(editor, prevCommandBar.lineNumber)
+                }
+            }
+            ADD_LIVE_SPAN.command -> {
+                //replace command inlay with span status inlay
+                val prevCommandBar = previousControlBar!!
+                previousControlBar!!.dispose()
+                previousControlBar = null
+
+                ApplicationManager.getApplication().runWriteAction {
+                    LiveStatusManager.showSpanStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
             CLEAR_LIVE_BREAKPOINTS.command -> {

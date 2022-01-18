@@ -8,14 +8,12 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import spp.jetbrains.mapper.extend.SourceCodeTokenizer
-import spp.jetbrains.marker.source.JVMMarkerUtils
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import spp.jetbrains.mapper.extend.SourceCodeTokenizer
+import spp.jetbrains.marker.source.JVMMarkerUtils
 
 abstract class SourceMapperTest : LightJavaCodeInsightFixtureTestCase() {
 
@@ -49,11 +47,7 @@ abstract class SourceMapperTest : LightJavaCodeInsightFixtureTestCase() {
 
                             result.add(
                                 SourceCodeTokenizer.TokenizedMethod(
-                                    ArtifactQualifiedName(
-                                        JVMMarkerUtils.getFullyQualifiedName(it),
-                                        "",
-                                        ArtifactType.METHOD
-                                    ), tokens
+                                    JVMMarkerUtils.getFullyQualifiedName(it), tokens
                                 )
                             )
                         }

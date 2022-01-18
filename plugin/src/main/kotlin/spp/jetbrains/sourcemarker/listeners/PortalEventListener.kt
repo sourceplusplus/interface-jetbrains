@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.util.PsiNavigateUtil
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
@@ -75,8 +76,9 @@ import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.error.AccessDenied
+import spp.protocol.instrument.LiveSourceLocation
 import spp.protocol.portal.PageType
-import spp.protocol.utils.ArtifactNameUtils.getQualifiedClassName
+import spp.protocol.utils.ArtifactNameUtils
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
 import java.net.URI
@@ -108,7 +110,7 @@ class PortalEventListener(
             if (lastDisplayedInternalPortal != null) {
                 lastDisplayedInternalPortal!!.configuration.darkMode = (it.newValue !is IntelliJLaf)
                 val sourceMark = SourceMarker.getSourceMark(
-                    lastDisplayedInternalPortal!!.viewingPortalArtifact, SourceMark.Type.GUTTER
+                    lastDisplayedInternalPortal!!.viewingArtifact, SourceMark.Type.GUTTER
                 )
                 if (sourceMark != null) {
                     val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
@@ -146,7 +148,7 @@ class PortalEventListener(
                 if (lastDisplayedInternalPortal == null) {
                     configureDisplayedPortal(portal)
                 } else {
-                    val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+                    val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
                     val jcefComponent = sourceMark!!.sourceMarkComponent as SourceMarkJcefComponent
                     val port = vertx.sharedData().getLocalMap<String, Int>("portal")["http.port"]!!
                     val host = "http://localhost:$port"
@@ -187,12 +189,18 @@ class PortalEventListener(
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(FindPortal) {
             val artifactQualifiedName = it.body()
-            val sourceMarks = SourceMarker.getSourceMarks(artifactQualifiedName.identifier)
+            val sourceMarks = SourceMarker.getSourceMarks(artifactQualifiedName)
             if (sourceMarks.isNotEmpty()) {
                 it.reply(sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
             } else {
                 GlobalScope.launch(vertx.dispatcher()) {
-                    val classArtifact = findArtifact(vertx, artifactQualifiedName.copy(type = ArtifactType.CLASS))
+                    val classArtifact = findArtifact(
+                        vertx, artifactQualifiedName.copy(
+                            identifier = ArtifactNameUtils.getQualifiedClassName(artifactQualifiedName.identifier)!!,
+                            operationName = null,
+                            type = ArtifactType.CLASS
+                        )
+                    )
                     val fileMarker = SourceMarker.getSourceFileMarker(classArtifact!!.containingFile)!!
                     val searchArtifact = findArtifact(vertx, artifactQualifiedName) as PsiNameIdentifierOwner
                     runReadAction {
@@ -207,11 +215,18 @@ class PortalEventListener(
         vertx.eventBus().consumer<ArtifactQualifiedName>(FindAndOpenPortal) {
             val artifactQualifiedName = it.body()
             runReadAction {
-                val sourceMarks = SourceMarker.getSourceMarks(artifactQualifiedName.identifier)
+                val sourceMarks = SourceMarker.getSourceMarks(artifactQualifiedName)
                 if (sourceMarks.isNotEmpty()) {
-                    val portal = sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                    openPortal(portal)
-                    it.reply(portal)
+                    val sourceMark = sourceMarks[0]
+                    ApplicationManager.getApplication().invokeLater {
+                        PsiNavigateUtil.navigate(sourceMark.getPsiElement())
+
+                        val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+                        openPortal(portal)
+                        it.reply(portal)
+                    }
+                } else {
+                    log.warn("Failed to find portal for artifact: $artifactQualifiedName")
                 }
             }
         }
@@ -219,18 +234,19 @@ class PortalEventListener(
         vertx.eventBus().consumer<SourcePortal>(ClosePortal) { closePortal(it.body()) }
         vertx.eventBus().consumer<SourcePortal>(RefreshOverview) {
             runReadAction {
-                val fileMarker =
-                    SourceMarker.getSourceFileMarker(getQualifiedClassName(it.body().viewingPortalArtifact)!!)!!
+                val fileMarker = SourceMarker.getSourceFileMarker(it.body().viewingArtifact)!!
                 GlobalScope.launch(vertx.dispatcher()) {
                     refreshOverview(fileMarker, it.body())
                 }
+
+                //todo: update subscriptions
             }
         }
         vertx.eventBus().consumer<SourcePortal>(RefreshActivity) {
             val portal = it.body()
             //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
-                refreshActivity(portal)
+                pullLatestActivity(portal)
             }
 
             //update subscriptions
@@ -239,7 +255,7 @@ class PortalEventListener(
                     if (it.succeeded()) {
                         GlobalScope.launch(vertx.dispatcher()) {
                             val sourceMark = SourceMarker.getSourceMark(
-                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                                portal.viewingArtifact, SourceMark.Type.GUTTER
                             ) ?: return@launch
                             val endpointName = sourceMark.getUserData(
                                 ENDPOINT_DETECTOR
@@ -249,7 +265,8 @@ class PortalEventListener(
                                 LiveViewSubscription(
                                     null,
                                     listOf(endpointName),
-                                    sourceMark.artifactQualifiedName,
+                                    portal.viewingArtifact,
+                                    LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
                                     LiveViewConfig(
                                         "ACTIVITY",
                                         false,
@@ -273,7 +290,7 @@ class PortalEventListener(
             val portal = it.body()
             //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
-                refreshTraces(it.body())
+                pullLatestTraces(it.body())
             }
 
             //update subscriptions
@@ -282,7 +299,7 @@ class PortalEventListener(
                     if (it.succeeded()) {
                         GlobalScope.launch(vertx.dispatcher()) {
                             val sourceMark = SourceMarker.getSourceMark(
-                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
+                                portal.viewingArtifact, SourceMark.Type.GUTTER
                             ) ?: return@launch
                             val endpointName = sourceMark.getUserData(
                                 ENDPOINT_DETECTOR
@@ -292,7 +309,8 @@ class PortalEventListener(
                                 LiveViewSubscription(
                                     null,
                                     listOf(endpointName),
-                                    sourceMark.artifactQualifiedName,
+                                    portal.viewingArtifact,
+                                    LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
                                     LiveViewConfig(
                                         "TRACES",
                                         false,
@@ -316,7 +334,7 @@ class PortalEventListener(
             val portal = it.body()
             //pull from skywalking
             GlobalScope.launch(vertx.dispatcher()) {
-                refreshLogs(portal)
+                pullLatestLogs(portal)
             }
 
             //update subscriptions
@@ -325,16 +343,28 @@ class PortalEventListener(
                     if (it.succeeded()) {
                         GlobalScope.launch(vertx.dispatcher()) {
                             val sourceMark = SourceMarker.getSourceMark(
-                                portal.viewingPortalArtifact, SourceMark.Type.GUTTER
-                            ) as MethodSourceMark? ?: return@launch
-                            val logPatterns = sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
-                                .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
+                                portal.viewingArtifact, SourceMark.Type.GUTTER
+                            )
+
+                            val logPatterns = if (sourceMark is ClassSourceMark) {
+                                sourceMark.sourceFileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
+                                    .flatMap {
+                                        it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                                            .getOrFindLoggerStatements(it)
+                                    }.map { it.logPattern }
+                            } else if (sourceMark is MethodSourceMark) {
+                                sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                                    .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
+                            } else {
+                                throw IllegalStateException("Unsupported source mark type")
+                            }
 
                             Instance.liveView!!.addLiveViewSubscription(
                                 LiveViewSubscription(
                                     null,
                                     logPatterns,
-                                    sourceMark.artifactQualifiedName,
+                                    portal.viewingArtifact,
+                                    LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
                                     LiveViewConfig(
                                         "LOGS",
                                         false,
@@ -373,7 +403,7 @@ class PortalEventListener(
             log.info("Clicked stack trace element: $element")
 
             val project = ProjectManager.getInstance().openProjects[0]
-            ArtifactNavigator.navigateTo(vertx, project, element)
+            ArtifactNavigator.navigateTo(project, element)
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(CanNavigateToArtifact) {
             val artifactQualifiedName = it.body()
@@ -382,22 +412,30 @@ class PortalEventListener(
                 it.reply(ArtifactNavigator.canNavigateTo(project, artifactQualifiedName))
             }
         }
-        vertx.eventBus().consumer<ArtifactQualifiedName>(NavigateToArtifact) {
-            val artifactQualifiedName = it.body()
-            val project = ProjectManager.getInstance().openProjects[0]
-            ArtifactNavigator.navigateTo(vertx, project, artifactQualifiedName)
+        vertx.eventBus().consumer<ArtifactQualifiedName>(NavigateToArtifact) { msg ->
+            GlobalScope.launch(vertx.dispatcher()) {
+                ArtifactNavigator.navigateTo(vertx, msg.body()) {
+                    if (it.succeeded()) {
+                        log.info("Navigated to artifact $it")
+                        msg.reply(it.result())
+                    } else {
+                        log.error("Failed to navigate to artifact", it.cause())
+                        msg.fail(500, it.cause().message)
+                    }
+                }
+            }
         }
     }
 
-    private suspend fun refreshTraces(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+    private suspend fun pullLatestTraces(portal: SourcePortal) {
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
                 GlobalScope.launch(vertx.dispatcher()) {
                     val traceResult = EndpointTracesBridge.getTraces(
                         GetEndpointTraces(
-                            artifactQualifiedName = portal.viewingPortalArtifact,
+                            artifactQualifiedName = portal.viewingArtifact,
                             endpointId = endpointId,
                             zonedDuration = ZonedDuration(
                                 ZonedDateTime.now().minusHours(24),
@@ -410,16 +448,12 @@ class PortalEventListener(
                         ), vertx
                     )
 
-                    handleTraceResult(traceResult, portal, portal.viewingPortalArtifact)
+                    handleTraceResult(traceResult, portal, portal.viewingArtifact)
                 }
             } else if (Instance.localTracing != null) {
                 portal.tracesView.localTracing = true
                 Instance.localTracing!!.getTraceResult(
-                    artifactQualifiedName = ArtifactQualifiedName(
-                        identifier = portal.viewingPortalArtifact,
-                        commitId = "null",
-                        type = ArtifactType.METHOD
-                    ),
+                    artifactQualifiedName = portal.viewingArtifact,
                     start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
                     stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
                     orderType = portal.tracesView.orderType,
@@ -427,7 +461,7 @@ class PortalEventListener(
                     pageNumber = portal.tracesView.pageNumber,
                 ) {
                     if (it.succeeded()) {
-                        handleTraceResult(it.result(), portal, portal.viewingPortalArtifact)
+                        handleTraceResult(it.result(), portal, portal.viewingArtifact)
                     } else {
                         val replyException = it.cause() as ReplyException
                         if (replyException.failureType() == ReplyFailure.TIMEOUT) {
@@ -447,7 +481,11 @@ class PortalEventListener(
         }
     }
 
-    private fun handleTraceResult(traceResult: TraceResult, portal: SourcePortal, artifactQualifiedName: String) {
+    private fun handleTraceResult(
+        traceResult: TraceResult,
+        portal: SourcePortal,
+        artifactQualifiedName: ArtifactQualifiedName
+    ) {
         //todo: rename {GET} to [GET] in skywalking
         if (markerConfig.autoResolveEndpointNames) {
             GlobalScope.launch(vertx.dispatcher()) {
@@ -477,9 +515,9 @@ class PortalEventListener(
         vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
     }
 
-    private suspend fun refreshLogs(portal: SourcePortal) {
+    private suspend fun pullLatestLogs(portal: SourcePortal) {
         if (log.isTraceEnabled) log.trace("Refreshing logs. Portal: {}", portal.portalUuid)
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
         GlobalScope.launch(vertx.dispatcher()) {
             val logsResult = LogsBridge.queryLogs(
                 GetEndpointLogs(
@@ -550,12 +588,7 @@ class PortalEventListener(
 
             endpointMetricResults.add(
                 ArtifactSummarizedResult(
-                    ArtifactQualifiedName(
-                        it.artifactQualifiedName,
-                        "todo",
-                        ArtifactType.ENDPOINT,
-                        operationName = endpointName
-                    ),
+                    it.artifactQualifiedName.copy(operationName = endpointName),
                     summarizedMetrics,
                     EndpointType.HTTP
                 )
@@ -578,62 +611,39 @@ class PortalEventListener(
         )
     }
 
-    private suspend fun refreshActivity(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+    private suspend fun pullLatestActivity(portal: SourcePortal) {
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
-                val endTime = ZonedDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MINUTES)
-                val startTime = endTime.minusMinutes(portal.activityView.timeFrame.minutes.toLong())
-                val metricsRequest = GetEndpointMetrics(
-                    listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
-                    endpointId,
-                    ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
-                )
-                val metrics = EndpointMetricsBridge.getMetrics(metricsRequest, vertx)
-                val metricResult = toProtocol(
-                    portal.viewingPortalArtifact,
-                    portal.activityView.timeFrame,
-                    portal.activityView.activeChartMetric,
-                    metricsRequest,
-                    metrics
-                )
-
-                val finalArtifactMetrics = metricResult.artifactMetrics.toMutableList()
-//                val multipleMetricsRequest = GetMultipleEndpointMetrics(
-//                    "endpoint_percentile",
-//                    endpointId,
-//                    5,
-//                    ZonedDuration(
-//                        ZonedDateTime.now().minusMinutes(portal.activityView.timeFrame.minutes.toLong()),
-//                        ZonedDateTime.now(),
-//                        SkywalkingClient.DurationStep.MINUTE
-//                    )
-//                )
-//                val multiMetrics = EndpointMetricsBridge.getMultipleMetrics(multipleMetricsRequest, vertx)
-//                multiMetrics.forEachIndexed { i, it ->
-//                    finalArtifactMetrics.add(
-//                        ArtifactMetrics(
-//                            metricType = when (i) {
-//                                0 -> MetricType.ResponseTime_50Percentile
-//                                1 -> MetricType.ResponseTime_75Percentile
-//                                2 -> MetricType.ResponseTime_90Percentile
-//                                3 -> MetricType.ResponseTime_95Percentile
-//                                4 -> MetricType.ResponseTime_99Percentile
-//                                else -> throw IllegalStateException()
-//                            },
-//                            values = it.values.map { it.toProtocol() }
-//                        )
-//                    )
-//                }
-
-                vertx.eventBus().send(ArtifactMetricsUpdated, metricResult.copy(artifactMetrics = finalArtifactMetrics))
+                pullLatestActivity(portal, endpointId)
             }
         }
     }
 
+    private suspend fun pullLatestActivity(portal: SourcePortal, endpointId: String) {
+        val endTime = ZonedDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MINUTES)
+        val startTime = endTime.minusMinutes(portal.activityView.timeFrame.minutes.toLong())
+        val metricsRequest = GetEndpointMetrics(
+            listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+            endpointId,
+            ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
+        )
+        val metrics = EndpointMetricsBridge.getMetrics(metricsRequest, vertx)
+        val metricResult = toProtocol(
+            portal.viewingArtifact,
+            portal.activityView.timeFrame,
+            portal.activityView.activeChartMetric,
+            metricsRequest,
+            metrics
+        )
+
+        val finalArtifactMetrics = metricResult.artifactMetrics.toMutableList()
+        vertx.eventBus().send(ArtifactMetricsUpdated, metricResult.copy(artifactMetrics = finalArtifactMetrics))
+    }
+
     private fun openPortal(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null) {
             configureDisplayedPortal(portal)
             ApplicationManager.getApplication().invokeLater(sourceMark::displayPopup)
@@ -641,7 +651,7 @@ class PortalEventListener(
     }
 
     private fun configureDisplayedPortal(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null) {
             val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
             if (portal != lastDisplayedInternalPortal) {
@@ -693,7 +703,7 @@ class PortalEventListener(
     }
 
     private fun closePortal(portal: SourcePortal) {
-        val sourceMark = SourceMarker.getSourceMark(portal.viewingPortalArtifact, SourceMark.Type.GUTTER)
+        val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
         if (sourceMark != null) {
             ApplicationManager.getApplication().invokeLater(sourceMark::closePopup)
         }
