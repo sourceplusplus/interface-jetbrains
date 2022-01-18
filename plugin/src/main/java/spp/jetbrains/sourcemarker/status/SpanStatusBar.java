@@ -25,10 +25,8 @@ import spp.protocol.SourceMarkerServices;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.meter.LiveMeter;
-import spp.protocol.instrument.meter.MeterType;
-import spp.protocol.instrument.meter.MetricValue;
-import spp.protocol.instrument.meter.MetricValueType;
 import spp.protocol.instrument.meter.event.LiveMeterRemoved;
+import spp.protocol.instrument.span.LiveSpan;
 import spp.protocol.service.live.LiveInstrumentService;
 
 import javax.swing.*;
@@ -48,7 +46,7 @@ import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 
-public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
+public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -56,7 +54,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     private JWindow popup;
     private LiveMeterConfigurationPanel configurationPanel;
     private boolean disposed = false;
-    private final String placeHolderText = "Meter Description";
+    private final String placeHolderText = "Operation Name";
     private LiveMeter liveMeter;
     private LiveBreakpointStatusPanel statusPanel;
     private JPanel wrapper;
@@ -70,7 +68,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             },
             new ArrayList<>(), 0, SortOrder.DESCENDING);
 
-    public MeterStatusBar(LiveSourceLocation sourceLocation, InlayMark inlayMark) {
+    public SpanStatusBar(LiveSourceLocation sourceLocation, InlayMark inlayMark) {
         this.sourceLocation = sourceLocation;
         this.inlayMark = inlayMark;
 
@@ -89,7 +87,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
-        meterNameField.hideAutocompletePopup();
+        spanOperationNameField.hideAutocompletePopup();
         if(popup != null) {
             popup.dispose();
             popup = null;
@@ -101,8 +99,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     public void focus() {
-        meterNameField.grabFocus();
-        meterNameField.requestFocusInWindow();
+        spanOperationNameField.grabFocus();
+        spanOperationNameField.requestFocusInWindow();
     }
 
     private void removeActiveDecorations() {
@@ -111,12 +109,12 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             closeLabel.setIcon(PluginIcons.close);
             configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
 
-            if (!meterNameField.getEditMode()) {
-                meterNameField.setBorder(new CompoundBorder(
+            if (!spanOperationNameField.getEditMode()) {
+                spanOperationNameField.setBorder(new CompoundBorder(
                         new LineBorder(Color.darkGray, 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                meterNameField.setBackground(PluginUI.getEditCompleteColor());
-                meterNameField.setEditable(false);
+                spanOperationNameField.setBackground(PluginUI.getEditCompleteColor());
+                spanOperationNameField.setEditable(false);
             }
         });
     }
@@ -139,7 +137,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         statusPanel = new LiveBreakpointStatusPanel();
         statusPanel.setHitLimit(liveMeter.getHitLimit());
 
-        meterNameField.setEditMode(false);
+        spanOperationNameField.setEditMode(false);
         removeActiveDecorations();
         configDropdownLabel.setVisible(false);
         SwingUtilities.invokeLater(() -> {
@@ -209,23 +207,13 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     private void setupComponents() {
-        meterTypeComboBox.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    ApplicationManager.getApplication().runWriteAction(() -> saveLiveMeter());
-                }
-            }
-        });
-        meterTypeComboBox.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
-
-        meterNameField.setCanShowSaveButton(false);
-        meterNameField.getDocument().addDocumentListener(new DocumentAdapter() {
+        spanOperationNameField.setCanShowSaveButton(false);
+        spanOperationNameField.getDocument().addDocumentListener(new DocumentAdapter() {
             @Override
             protected void textChanged(DocumentEvent e) {
             }
         });
-        meterNameField.addKeyListener(new KeyAdapter() {
+        spanOperationNameField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_TAB) {
@@ -239,11 +227,11 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    meterTypeComboBox.requestFocus();
+                    ApplicationManager.getApplication().runWriteAction(() -> saveLiveSpan());
                 }
             }
         });
-        meterNameField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+        spanOperationNameField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
 
         addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -308,19 +296,19 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     private void showConfigurationPopup(AtomicLong popupLastOpened) {
-        popup = new JWindow(SwingUtilities.getWindowAncestor(MeterStatusBar.this));
+        popup = new JWindow(SwingUtilities.getWindowAncestor(SpanStatusBar.this));
         popup.setType(Window.Type.POPUP);
         popup.setAlwaysOnTop(true);
 
         if (configurationPanel == null) {
-            configurationPanel = new LiveMeterConfigurationPanel(meterNameField, inlayMark);
+            configurationPanel = new LiveMeterConfigurationPanel(spanOperationNameField, inlayMark);
         }
 
         popup.add(configurationPanel);
-        popup.setPreferredSize(new Dimension(MeterStatusBar.this.getWidth(), popup.getPreferredSize().height));
+        popup.setPreferredSize(new Dimension(SpanStatusBar.this.getWidth(), popup.getPreferredSize().height));
         popup.pack();
         popup.setLocation(configPanel.getLocationOnScreen().x - 1,
-                configPanel.getLocationOnScreen().y + MeterStatusBar.this.getHeight() - 2);
+                configPanel.getLocationOnScreen().y + SpanStatusBar.this.getHeight() - 2);
 
         popup.setVisible(true);
 
@@ -337,8 +325,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         });
     }
 
-    private void saveLiveMeter() {
-        meterNameField.setShowSaveButton(false);
+    private void saveLiveSpan() {
+        spanOperationNameField.setShowSaveButton(false);
 
         String condition = null;
         Long expirationDate = null;
@@ -360,10 +348,8 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         meta.put("original_source_mark", inlayMark.getId());
 
         LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
-        LiveMeter instrument = new LiveMeter(
-                meterNameField.getText(),
-                MeterType.valueOf(meterTypeComboBox.getSelectedItem().toString().toUpperCase()),
-                new MetricValue(MetricValueType.NUMBER, "1"),
+        LiveSpan instrument = new LiveSpan(
+                spanOperationNameField.getText(),
                 sourceLocation,
                 condition,
                 expirationDate,
@@ -423,9 +409,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        meterNameField = new AutocompleteField(placeHolderText, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE);
-        label1 = new JLabel();
-        meterTypeComboBox = new JComboBox<>();
+        spanOperationNameField = new AutocompleteField(placeHolderText, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE);
         timeLabel = new JLabel();
         separator1 = new JSeparator();
         closeLabel = new JLabel();
@@ -458,7 +442,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(PluginIcons.analytics);
+            configLabel.setIcon(PluginIcons.mapMarkedAlt);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----
@@ -478,28 +462,14 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 // rows
                 "0[grow]0"));
 
-            //---- meterConditionField ----
-            meterNameField.setBackground(STATUS_BAR_TXT_BG_COLOR);
-            meterNameField.setBorder(new CompoundBorder(
+            //---- spanOperationNameField ----
+            spanOperationNameField.setBackground(STATUS_BAR_TXT_BG_COLOR);
+            spanOperationNameField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-            meterNameField.setFont(ROBOTO_LIGHT_PLAIN_17);
-            meterNameField.setMinimumSize(new Dimension(0, 27));
-            mainPanel.add(meterNameField, "cell 0 0");
-
-            //---- label1 ----
-            label1.setText("Type");
-            label1.setForeground(Color.gray);
-            label1.setFont(ROBOTO_LIGHT_PLAIN_15);
-            mainPanel.add(label1, "cell 1 0");
-
-            //---- meterTypeComboBox ----
-            meterTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
-                "Count",
-                "Gauge",
-                "Histogram"
-            }));
-            mainPanel.add(meterTypeComboBox, "cell 1 0");
+            spanOperationNameField.setFont(ROBOTO_LIGHT_PLAIN_17);
+            spanOperationNameField.setMinimumSize(new Dimension(0, 27));
+            mainPanel.add(spanOperationNameField, "cell 0 0 2 1");
 
             //---- timeLabel ----
             timeLabel.setIcon(PluginIcons.clock);
@@ -529,9 +499,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     private JLabel configLabel;
     private JLabel configDropdownLabel;
     private JPanel mainPanel;
-    private AutocompleteField meterNameField;
-    private JLabel label1;
-    private JComboBox<String> meterTypeComboBox;
+    private AutocompleteField spanOperationNameField;
     private JLabel timeLabel;
     private JSeparator separator1;
     private JLabel closeLabel;

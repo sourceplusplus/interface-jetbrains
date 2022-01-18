@@ -48,7 +48,7 @@ new FormModel {
 				name: "mainPanel"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				add( new FormComponent( "javax.swing.JTextPane" ) {
-					name: "meterConditionField"
+					name: "spanOperationNameField"
 					"border": new javax.swing.border.CompoundBorder( new javax.swing.border.LineBorder( sfield java.awt.Color darkGray, 1, true ), new javax.swing.border.EmptyBorder( 2, 6, 0, 0 ) )
 					"font": new java.awt.Font( "Roboto Light", 0, 14 )
 					"minimumSize": new java.awt.Dimension( 0, 27 )
@@ -56,26 +56,7 @@ new FormModel {
 						"JavaCodeGenerator.customCreateCode": "new AutocompleteField(placeHolderText, Collections.emptyList(), null, inlayMark.getLineNumber(), false, false, COMPLETE_COLOR_PURPLE);"
 					}
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 0"
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label1"
-					"text": "Type"
-					"foreground": sfield java.awt.Color gray
-					"font": new java.awt.Font( "Roboto Light", 0, 15 )
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 0"
-				} )
-				add( new FormComponent( "javax.swing.JComboBox" ) {
-					name: "meterTypeComboBox"
-					"model": new javax.swing.DefaultComboBoxModel {
-						selectedItem: "Count"
-						addElement( "Count" )
-						addElement( "Gauge" )
-						addElement( "Histogram" )
-					}
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 0"
+					"value": "cell 0 0 2 1"
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "timeLabel"
