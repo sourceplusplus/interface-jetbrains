@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "7.0.5.1.409" Java: "11.0.7" encoding: "UTF-8"
+JFDML JFormDesigner: "7.0.5.2.410" Java: "11.0.13" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -106,9 +106,9 @@ new FormModel {
 						"editable": false
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
 					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "configurationLabel"
+						name: "closeLabel"
 						auxiliary() {
-							"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.config);"
+							"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.close);"
 						}
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 3

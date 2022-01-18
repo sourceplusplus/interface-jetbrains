@@ -3,11 +3,13 @@ package spp.jetbrains.sourcemarker.status;
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+import spp.jetbrains.marker.source.mark.gutter.GutterMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
 import io.vertx.core.json.JsonObject;
 import org.jetbrains.annotations.NotNull;
+import spp.protocol.SourceMarkerServices;
 import spp.protocol.instrument.LiveInstrumentEvent;
 import spp.protocol.instrument.meter.LiveMeter;
 import spp.protocol.instrument.meter.MeterType;
@@ -24,7 +26,13 @@ import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouse
 
 public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener {
 
-    public LiveMeterStatusPanel(LiveMeter liveMeter) {
+    private final LiveMeter liveMeter;
+    private final GutterMark gutterMark;
+
+    public LiveMeterStatusPanel(LiveMeter liveMeter, GutterMark gutterMark) {
+        this.liveMeter = liveMeter;
+        this.gutterMark = gutterMark;
+
         initComponents();
         setupComponents();
 
@@ -73,32 +81,39 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
     private void removeActiveDecorations() {
         SwingUtilities.invokeLater(() -> {
-            configurationLabel.setIcon(PluginIcons.config);
+            closeLabel.setIcon(PluginIcons.close);
         });
     }
 
     private void setupComponents() {
-        configurationLabel.setCursor(Cursor.getDefaultCursor());
-        configurationLabel.addMouseMotionListener(new MouseAdapter() {
+        closeLabel.setCursor(Cursor.getDefaultCursor());
+        closeLabel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                configurationLabel.setIcon(PluginIcons.configHovered);
+                closeLabel.setIcon(PluginIcons.closeHovered);
             }
         });
-        addRecursiveMouseListener(configurationLabel, new MouseAdapter() {
+        addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
+                SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId(), it -> {
+                    if (it.succeeded()) {
+                        gutterMark.dispose();
+                        LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);
+                    } else {
+                        it.cause().printStackTrace();
+                    }
+                });
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-                configurationLabel.setIcon(PluginIcons.configPressed);
+                closeLabel.setIcon(PluginIcons.closePressed);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                configurationLabel.setIcon(PluginIcons.configHovered);
+                closeLabel.setIcon(PluginIcons.closeHovered);
             }
         }, () -> {
             removeActiveDecorations();
@@ -121,7 +136,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
         dayValueLabel = new JLabel();
         panel2 = new JPanel();
         meterDescriptionTextField = new JTextField();
-        configurationLabel = new JLabel();
+        closeLabel = new JLabel();
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
@@ -237,9 +252,9 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                 meterDescriptionTextField.setEditable(false);
                 panel2.add(meterDescriptionTextField, cc.xy(1, 1));
 
-                //---- configurationLabel ----
-                configurationLabel.setIcon(PluginIcons.config);
-                panel2.add(configurationLabel, cc.xy(3, 1));
+                //---- closeLabel ----
+                closeLabel.setIcon(PluginIcons.close);
+                panel2.add(closeLabel, cc.xy(3, 1));
             }
             panel4.add(panel2, cc.xy(1, 3));
         }
@@ -261,6 +276,6 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
     private JLabel dayValueLabel;
     private JPanel panel2;
     private JTextField meterDescriptionTextField;
-    private JLabel configurationLabel;
+    private JLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

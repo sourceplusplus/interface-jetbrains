@@ -149,9 +149,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             mainPanel.add(statusPanel);
 
             remove(closeLabel);
-//                    JLabel searchLabel = new JLabel();
-//                    searchLabel.setIcon(PluginIcons.search);
-//                    add(searchLabel, "cell 2 0");
+
             expandLabel = new JLabel();
             expandLabel.setCursor(Cursor.getDefaultCursor());
             expandLabel.addMouseMotionListener(new MouseAdapter() {

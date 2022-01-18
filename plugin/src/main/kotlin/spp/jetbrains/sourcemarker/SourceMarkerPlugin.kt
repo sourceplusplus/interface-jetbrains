@@ -323,7 +323,7 @@ object SourceMarkerPlugin {
                     .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
                     .build(LiveViewService::class.java)
 
-                val viewListener = LiveViewManager(project)
+                val viewListener = LiveViewManager(config)
                 GlobalScope.launch(vertx.dispatcher()) {
                     deploymentIds.add(vertx.deployVerticle(viewListener).await())
                 }
