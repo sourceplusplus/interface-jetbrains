@@ -24,7 +24,6 @@ import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.SourceMarkerServices;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveSourceLocation;
-import spp.protocol.instrument.meter.LiveMeter;
 import spp.protocol.instrument.meter.event.LiveMeterRemoved;
 import spp.protocol.instrument.span.LiveSpan;
 import spp.protocol.service.live.LiveInstrumentService;
@@ -55,7 +54,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
     private LiveMeterConfigurationPanel configurationPanel;
     private boolean disposed = false;
     private final String placeHolderText = "Operation Name";
-    private LiveMeter liveMeter;
+    private LiveSpan liveSpan;
     private LiveBreakpointStatusPanel statusPanel;
     private JPanel wrapper;
     private JPanel panel;
@@ -77,7 +76,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
-        this.liveMeter = (LiveMeter) liveInstrument;
+        this.liveSpan = (LiveSpan) liveInstrument;
         setupAsActive();
     }
 
@@ -88,7 +87,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
         spanOperationNameField.hideAutocompletePopup();
-        if(popup != null) {
+        if (popup != null) {
             popup.dispose();
             popup = null;
         }
@@ -135,7 +134,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             }
         });
         statusPanel = new LiveBreakpointStatusPanel();
-        statusPanel.setHitLimit(liveMeter.getHitLimit());
+        statusPanel.setHitLimit(liveSpan.getHitLimit());
 
         spanOperationNameField.setEditMode(false);
         removeActiveDecorations();
@@ -147,9 +146,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             mainPanel.add(statusPanel);
 
             remove(closeLabel);
-//                    JLabel searchLabel = new JLabel();
-//                    searchLabel.setIcon(PluginIcons.search);
-//                    add(searchLabel, "cell 2 0");
+
             expandLabel = new JLabel();
             expandLabel.setCursor(Cursor.getDefaultCursor());
             expandLabel.addMouseMotionListener(new MouseAdapter() {
@@ -363,15 +360,11 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         );
         instrumentService.addLiveInstrument(instrument, it -> {
             if (it.succeeded()) {
-                liveMeter = (LiveMeter) it.result();
-                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveMeter);
+                liveSpan = (LiveSpan) it.result();
+                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveSpan);
 
                 ApplicationManager.getApplication().invokeLater(() -> {
                     inlayMark.dispose(); //dispose this bar
-
-                    //create gutter popup
-                    ApplicationManager.getApplication().runReadAction(()
-                            -> LiveStatusManager.showMeterStatusIcon(liveMeter, inlayMark.getSourceFileMarker()));
                 });
             } else {
                 it.cause().printStackTrace();
@@ -391,10 +384,10 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkKeys.INSTANCE.getGROUPED_MARKS());
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
-        if (liveMeter != null) {
-            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId(), it -> {
+        if (liveSpan != null) {
+            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveSpan.getId(), it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);
+                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveSpan);
                 } else {
                     it.cause().printStackTrace();
                 }

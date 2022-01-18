@@ -265,7 +265,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = SpanStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,
                     service = config.serviceName
                 ),
                 inlayMark

@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.*
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
@@ -457,7 +458,7 @@ object JVMMarkerUtils {
                 Base64.getEncoder().encodeToString(expression.toString().toByteArray())
             }""",
             type = ArtifactType.EXPRESSION,
-            lineNumber = getLineNumber(expression.sourcePsi!!)
+            lineNumber = SourceMarkerUtils.getLineNumber(expression.sourcePsi!!)
         )
     }
 
@@ -470,7 +471,7 @@ object JVMMarkerUtils {
                 Base64.getEncoder().encodeToString(expression.toString().toByteArray())
             }""",
             type = ArtifactType.EXPRESSION,
-            lineNumber = getLineNumber(element)
+            lineNumber = SourceMarkerUtils.getLineNumber(element)
         )
     }
 
@@ -556,10 +557,5 @@ object JVMMarkerUtils {
             }
         }
         return arrayDimensions
-    }
-
-    fun getLineNumber(element: PsiElement): Int {
-        val document = element.containingFile.viewProvider.document
-        return document!!.getLineNumber(element.textRange.startOffset) + 1
     }
 }
