@@ -62,15 +62,7 @@ class PluginSqlProducerSearch(val vertx: Vertx) : SqlProducerSearch {
                     for (detector in detectorSet) {
                         try {
                             if (detector.isSqlSource(query, method)) {
-                                promise.complete(
-                                    Optional.of(
-                                        ArtifactQualifiedName(
-                                            JVMMarkerUtils.getFullyQualifiedName(method.method),
-                                            "todo",
-                                            ArtifactType.METHOD
-                                        )
-                                    )
-                                )
+                                promise.complete(Optional.of(JVMMarkerUtils.getFullyQualifiedName(method.method)))
                                 keepSearching = false
                             }
                         } catch (throwable: Throwable) {

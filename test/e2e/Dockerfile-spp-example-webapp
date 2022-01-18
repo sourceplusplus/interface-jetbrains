@@ -1,6 +1,6 @@
 FROM azul/zulu-openjdk-alpine:11
 
-ADD ./example-web-app/build/distributions/spp-example-webapp-boot-1.0-SNAPSHOT.zip /spp-example-webapp-boot-1.0-SNAPSHOT.zip
+ADD ./example-web-app/build/distributions/example-jvm-boot-1.0-SNAPSHOT.zip /example-jvm-boot-1.0-SNAPSHOT.zip
 
 RUN apk --no-cache add curl
 
@@ -18,4 +18,4 @@ ENV JAVA_OPTS="-javaagent:/tmp/spp-probe/spp-probe-0.2.1.jar"
 ENV SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
 
 RUN unzip *.zip
-CMD ["./spp-example-webapp-boot-1.0-SNAPSHOT/bin/spp-example-webapp"]
+CMD ["./example-jvm-boot-1.0-SNAPSHOT/bin/example-jvm"]

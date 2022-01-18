@@ -2,6 +2,7 @@ package spp.jetbrains.marker.source.mark.api
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
+import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
  * Returns a [SourceMark] given a PSI element.
@@ -16,10 +17,10 @@ interface SourceMarkProvider {
     ): ExpressionSourceMark
 
     fun createMethodSourceMark(
-        psiMethod: PsiNameIdentifierOwner, qualifiedName: String, type: SourceMark.Type
+        psiMethod: PsiNameIdentifierOwner, qualifiedName: ArtifactQualifiedName, type: SourceMark.Type
     ): MethodSourceMark
 
     fun createClassSourceMark(
-        psiClass: PsiNameIdentifierOwner, qualifiedName: String, type: SourceMark.Type
+        psiClass: PsiNameIdentifierOwner, qualifiedName: ArtifactQualifiedName, type: SourceMark.Type
     ): ClassSourceMark
 }

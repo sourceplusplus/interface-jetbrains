@@ -175,7 +175,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
                     val portal = it.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
                     vertx.eventBus().send(
                         ArtifactLogUpdated,
-                        logHit.logResult.copy(artifactQualifiedName = portal.viewingPortalArtifact)
+                        logHit.logResult.copy(artifactQualifiedName = portal.viewingArtifact)
                     )
                 }
             }

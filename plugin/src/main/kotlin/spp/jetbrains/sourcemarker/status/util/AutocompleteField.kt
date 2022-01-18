@@ -9,6 +9,7 @@ import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.*
 import spp.jetbrains.sourcemarker.service.log.VariableParser
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
+import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*
 import java.awt.event.*
 import java.util.function.Function
@@ -29,8 +30,8 @@ import javax.swing.text.*
 class AutocompleteField(
     var placeHolderText: String?,
     private val allLookup: List<AutocompleteFieldRow>,
-    private val lookup: Function<String, List<AutocompleteFieldRow>>,
-    internal val lineNumber: Int = 0,
+    private val lookup: Function<String, List<AutocompleteFieldRow>>? = null,
+    internal val artifactQualifiedName: ArtifactQualifiedName,
     private val replaceCommandOnTab: Boolean = false,
     private val autocompleteOnEnter: Boolean = true,
     private val varColor: Color = COMPLETE_COLOR_PURPLE
@@ -81,7 +82,7 @@ class AutocompleteField(
         })
 
         list.font = ROBOTO_LIGHT_PLAIN_14
-        list.setCellRenderer(AutoCompleteCellRenderer(lineNumber))
+        list.setCellRenderer(AutoCompleteCellRenderer(artifactQualifiedName))
 
         list.setBackground(AUTO_COMPLETE_HIGHLIGHT_COLOR)
         list.setBorder(JBUI.Borders.empty())
@@ -177,6 +178,7 @@ class AutocompleteField(
 
     fun showAutocompletePopup() {
         try {
+            popup.pack()
             popup.setLocation(locationOnScreen.x, locationOnScreen.y + height + 6)
             popup.isVisible = true
         } catch (ignored: IllegalComponentStateException) {
@@ -194,13 +196,12 @@ class AutocompleteField(
     private fun documentChanged() = SwingUtilities.invokeLater {
         if (!editMode) return@invokeLater
         results.clear()
-        results.addAll(lookup.apply(text))
+        lookup?.let { results.addAll(it.apply(text)) }
         model.updateView()
         list.visibleRowCount = results.size.coerceAtMost(10)
         if (results.size > 0) {
             list.selectedIndex = 0
         }
-        popup.pack()
 
         if (text.isNotEmpty() && results.size > 0) {
             showAutocompletePopup()
@@ -222,9 +223,12 @@ class AutocompleteField(
             if (results.size > 0) {
                 list.selectedIndex = 0
             }
-            popup.pack()
 
-            showAutocompletePopup()
+            if (results.size > 0) {
+                showAutocompletePopup()
+            } else {
+                hideAutocompletePopup()
+            }
         } else if (e.keyCode == KeyEvent.VK_CONTROL) {
             hasControlHeld = true
         } else if (e.keyCode == KeyEvent.VK_UP) {

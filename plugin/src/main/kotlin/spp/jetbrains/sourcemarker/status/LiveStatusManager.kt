@@ -30,6 +30,8 @@ import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.SourceMarkerServices
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.instrument.LiveInstrument
 import spp.protocol.instrument.LiveSourceLocation
@@ -40,14 +42,17 @@ import spp.protocol.instrument.meter.MeterType
 import spp.protocol.portal.PageType
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
 import javax.swing.JPanel
 
 /**
- * todo: description.
+ * Displays and manages the live status bars inside the editor.
  *
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -69,7 +74,7 @@ object LiveStatusManager : SourceMarkEventListener {
                     val methodSourceMark = event.sourceMark as MethodSourceMark
                     val qualifiedClassName = namingService.getClassQualifiedNames(
                         methodSourceMark.sourceFileMarker.psiFile
-                    )[0]
+                    )[0].identifier
 
                     val textRange = methodSourceMark.getPsiElement().textRange
                     val document = PsiDocumentManager.getInstance(methodSourceMark.project)
@@ -82,7 +87,7 @@ object LiveStatusManager : SourceMarkEventListener {
                             when (it) {
                                 is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
                                 is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
-                                is LiveMeter -> showMeterStatusIcon(it, event.sourceMark)
+                                is LiveMeter -> showMeterStatusIcon(it, event.sourceMark.sourceFileMarker)
                                 else -> throw UnsupportedOperationException(it.javaClass.simpleName)
                             }
                         }
@@ -114,7 +119,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = BreakpointStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
@@ -164,7 +169,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
@@ -218,10 +223,54 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0], lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
-                scopeService.getScopeVariables(fileMarker, lineNumber),
+                inlayMark
+            )
+            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+            statusBar.setWrapperPanel(wrapperPanel)
+            wrapperPanel.add(statusBar)
+            statusBar.setEditor(editor)
+            editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+            inlayMark.configuration.showComponentInlay = true
+            inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+            }
+            inlayMark.visible.set(true)
+            inlayMark.apply()
+
+            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+//            sourcePortal.configuration.currentPage = PageType.METERS
+            sourcePortal.configuration.statusBar = true
+
+            statusBar.focus()
+        }
+    }
+
+    fun showSpanStatusBar(editor: Editor, lineNumber: Int) {
+        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
+            .getUserData(SourceFileMarker.KEY)
+        if (fileMarker == null) {
+            log.warn("Could not find file marker for file: {}", editor.document)
+            return
+        }
+
+        val inlayMark = creationService.createExpressionInlayMark(fileMarker, lineNumber)
+        if (!fileMarker.containsSourceMark(inlayMark)) {
+            val wrapperPanel = JPanel()
+            wrapperPanel.layout = BorderLayout()
+
+            val config = Json.decodeValue(
+                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
+            val statusBar = SpanStatusBar(
+                LiveSourceLocation(
+                    inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,
+                    service = config.serviceName
+                ),
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
@@ -337,12 +386,13 @@ object LiveStatusManager : SourceMarkEventListener {
     }
 
     @JvmStatic
-    fun showMeterStatusIcon(liveMeter: LiveMeter, sourceMark: SourceMark) {
+    fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
         SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
             LiveViewSubscription(
                 null,
                 listOf(liveMeter.toMetricId()),
-                sourceMark.artifactQualifiedName,
+                ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
+                liveMeter.location,
                 LiveViewConfig(
                     "LIVE_METER",
                     true,
@@ -359,7 +409,7 @@ object LiveStatusManager : SourceMarkEventListener {
         //create gutter popup
         ApplicationManager.getApplication().runReadAction {
             val gutterMark = creationService.getOrCreateExpressionGutterMark(
-                sourceMark.sourceFileMarker, liveMeter.location.line, false
+                sourceFileMarker, liveMeter.location.line, false
             )
             if (gutterMark.isPresent) {
                 gutterMark.get().putUserData(SourceMarkKeys.METER_ID, liveMeter.id!!)
@@ -368,10 +418,10 @@ object LiveStatusManager : SourceMarkEventListener {
                     MeterType.GAUGE -> gutterMark.get().configuration.icon = LIVE_METER_GAUGE_ICON
                     MeterType.HISTOGRAM -> gutterMark.get().configuration.icon = LIVE_METER_HISTOGRAM_ICON
                 }
-                gutterMark.get().configuration.activateOnMouseHover = false
+                gutterMark.get().configuration.activateOnMouseHover = true
                 gutterMark.get().configuration.activateOnMouseClick = true
 
-                val statusBar = LiveMeterStatusPanel(liveMeter)
+                val statusBar = LiveMeterStatusPanel(liveMeter, gutterMark.get())
                 val panel = JPanel(GridBagLayout())
                 panel.add(statusBar, GridBagConstraints())
                 panel.preferredSize = Dimension(385, 70)
