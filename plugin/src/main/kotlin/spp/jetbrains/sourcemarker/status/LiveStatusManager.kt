@@ -246,6 +246,51 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
+    fun showSpanStatusBar(editor: Editor, lineNumber: Int) {
+        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
+            .getUserData(SourceFileMarker.KEY)
+        if (fileMarker == null) {
+            log.warn("Could not find file marker for file: {}", editor.document)
+            return
+        }
+
+        val inlayMark = creationService.createExpressionInlayMark(fileMarker, lineNumber)
+        if (!fileMarker.containsSourceMark(inlayMark)) {
+            val wrapperPanel = JPanel()
+            wrapperPanel.layout = BorderLayout()
+
+            val config = Json.decodeValue(
+                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
+            val statusBar = SpanStatusBar(
+                LiveSourceLocation(
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    service = config.serviceName
+                ),
+                inlayMark
+            )
+            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+            statusBar.setWrapperPanel(wrapperPanel)
+            wrapperPanel.add(statusBar)
+            statusBar.setEditor(editor)
+            editor.scrollingModel.addVisibleAreaListener(statusBar)
+
+            inlayMark.configuration.showComponentInlay = true
+            inlayMark.configuration.componentProvider = object : SwingSourceMarkComponentProvider() {
+                override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
+            }
+            inlayMark.visible.set(true)
+            inlayMark.apply()
+
+            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
+//            sourcePortal.configuration.currentPage = PageType.METERS
+            sourcePortal.configuration.statusBar = true
+
+            statusBar.focus()
+        }
+    }
+
     fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!

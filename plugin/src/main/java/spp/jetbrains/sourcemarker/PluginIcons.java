@@ -22,6 +22,8 @@ public interface PluginIcons {
 
     Icon analytics = IconLoader.getIcon("/icons/analytics.svg", PluginIcons.class);
 
+    Icon mapMarkedAlt = IconLoader.getIcon("/icons/map-marked-alt.svg", PluginIcons.class);
+
     Icon config = IconLoader.getIcon("/icons/configIcon.svg", PluginIcons.class);
     Icon configHovered = IconLoader.getIcon("/icons/configIconHovered.svg", PluginIcons.class);
     Icon configPressed = IconLoader.getIcon("/icons/configIconPressed.svg", PluginIcons.class);
