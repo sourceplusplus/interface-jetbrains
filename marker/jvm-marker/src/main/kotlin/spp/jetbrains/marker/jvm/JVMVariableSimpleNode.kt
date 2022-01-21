@@ -7,9 +7,9 @@ import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
+import org.apache.commons.lang3.EnumUtils
 import spp.protocol.instrument.LiveVariable
 import spp.protocol.instrument.LiveVariableScope
-import org.apache.commons.lang3.EnumUtils
 
 /**
  * todo: description.
@@ -111,7 +111,7 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                 val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
                 val identity = variable.liveIdentity
                 presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
-
+                VariableValueFormatter.format(variable, presentation)
                 presentation.setIcon(AllIcons.Debugger.Value)
             }
         } else {
