@@ -4,15 +4,14 @@ plugins {
 }
 
 val pluginGroup: String by project
-val pluginVersion: String by project
-val protocolVersion: String by project
+val projectVersion: String by project
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = pluginGroup
             artifactId = "mapper"
-            version = pluginVersion
+            version = projectVersion
 
             from(components["java"])
         }
@@ -24,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
+    implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r")
