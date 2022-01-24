@@ -7,9 +7,8 @@ import spp.protocol.instrument.LiveVariable
 
 object VariableValueFormatter {
 
-    private val formatterMap: Map<String, ValueFormatter> = mapOf(Pair("java.time.Instant", InstantFormatter()))
+    private val formatterMap: Map<String, ValueFormatter> = mapOf("java.time.Instant" to InstantFormatter())
 
-    @JvmStatic
     fun format(variable: LiveVariable, presentation: PresentationData) {
         formatterMap[variable.liveClazz]?.format(variable, presentation)
     }
