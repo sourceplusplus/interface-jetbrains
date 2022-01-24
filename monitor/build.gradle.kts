@@ -3,7 +3,7 @@ plugins {
     id("com.apollographql.apollo3")
 }
 
-val vertxVersion = ext.get("vertxVersion")
+val vertxVersion: String by project
 val kotlinVersion = ext.get("kotlinVersion")
 val apolloVersion: String by project
 val projectVersion: String by project

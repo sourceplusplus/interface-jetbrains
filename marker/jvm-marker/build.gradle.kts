@@ -3,7 +3,7 @@ plugins {
 }
 
 val kotlinVersion = ext.get("kotlinVersion")
-val vertxVersion = ext.get("vertxVersion")
+val vertxVersion: String by project
 val projectVersion: String by project
 
 repositories {

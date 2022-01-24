@@ -8,7 +8,7 @@ plugins {
     id("maven-publish")
 }
 
-val vertxVersion = ext.get("vertxVersion")
+val vertxVersion: String by project
 val kotlinVersion = ext.get("kotlinVersion")
 val projectVersion: String by project
 
