@@ -121,7 +121,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                     }
                 }
                 val headers = JsonObject()
-                headers.put("token", pluginConfig.serviceToken!!)
+                pluginConfig.serviceToken?.let { headers.put("token", it) }
                 FrameHelper.sendFrame(
                     BridgeEventType.SEND.name.toLowerCase(),
                     SourceMarkerServices.Status.MARKER_CONNECTED,
