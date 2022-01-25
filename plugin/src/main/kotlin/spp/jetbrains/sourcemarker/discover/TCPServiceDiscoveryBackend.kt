@@ -75,7 +75,9 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         .setSsl(pluginConfig.isSsl())
                         .setTrustOptions(
                             TrustOptions.wrap(
-                                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                                JavaPinning.trustManagerForPins(
+                                    certificatePins.map { Pin.fromString("CERTSHA256:$it") }
+                                )
                             )
                         )
                     vertx.createNetClient(options)
