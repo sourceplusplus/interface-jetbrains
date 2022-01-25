@@ -5,6 +5,7 @@ plugins {
 val kotlinVersion = ext.get("kotlinVersion")
 val vertxVersion: String by project
 val projectVersion: String by project
+val slf4jVersion: String by project
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
@@ -24,7 +25,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("org.jetbrains:annotations:23.0.0")
-    compileOnly("org.slf4j:slf4j-api:1.7.33")
+    compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:ide-impl:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion")
