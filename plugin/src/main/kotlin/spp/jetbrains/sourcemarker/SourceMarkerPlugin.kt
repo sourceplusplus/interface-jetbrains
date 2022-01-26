@@ -283,7 +283,7 @@ object SourceMarkerPlugin {
             log.info("Live service available")
 
             Instance.liveService = ServiceProxyBuilder(vertx)
-                .setToken(config.serviceToken!!)
+                .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceMarkerServices.Utilize.LIVE_SERVICE)
                 .build(LiveService::class.java)
         } else {
@@ -297,7 +297,7 @@ object SourceMarkerPlugin {
                 SourceMarker.addGlobalSourceMarkEventListener(LiveStatusManager)
 
                 Instance.liveInstrument = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
+                    .apply { config.serviceToken?.let { setToken(it) } }
                     .setAddress(SourceMarkerServices.Utilize.LIVE_INSTRUMENT)
                     .build(LiveInstrumentService::class.java)
                 ApplicationManager.getApplication().invokeLater {
@@ -319,7 +319,7 @@ object SourceMarkerPlugin {
             if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_VIEW }) {
                 log.info("Live views available")
                 Instance.liveView = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
+                    .apply { config.serviceToken?.let { setToken(it) } }
                     .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
                     .build(LiveViewService::class.java)
 
@@ -339,7 +339,7 @@ object SourceMarkerPlugin {
             if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOCAL_TRACING }) {
                 log.info("Local tracing available")
                 Instance.localTracing = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
+                    .apply { config.serviceToken?.let { setToken(it) } }
                     .setAddress(SourceMarkerServices.Utilize.LOCAL_TRACING)
                     .build(LocalTracingService::class.java)
             } else {
@@ -354,7 +354,7 @@ object SourceMarkerPlugin {
             if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR }) {
                 log.info("Log count indicator available")
                 Instance.logCountIndicator = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
+                    .apply { config.serviceToken?.let { setToken(it) } }
                     .setAddress(SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR)
                     .build(LogCountIndicatorService::class.java)
 
@@ -436,7 +436,9 @@ object SourceMarkerPlugin {
             val resp = req.response().await()
             if (resp.statusCode() in 200..299) {
                 val body = resp.body().await().toString()
-                config.serviceToken = body
+                if (resp.statusCode() != 202) {
+                    config.serviceToken = body
+                }
             } else {
                 config.serviceToken = null
 
