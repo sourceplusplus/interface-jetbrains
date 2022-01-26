@@ -3,6 +3,11 @@
 # Plugin Changelog
 
 ## [Unreleased]
+- Added live meters & spans
+- Support ${} style log variables
+- Improved control bar
+- Improved light/dark UI styling
+- Dependency upgrades
 
 ## [0.2.2] - 2021-11-23
 - Improved Python live breakpoint display
