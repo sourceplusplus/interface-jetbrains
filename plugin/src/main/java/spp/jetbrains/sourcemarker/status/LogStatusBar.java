@@ -334,7 +334,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(UIUtil.getBoundsColor(), 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                liveLogTextField.setBackground(STATUS_BAR_TXT_BG_COLOR);
+                liveLogTextField.setBackground(DFLT_BGND_COLOR);
                 liveLogTextField.setEditable(false);
             }
         });
