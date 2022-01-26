@@ -28,6 +28,7 @@ import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.protocol.SourceMarkerServices
 import spp.protocol.SourceMarkerServices.Utilize
 import spp.protocol.extend.TCPServiceFrameParser
+import spp.protocol.platform.PlatformAddress
 import spp.protocol.status.MarkerConnection
 import java.util.*
 
@@ -126,7 +127,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 pluginConfig.serviceToken?.let { headers.put("token", it) }
                 FrameHelper.sendFrame(
                     BridgeEventType.SEND.name.toLowerCase(),
-                    SourceMarkerServices.Status.MARKER_CONNECTED,
+                    PlatformAddress.MARKER_CONNECTED.address,
                     replyAddress, headers, true, JsonObject.mapFrom(pc), socket!!
                 )
             }
