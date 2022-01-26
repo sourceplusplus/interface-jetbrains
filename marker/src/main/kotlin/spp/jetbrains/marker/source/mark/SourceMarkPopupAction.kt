@@ -28,7 +28,7 @@ open class SourceMarkPopupAction : AnAction() {
 
     override fun update(@NotNull e: AnActionEvent) {
         if (!SourceMarker.enabled) {
-            log.warn("SourceMarker popup action disabled")
+            log.warn("SourceMarker disabled. Ignoring popup action.")
             return
         }
 
