@@ -5,15 +5,15 @@ plugins {
 
 val kotlinVersion = ext.get("kotlinVersion")
 val pluginGroup: String by project
-val pluginVersion: String by project
-val protocolVersion: String by project
+val projectVersion: String by project
+val slf4jVersion: String by project
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = pluginGroup
             artifactId = "marker"
-            version = pluginVersion
+            version = projectVersion
 
             from(components["java"])
         }
@@ -28,12 +28,12 @@ repositories {
 dependencies {
     val intellijVersion = "213.6461.79"
 
-    compileOnly("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.0.1-jre")
     compileOnly("org.jetbrains:annotations:23.0.0")
-    compileOnly("org.slf4j:slf4j-api:1.7.33")
+    compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
     compileOnly("org.jetbrains.intellij.deps.jcef:jcef:97.2.22-g6779618-chromium-97.0.4692.45-api-1.6")
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:ide-impl:$intellijVersion")

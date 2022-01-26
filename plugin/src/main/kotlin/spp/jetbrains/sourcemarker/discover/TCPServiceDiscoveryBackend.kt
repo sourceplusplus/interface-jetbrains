@@ -75,7 +75,9 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         .setSsl(pluginConfig.isSsl())
                         .setTrustOptions(
                             TrustOptions.wrap(
-                                JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                                JavaPinning.trustManagerForPins(
+                                    certificatePins.map { Pin.fromString("CERTSHA256:$it") }
+                                )
                             )
                         )
                     vertx.createNetClient(options)
@@ -121,7 +123,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                     }
                 }
                 val headers = JsonObject()
-                headers.put("token", pluginConfig.serviceToken!!)
+                pluginConfig.serviceToken?.let { headers.put("token", it) }
                 FrameHelper.sendFrame(
                     BridgeEventType.SEND.name.toLowerCase(),
                     SourceMarkerServices.Status.MARKER_CONNECTED,
