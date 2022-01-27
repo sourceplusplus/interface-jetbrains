@@ -543,6 +543,7 @@ object SourceMarkerPlugin {
     }
 
     private fun initMarker(config: SourceMarkerConfig, project: Project) {
+        log.info("Initializing marker")
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
 
         val gutterMarkConfig = GutterMarkConfiguration()
@@ -580,6 +581,7 @@ object SourceMarkerPlugin {
             }
         }
         SourceMarker.enabled = true
+        log.info("Source marker enabled")
 
         //force marker re-processing
         DaemonCodeAnalyzer.getInstance(project).restart()
