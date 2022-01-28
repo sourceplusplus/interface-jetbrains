@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    val intellijVersion = "213.6461.79"
+    val intellijVersion = "213.6777.52"
 
     compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
