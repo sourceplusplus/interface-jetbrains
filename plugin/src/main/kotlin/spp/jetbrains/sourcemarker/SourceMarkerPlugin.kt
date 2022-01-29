@@ -1,8 +1,10 @@
 package spp.jetbrains.sourcemarker
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -45,6 +47,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.*
@@ -95,6 +98,7 @@ import spp.protocol.util.KSerializers
 import spp.protocol.util.LocalMessageCodec
 import java.awt.Color
 import java.awt.Dimension
+import java.io.File
 import java.io.IOException
 import java.util.*
 
@@ -176,6 +180,25 @@ object SourceMarkerPlugin {
         }
     }
 
+    private fun loadDefaultConfiguration(project: Project): SourceMarkerConfig {
+        if (project.basePath != null) {
+            val configFile = File(project.basePath, ".spp/spp-plugin.yml")
+            if (configFile.exists()) {
+                val config = JsonObject(
+                    ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
+                )
+                config.fieldNames().toList().forEach {
+                    config.put(CaseUtils.toCamelCase(it, false, '_'), config.getValue(it))
+                    config.remove(it)
+                }
+                PropertiesComponent.getInstance(project).setValue("sourcemarker_plugin_config", config.toString())
+                return Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
+            }
+        }
+
+        return SourceMarkerConfig()
+    }
+
     suspend fun init(project: Project) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
@@ -193,7 +216,7 @@ object SourceMarkerPlugin {
                 SourceMarkerConfig()
             }
         } else {
-            SourceMarkerConfig()
+            loadDefaultConfiguration(project)
         }
 
         //attempt to determine root source package automatically (if necessary)
@@ -283,7 +306,7 @@ object SourceMarkerPlugin {
             log.info("Live service available")
 
             Instance.liveService = ServiceProxyBuilder(vertx)
-                .setToken(config.serviceToken!!)
+                .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceMarkerServices.Utilize.LIVE_SERVICE)
                 .build(LiveService::class.java)
         } else {
@@ -297,7 +320,7 @@ object SourceMarkerPlugin {
                 SourceMarker.addGlobalSourceMarkEventListener(LiveStatusManager)
 
                 Instance.liveInstrument = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
+                    .apply { config.serviceToken?.let { setToken(it) } }
                     .setAddress(SourceMarkerServices.Utilize.LIVE_INSTRUMENT)
                     .build(LiveInstrumentService::class.java)
                 ApplicationManager.getApplication().invokeLater {
@@ -319,7 +342,7 @@ object SourceMarkerPlugin {
             if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_VIEW }) {
                 log.info("Live views available")
                 Instance.liveView = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
+                    .apply { config.serviceToken?.let { setToken(it) } }
                     .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
                     .build(LiveViewService::class.java)
 
@@ -339,7 +362,7 @@ object SourceMarkerPlugin {
             if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOCAL_TRACING }) {
                 log.info("Local tracing available")
                 Instance.localTracing = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
+                    .apply { config.serviceToken?.let { setToken(it) } }
                     .setAddress(SourceMarkerServices.Utilize.LOCAL_TRACING)
                     .build(LocalTracingService::class.java)
             } else {
@@ -354,7 +377,7 @@ object SourceMarkerPlugin {
             if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR }) {
                 log.info("Log count indicator available")
                 Instance.logCountIndicator = ServiceProxyBuilder(vertx)
-                    .setToken(config.serviceToken!!)
+                    .apply { config.serviceToken?.let { setToken(it) } }
                     .setAddress(SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR)
                     .build(LogCountIndicatorService::class.java)
 
@@ -436,7 +459,9 @@ object SourceMarkerPlugin {
             val resp = req.response().await()
             if (resp.statusCode() in 200..299) {
                 val body = resp.body().await().toString()
-                config.serviceToken = body
+                if (resp.statusCode() != 202) {
+                    config.serviceToken = body
+                }
             } else {
                 config.serviceToken = null
 
@@ -541,6 +566,7 @@ object SourceMarkerPlugin {
     }
 
     private fun initMarker(config: SourceMarkerConfig, project: Project) {
+        log.info("Initializing marker")
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
 
         val gutterMarkConfig = GutterMarkConfiguration()
@@ -578,6 +604,7 @@ object SourceMarkerPlugin {
             }
         }
         SourceMarker.enabled = true
+        log.info("Source marker enabled")
 
         //force marker re-processing
         DaemonCodeAnalyzer.getInstance(project).restart()

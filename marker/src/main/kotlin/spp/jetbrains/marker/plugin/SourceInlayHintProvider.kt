@@ -18,6 +18,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.ui.paint.EffectPainter
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarker.getSourceFileMarker
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -41,6 +42,8 @@ import javax.swing.JPanel
 abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
+        private val log = LoggerFactory.getLogger(SourceInlayHintProvider::class.java)
+
         @Volatile
         @JvmField
         var latestInlayMarkAddedAt: Long = -1L
@@ -84,6 +87,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
         sink: InlayHintsSink
     ): InlayHintsCollector? {
         if (!SourceMarker.enabled) {
+            log.warn("SourceMarker is disabled. Skipping inlay hints.")
             return null
         }
 

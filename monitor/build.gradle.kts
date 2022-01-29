@@ -3,14 +3,15 @@ plugins {
     id("com.apollographql.apollo3")
 }
 
-val vertxVersion = ext.get("vertxVersion")
+val vertxVersion: String by project
 val kotlinVersion = ext.get("kotlinVersion")
 val apolloVersion: String by project
-val protocolVersion: String by project
+val projectVersion: String by project
+val slf4jVersion: String by project
 
 dependencies {
-    implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
-    implementation("org.slf4j:slf4j-api:1.7.33")
+    implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")
 

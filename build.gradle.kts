@@ -2,23 +2,22 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     id("com.avast.gradle.docker-compose")
-
     id("org.jetbrains.kotlin.jvm") apply false
-
     id("io.gitlab.arturbosch.detekt")
     id("maven-publish")
 }
 
 val pluginGroup: String by project
 val pluginName: String by project
-val pluginVersion: String by project
+val projectVersion: String by project
 val pluginSinceBuild: String by project
+val vertxVersion: String by project
 
 val platformType: String by project
 val platformDownloadSources: String by project
 
 group = pluginGroup
-version = pluginVersion
+version = projectVersion
 
 repositories {
     mavenCentral()
@@ -26,7 +25,6 @@ repositories {
 
 subprojects {
     ext {
-        set("vertxVersion", "4.0.3")
         set("kotlinVersion", "1.5.0")
     }
 

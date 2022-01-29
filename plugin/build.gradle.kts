@@ -8,15 +8,13 @@ plugins {
     id("maven-publish")
 }
 
-val vertxVersion = ext.get("vertxVersion")
+val vertxVersion: String by project
 val kotlinVersion = ext.get("kotlinVersion")
-val protocolVersion: String by project
-val portalVersion: String by project
+val projectVersion: String by project
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
 val pluginName: String by project
-val pluginVersion: String by project
 val pluginSinceBuild: String by project
 val pluginVerifierIdeVersions: String by project
 
@@ -26,7 +24,7 @@ val platformPlugins: String by project
 val platformDownloadSources: String by project
 
 group = pluginGroup
-version = pluginVersion
+version = projectVersion
 
 intellij {
     pluginName.set("interface-jetbrains")
@@ -45,7 +43,7 @@ tasks.getByName<JavaExec>("runIde") {
 }
 
 changelog {
-    version.set(pluginVersion)
+    version.set(projectVersion)
 }
 
 dependencies {
@@ -63,10 +61,11 @@ dependencies {
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
-        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$portalVersion") { isTransitive = false }
-        implementation("com.github.sourceplusplus.protocol:protocol:$protocolVersion")
+        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$projectVersion") { isTransitive = false }
+        implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     }
 
+    implementation("org.apache.commons:commons-text:1.9")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
@@ -75,8 +74,7 @@ dependencies {
     implementation("io.vertx:vertx-web:$vertxVersion")
     //implementation("io.vertx:vertx-service-discovery:$vertxVersion")
     implementation(files(".ext/vertx-service-discovery-4.0.3-SNAPSHOT.jar"))
-    //implementation("io.vertx:vertx-service-proxy:$vertxVersion")
-    implementation(files(".ext/vertx-service-proxy-4.0.2.jar"))
+    implementation("io.vertx:vertx-service-proxy:$vertxVersion")
     implementation("io.vertx:vertx-tcp-eventbus-bridge:$vertxVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.1")
@@ -98,7 +96,7 @@ dependencies {
 
 tasks {
     patchPluginXml {
-        version.set(pluginVersion)
+        version.set(projectVersion)
         sinceBuild.set(pluginSinceBuild)
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
@@ -121,7 +119,7 @@ tasks {
     publishPlugin {
         dependsOn("patchChangelog")
         token.set(System.getenv("PUBLISH_TOKEN"))
-        channels.set(listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first()))
+        channels.set(listOf(projectVersion.split('-').getOrElse(1) { "default" }.split('.').first()))
     }
     runPluginVerifier {
         ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })

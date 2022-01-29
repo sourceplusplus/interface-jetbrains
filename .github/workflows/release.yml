@@ -4,7 +4,7 @@
 name: Release
 on:
   release:
-    types: [ prereleased, released ]
+    types: [prereleased, released]
 
 jobs:
 
@@ -16,7 +16,7 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2.4.0
         with:
           ref: ${{ github.event.release.tag_name }}
 
@@ -28,36 +28,60 @@ jobs:
           java-version: 11
           cache: gradle
 
-#       # Update Unreleased section with the current release note
-#       - name: Patch Changelog
-#         run: |
-#           ./gradlew patchChangelog --release-note="`cat << EOM
-#           ${{ github.event.release.body }}
-#           EOM`"
+      # Set environment variables
+      - name: Export Properties
+        id: properties
+        shell: bash
+        run: |
+          CHANGELOG="$(cat << 'EOM' | sed -e 's/^[[:space:]]*$//g' -e '/./,$!d'
+          ${{ github.event.release.body }}
+          EOM
+          )"
+          
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+
+          echo "::set-output name=changelog::$CHANGELOG"
+
+      # Update Unreleased section with the current release note
+      - name: Patch Changelog
+        if: ${{ steps.properties.outputs.changelog != '' }}
+        env:
+          CHANGELOG: ${{ steps.properties.outputs.changelog }}
+        run: |
+          ./gradlew patchChangelog --release-note="$CHANGELOG"
 
       # Publish the plugin to the Marketplace
       - name: Publish Plugin
         env:
-          PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH_PLUGIN_TOKEN }}
+          PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH_TOKEN }}
         run: ./gradlew publishPlugin
 
-#       # Create pull request
-#       - name: Create Pull Request
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         run: |
-#           VERSION="${{ github.event.release.tag_name }}"
-#           BRANCH="changelog-update-$VERSION"
+      # Upload artifact as a release asset
+      - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.event.release.tag_name }} ./plugin/build/distributions/*
 
-#           git config user.email "action@github.com"
-#           git config user.name "GitHub Action"
+      # Create pull request
+      - name: Create Pull Request
+        if: ${{ steps.properties.outputs.changelog != '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          BRANCH="changelog-update-$VERSION"
 
-#           git checkout -b $BRANCH
-#           git commit -am "Changelog update - $VERSION"
-#           git push --set-upstream origin $BRANCH
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
 
-#           gh pr create \
-#             --title "Changelog update - \`$VERSION\`" \
-#             --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
-#             --base master \
-#             --head $BRANCH
+          git checkout -b $BRANCH
+          git commit -am "Changelog update - $VERSION"
+          git push --set-upstream origin $BRANCH
+
+          gh pr create \
+            --title "Changelog update - \`$VERSION\`" \
+            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
+            --base master \
+            --head $BRANCH
