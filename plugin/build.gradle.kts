@@ -65,6 +65,7 @@ dependencies {
         implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     }
 
+    implementation("org.apache.commons:commons-text:1.9")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("io.vertx:vertx-core:$vertxVersion")
