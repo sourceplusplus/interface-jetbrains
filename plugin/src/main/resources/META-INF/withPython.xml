@@ -1,0 +1,8 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider language="Python"
+                                        implementationClass="spp.jetbrains.marker.py.PythonLineMarkerProvider"/>
+        <codeInsight.inlayProvider language="Python"
+                                   implementationClass="spp.jetbrains.marker.py.PythonSourceInlayHintProvider"/>
+    </extensions>
+</idea-plugin>

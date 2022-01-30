@@ -1,0 +1,8 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider language="kotlin"
+                                        implementationClass="spp.jetbrains.marker.jvm.JVMLineMarkerProvider$KotlinDescriptor"/>
+        <codeInsight.inlayProvider language="kotlin"
+                                   implementationClass="spp.jetbrains.marker.jvm.JVMSourceInlayHintProvider"/>
+    </extensions>
+</idea-plugin>

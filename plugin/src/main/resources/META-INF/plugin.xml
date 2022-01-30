@@ -1,0 +1,56 @@
+<idea-plugin>
+    <id>com.sourceplusplus.plugin.intellij</id>
+    <name>Source++</name>
+    <vendor email="support@sourceplusplus.com" url="https://github.com/sourceplusplus">Source++</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.xdebugger</depends>
+    <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
+    <depends optional="true" config-file="withGroovy.xml">org.intellij.groovy</depends>
+    <depends optional="true" config-file="withKotlin.xml">org.jetbrains.kotlin</depends>
+    <depends optional="true" config-file="withPython.xml">com.intellij.modules.python</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService
+                serviceImplementation="spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService"/>
+        <editor.linePainter
+                implementation="spp.jetbrains.sourcemarker.service.breakpoint.painter.VariableEditorLinePainter"/>
+        <applicationConfigurable
+                instance="spp.jetbrains.sourcemarker.settings.SourceMarkerConfigurable"
+                groupId="tools"
+                id="Source++"
+                displayName="Source++"/>
+        <postStartupActivity
+                implementation="spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity"/>
+
+        <errorHandler implementation="spp.jetbrains.sourcemarker.reporting.GitHubErrorReporter"/>
+
+        <projectService
+                serviceImplementation="spp.jetbrains.sourcemarker.console.SourceMarkerConsoleService"/>
+        <toolWindow id="Source++ Console"
+                    factoryClass="spp.jetbrains.sourcemarker.console.SourceMarkerToolWindowFactory"/>
+    </extensions>
+
+    <projectListeners>
+        <listener class="spp.jetbrains.marker.plugin.FileActivityListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </projectListeners>
+
+    <actions>
+        <action id="spp.jetbrains.sourcemarker.command.ControlBarAction"
+                class="spp.jetbrains.sourcemarker.command.ControlBarAction"
+                text="SourceCommand Action" description="Source command action">
+            <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
+        </action>
+        <action id="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
+                class="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
+                text="SourceMarkVisibility Action" description="SourceMark visibility action">
+            <keyboard-shortcut first-keystroke="control shift D" keymap="$default"/>
+        </action>
+        <action id="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
+                class="spp.jetbrains.marker.source.mark.SourceMarkPopupAction"
+                text="SourcePortal Popup Action" description="SourcePortal popup action">
+        </action>
+    </actions>
+</idea-plugin>
