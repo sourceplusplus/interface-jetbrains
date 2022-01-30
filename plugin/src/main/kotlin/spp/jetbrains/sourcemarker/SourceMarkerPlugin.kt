@@ -1,8 +1,10 @@
 package spp.jetbrains.sourcemarker
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -45,6 +47,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.*
@@ -95,6 +98,7 @@ import spp.protocol.util.KSerializers
 import spp.protocol.util.LocalMessageCodec
 import java.awt.Color
 import java.awt.Dimension
+import java.io.File
 import java.io.IOException
 import java.util.*
 
@@ -176,6 +180,25 @@ object SourceMarkerPlugin {
         }
     }
 
+    private fun loadDefaultConfiguration(project: Project): SourceMarkerConfig {
+        if (project.basePath != null) {
+            val configFile = File(project.basePath, ".spp/spp-plugin.yml")
+            if (configFile.exists()) {
+                val config = JsonObject(
+                    ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
+                )
+                config.fieldNames().toList().forEach {
+                    config.put(CaseUtils.toCamelCase(it, false, '_'), config.getValue(it))
+                    config.remove(it)
+                }
+                PropertiesComponent.getInstance(project).setValue("sourcemarker_plugin_config", config.toString())
+                return Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
+            }
+        }
+
+        return SourceMarkerConfig()
+    }
+
     suspend fun init(project: Project) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
@@ -193,7 +216,7 @@ object SourceMarkerPlugin {
                 SourceMarkerConfig()
             }
         } else {
-            SourceMarkerConfig()
+            loadDefaultConfiguration(project)
         }
 
         //attempt to determine root source package automatically (if necessary)
