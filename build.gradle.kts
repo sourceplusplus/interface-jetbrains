@@ -1,6 +1,7 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
+    id("com.diffplug.spotless") apply false
     id("com.avast.gradle.docker-compose")
     id("org.jetbrains.kotlin.jvm") apply false
     id("io.gitlab.arturbosch.detekt")
@@ -62,6 +63,17 @@ subprojects {
 
                 outputs.upToDateWhen { false }
                 showStandardStreams = true
+            }
+        }
+    }
+
+    apply(plugin = "com.diffplug.spotless")
+    configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+        kotlin {
+            if (file("../LICENSE-HEADER.txt").exists()) {
+                licenseHeaderFile(file("../LICENSE-HEADER.txt"))
+            } else {
+                licenseHeaderFile(file("../../LICENSE-HEADER.txt"))
             }
         }
     }
