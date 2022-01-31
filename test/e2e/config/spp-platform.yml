@@ -10,6 +10,10 @@ spp-platform:
     bridge_port: ${SPP_MARKER_BRIDGE_PORT:-5455}
   processor:
     bridge_port: ${SPP_PROCESSOR_BRIDGE_PORT:-5460}
+    live-instrument:
+      enabled: ${SPP_PROCESSOR_LIVE_INSTRUMENT_ENABLED:-true}
+    live-view:
+      enabled: ${SPP_PROCESSOR_LIVE_VIEW_ENABLED:-true}
 
 storage:
   selector: ${SPP_STORAGE:-memory}
