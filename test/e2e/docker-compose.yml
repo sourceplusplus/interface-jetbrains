@@ -1,15 +1,19 @@
 version: '3.3'
 services:
   spp-platform:
+    image: sourceplusplus/spp-platform:latest
     container_name: spp-platform
-    build:
-      context: .
-      dockerfile: Dockerfile-spp-platform
     hostname: spp-platform
     ports:
       - "5445:5445"
       - "5450:5450"
       - "5455:5455"
+    environment:
+      - SPP_LOGGING_LEVEL=trace
+      - SPP_OAP_HOST=skywalking-oap
+    volumes:
+      - ./config/spp-platform.crt:/opt/sourceplusplus/config/spp-platform.crt
+      - ./config/spp-platform.key:/opt/sourceplusplus/config/spp-platform.key
   skywalking-oap:
     container_name: skywalking-oap
     build:
