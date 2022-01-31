@@ -165,7 +165,7 @@ object LiveStatusManager : SourceMarkEventListener {
     /**
      * Invoked via control bar. Force visible.
      */
-    fun showLogStatusBar(editor: Editor, lineNumber: Int) {
+    fun showLogStatusBar(editor: Editor, lineNumber: Int, watchExpression: Boolean) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
@@ -178,17 +178,47 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            if (watchExpression) {
+                SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
+                    LiveViewSubscription(
+                        null,
+                        listOf("Getting user list"),
+                        ArtifactQualifiedName(
+                            inlayMark.artifactQualifiedName.identifier,
+                            lineNumber = inlayMark.artifactQualifiedName.lineNumber,
+                            type = ArtifactType.EXPRESSION
+                        ),
+                        LiveSourceLocation(
+                            inlayMark.artifactQualifiedName.identifier,
+                            line = inlayMark.artifactQualifiedName.lineNumber!!
+                        ),
+                        LiveViewConfig(
+                            "LOGS",
+                            true,
+                            listOf("endpoint_logs"),
+                            0
+                        )
+                    )
+                ) {
+                    if (it.failed()) {
+                        log.error("Failed to add live view subscription", it.cause())
+                    }
+                }
+            }
+
             val config = Json.decodeValue(
                 PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
                 SourceMarkerConfig::class.java
             )
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier,
+                    lineNumber,
                     service = config.serviceName
                 ),
-                scopeService.getScopeVariables(fileMarker, lineNumber),
-                inlayMark
+                if (watchExpression) emptyList() else scopeService.getScopeVariables(fileMarker, lineNumber),
+                inlayMark,
+                watchExpression
             )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
@@ -214,7 +244,9 @@ object LiveStatusManager : SourceMarkEventListener {
                 )
             }
 
-            statusBar.focus()
+            if (!watchExpression) {
+                statusBar.focus()
+            }
         }
     }
 
@@ -363,7 +395,8 @@ object LiveStatusManager : SourceMarkEventListener {
                     val statusBar = LogStatusBar(
                         liveLog.location,
                         emptyList(),
-                        inlayMark
+                        inlayMark,
+                        false
                     )
                     inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
                     statusBar.setWrapperPanel(wrapperPanel)

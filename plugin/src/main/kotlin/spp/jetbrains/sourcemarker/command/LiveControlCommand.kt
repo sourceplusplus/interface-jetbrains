@@ -52,6 +52,12 @@ enum class LiveControlCommand(
         PluginIcons.Command.viewLogsSelected,
         PluginIcons.Command.viewLogsUnSelected
     ),
+    WATCH_LOG(
+        "Watch Log",
+        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Log ➛ Scope: </span><span style=\"font-size: 80%; color: #E6E6E6\">Expression</span></html>",
+        PluginIcons.Command.viewLogsSelected,
+        PluginIcons.Command.viewLogsUnSelected
+    ),
     WATCH_VARIABLE(
         "watch",
         "Manual Tracing ➛ Watched Variables ➛ Scope: Local / Add *variable* to watched variables"

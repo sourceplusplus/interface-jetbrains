@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.portal.SourcePortal
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
@@ -41,6 +42,7 @@ import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import spp.protocol.SourceMarkerServices.Provide
+import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType
@@ -81,6 +83,10 @@ class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle(
         vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_VIEW_SUBSCRIBER + "." + developer) {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
+            if (!SourceMarker.enabled) {
+                log.warn("SourceMarker is not enabled, ignoring live event: {}", event)
+                return@consumer
+            }
 
             when (event.viewConfig.viewName) {
                 "LIVE_METER" -> GlobalScope.launch(vertx.dispatcher()) { consumeLiveMeterEvent(event) }
@@ -141,16 +147,23 @@ class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle(
             Int.MAX_VALUE
         )
 
-        for ((content, logs) in logsResult.logs.groupBy { it.content }) {
-            SourceMarkSearch.findInheritedSourceMarks(content).forEach {
-                vertx.eventBus().send(
-                    ProtocolAddress.Global.ArtifactLogUpdated,
-                    logsResult.copy(
-                        artifactQualifiedName = it.artifactQualifiedName,
-                        total = logs.size,
-                        logs = logs,
+        if (event.artifactQualifiedName.type == ArtifactType.EXPRESSION) {
+            val expressionMark = SourceMarkSearch.findSourceMark(event.artifactQualifiedName)
+            if (expressionMark != null) {
+                vertx.eventBus().send(ProtocolAddress.Global.ArtifactLogUpdated, logsResult)
+            }
+        } else {
+            for ((content, logs) in logsResult.logs.groupBy { it.content }) {
+                SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                    vertx.eventBus().send(
+                        ProtocolAddress.Global.ArtifactLogUpdated,
+                        logsResult.copy(
+                            artifactQualifiedName = it.artifactQualifiedName,
+                            total = logs.size,
+                            logs = logs,
+                        )
                     )
-                )
+                }
             }
         }
     }

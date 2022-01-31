@@ -65,7 +65,7 @@ object ControlBarController {
             LiveControlCommand.values().toList().filter {
                 @Suppress("UselessCallOnCollection") //unknown enums are null
                 selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
-            }
+            } + listOf(WATCH_LOG)
         }
     }
 
@@ -75,6 +75,16 @@ object ControlBarController {
             VIEW_ACTIVITY.command -> handleViewPortalCommand(editor, VIEW_ACTIVITY)
             VIEW_TRACES.command -> handleViewPortalCommand(editor, VIEW_TRACES)
             VIEW_LOGS.command -> handleViewPortalCommand(editor, VIEW_LOGS)
+            WATCH_LOG.command -> {
+                //replace command inlay with log status inlay
+                val prevCommandBar = previousControlBar!!
+                previousControlBar!!.dispose()
+                previousControlBar = null
+
+                ApplicationManager.getApplication().runWriteAction {
+                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber, true)
+                }
+            }
             ADD_LIVE_BREAKPOINT.command -> {
                 //replace command inlay with breakpoint status inlay
                 val prevCommandBar = previousControlBar!!
@@ -92,7 +102,7 @@ object ControlBarController {
                 previousControlBar = null
 
                 ApplicationManager.getApplication().runWriteAction {
-                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
+                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber, false)
                 }
             }
             ADD_LIVE_METER.command -> {

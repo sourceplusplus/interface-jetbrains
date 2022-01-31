@@ -74,6 +74,7 @@ object SourceMarkSearch {
         return when (artifact.type) {
             ArtifactType.ENDPOINT -> findEndpointSourceMark(artifact)
             ArtifactType.STATEMENT -> findExpressionAdvice(artifact)
+            ArtifactType.EXPRESSION -> findExpressionAdvice(artifact)
             else -> TODO("impl")
         }
     }
@@ -121,6 +122,10 @@ object SourceMarkSearch {
     }
 
     private fun findExpressionAdvice(artifact: ArtifactQualifiedName): ExpressionSourceMark? {
+        if (artifact.type == ArtifactType.EXPRESSION) {
+            return SourceMarker.getSourceMarks().find { it.artifactQualifiedName == artifact } as ExpressionSourceMark?
+        }
+
         val qualifiedClassName = artifact.identifier.substring(0, artifact.identifier.lastIndexOf("."))
         val fileMarker = SourceMarker.getSourceFileMarker(qualifiedClassName)
         return if (fileMarker != null) {
