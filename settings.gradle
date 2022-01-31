@@ -8,6 +8,7 @@ pluginManagement {
         id 'com.avast.gradle.docker-compose' version "0.15.0" apply false
         id 'io.gitlab.arturbosch.detekt' version "1.19.0" apply false
         id 'com.apollographql.apollo3' version "3.0.0" apply false
+        id 'com.diffplug.spotless' version '6.2.0' apply false
     }
 }
 
@@ -17,4 +18,3 @@ include 'marker:jvm-marker'
 include 'marker:py-marker'
 include 'monitor'
 include 'plugin'
-include 'monitor:skywalking'
