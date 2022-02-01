@@ -23,6 +23,7 @@ import java.awt.event.MouseEvent;
 import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
 
 public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener {
 
@@ -96,7 +97,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId(), it -> {
+                INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                     if (it.succeeded()) {
                         gutterMark.dispose();
                         LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);

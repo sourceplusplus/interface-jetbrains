@@ -22,6 +22,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.ProjectManager
 import io.vertx.core.json.Json
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -63,48 +64,42 @@ class LogCountIndicators : CoroutineVerticle() {
                         val fileLogPatterns = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>().flatMap {
                             it.getUserData(LOGGER_DETECTOR)!!.getOrFindLoggerStatements(it)
                         }
-                        Instance.logCountIndicator!!.getPatternOccurrences(
+                        val occurrences = Instance.logCountIndicator!!.getPatternOccurrences(
                             fileLogPatterns.map { it.logPattern },
                             config.serviceName,
                             Clock.System.now().minus(15, DateTimeUnit.MINUTE),
                             Clock.System.now(),
                             DurationStep.MINUTE
-                        ) {
-                            if (it.succeeded()) {
-                                val occurrences = it.result()
-                                //log.info("Found ${occurrences} occurrences of log patterns")
+                        ).await()
+                        //log.info("Found ${occurrences} occurrences of log patterns")
 
-                                ApplicationManager.getApplication().runReadAction {
-                                    fileLogPatterns.forEach { logger ->
-                                        val sumValue = occurrences.getJsonObject(logger.logPattern)
-                                            .getJsonArray("values").list.sumOf { it as Int? ?: 0 }
+                        ApplicationManager.getApplication().runReadAction {
+                            fileLogPatterns.forEach { logger ->
+                                val sumValue = occurrences.getJsonObject(logger.logPattern)
+                                    .getJsonArray("values").list.sumOf { it as Int? ?: 0 }
 
-                                        val logIndicator = creationService.getOrCreateExpressionGutterMark(
-                                            fileMarker,
-                                            logger.lineLocation
-                                        ).get()
-                                        if (!fileMarker.containsSourceMark(logIndicator)) {
-                                            logIndicator.configuration.icon =
-                                                SourceMarkerIcons.getNumericGutterMarkIcon(
-                                                    sumValue,
-                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b"
-                                                    else "#182d34"
-                                                )
-                                            logIndicator.apply(true)
-                                        } else {
-                                            logIndicator.configuration.icon =
-                                                SourceMarkerIcons.getNumericGutterMarkIcon(
-                                                    sumValue,
-                                                    if (logger.level == "warn" || logger.level == "error") "#e1483b"
-                                                    else "#182d34"
-                                                )
-                                            //todo: should just be updating rendering, not all analysis
-                                            fileMarker.refresh()
-                                        }
-                                    }
+                                val logIndicator = creationService.getOrCreateExpressionGutterMark(
+                                    fileMarker,
+                                    logger.lineLocation
+                                ).get()
+                                if (!fileMarker.containsSourceMark(logIndicator)) {
+                                    logIndicator.configuration.icon =
+                                        SourceMarkerIcons.getNumericGutterMarkIcon(
+                                            sumValue,
+                                            if (logger.level == "warn" || logger.level == "error") "#e1483b"
+                                            else "#182d34"
+                                        )
+                                    logIndicator.apply(true)
+                                } else {
+                                    logIndicator.configuration.icon =
+                                        SourceMarkerIcons.getNumericGutterMarkIcon(
+                                            sumValue,
+                                            if (logger.level == "warn" || logger.level == "error") "#e1483b"
+                                            else "#182d34"
+                                        )
+                                    //todo: should just be updating rendering, not all analysis
+                                    fileMarker.refresh()
                                 }
-                            } else {
-                                log.error("Failed to get log pattern occurrences", it.cause())
                             }
                         }
                     }
