@@ -50,11 +50,7 @@ import spp.protocol.SourceMarkerServices
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.log.LogResult
-import spp.protocol.instrument.LiveInstrument
-import spp.protocol.instrument.LiveSourceLocation
-import spp.protocol.instrument.breakpoint.LiveBreakpoint
-import spp.protocol.instrument.log.LiveLog
-import spp.protocol.instrument.meter.LiveMeter
+import spp.protocol.instrument.*
 import spp.protocol.instrument.meter.MeterType
 import spp.protocol.portal.PageType
 import spp.protocol.view.LiveViewConfig

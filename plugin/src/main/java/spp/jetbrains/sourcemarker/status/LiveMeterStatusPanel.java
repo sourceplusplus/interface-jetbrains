@@ -3,14 +3,14 @@ package spp.jetbrains.sourcemarker.status;
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+import io.vertx.core.json.JsonObject;
+import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
-import io.vertx.core.json.JsonObject;
-import org.jetbrains.annotations.NotNull;
 import spp.protocol.instrument.LiveInstrumentEvent;
-import spp.protocol.instrument.meter.LiveMeter;
+import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.meter.MeterType;
 
 import javax.swing.*;

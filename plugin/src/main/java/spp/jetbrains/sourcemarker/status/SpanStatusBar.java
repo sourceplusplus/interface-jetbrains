@@ -23,8 +23,8 @@ import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveSourceLocation;
+import spp.protocol.instrument.LiveSpan;
 import spp.protocol.instrument.meter.event.LiveMeterRemoved;
-import spp.protocol.instrument.span.LiveSpan;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -34,8 +34,10 @@ import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
