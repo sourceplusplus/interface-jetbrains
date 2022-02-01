@@ -95,8 +95,8 @@ import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.protocol.SourceMarkerServices
-import spp.protocol.SourceMarkerServices.Instance
+import spp.protocol.SourceServices
+import spp.protocol.SourceServices.Instance
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.endpoint.EndpointResult
 import spp.protocol.artifact.exception.LiveStackTraceElement
@@ -107,9 +107,9 @@ import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import spp.protocol.artifact.trace.TraceStack
 import spp.protocol.service.LiveService
-import spp.protocol.service.live.LiveInstrumentService
-import spp.protocol.service.live.LiveViewService
-import spp.protocol.service.logging.LogCountIndicatorService
+import spp.protocol.service.LiveInstrumentService
+import spp.protocol.service.LiveViewService
+import spp.protocol.service.LogCountIndicatorService
 import spp.protocol.util.KSerializers
 import spp.protocol.util.LocalMessageCodec
 import java.awt.Color
@@ -318,12 +318,12 @@ object SourceMarkerPlugin {
         val availableRecords = discovery.getRecords { true }.await()
 
         //live service
-        if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_SERVICE }) {
+        if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_SERVICE }) {
             log.info("Live service available")
 
             Instance.liveService = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
-                .setAddress(SourceMarkerServices.Utilize.LIVE_SERVICE)
+                .setAddress(SourceServices.Utilize.LIVE_SERVICE)
                 .build(LiveService::class.java)
         } else {
             log.warn("Live service unavailable")
@@ -331,13 +331,13 @@ object SourceMarkerPlugin {
 
         //live instrument
         if (hardcodedConfig.getJsonObject("services").getBoolean("live_instrument")) {
-            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_INSTRUMENT }) {
+            if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_INSTRUMENT }) {
                 log.info("Live instruments available")
                 SourceMarker.addGlobalSourceMarkEventListener(LiveStatusManager)
 
                 Instance.liveInstrument = ServiceProxyBuilder(vertx)
                     .apply { config.serviceToken?.let { setToken(it) } }
-                    .setAddress(SourceMarkerServices.Utilize.LIVE_INSTRUMENT)
+                    .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
                     .build(LiveInstrumentService::class.java)
                 ApplicationManager.getApplication().invokeLater {
                     BreakpointHitWindowService.getInstance(project).showEventsWindow()
@@ -355,11 +355,11 @@ object SourceMarkerPlugin {
 
         //live view
         if (hardcodedConfig.getJsonObject("services").getBoolean("live_view")) {
-            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LIVE_VIEW }) {
+            if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_VIEW }) {
                 log.info("Live views available")
                 Instance.liveView = ServiceProxyBuilder(vertx)
                     .apply { config.serviceToken?.let { setToken(it) } }
-                    .setAddress(SourceMarkerServices.Utilize.LIVE_VIEW)
+                    .setAddress(SourceServices.Utilize.LIVE_VIEW)
                     .build(LiveViewService::class.java)
 
                 val viewListener = LiveViewManager(config)
@@ -375,11 +375,11 @@ object SourceMarkerPlugin {
 
         //log count indicator
         if (hardcodedConfig.getJsonObject("services").getBoolean("log_count_indicator")) {
-            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR }) {
+            if (availableRecords.any { it.name == SourceServices.Utilize.LOG_COUNT_INDICATOR }) {
                 log.info("Log count indicator available")
                 Instance.logCountIndicator = ServiceProxyBuilder(vertx)
                     .apply { config.serviceToken?.let { setToken(it) } }
-                    .setAddress(SourceMarkerServices.Utilize.LOG_COUNT_INDICATOR)
+                    .setAddress(SourceServices.Utilize.LOG_COUNT_INDICATOR)
                     .build(LogCountIndicatorService::class.java)
 
                 GlobalScope.launch(vertx.dispatcher()) {

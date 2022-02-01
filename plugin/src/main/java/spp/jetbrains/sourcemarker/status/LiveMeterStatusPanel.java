@@ -22,7 +22,7 @@ import java.awt.event.MouseEvent;
 import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
+import static spp.protocol.SourceServices.Instance.INSTANCE;
 
 public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener {
 

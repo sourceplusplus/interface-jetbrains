@@ -40,7 +40,7 @@ import spp.protocol.ProtocolAddress
 import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
-import spp.protocol.SourceMarkerServices.Provide
+import spp.protocol.SourceServices.Provide
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType

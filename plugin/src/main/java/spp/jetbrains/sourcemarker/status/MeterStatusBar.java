@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
+import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {

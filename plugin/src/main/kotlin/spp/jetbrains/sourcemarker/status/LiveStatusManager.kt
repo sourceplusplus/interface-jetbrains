@@ -46,7 +46,7 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
-import spp.protocol.SourceMarkerServices
+import spp.protocol.SourceServices
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.log.LogResult
@@ -396,7 +396,7 @@ object LiveStatusManager : SourceMarkEventListener {
 
     @JvmStatic
     fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
-        SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
+        SourceServices.Instance.liveView!!.addLiveViewSubscription(
             LiveViewSubscription(
                 null,
                 listOf(liveMeter.toMetricId()),

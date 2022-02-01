@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
+import static spp.protocol.SourceServices.Instance.INSTANCE;
 
 public class PluginConfigurationPanel {
     private JPanel myWholePanel;

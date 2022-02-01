@@ -42,7 +42,7 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
-import spp.protocol.SourceMarkerServices.Utilize
+import spp.protocol.SourceServices.Utilize
 import spp.protocol.extend.TCPServiceFrameParser
 import spp.protocol.platform.PlatformAddress
 import spp.protocol.status.InstanceConnection

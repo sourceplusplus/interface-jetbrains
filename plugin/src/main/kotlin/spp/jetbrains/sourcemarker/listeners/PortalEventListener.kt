@@ -79,7 +79,7 @@ import spp.protocol.ProtocolAddress.Global.RefreshTraces
 import spp.protocol.ProtocolAddress.Global.SetCurrentPage
 import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import spp.protocol.ProtocolAddress.Portal.UpdateEndpoints
-import spp.protocol.SourceMarkerServices.Instance
+import spp.protocol.SourceServices.Instance
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.endpoint.EndpointResult

@@ -39,7 +39,7 @@ import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.ProtocolAddress.Global.SetCurrentPage
-import spp.protocol.SourceMarkerServices
+import spp.protocol.SourceServices
 import spp.protocol.instrument.LiveInstrumentType.*
 import spp.protocol.portal.PageType
 import java.awt.BorderLayout
@@ -58,7 +58,7 @@ object ControlBarController {
     private var previousControlBar: InlayMark? = null
     private val availableCommands by lazy {
         runBlocking {
-            val selfInfo = SourceMarkerServices.Instance.liveService!!.getSelf().await()
+            val selfInfo = SourceServices.Instance.liveService!!.getSelf().await()
             LiveControlCommand.values().toList().filter {
                 @Suppress("UselessCallOnCollection") //unknown enums are null
                 selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
@@ -116,7 +116,7 @@ object ControlBarController {
                 previousControlBar!!.dispose()
                 previousControlBar = null
 
-                SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments(BREAKPOINT).onComplete {
+                SourceServices.Instance.liveInstrument!!.clearLiveInstruments(BREAKPOINT).onComplete {
                     if (it.failed()) {
                         log.error("Failed to clear live breakpoints", it.cause())
                     }
@@ -126,7 +126,7 @@ object ControlBarController {
                 previousControlBar!!.dispose()
                 previousControlBar = null
 
-                SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments(LOG).onComplete {
+                SourceServices.Instance.liveInstrument!!.clearLiveInstruments(LOG).onComplete {
                     if (it.failed()) {
                         log.error("Failed to clear live logs", it.cause())
                     }
@@ -136,7 +136,7 @@ object ControlBarController {
                 previousControlBar!!.dispose()
                 previousControlBar = null
 
-                SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments(METER).onComplete {
+                SourceServices.Instance.liveInstrument!!.clearLiveInstruments(METER).onComplete {
                     if (it.failed()) {
                         log.error("Failed to clear live meters", it.cause())
                     }
@@ -146,7 +146,7 @@ object ControlBarController {
                 previousControlBar!!.dispose()
                 previousControlBar = null
 
-                SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments(SPAN).onComplete {
+                SourceServices.Instance.liveInstrument!!.clearLiveInstruments(SPAN).onComplete {
                     if (it.failed()) {
                         log.error("Failed to clear live spans", it.cause())
                     }
@@ -156,7 +156,7 @@ object ControlBarController {
                 previousControlBar!!.dispose()
                 previousControlBar = null
 
-                SourceMarkerServices.Instance.liveInstrument!!.clearLiveInstruments(null).onComplete {
+                SourceServices.Instance.liveInstrument!!.clearLiveInstruments(null).onComplete {
                     if (it.failed()) {
                         log.error("Failed to clear live instruments", it.cause())
                     }
