@@ -151,12 +151,7 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
                     listOf(endpointName),
                     sourceMark.artifactQualifiedName,
                     LiveSourceLocation(sourceMark.artifactQualifiedName.identifier, -1),
-                    LiveViewConfig(
-                        "ACTIVITY",
-                        false,
-                        listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
-                        refreshRateLimit = 0
-                    )
+                    LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
                 )
             ) {
                 if (it.succeeded()) {

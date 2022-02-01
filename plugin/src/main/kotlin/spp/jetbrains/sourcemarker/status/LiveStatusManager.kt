@@ -192,12 +192,7 @@ object LiveStatusManager : SourceMarkEventListener {
                             inlayMark.artifactQualifiedName.identifier,
                             line = inlayMark.artifactQualifiedName.lineNumber!!
                         ),
-                        LiveViewConfig(
-                            "LOGS",
-                            true,
-                            listOf("endpoint_logs"),
-                            0
-                        )
+                        LiveViewConfig("LOGS", listOf("endpoint_logs"))
                     )
                 ) {
                     if (it.failed()) {
@@ -439,12 +434,7 @@ object LiveStatusManager : SourceMarkEventListener {
                 listOf(liveMeter.toMetricId()),
                 ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
                 liveMeter.location,
-                LiveViewConfig(
-                    "LIVE_METER",
-                    true,
-                    listOf("last_minute", "last_hour", "last_day"),
-                    0
-                )
+                LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
             )
         ) {
             if (it.failed()) {

@@ -25,7 +25,6 @@ import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.util.PsiNavigateUtil
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import io.vertx.core.eventbus.ReplyException
-import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -33,7 +32,6 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarker.creationService
@@ -92,7 +90,6 @@ import spp.protocol.artifact.metrics.ArtifactSummarizedResult
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
-import spp.protocol.error.AccessDenied
 import spp.protocol.instrument.LiveSourceLocation
 import spp.protocol.portal.PageType
 import spp.protocol.utils.ArtifactNameUtils
@@ -284,12 +281,7 @@ class PortalEventListener(
                                     listOf(endpointName),
                                     portal.viewingArtifact,
                                     LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                                    LiveViewConfig(
-                                        "ACTIVITY",
-                                        false,
-                                        listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
-                                        0
-                                    )
+                                    LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
                                 )
                             ) {
                                 if (it.failed()) {
@@ -328,12 +320,7 @@ class PortalEventListener(
                                     listOf(endpointName),
                                     portal.viewingArtifact,
                                     LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                                    LiveViewConfig(
-                                        "TRACES",
-                                        false,
-                                        listOf("endpoint_traces"),
-                                        0
-                                    )
+                                    LiveViewConfig("TRACES", listOf("endpoint_traces"))
                                 )
                             ) {
                                 if (it.failed()) {
@@ -382,12 +369,7 @@ class PortalEventListener(
                                     logPatterns,
                                     portal.viewingArtifact,
                                     LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                                    LiveViewConfig(
-                                        "LOGS",
-                                        false,
-                                        listOf("endpoint_logs"),
-                                        0
-                                    )
+                                    LiveViewConfig("LOGS", listOf("endpoint_logs"))
                                 )
                             ) {
                                 if (it.failed()) {
@@ -466,33 +448,6 @@ class PortalEventListener(
                     )
 
                     handleTraceResult(traceResult, portal, portal.viewingArtifact)
-                }
-            } else if (Instance.localTracing != null) {
-                portal.tracesView.localTracing = true
-                Instance.localTracing!!.getTraceResult(
-                    artifactQualifiedName = portal.viewingArtifact,
-                    start = ZonedDateTime.now().minusHours(24).toInstant().toKotlinInstant(),
-                    stop = ZonedDateTime.now().toInstant().toKotlinInstant(),
-                    orderType = portal.tracesView.orderType,
-                    pageSize = portal.tracesView.viewTraceAmount,
-                    pageNumber = portal.tracesView.pageNumber,
-                ) {
-                    if (it.succeeded()) {
-                        handleTraceResult(it.result(), portal, portal.viewingArtifact)
-                    } else {
-                        val replyException = it.cause() as ReplyException
-                        if (replyException.failureType() == ReplyFailure.TIMEOUT) {
-                            log.warn("Timed out getting local trace results")
-                        } else {
-                            val actualException = replyException.cause!!
-                            if (actualException is AccessDenied) {
-                                log.error("Access denied. Reason: " + actualException.reason)
-                            } else {
-                                it.cause().printStackTrace()
-                                log.error("Failed to get local trace results", it.cause())
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -679,8 +634,6 @@ class PortalEventListener(
                     portal.configuration.visibleActivity = true
                     portal.configuration.visibleTraces = true
                     portal.configuration.visibleLogs = true //todo: can hide based on if there is logs
-                } else if (Instance.localTracing != null) {
-                    portal.configuration.visibleTraces = true
                 } else {
                     //non-endpoint artifact; hide activity/traces till manually shown
                     portal.configuration.visibleActivity = false
