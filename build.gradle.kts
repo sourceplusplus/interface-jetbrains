@@ -96,6 +96,7 @@ tasks {
         }
     }
     register<Exec>("buildExampleWebApp") {
+        mustRunAfter("downloadProbe")
         workingDir = File("./test/e2e/example-web-app")
 
         if (Os.isFamily(Os.FAMILY_UNIX)) {
