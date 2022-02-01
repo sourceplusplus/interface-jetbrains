@@ -27,7 +27,6 @@ import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.artifact.log.Log;
 import spp.protocol.instrument.*;
-import spp.protocol.instrument.log.event.LiveLogRemoved;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -223,7 +222,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         } else if (event.getEventType() == LOG_REMOVED) {
             removed = true;
 
-            LiveLogRemoved removed = Json.decodeValue(event.getData(), LiveLogRemoved.class);
+            LiveInstrumentRemoved removed = Json.decodeValue(event.getData(), LiveInstrumentRemoved.class);
             if (removed.getCause() != null) {
                 commandModel.insertRow(0, event);
 

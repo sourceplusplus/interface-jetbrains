@@ -37,14 +37,9 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import spp.protocol.SourceMarkerServices.Instance
 import spp.protocol.SourceMarkerServices.Provide
-import spp.protocol.instrument.LiveBreakpoint
-import spp.protocol.instrument.LiveInstrumentEvent
-import spp.protocol.instrument.LiveInstrumentEventType
-import spp.protocol.instrument.LiveLog
+import spp.protocol.instrument.*
 import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
 import spp.protocol.instrument.log.event.LiveLogHit
-import spp.protocol.instrument.log.event.LiveLogRemoved
 
 /**
  * todo: description.
@@ -98,9 +93,9 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
     }
 
     private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
+        val logRemoved = Json.decodeValue(liveEvent.data, LiveInstrumentRemoved::class.java)
         ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByLogId(logRemoved.logId)
+            val inlayMark = SourceMarkSearch.findByLogId(logRemoved.liveInstrument.id!!)
             if (inlayMark != null) {
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
@@ -144,9 +139,9 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
     }
 
     private fun handleBreakpointRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val bpRemoved = Json.decodeValue(liveEvent.data, LiveBreakpointRemoved::class.java)
+        val bpRemoved = Json.decodeValue(liveEvent.data, LiveInstrumentRemoved::class.java)
         ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByBreakpointId(bpRemoved.breakpointId)
+            val inlayMark = SourceMarkSearch.findByBreakpointId(bpRemoved.liveInstrument.id!!)
             if (inlayMark != null) {
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {

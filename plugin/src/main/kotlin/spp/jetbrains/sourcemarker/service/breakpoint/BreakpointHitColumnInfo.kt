@@ -21,11 +21,11 @@ import com.intellij.util.ui.ColumnInfo
 import spp.protocol.instrument.LiveInstrumentEvent
 import spp.protocol.instrument.LiveInstrumentEventType
 import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
 import spp.protocol.utils.toPrettyDuration
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import io.vertx.core.json.Json
 import kotlinx.datetime.Clock
+import spp.protocol.instrument.LiveInstrumentRemoved
 
 /**
  * todo: description.
@@ -41,14 +41,14 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
                 val obj1 = if (t.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
                     Json.decodeValue(t.data, LiveBreakpointHit::class.java)
                 } else if (t.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
-                    Json.decodeValue(t.data, LiveBreakpointRemoved::class.java)
+                    Json.decodeValue(t.data, LiveInstrumentRemoved::class.java)
                 } else {
                     throw IllegalArgumentException(t.eventType.name)
                 }
                 val obj2 = if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
                     Json.decodeValue(t2.data, LiveBreakpointHit::class.java)
                 } else if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
-                    Json.decodeValue(t2.data, LiveBreakpointRemoved::class.java)
+                    Json.decodeValue(t2.data, LiveInstrumentRemoved::class.java)
                 } else {
                     throw IllegalArgumentException(t2.eventType.name)
                 }
@@ -73,7 +73,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
                 else -> item.toString()
             }
         } else {
-            val item = Json.decodeValue(event.data, LiveBreakpointRemoved::class.java)
+            val item = Json.decodeValue(event.data, LiveInstrumentRemoved::class.java)
             return when (name) {
                 "Breakpoint Data" -> item.cause!!.message ?: item.cause!!.exceptionType
                 "Time" -> (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())

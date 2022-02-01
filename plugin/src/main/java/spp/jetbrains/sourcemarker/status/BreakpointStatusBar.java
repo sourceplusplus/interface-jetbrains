@@ -27,7 +27,6 @@ import spp.jetbrains.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.instrument.*;
 import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit;
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -169,7 +168,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             } else if (event.getEventType() == BREAKPOINT_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
 
-                LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
+                LiveInstrumentRemoved removed = Json.decodeValue(event.getData(), LiveInstrumentRemoved.class);
                 if (removed.getCause() == null) {
                     statusPanel.setStatus("Complete", COMPLETE_COLOR_PURPLE);
                 } else {

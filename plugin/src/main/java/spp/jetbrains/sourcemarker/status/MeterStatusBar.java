@@ -22,12 +22,12 @@ import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.instrument.LiveInstrument;
+import spp.protocol.instrument.LiveInstrumentRemoved;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.meter.MeterType;
 import spp.protocol.instrument.meter.MetricValue;
 import spp.protocol.instrument.meter.MetricValueType;
-import spp.protocol.instrument.meter.event.LiveMeterRemoved;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -128,7 +128,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             if (event.getEventType() == METER_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
 
-                LiveMeterRemoved removed = Json.decodeValue(event.getData(), LiveMeterRemoved.class);
+                LiveInstrumentRemoved removed = Json.decodeValue(event.getData(), LiveInstrumentRemoved.class);
                 if (removed.getCause() == null) {
                     statusPanel.setStatus("Complete", COMPLETE_COLOR_PURPLE);
                 } else {
