@@ -22,9 +22,9 @@ import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.instrument.LiveInstrument;
-import spp.protocol.instrument.LiveInstrumentRemoved;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.LiveSpan;
+import spp.protocol.instrument.event.LiveInstrumentRemoved;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -44,7 +44,7 @@ import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
-import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
+import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
 
 public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 

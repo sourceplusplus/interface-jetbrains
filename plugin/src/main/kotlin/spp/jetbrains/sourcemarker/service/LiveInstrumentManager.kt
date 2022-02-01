@@ -37,9 +37,9 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import spp.protocol.SourceMarkerServices.Instance
 import spp.protocol.SourceMarkerServices.Provide
-import spp.protocol.instrument.*
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import spp.protocol.instrument.log.event.LiveLogHit
+import spp.protocol.instrument.LiveBreakpoint
+import spp.protocol.instrument.LiveLog
+import spp.protocol.instrument.event.*
 
 /**
  * todo: description.

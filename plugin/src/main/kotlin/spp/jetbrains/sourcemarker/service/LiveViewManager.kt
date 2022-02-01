@@ -52,8 +52,8 @@ import spp.protocol.artifact.trace.Trace
 import spp.protocol.artifact.trace.TraceOrderType
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
-import spp.protocol.instrument.LiveInstrumentEvent
-import spp.protocol.instrument.LiveInstrumentEventType.METER_UPDATED
+import spp.protocol.instrument.event.LiveInstrumentEvent
+import spp.protocol.instrument.event.LiveInstrumentEventType.METER_UPDATED
 import spp.protocol.instrument.meter.MeterType
 import spp.protocol.view.LiveViewEvent
 import java.net.URI

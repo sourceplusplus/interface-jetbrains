@@ -25,8 +25,14 @@ import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService;
 import spp.jetbrains.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.protocol.instrument.*;
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit;
+import spp.protocol.instrument.LiveBreakpoint;
+import spp.protocol.instrument.LiveInstrument;
+import spp.protocol.instrument.LiveSourceLocation;
+import spp.protocol.instrument.event.LiveBreakpointHit;
+import spp.protocol.instrument.event.LiveInstrumentEvent;
+import spp.protocol.instrument.event.LiveInstrumentRemoved;
+import spp.protocol.instrument.throttle.InstrumentThrottle;
+import spp.protocol.instrument.throttle.ThrottleStep;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -48,8 +54,8 @@ import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
-import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
-import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
+import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_HIT;
+import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 
 public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 

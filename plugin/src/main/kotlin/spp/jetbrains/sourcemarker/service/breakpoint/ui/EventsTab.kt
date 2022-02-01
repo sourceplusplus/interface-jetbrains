@@ -29,7 +29,7 @@ import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointEventColumnInfo
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import spp.protocol.instrument.event.LiveBreakpointHit
 import java.awt.BorderLayout
 import java.awt.Point
 import java.awt.event.MouseAdapter

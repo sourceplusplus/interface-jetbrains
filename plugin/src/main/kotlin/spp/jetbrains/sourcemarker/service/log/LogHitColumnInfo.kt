@@ -18,14 +18,14 @@
 package spp.jetbrains.sourcemarker.service.log
 
 import com.intellij.util.ui.ColumnInfo
-import spp.protocol.instrument.LiveInstrumentEvent
-import spp.protocol.instrument.LiveInstrumentEventType
-import spp.protocol.instrument.log.event.LiveLogHit
-import spp.protocol.utils.toPrettyDuration
-import spp.jetbrains.sourcemarker.PluginBundle.message
 import io.vertx.core.json.Json
 import kotlinx.datetime.Clock
-import spp.protocol.instrument.LiveInstrumentRemoved
+import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.protocol.instrument.event.LiveInstrumentEvent
+import spp.protocol.instrument.event.LiveInstrumentEventType
+import spp.protocol.instrument.event.LiveInstrumentRemoved
+import spp.protocol.instrument.event.LiveLogHit
+import spp.protocol.utils.toPrettyDuration
 
 /**
  * todo: description.

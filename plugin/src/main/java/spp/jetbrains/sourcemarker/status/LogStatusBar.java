@@ -26,7 +26,13 @@ import spp.jetbrains.sourcemarker.service.log.VariableParser;
 import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.artifact.log.Log;
-import spp.protocol.instrument.*;
+import spp.protocol.instrument.LiveInstrument;
+import spp.protocol.instrument.LiveLog;
+import spp.protocol.instrument.LiveSourceLocation;
+import spp.protocol.instrument.event.LiveInstrumentEvent;
+import spp.protocol.instrument.event.LiveInstrumentRemoved;
+import spp.protocol.instrument.throttle.InstrumentThrottle;
+import spp.protocol.instrument.throttle.ThrottleStep;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -53,8 +59,8 @@ import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
-import static spp.protocol.instrument.LiveInstrumentEventType.LOG_HIT;
-import static spp.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
+import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
+import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_REMOVED;
 
 public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener, InstrumentEventListener {
 
