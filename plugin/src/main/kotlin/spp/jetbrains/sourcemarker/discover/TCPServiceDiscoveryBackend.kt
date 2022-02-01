@@ -42,11 +42,10 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
-import spp.protocol.SourceMarkerServices
 import spp.protocol.SourceMarkerServices.Utilize
 import spp.protocol.extend.TCPServiceFrameParser
 import spp.protocol.platform.PlatformAddress
-import spp.protocol.status.MarkerConnection
+import spp.protocol.status.InstanceConnection
 import java.util.*
 
 /**
@@ -123,12 +122,11 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 setupHandler(vertx, Utilize.LIVE_SERVICE)
                 setupHandler(vertx, Utilize.LIVE_INSTRUMENT)
                 setupHandler(vertx, Utilize.LIVE_VIEW)
-                setupHandler(vertx, Utilize.LOCAL_TRACING)
                 setupHandler(vertx, Utilize.LOG_COUNT_INDICATOR)
 
                 //setup connection
                 val replyAddress = UUID.randomUUID().toString()
-                val pc = MarkerConnection(SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis())
+                val pc = InstanceConnection(SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis())
                 val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer("local.$replyAddress")
 
                 val promise = Promise.promise<Void>()
