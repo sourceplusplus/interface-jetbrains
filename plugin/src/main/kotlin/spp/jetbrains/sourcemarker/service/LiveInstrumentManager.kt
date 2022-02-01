@@ -87,7 +87,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
         )
 
         //show live status bars
-        Instance.liveInstrument!!.getLiveInstruments {
+        Instance.liveInstrument!!.getLiveInstruments(null).onComplete {
             if (it.succeeded()) {
                 log.info("Found {} active live status bars", it.result().size)
                 LiveStatusManager.addActiveLiveInstruments(it.result())
