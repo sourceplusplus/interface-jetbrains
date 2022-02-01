@@ -215,7 +215,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         this.latestLog = latestLog;
 
         String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
-        String formattedMessage = latestLog.getFormattedMessage();
+        String formattedMessage = latestLog.toFormattedMessage();
         if (!timeLabel.getText().equals(formattedTime) || !liveLogTextField.getText().equals(formattedMessage)) {
             SwingUtilities.invokeLater(() -> {
                 if (liveLogTextField.getEditMode()) {
