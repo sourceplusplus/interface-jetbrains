@@ -62,8 +62,8 @@ dependencies {
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
-        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$projectVersion") { isTransitive = false }
-        implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
+        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:fc869f7181") { isTransitive = false }
+        implementation("com.github.sourceplusplus.protocol:protocol:a97325afb6")
     }
 
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
