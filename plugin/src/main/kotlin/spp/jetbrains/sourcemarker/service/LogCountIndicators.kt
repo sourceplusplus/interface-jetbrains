@@ -69,7 +69,7 @@ class LogCountIndicators : CoroutineVerticle() {
                             Clock.System.now().minus(15, DateTimeUnit.MINUTE),
                             Clock.System.now(),
                             DurationStep.MINUTE
-                        ) {
+                        ).onComplete {
                             if (it.succeeded()) {
                                 val occurrences = it.result()
                                 //log.info("Found ${occurrences} occurrences of log patterns")

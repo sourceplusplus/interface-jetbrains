@@ -21,12 +21,10 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.protocol.SourceMarkerServices;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.meter.event.LiveMeterRemoved;
 import spp.protocol.instrument.span.LiveSpan;
-import spp.protocol.service.live.LiveInstrumentService;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -43,6 +41,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
 import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 
 public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
@@ -344,7 +343,6 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         HashMap<String, String> meta = new HashMap<>();
         meta.put("original_source_mark", inlayMark.getId());
 
-        LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
         LiveSpan instrument = new LiveSpan(
                 spanOperationNameField.getText(),
                 sourceLocation,
@@ -358,7 +356,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
                 null,
                 meta
         );
-        instrumentService.addLiveInstrument(instrument, it -> {
+        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveSpan = (LiveSpan) it.result();
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveSpan);
@@ -385,7 +383,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveSpan != null) {
-            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveSpan.getId(), it -> {
+            INSTANCE.getLiveInstrument().removeLiveInstrument(liveSpan.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveSpan);
                 } else {

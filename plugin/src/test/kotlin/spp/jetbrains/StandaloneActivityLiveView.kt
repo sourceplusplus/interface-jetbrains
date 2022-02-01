@@ -145,20 +145,15 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
             val endpointName = sourceMark.getUserData(
                 SourceMarkKeys.ENDPOINT_DETECTOR
             )?.getOrFindEndpointName(sourceMark) ?: return@launch
-            SourceMarkerServices.Instance.liveView?.addLiveViewSubscription(
+            SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
                 LiveViewSubscription(
                     null,
                     listOf(endpointName),
                     sourceMark.artifactQualifiedName,
                     LiveSourceLocation(sourceMark.artifactQualifiedName.identifier, -1),
-                    LiveViewConfig(
-                        "ACTIVITY",
-                        false,
-                        listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
-                        refreshRateLimit = 0
-                    )
+                    LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
                 )
-            ) {
+            ).onComplete {
                 if (it.succeeded()) {
                     println(it)
                 } else {

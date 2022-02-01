@@ -30,7 +30,6 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.portal.SourcePortal
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
-import spp.jetbrains.sourcemarker.mark.SourceMarkConstructor
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
@@ -105,7 +104,6 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
             sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
         } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
             event.sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!.close()
-            SourceMarkConstructor.tearDownSourceMark(event.sourceMark)
         }
     }
 }

@@ -110,7 +110,6 @@ import spp.protocol.service.LiveService
 import spp.protocol.service.live.LiveInstrumentService
 import spp.protocol.service.live.LiveViewService
 import spp.protocol.service.logging.LogCountIndicatorService
-import spp.protocol.service.tracing.LocalTracingService
 import spp.protocol.util.KSerializers
 import spp.protocol.util.LocalMessageCodec
 import java.awt.Color
@@ -372,21 +371,6 @@ object SourceMarkerPlugin {
             }
         } else {
             log.info("Live views disabled")
-        }
-
-        //local tracing
-        if (hardcodedConfig.getJsonObject("services").getBoolean("local_tracing")) {
-            if (availableRecords.any { it.name == SourceMarkerServices.Utilize.LOCAL_TRACING }) {
-                log.info("Local tracing available")
-                Instance.localTracing = ServiceProxyBuilder(vertx)
-                    .apply { config.serviceToken?.let { setToken(it) } }
-                    .setAddress(SourceMarkerServices.Utilize.LOCAL_TRACING)
-                    .build(LocalTracingService::class.java)
-            } else {
-                log.warn("Local tracing unavailable")
-            }
-        } else {
-            log.info("Local tracing disabled")
         }
 
         //log count indicator

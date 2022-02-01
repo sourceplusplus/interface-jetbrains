@@ -406,14 +406,9 @@ object LiveStatusManager : SourceMarkEventListener {
                 listOf(liveMeter.toMetricId()),
                 ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
                 liveMeter.location,
-                LiveViewConfig(
-                    "LIVE_METER",
-                    true,
-                    listOf("last_minute", "last_hour", "last_day"),
-                    0
-                )
+                LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
             )
-        ) {
+        ).onComplete {
             if (it.failed()) {
                 log.error("Failed to add live view subscription", it.cause())
             }

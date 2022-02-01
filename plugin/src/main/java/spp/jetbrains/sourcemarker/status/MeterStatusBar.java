@@ -21,7 +21,6 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.protocol.SourceMarkerServices;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.meter.LiveMeter;
@@ -29,7 +28,6 @@ import spp.protocol.instrument.meter.MeterType;
 import spp.protocol.instrument.meter.MetricValue;
 import spp.protocol.instrument.meter.MetricValueType;
 import spp.protocol.instrument.meter.event.LiveMeterRemoved;
-import spp.protocol.service.live.LiveInstrumentService;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -46,6 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
 import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
@@ -357,7 +356,6 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         HashMap<String, String> meta = new HashMap<>();
         meta.put("original_source_mark", inlayMark.getId());
 
-        LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
         LiveMeter instrument = new LiveMeter(
                 meterNameField.getText(),
                 MeterType.valueOf(meterTypeComboBox.getSelectedItem().toString().toUpperCase()),
@@ -373,7 +371,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 null,
                 meta
         );
-        instrumentService.addLiveInstrument(instrument, it -> {
+        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveMeter = (LiveMeter) it.result();
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveMeter);
@@ -404,7 +402,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveMeter != null) {
-            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId(), it -> {
+            INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);
                 } else {

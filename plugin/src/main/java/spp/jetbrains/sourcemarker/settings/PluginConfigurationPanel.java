@@ -46,7 +46,7 @@ public class PluginConfigurationPanel {
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
 
         if (INSTANCE.getLiveService() != null) {
-            INSTANCE.getLiveService().getServices(it -> {
+            INSTANCE.getLiveService().getServices().onComplete(it -> {
                 if (it.succeeded()) {
                     it.result().forEach(service -> serviceComboBox.addItem(service.getName()));
 

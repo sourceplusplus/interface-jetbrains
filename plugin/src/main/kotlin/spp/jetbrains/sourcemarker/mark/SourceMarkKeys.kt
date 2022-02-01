@@ -20,7 +20,6 @@ package spp.jetbrains.sourcemarker.mark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.portal.SourcePortal
-import spp.protocol.advice.ArtifactAdvice
 import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.jvm.psi.LoggerDetector
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
@@ -36,7 +35,6 @@ object SourceMarkKeys {
     val SOURCE_PORTAL = SourceKey<SourcePortal>("SOURCE_PORTAL")
     val ENDPOINT_DETECTOR = SourceKey<EndpointDetector>("ENDPOINT_DETECTOR")
     val LOGGER_DETECTOR = SourceKey<LoggerDetector>("LOGGER_DETECTOR")
-    val ARTIFACT_ADVICE = SourceKey<MutableList<ArtifactAdvice>>("ARTIFACT_ADVICE")
     val BREAKPOINT_ID = SourceKey<String>("BREAKPOINT_ID")
     val LOG_ID = SourceKey<String>("LOG_ID")
     val METER_ID = SourceKey<String>("METER_ID")

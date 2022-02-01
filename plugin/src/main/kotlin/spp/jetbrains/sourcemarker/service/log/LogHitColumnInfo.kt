@@ -62,7 +62,7 @@ class LogHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(n
         if (event.eventType == LiveInstrumentEventType.LOG_HIT) {
             val item = Json.decodeValue(event.data, LiveLogHit::class.java)
             return when (name) {
-                "Message" -> item.logResult.logs.first().getFormattedMessage()
+                "Message" -> item.logResult.logs.first().toFormattedMessage()
                 "Time" ->
                     (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())
                         .toPrettyDuration() + " " + message("ago")

@@ -21,9 +21,6 @@ import com.intellij.ui.scale.ScaleContext
 import com.intellij.util.SVGLoader
 import com.intellij.util.ui.JBImageIcon
 import spp.jetbrains.sourcemarker.PluginIcons
-import spp.protocol.advice.ArtifactAdvice
-import spp.protocol.advice.cautionary.RampDetectionAdvice
-import spp.protocol.advice.informative.ActiveExceptionAdvice
 import java.io.ByteArrayInputStream
 import javax.swing.Icon
 
@@ -46,14 +43,6 @@ object SourceMarkerIcons {
     val LIVE_BREAKPOINT_COMPLETE_ICON = PluginIcons.Breakpoint.complete
     val LIVE_BREAKPOINT_PENDING_ICON = PluginIcons.Breakpoint.pending
     val LIVE_BREAKPOINT_ERROR_ICON = PluginIcons.Breakpoint.error
-
-    fun getGutterMarkIcon(advice: ArtifactAdvice): Icon? {
-        return when (advice) {
-            is ActiveExceptionAdvice -> exclamationTriangle
-            is RampDetectionAdvice -> performanceRamp
-            else -> null
-        }
-    }
 
     fun getNumericGutterMarkIcon(value: Int, color: String = "#182d34"): Icon {
         return JBImageIcon(
