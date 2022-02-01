@@ -17,10 +17,6 @@
  */
 package spp.jetbrains.mapper.vcs.git
 
-import spp.jetbrains.mapper.api.impl.SourceMapperImpl
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
-import spp.protocol.artifact.LocalArtifact
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.diff.DiffEntry
@@ -33,6 +29,10 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.TreeWalk
 import org.slf4j.LoggerFactory
+import spp.jetbrains.mapper.api.impl.SourceMapperImpl
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
+import spp.protocol.artifact.LocalArtifact
 import java.io.IOException
 
 /**

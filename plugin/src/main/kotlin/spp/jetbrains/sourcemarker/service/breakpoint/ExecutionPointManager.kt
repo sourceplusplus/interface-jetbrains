@@ -25,10 +25,10 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.protocol.artifact.exception.qualifiedClassName
 import spp.protocol.artifact.exception.sourceAsLineNumber
-import org.slf4j.LoggerFactory
 
 /**
  * todo: probably don't need this as the breakpoint bar serves as the execution point indicator

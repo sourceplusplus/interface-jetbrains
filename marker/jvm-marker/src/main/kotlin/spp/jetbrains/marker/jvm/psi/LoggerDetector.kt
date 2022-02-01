@@ -27,10 +27,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.mark.api.MethodSourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -43,6 +39,10 @@ import org.jetbrains.plugins.groovy.lang.psi.impl.stringValue
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.api.MethodSourceMark
+import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 
 /**
  * Detects the presence of log statements within methods and saves log patterns.

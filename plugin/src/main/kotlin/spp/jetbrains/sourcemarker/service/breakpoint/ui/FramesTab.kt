@@ -24,11 +24,11 @@ import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
-import spp.protocol.artifact.exception.LiveStackTraceElement
-import spp.protocol.artifact.exception.sourceAsLineNumber
 import spp.jetbrains.sourcemarker.service.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.protocol.artifact.exception.LiveStackTraceElement
+import spp.protocol.artifact.exception.sourceAsLineNumber
 import java.awt.BorderLayout
 import javax.swing.JList
 import javax.swing.JPanel

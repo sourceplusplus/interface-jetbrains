@@ -6,28 +6,27 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.EditorTextField;
-import com.intellij.util.ui.UIUtil;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
+import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import net.miginfocom.swing.MigLayout;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Objects;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
-import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.*;
+import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.INTELLIJ_PRODUCT_CODES;
+import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES;
 
 public class LiveLogConfigurationPanel extends JPanel {
 

@@ -45,8 +45,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
 import com.intellij.util.io.decodeBase64
-import spp.jetbrains.sourcemarker.PluginBundle
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import io.vertx.core.json.JsonObject
 import org.eclipse.egit.github.core.Issue
 import org.eclipse.egit.github.core.Label
@@ -54,6 +52,8 @@ import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
 import org.slf4j.LoggerFactory
+import spp.jetbrains.sourcemarker.PluginBundle
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import java.awt.Component
 import java.io.IOException
 import java.io.PrintWriter

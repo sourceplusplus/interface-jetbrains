@@ -19,8 +19,6 @@ package spp.jetbrains.marker.jvm.psi.endpoint
 
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
-import spp.jetbrains.marker.jvm.psi.EndpointDetector.DetectedEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.plugins.groovy.lang.psi.uast.GrUReferenceExpression
@@ -31,6 +29,8 @@ import org.jetbrains.uast.kotlin.KotlinStringULiteralExpression
 import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinUSimpleReferenceExpression
 import org.jetbrains.uast.kotlin.expressions.KotlinUCollectionLiteralExpression
+import spp.jetbrains.marker.jvm.psi.EndpointDetector
+import spp.jetbrains.marker.jvm.psi.EndpointDetector.DetectedEndpoint
 import java.util.*
 
 /**

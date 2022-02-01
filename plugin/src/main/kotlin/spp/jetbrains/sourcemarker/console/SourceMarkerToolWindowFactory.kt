@@ -23,10 +23,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowFactory
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import org.slf4j.LoggerFactory
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 
 /**
  * Displays logs from the SourceMarker plugin to a console window.

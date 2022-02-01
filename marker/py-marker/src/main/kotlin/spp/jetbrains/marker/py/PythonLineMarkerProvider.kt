@@ -20,11 +20,11 @@ package spp.jetbrains.marker.py
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyFile
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceLineMarkerProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
-import org.slf4j.LoggerFactory
 
 /**
  * Associates Python [GutterMark]s to PSI elements.

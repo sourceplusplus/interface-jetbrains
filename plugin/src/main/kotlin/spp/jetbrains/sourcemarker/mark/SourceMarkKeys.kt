@@ -17,11 +17,11 @@
  */
 package spp.jetbrains.sourcemarker.mark
 
+import spp.jetbrains.marker.jvm.psi.EndpointDetector
+import spp.jetbrains.marker.jvm.psi.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.portal.SourcePortal
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
-import spp.jetbrains.marker.jvm.psi.LoggerDetector
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.status.StatusBar
 

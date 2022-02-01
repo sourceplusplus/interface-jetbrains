@@ -18,14 +18,14 @@
 package spp.jetbrains.sourcemarker.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import org.junit.jupiter.api.Test
+import spp.jetbrains.marker.jvm.psi.EndpointDetector
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 
 class JavaEndpointDetectorTest : EndpointDetectorTest() {
 
