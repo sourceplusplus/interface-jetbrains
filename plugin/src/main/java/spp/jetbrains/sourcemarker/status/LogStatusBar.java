@@ -25,7 +25,6 @@ import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
 import spp.jetbrains.sourcemarker.service.log.LogHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.protocol.SourceMarkerServices;
 import spp.protocol.artifact.log.Log;
 import spp.protocol.instrument.InstrumentThrottle;
 import spp.protocol.instrument.LiveInstrument;
@@ -34,7 +33,6 @@ import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.ThrottleStep;
 import spp.protocol.instrument.log.LiveLog;
 import spp.protocol.instrument.log.event.LiveLogRemoved;
-import spp.protocol.service.live.LiveInstrumentService;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -58,7 +56,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -67,7 +64,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
-import static spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.CNFG_PANEL_BGND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.CNFG_PANEL_FOCUS_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
@@ -77,6 +73,7 @@ import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.jetbrains.sourcemarker.PluginUI.STATUS_BAR_TXT_BG_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
 import static spp.protocol.instrument.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.LiveInstrumentEventType.LOG_REMOVED;
 
@@ -195,7 +192,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         this.latestLog = latestLog;
 
         String formattedTime = time.atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
-        String formattedMessage = latestLog.getFormattedMessage();
+        String formattedMessage = latestLog.toFormattedMessage();
         if (!timeLabel.getText().equals(formattedTime) || !liveLogTextField.getText().equals(formattedMessage)) {
             SwingUtilities.invokeLater(() -> {
                 if (liveLogTextField.getEditMode()) {
@@ -562,7 +559,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             latestTime = null;
             latestLog = null;
 
-            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId(), it -> {
+            INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(oldLiveLog);
                 } else {
@@ -598,7 +595,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         HashMap<String, String> meta = new HashMap<>();
         meta.put("original_source_mark", inlayMark.getId());
 
-        LiveInstrumentService instrumentService = Objects.requireNonNull(SourceMarkerServices.Instance.INSTANCE.getLiveInstrument());
         LiveLog instrument = new LiveLog(
                 finalLogPattern,
                 resp.second.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
@@ -621,7 +617,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         displayTimeField();
         wrapper.grabFocus();
 
-        instrumentService.addLiveInstrument(instrument, it -> {
+        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveLog = (LiveLog) it.result();
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
@@ -646,7 +642,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         inlayMark.dispose(true);
 
         if (liveLog != null) {
-            SourceMarkerServices.Instance.INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId(), it -> {
+            INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveLog);
                 } else {
