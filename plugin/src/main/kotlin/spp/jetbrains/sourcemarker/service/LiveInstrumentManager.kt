@@ -66,7 +66,7 @@ class LiveInstrumentManager(
         log.debug("LiveInstrumentManager started")
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
-        vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_INSTRUMENT_SUBSCRIBER) {
+        vertx.eventBus().consumer<JsonObject>(Provide.LIVE_INSTRUMENT_SUBSCRIBER) {
             val liveEvent = Json.decodeValue(it.body().toString(), LiveInstrumentEvent::class.java)
             log.debug("Received instrument event. Type: {}", liveEvent.eventType)
 

@@ -128,7 +128,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 //setup connection
                 val replyAddress = UUID.randomUUID().toString()
                 val pc = InstanceConnection(SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis())
-                val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer("local.$replyAddress")
+                val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer(replyAddress)
 
                 val promise = Promise.promise<Void>()
                 consumer.handler {
@@ -152,7 +152,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     private fun setupHandler(vertx: Vertx, address: String) {
         vertx.eventBus().localConsumer<JsonObject>(address) { resp ->
             val replyAddress = UUID.randomUUID().toString()
-            val tempConsumer = vertx.eventBus().localConsumer<Any>("local.$replyAddress")
+            val tempConsumer = vertx.eventBus().localConsumer<Any>(replyAddress)
             tempConsumer.handler {
                 resp.reply(it.body())
                 tempConsumer.unregister()

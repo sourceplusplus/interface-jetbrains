@@ -77,7 +77,7 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
             developer = json.getJsonObject("payload").getString("developer_id")
         }
 
-        vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_VIEW_SUBSCRIBER + "." + developer) {
+        vertx.eventBus().consumer<JsonObject>(Provide.LIVE_VIEW_SUBSCRIBER + "." + developer) {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
 
