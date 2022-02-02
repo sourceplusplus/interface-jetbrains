@@ -33,6 +33,7 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.search.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointTriggerListener
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved
@@ -52,7 +53,10 @@ import spp.protocol.instrument.event.LiveLogHit
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("UNCHECKED_CAST")
-class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() {
+class LiveInstrumentManager(
+    private val project: Project,
+    private val pluginConfig: SourceMarkerConfig
+) : CoroutineVerticle() {
 
     companion object {
         private val log = LoggerFactory.getLogger(LiveInstrumentManager::class.java)
@@ -80,9 +84,9 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
         //register listener
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            Provide.LIVE_INSTRUMENT_SUBSCRIBER,
-            JsonObject(),
-            TCPServiceDiscoveryBackend.socket!!
+            Provide.LIVE_INSTRUMENT_SUBSCRIBER, null,
+            JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
+            null, null, TCPServiceDiscoveryBackend.socket!!
         )
 
         //show live status bars

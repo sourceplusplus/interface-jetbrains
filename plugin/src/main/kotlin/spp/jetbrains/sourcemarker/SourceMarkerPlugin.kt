@@ -342,7 +342,7 @@ object SourceMarkerPlugin {
                 ApplicationManager.getApplication().invokeLater {
                     BreakpointHitWindowService.getInstance(project).showEventsWindow()
                 }
-                val breakpointListener = LiveInstrumentManager(project)
+                val breakpointListener = LiveInstrumentManager(project, config)
                 GlobalScope.launch(vertx.dispatcher()) {
                     deploymentIds.add(vertx.deployVerticle(breakpointListener).await())
                 }

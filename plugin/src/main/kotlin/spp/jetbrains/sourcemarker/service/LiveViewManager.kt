@@ -60,7 +60,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatterBuilder
 
-class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle() {
+class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineVerticle() {
 
     private val log = LoggerFactory.getLogger(LiveViewManager::class.java)
 
@@ -72,8 +72,8 @@ class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle(
     override suspend fun start() {
         //register listener
         var developer = "system"
-        if (markerConfig.serviceToken != null) {
-            val json = JWT.parse(markerConfig.serviceToken)
+        if (pluginConfig.serviceToken != null) {
+            val json = JWT.parse(pluginConfig.serviceToken)
             developer = json.getJsonObject("payload").getString("developer_id")
         }
 
@@ -106,9 +106,9 @@ class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle(
 
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            Provide.LIVE_VIEW_SUBSCRIBER + "." + developer,
-            JsonObject(),
-            TCPServiceDiscoveryBackend.socket!!
+            Provide.LIVE_VIEW_SUBSCRIBER + "." + developer, null,
+            JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
+            null, null, TCPServiceDiscoveryBackend.socket!!
         )
     }
 
