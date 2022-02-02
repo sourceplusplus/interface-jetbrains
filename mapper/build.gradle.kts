@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.sourceplusplus.protocol:protocol:f9cb03d3b4")
+    implementation("com.github.sourceplusplus.protocol:protocol:e6ab057003")
     implementation("com.github.sh5i:git-stein:v0.5.0")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r")
