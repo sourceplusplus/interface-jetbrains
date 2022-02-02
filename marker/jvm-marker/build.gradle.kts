@@ -21,7 +21,7 @@ dependencies {
         compileOnly(project(":marker"))
         compileOnly(project(":monitor"))
     }
-    compileOnly("com.github.sourceplusplus.protocol:protocol:a97325afb6")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:f9cb03d3b4")
     val intellijVersion = "213.6777.52"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
