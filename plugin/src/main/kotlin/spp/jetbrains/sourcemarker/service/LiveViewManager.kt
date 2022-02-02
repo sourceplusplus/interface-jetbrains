@@ -39,7 +39,7 @@ import spp.protocol.ProtocolAddress
 import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
-import spp.protocol.SourceServices.Provide
+import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType
@@ -77,7 +77,7 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
             developer = json.getJsonObject("payload").getString("developer_id")
         }
 
-        vertx.eventBus().consumer<JsonObject>(Provide.LIVE_VIEW_SUBSCRIBER + "." + developer) {
+        vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developer)) {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
 
@@ -106,7 +106,7 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
 
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            Provide.LIVE_VIEW_SUBSCRIBER + "." + developer, null,
+            toLiveViewSubscriberAddress(developer), null,
             JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
             null, null, TCPServiceDiscoveryBackend.socket!!
         )

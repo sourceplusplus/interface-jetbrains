@@ -23,6 +23,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -38,7 +39,7 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
 import spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 import spp.protocol.SourceServices.Instance
-import spp.protocol.SourceServices.Provide
+import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.event.LiveBreakpointHit
@@ -63,10 +64,14 @@ class LiveInstrumentManager(
     }
 
     override suspend fun start() {
-        log.debug("LiveInstrumentManager started")
+        var developer = "system"
+        if (pluginConfig.serviceToken != null) {
+            val json = JWT.parse(pluginConfig.serviceToken)
+            developer = json.getJsonObject("payload").getString("developer_id")
+        }
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
-        vertx.eventBus().consumer<JsonObject>(Provide.LIVE_INSTRUMENT_SUBSCRIBER) {
+        vertx.eventBus().consumer<JsonObject>(toLiveInstrumentSubscriberAddress(developer)) {
             val liveEvent = Json.decodeValue(it.body().toString(), LiveInstrumentEvent::class.java)
             log.debug("Received instrument event. Type: {}", liveEvent.eventType)
 
@@ -84,7 +89,7 @@ class LiveInstrumentManager(
         //register listener
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            Provide.LIVE_INSTRUMENT_SUBSCRIBER, null,
+            toLiveInstrumentSubscriberAddress(developer), null,
             JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
             null, null, TCPServiceDiscoveryBackend.socket!!
         )
