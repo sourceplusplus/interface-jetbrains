@@ -4,6 +4,7 @@
 
 ## [Unreleased]
 ### Added
+- Ability to configure plugin via `.spp/spp-plugin.yml` file
 
 ### Changed
 
@@ -12,6 +13,7 @@
 ### Removed
 
 ### Fixed
+- Backwards compatibility issues
 
 ### Security
 

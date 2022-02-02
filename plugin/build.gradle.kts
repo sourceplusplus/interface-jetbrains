@@ -8,6 +8,7 @@ plugins {
     id("maven-publish")
 }
 
+val joorVersion: String by project
 val jacksonVersion: String by project
 val vertxVersion: String by project
 val kotlinVersion = ext.get("kotlinVersion")
@@ -66,6 +67,7 @@ dependencies {
         implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     }
 
+    implementation("org.jooq:joor:$joorVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
     implementation("org.apache.commons:commons-text:1.9")
     implementation("com.github.sh5i:git-stein:v0.5.0")
@@ -74,7 +76,6 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("io.vertx:vertx-web:$vertxVersion")
-    //implementation("io.vertx:vertx-service-discovery:$vertxVersion")
     implementation(files(".ext/vertx-service-discovery-4.0.3-SNAPSHOT.jar"))
     implementation("io.vertx:vertx-service-proxy:$vertxVersion")
     implementation("io.vertx:vertx-tcp-eventbus-bridge:$vertxVersion")

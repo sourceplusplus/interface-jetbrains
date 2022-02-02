@@ -7,6 +7,7 @@ val kotlinVersion = ext.get("kotlinVersion")
 val pluginGroup: String by project
 val projectVersion: String by project
 val slf4jVersion: String by project
+val joorVersion: String by project
 
 publishing {
     publications {
@@ -28,6 +29,7 @@ repositories {
 dependencies {
     val intellijVersion = "213.6777.52"
 
+    compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
