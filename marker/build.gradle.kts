@@ -28,7 +28,7 @@ repositories {
 dependencies {
     val intellijVersion = "213.6777.52"
 
-    compileOnly("com.github.sourceplusplus.protocol:protocol:e6ab057003")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:90a0782cda")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.0.1-jre")

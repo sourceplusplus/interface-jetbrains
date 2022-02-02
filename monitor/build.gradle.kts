@@ -10,7 +10,7 @@ val projectVersion: String by project
 val slf4jVersion: String by project
 
 dependencies {
-    implementation("com.github.sourceplusplus.protocol:protocol:e6ab057003")
+    implementation("com.github.sourceplusplus.protocol:protocol:90a0782cda")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")
