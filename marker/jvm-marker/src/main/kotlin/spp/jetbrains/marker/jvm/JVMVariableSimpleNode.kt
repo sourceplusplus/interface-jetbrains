@@ -128,7 +128,7 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                 val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
                 val identity = variable.liveIdentity
                 presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
-
+                VariableValueFormatter.format(variable, presentation)
                 presentation.setIcon(AllIcons.Debugger.Value)
             }
         } else {
