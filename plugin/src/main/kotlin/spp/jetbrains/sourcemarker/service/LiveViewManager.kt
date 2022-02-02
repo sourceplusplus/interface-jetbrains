@@ -25,7 +25,6 @@ import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
@@ -83,8 +82,8 @@ class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle(
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
 
             when (event.viewConfig.viewName) {
-                "LIVE_METER" -> GlobalScope.launch(vertx.dispatcher()) { consumeLiveMeterEvent(event) }
-                "LOGS" -> GlobalScope.launch(vertx.dispatcher()) { consumeLogsViewEvent(event) }
+                "LIVE_METER" -> launch(vertx.dispatcher()) { consumeLiveMeterEvent(event) }
+                "LOGS" -> launch(vertx.dispatcher()) { consumeLogsViewEvent(event) }
                 "TRACES" -> {
                     val sourceMark = SourceMarkSearch.findByEndpointName(event.entityId)
                     if (sourceMark == null) {
@@ -113,7 +112,7 @@ class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle(
         )
     }
 
-    private suspend fun consumeLiveMeterEvent(event: LiveViewEvent) {
+    private fun consumeLiveMeterEvent(event: LiveViewEvent) {
         val meterTypeStr = event.entityId.substringAfter("spp_").substringBefore("_").toUpperCase()
         val meterType = MeterType.valueOf(meterTypeStr)
         val meterId = event.entityId.substringAfter(meterType.name.toLowerCase() + "_").replace("_", "-")

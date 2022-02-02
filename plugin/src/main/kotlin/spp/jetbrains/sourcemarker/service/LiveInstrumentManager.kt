@@ -35,11 +35,15 @@ import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
+import spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
-import spp.protocol.instrument.event.*
+import spp.protocol.instrument.event.LiveBreakpointHit
+import spp.protocol.instrument.event.LiveInstrumentEvent
+import spp.protocol.instrument.event.LiveInstrumentEventType
+import spp.protocol.instrument.event.LiveLogHit
 
 /**
  * todo: description.
@@ -93,7 +97,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
     }
 
     private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val logRemoved = Json.decodeValue(liveEvent.data, LiveInstrumentRemoved::class.java)
+        val logRemoved = deserializeLiveInstrumentRemoved(JsonObject(liveEvent.data))
         ApplicationManager.getApplication().invokeLater {
             val inlayMark = SourceMarkSearch.findByLogId(logRemoved.liveInstrument.id!!)
             if (inlayMark != null) {
@@ -139,7 +143,7 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
     }
 
     private fun handleBreakpointRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val bpRemoved = Json.decodeValue(liveEvent.data, LiveInstrumentRemoved::class.java)
+        val bpRemoved = deserializeLiveInstrumentRemoved(JsonObject(liveEvent.data))
         ApplicationManager.getApplication().invokeLater {
             val inlayMark = SourceMarkSearch.findByBreakpointId(bpRemoved.liveInstrument.id!!)
             if (inlayMark != null) {

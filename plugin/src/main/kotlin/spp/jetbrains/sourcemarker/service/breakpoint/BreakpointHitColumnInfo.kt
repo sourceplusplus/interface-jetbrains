@@ -19,12 +19,13 @@ package spp.jetbrains.sourcemarker.service.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import kotlinx.datetime.Clock
 import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
-import spp.protocol.instrument.event.LiveInstrumentRemoved
 import spp.protocol.utils.toPrettyDuration
 
 /**
@@ -41,14 +42,14 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
                 val obj1 = if (t.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
                     Json.decodeValue(t.data, LiveBreakpointHit::class.java)
                 } else if (t.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
-                    Json.decodeValue(t.data, LiveInstrumentRemoved::class.java)
+                    deserializeLiveInstrumentRemoved(JsonObject(t.data))
                 } else {
                     throw IllegalArgumentException(t.eventType.name)
                 }
                 val obj2 = if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
                     Json.decodeValue(t2.data, LiveBreakpointHit::class.java)
                 } else if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
-                    Json.decodeValue(t2.data, LiveInstrumentRemoved::class.java)
+                    deserializeLiveInstrumentRemoved(JsonObject(t2.data))
                 } else {
                     throw IllegalArgumentException(t2.eventType.name)
                 }
@@ -73,7 +74,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
                 else -> item.toString()
             }
         } else {
-            val item = Json.decodeValue(event.data, LiveInstrumentRemoved::class.java)
+            val item = deserializeLiveInstrumentRemoved(JsonObject(event.data))
             return when (name) {
                 "Breakpoint Data" -> item.cause!!.message ?: item.cause!!.exceptionType
                 "Time" -> (Clock.System.now().toEpochMilliseconds() - item.occurredAt.toEpochMilliseconds())
