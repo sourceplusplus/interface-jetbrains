@@ -12,7 +12,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
@@ -58,6 +58,7 @@ import java.util.stream.Collectors;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_REMOVED;
@@ -228,7 +229,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         } else if (event.getEventType() == LOG_REMOVED) {
             removed = true;
 
-            LiveInstrumentRemoved removed = Json.decodeValue(event.getData(), LiveInstrumentRemoved.class);
+            LiveInstrumentRemoved removed = deserializeLiveInstrumentRemoved(new JsonObject(event.getData()));
             if (removed.getCause() != null) {
                 commandModel.insertRow(0, event);
 
