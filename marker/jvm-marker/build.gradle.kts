@@ -6,6 +6,7 @@ val kotlinVersion = ext.get("kotlinVersion")
 val vertxVersion: String by project
 val projectVersion: String by project
 val slf4jVersion: String by project
+val joorVersion: String by project
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
@@ -24,6 +25,7 @@ dependencies {
     compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     val intellijVersion = "213.6777.52"
 
+    implementation("org.jooq:joor:$joorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:31.0.1-jre")
