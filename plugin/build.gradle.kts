@@ -1,4 +1,5 @@
 import org.jetbrains.changelog.markdownToHTML
+import java.net.URL
 
 plugins {
     id("java")
@@ -116,7 +117,12 @@ tasks {
         )
 
         // Get the latest available change notes from the changelog file
-        changeNotes.set(changelog.getLatest().toHTML())
+        val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
+            .readText()
+            .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
+            .substringBefore("\n### ").substringBefore("\n## ")
+            .trim()
+        changeNotes.set(markdownToHTML(changelog))
     }
 
     publishPlugin {
@@ -130,6 +136,15 @@ tasks {
 }
 
 tasks {
+    register("getPluginChangelog") {
+        val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
+            .readText()
+            .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
+            .substringBefore("\n### ").substringBefore("\n## ")
+            .trim()
+        println(changelog)
+    }
+
     test {
         useJUnitPlatform()
     }
