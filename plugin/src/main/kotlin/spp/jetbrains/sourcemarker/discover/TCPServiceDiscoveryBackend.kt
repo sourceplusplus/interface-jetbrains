@@ -142,7 +142,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 val headers = JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } }
                 FrameHelper.sendFrame(
                     BridgeEventType.SEND.name.toLowerCase(),
-                    PlatformAddress.MARKER_CONNECTED.address,
+                    PlatformAddress.MARKER_CONNECTED,
                     replyAddress, headers, true, JsonObject.mapFrom(pc), socket!!
                 )
             }
