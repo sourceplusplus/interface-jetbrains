@@ -80,6 +80,7 @@ import spp.protocol.ProtocolAddress.Global.SetCurrentPage
 import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import spp.protocol.ProtocolAddress.Portal.UpdateEndpoints
 import spp.protocol.SourceServices.Instance
+import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.endpoint.EndpointResult
@@ -92,7 +93,6 @@ import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.instrument.LiveSourceLocation
 import spp.protocol.portal.PageType
-import spp.protocol.utils.ArtifactNameUtils
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
 import java.net.URI

@@ -46,7 +46,7 @@ import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.protocol.SourceServices.Utilize
 import spp.protocol.extend.TCPServiceFrameParser
 import spp.protocol.platform.PlatformAddress
-import spp.protocol.status.InstanceConnection
+import spp.protocol.platform.status.InstanceConnection
 import java.util.*
 
 /**

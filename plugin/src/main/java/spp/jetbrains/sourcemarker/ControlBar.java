@@ -12,7 +12,7 @@ import spp.jetbrains.sourcemarker.command.ControlBarController;
 import spp.jetbrains.sourcemarker.command.LiveControlCommand;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
-import spp.protocol.utils.ArtifactNameUtils;
+import spp.protocol.artifact.ArtifactNameUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;

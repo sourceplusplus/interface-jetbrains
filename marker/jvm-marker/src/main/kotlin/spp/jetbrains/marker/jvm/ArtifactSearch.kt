@@ -40,9 +40,9 @@ import org.jetbrains.uast.toUElementOfType
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.source.JVMMarkerUtils
+import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
-import spp.protocol.utils.ArtifactNameUtils
 import java.util.*
 
 /**
