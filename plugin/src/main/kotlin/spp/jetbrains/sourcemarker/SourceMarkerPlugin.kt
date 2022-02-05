@@ -17,6 +17,7 @@
  */
 package spp.jetbrains.sourcemarker
 
+import com.apollographql.apollo3.exception.ApolloHttpException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -106,8 +107,8 @@ import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import spp.protocol.artifact.trace.TraceStack
-import spp.protocol.service.LiveService
 import spp.protocol.service.LiveInstrumentService
+import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import spp.protocol.service.LogCountIndicatorService
 import spp.protocol.util.KSerializers
@@ -257,6 +258,29 @@ object SourceMarkerPlugin {
                 initMonitor(config)
                 connectedMonitor = true
             } catch (ignored: CancellationException) {
+            } catch (throwable: ApolloHttpException) {
+                val pluginName = message("plugin_name")
+                if (throwable.statusCode == 401) {
+                    Notifications.Bus.notify(
+                        Notification(
+                            pluginName, "Connection unauthorized",
+                            "Failed to authenticate with $pluginName. " +
+                                    "Please ensure the correct configuration " +
+                                    "is set at: Settings -> Tools -> $pluginName",
+                            NotificationType.ERROR
+                        )
+                    )
+                } else {
+                    Notifications.Bus.notify(
+                        Notification(
+                            pluginName, "Connection failed",
+                            "Failed to connect to $pluginName. " +
+                                    "Please ensure the correct configuration " +
+                                    "is set at: Settings -> Tools -> $pluginName",
+                            NotificationType.ERROR
+                        )
+                    )
+                }
             } catch (throwable: Throwable) {
                 //todo: if first time bring up config panel automatically instead of notification
                 val pluginName = message("plugin_name")
@@ -284,8 +308,8 @@ object SourceMarkerPlugin {
                 log.error("Connection failed. Reason: {}", throwable.message)
             }
 
-            discoverAvailableServices(config, project)
             if (connectedMonitor) {
+                discoverAvailableServices(config, project)
                 initPortal(config)
                 initMarker(config, project)
                 initMapper()
@@ -465,15 +489,6 @@ object SourceMarkerPlugin {
                 }
             } else {
                 config.serviceToken = null
-
-                log.error("Invalid access token")
-                Notifications.Bus.notify(
-                    Notification(
-                        message("plugin_name"), "Invalid access token",
-                        "Failed to validate access token",
-                        NotificationType.ERROR
-                    )
-                )
             }
         } else {
             //try default local access
