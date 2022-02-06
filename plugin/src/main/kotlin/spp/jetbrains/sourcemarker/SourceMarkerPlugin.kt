@@ -328,15 +328,22 @@ object SourceMarkerPlugin {
             throw RuntimeException(e)
         }
 
-        val discovery: ServiceDiscovery = DiscoveryImpl(
-            vertx,
-            ServiceDiscoveryOptions().setBackendConfiguration(
-                JsonObject()
-                    .put("backend-name", "tcp-service-discovery")
-                    .put("hardcoded_config", hardcodedConfig)
-                    .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
+        val discovery: ServiceDiscovery
+        val originalClassLoader = Thread.currentThread().contextClassLoader
+        try {
+            Thread.currentThread().contextClassLoader = javaClass.classLoader
+            discovery = DiscoveryImpl(
+                vertx,
+                ServiceDiscoveryOptions().setBackendConfiguration(
+                    JsonObject()
+                        .put("backend-name", "tcp-service-discovery")
+                        .put("hardcoded_config", hardcodedConfig)
+                        .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
+                )
             )
-        )
+        } finally {
+            Thread.currentThread().contextClassLoader = originalClassLoader
+        }
 
         log.info("Discovering available services")
         val availableRecords = discovery.getRecords { true }.await()
