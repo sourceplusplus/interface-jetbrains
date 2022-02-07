@@ -34,7 +34,7 @@ dependencies {
     compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
     compileOnly("org.jooq:jooq:3.16.2")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
-    compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.4")
+    compileOnly("com.android.tools.external.org-jetbrains:uast:30.1.1")
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:ide-impl:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion")
