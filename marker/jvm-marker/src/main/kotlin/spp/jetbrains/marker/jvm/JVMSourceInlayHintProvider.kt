@@ -23,17 +23,17 @@ import com.intellij.openapi.editor.BlockInlayPriority
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
-import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.source.JVMMarkerUtils
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.psiUtil.getParentOfType
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
+import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.plugin.SourceInlayHintProvider
+import spp.jetbrains.marker.source.JVMMarkerUtils
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 
 /**
  * todo: description.

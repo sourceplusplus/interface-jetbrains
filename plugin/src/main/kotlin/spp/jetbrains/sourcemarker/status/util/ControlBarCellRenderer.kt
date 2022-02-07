@@ -21,7 +21,7 @@ import spp.jetbrains.sourcemarker.PluginUI
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
-import spp.protocol.utils.ArtifactNameUtils.getShortFunctionSignature
+import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList

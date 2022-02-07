@@ -33,7 +33,7 @@ import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.protocol.SourceMarkerServices.Instance
+import spp.protocol.SourceServices.Instance
 import spp.protocol.instrument.DurationStep
 
 /**
@@ -69,7 +69,7 @@ class LogCountIndicators : CoroutineVerticle() {
                             Clock.System.now().minus(15, DateTimeUnit.MINUTE),
                             Clock.System.now(),
                             DurationStep.MINUTE
-                        ) {
+                        ).onComplete {
                             if (it.succeeded()) {
                                 val occurrences = it.result()
                                 //log.info("Found ${occurrences} occurrences of log patterns")

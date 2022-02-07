@@ -49,7 +49,7 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.ProtocolAddress.Global.RefreshActivity
-import spp.protocol.SourceMarkerServices
+import spp.protocol.SourceServices
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.LiveSourceLocation
@@ -145,20 +145,15 @@ class StandaloneActivityLiveView : LightJavaCodeInsightFixtureTestCase() {
             val endpointName = sourceMark.getUserData(
                 SourceMarkKeys.ENDPOINT_DETECTOR
             )?.getOrFindEndpointName(sourceMark) ?: return@launch
-            SourceMarkerServices.Instance.liveView?.addLiveViewSubscription(
+            SourceServices.Instance.liveView!!.addLiveViewSubscription(
                 LiveViewSubscription(
                     null,
                     listOf(endpointName),
                     sourceMark.artifactQualifiedName,
                     LiveSourceLocation(sourceMark.artifactQualifiedName.identifier, -1),
-                    LiveViewConfig(
-                        "ACTIVITY",
-                        false,
-                        listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
-                        refreshRateLimit = 0
-                    )
+                    LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
                 )
-            ) {
+            ).onComplete {
                 if (it.succeeded()) {
                     println(it)
                 } else {

@@ -17,8 +17,8 @@
  */
 package spp.jetbrains.monitor.skywalking.model
 
-import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
 import kotlinx.datetime.Instant
+import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
 import java.time.Duration
 import java.time.Period
 import java.time.ZonedDateTime

@@ -18,7 +18,6 @@
 package spp.jetbrains.mapper.vcs.git
 
 import com.google.common.base.Preconditions
-import spp.jetbrains.mapper.extend.SourceCodeTokenizer
 import jp.ac.titech.c.se.stein.PorcelainAPI
 import jp.ac.titech.c.se.stein.core.Context
 import jp.ac.titech.c.se.stein.core.EntrySet
@@ -29,6 +28,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.Repository
 import org.slf4j.LoggerFactory
+import spp.jetbrains.mapper.extend.SourceCodeTokenizer
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.*

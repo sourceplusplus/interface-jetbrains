@@ -26,6 +26,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
@@ -35,7 +36,6 @@ import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
-import org.slf4j.LoggerFactory
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 

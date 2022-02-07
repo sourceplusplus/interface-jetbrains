@@ -21,12 +21,12 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
-import spp.jetbrains.sourcemarker.PluginBundle.message
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import javax.swing.JComponent
 
 /**

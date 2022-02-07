@@ -17,18 +17,18 @@
  */
 package spp.jetbrains.monitor.skywalking.bridge
 
-import spp.jetbrains.monitor.skywalking.SkywalkingClient
-import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
-import spp.jetbrains.monitor.skywalking.toProtocol
-import spp.protocol.artifact.trace.Trace
-import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import spp.jetbrains.monitor.skywalking.SkywalkingClient
+import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
+import spp.jetbrains.monitor.skywalking.toProtocol
+import spp.protocol.artifact.trace.Trace
+import spp.protocol.artifact.trace.TraceResult
+import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 
 /**
  * todo: description.

@@ -24,8 +24,8 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.*
-import spp.jetbrains.sourcemarker.service.log.VariableParser
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
+import spp.jetbrains.sourcemarker.service.log.VariableParser
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*
 import java.awt.event.*

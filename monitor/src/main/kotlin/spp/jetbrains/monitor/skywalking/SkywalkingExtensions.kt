@@ -17,12 +17,6 @@
  */
 package spp.jetbrains.monitor.skywalking
 
-import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
-import spp.protocol.artifact.QueryTimeFrame
-import spp.protocol.artifact.metrics.ArtifactMetricResult
-import spp.protocol.artifact.metrics.ArtifactMetrics
-import spp.protocol.artifact.metrics.MetricType
-import spp.protocol.artifact.trace.*
 import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
@@ -30,8 +24,13 @@ import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.QueryOrder
 import monitor.skywalking.protocol.type.TraceState
+import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.protocol.artifact.ArtifactQualifiedName
-import java.math.BigDecimal
+import spp.protocol.artifact.QueryTimeFrame
+import spp.protocol.artifact.metrics.ArtifactMetricResult
+import spp.protocol.artifact.metrics.ArtifactMetrics
+import spp.protocol.artifact.metrics.MetricType
+import spp.protocol.artifact.trace.*
 
 fun toProtocol(
     artifactQualifiedName: ArtifactQualifiedName,

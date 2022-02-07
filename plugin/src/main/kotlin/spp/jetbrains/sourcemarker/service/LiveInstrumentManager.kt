@@ -21,30 +21,31 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.impl.jose.JWT
+import io.vertx.ext.bridge.BridgeEventType
+import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
+import io.vertx.kotlin.coroutines.CoroutineVerticle
+import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
-import spp.protocol.SourceMarkerServices.Instance
-import spp.protocol.SourceMarkerServices.Provide
-import spp.protocol.instrument.LiveInstrumentEvent
-import spp.protocol.instrument.LiveInstrumentEventType
-import spp.protocol.instrument.breakpoint.LiveBreakpoint
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved
-import spp.protocol.instrument.log.LiveLog
-import spp.protocol.instrument.log.event.LiveLogHit
-import spp.protocol.instrument.log.event.LiveLogRemoved
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.search.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointTriggerListener
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.bridge.BridgeEventType
-import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
-import io.vertx.kotlin.coroutines.CoroutineVerticle
-import org.slf4j.LoggerFactory
+import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
+import spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved
+import spp.protocol.SourceServices.Instance
+import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
+import spp.protocol.instrument.LiveBreakpoint
+import spp.protocol.instrument.LiveLog
+import spp.protocol.instrument.event.LiveBreakpointHit
+import spp.protocol.instrument.event.LiveInstrumentEvent
+import spp.protocol.instrument.event.LiveInstrumentEventType
+import spp.protocol.instrument.event.LiveLogHit
 
 /**
  * todo: description.
@@ -53,17 +54,24 @@ import org.slf4j.LoggerFactory
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("UNCHECKED_CAST")
-class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() {
+class LiveInstrumentManager(
+    private val project: Project,
+    private val pluginConfig: SourceMarkerConfig
+) : CoroutineVerticle() {
 
     companion object {
         private val log = LoggerFactory.getLogger(LiveInstrumentManager::class.java)
     }
 
     override suspend fun start() {
-        log.debug("LiveInstrumentManager started")
+        var developer = "system"
+        if (pluginConfig.serviceToken != null) {
+            val json = JWT.parse(pluginConfig.serviceToken)
+            developer = json.getJsonObject("payload").getString("developer_id")
+        }
         EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
-        vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_INSTRUMENT_SUBSCRIBER) {
+        vertx.eventBus().consumer<JsonObject>(toLiveInstrumentSubscriberAddress(developer)) {
             val liveEvent = Json.decodeValue(it.body().toString(), LiveInstrumentEvent::class.java)
             log.debug("Received instrument event. Type: {}", liveEvent.eventType)
 
@@ -81,13 +89,13 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
         //register listener
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            Provide.LIVE_INSTRUMENT_SUBSCRIBER,
-            JsonObject(),
-            TCPServiceDiscoveryBackend.socket!!
+            toLiveInstrumentSubscriberAddress(developer), null,
+            JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
+            null, null, TCPServiceDiscoveryBackend.socket!!
         )
 
         //show live status bars
-        Instance.liveInstrument!!.getLiveInstruments {
+        Instance.liveInstrument!!.getLiveInstruments(null).onComplete {
             if (it.succeeded()) {
                 log.info("Found {} active live status bars", it.result().size)
                 LiveStatusManager.addActiveLiveInstruments(it.result())
@@ -98,9 +106,9 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
     }
 
     private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val logRemoved = Json.decodeValue(liveEvent.data, LiveLogRemoved::class.java)
+        val logRemoved = deserializeLiveInstrumentRemoved(JsonObject(liveEvent.data))
         ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByLogId(logRemoved.logId)
+            val inlayMark = SourceMarkSearch.findByLogId(logRemoved.liveInstrument.id!!)
             if (inlayMark != null) {
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
@@ -144,9 +152,9 @@ class LiveInstrumentManager(private val project: Project) : CoroutineVerticle() 
     }
 
     private fun handleBreakpointRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val bpRemoved = Json.decodeValue(liveEvent.data, LiveBreakpointRemoved::class.java)
+        val bpRemoved = deserializeLiveInstrumentRemoved(JsonObject(liveEvent.data))
         ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByBreakpointId(bpRemoved.breakpointId)
+            val inlayMark = SourceMarkSearch.findByBreakpointId(bpRemoved.liveInstrument.id!!)
             if (inlayMark != null) {
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {

@@ -17,12 +17,12 @@
  */
 package spp.jetbrains.mapper.vcs.git
 
-import spp.jetbrains.mapper.SourceMapperTest
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import spp.jetbrains.mapper.SourceMapperTest
 import java.io.File
 import java.nio.file.Files
 import java.util.*

@@ -25,7 +25,6 @@ import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
@@ -40,7 +39,7 @@ import spp.protocol.ProtocolAddress
 import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
-import spp.protocol.SourceMarkerServices.Provide
+import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType
@@ -52,8 +51,8 @@ import spp.protocol.artifact.trace.Trace
 import spp.protocol.artifact.trace.TraceOrderType
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
-import spp.protocol.instrument.LiveInstrumentEvent
-import spp.protocol.instrument.LiveInstrumentEventType.METER_UPDATED
+import spp.protocol.instrument.event.LiveInstrumentEvent
+import spp.protocol.instrument.event.LiveInstrumentEventType.METER_UPDATED
 import spp.protocol.instrument.meter.MeterType
 import spp.protocol.view.LiveViewEvent
 import java.net.URI
@@ -61,7 +60,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatterBuilder
 
-class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle() {
+class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineVerticle() {
 
     private val log = LoggerFactory.getLogger(LiveViewManager::class.java)
 
@@ -73,18 +72,18 @@ class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle(
     override suspend fun start() {
         //register listener
         var developer = "system"
-        if (markerConfig.serviceToken != null) {
-            val json = JWT.parse(markerConfig.serviceToken)
+        if (pluginConfig.serviceToken != null) {
+            val json = JWT.parse(pluginConfig.serviceToken)
             developer = json.getJsonObject("payload").getString("developer_id")
         }
 
-        vertx.eventBus().consumer<JsonObject>("local." + Provide.LIVE_VIEW_SUBSCRIBER + "." + developer) {
+        vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developer)) {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
 
             when (event.viewConfig.viewName) {
-                "LIVE_METER" -> GlobalScope.launch(vertx.dispatcher()) { consumeLiveMeterEvent(event) }
-                "LOGS" -> GlobalScope.launch(vertx.dispatcher()) { consumeLogsViewEvent(event) }
+                "LIVE_METER" -> launch(vertx.dispatcher()) { consumeLiveMeterEvent(event) }
+                "LOGS" -> launch(vertx.dispatcher()) { consumeLogsViewEvent(event) }
                 "TRACES" -> {
                     val sourceMark = SourceMarkSearch.findByEndpointName(event.entityId)
                     if (sourceMark == null) {
@@ -107,13 +106,13 @@ class LiveViewManager(val markerConfig: SourceMarkerConfig) : CoroutineVerticle(
 
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.toLowerCase(),
-            Provide.LIVE_VIEW_SUBSCRIBER + "." + developer,
-            JsonObject(),
-            TCPServiceDiscoveryBackend.socket!!
+            toLiveViewSubscriberAddress(developer), null,
+            JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
+            null, null, TCPServiceDiscoveryBackend.socket!!
         )
     }
 
-    private suspend fun consumeLiveMeterEvent(event: LiveViewEvent) {
+    private fun consumeLiveMeterEvent(event: LiveViewEvent) {
         val meterTypeStr = event.entityId.substringAfter("spp_").substringBefore("_").toUpperCase()
         val meterType = MeterType.valueOf(meterTypeStr)
         val meterId = event.entityId.substringAfter(meterType.name.toLowerCase() + "_").replace("_", "-")

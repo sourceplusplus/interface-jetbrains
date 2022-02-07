@@ -23,13 +23,13 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
-import spp.jetbrains.sourcemarker.PluginBundle
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import kotlinx.coroutines.runBlocking
 import org.apache.log4j.FileAppender
 import org.apache.log4j.Logger
 import org.apache.log4j.PatternLayout
+import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
+import spp.jetbrains.sourcemarker.PluginBundle
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 
 /**
  * todo: description.

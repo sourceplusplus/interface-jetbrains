@@ -19,12 +19,6 @@ package spp.jetbrains.marker.jvm.psi
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.util.Computable
-import spp.jetbrains.marker.jvm.psi.endpoint.SkywalkingTraceEndpoint
-import spp.jetbrains.marker.jvm.psi.endpoint.SpringMVCEndpoint
-import spp.jetbrains.marker.source.mark.api.MethodSourceMark
-import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.monitor.skywalking.bridge.EndpointBridge
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -39,6 +33,12 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.jvm.psi.endpoint.SkywalkingTraceEndpoint
+import spp.jetbrains.marker.jvm.psi.endpoint.SpringMVCEndpoint
+import spp.jetbrains.marker.source.mark.api.MethodSourceMark
+import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.monitor.skywalking.bridge.EndpointBridge
 import java.util.*
 
 /**

@@ -30,13 +30,6 @@ import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import spp.jetbrains.portal.SourcePortal
-import spp.protocol.ProtocolAddress.Global.RefreshTraces
-import spp.protocol.portal.PageType
-import spp.protocol.portal.PortalConfiguration
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import io.vertx.core.Promise
 import io.vertx.core.json.Json
 import io.vertx.kotlin.coroutines.await
@@ -47,8 +40,15 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import spp.jetbrains.portal.SourcePortal
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
+import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.protocol.ProtocolAddress.Global.RefreshTraces
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
+import spp.protocol.portal.PageType
+import spp.protocol.portal.PortalConfiguration
 import java.io.File
 
 class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {

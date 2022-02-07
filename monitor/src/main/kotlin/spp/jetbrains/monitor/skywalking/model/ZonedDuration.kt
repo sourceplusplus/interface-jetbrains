@@ -17,8 +17,8 @@
  */
 package spp.jetbrains.monitor.skywalking.model
 
-import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import monitor.skywalking.protocol.type.Duration
+import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import java.time.ZonedDateTime
 
 /**

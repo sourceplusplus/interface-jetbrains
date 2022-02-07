@@ -24,9 +24,9 @@ import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
-import spp.protocol.instrument.LiveVariable
-import spp.protocol.instrument.LiveVariableScope
 import org.apache.commons.lang3.EnumUtils
+import spp.protocol.instrument.variable.LiveVariable
+import spp.protocol.instrument.variable.LiveVariableScope
 
 /**
  * todo: description.

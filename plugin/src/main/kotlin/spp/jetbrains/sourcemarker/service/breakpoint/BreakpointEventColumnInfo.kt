@@ -19,13 +19,13 @@ package spp.jetbrains.sourcemarker.service.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.table.IconTableCellRenderer
+import kotlinx.datetime.toJavaInstant
+import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons
 import spp.protocol.artifact.exception.methodName
 import spp.protocol.artifact.exception.qualifiedClassName
 import spp.protocol.artifact.exception.shortQualifiedClassName
 import spp.protocol.artifact.exception.sourceAsLineNumber
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons
-import kotlinx.datetime.toJavaInstant
+import spp.protocol.instrument.event.LiveBreakpointHit
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.swing.Icon

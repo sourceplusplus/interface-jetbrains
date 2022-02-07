@@ -12,7 +12,7 @@ import spp.jetbrains.sourcemarker.command.ControlBarController;
 import spp.jetbrains.sourcemarker.command.LiveControlCommand;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
-import spp.protocol.utils.ArtifactNameUtils;
+import spp.protocol.artifact.ArtifactNameUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -24,10 +24,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_17;
-import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
-import static spp.jetbrains.sourcemarker.PluginUI.STATUS_BAR_TXT_BG_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class ControlBar extends JPanel implements VisibleAreaListener {

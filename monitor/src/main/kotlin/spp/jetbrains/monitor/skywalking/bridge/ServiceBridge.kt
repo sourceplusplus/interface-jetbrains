@@ -17,8 +17,6 @@
  */
 package spp.jetbrains.monitor.skywalking.bridge
 
-import spp.jetbrains.monitor.skywalking.SkywalkingClient
-import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -26,6 +24,8 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
+import spp.jetbrains.monitor.skywalking.SkywalkingClient
+import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
 import java.time.ZonedDateTime
 
 /**

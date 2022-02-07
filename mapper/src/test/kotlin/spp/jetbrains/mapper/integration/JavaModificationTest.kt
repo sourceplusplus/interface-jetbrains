@@ -17,11 +17,6 @@
  */
 package spp.jetbrains.mapper.integration
 
-import spp.jetbrains.mapper.api.impl.SourceMapperImpl
-import spp.jetbrains.mapper.extend.SourceCodeTokenizer
-import spp.jetbrains.mapper.vcs.git.GitRepositoryMapper
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.Constants
@@ -29,6 +24,11 @@ import org.intellij.lang.annotations.Language
 import org.junit.Assert.*
 import org.junit.Ignore
 import org.junit.Test
+import spp.jetbrains.mapper.api.impl.SourceMapperImpl
+import spp.jetbrains.mapper.extend.SourceCodeTokenizer
+import spp.jetbrains.mapper.vcs.git.GitRepositoryMapper
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import java.io.File
 import java.nio.file.Files
 import java.util.*

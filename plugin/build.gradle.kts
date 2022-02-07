@@ -77,7 +77,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("io.vertx:vertx-web:$vertxVersion")
-    implementation(files(".ext/vertx-service-discovery-4.0.3-SNAPSHOT.jar"))
+    implementation("io.vertx:vertx-service-discovery:$vertxVersion")
     implementation("io.vertx:vertx-service-proxy:$vertxVersion")
     implementation("io.vertx:vertx-tcp-eventbus-bridge:$vertxVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1")

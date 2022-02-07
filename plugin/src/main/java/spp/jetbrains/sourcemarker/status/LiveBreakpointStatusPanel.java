@@ -2,12 +2,7 @@ package spp.jetbrains.sourcemarker.status;
 
 import com.codahale.metrics.Meter;
 import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.FormSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.layout.Sizes;
+import com.jgoodies.forms.layout.*;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.protocol.utils.TimeUtilsKt;
 
@@ -17,10 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static spp.jetbrains.sourcemarker.PluginUI.EXPIRY_FOREGROUND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR1;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
-import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
+import static spp.jetbrains.sourcemarker.PluginUI.*;
 
 public class LiveBreakpointStatusPanel extends JPanel {
 

@@ -30,12 +30,12 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit
+import org.slf4j.LoggerFactory
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
 import spp.jetbrains.sourcemarker.service.breakpoint.LiveBreakpointConstants.LIVE_BREAKPOINT_NAME
 import spp.jetbrains.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
 import spp.jetbrains.sourcemarker.service.breakpoint.ui.EventsWindow
-import org.slf4j.LoggerFactory
+import spp.protocol.instrument.event.LiveBreakpointHit
 
 /**
  * todo: description.

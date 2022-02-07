@@ -24,7 +24,7 @@ import spp.jetbrains.marker.jvm.JVMVariableSimpleNode
 import spp.jetbrains.marker.py.PythonVariableRootNode
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
-import spp.protocol.instrument.LiveVariableScope
+import spp.protocol.instrument.variable.LiveVariableScope
 
 /**
  * todo: description.
