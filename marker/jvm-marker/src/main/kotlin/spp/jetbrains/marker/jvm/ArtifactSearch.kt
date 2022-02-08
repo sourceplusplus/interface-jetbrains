@@ -59,8 +59,12 @@ object ArtifactSearch {
     suspend fun detectRootPackage(project: Project): String? {
         var basePackages = withContext(Dispatchers.Default) {
             ApplicationManager.getApplication().runReadAction(Computable<Array<PsiPackage>> {
-                JavaPsiFacade.getInstance(project).findPackage("")
-                    ?.getSubPackages(ProjectScope.getProjectScope(project))!!
+                val foundPackage = JavaPsiFacade.getInstance(project).findPackage("")
+                if (foundPackage != null) {
+                    foundPackage.getSubPackages(ProjectScope.getProjectScope(project))
+                } else {
+                    emptyArray()
+                }
             })
         }
 
