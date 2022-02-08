@@ -35,6 +35,7 @@ import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkCompo
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
@@ -45,6 +46,7 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.status.util.FixedSizeList
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.SourceServices
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -60,6 +62,7 @@ import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -74,6 +77,17 @@ object LiveStatusManager : SourceMarkEventListener {
 
     private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
+    private val logData = ConcurrentHashMap<String?, List<*>>()
+
+    fun getLogData(inlayMark: InlayMark?): List<*> {
+        val logId = inlayMark?.getUserData(LOG_ID)
+        return logData.getOrPut(logId) { FixedSizeList<Any>(100) }
+    }
+
+    fun removeLogData(inlayMark: InlayMark?) {
+        val logId = inlayMark?.getUserData(LOG_ID)
+        logData.remove(logId)
+    }
 
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
