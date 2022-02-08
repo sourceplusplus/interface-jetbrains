@@ -60,7 +60,7 @@ object ArtifactSearch {
         var basePackages = withContext(Dispatchers.Default) {
             ApplicationManager.getApplication().runReadAction(Computable<Array<PsiPackage>> {
                 JavaPsiFacade.getInstance(project).findPackage("")
-                    ?.getSubPackages(ProjectScope.getProjectScope(project))!!
+                    ?.getSubPackages(ProjectScope.getProjectScope(project)) ?: emptyArray()
             })
         }
 
