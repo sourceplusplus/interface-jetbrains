@@ -91,12 +91,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private JPanel wrapper;
     private boolean errored = false;
     private boolean removed = false;
-    private final ListTableModel commandModel = new ListTableModel<>(
-            new ColumnInfo[]{
-                    new LogHitColumnInfo(MESSAGE),
-                    new LogHitColumnInfo(TIME)
-            },
-            new ArrayList<>(), 0, SortOrder.DESCENDING);
+    private ListTableModel commandModel = null;
     private final Pair<Pattern, Pattern> patternPair;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
@@ -152,11 +147,21 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.setEditMode(false);
         liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
         wrapper.grabFocus();
+        initCommandModel();
         removeActiveDecorations();
         displayTimeField();
         addExpandButton();
         repaint();
         LiveStatusManager.INSTANCE.addStatusBar(inlayMark,this);
+    }
+
+    private void initCommandModel() {
+        commandModel = new ListTableModel<>(
+                new ColumnInfo[]{
+                        new LogHitColumnInfo(MESSAGE),
+                        new LogHitColumnInfo(TIME)
+                },
+                LiveStatusManager.INSTANCE.getLogData(inlayMark), 0, SortOrder.DESCENDING);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -625,9 +630,9 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             popup.dispose();
             popup = null;
         }
-        inlayMark.dispose(true);
 
         if (liveLog != null) {
+            LiveStatusManager.INSTANCE.removeLogData(inlayMark);
             INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveLog);
@@ -636,6 +641,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 }
             });
         }
+        inlayMark.dispose(true);
     }
 
     private void initComponents() {
