@@ -29,7 +29,6 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
@@ -207,7 +206,7 @@ class PortalEventListener(
             if (sourceMarks.isNotEmpty()) {
                 it.reply(sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
             } else {
-                GlobalScope.launch(vertx.dispatcher()) {
+                launch(vertx.dispatcher()) {
                     val classArtifact = findArtifact(
                         vertx, artifactQualifiedName.copy(
                             identifier = ArtifactNameUtils.getQualifiedClassName(artifactQualifiedName.identifier)!!,
@@ -249,7 +248,7 @@ class PortalEventListener(
         vertx.eventBus().consumer<SourcePortal>(RefreshOverview) {
             runReadAction {
                 val fileMarker = SourceMarker.getSourceFileMarker(it.body().viewingArtifact)!!
-                GlobalScope.launch(vertx.dispatcher()) {
+                launch(vertx.dispatcher()) {
                     refreshOverview(fileMarker, it.body())
                 }
 
@@ -259,7 +258,7 @@ class PortalEventListener(
         vertx.eventBus().consumer<SourcePortal>(RefreshActivity) {
             val portal = it.body()
             //pull from skywalking
-            GlobalScope.launch(vertx.dispatcher()) {
+            launch(vertx.dispatcher()) {
                 pullLatestActivity(portal)
             }
 
@@ -267,7 +266,7 @@ class PortalEventListener(
             if (Instance.liveView != null) {
                 Instance.liveView!!.clearLiveViewSubscriptions().onComplete {
                     if (it.succeeded()) {
-                        GlobalScope.launch(vertx.dispatcher()) {
+                        launch(vertx.dispatcher()) {
                             val sourceMark = SourceMarker.getSourceMark(
                                 portal.viewingArtifact, SourceMark.Type.GUTTER
                             ) ?: return@launch
@@ -298,7 +297,7 @@ class PortalEventListener(
         vertx.eventBus().consumer<SourcePortal>(RefreshTraces) {
             val portal = it.body()
             //pull from skywalking
-            GlobalScope.launch(vertx.dispatcher()) {
+            launch(vertx.dispatcher()) {
                 pullLatestTraces(it.body())
             }
 
@@ -306,7 +305,7 @@ class PortalEventListener(
             if (Instance.liveView != null) {
                 Instance.liveView!!.clearLiveViewSubscriptions().onComplete {
                     if (it.succeeded()) {
-                        GlobalScope.launch(vertx.dispatcher()) {
+                        launch(vertx.dispatcher()) {
                             val sourceMark = SourceMarker.getSourceMark(
                                 portal.viewingArtifact, SourceMark.Type.GUTTER
                             ) ?: return@launch
@@ -337,7 +336,7 @@ class PortalEventListener(
         vertx.eventBus().consumer<SourcePortal>(RefreshLogs) {
             val portal = it.body()
             //pull from skywalking
-            GlobalScope.launch(vertx.dispatcher()) {
+            launch(vertx.dispatcher()) {
                 pullLatestLogs(portal)
             }
 
@@ -345,7 +344,7 @@ class PortalEventListener(
             if (Instance.liveView != null) {
                 Instance.liveView!!.clearLiveViewSubscriptions().onComplete {
                     if (it.succeeded()) {
-                        GlobalScope.launch(vertx.dispatcher()) {
+                        launch(vertx.dispatcher()) {
                             val sourceMark = SourceMarker.getSourceMark(
                                 portal.viewingArtifact, SourceMark.Type.GUTTER
                             )
@@ -385,7 +384,7 @@ class PortalEventListener(
         }
         vertx.eventBus().consumer<String>(QueryTraceStack) { handler ->
             val traceId = handler.body()
-            GlobalScope.launch(vertx.dispatcher()) {
+            launch(vertx.dispatcher()) {
                 handler.reply(EndpointTracesBridge.getTraceStack(traceId, vertx))
             }
         }
@@ -407,12 +406,12 @@ class PortalEventListener(
         vertx.eventBus().consumer<ArtifactQualifiedName>(CanNavigateToArtifact) {
             val artifactQualifiedName = it.body()
             val project = ProjectManager.getInstance().openProjects[0]
-            GlobalScope.launch(vertx.dispatcher()) {
+            launch(vertx.dispatcher()) {
                 it.reply(ArtifactNavigator.canNavigateTo(project, artifactQualifiedName))
             }
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(NavigateToArtifact) { msg ->
-            GlobalScope.launch(vertx.dispatcher()) {
+            launch(vertx.dispatcher()) {
                 ArtifactNavigator.navigateTo(vertx, msg.body()) {
                     if (it.succeeded()) {
                         log.info("Navigated to artifact $it")
@@ -431,7 +430,7 @@ class PortalEventListener(
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
-                GlobalScope.launch(vertx.dispatcher()) {
+                launch(vertx.dispatcher()) {
                     val traceResult = EndpointTracesBridge.getTraces(
                         GetEndpointTraces(
                             artifactQualifiedName = portal.viewingArtifact,
@@ -460,7 +459,7 @@ class PortalEventListener(
     ) {
         //todo: rename {GET} to [GET] in skywalking
         if (markerConfig.autoResolveEndpointNames) {
-            GlobalScope.launch(vertx.dispatcher()) {
+            launch(vertx.dispatcher()) {
                 //todo: only try to auto resolve endpoint names with dynamic ids
                 //todo: support multiple operationsNames/traceIds
                 traceResult.traces.forEach {
@@ -490,7 +489,7 @@ class PortalEventListener(
     private suspend fun pullLatestLogs(portal: SourcePortal) {
         if (log.isTraceEnabled) log.trace("Refreshing logs. Portal: {}", portal.portalUuid)
         val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
-        GlobalScope.launch(vertx.dispatcher()) {
+        launch(vertx.dispatcher()) {
             val logsResult = LogsBridge.queryLogs(
                 GetEndpointLogs(
                     endpointId = if (sourceMark is MethodSourceMark) {
