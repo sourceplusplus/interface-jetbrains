@@ -2,7 +2,7 @@ package spp.jetbrains.sourcemarker.status.util
 
 import java.util.ArrayList
 
-class FixedSizeList<E>(val maxCapacity: Int) : ArrayList<E>() {
+class CircularList<E>(val maxCapacity: Int) : ArrayList<E>() {
 
     override fun add(element: E): Boolean {
         if(size == maxCapacity) {

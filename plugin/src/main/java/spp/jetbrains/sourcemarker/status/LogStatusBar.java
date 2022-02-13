@@ -12,6 +12,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +32,7 @@ import spp.protocol.instrument.LiveLog;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
+import spp.protocol.instrument.event.LiveLogHit;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
 
@@ -41,11 +43,18 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,7 +65,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
-import static spp.jetbrains.sourcemarker.PluginUI.*;
+import static spp.jetbrains.sourcemarker.PluginUI.CNFG_PANEL_BGND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.CNFG_PANEL_FOCUS_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
+import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
+import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_17;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
+import static spp.jetbrains.sourcemarker.PluginUI.STATUS_BAR_TXT_BG_COLOR;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
@@ -76,7 +92,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private final LiveSourceLocation sourceLocation;
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
-    private final String placeHolderText;
+    private final String placeHolderText = "Input log message (use $ for variables)";
     private EditorImpl editor;
     private LiveLog liveLog;
     private Instant latestTime;
@@ -131,8 +147,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         this.inlayMark = inlayMark;
 
-        placeHolderText = "Input log message (use $ for variables)";
-
         initComponents();
         setupComponents();
         showEditableMode();
@@ -145,23 +159,31 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     public void setLiveInstrument(LiveInstrument liveInstrument) {
         this.liveLog = (LiveLog) liveInstrument;
         liveLogTextField.setEditMode(false);
-        liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
         wrapper.grabFocus();
         initCommandModel();
         removeActiveDecorations();
         displayTimeField();
         addExpandButton();
         repaint();
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark,this);
+        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, this);
     }
 
     private void initCommandModel() {
-        commandModel = new ListTableModel<>(
+        List logData = LiveStatusManager.INSTANCE.getLogData(inlayMark);
+        if (logData.isEmpty()) {
+            liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
+        } else {
+            LiveInstrumentEvent event = (LiveInstrumentEvent) logData.get(0);
+            LiveLogHit log = Json.decodeValue(event.getData(), LiveLogHit.class);
+            Instant logTime = ((kotlinx.datetime.Instant) Json.decodeValue(event.getData(), LiveLogHit.class)
+                    .getOccurredAt()).getValue$kotlinx_datetime();
+            setLatestLog(logTime, log.getLogResult().getLogs().get(0));
+        }
+        commandModel = new ListTableModel(
                 new ColumnInfo[]{
                         new LogHitColumnInfo(MESSAGE),
                         new LogHitColumnInfo(TIME)
-                },
-                LiveStatusManager.INSTANCE.getLogData(inlayMark), 0, SortOrder.DESCENDING);
+                }, logData, 0, SortOrder.DESCENDING);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -171,7 +193,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     @Override
     public void visibleAreaChanged(@NotNull VisibleAreaEvent e) {
         liveLogTextField.hideAutocompletePopup();
-        if(popup != null) {
+        if (popup != null) {
             popup.dispose();
             popup = null;
         }
@@ -660,14 +682,14 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         setMinimumSize(new Dimension(500, 40));
         setBorder(PluginUI.PANEL_BORDER);
         setLayout(new MigLayout(
-            "hidemode 3",
-            // columns
-            "0[fill]" +
-            "[fill]" +
-            "[grow,fill]" +
-            "[fill]",
-            // rows
-            "0[grow]0"));
+                "hidemode 3",
+                // columns
+                "0[fill]" +
+                        "[fill]" +
+                        "[grow,fill]" +
+                        "[fill]",
+                // rows
+                "0[grow]0"));
 
         //======== configPanel ========
         {
@@ -676,12 +698,12 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
             configPanel.setLayout(new MigLayout(
-                "fill,insets 0,hidemode 3",
-                // columns
-                "5[fill]" +
-                "[fill]4",
-                // rows
-                "[grow]"));
+                    "fill,insets 0,hidemode 3",
+                    // columns
+                    "5[fill]" +
+                            "[fill]4",
+                    // rows
+                    "[grow]"));
 
             //---- configLabel ----
             configLabel.setIcon(PluginIcons.alignLeft);
@@ -711,8 +733,8 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         //---- liveLogTextField ----
         liveLogTextField.setBackground(UIUtil.getTextFieldBackground());
         liveLogTextField.setBorder(new CompoundBorder(
-            new LineBorder(UIUtil.getBoundsColor(), 1, true),
-            new EmptyBorder(2, 6, 0, 0)));
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                new EmptyBorder(2, 6, 0, 0)));
         liveLogTextField.setFont(ROBOTO_LIGHT_PLAIN_17);
         liveLogTextField.setMinimumSize(new Dimension(0, 27));
         add(liveLogTextField, "cell 2 0");

@@ -46,7 +46,7 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.status.util.FixedSizeList
+import spp.jetbrains.sourcemarker.status.util.CircularList
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.SourceServices
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -79,13 +79,13 @@ object LiveStatusManager : SourceMarkEventListener {
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
     private val logData = ConcurrentHashMap<String?, List<*>>()
 
-    fun getLogData(inlayMark: InlayMark?): List<*> {
-        val logId = inlayMark?.getUserData(LOG_ID)
-        return logData.getOrPut(logId) { FixedSizeList<Any>(100) }
+    fun getLogData(inlayMark: InlayMark): List<*> {
+        val logId = inlayMark.getUserData(LOG_ID)
+        return logData.getOrPut(logId) { CircularList<Any>(1000) }
     }
 
-    fun removeLogData(inlayMark: InlayMark?) {
-        val logId = inlayMark?.getUserData(LOG_ID)
+    fun removeLogData(inlayMark: InlayMark) {
+        val logId = inlayMark.getUserData(LOG_ID)
         logData.remove(logId)
     }
 
