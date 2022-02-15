@@ -77,17 +77,7 @@ object LiveStatusManager : SourceMarkEventListener {
 
     private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
-    private val logData = ConcurrentHashMap<String?, List<*>>()
-
-    fun getLogData(inlayMark: InlayMark): List<*> {
-        val logId = inlayMark.getUserData(LOG_ID)
-        return logData.getOrPut(logId) { CircularList<Any>(1000) }
-    }
-
-    fun removeLogData(inlayMark: InlayMark) {
-        val logId = inlayMark.getUserData(LOG_ID)
-        logData.remove(logId)
-    }
+    private val logData = ConcurrentHashMap<String, List<*>>()
 
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
@@ -479,5 +469,15 @@ object LiveStatusManager : SourceMarkEventListener {
 
     fun removeActiveLiveInstrument(instrumentId: String) {
         activeStatusBars.removeIf { it.id == instrumentId }
+    }
+
+    fun getLogData(inlayMark: InlayMark): List<*> {
+        val logId = inlayMark.getUserData(LOG_ID)
+        return logData.getOrPut(logId) { CircularList<Any>(1000) }
+    }
+
+    fun removeLogData(inlayMark: InlayMark) {
+        val logId = inlayMark.getUserData(LOG_ID)
+        logData.remove(logId)
     }
 }
