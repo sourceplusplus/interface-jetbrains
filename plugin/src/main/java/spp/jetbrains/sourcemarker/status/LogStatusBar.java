@@ -165,7 +165,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         displayTimeField();
         addExpandButton();
         repaint();
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, this);
+        LiveStatusManager.addStatusBar(inlayMark, this);
     }
 
     private void initCommandModel() {
@@ -174,10 +174,9 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
         } else {
             LiveInstrumentEvent event = (LiveInstrumentEvent) logData.get(0);
-            LiveLogHit log = Json.decodeValue(event.getData(), LiveLogHit.class);
-            Instant logTime = ((kotlinx.datetime.Instant) Json.decodeValue(event.getData(), LiveLogHit.class)
-                    .getOccurredAt()).getValue$kotlinx_datetime();
-            setLatestLog(logTime, log.getLogResult().getLogs().get(0));
+            LiveLogHit logHit = Json.decodeValue(event.getData(), LiveLogHit.class);
+            Instant logTime = ((kotlinx.datetime.Instant) logHit.getOccurredAt()).getValue$kotlinx_datetime();
+            setLatestLog(logTime, logHit.getLogResult().getLogs().get(0));
         }
         commandModel = new ListTableModel(
                 new ColumnInfo[]{
