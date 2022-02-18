@@ -113,11 +113,9 @@ import spp.protocol.service.LiveViewService
 import spp.protocol.service.LogCountIndicatorService
 import spp.protocol.util.KSerializers
 import spp.protocol.util.LocalMessageCodec
-import java.awt.Color
 import java.awt.Dimension
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 /**
  * Sets up the SourceMarker plugin by configuring and initializing the various plugin modules.
@@ -127,9 +125,6 @@ import java.util.*
  */
 @Suppress("MagicNumber")
 object SourceMarkerPlugin {
-
-    val SOURCE_RED = Color(225, 72, 59)
-    val INSTANCE_ID = UUID.randomUUID().toString()
 
     private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
     private val deploymentIds = mutableListOf<String>()

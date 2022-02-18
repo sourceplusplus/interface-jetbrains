@@ -39,7 +39,6 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
@@ -127,7 +126,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
                 //setup connection
                 val replyAddress = UUID.randomUUID().toString()
-                val pc = InstanceConnection(SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis())
+                val pc = InstanceConnection(UUID.randomUUID().toString(), System.currentTimeMillis())
                 val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer(replyAddress)
 
                 val promise = Promise.promise<Void>()
