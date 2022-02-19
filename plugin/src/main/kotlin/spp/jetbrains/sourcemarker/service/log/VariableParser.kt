@@ -18,6 +18,7 @@
 package spp.jetbrains.sourcemarker.service.log
 
 import com.intellij.openapi.util.Pair
+import spp.protocol.instrument.LiveLog
 import java.util.function.Function
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -28,69 +29,59 @@ object VariableParser {
     const val EMPTY = ""
     const val SPACE = " "
     const val DOLLAR = "$"
+    val QUOTE_CURLY_BRACES = Pattern.quote("{}")
+    val QUOTE_SQUARE_BRACES = Pattern.quote("[]")
 
     @JvmStatic
-    fun createPattern(scopeVars: List<String>): Pair<Pattern?, Pattern?> {
+    fun createPattern(scopeVars: List<String>): Pattern? {
         var variablePattern: Pattern? = null
-        var templateVariablePattern: Pattern? = null
         if (scopeVars.isNotEmpty()) {
             val sb = StringBuilder("(")
-            val sbt = StringBuilder("(")
             for (i in scopeVars.indices) {
-                sb.append("\\$").append(scopeVars[i])
-                sbt.append("\\$\\{").append(scopeVars[i]).append("\\}")
+                sb.append("\\$").append(scopeVars[i]).append(" ")
+                sb.append("|")
+                sb.append("\\$\\{").append(scopeVars[i]).append("\\}")
                 if (i + 1 < scopeVars.size) {
                     sb.append("|")
-                    sbt.append("|")
                 }
             }
-            sb.append(")(?:\\s|$)")
-            sbt.append(")(?:|$)")
+            sb.append(")(?:|$)")
             variablePattern = Pattern.compile(sb.toString())
-            templateVariablePattern = Pattern.compile(sbt.toString())
         }
-        return Pair.create(variablePattern, templateVariablePattern)
+        return variablePattern
     }
 
     @JvmStatic
-    fun extractVariables(patternPair: Pair<Pattern?, Pattern?>, logText: String): Pair<String, List<String>> {
-        var logTemplate = logText
+    fun extractVariables(pattern: Pattern?, logText: String): Pair<String, List<String>> {
+        var logTemplate = "$logText "
         val varMatches: MutableList<String> = ArrayList()
-        if (patternPair.first != null) {
-            val m = patternPair.first!!.matcher(logTemplate)
+        pattern?.let {
+            val m = it.matcher(logTemplate)
             var matchLength = 0
             while (m.find()) {
-                val variable = m.group(1)
-                logTemplate = (logTemplate.substring(0, m.start() - matchLength)
-                        + logTemplate.substring(m.start() - matchLength)
-                    .replaceFirst(Pattern.quote(variable).toRegex(), "{}"))
-                matchLength = matchLength + variable.length - 1
+                var variable = m.group(1).trim()
+
+                if (variable.contains("{")) {
+                    logTemplate = (logTemplate.substring(0, m.start() - matchLength)
+                            + logTemplate.substring(m.start() - matchLength)
+                        .replaceFirst(Pattern.quote(variable).toRegex(), "[]"))
+                    matchLength = matchLength + variable.length - 1
+                    variable = variable.replace(PATTERN_CURLY_BRACES.toRegex(), EMPTY)
+                } else {
+                    logTemplate = (logTemplate.substring(0, m.start() - matchLength)
+                            + logTemplate.substring(m.start() - matchLength)
+                        .replaceFirst(Pattern.quote(variable).toRegex(), "{}"))
+                    matchLength = matchLength + variable.length - 1
+                }
                 varMatches.add(variable)
             }
         }
-        if (patternPair.second != null) {
-            val m = patternPair.second!!.matcher(logTemplate)
-            var matchLength = 0
-            while (m.find()) {
-                var variable = m.group(1)
-                logTemplate = (logTemplate.substring(0, m.start() - matchLength)
-                        + logTemplate.substring(m.start() - matchLength)
-                    .replaceFirst(Pattern.quote(variable).toRegex(), "{}"))
-                matchLength = matchLength + variable.length - 1
-                variable = variable.replace(PATTERN_CURLY_BRACES.toRegex(), EMPTY)
-                varMatches.add(variable)
-            }
-        }
-        return Pair.create(logTemplate, varMatches)
+        return Pair.create(logTemplate.trim(), varMatches)
     }
 
-    fun matchVariables(patternPair: Pair<Pattern?, Pattern?>, input: String, function: Function<Matcher, Any>) {
-        if (patternPair.first != null) {
-            val match = patternPair.first!!.matcher(input)
-            function.apply(match)
-        }
-        if (patternPair.second != null) {
-            val match = patternPair.second!!.matcher(input)
+    fun matchVariables(patternPair: Pattern?, input: String, function: Function<Matcher, Any>) {
+        patternPair?.let {
+            val match = it.matcher(input)
             function.apply(match)
         }
     }
@@ -102,5 +93,36 @@ object VariableParser {
                 && v.toLowerCase().contains(variable.substring(1)))
                 || (variable.startsWith("\${") && variable.substring(2) != v
                 && v.toLowerCase().contains(variable.substring(2))))
+    }
+
+    @JvmStatic
+    fun createOriginalMessage(liveLog: LiveLog): String {
+        var originalMessage = liveLog.logFormat
+        for (arg in liveLog.logArguments) {
+            val pattern = findFirstPattern(originalMessage)
+            if (pattern == QUOTE_CURLY_BRACES) {
+                originalMessage = originalMessage.replaceFirst(
+                    findFirstPattern(originalMessage).toRegex(),
+                    Matcher.quoteReplacement("$DOLLAR$arg")
+                )
+            } else {
+                originalMessage = originalMessage.replaceFirst(
+                    findFirstPattern(originalMessage).toRegex(),
+                    Matcher.quoteReplacement("$DOLLAR{$arg}")
+                )
+            }
+
+        }
+        return originalMessage
+    }
+
+    private fun findFirstPattern(message: String): String {
+        val indexOfSquareB = message.indexOf("[]")
+        if (indexOfSquareB == -1)
+            return QUOTE_CURLY_BRACES
+        val indexOfCurlyB = message.indexOf("{}")
+        if (indexOfCurlyB == -1)
+            return QUOTE_SQUARE_BRACES
+        return if (indexOfSquareB < indexOfCurlyB) QUOTE_SQUARE_BRACES else QUOTE_CURLY_BRACES
     }
 }

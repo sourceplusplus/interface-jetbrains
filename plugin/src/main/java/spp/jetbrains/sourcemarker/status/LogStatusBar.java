@@ -86,7 +86,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private static final String WAITING_FOR_LIVE_LOG_DATA = "Waiting for live log data...";
     private static final String MESSAGE = "Message";
     private static final String TIME = "Time";
-    private static final String QUOTE_CURLY_BRACES = Pattern.quote("{}");
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -108,7 +107,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private boolean errored = false;
     private boolean removed = false;
     private ListTableModel commandModel = null;
-    private final Pair<Pattern, Pattern> patternPair;
+    private final Pattern variablePattern;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this.sourceLocation = sourceLocation;
@@ -143,7 +142,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 .limit(7)
                 .collect(Collectors.toList());
 
-        patternPair = VariableParser.createPattern(scopeVars);
+        variablePattern = VariableParser.createPattern(scopeVars);
 
         this.inlayMark = inlayMark;
 
@@ -363,13 +362,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             protected void textChanged(DocumentEvent e) {
                 if (settingFormattedMessage.get()) return;
                 if (liveLog != null) {
-                    String originalMessage = liveLog.getLogFormat();
-                    for (String var : liveLog.getLogArguments()) {
-                        originalMessage = originalMessage.replaceFirst(
-                                QUOTE_CURLY_BRACES,
-                                Matcher.quoteReplacement(VariableParser.DOLLAR + var)
-                        );
-                    }
+                    String originalMessage = VariableParser.createOriginalMessage(liveLog);
 
                     boolean logMessageChanged = !originalMessage.equals(liveLogTextField.getText());
                     if (configurationPanel != null && liveLogTextField.getEditMode()) {
@@ -406,13 +399,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 liveLogTextField.setEditMode(true);
 
                 if (liveLog != null) {
-                    String originalMessage = liveLog.getLogFormat();
-                    for (String var : liveLog.getLogArguments()) {
-                        originalMessage = originalMessage.replaceFirst(
-                                QUOTE_CURLY_BRACES,
-                                Matcher.quoteReplacement(VariableParser.DOLLAR + var)
-                        );
-                    }
+                    String originalMessage = VariableParser.createOriginalMessage(liveLog);
                     settingFormattedMessage.set(true);
                     liveLogTextField.setText(originalMessage);
                     settingFormattedMessage.set(false);
@@ -580,9 +567,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             });
         }
 
-        Pair<String, List<String>> resp = VariableParser.extractVariables(patternPair, liveLogTextField.getText());
-        final String finalLogPattern = resp.first;
-
         String condition = null;
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
         InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
@@ -607,6 +591,8 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         HashMap<String, String> meta = new HashMap<>();
         meta.put("original_source_mark", inlayMark.getId());
 
+        Pair<String, List<String>> resp = VariableParser.extractVariables(variablePattern, liveLogTextField.getText());
+        final String finalLogPattern = resp.first;
         LiveLog instrument = new LiveLog(
                 finalLogPattern,
                 resp.second.stream().map(it -> it.substring(1)).collect(Collectors.toList()),

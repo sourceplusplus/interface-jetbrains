@@ -66,7 +66,7 @@ class AutocompleteField(
     var addOnSuggestionDoubleClick: Boolean = true
     var placeHolderTextColor: Color? = null
     var canShowSaveButton = true
-    var patternPair: Pair<Pattern?, Pattern?> = Pair.empty();
+    var variablePattern: Pattern?
 
     val matchAndApplyStyle = { m: Matcher ->
         while (m.find()) {
@@ -116,7 +116,7 @@ class AutocompleteField(
         document.addDocumentListener(this)
         addKeyListener(this)
 
-        patternPair = VariableParser.createPattern(allLookup.map { a->a.getText().substring(1)})
+        variablePattern = VariableParser.createPattern(allLookup.map { a->a.getText().substring(1)})
 
         document.putProperty("filterNewlines", true)
 
@@ -185,7 +185,7 @@ class AutocompleteField(
             true
         )
 
-        VariableParser.matchVariables(patternPair, text, matchAndApplyStyle)
+        VariableParser.matchVariables(variablePattern, text, matchAndApplyStyle)
     }
 
     private fun addNumberStyle(pn: JTextPane) {
