@@ -156,7 +156,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         displayTimeField();
         addExpandButton();
         repaint();
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark,this);
+        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, this);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
