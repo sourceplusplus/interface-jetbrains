@@ -24,40 +24,48 @@ import java.util.regex.Pattern
 
 object VariableParser {
 
-    const val PATTERN_CURLY_BRACES = "\\{|\\}"
     const val EMPTY = ""
     const val SPACE = " "
     const val DOLLAR = "$"
 
     @JvmStatic
-    fun createPattern(scopeVars: List<String>): Pair<Pattern?, Pattern?> {
-        var variablePattern: Pattern? = null
-        var templateVariablePattern: Pattern? = null
+    fun createPattern(
+        scopeVars: List<String>, varInitChar: String = DOLLAR,
+        includeCurlyPattern: Boolean = true,
+        ignoreCase: Boolean = false
+    ): Pattern {
+        val sb = StringBuilder("")
         if (scopeVars.isNotEmpty()) {
-            val sb = StringBuilder("(")
-            val sbt = StringBuilder("(")
+            sb.append("(")
             for (i in scopeVars.indices) {
-                sb.append("\\$").append(scopeVars[i])
-                sbt.append("\\$\\{").append(scopeVars[i]).append("\\}")
+                if (varInitChar.isNotEmpty()) {
+                    sb.append("\\$varInitChar")
+                }
+                sb.append(scopeVars[i]).append("(?=\\s|$)")
+                if (includeCurlyPattern) {
+                    sb.append("|")
+                    sb.append("\\$varInitChar\\{").append(scopeVars[i]).append("\\}")
+                }
                 if (i + 1 < scopeVars.size) {
                     sb.append("|")
-                    sbt.append("|")
                 }
             }
-            sb.append(")(?:\\s|$)")
-            sbt.append(")(?:|$)")
-            variablePattern = Pattern.compile(sb.toString())
-            templateVariablePattern = Pattern.compile(sbt.toString())
+            sb.append(")")
         }
-        return Pair.create(variablePattern, templateVariablePattern)
+
+        return if (ignoreCase) {
+            Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE)
+        } else {
+            Pattern.compile(sb.toString())
+        }
     }
 
     @JvmStatic
-    fun extractVariables(patternPair: Pair<Pattern?, Pattern?>, logText: String): Pair<String, List<String>> {
+    fun extractVariables(pattern: Pattern, logText: String): Pair<String, List<String>> {
         var logTemplate = logText
         val varMatches: MutableList<String> = ArrayList()
-        if (patternPair.first != null) {
-            val m = patternPair.first!!.matcher(logTemplate)
+        if (pattern.pattern().isNotEmpty()) {
+            val m = pattern.matcher(logTemplate)
             var matchLength = 0
             while (m.find()) {
                 val variable = m.group(1)
@@ -65,34 +73,20 @@ object VariableParser {
                         + logTemplate.substring(m.start() - matchLength)
                     .replaceFirst(Pattern.quote(variable).toRegex(), "{}"))
                 matchLength = matchLength + variable.length - 1
-                varMatches.add(variable)
-            }
-        }
-        if (patternPair.second != null) {
-            val m = patternPair.second!!.matcher(logTemplate)
-            var matchLength = 0
-            while (m.find()) {
-                var variable = m.group(1)
-                logTemplate = (logTemplate.substring(0, m.start() - matchLength)
-                        + logTemplate.substring(m.start() - matchLength)
-                    .replaceFirst(Pattern.quote(variable).toRegex(), "{}"))
-                matchLength = matchLength + variable.length - 1
-                variable = variable.replace(PATTERN_CURLY_BRACES.toRegex(), EMPTY)
-                varMatches.add(variable)
+
+                if (variable.startsWith("$DOLLAR{")) {
+                    varMatches.add(variable.substring(2, variable.length - 1))
+                } else {
+                    varMatches.add(variable.substring(1))
+                }
             }
         }
         return Pair.create(logTemplate, varMatches)
     }
 
-    fun matchVariables(patternPair: Pair<Pattern?, Pattern?>, input: String, function: Function<Matcher, Any>) {
-        if (patternPair.first != null) {
-            val match = patternPair.first!!.matcher(input)
-            function.apply(match)
-        }
-        if (patternPair.second != null) {
-            val match = patternPair.second!!.matcher(input)
-            function.apply(match)
-        }
+    fun matchVariables(pattern: Pattern, input: String, function: Function<Matcher, Any>) {
+        val match = pattern.matcher(input)
+        function.apply(match)
     }
 
     @JvmStatic
