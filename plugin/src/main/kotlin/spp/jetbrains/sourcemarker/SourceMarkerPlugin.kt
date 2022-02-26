@@ -111,8 +111,8 @@ import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import spp.protocol.service.LogCountIndicatorService
-import spp.protocol.util.KSerializers
-import spp.protocol.util.LocalMessageCodec
+import spp.protocol.marshall.KSerializers
+import spp.protocol.marshall.LocalMessageCodec
 import java.awt.Dimension
 import java.io.File
 import java.io.IOException

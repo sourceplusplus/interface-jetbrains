@@ -37,7 +37,7 @@ import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointTriggerListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
-import spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved
+import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
 import spp.protocol.instrument.LiveBreakpoint

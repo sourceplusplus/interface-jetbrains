@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
-import spp.protocol.util.LocalMessageCodec
+import spp.protocol.marshall.LocalMessageCodec
 import java.io.IOException
 import java.time.ZoneOffset.ofHours
 import java.time.ZonedDateTime

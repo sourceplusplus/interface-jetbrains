@@ -35,7 +35,7 @@ import spp.protocol.artifact.exception.LiveStackTrace
 import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType
 import spp.protocol.artifact.log.LogResult
-import spp.protocol.util.LocalMessageCodec
+import spp.protocol.marshall.LocalMessageCodec
 
 /**
  * todo: description.

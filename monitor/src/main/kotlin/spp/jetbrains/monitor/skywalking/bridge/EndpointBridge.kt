@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
-import spp.protocol.util.LocalMessageCodec
+import spp.protocol.marshall.LocalMessageCodec
 
 /**
  * todo: description.
