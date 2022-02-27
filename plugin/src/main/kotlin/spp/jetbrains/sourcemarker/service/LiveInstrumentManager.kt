@@ -42,10 +42,10 @@ import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
-import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
 import spp.protocol.instrument.event.LiveLogHit
+import spp.protocol.marshall.ProtocolMarshaller
 
 /**
  * todo: description.
@@ -165,7 +165,7 @@ class LiveInstrumentManager(
     }
 
     private fun handleBreakpointHitEvent(liveEvent: LiveInstrumentEvent) {
-        val bpHit = Json.decodeValue(liveEvent.data, LiveBreakpointHit::class.java)
+        val bpHit = ProtocolMarshaller.deserializeLiveBreakpointHit(JsonObject(liveEvent.data))
         ApplicationManager.getApplication().invokeLater {
             val project = ProjectManager.getInstance().openProjects[0]
             BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
