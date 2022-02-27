@@ -238,7 +238,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
-                } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                } else if (e.getKeyChar() == KeyEvent.VK_ENTER && meterNameField.getText().length() > 0) {
                     meterTypeComboBox.requestFocus();
                 }
             }

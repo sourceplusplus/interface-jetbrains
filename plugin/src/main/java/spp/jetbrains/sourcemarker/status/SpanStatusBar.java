@@ -225,7 +225,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
-                } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                } else if (e.getKeyChar() == KeyEvent.VK_ENTER && spanOperationNameField.getText().length() > 0) {
                     ApplicationManager.getApplication().runWriteAction(() -> saveLiveSpan());
                 }
             }
