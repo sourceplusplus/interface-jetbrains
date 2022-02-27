@@ -69,10 +69,12 @@ class AutocompleteField(
     var includeCurlyPattern: Boolean = false
 
     val matchAndApplyStyle = { m: Matcher ->
-        while (m.find()) {
-            val variable: String = m.group(1)
-            val varIndex = m.start()
-            styledDocument.setCharacterAttributes(varIndex, variable.length, getStyle("numbers"), true)
+        if (varPattern.pattern().isNotEmpty()) {
+            while (m.find()) {
+                val variable: String = m.group(1)
+                val varIndex = m.start()
+                styledDocument.setCharacterAttributes(varIndex, variable.length, getStyle("numbers"), true)
+            }
         }
     }
 
