@@ -166,21 +166,10 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         }
     }
 
-    override fun store(record: Record, resultHandler: Handler<AsyncResult<Record>>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun remove(record: Record, resultHandler: Handler<AsyncResult<Record>>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun remove(uuid: String, resultHandler: Handler<AsyncResult<Record>>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun update(record: Record, resultHandler: Handler<AsyncResult<Void>>) {
-        TODO("Not yet implemented")
-    }
+    override fun store(record: Record, resultHandler: Handler<AsyncResult<Record>>) = Unit
+    override fun remove(record: Record, resultHandler: Handler<AsyncResult<Record>>) = Unit
+    override fun remove(uuid: String, resultHandler: Handler<AsyncResult<Record>>) = Unit
+    override fun update(record: Record, resultHandler: Handler<AsyncResult<Void>>) = Unit
 
     override fun getRecords(resultHandler: Handler<AsyncResult<MutableList<Record>>>) {
         if (setupFuture.isComplete) {
@@ -212,9 +201,6 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         }
     }
 
-    override fun getRecord(uuid: String, resultHandler: Handler<AsyncResult<Record>>) {
-        TODO("Not yet implemented")
-    }
-
+    override fun getRecord(uuid: String, resultHandler: Handler<AsyncResult<Record>>) = Unit
     override fun name() = "tcp-service-discovery"
 }
