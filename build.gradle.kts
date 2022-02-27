@@ -80,7 +80,23 @@ subprojects {
 }
 
 tasks {
+    register("downloadProbe") {
+        doLast {
+            val f = File(projectDir, "test/e2e/spp-probe-$projectVersion.jar")
+            if (!f.exists()) {
+                println("Downloading Source++ JVM probe")
+                java.net.URL("https://github.com/sourceplusplus/probe-jvm/releases/download/$projectVersion/spp-probe-$projectVersion.jar")
+                    .openStream().use { input ->
+                        java.io.FileOutputStream(f).use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                println("Downloaded Source++ JVM probe")
+            }
+        }
+    }
     register<Exec>("buildExampleWebApp") {
+        mustRunAfter("downloadProbe")
         workingDir = File("./test/e2e/example-web-app")
 
         if (Os.isFamily(Os.FAMILY_UNIX)) {
@@ -91,7 +107,7 @@ tasks {
     }
 
     register("assembleUp") {
-        dependsOn("buildExampleWebApp", "composeUp")
+        dependsOn("downloadProbe", "buildExampleWebApp", "composeUp")
     }
     getByName("composeUp").shouldRunAfter("buildExampleWebApp")
 }

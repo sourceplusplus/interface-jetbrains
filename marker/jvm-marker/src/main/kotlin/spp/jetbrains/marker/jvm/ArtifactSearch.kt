@@ -26,10 +26,6 @@ import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
-import spp.jetbrains.marker.source.JVMMarkerUtils
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
@@ -42,7 +38,11 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
 import org.slf4j.LoggerFactory
-import spp.protocol.utils.ArtifactNameUtils
+import spp.jetbrains.marker.jvm.psi.EndpointDetector
+import spp.jetbrains.marker.source.JVMMarkerUtils
+import spp.protocol.artifact.ArtifactNameUtils
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import java.util.*
 
 /**
@@ -60,7 +60,7 @@ object ArtifactSearch {
         var basePackages = withContext(Dispatchers.Default) {
             ApplicationManager.getApplication().runReadAction(Computable<Array<PsiPackage>> {
                 JavaPsiFacade.getInstance(project).findPackage("")
-                    ?.getSubPackages(ProjectScope.getProjectScope(project))!!
+                    ?.getSubPackages(ProjectScope.getProjectScope(project)) ?: emptyArray()
             })
         }
 

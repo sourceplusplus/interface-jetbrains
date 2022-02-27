@@ -18,12 +18,12 @@
 package spp.jetbrains.marker.jvm.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
-import spp.jetbrains.marker.jvm.psi.EndpointDetector.DetectedEndpoint
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.expressions.UInjectionHost
+import spp.jetbrains.marker.jvm.psi.EndpointDetector
+import spp.jetbrains.marker.jvm.psi.EndpointDetector.DetectedEndpoint
 import java.util.*
 
 /**

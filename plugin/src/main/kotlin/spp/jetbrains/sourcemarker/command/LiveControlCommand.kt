@@ -113,6 +113,12 @@ enum class LiveControlCommand(
         "Clear all self-created live meters",
         PluginIcons.Command.clearInstrumentSelected,
         PluginIcons.Command.clearInstrumentUnSelected
+    ),
+    CLEAR_LIVE_SPANS(
+        "Clear Spans",
+        "Clear all self-created live spans",
+        PluginIcons.Command.clearInstrumentSelected,
+        PluginIcons.Command.clearInstrumentUnSelected
     );
 
     override fun getText(): String {

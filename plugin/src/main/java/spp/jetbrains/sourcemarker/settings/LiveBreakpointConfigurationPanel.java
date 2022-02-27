@@ -1,11 +1,10 @@
 package spp.jetbrains.sourcemarker.settings;
 
+import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Objects;
 

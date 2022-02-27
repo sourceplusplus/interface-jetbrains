@@ -20,6 +20,7 @@ package spp.jetbrains.sourcemarker.discover
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
+import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -38,15 +39,13 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
-import spp.protocol.SourceMarkerServices
-import spp.protocol.SourceMarkerServices.Utilize
+import spp.protocol.SourceServices.Utilize
 import spp.protocol.extend.TCPServiceFrameParser
 import spp.protocol.platform.PlatformAddress
-import spp.protocol.status.MarkerConnection
+import spp.protocol.platform.status.InstanceConnection
 import java.util.*
 
 /**
@@ -65,18 +64,18 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
     private lateinit var vertx: Vertx
     private lateinit var client: NetClient
+    private lateinit var pluginConfig: SourceMarkerConfig
     private val setupPromise = Promise.promise<Void>()
     private val setupFuture = setupPromise.future()
 
     override fun init(vertx: Vertx, config: JsonObject) {
         this.vertx = vertx
-
-        val hardcodedConfig = config.getJsonObject("hardcoded_config")
-        val pluginConfig = Json.decodeValue(
+        pluginConfig = Json.decodeValue(
             config.getJsonObject("sourcemarker_plugin_config").toString(), SourceMarkerConfig::class.java
         )
 
         val serviceHost = pluginConfig.serviceHostNormalized!!
+        val hardcodedConfig = config.getJsonObject("hardcoded_config")
         val servicePort = hardcodedConfig.getInteger("tcp_service_port")
         val certificatePins = mutableListOf<String>()
         certificatePins.addAll(pluginConfig.certificatePins)
@@ -127,8 +126,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
                 //setup connection
                 val replyAddress = UUID.randomUUID().toString()
-                val pc = MarkerConnection(SourceMarkerPlugin.INSTANCE_ID, System.currentTimeMillis())
-                val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer("local.$replyAddress")
+                val pc = InstanceConnection(UUID.randomUUID().toString(), System.currentTimeMillis())
+                val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer(replyAddress)
 
                 val promise = Promise.promise<Void>()
                 consumer.handler {
@@ -139,11 +138,10 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         setupPromise.complete()
                     }
                 }
-                val headers = JsonObject()
-                pluginConfig.serviceToken?.let { headers.put("token", it) }
+                val headers = JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } }
                 FrameHelper.sendFrame(
                     BridgeEventType.SEND.name.toLowerCase(),
-                    PlatformAddress.MARKER_CONNECTED.address,
+                    PlatformAddress.MARKER_CONNECTED,
                     replyAddress, headers, true, JsonObject.mapFrom(pc), socket!!
                 )
             }
@@ -153,7 +151,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     private fun setupHandler(vertx: Vertx, address: String) {
         vertx.eventBus().localConsumer<JsonObject>(address) { resp ->
             val replyAddress = UUID.randomUUID().toString()
-            val tempConsumer = vertx.eventBus().localConsumer<Any>("local.$replyAddress")
+            val tempConsumer = vertx.eventBus().localConsumer<Any>(replyAddress)
             tempConsumer.handler {
                 resp.reply(it.body())
                 tempConsumer.unregister()
@@ -168,26 +166,17 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         }
     }
 
-    override fun store(record: Record, resultHandler: Handler<AsyncResult<Record>>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun remove(record: Record, resultHandler: Handler<AsyncResult<Record>>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun remove(uuid: String, resultHandler: Handler<AsyncResult<Record>>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun update(record: Record, resultHandler: Handler<AsyncResult<Void>>) {
-        TODO("Not yet implemented")
-    }
+    override fun store(record: Record, resultHandler: Handler<AsyncResult<Record>>) = Unit
+    override fun remove(record: Record, resultHandler: Handler<AsyncResult<Record>>) = Unit
+    override fun remove(uuid: String, resultHandler: Handler<AsyncResult<Record>>) = Unit
+    override fun update(record: Record, resultHandler: Handler<AsyncResult<Void>>) = Unit
 
     override fun getRecords(resultHandler: Handler<AsyncResult<MutableList<Record>>>) {
         if (setupFuture.isComplete) {
             if (setupFuture.succeeded()) {
-                vertx.eventBus().request<JsonObject>("get-records", null) {
+                val deliveryOptions = DeliveryOptions()
+                    .apply { pluginConfig.serviceToken?.let { addHeader("auth-token", it) } }
+                vertx.eventBus().request<JsonObject>("get-records", null, deliveryOptions) {
                     resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it.result().body()))))
                 }
             } else {
@@ -196,7 +185,9 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         } else {
             setupFuture.onComplete {
                 if (it.succeeded()) {
-                    vertx.eventBus().request<JsonArray>("get-records", null) {
+                    val deliveryOptions = DeliveryOptions()
+                        .apply { pluginConfig.serviceToken?.let { addHeader("auth-token", it) } }
+                    vertx.eventBus().request<JsonArray>("get-records", null, deliveryOptions) {
                         val records = mutableListOf<Record>()
                         it.result().body().forEach { record ->
                             records.add(Record(record as JsonObject))
@@ -210,9 +201,6 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         }
     }
 
-    override fun getRecord(uuid: String, resultHandler: Handler<AsyncResult<Record>>) {
-        TODO("Not yet implemented")
-    }
-
+    override fun getRecord(uuid: String, resultHandler: Handler<AsyncResult<Record>>) = Unit
     override fun name() = "tcp-service-discovery"
 }

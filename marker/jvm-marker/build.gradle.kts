@@ -21,7 +21,7 @@ dependencies {
         compileOnly(project(":marker"))
         compileOnly(project(":monitor"))
     }
-    compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:473051b4e5")
     val intellijVersion = "213.6777.52"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
@@ -32,7 +32,7 @@ dependencies {
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
-    compileOnly("org.jooq:jooq:3.16.2")
+    compileOnly("org.jooq:jooq:3.16.4")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
     compileOnly("com.android.tools.external.org-jetbrains:uast:30.0.4")
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")

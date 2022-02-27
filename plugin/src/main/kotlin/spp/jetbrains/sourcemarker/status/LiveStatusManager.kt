@@ -46,15 +46,11 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.ProtocolAddress.Portal.DisplayLogs
-import spp.protocol.SourceMarkerServices
+import spp.protocol.SourceServices
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.log.LogResult
-import spp.protocol.instrument.LiveInstrument
-import spp.protocol.instrument.LiveSourceLocation
-import spp.protocol.instrument.breakpoint.LiveBreakpoint
-import spp.protocol.instrument.log.LiveLog
-import spp.protocol.instrument.meter.LiveMeter
+import spp.protocol.instrument.*
 import spp.protocol.instrument.meter.MeterType
 import spp.protocol.portal.PageType
 import spp.protocol.view.LiveViewConfig
@@ -428,7 +424,7 @@ object LiveStatusManager : SourceMarkEventListener {
 
     @JvmStatic
     fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
-        SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
+        SourceServices.Instance.liveView!!.addLiveViewSubscription(
             LiveViewSubscription(
                 null,
                 listOf(liveMeter.toMetricId()),
@@ -436,7 +432,7 @@ object LiveStatusManager : SourceMarkEventListener {
                 liveMeter.location,
                 LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
             )
-        ) {
+        ).onComplete {
             if (it.failed()) {
                 log.error("Failed to add live view subscription", it.cause())
             }

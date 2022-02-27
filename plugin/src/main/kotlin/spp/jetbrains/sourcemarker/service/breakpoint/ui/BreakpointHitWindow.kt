@@ -29,14 +29,14 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.content.Content
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import spp.protocol.artifact.exception.LiveStackTrace
-import spp.protocol.artifact.exception.LiveStackTraceElement
+import io.vertx.core.json.Json
 import spp.jetbrains.sourcemarker.service.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.service.breakpoint.ExecutionPointManager
 import spp.jetbrains.sourcemarker.service.breakpoint.LiveBreakpointConstants
 import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import io.vertx.core.json.Json
+import spp.protocol.artifact.exception.LiveStackTrace
+import spp.protocol.artifact.exception.LiveStackTraceElement
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
 

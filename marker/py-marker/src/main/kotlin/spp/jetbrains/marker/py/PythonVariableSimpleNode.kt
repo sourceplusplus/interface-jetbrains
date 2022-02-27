@@ -24,7 +24,7 @@ import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
 import io.vertx.core.json.JsonObject
-import spp.protocol.instrument.LiveVariable
+import spp.protocol.instrument.variable.LiveVariable
 
 /**
  * todo: description.

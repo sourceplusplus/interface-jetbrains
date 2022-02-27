@@ -17,7 +17,6 @@
  */
 package spp.jetbrains.monitor.skywalking.bridge
 
-import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
@@ -27,7 +26,8 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import org.slf4j.LoggerFactory
-import spp.protocol.util.LocalMessageCodec
+import spp.jetbrains.monitor.skywalking.SkywalkingClient
+import spp.protocol.marshall.LocalMessageCodec
 
 /**
  * todo: description.

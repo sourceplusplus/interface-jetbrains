@@ -20,12 +20,12 @@ package spp.jetbrains.marker.jvm
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import spp.jetbrains.marker.ArtifactNamingService
-import spp.jetbrains.marker.source.JVMMarkerUtils
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
+import spp.jetbrains.marker.ArtifactNamingService
+import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 

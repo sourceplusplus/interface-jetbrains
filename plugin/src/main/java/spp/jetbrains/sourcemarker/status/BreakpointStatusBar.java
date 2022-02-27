@@ -13,6 +13,7 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.StringUtils;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
@@ -25,14 +26,14 @@ import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService;
 import spp.jetbrains.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.protocol.instrument.InstrumentThrottle;
+import spp.protocol.instrument.LiveBreakpoint;
 import spp.protocol.instrument.LiveInstrument;
-import spp.protocol.instrument.LiveInstrumentEvent;
 import spp.protocol.instrument.LiveSourceLocation;
-import spp.protocol.instrument.ThrottleStep;
-import spp.protocol.instrument.breakpoint.LiveBreakpoint;
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointHit;
-import spp.protocol.instrument.breakpoint.event.LiveBreakpointRemoved;
+import spp.protocol.instrument.event.LiveBreakpointHit;
+import spp.protocol.instrument.event.LiveInstrumentEvent;
+import spp.protocol.instrument.event.LiveInstrumentRemoved;
+import spp.protocol.instrument.throttle.InstrumentThrottle;
+import spp.protocol.instrument.throttle.ThrottleStep;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -40,13 +41,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import java.awt.*;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,9 +54,10 @@ import java.util.stream.Collectors;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
-import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_HIT;
-import static spp.protocol.instrument.LiveInstrumentEventType.BREAKPOINT_REMOVED;
+import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
+import static spp.protocol.SourceServices.Instance.INSTANCE;
+import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_HIT;
+import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 
 public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
@@ -180,7 +176,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             } else if (event.getEventType() == BREAKPOINT_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
 
-                LiveBreakpointRemoved removed = Json.decodeValue(event.getData(), LiveBreakpointRemoved.class);
+                LiveInstrumentRemoved removed = deserializeLiveInstrumentRemoved(new JsonObject(event.getData()));
                 if (removed.getCause() == null) {
                     statusPanel.setStatus("Complete", COMPLETE_COLOR_PURPLE);
                 } else {
@@ -515,7 +511,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
-            "0[fill]" +
+            "0[fill]0" +
             "[grow,fill]" +
             "[fill]",
             // rows

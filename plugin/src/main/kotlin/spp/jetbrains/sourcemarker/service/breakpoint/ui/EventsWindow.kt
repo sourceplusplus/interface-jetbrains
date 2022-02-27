@@ -23,8 +23,8 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
-import spp.jetbrains.sourcemarker.service.breakpoint.LiveBreakpointConstants
 import spp.jetbrains.sourcemarker.service.breakpoint.DebugStackFrameListener
+import spp.jetbrains.sourcemarker.service.breakpoint.LiveBreakpointConstants
 import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent

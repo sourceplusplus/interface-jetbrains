@@ -17,12 +17,12 @@
  */
 package spp.jetbrains.mapper.api.impl
 
+import org.slf4j.LoggerFactory
 import spp.jetbrains.mapper.api.SourceMapper
 import spp.jetbrains.mapper.vcs.git.GitRepositoryMapper
 import spp.jetbrains.mapper.vcs.git.LogFollowCommand
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.LocalArtifact
-import org.slf4j.LoggerFactory
 import java.util.*
 
 /**

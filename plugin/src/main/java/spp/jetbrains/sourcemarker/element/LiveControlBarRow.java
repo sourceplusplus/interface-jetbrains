@@ -2,27 +2,14 @@ package spp.jetbrains.sourcemarker.element;
 
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.FormSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.layout.Sizes;
+import com.jgoodies.forms.layout.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static spp.jetbrains.sourcemarker.PluginUI.CONTROL_BAR_CMD_FOREGROUND;
-import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_11;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_PLAIN_15;
-import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
+import static spp.jetbrains.sourcemarker.PluginUI.*;
 
 public class LiveControlBarRow extends JPanel {
 

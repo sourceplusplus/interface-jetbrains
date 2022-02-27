@@ -29,7 +29,6 @@ import com.intellij.xdebugger.ui.DebuggerColors
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import java.awt.Color
 import java.awt.Font
-import java.util.*
 
 /**
  * todo: description.

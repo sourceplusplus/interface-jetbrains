@@ -17,7 +17,7 @@
  */
 package spp.jetbrains.sourcemarker.service
 
-import spp.protocol.instrument.LiveInstrumentEvent
+import spp.protocol.instrument.event.LiveInstrumentEvent
 
 /**
  * todo: description.

@@ -11,7 +11,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
@@ -21,15 +21,13 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.protocol.SourceMarkerServices;
 import spp.protocol.instrument.LiveInstrument;
+import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.LiveSourceLocation;
-import spp.protocol.instrument.meter.LiveMeter;
+import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.meter.MeterType;
 import spp.protocol.instrument.meter.MetricValue;
 import spp.protocol.instrument.meter.MetricValueType;
-import spp.protocol.instrument.meter.event.LiveMeterRemoved;
-import spp.protocol.service.live.LiveInstrumentService;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -39,15 +37,18 @@ import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
-import static spp.protocol.instrument.LiveInstrumentEventType.METER_REMOVED;
+import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
+import static spp.protocol.SourceServices.Instance.INSTANCE;
+import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
@@ -128,7 +129,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             if (event.getEventType() == METER_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
 
-                LiveMeterRemoved removed = Json.decodeValue(event.getData(), LiveMeterRemoved.class);
+                LiveInstrumentRemoved removed = deserializeLiveInstrumentRemoved(new JsonObject(event.getData()));
                 if (removed.getCause() == null) {
                     statusPanel.setStatus("Complete", COMPLETE_COLOR_PURPLE);
                 } else {
@@ -237,7 +238,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
-                } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                } else if (e.getKeyChar() == KeyEvent.VK_ENTER && meterNameField.getText().length() > 0) {
                     meterTypeComboBox.requestFocus();
                 }
             }

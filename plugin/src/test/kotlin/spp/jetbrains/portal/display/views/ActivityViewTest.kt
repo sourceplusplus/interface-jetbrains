@@ -17,18 +17,18 @@
  */
 package spp.jetbrains.portal.display.views
 
+import kotlinx.datetime.toKotlinInstant
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 import spp.jetbrains.portal.SourcePortal
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.metrics.ArtifactMetricResult
 import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.portal.PortalConfiguration
-import kotlinx.datetime.toKotlinInstant
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Test
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 

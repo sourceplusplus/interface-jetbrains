@@ -54,7 +54,7 @@ class FileActivityListener : FileEditorManagerListener {
     }
 
     override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
-        if (DumbService.isDumb(source.project)) {
+        if (DumbService.isDumb(source.project) || !file.isValid) {
             log.debug("Ignoring file closed: $file")
         } else {
             log.debug("File closed: $file")

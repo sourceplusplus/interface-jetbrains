@@ -21,16 +21,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.JavaRecursiveElementVisitor
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.*
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.mark.api.MethodSourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -39,10 +32,13 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.plugins.groovy.lang.psi.impl.stringValue
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.api.MethodSourceMark
+import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 
 /**
  * Detects the presence of log statements within methods and saves log patterns.
@@ -126,8 +122,10 @@ class LoggerDetector(val vertx: Vertx) {
                     if (methodName != null && LOGGER_METHODS.contains(methodName)) {
                         val resolvedMethod = expression.resolveMethod() ?: return
                         if (LOGGER_CLASSES.contains(resolvedMethod.containingClass?.qualifiedName.orEmpty())) {
-                            if (expression.argumentList.expressions.firstOrNull()?.stringValue() != null) {
-                                val logTemplate = expression.argumentList.expressions.first().stringValue()!!
+                            val logTemplate = (expression.argumentList.expressions.firstOrNull()?.run {
+                                (this as? PsiLiteral)?.value as? String
+                            })
+                            if (logTemplate != null) {
                                 loggerStatements.add(
                                     DetectedLogger(logTemplate, methodName, getLineNumber(expression) + 1)
                                 )

@@ -3,15 +3,14 @@ package spp.jetbrains.sourcemarker.status;
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+import io.vertx.core.json.JsonObject;
+import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
-import io.vertx.core.json.JsonObject;
-import org.jetbrains.annotations.NotNull;
-import spp.protocol.SourceMarkerServices;
-import spp.protocol.instrument.LiveInstrumentEvent;
-import spp.protocol.instrument.meter.LiveMeter;
+import spp.protocol.instrument.LiveMeter;
+import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.meter.MeterType;
 
 import javax.swing.*;
@@ -23,7 +22,7 @@ import java.awt.event.MouseEvent;
 import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceMarkerServices.Instance.INSTANCE;
+import static spp.protocol.SourceServices.Instance.INSTANCE;
 
 public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener {
 

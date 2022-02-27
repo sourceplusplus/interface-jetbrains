@@ -22,8 +22,8 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
-import spp.protocol.instrument.LiveVariable
-import spp.protocol.instrument.LiveVariableScope
+import spp.protocol.instrument.variable.LiveVariable
+import spp.protocol.instrument.variable.LiveVariableScope
 
 /**
  * todo: description.
