@@ -23,6 +23,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.json.Json
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker.creationService
 import spp.jetbrains.marker.SourceMarker.namingService
@@ -175,10 +176,25 @@ object LiveStatusManager : SourceMarkEventListener {
             wrapperPanel.layout = BorderLayout()
 
             if (watchExpression) {
-                SourceMarkerServices.Instance.liveView!!.addLiveViewSubscription(
+                val logPatterns = mutableListOf<String>()
+                val parentMark = inlayMark.getParentSourceMark()
+                if (parentMark is MethodSourceMark) {
+                    val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
+                    if (loggerDetector != null) {
+                        runBlocking {
+                            val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
+                            val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
+                            if (logOnCurrentLine != null) {
+                                logPatterns.add(logOnCurrentLine.logPattern)
+                            }
+                        }
+                    }
+                }
+
+                SourceServices.Instance.liveView!!.addLiveViewSubscription(
                     LiveViewSubscription(
                         null,
-                        listOf("Getting user list"),
+                        logPatterns,
                         ArtifactQualifiedName(
                             inlayMark.artifactQualifiedName.identifier,
                             lineNumber = inlayMark.artifactQualifiedName.lineNumber,
@@ -190,7 +206,7 @@ object LiveStatusManager : SourceMarkEventListener {
                         ),
                         LiveViewConfig("LOGS", listOf("endpoint_logs"))
                     )
-                ) {
+                ).onComplete {
                     if (it.failed()) {
                         log.error("Failed to add live view subscription", it.cause())
                     }
@@ -228,14 +244,12 @@ object LiveStatusManager : SourceMarkEventListener {
             sourcePortal.configuration.currentPage = PageType.LOGS
             sourcePortal.configuration.statusBar = true
 
-            SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
-                val latestLog = it.body().logs.first()
-                statusBar.setLatestLog(
-                    Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog
-                )
-            }
-
             if (!watchExpression) {
+                SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
+                    val latestLog = it.body().logs.first()
+                    statusBar.setLatestLog(Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog)
+                }
+
                 statusBar.focus()
             }
         }

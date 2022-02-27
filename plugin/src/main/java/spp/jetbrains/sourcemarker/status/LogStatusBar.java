@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
@@ -27,11 +28,13 @@ import spp.jetbrains.sourcemarker.service.log.VariableParser;
 import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.artifact.log.Log;
+import spp.protocol.artifact.log.LogResult;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveLog;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
+import spp.protocol.instrument.event.LiveLogHit;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
 
@@ -58,6 +61,7 @@ import java.util.stream.Collectors;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
@@ -157,21 +161,21 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
             SourceMarkerPlugin.INSTANCE.getVertx().eventBus().consumer(ArtifactLogUpdated, event -> {
                 LogResult logResult = (LogResult) event.body();
+                if (!inlayMark.getArtifactQualifiedName().equals(logResult.getArtifactQualifiedName())) {
+                    return;
+                }
                 Log latestLog = logResult.getLogs().get(0);
                 setLatestLog(Instant.now(), latestLog);
 
-                JsonObject logJson = JsonObject.mapFrom(new LiveLogHit(
-                        "-1", kotlinx.datetime.Instant.Companion.now(), "null", "null", logResult
+                JsonObject logJson = JsonObject.mapFrom(new LiveLogHit( //todo: real hit info
+                        "-1", latestLog.getTimestamp(), "null", "null", logResult
                 ));
                 logJson.getJsonObject("logResult").getJsonArray("logs").forEach(it -> {
                     JsonObject log = (JsonObject) it;
                     log.remove("formattedMessage");
                 });
 
-                LiveInstrumentEvent liveInstrumentEvent = new LiveInstrumentEvent(
-                        LOG_HIT,
-                        logJson.toString()
-                );
+                LiveInstrumentEvent liveInstrumentEvent = new LiveInstrumentEvent(LOG_HIT, logJson.toString());
                 commandModel.insertRow(0, liveInstrumentEvent);
             });
         } else {

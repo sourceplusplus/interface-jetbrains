@@ -41,6 +41,7 @@ import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
+import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType

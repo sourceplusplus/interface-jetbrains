@@ -32,6 +32,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
@@ -62,8 +63,26 @@ object ControlBarController {
             LiveControlCommand.values().toList().filter {
                 @Suppress("UselessCallOnCollection") //unknown enums are null
                 selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
-            } + listOf(WATCH_LOG)
+            }
         }
+    }
+
+    private fun determineAvailableCommands(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
+        val availableCommandsAtLocation = availableCommands.toMutableList()
+        val parentMark = inlayMark.getParentSourceMark()
+        if (parentMark is MethodSourceMark) {
+            val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
+            if (loggerDetector != null) {
+                runBlocking {
+                    val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
+                    val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
+                    if (logOnCurrentLine != null) {
+                        availableCommandsAtLocation.add(WATCH_LOG)
+                    }
+                }
+            }
+        }
+        return availableCommandsAtLocation
     }
 
     fun handleCommandInput(input: String, editor: Editor) {
@@ -263,7 +282,7 @@ object ControlBarController {
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
 
-                val controlBar = ControlBar(editor, inlayMark, availableCommands)
+                val controlBar = ControlBar(editor, inlayMark, determineAvailableCommands(inlayMark))
                 wrapperPanel.add(controlBar)
                 editor.scrollingModel.addVisibleAreaListener(controlBar)
 
