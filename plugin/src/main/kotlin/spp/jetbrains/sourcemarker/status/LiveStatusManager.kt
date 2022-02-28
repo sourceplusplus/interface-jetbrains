@@ -207,7 +207,19 @@ object LiveStatusManager : SourceMarkEventListener {
                         LiveViewConfig("LOGS", listOf("endpoint_logs"))
                     )
                 ).onComplete {
-                    if (it.failed()) {
+                    if (it.succeeded()) {
+                        inlayMark.addEventListener { event ->
+                            if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+                                SourceServices.Instance.liveView!!.removeLiveViewSubscription(
+                                    it.result().subscriptionId!!
+                                ).onComplete {
+                                    if (it.failed()) {
+                                        log.error("Failed to remove subscription: {}", it.cause())
+                                    }
+                                }
+                            }
+                        }
+                    } else {
                         log.error("Failed to add live view subscription", it.cause())
                     }
                 }
