@@ -28,7 +28,6 @@ import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -350,18 +349,18 @@ class PortalEventListener(
                                 portal.viewingArtifact, SourceMark.Type.GUTTER
                             )
 
-                    val logPatterns = if (sourceMark is ClassSourceMark) {
-                        sourceMark.sourceFileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
-                            .flatMap {
-                                it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
-                                    .getOrFindLoggerStatements(it)
-                            }.map { it.logPattern }
-                    } else if (sourceMark is MethodSourceMark) {
-                        sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
-                            .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
-                    } else {
-                        throw IllegalStateException("Unsupported source mark type")
-                    }
+                            val logPatterns = if (sourceMark is ClassSourceMark) {
+                                sourceMark.sourceFileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
+                                    .flatMap {
+                                        it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                                            .getOrFindLoggerStatements(it)
+                                    }.map { it.logPattern }
+                            } else if (sourceMark is MethodSourceMark) {
+                                sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                                    .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
+                            } else {
+                                throw IllegalStateException("Unsupported source mark type")
+                            }
 
                             Instance.liveView!!.addLiveViewSubscription(
                                 LiveViewSubscription(
