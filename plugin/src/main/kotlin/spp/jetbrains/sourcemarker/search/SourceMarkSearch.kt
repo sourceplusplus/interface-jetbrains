@@ -40,27 +40,6 @@ object SourceMarkSearch {
             }
     }
 
-    fun findByMeterId(meterId: String): SourceMark? {
-        return SourceMarker.getSourceMarks()
-            .firstOrNull {
-                it.getUserData(SourceMarkKeys.METER_ID) == meterId
-            }
-    }
-
-    fun findByLogId(logId: String): SourceMark? {
-        return SourceMarker.getSourceMarks()
-            .firstOrNull {
-                it.getUserData(SourceMarkKeys.LOG_ID) == logId
-            }
-    }
-
-    fun findByBreakpointId(breakpointId: String): SourceMark? {
-        return SourceMarker.getSourceMarks()
-            .firstOrNull {
-                it.getUserData(SourceMarkKeys.BREAKPOINT_ID) == breakpointId
-            }
-    }
-
     fun findByInstrumentId(instrumentId: String): SourceMark? {
         return SourceMarker.getSourceMarks()
             .firstOrNull {
@@ -73,7 +52,8 @@ object SourceMarkSearch {
     suspend fun findSourceMark(artifact: ArtifactQualifiedName): SourceMark? {
         return when (artifact.type) {
             ArtifactType.ENDPOINT -> findEndpointSourceMark(artifact)
-            ArtifactType.STATEMENT -> findExpressionAdvice(artifact)
+            ArtifactType.STATEMENT -> findExpressionSourceMark(artifact)
+            ArtifactType.EXPRESSION -> findExpressionSourceMark(artifact)
             else -> TODO("impl")
         }
     }
@@ -120,7 +100,11 @@ object SourceMarkSearch {
             }
     }
 
-    private fun findExpressionAdvice(artifact: ArtifactQualifiedName): ExpressionSourceMark? {
+    private fun findExpressionSourceMark(artifact: ArtifactQualifiedName): ExpressionSourceMark? {
+        if (artifact.type == ArtifactType.EXPRESSION) {
+            return SourceMarker.getSourceMarks().find { it.artifactQualifiedName == artifact } as ExpressionSourceMark?
+        }
+
         val qualifiedClassName = artifact.identifier.substring(0, artifact.identifier.lastIndexOf("."))
         val fileMarker = SourceMarker.getSourceFileMarker(qualifiedClassName)
         return if (fileMarker != null) {

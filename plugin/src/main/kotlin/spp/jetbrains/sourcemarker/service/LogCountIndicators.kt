@@ -63,7 +63,7 @@ class LogCountIndicators : CoroutineVerticle() {
                         val fileLogPatterns = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>().flatMap {
                             it.getUserData(LOGGER_DETECTOR)!!.getOrFindLoggerStatements(it)
                         }
-                        Instance.logCountIndicator!!.getPatternOccurrences(
+                        val occurrences = Instance.logCountIndicator!!.getPatternOccurrences(
                             fileLogPatterns.map { it.logPattern },
                             config.serviceName,
                             Clock.System.now().minus(15, DateTimeUnit.MINUTE),
@@ -103,8 +103,6 @@ class LogCountIndicators : CoroutineVerticle() {
                                         }
                                     }
                                 }
-                            } else {
-                                log.error("Failed to get log pattern occurrences", it.cause())
                             }
                         }
                     }
