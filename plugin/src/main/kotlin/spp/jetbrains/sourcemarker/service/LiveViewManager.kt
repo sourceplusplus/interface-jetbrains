@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.portal.SourcePortal
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
@@ -40,6 +41,7 @@ import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
 import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
 import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
+import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType
@@ -80,6 +82,10 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
         vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developer)) {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
             if (log.isTraceEnabled) log.trace("Received live event: {}", event)
+            if (!SourceMarker.enabled) {
+                log.warn("SourceMarker is not enabled, ignoring live event: {}", event)
+                return@consumer
+            }
 
             when (event.viewConfig.viewName) {
                 "LIVE_METER" -> launch(vertx.dispatcher()) { consumeLiveMeterEvent(event) }
@@ -116,7 +122,7 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
         val meterTypeStr = event.entityId.substringAfter("spp_").substringBefore("_").toUpperCase()
         val meterType = MeterType.valueOf(meterTypeStr)
         val meterId = event.entityId.substringAfter(meterType.name.toLowerCase() + "_").replace("_", "-")
-        val meterMark = SourceMarkSearch.findByMeterId(meterId)
+        val meterMark = SourceMarkSearch.findByInstrumentId(meterId)
         if (meterMark == null) {
             log.info("Could not find source mark for: " + event.entityId)
             return
@@ -140,16 +146,23 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
             Int.MAX_VALUE
         )
 
-        for ((content, logs) in logsResult.logs.groupBy { it.content }) {
-            SourceMarkSearch.findInheritedSourceMarks(content).forEach {
-                vertx.eventBus().send(
-                    ProtocolAddress.Global.ArtifactLogUpdated,
-                    logsResult.copy(
-                        artifactQualifiedName = it.artifactQualifiedName,
-                        total = logs.size,
-                        logs = logs,
+        if (event.artifactQualifiedName.type == ArtifactType.EXPRESSION) {
+            val expressionMark = SourceMarkSearch.findSourceMark(event.artifactQualifiedName)
+            if (expressionMark != null) {
+                vertx.eventBus().send(ProtocolAddress.Global.ArtifactLogUpdated, logsResult)
+            }
+        } else {
+            for ((content, logs) in logsResult.logs.groupBy { it.content }) {
+                SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                    vertx.eventBus().send(
+                        ProtocolAddress.Global.ArtifactLogUpdated,
+                        logsResult.copy(
+                            artifactQualifiedName = it.artifactQualifiedName,
+                            total = logs.size,
+                            logs = logs,
+                        )
                     )
-                )
+                }
             }
         }
     }

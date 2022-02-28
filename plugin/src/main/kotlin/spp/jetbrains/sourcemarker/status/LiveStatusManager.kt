@@ -23,6 +23,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.json.Json
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker.creationService
 import spp.jetbrains.marker.SourceMarker.namingService
@@ -161,7 +162,7 @@ object LiveStatusManager : SourceMarkEventListener {
     /**
      * Invoked via control bar. Force visible.
      */
-    fun showLogStatusBar(editor: Editor, lineNumber: Int) {
+    fun showLogStatusBar(editor: Editor, lineNumber: Int, watchExpression: Boolean) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
@@ -174,17 +175,69 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            if (watchExpression) {
+                val logPatterns = mutableListOf<String>()
+                val parentMark = inlayMark.getParentSourceMark()
+                if (parentMark is MethodSourceMark) {
+                    val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
+                    if (loggerDetector != null) {
+                        runBlocking {
+                            val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
+                            val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
+                            if (logOnCurrentLine != null) {
+                                logPatterns.add(logOnCurrentLine.logPattern)
+                            }
+                        }
+                    }
+                }
+
+                SourceServices.Instance.liveView!!.addLiveViewSubscription(
+                    LiveViewSubscription(
+                        null,
+                        logPatterns,
+                        ArtifactQualifiedName(
+                            inlayMark.artifactQualifiedName.identifier,
+                            lineNumber = inlayMark.artifactQualifiedName.lineNumber,
+                            type = ArtifactType.EXPRESSION
+                        ),
+                        LiveSourceLocation(
+                            inlayMark.artifactQualifiedName.identifier,
+                            line = inlayMark.artifactQualifiedName.lineNumber!!
+                        ),
+                        LiveViewConfig("LOGS", listOf("endpoint_logs"))
+                    )
+                ).onComplete {
+                    if (it.succeeded()) {
+                        inlayMark.addEventListener { event ->
+                            if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+                                SourceServices.Instance.liveView!!.removeLiveViewSubscription(
+                                    it.result().subscriptionId!!
+                                ).onComplete {
+                                    if (it.failed()) {
+                                        log.error("Failed to remove subscription: {}", it.cause())
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        log.error("Failed to add live view subscription", it.cause())
+                    }
+                }
+            }
+
             val config = Json.decodeValue(
                 PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
                 SourceMarkerConfig::class.java
             )
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier,
+                    lineNumber,
                     service = config.serviceName
                 ),
-                scopeService.getScopeVariables(fileMarker, lineNumber),
-                inlayMark
+                if (watchExpression) emptyList() else scopeService.getScopeVariables(fileMarker, lineNumber),
+                inlayMark,
+                watchExpression
             )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
@@ -203,14 +256,14 @@ object LiveStatusManager : SourceMarkEventListener {
             sourcePortal.configuration.currentPage = PageType.LOGS
             sourcePortal.configuration.statusBar = true
 
-            SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
-                val latestLog = it.body().logs.first()
-                statusBar.setLatestLog(
-                    Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog
-                )
-            }
+            if (!watchExpression) {
+                SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
+                    val latestLog = it.body().logs.first()
+                    statusBar.setLatestLog(Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog)
+                }
 
-            statusBar.focus()
+                statusBar.focus()
+            }
         }
     }
 
@@ -359,7 +412,8 @@ object LiveStatusManager : SourceMarkEventListener {
                     val statusBar = LogStatusBar(
                         liveLog.location,
                         emptyList(),
-                        inlayMark
+                        inlayMark,
+                        false
                     )
                     inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
                     statusBar.setWrapperPanel(wrapperPanel)

@@ -32,6 +32,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
@@ -66,12 +67,40 @@ object ControlBarController {
         }
     }
 
+    private fun determineAvailableCommands(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
+        val availableCommandsAtLocation = availableCommands.toMutableList()
+        val parentMark = inlayMark.getParentSourceMark()
+        if (parentMark is MethodSourceMark) {
+            val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
+            if (loggerDetector != null) {
+                runBlocking {
+                    val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
+                    val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
+                    if (logOnCurrentLine != null) {
+                        availableCommandsAtLocation.add(WATCH_LOG)
+                    }
+                }
+            }
+        }
+        return availableCommandsAtLocation
+    }
+
     fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
         when (input) {
             VIEW_ACTIVITY.command -> handleViewPortalCommand(editor, VIEW_ACTIVITY)
             VIEW_TRACES.command -> handleViewPortalCommand(editor, VIEW_TRACES)
             VIEW_LOGS.command -> handleViewPortalCommand(editor, VIEW_LOGS)
+            WATCH_LOG.command -> {
+                //replace command inlay with log status inlay
+                val prevCommandBar = previousControlBar!!
+                previousControlBar!!.dispose()
+                previousControlBar = null
+
+                ApplicationManager.getApplication().runWriteAction {
+                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber, true)
+                }
+            }
             ADD_LIVE_BREAKPOINT.command -> {
                 //replace command inlay with breakpoint status inlay
                 val prevCommandBar = previousControlBar!!
@@ -89,7 +118,7 @@ object ControlBarController {
                 previousControlBar = null
 
                 ApplicationManager.getApplication().runWriteAction {
-                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
+                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber, false)
                 }
             }
             ADD_LIVE_METER.command -> {
@@ -253,7 +282,7 @@ object ControlBarController {
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
 
-                val controlBar = ControlBar(editor, inlayMark, availableCommands)
+                val controlBar = ControlBar(editor, inlayMark, determineAvailableCommands(inlayMark))
                 wrapperPanel.add(controlBar)
                 editor.scrollingModel.addVisibleAreaListener(controlBar)
 
