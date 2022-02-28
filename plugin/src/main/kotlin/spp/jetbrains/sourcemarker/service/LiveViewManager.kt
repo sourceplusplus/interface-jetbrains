@@ -122,7 +122,7 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
         val meterTypeStr = event.entityId.substringAfter("spp_").substringBefore("_").toUpperCase()
         val meterType = MeterType.valueOf(meterTypeStr)
         val meterId = event.entityId.substringAfter(meterType.name.toLowerCase() + "_").replace("_", "-")
-        val meterMark = SourceMarkSearch.findByMeterId(meterId)
+        val meterMark = SourceMarkSearch.findByInstrumentId(meterId)
         if (meterMark == null) {
             log.info("Could not find source mark for: " + event.entityId)
             return
