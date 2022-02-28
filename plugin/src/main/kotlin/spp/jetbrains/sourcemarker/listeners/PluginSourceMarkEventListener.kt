@@ -33,9 +33,9 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
-import spp.protocol.ProtocolAddress.Global.OpenPortal
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.OpenPortal
 import spp.protocol.artifact.ArtifactType
-import spp.protocol.portal.PageType
+import spp.jetbrains.portal.protocol.portal.PageType
 
 /**
  * todo: description.

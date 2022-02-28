@@ -46,14 +46,14 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOG_ID
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.protocol.ProtocolAddress.Portal.DisplayLogs
+import spp.jetbrains.portal.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.SourceServices
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.instrument.*
 import spp.protocol.instrument.meter.MeterType
-import spp.protocol.portal.PageType
+import spp.jetbrains.portal.protocol.portal.PageType
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
 import java.awt.BorderLayout

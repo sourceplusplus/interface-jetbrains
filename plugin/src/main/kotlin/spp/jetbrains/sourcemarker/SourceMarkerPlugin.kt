@@ -99,7 +99,7 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.endpoint.EndpointResult
+import spp.jetbrains.portal.protocol.artifact.endpoint.EndpointResult
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.artifact.metrics.ArtifactMetricResult

@@ -28,7 +28,7 @@ import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.metrics.ArtifactMetricResult
 import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.metrics.MetricType
-import spp.protocol.portal.PortalConfiguration
+import spp.jetbrains.portal.protocol.portal.PortalConfiguration
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 

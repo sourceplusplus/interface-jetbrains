@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated;
+import static spp.jetbrains.portal.protocol.ProtocolAddress.Global.ArtifactLogUpdated;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;

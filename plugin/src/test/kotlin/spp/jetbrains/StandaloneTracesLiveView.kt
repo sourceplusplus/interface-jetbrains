@@ -44,11 +44,11 @@ import spp.jetbrains.portal.SourcePortal
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.protocol.ProtocolAddress.Global.RefreshTraces
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.RefreshTraces
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
-import spp.protocol.portal.PageType
-import spp.protocol.portal.PortalConfiguration
+import spp.jetbrains.portal.protocol.portal.PageType
+import spp.jetbrains.portal.protocol.portal.PortalConfiguration
 import java.io.File
 
 class StandaloneTracesLiveView : LightJavaCodeInsightFixtureTestCase() {

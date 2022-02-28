@@ -36,10 +36,10 @@ import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.search.SourceMarkSearch
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.protocol.ProtocolAddress
-import spp.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
-import spp.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
-import spp.protocol.ProtocolAddress.Global.TraceSpanUpdated
+import spp.jetbrains.portal.protocol.ProtocolAddress
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.ArtifactMetricsUpdated
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.ArtifactTracesUpdated
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.TraceSpanUpdated
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.QueryTimeFrame

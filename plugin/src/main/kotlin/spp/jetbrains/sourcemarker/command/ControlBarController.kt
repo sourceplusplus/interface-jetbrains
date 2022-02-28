@@ -39,10 +39,10 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.protocol.ProtocolAddress.Global.SetCurrentPage
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.SetCurrentPage
 import spp.protocol.SourceServices
 import spp.protocol.instrument.LiveInstrumentType.*
-import spp.protocol.portal.PageType
+import spp.jetbrains.portal.protocol.portal.PageType
 import java.awt.BorderLayout
 import javax.swing.JComponent
 import javax.swing.JPanel

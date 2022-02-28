@@ -48,12 +48,12 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.protocol.ProtocolAddress.Global.RefreshActivity
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.RefreshActivity
 import spp.protocol.SourceServices
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.LiveSourceLocation
-import spp.protocol.portal.PortalConfiguration
+import spp.jetbrains.portal.protocol.portal.PortalConfiguration
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
 import java.io.File
