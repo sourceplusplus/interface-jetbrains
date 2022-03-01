@@ -23,7 +23,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.google.guava:guava:31.0.1-jre")
+    implementation("com.google.guava:guava:31.1-jre")
     implementation("org.jetbrains:annotations:23.0.0")
     compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
