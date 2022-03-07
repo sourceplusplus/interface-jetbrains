@@ -30,7 +30,6 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import org.slf4j.LoggerFactory
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
 import spp.jetbrains.sourcemarker.service.breakpoint.LiveBreakpointConstants.LIVE_BREAKPOINT_NAME
 import spp.jetbrains.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
@@ -47,8 +46,6 @@ import spp.protocol.instrument.event.LiveBreakpointHit
 class BreakpointHitWindowService(private val project: Project) : Disposable {
 
     companion object {
-        private val log = LoggerFactory.getLogger(BreakpointHitWindowService::class.java)
-
         fun getInstance(project: Project): BreakpointHitWindowService {
             return ServiceManager.getService(project, BreakpointHitWindowService::class.java)
         }
