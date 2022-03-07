@@ -557,10 +557,6 @@ object SourceMarkerPlugin {
         )
     }
 
-    private fun initMapper() {
-        //todo: this
-    }
-
     private suspend fun initPortal(config: SourceMarkerConfig) {
         //todo: portal should be connected to event bus without bridge
         val sockJSHandler = SockJSHandler.create(vertx)
