@@ -89,7 +89,6 @@ import spp.jetbrains.sourcemarker.listeners.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.listeners.PortalEventListener
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
-import spp.jetbrains.sourcemarker.service.LogCountIndicators
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
@@ -107,12 +106,11 @@ import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import spp.protocol.artifact.trace.TraceStack
+import spp.protocol.marshall.KSerializers
+import spp.protocol.marshall.LocalMessageCodec
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
-import spp.protocol.service.LogCountIndicatorService
-import spp.protocol.marshall.KSerializers
-import spp.protocol.marshall.LocalMessageCodec
 import java.awt.Dimension
 import java.io.File
 import java.io.IOException
@@ -397,25 +395,6 @@ object SourceMarkerPlugin {
             }
         } else {
             log.info("Live views disabled")
-        }
-
-        //log count indicator
-        if (hardcodedConfig.getJsonObject("services").getBoolean("log_count_indicator")) {
-            if (availableRecords.any { it.name == SourceServices.Utilize.LOG_COUNT_INDICATOR }) {
-                log.info("Log count indicator available")
-                Instance.logCountIndicator = ServiceProxyBuilder(vertx)
-                    .apply { config.serviceToken?.let { setToken(it) } }
-                    .setAddress(SourceServices.Utilize.LOG_COUNT_INDICATOR)
-                    .build(LogCountIndicatorService::class.java)
-
-                GlobalScope.launch(vertx.dispatcher()) {
-                    deploymentIds.add(vertx.deployVerticle(LogCountIndicators()).await())
-                }
-            } else {
-                log.warn("Log count indicator unavailable")
-            }
-        } else {
-            log.info("Log count indicator disabled")
         }
     }
 

@@ -122,7 +122,6 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 setupHandler(vertx, Utilize.LIVE_SERVICE)
                 setupHandler(vertx, Utilize.LIVE_INSTRUMENT)
                 setupHandler(vertx, Utilize.LIVE_VIEW)
-                setupHandler(vertx, Utilize.LOG_COUNT_INDICATOR)
 
                 //setup connection
                 val replyAddress = UUID.randomUUID().toString()
