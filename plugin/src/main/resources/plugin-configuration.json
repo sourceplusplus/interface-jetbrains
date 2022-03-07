@@ -6,7 +6,6 @@
   "service_port": 5445,
   "tcp_service_port": 5455,
   "services": {
-    "log_count_indicator": false,
     "live_instrument": true,
     "live_view": true
   }
