@@ -51,7 +51,6 @@ changelog {
 
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
-        implementation(project(":interfaces:jetbrains:mapper"))
         implementation(project(":interfaces:jetbrains:marker"))
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
@@ -59,7 +58,6 @@ dependencies {
         implementation(project(":interfaces:portal"))
         implementation(project(":protocol"))
     } else {
-        implementation(project(":mapper"))
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
