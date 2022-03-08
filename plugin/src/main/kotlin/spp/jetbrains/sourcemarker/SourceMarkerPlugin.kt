@@ -519,8 +519,7 @@ object SourceMarkerPlugin {
 
         val scheme = if (config.isSsl()) "https" else "http"
         val skywalkingHost = "$scheme://${config.serviceHostNormalized}:" +
-                "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}" +
-                "/graphql/skywalking"
+                "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}/graphql"
 
         val certificatePins = mutableListOf<String>()
         certificatePins.addAll(config.certificatePins)
