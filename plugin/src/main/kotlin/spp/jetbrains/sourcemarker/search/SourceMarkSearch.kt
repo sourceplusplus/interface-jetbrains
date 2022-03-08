@@ -34,19 +34,21 @@ import spp.protocol.artifact.ArtifactType
 object SourceMarkSearch {
 
     fun findByEndpointName(endpointName: String): SourceMark? {
-        return SourceMarker.getSourceMarks()
-            .firstOrNull {
-                it.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)?.getEndpointName(it) == endpointName
-            }
+        return SourceMarker.getSourceMarks().firstOrNull {
+            it.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)?.getEndpointName(it) == endpointName
+        }
     }
 
     fun findByInstrumentId(instrumentId: String): SourceMark? {
-        return SourceMarker.getSourceMarks()
-            .firstOrNull {
-                it.getUserData(SourceMarkKeys.BREAKPOINT_ID) == instrumentId
-                        || it.getUserData(SourceMarkKeys.LOG_ID) == instrumentId
-                        || it.getUserData(SourceMarkKeys.METER_ID) == instrumentId
-            }
+        return SourceMarker.getSourceMarks().firstOrNull {
+            it.getUserData(SourceMarkKeys.INSTRUMENT_ID) == instrumentId
+        }
+    }
+
+    fun findBySubscriptionId(subscriptionId: String): SourceMark? {
+        return SourceMarker.getSourceMarks().firstOrNull {
+            it.getUserData(SourceMarkKeys.VIEW_SUBSCRIPTION_ID) == subscriptionId
+        }
     }
 
     suspend fun findSourceMark(artifact: ArtifactQualifiedName): SourceMark? {

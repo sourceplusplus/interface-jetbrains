@@ -12,22 +12,23 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
+import spp.jetbrains.sourcemarker.service.ViewEventListener;
 import spp.jetbrains.sourcemarker.service.log.LogHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.log.VariableParser;
 import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.artifact.log.Log;
+import spp.protocol.artifact.log.LogOrderType;
 import spp.protocol.artifact.log.LogResult;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveLog;
@@ -37,6 +38,7 @@ import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.event.LiveLogHit;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
+import spp.protocol.view.LiveViewEvent;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -50,6 +52,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -61,13 +64,13 @@ import java.util.stream.Collectors;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.jetbrains.portal.protocol.ProtocolAddress.Global.ArtifactLogUpdated;
-import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_REMOVED;
+import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
-public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener, InstrumentEventListener {
+public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener,
+        InstrumentEventListener, ViewEventListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -152,33 +155,15 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         setupComponents();
 
         if (watchExpression) {
+            LiveStatusManager.addViewEventListener(inlayMark, this);
             liveLogTextField.setCanShowSaveButton(false);
             liveLogTextField.setEditMode(false);
             removeActiveDecorations();
             configDropdownLabel.setVisible(false);
             displayTimeField();
             addExpandButton();
-
-            SourceMarkerPlugin.INSTANCE.getVertx().eventBus().consumer(ArtifactLogUpdated, event -> {
-                LogResult logResult = (LogResult) event.body();
-                if (!inlayMark.getArtifactQualifiedName().equals(logResult.getArtifactQualifiedName())) {
-                    return;
-                }
-                Log latestLog = logResult.getLogs().get(0);
-                setLatestLog(Instant.now(), latestLog);
-
-                JsonObject logJson = JsonObject.mapFrom(new LiveLogHit( //todo: real hit info
-                        "-1", latestLog.getTimestamp(), "null", "null", logResult
-                ));
-                logJson.getJsonObject("logResult").getJsonArray("logs").forEach(it -> {
-                    JsonObject log = (JsonObject) it;
-                    log.remove("formattedMessage");
-                });
-
-                LiveInstrumentEvent liveInstrumentEvent = new LiveInstrumentEvent(LOG_HIT, logJson.toString());
-                commandModel.insertRow(0, liveInstrumentEvent);
-            });
         } else {
+            LiveStatusManager.addStatusBar(inlayMark, this);
             showEditableMode();
             liveLogTextField.setEditMode(true);
             liveLogTextField.addSaveListener(this::saveLiveLog);
@@ -194,7 +179,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         displayTimeField();
         addExpandButton();
         repaint();
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, this);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -264,6 +248,13 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     public void accept(@NotNull LiveInstrumentEvent event) {
         if (event.getEventType() == LOG_HIT) {
             commandModel.insertRow(0, event);
+
+            LiveLogHit logHit = Json.decodeValue(event.getData(), LiveLogHit.class);
+            //LiveLogHit logHit = ProtocolMarshaller.deserializeLiveLogHit(new JsonObject(event.getData()));
+            setLatestLog(
+                    Instant.ofEpochMilli(logHit.getLogResult().getTimestamp().toEpochMilliseconds()),
+                    logHit.getLogResult().getLogs().get(0)
+            );
         } else if (event.getEventType() == LOG_REMOVED) {
             removed = true;
 
@@ -282,6 +273,32 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             removeActiveDecorations();
             repaint();
         }
+    }
+
+    @Override
+    public void accept(@NotNull LiveViewEvent event) {
+        JsonObject rawMetrics = new JsonObject(event.getMetricsData());
+        Log logData = Json.decodeValue(rawMetrics.getJsonObject("log").toString(), Log.class);
+        LogResult logResult = new LogResult(
+            event.getArtifactQualifiedName(),
+            LogOrderType.NEWEST_LOGS,
+            logData.getTimestamp(),
+            Collections.singletonList(logData),
+            Integer.MAX_VALUE
+        );
+        Log latestLog = logResult.getLogs().get(0);
+        setLatestLog(Instant.now(), latestLog);
+
+        JsonObject logJson = JsonObject.mapFrom(new LiveLogHit( //todo: real hit info
+                "-1", latestLog.getTimestamp(), "null", "null", logResult
+        ));
+        logJson.getJsonObject("logResult").getJsonArray("logs").forEach(it -> {
+            JsonObject log = (JsonObject) it;
+            log.remove("formattedMessage");
+        });
+
+        LiveInstrumentEvent liveInstrumentEvent = new LiveInstrumentEvent(LOG_HIT, logJson.toString());
+        commandModel.insertRow(0, liveInstrumentEvent);
     }
 
     private void addExpandButton() {
@@ -636,7 +653,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveLog = (LiveLog) it.result();
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), it.result().getId());
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
 
                 inlayMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR())

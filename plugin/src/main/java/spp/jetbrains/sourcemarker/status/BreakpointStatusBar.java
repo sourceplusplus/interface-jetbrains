@@ -453,7 +453,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
         INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveBreakpoint = (LiveBreakpoint) it.result();
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getBREAKPOINT_ID(), liveBreakpoint.getId());
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), liveBreakpoint.getId());
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveBreakpoint);
             } else {
                 it.cause().printStackTrace();
