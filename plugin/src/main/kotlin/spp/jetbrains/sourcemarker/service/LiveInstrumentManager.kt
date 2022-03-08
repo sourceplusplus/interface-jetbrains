@@ -172,7 +172,7 @@ class LiveInstrumentManager(
             return
         }
 
-        val logHit = Json.decodeValue(liveEvent.data, LiveLogHit::class.java)
+        val logHit = ProtocolMarshaller.deserializeLiveLogHit(JsonObject(liveEvent.data))
         SourceMarkSearch.findByInstrumentId(logHit.logId)
             ?.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
     }

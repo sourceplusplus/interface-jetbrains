@@ -18,14 +18,13 @@
 package spp.jetbrains.sourcemarker.service.log
 
 import com.intellij.util.ui.ColumnInfo
-import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import kotlinx.datetime.Clock
 import spp.jetbrains.sourcemarker.PluginBundle.message
-import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
-import spp.protocol.instrument.event.LiveLogHit
+import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
+import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveLogHit
 import spp.protocol.utils.toPrettyDuration
 
 /**
@@ -40,14 +39,14 @@ class LogHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(n
         return when (name) {
             "Time" -> Comparator { t: LiveInstrumentEvent, t2: LiveInstrumentEvent ->
                 val obj1 = if (t.eventType == LiveInstrumentEventType.LOG_HIT) {
-                    Json.decodeValue(t.data, LiveLogHit::class.java)
+                    deserializeLiveLogHit(JsonObject(t.data))
                 } else if (t.eventType == LiveInstrumentEventType.LOG_REMOVED) {
                     deserializeLiveInstrumentRemoved(JsonObject(t.data))
                 } else {
                     throw IllegalArgumentException(t.eventType.name)
                 }
                 val obj2 = if (t2.eventType == LiveInstrumentEventType.LOG_HIT) {
-                    Json.decodeValue(t2.data, LiveLogHit::class.java)
+                    deserializeLiveLogHit(JsonObject(t2.data))
                 } else if (t2.eventType == LiveInstrumentEventType.LOG_REMOVED) {
                     deserializeLiveInstrumentRemoved(JsonObject(t2.data))
                 } else {
@@ -61,7 +60,7 @@ class LogHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(n
 
     override fun valueOf(event: LiveInstrumentEvent): String {
         if (event.eventType == LiveInstrumentEventType.LOG_HIT) {
-            val item = Json.decodeValue(event.data, LiveLogHit::class.java)
+            val item = deserializeLiveLogHit(JsonObject(event.data))
             return when (name) {
                 "Message" -> item.logResult.logs.first().toFormattedMessage()
                 "Time" ->

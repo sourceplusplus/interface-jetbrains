@@ -12,7 +12,6 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +37,7 @@ import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.event.LiveLogHit;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
+import spp.protocol.marshall.ProtocolMarshaller;
 import spp.protocol.view.LiveViewEvent;
 
 import javax.swing.*;
@@ -249,8 +249,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         if (event.getEventType() == LOG_HIT) {
             commandModel.insertRow(0, event);
 
-            LiveLogHit logHit = Json.decodeValue(event.getData(), LiveLogHit.class);
-            //LiveLogHit logHit = ProtocolMarshaller.deserializeLiveLogHit(new JsonObject(event.getData()));
+            LiveLogHit logHit = ProtocolMarshaller.deserializeLiveLogHit(new JsonObject(event.getData()));
             setLatestLog(
                     Instant.ofEpochMilli(logHit.getLogResult().getTimestamp().toEpochMilliseconds()),
                     logHit.getLogResult().getLogs().get(0)
@@ -278,7 +277,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     @Override
     public void accept(@NotNull LiveViewEvent event) {
         JsonObject rawMetrics = new JsonObject(event.getMetricsData());
-        Log logData = Json.decodeValue(rawMetrics.getJsonObject("log").toString(), Log.class);
+        Log logData = ProtocolMarshaller.deserializeLog(rawMetrics.getJsonObject("log"));
         LogResult logResult = new LogResult(
             event.getArtifactQualifiedName(),
             LogOrderType.NEWEST_LOGS,
