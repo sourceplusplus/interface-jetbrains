@@ -18,6 +18,7 @@
 package spp.jetbrains.monitor.skywalking
 
 import kotlinx.datetime.Instant
+import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
@@ -31,6 +32,7 @@ import spp.protocol.artifact.metrics.ArtifactMetricResult
 import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.artifact.trace.*
+import spp.protocol.platform.general.Service
 
 fun toProtocol(
     artifactQualifiedName: ArtifactQualifiedName,
@@ -133,4 +135,8 @@ fun Iterable<GetLinearIntValuesQuery.Value>.average(): Double {
 
 fun GetMultipleLinearIntValuesQuery.Value.toProtocol(): Double {
     return (value as Int).toDouble()
+}
+
+fun GetAllServicesQuery.Result.toProtocol(): Service {
+    return Service(id, name)
 }
