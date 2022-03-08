@@ -30,7 +30,7 @@ dependencies {
     val intellijVersion = "213.6777.52"
 
     compileOnly("org.jooq:joor:$joorVersion")
-    compileOnly("com.github.sourceplusplus.protocol:protocol:eacd2a58a0")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:e540bbcccb")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.0.1-jre")
