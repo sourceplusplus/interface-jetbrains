@@ -12,7 +12,6 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.StringUtils;
@@ -34,6 +33,7 @@ import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
+import spp.protocol.marshall.ProtocolMarshaller;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -232,7 +232,9 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                                         table.convertRowIndexToModel(table.getSelectedRow())
                                 );
                                 if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
-                                LiveBreakpointHit selectedValue = Json.decodeValue(selectedEvent.getData(), LiveBreakpointHit.class);
+                                LiveBreakpointHit selectedValue = ProtocolMarshaller.deserializeLiveBreakpointHit(
+                                        new JsonObject(selectedEvent.getData())
+                                );
                                 if (selectedValue.equals(shownBreakpointHit.getAndSet(selectedValue))) return;
 
                                 SwingUtilities.invokeLater(() -> {
