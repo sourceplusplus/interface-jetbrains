@@ -27,8 +27,6 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.google.common.base.Charsets
-import com.google.common.io.Resources
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
@@ -113,7 +111,6 @@ import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.awt.Dimension
 import java.io.File
-import java.io.IOException
 
 /**
  * Sets up the SourceMarker plugin by configuring and initializing the various plugin modules.
@@ -311,16 +308,6 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun discoverAvailableServices(config: SourceMarkerConfig, project: Project) {
-        val hardcodedConfig: JsonObject = try {
-            JsonObject(
-                Resources.toString(
-                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
-                )
-            )
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        }
-
         val discovery: ServiceDiscovery
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
@@ -330,7 +317,6 @@ object SourceMarkerPlugin {
                 ServiceDiscoveryOptions().setBackendConfiguration(
                     JsonObject()
                         .put("backend-name", "tcp-service-discovery")
-                        .put("hardcoded_config", hardcodedConfig)
                         .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
                 )
             )
@@ -354,47 +340,39 @@ object SourceMarkerPlugin {
         }
 
         //live instrument
-        if (hardcodedConfig.getJsonObject("services").getBoolean("live_instrument")) {
-            if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_INSTRUMENT }) {
-                log.info("Live instruments available")
-                SourceMarker.addGlobalSourceMarkEventListener(LiveStatusManager)
+        if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_INSTRUMENT }) {
+            log.info("Live instruments available")
+            SourceMarker.addGlobalSourceMarkEventListener(LiveStatusManager)
 
-                Instance.liveInstrument = ServiceProxyBuilder(vertx)
-                    .apply { config.serviceToken?.let { setToken(it) } }
-                    .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
-                    .build(LiveInstrumentService::class.java)
-                ApplicationManager.getApplication().invokeLater {
-                    BreakpointHitWindowService.getInstance(project).showEventsWindow()
-                }
-                val breakpointListener = LiveInstrumentManager(project, config)
-                GlobalScope.launch(vertx.dispatcher()) {
-                    deploymentIds.add(vertx.deployVerticle(breakpointListener).await())
-                }
-            } else {
-                log.warn("Live instruments unavailable")
+            Instance.liveInstrument = ServiceProxyBuilder(vertx)
+                .apply { config.serviceToken?.let { setToken(it) } }
+                .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
+                .build(LiveInstrumentService::class.java)
+            ApplicationManager.getApplication().invokeLater {
+                BreakpointHitWindowService.getInstance(project).showEventsWindow()
+            }
+            val breakpointListener = LiveInstrumentManager(project, config)
+            GlobalScope.launch(vertx.dispatcher()) {
+                deploymentIds.add(vertx.deployVerticle(breakpointListener).await())
             }
         } else {
-            log.info("Live instruments disabled")
+            log.warn("Live instruments unavailable")
         }
 
         //live view
-        if (hardcodedConfig.getJsonObject("services").getBoolean("live_view")) {
-            if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_VIEW }) {
-                log.info("Live views available")
-                Instance.liveView = ServiceProxyBuilder(vertx)
-                    .apply { config.serviceToken?.let { setToken(it) } }
-                    .setAddress(SourceServices.Utilize.LIVE_VIEW)
-                    .build(LiveViewService::class.java)
+        if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_VIEW }) {
+            log.info("Live views available")
+            Instance.liveView = ServiceProxyBuilder(vertx)
+                .apply { config.serviceToken?.let { setToken(it) } }
+                .setAddress(SourceServices.Utilize.LIVE_VIEW)
+                .build(LiveViewService::class.java)
 
-                val viewListener = LiveViewManager(config)
-                GlobalScope.launch(vertx.dispatcher()) {
-                    deploymentIds.add(vertx.deployVerticle(viewListener).await())
-                }
-            } else {
-                log.warn("Live views unavailable")
+            val viewListener = LiveViewManager(config)
+            GlobalScope.launch(vertx.dispatcher()) {
+                deploymentIds.add(vertx.deployVerticle(viewListener).await())
             }
         } else {
-            log.info("Live views disabled")
+            log.warn("Live views unavailable")
         }
     }
 
@@ -417,24 +395,10 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initServices(project: Project, config: SourceMarkerConfig) {
-        val hardcodedConfig: JsonObject = try {
-            JsonObject(
-                Resources.toString(
-                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
-                )
-            )
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        }
-
         if (!config.serviceHost.isNullOrBlank()) {
-            val servicePort = config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))!!
+            val servicePort = config.getServicePortNormalized()!!
             val certificatePins = mutableListOf<String>()
             certificatePins.addAll(config.certificatePins)
-            val hardcodedPin = hardcodedConfig.getString("certificate_pin")
-            if (!hardcodedPin.isNullOrBlank()) {
-                certificatePins.add(hardcodedPin)
-            }
             val httpClientOptions = if (certificatePins.isNotEmpty()) {
                 HttpClientOptions()
                     .setTrustOptions(
@@ -453,7 +417,7 @@ object SourceMarkerPlugin {
                 }
             }
 
-            val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=" + config.accessToken
+            val tokenUri = "/api/new-token?access_token=" + config.accessToken
             val req = vertx.createHttpClient(httpClientOptions).request(
                 RequestOptions()
                     .setSsl(config.isSsl())
@@ -474,12 +438,12 @@ object SourceMarkerPlugin {
         } else {
             //try default local access
             val defaultAccessToken = "change-me"
-            val tokenUri = hardcodedConfig.getString("token_uri") + "?access_token=$defaultAccessToken"
+            val tokenUri = "/api/new-token?access_token=$defaultAccessToken"
             val req = vertx.createHttpClient(HttpClientOptions().setSsl(true).setVerifyHost(false).setTrustAll(true))
                 .request(
                     RequestOptions()
                         .setHost("localhost")
-                        .setPort(hardcodedConfig.getInteger("service_port"))
+                        .setPort(SourceMarkerConfig.DEFAULT_SERVICE_PORT)
                         .setURI(tokenUri)
                 ).await()
             req.end().await()
@@ -487,7 +451,7 @@ object SourceMarkerPlugin {
             if (resp.statusCode() in 200..299) {
                 val body = resp.body().await().toString()
                 config.serviceToken = body
-                config.serviceHost = "https://localhost:" + hardcodedConfig.getInteger("service_port")
+                config.serviceHost = "https://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
                 config.accessToken = defaultAccessToken
                 config.verifyHost = false
 
@@ -507,27 +471,10 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initMonitor(config: SourceMarkerConfig) {
-        val hardcodedConfig: JsonObject = try {
-            JsonObject(
-                Resources.toString(
-                    Resources.getResource(javaClass, "/plugin-configuration.json"), Charsets.UTF_8
-                )
-            )
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        }
-
         val scheme = if (config.isSsl()) "https" else "http"
-        val skywalkingHost = "$scheme://${config.serviceHostNormalized}:" +
-                "${config.getServicePortNormalized(hardcodedConfig.getInteger("service_port"))}/graphql"
-
+        val skywalkingHost = "$scheme://${config.serviceHostNormalized}:${config.getServicePortNormalized()}/graphql"
         val certificatePins = mutableListOf<String>()
         certificatePins.addAll(config.certificatePins)
-        val hardcodedPin = hardcodedConfig.getString("certificate_pin")
-        if (!hardcodedPin.isNullOrBlank()) {
-            certificatePins.add(hardcodedPin)
-        }
-
         deploymentIds.add(
             vertx.deployVerticle(
                 SkywalkingMonitor(

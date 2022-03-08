@@ -34,7 +34,12 @@ data class SourceMarkerConfig(
     var serviceToken: String? = null,
     var verifyHost: Boolean = true,
     val serviceName: String? = null
-)
+) {
+    companion object {
+        const val DEFAULT_SERVICE_PORT = 5445
+        const val DEFAULT_TCP_SERVICE_PORT = 5455
+    }
+}
 
 val SourceMarkerConfig.serviceHostNormalized: String?
     get() {
@@ -48,15 +53,15 @@ val SourceMarkerConfig.serviceHostNormalized: String?
         return serviceHost
     }
 
-fun SourceMarkerConfig.getServicePortNormalized(defaultServicePort: Int?): Int? {
+fun SourceMarkerConfig.getServicePortNormalized(): Int? {
     if (serviceHost == null) return null
     val hostStr = serviceHost!!.substringAfter("https://").substringAfter("http://")
     if (hostStr.contains(":")) {
         return hostStr.split(":")[1].toInt()
     }
-    return defaultServicePort
+    return SourceMarkerConfig.DEFAULT_SERVICE_PORT
 }
 
 fun SourceMarkerConfig.isSsl(): Boolean {
-    return getServicePortNormalized(null) == 443 || serviceHost?.startsWith("https://") == true
+    return getServicePortNormalized() == 443 || serviceHost?.startsWith("https://") == true
 }

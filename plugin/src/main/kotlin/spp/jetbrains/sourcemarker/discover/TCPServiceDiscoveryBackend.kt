@@ -75,14 +75,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         )
 
         val serviceHost = pluginConfig.serviceHostNormalized!!
-        val hardcodedConfig = config.getJsonObject("hardcoded_config")
-        val servicePort = hardcodedConfig.getInteger("tcp_service_port")
         val certificatePins = mutableListOf<String>()
         certificatePins.addAll(pluginConfig.certificatePins)
-        val hardcodedPin = hardcodedConfig.getString("certificate_pin")
-        if (!hardcodedPin.isNullOrBlank()) {
-            certificatePins.add(hardcodedPin)
-        }
 
         GlobalScope.launch(vertx.dispatcher()) {
             try {
@@ -109,7 +103,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         }
                     vertx.createNetClient(options)
                 }
-                socket = client.connect(servicePort, serviceHost).await()
+                socket = client.connect(SourceMarkerConfig.DEFAULT_TCP_SERVICE_PORT, serviceHost).await()
             } catch (ex: Exception) {
                 log.error("Failed to connect to service discovery server", ex)
                 setupPromise.fail(ex)
