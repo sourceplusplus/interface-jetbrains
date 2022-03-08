@@ -531,7 +531,9 @@ object SourceMarkerPlugin {
 
         deploymentIds.add(
             vertx.deployVerticle(
-                SkywalkingMonitor(skywalkingHost, config.serviceToken, certificatePins, config.verifyHost)
+                SkywalkingMonitor(
+                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName
+                )
             ).await()
         )
     }

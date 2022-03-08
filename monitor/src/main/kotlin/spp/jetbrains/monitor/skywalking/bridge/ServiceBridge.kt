@@ -35,7 +35,10 @@ import java.time.ZonedDateTime
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
+class ServiceBridge(
+    private val skywalkingClient: SkywalkingClient,
+    private val initServiceName: String?
+) : CoroutineVerticle() {
 
     var currentService: Service? = null
     var activeServices: List<Service> = emptyList()
@@ -51,7 +54,12 @@ class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineV
                     vertx.cancelTimer(timerId)
                     vertx.eventBus().publish(activeServicesUpdatedAddress, activeServices)
 
-                    currentService = activeServices[0]
+                    if (initServiceName != null) {
+                        currentService = activeServices.find { it.name == initServiceName }
+                    }
+                    if (currentService == null) {
+                        currentService = activeServices[0]
+                    }
                     vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
                 }
             }
