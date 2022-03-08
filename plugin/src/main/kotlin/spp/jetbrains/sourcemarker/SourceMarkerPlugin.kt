@@ -48,10 +48,6 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.core.net.TrustOptions
-import io.vertx.ext.bridge.PermittedOptions
-import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
-import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.servicediscovery.ServiceDiscovery
@@ -77,14 +73,11 @@ import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefC
 import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
-import spp.jetbrains.portal.SourcePortal
-import spp.jetbrains.portal.backend.PortalServer
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.listeners.PluginSourceMarkEventListener
-import spp.jetbrains.sourcemarker.listeners.PortalEventListener
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
@@ -96,7 +89,6 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.artifact.ArtifactQualifiedName
-import spp.jetbrains.portal.protocol.artifact.endpoint.EndpointResult
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.artifact.metrics.ArtifactMetricResult
@@ -139,7 +131,6 @@ object SourceMarkerPlugin {
         }
         vertx = Vertx.vertx(options)
         log.debug("Registering SourceMarker protocol codecs")
-        vertx.eventBus().registerDefaultCodec(SourcePortal::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(ArtifactMetricResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(TraceResult::class.java, LocalMessageCodec())
         vertx.eventBus().registerDefaultCodec(TraceStack::class.java, LocalMessageCodec())
@@ -482,28 +473,6 @@ object SourceMarkerPlugin {
                 )
             ).await()
         )
-    }
-
-    private suspend fun initPortal(config: SourceMarkerConfig) {
-        //todo: portal should be connected to event bus without bridge
-        val sockJSHandler = SockJSHandler.create(vertx)
-        val portalBridgeOptions = SockJSBridgeOptions()
-            .addInboundPermitted(PermittedOptions().setAddressRegex(".+"))
-            .addOutboundPermitted(PermittedOptions().setAddressRegex(".+"))
-        sockJSHandler.bridge(portalBridgeOptions)
-
-        val router = Router.router(vertx)
-        router.route("/eventbus/*").handler(sockJSHandler)
-        val bridgePort = vertx.sharedData().getLocalMap<String, Int>("portal")
-            .getOrDefault("bridge.port", 0)
-        if (bridgePort != 0) {
-            log.info("Starting bridge server on port: {}", bridgePort)
-        }
-        val bridgeServer = vertx.createHttpServer().requestHandler(router).listen(bridgePort, "localhost").await()
-
-        //todo: load portal config (custom themes, etc)
-        deploymentIds.add(vertx.deployVerticle(PortalServer(bridgeServer.actualPort())).await())
-        deploymentIds.add(vertx.deployVerticle(PortalEventListener(config)).await())
     }
 
     private fun initMarker(config: SourceMarkerConfig, project: Project) {
