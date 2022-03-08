@@ -22,10 +22,10 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import kotlinx.datetime.Clock
 import spp.jetbrains.sourcemarker.PluginBundle.message
-import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
-import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
+import spp.protocol.marshall.ProtocolMarshaller
+import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 import spp.protocol.utils.toPrettyDuration
 
 /**
@@ -40,14 +40,14 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
         return when (name) {
             "Time" -> Comparator { t: LiveInstrumentEvent, t2: LiveInstrumentEvent ->
                 val obj1 = if (t.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
-                    Json.decodeValue(t.data, LiveBreakpointHit::class.java)
+                    ProtocolMarshaller.deserializeLiveBreakpointHit(JsonObject(t.data))
                 } else if (t.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
                     deserializeLiveInstrumentRemoved(JsonObject(t.data))
                 } else {
                     throw IllegalArgumentException(t.eventType.name)
                 }
                 val obj2 = if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
-                    Json.decodeValue(t2.data, LiveBreakpointHit::class.java)
+                    ProtocolMarshaller.deserializeLiveBreakpointHit(JsonObject(t2.data))
                 } else if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
                     deserializeLiveInstrumentRemoved(JsonObject(t2.data))
                 } else {
@@ -62,7 +62,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
     override fun valueOf(event: LiveInstrumentEvent): String {
         val breakpointData = mutableListOf<Map<String, Any>>()
         if (event.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
-            val item = Json.decodeValue(event.data, LiveBreakpointHit::class.java)
+            val item = ProtocolMarshaller.deserializeLiveBreakpointHit(JsonObject(event.data))
             item.stackTrace.elements.first().variables.forEach {
                 breakpointData.add(mapOf(it.name to it.value))
             }
