@@ -151,10 +151,6 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.visible.set(true)
             inlayMark.apply()
 
-            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-//            sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
-            sourcePortal.configuration.statusBar = true
-
             statusBar.focus()
         }
     }
@@ -252,10 +248,6 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.visible.set(true)
             inlayMark.apply()
 
-            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            sourcePortal.configuration.currentPage = PageType.LOGS
-            sourcePortal.configuration.statusBar = true
-
             if (!watchExpression) {
                 SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
                     val latestLog = it.body().logs.first()
@@ -304,10 +296,6 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.visible.set(true)
             inlayMark.apply()
 
-            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-//            sourcePortal.configuration.currentPage = PageType.METERS
-            sourcePortal.configuration.statusBar = true
-
             statusBar.focus()
         }
     }
@@ -349,10 +337,6 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.visible.set(true)
             inlayMark.apply()
 
-            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-//            sourcePortal.configuration.currentPage = PageType.METERS
-            sourcePortal.configuration.statusBar = true
-
             statusBar.focus()
         }
     }
@@ -386,10 +370,6 @@ object LiveStatusManager : SourceMarkEventListener {
                         override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
                     }
                     inlayMark.apply()
-
-                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                    //sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
-                    sourcePortal.configuration.statusBar = true
                 }
             } else {
                 log.warn("No detected expression at line {}. Inlay mark ignored", liveBreakpoint.location.line)
@@ -427,10 +407,6 @@ object LiveStatusManager : SourceMarkEventListener {
                         override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
                     }
                     inlayMark.apply()
-
-                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                    sourcePortal.configuration.currentPage = PageType.LOGS
-                    sourcePortal.configuration.statusBar = true
 
                     val detector = inlayMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
                     detector.addLiveLog(editor, inlayMark, liveLog.logFormat, liveLog.location.line)

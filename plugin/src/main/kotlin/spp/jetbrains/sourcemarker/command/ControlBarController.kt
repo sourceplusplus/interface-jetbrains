@@ -293,10 +293,6 @@ object ControlBarController {
                 inlayMark.visible.set(true)
                 inlayMark.apply()
 
-                val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                sourcePortal.configuration.currentPage = PageType.LOGS
-                sourcePortal.configuration.statusBar = true
-
                 controlBar.focus()
             }
         } else if (tryingAboveLine) {
