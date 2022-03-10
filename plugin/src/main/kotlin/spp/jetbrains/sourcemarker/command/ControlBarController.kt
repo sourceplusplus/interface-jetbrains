@@ -54,17 +54,27 @@ object ControlBarController {
 
     private val log = LoggerFactory.getLogger(ControlBarController::class.java)
     private var previousControlBar: InlayMark? = null
-    private val availableCommands by lazy {
-        runBlocking {
-            val selfInfo = SourceServices.Instance.liveService!!.getSelf().await()
-            LiveControlCommand.values().toList().filter {
-                @Suppress("UselessCallOnCollection") //unknown enums are null
-                selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
-            }
-        }
+    private val availableCommands: MutableList<LiveControlCommand> = mutableListOf()
+
+    fun clearAvailableCommands() {
+        availableCommands.clear()
     }
 
-    private fun determineAvailableCommands(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
+    private suspend fun syncAvailableCommands() {
+        availableCommands.clear()
+
+        val selfInfo = SourceServices.Instance.liveService!!.getSelf().await()
+        availableCommands.addAll(LiveControlCommand.values().toList().filter {
+            @Suppress("UselessCallOnCollection") //unknown enums are null
+            selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
+        })
+    }
+
+    private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
+        if (availableCommands.isEmpty()) {
+            runBlocking { syncAvailableCommands() }
+        }
+
         val availableCommandsAtLocation = availableCommands.toMutableList()
         val parentMark = inlayMark.getParentSourceMark()
         if (parentMark is MethodSourceMark) {
@@ -265,7 +275,7 @@ object ControlBarController {
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
 
-                val controlBar = ControlBar(editor, inlayMark, determineAvailableCommands(inlayMark))
+                val controlBar = ControlBar(editor, inlayMark, determineAvailableCommandsAtLocation(inlayMark))
                 wrapperPanel.add(controlBar)
                 editor.scrollingModel.addVisibleAreaListener(controlBar)
 

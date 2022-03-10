@@ -3,15 +3,19 @@ package spp.jetbrains.sourcemarker.status;
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
+import spp.jetbrains.sourcemarker.service.ViewEventListener;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
+import spp.protocol.instrument.event.LiveInstrumentEventType;
 import spp.protocol.instrument.meter.MeterType;
+import spp.protocol.view.LiveViewEvent;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -24,7 +28,7 @@ import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 
-public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener {
+public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener, ViewEventListener {
 
     private final LiveMeter liveMeter;
     private final GutterMark gutterMark;
@@ -59,6 +63,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
             dayLabel.setVisible(false);
             dayValueLabel.setVisible(false);
         }
+        LiveStatusManager.addViewEventListener(gutterMark, this);
     }
 
     @Override
@@ -67,6 +72,11 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
         minuteValueLabel.setText(getShortNumber(rawMetrics.getString("last_minute")));
         hourValueLabel.setText(getShortNumber(rawMetrics.getString("last_hour")));
         dayValueLabel.setText(getShortNumber(rawMetrics.getString("last_day")));
+    }
+
+    @Override
+    public void accept(@NotNull LiveViewEvent event) {
+        accept(new LiveInstrumentEvent(LiveInstrumentEventType.METER_UPDATED, Json.encode(event)));
     }
 
     private String getShortNumber(String number) {

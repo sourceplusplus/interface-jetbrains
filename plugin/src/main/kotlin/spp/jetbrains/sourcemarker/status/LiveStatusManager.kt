@@ -412,20 +412,6 @@ object LiveStatusManager : SourceMarkEventListener {
 
     @JvmStatic
     fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
-        SourceServices.Instance.liveView!!.addLiveViewSubscription(
-            LiveViewSubscription(
-                null,
-                listOf(liveMeter.toMetricId()),
-                ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
-                liveMeter.location,
-                LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
-            )
-        ).onComplete {
-            if (it.failed()) {
-                log.error("Failed to add live view subscription", it.cause())
-            }
-        }
-
         //create gutter popup
         ApplicationManager.getApplication().runReadAction {
             val gutterMark = creationService.getOrCreateExpressionGutterMark(
@@ -453,6 +439,22 @@ object LiveStatusManager : SourceMarkEventListener {
                 }
                 gutterMark.get().apply(true)
                 addStatusBar(gutterMark.get(), statusBar)
+
+                SourceServices.Instance.liveView!!.addLiveViewSubscription(
+                    LiveViewSubscription(
+                        null,
+                        listOf(liveMeter.toMetricId()),
+                        ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
+                        liveMeter.location,
+                        LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
+                    )
+                ).onComplete {
+                    if (it.succeeded()) {
+                        gutterMark.get().putUserData(VIEW_SUBSCRIPTION_ID, it.result().subscriptionId)
+                    } else {
+                        log.error("Failed to add live view subscription", it.cause())
+                    }
+                }
             } else {
                 log.error("Could not create gutter mark for live meter")
             }
