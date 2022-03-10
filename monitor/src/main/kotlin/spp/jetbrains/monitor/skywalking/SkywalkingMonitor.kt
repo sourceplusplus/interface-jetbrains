@@ -27,6 +27,8 @@ import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.bridge.*
+import spp.jetbrains.monitor.skywalking.service.SWLiveService
+import spp.protocol.SourceServices
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
@@ -113,6 +115,12 @@ class SkywalkingMonitor(
             vertx.deployVerticle(EndpointMetricsBridge(skywalkingClient)).await()
             vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
             vertx.deployVerticle(LogsBridge(skywalkingClient)).await()
+
+            if (SourceServices.Instance.liveService == null) {
+                val swLiveService = SWLiveService()
+                vertx.deployVerticle(swLiveService).await()
+                SourceServices.Instance.liveService = swLiveService
+            }
         }
     }
 }
