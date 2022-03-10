@@ -23,19 +23,13 @@ import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.jvm.psi.LoggerDetector
-import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
-import spp.jetbrains.portal.SourcePortal
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
-import spp.jetbrains.portal.protocol.ProtocolAddress.Global.OpenPortal
-import spp.protocol.artifact.ArtifactType
-import spp.jetbrains.portal.protocol.portal.PageType
 
 /**
  * todo: description.
@@ -56,41 +50,8 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
             log.trace("Handling event: $event")
         }
 
-        if (event.eventCode == SourceMarkEventCode.PORTAL_OPENED) {
+        if (event.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
             val sourceMark = event.sourceMark
-            val sourcePortal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            sourcePortal.visible = true
-        } else if (event.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
-            val sourceMark = event.sourceMark
-            val sourcePortal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            sourcePortal.visible = false
-        } else if (event.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
-            val sourceMark = event.sourceMark
-
-            //register portal for source mark
-            val sourcePortal = SourcePortal.getPortal(SourcePortal.register(
-                sourceMark.artifactQualifiedName, false
-            ))
-            sourceMark.putUserData(SourceMarkKeys.SOURCE_PORTAL, sourcePortal!!)
-            sourceMark.addEventListener {
-                if (it.eventCode == SourceMarkEventCode.PORTAL_OPENING) {
-                    vertx.eventBus().publish(OpenPortal, sourcePortal)
-                }
-            }
-
-            if (sourceMark is ClassSourceMark) {
-                //class-based portals only have overview page
-                sourcePortal.configuration.currentPage = PageType.OVERVIEW
-                sourcePortal.configuration.visibleActivity = false
-                sourcePortal.configuration.visibleTraces = false
-                sourcePortal.configuration.artifactType = ArtifactType.CLASS
-            } else if (sourceMark is MethodSourceMark) {
-                //method-based portals don't have overview page
-                sourcePortal.configuration.visibleOverview = false
-                sourcePortal.configuration.artifactType = ArtifactType.METHOD
-            } else {
-                sourcePortal.configuration.artifactType = ArtifactType.EXPRESSION
-            }
 
             if (sourceMark is MethodSourceMark) {
                 //setup endpoint detector and attempt detection
@@ -102,8 +63,6 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
 
             //setup logger detector
             sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
-        } else if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
-            event.sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!.close()
         }
     }
 }

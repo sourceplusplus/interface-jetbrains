@@ -18,16 +18,11 @@
 package spp.jetbrains.sourcemarker
 
 import com.apollographql.apollo3.exception.ApolloHttpException
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import com.fasterxml.jackson.datatype.guava.GuavaModule
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -69,15 +64,25 @@ import spp.jetbrains.marker.py.PythonArtifactScopeService
 import spp.jetbrains.marker.py.PythonConditionParser
 import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
+import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
+import spp.jetbrains.portal.SourcePortal
+import spp.jetbrains.portal.backend.PortalServer
+import spp.jetbrains.portal.protocol.portal.PageType
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
+import spp.jetbrains.sourcemarker.command.ControlBarController
+import spp.jetbrains.sourcemarker.command.LiveControlCommand
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.listeners.PluginSourceMarkEventListener
+import spp.jetbrains.sourcemarker.listeners.PortalEventListener
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
 import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
@@ -88,21 +93,13 @@ import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.exception.LiveStackTraceElement
-import spp.protocol.artifact.log.LogResult
-import spp.protocol.artifact.metrics.ArtifactMetricResult
-import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpan
-import spp.protocol.artifact.trace.TraceSpanStackQueryResult
-import spp.protocol.artifact.trace.TraceStack
 import spp.protocol.marshall.KSerializers
-import spp.protocol.marshall.LocalMessageCodec
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.awt.Dimension
 import java.io.File
+import javax.swing.UIManager
 
 /**
  * Sets up the SourceMarker plugin by configuring and initializing the various plugin modules.
@@ -118,9 +115,6 @@ object SourceMarkerPlugin {
     val vertx: Vertx
     private var connectionJob: Job? = null
 
-    /**
-     * Setup Vert.x EventBus for communication between plugin modules.
-     */
     init {
         SourceMarker.enabled = false
         val options = if (System.getProperty("sourcemarker.debug.unblocked_threads", "false")!!.toBoolean()) {
@@ -130,28 +124,6 @@ object SourceMarkerPlugin {
             VertxOptions()
         }
         vertx = Vertx.vertx(options)
-        log.debug("Registering SourceMarker protocol codecs")
-        vertx.eventBus().registerDefaultCodec(ArtifactMetricResult::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(TraceResult::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(TraceStack::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(TraceSpanStackQueryResult::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(EndpointResult::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(LiveStackTraceElement::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(LogResult::class.java, LocalMessageCodec())
-        vertx.eventBus().registerDefaultCodec(TraceSpan::class.java, LocalMessageCodec())
-
-        val module = SimpleModule()
-        module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
-        module.addDeserializer(Instant::class.java, KSerializers.KotlinInstantDeserializer())
-        DatabindCodec.mapper().registerModule(module)
-
-        DatabindCodec.mapper().registerModule(GuavaModule())
-        DatabindCodec.mapper().registerModule(Jdk8Module())
-        DatabindCodec.mapper().registerModule(JavaTimeModule())
-        DatabindCodec.mapper().registerModule(KotlinModule.Builder().build())
-        DatabindCodec.mapper().enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-        DatabindCodec.mapper().enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
 
         val productCode = ApplicationInfo.getInstance().build.productCode
         if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
@@ -473,6 +445,62 @@ object SourceMarkerPlugin {
                 )
             ).await()
         )
+    }
+
+    private suspend fun initPortal(config: SourceMarkerConfig) {
+        log.info("Initializing portal")
+
+        val module = SimpleModule()
+        module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
+        module.addDeserializer(Instant::class.java, KSerializers.KotlinInstantDeserializer())
+        DatabindCodec.mapper().registerModule(module)
+
+        val portalServer = PortalServer()
+        deploymentIds.add(vertx.deployVerticle(portalServer).await())
+        deploymentIds.add(vertx.deployVerticle(PortalEventListener(config)).await())
+
+        SourceMarker.addGlobalSourceMarkEventListener {
+            if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
+                //todo: only register when needed
+                //register portal for source mark
+                val portal = SourcePortal.getPortal(
+                    SourcePortal.register(it.sourceMark.artifactQualifiedName, false)
+                )!!
+                it.sourceMark.putUserData(SourceMarkKeys.PORTAL_CONFIGURATION, portal.configuration)
+                portal.configuration.config["visibleOverview"] = it.sourceMark.isClassMark
+                portal.configuration.config["visibleActivity"] = true
+                portal.configuration.config["visibleTraces"] = true
+                portal.configuration.config["visibleLogs"] = true
+                portal.configuration.config["visibleConfiguration"] = false
+
+                val genUrl = "http://localhost:${portalServer.serverPort}?portalUuid=${portal.portalUuid}"
+                it.sourceMark.addEventListener {
+                    if (it.eventCode == SourceMarkEventCode.UPDATE_PORTAL_CONFIG) {
+                        when (val command = it.params.first() as LiveControlCommand) {
+                            VIEW_ACTIVITY -> portal.configuration.config["currentPage"] = PageType.ACTIVITY
+                            VIEW_TRACES -> portal.configuration.config["currentPage"] = PageType.TRACES
+                            VIEW_LOGS -> portal.configuration.config["currentPage"] = PageType.LOGS
+                            else -> throw UnsupportedOperationException("Command input: $command")
+                        }
+
+                        val jcefComponent = it.sourceMark.sourceMarkComponent as SourceMarkJcefComponent
+                        jcefComponent.configuration.currentUrl = "#"
+                    } else if (it.eventCode == SourceMarkEventCode.PORTAL_OPENING) {
+                        val jcefComponent = it.sourceMark.sourceMarkComponent as SourceMarkJcefComponent
+                        portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
+
+                        if (jcefComponent.configuration.currentUrl != genUrl) {
+                            jcefComponent.configuration.initialUrl = genUrl
+                            jcefComponent.configuration.currentUrl = genUrl
+                            jcefComponent.getBrowser().cefBrowser.executeJavaScript(
+                                "window.location.href = '$genUrl';", genUrl, 0
+                            )
+                        }
+                        ApplicationManager.getApplication().invokeLater(it.sourceMark::displayPopup)
+                    }
+                }
+            }
+        }
     }
 
     private fun initMarker(config: SourceMarkerConfig, project: Project) {

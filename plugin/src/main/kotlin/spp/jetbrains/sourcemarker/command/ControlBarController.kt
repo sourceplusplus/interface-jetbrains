@@ -31,18 +31,15 @@ import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.*
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.jetbrains.portal.protocol.ProtocolAddress.Global.SetCurrentPage
 import spp.protocol.SourceServices
 import spp.protocol.instrument.LiveInstrumentType.*
-import spp.jetbrains.portal.protocol.portal.PageType
 import java.awt.BorderLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -218,26 +215,12 @@ object ControlBarController {
         }
 
         if (sourceMark != null) {
-            val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            when (command) {
-                VIEW_ACTIVITY -> portal.configuration.currentPage = PageType.ACTIVITY
-                VIEW_TRACES -> portal.configuration.currentPage = PageType.TRACES
-                VIEW_LOGS -> portal.configuration.currentPage = PageType.LOGS
-                else -> throw UnsupportedOperationException("Command input: $command")
-            }
-            SourceMarkerPlugin.vertx.eventBus().request<Any>(SetCurrentPage, portal) {
-                sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.PORTAL_OPENING))
+            sourceMark.triggerEvent(SourceMarkEvent(sourceMark, UPDATE_PORTAL_CONFIG, command)) {
+                sourceMark.triggerEvent(SourceMarkEvent(sourceMark, PORTAL_OPENING))
             }
         } else if (classSourceMark != null) {
-            val portal = classSourceMark!!.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            when (command) {
-                VIEW_ACTIVITY -> portal.configuration.currentPage = PageType.ACTIVITY
-                VIEW_TRACES -> portal.configuration.currentPage = PageType.TRACES
-                VIEW_LOGS -> portal.configuration.currentPage = PageType.LOGS
-                else -> throw UnsupportedOperationException("Command input: $command")
-            }
-            SourceMarkerPlugin.vertx.eventBus().request<Any>(SetCurrentPage, portal) {
-                classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, SourceMarkEventCode.PORTAL_OPENING))
+            classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, UPDATE_PORTAL_CONFIG, command)) {
+                classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, PORTAL_OPENING))
             }
         } else {
             log.warn("No source mark found for command: {}", command)
