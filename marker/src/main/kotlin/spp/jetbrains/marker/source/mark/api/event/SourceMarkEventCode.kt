@@ -33,7 +33,8 @@ enum class SourceMarkEventCode(private val code: Int) : IEventCode {
     NAME_CHANGED(1003),
     PORTAL_OPENING(1004),
     PORTAL_OPENED(1005),
-    PORTAL_CLOSED(1006);
+    PORTAL_CLOSED(1006),
+    UPDATE_PORTAL_CONFIG(1007);
 
     override fun code(): Int {
         return this.code

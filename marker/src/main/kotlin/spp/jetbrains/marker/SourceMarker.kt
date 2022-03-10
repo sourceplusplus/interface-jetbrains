@@ -25,7 +25,9 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
+import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 
 /**
  * todo: description.
@@ -111,11 +113,15 @@ object SourceMarker {
         }
     }
 
-    fun getSourceFileMarker(classQualifiedName: ArtifactQualifiedName): SourceFileMarker? {
+    fun getSourceFileMarker(artifactQualifiedName: ArtifactQualifiedName): SourceFileMarker? {
         check(enabled) { "SourceMarker disabled" }
 
+        val classArtifactQualifiedName = artifactQualifiedName.copy(
+            identifier = ArtifactNameUtils.getQualifiedClassName(artifactQualifiedName.identifier)!!,
+            type = ArtifactType.CLASS
+        )
         return availableSourceFileMarkers.values.find {
-            namingService.getClassQualifiedNames(it.psiFile).contains(classQualifiedName)
+            namingService.getClassQualifiedNames(it.psiFile).contains(classArtifactQualifiedName)
         }
     }
 
