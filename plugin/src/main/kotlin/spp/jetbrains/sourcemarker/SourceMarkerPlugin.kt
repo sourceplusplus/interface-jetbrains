@@ -94,6 +94,7 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.marshall.KSerializers
+import spp.protocol.portal.PortalConfiguration
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
@@ -114,6 +115,7 @@ object SourceMarkerPlugin {
     private val deploymentIds = mutableListOf<String>()
     val vertx: Vertx
     private var connectionJob: Job? = null
+    private var discovery: ServiceDiscovery? = null
 
     init {
         SourceMarker.enabled = false
@@ -262,16 +264,13 @@ object SourceMarkerPlugin {
             }
 
             if (connectedMonitor) {
-                discoverAvailableServices(config, project)
                 initPortal(config)
                 initMarker(config, project)
-                initMapper()
             }
         }
     }
 
     private suspend fun discoverAvailableServices(config: SourceMarkerConfig, project: Project) {
-        val discovery: ServiceDiscovery
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
             Thread.currentThread().contextClassLoader = javaClass.classLoader
@@ -288,7 +287,7 @@ object SourceMarkerPlugin {
         }
 
         log.info("Discovering available services")
-        val availableRecords = discovery.getRecords { true }.await()
+        val availableRecords = discovery!!.getRecords { true }.await()
 
         //live service
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_SERVICE }) {
@@ -355,6 +354,11 @@ object SourceMarkerPlugin {
 
         TCPServiceDiscoveryBackend.socket?.close()?.await()
         TCPServiceDiscoveryBackend.socket = null
+        discovery?.close()
+        discovery = null
+
+        Instance.clearServices()
+        ControlBarController.clearAvailableCommands()
     }
 
     private suspend fun initServices(project: Project, config: SourceMarkerConfig) {
@@ -395,6 +399,8 @@ object SourceMarkerPlugin {
                 if (resp.statusCode() != 202) {
                     config.serviceToken = body
                 }
+
+                discoverAvailableServices(config, project)
             } else {
                 config.serviceToken = null
             }
@@ -420,6 +426,8 @@ object SourceMarkerPlugin {
 
                 val projectSettings = PropertiesComponent.getInstance(project)
                 projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
+
+                discoverAvailableServices(config, project)
 
                 //auto-established notification
                 Notifications.Bus.notify(
