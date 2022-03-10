@@ -24,11 +24,15 @@ import com.intellij.openapi.project.ProjectManager
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.ArtifactNavigator
@@ -80,16 +84,28 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.search.SourceMarkSearch
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.SourceServices.Instance
+import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.exception.LiveStackTraceElement
+import spp.protocol.artifact.log.Log
+import spp.protocol.artifact.log.LogOrderType
+import spp.protocol.artifact.log.LogResult
+import spp.protocol.artifact.metrics.ArtifactMetricResult
+import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.metrics.MetricType
+import spp.protocol.artifact.trace.Trace
+import spp.protocol.artifact.trace.TraceOrderType
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.instrument.LiveSourceLocation
 import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewEvent
 import spp.protocol.view.LiveViewSubscription
 import java.net.URI
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoUnit
 import javax.swing.UIManager
 
@@ -109,6 +125,10 @@ class PortalEventListener(
         private val log = LoggerFactory.getLogger(PortalEventListener::class.java)
     }
 
+    private val formatter = DateTimeFormatterBuilder()
+        .appendPattern("yyyyMMddHHmm")
+        .toFormatter()
+        .withZone(ZoneOffset.UTC) //todo: load from SkywalkingMonitor
     private var lastDisplayedInternalPortal: SourcePortal? = null
 
     override suspend fun start() {
@@ -123,6 +143,21 @@ class PortalEventListener(
                     val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
                     jcefComponent.getBrowser().cefBrowser.reload()
                 }
+            }
+        }
+
+        //listen to live view events
+        var developer = "system"
+        if (markerConfig.serviceToken != null) {
+            val json = JWT.parse(markerConfig.serviceToken)
+            developer = json.getJsonObject("payload").getString("developer_id")
+        }
+        vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developer)) {
+            val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
+            when (event.viewConfig.viewName) {
+                "LOGS" -> launch(vertx.dispatcher()) { consumeLogsViewEvent(event) }
+                "TRACES" -> consumeTracesViewEvent(event)
+                "ACTIVITY" -> consumeActivityViewEvent(event)
             }
         }
 
@@ -277,7 +312,9 @@ class PortalEventListener(
                                     LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
                                 )
                             ).onComplete {
-                                if (it.failed()) {
+                                if (it.succeeded()) {
+                                    portal.configuration.config["subscriptionId"] = it.result().subscriptionId!!
+                                } else {
                                     log.error("Failed to add live view subscription", it.cause())
                                 }
                             }
@@ -316,7 +353,9 @@ class PortalEventListener(
                                     LiveViewConfig("TRACES", listOf("endpoint_traces"))
                                 )
                             ).onComplete {
-                                if (it.failed()) {
+                                if (it.succeeded()) {
+                                    portal.configuration.config["subscriptionId"] = it.result().subscriptionId!!
+                                } else {
                                     log.error("Failed to add live view subscription", it.cause())
                                 }
                             }
@@ -365,7 +404,9 @@ class PortalEventListener(
                                     LiveViewConfig("LOGS", listOf("endpoint_logs"))
                                 )
                             ).onComplete {
-                                if (it.failed()) {
+                                if (it.succeeded()) {
+                                    portal.configuration.config["subscriptionId"] = it.result().subscriptionId!!
+                                } else {
                                     log.error("Failed to add live view subscription", it.cause())
                                 }
                             }
@@ -500,23 +541,18 @@ class PortalEventListener(
                 ), vertx
             )
             if (logsResult.succeeded()) {
-                vertx.eventBus().send(
-                    ArtifactLogUpdated, logsResult.result().copy(
-                        artifactQualifiedName = portal.configuration.artifactQualifiedName
-                    )
-                )
-//                //todo: impl method filtering in skywalking
-//                for ((content, logs) in logsResult.result().logs.groupBy { it.content }) {
-//                    SourceMarkSearch.findInheritedSourceMarks(content).forEach {
-//                        vertx.eventBus().send(
-//                            ArtifactLogUpdated, logsResult.result().copy(
-//                                artifactQualifiedName = it.artifactQualifiedName,
-//                                total = logs.size,
-//                                logs = logs,
-//                            )
-//                        )
-//                    }
-//                }
+                //todo: impl method filtering in skywalking
+                for ((content, logs) in logsResult.result().logs.groupBy { it.content }) {
+                    SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                        vertx.eventBus().send(
+                            ArtifactLogUpdated, logsResult.result().copy(
+                                artifactQualifiedName = it.artifactQualifiedName,
+                                total = logs.size,
+                                logs = logs,
+                            )
+                        )
+                    }
+                }
             } else {
                 val replyException = logsResult.cause() as ReplyException
                 if (replyException.failureCode() == 404) {
@@ -668,6 +704,113 @@ class PortalEventListener(
                 lastDisplayedInternalPortal = portal
             }
         }
+    }
+
+    private fun consumeTracesViewEvent(event: LiveViewEvent) {
+        val portal = SourcePortal.getPortals().find {
+            it.configuration.config["subscriptionId"] == event.subscriptionId
+        } ?: return
+
+        val rawMetrics = JsonObject(event.metricsData)
+        val trace = Json.decodeValue(rawMetrics.getJsonObject("trace").toString(), Trace::class.java)
+        val traceResult = TraceResult(
+            portal.viewingArtifact,
+            null,
+            TraceOrderType.LATEST_TRACES,
+            trace.start,
+            trace.start.toJavaInstant().minusMillis(trace.duration.toLong()).toKotlinInstant(),
+            "minute",
+            listOf(trace),
+            Int.MAX_VALUE
+        )
+        vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
+
+        val url = trace.meta["url"]
+        val httpMethod = trace.meta["http.method"]
+        if (url != null && httpMethod != null) {
+            val updatedEndpointName = "$httpMethod:${URI(url).path}"
+            val entrySpan = Json.decodeValue(trace.meta["entrySpan"], TraceSpan::class.java)
+            vertx.eventBus().send(
+                TraceSpanUpdated, entrySpan.copy(
+                    endpointName = updatedEndpointName,
+                    artifactQualifiedName = event.artifactQualifiedName
+                )
+            )
+        }
+    }
+
+    private suspend fun consumeLogsViewEvent(event: LiveViewEvent) {
+        val rawMetrics = JsonObject(event.metricsData)
+        val logData = Json.decodeValue(rawMetrics.getJsonObject("log").toString(), Log::class.java)
+        val logsResult = LogResult(
+            event.artifactQualifiedName,
+            LogOrderType.NEWEST_LOGS,
+            logData.timestamp,
+            listOf(logData),
+            Int.MAX_VALUE
+        )
+        for ((content, logs) in logsResult.logs.groupBy { it.content }) {
+            SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                vertx.eventBus().send(
+                    ArtifactLogUpdated, logsResult.copy(
+                        artifactQualifiedName = it.artifactQualifiedName,
+                        total = logs.size,
+                        logs = logs,
+                    )
+                )
+            }
+        }
+    }
+
+    private fun consumeActivityViewEvent(event: LiveViewEvent) {
+        val portal = SourcePortal.getPortals().find {
+            it.configuration.config["subscriptionId"] == event.subscriptionId
+        } ?: return
+
+        val artifactMetrics = toArtifactMetrics(event)
+        val metricResult = ArtifactMetricResult(
+            portal.viewingArtifact,
+            QueryTimeFrame.valueOf(1),
+            portal.activityView.activeChartMetric, //todo: assumes activity view
+            formatter.parse(event.timeBucket, java.time.Instant::from).toKotlinInstant(),
+            formatter.parse(event.timeBucket, java.time.Instant::from).plusSeconds(60).toKotlinInstant(),
+            "minute",
+            artifactMetrics,
+            true
+        )
+        vertx.eventBus().send(ArtifactMetricsUpdated, metricResult)
+    }
+
+    private fun toArtifactMetrics(event: LiveViewEvent): List<ArtifactMetrics> {
+        val rawMetrics = mutableListOf<Int>()
+        if (event.viewConfig.viewMetrics.size > 1) {
+            val multiMetrics = JsonArray(event.metricsData)
+            for (i in 0 until multiMetrics.size()) {
+                val metricsName = multiMetrics.getJsonObject(i).getJsonObject("meta").getString("metricsName")
+                val value = when (MetricType.realValueOf(metricsName)) {
+                    MetricType.Throughput_Average -> multiMetrics.getJsonObject(i)
+                        .getInteger("value")
+                    MetricType.ResponseTime_Average -> multiMetrics.getJsonObject(i)
+                        .getInteger("value")
+                    MetricType.ServiceLevelAgreement_Average -> multiMetrics.getJsonObject(i)
+                        .getInteger("percentage")
+                    else -> TODO(metricsName)
+                }
+                rawMetrics.add(value)
+            }
+        } else {
+            val value = when (val metricType = MetricType.realValueOf(event.viewConfig.viewMetrics.first())) {
+                MetricType.Throughput_Average -> JsonObject(event.metricsData).getInteger("value")
+                MetricType.ResponseTime_Average -> JsonObject(event.metricsData).getInteger("value")
+                MetricType.ServiceLevelAgreement_Average -> JsonObject(event.metricsData).getInteger("percentage")
+                else -> TODO(metricType.name)
+            }
+            rawMetrics.add(value)
+        }
+        val artifactMetrics = rawMetrics.mapIndexed { i: Int, it: Int ->
+            ArtifactMetrics(MetricType.realValueOf(event.viewConfig.viewMetrics[i]), listOf(it.toDouble()))
+        }
+        return artifactMetrics
     }
 
     private fun closePortal(portal: SourcePortal) {

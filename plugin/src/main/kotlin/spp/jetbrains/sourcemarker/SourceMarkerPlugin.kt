@@ -463,7 +463,7 @@ object SourceMarkerPlugin {
         module.addDeserializer(Instant::class.java, KSerializers.KotlinInstantDeserializer())
         DatabindCodec.mapper().registerModule(module)
 
-        val portalServer = PortalServer()
+        val portalServer = PortalServer(0)
         deploymentIds.add(vertx.deployVerticle(portalServer).await())
         deploymentIds.add(vertx.deployVerticle(PortalEventListener(config)).await())
 
