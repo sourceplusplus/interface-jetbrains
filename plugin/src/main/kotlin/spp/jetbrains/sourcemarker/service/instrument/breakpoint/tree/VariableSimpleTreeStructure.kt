@@ -15,7 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint.tree
+
+import com.intellij.ui.treeStructure.SimpleTreeStructure
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 
 /**
  * todo: description.
@@ -23,9 +26,15 @@ package spp.jetbrains.sourcemarker.service.breakpoint
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object LiveBreakpointConstants {
-    const val LIVE_BREAKPOINT_NAME = "Live Breakpoints"
-    const val LIVE_RECORDER_STACK_FRAMES = "Live Stack Frames"
-    const val LIVE_RECORDER_VARIABLES = "Live Variables"
-    const val LIVE_RUNNER = "Live Runner"
+class VariableSimpleTreeStructure : SimpleTreeStructure() {
+
+    private val simpleRoot = VariableRootSimpleNode()
+
+    override fun getRootElement(): VariableRootSimpleNode {
+        return simpleRoot
+    }
+
+    fun setStackFrameManager(stackFrameManager: StackFrameManager) {
+        simpleRoot.setStackFrameManager(stackFrameManager)
+    }
 }

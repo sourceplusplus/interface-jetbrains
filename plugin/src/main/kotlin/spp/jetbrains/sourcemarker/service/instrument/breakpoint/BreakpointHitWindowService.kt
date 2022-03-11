@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.Service
@@ -31,9 +31,9 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
-import spp.jetbrains.sourcemarker.service.breakpoint.LiveBreakpointConstants.LIVE_BREAKPOINT_NAME
-import spp.jetbrains.sourcemarker.service.breakpoint.ui.BreakpointHitWindow
-import spp.jetbrains.sourcemarker.service.breakpoint.ui.EventsWindow
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.LiveBreakpointConstants.LIVE_BREAKPOINT_NAME
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui.BreakpointHitWindow
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui.EventsWindow
 import spp.protocol.instrument.event.LiveBreakpointHit
 
 /**

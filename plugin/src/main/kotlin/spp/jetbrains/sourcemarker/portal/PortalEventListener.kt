@@ -81,7 +81,7 @@ import spp.jetbrains.portal.protocol.portal.PageType
 import spp.jetbrains.sourcemarker.PluginBundle
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
-import spp.jetbrains.sourcemarker.search.SourceMarkSearch
+import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress

@@ -15,7 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint
+
+import com.intellij.openapi.editor.event.EditorMouseEvent
+import com.intellij.openapi.editor.event.EditorMouseListener
 
 /**
  * todo: description.
@@ -23,6 +26,11 @@ package spp.jetbrains.sourcemarker.service.breakpoint
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface DebugStackFrameListener {
-    fun onChanged(stackFrameManager: StackFrameManager)
+object BreakpointTriggerListener : EditorMouseListener {
+
+    var shiftHeld = false
+
+    override fun mousePressed(event: EditorMouseEvent) {
+        shiftHeld = event.mouseEvent.isShiftDown
+    }
 }

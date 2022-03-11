@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint.painter
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint.painter
 
 import com.intellij.openapi.editor.EditorLinePainter
 import com.intellij.openapi.editor.LineExtensionInfo
@@ -26,7 +26,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.Gray
 import com.intellij.ui.JBColor
 import com.intellij.xdebugger.ui.DebuggerColors
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import java.awt.Color
 import java.awt.Font
 

@@ -68,12 +68,12 @@ import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.command.ControlBarController
-import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
-import spp.jetbrains.sourcemarker.listeners.PluginSourceMarkEventListener
+import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
+import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.portal.PortalController
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl

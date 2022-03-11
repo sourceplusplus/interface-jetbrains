@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint.ui
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 
 import com.intellij.execution.ui.RunnerLayoutUi
 import com.intellij.execution.ui.layout.PlaceInGrid
@@ -23,9 +23,9 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
-import spp.jetbrains.sourcemarker.service.breakpoint.DebugStackFrameListener
-import spp.jetbrains.sourcemarker.service.breakpoint.LiveBreakpointConstants
-import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.DebugStackFrameListener
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.LiveBreakpointConstants
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
 

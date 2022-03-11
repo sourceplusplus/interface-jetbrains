@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint.ui
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 
 import com.intellij.execution.ui.RunnerLayoutUi
 import com.intellij.execution.ui.layout.PlaceInGrid
@@ -30,10 +30,10 @@ import com.intellij.ui.content.Content
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import io.vertx.core.json.Json
-import spp.jetbrains.sourcemarker.service.breakpoint.DebugStackFrameListener
-import spp.jetbrains.sourcemarker.service.breakpoint.ExecutionPointManager
-import spp.jetbrains.sourcemarker.service.breakpoint.LiveBreakpointConstants
-import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.DebugStackFrameListener
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.ExecutionPointManager
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.LiveBreakpointConstants
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.artifact.exception.LiveStackTrace
 import spp.protocol.artifact.exception.LiveStackTraceElement

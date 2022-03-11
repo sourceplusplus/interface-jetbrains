@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint.ui
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationInfo
@@ -27,8 +27,8 @@ import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointEventColumnInfo
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointEventColumnInfo
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.protocol.instrument.event.LiveBreakpointHit
 import java.awt.BorderLayout
 import java.awt.Point

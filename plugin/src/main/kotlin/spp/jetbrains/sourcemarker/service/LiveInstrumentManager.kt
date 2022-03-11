@@ -29,11 +29,11 @@ import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
+import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
-import spp.jetbrains.sourcemarker.search.SourceMarkSearch
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointTriggerListener
+import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointTriggerListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices.Instance
@@ -42,7 +42,6 @@ import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
-import spp.protocol.instrument.event.LiveLogHit
 import spp.protocol.marshall.ProtocolMarshaller
 import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 

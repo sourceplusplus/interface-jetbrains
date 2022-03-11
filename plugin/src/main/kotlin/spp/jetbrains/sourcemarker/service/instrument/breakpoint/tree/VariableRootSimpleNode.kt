@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint.tree
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint.tree
 
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.ui.treeStructure.SimpleNode
@@ -23,7 +23,7 @@ import com.intellij.util.containers.hash.LinkedHashMap
 import spp.jetbrains.marker.jvm.JVMVariableSimpleNode
 import spp.jetbrains.marker.py.PythonVariableRootNode
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
-import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 import spp.protocol.instrument.variable.LiveVariableScope
 
 /**

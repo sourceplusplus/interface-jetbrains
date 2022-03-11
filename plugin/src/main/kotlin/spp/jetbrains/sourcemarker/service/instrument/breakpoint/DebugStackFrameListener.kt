@@ -15,10 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint.tree
-
-import com.intellij.ui.treeStructure.SimpleTreeStructure
-import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
+package spp.jetbrains.sourcemarker.service.instrument.breakpoint
 
 /**
  * todo: description.
@@ -26,15 +23,6 @@ import spp.jetbrains.sourcemarker.service.breakpoint.StackFrameManager
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class VariableSimpleTreeStructure : SimpleTreeStructure() {
-
-    private val simpleRoot = VariableRootSimpleNode()
-
-    override fun getRootElement(): VariableRootSimpleNode {
-        return simpleRoot
-    }
-
-    fun setStackFrameManager(stackFrameManager: StackFrameManager) {
-        simpleRoot.setStackFrameManager(stackFrameManager)
-    }
+interface DebugStackFrameListener {
+    fun onChanged(stackFrameManager: StackFrameManager)
 }

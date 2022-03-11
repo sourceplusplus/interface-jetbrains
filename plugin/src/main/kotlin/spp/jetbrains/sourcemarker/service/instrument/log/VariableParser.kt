@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.service.log
+package spp.jetbrains.sourcemarker.service.instrument.log
 
 import com.intellij.openapi.util.Pair
 import java.util.function.Function
