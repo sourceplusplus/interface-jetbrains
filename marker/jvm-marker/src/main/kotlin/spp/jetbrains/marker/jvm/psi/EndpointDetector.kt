@@ -51,9 +51,9 @@ class EndpointDetector(val vertx: Vertx) {
 
     companion object {
         private val log = LoggerFactory.getLogger(EndpointDetector::class.java)
-        private val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
-        private val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
-        private val ENDPOINT_INTERNAL = SourceKey<Boolean>("ENDPOINT_INTERNAL")
+        val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
+        val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
+        val ENDPOINT_INTERNAL = SourceKey<Boolean>("ENDPOINT_INTERNAL")
     }
 
     private val detectorSet = setOf(
