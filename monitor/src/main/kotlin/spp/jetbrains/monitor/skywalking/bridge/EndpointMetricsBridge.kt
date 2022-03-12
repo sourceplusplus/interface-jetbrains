@@ -43,12 +43,11 @@ class EndpointMetricsBridge(private val skywalkingClient: SkywalkingClient) : Co
                 val request = it.body()
                 val response: MutableList<GetLinearIntValuesQuery.Result> = ArrayList()
                 request.metricIds.forEach {
-                    val metric =
-                        skywalkingClient.getEndpointMetrics(
-                            it,
-                            request.endpointId,
-                            request.zonedDuration.toDuration(skywalkingClient)
-                        )
+                    val metric = skywalkingClient.getEndpointMetrics(
+                        it,
+                        request.endpointId,
+                        request.zonedDuration.toDuration(skywalkingClient)
+                    )
                     if (metric != null) response.add(metric)
                 }
                 it.reply(response)
