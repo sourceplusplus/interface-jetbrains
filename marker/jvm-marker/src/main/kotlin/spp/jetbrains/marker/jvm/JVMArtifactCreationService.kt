@@ -31,6 +31,7 @@ import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
+import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import java.util.*
 
 /**
@@ -116,6 +117,14 @@ class JVMArtifactCreationService : ArtifactCreationService {
         } else {
             Optional.empty()
         }
+    }
+
+    override fun createMethodInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): MethodInlayMark {
+        return JVMMarkerUtils.createMethodInlayMark(fileMarker, element, autoApply)
     }
 
     override fun createExpressionInlayMark(
