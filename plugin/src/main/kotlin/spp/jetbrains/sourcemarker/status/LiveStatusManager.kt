@@ -201,16 +201,11 @@ object LiveStatusManager : SourceMarkEventListener {
                     )
                 ).onComplete {
                     if (it.succeeded()) {
-                        inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, it.result().subscriptionId)
+                        val subscriptionId = it.result().subscriptionId!!
+                        inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
                         inlayMark.addEventListener { event ->
                             if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
-                                SourceServices.Instance.liveView!!.removeLiveViewSubscription(
-                                    it.result().subscriptionId!!
-                                ).onComplete {
-                                    if (it.failed()) {
-                                        log.error("Failed to remove subscription: {}", it.cause())
-                                    }
-                                }
+                                SourceServices.Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
                             }
                         }
                     } else {
