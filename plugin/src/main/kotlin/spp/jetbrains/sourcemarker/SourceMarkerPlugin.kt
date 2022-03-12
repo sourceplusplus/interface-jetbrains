@@ -68,17 +68,18 @@ import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.command.ControlBarController
-import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.portal.PortalController
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
+import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
+import spp.jetbrains.sourcemarker.view.ActivityQuickStatsInlayHints
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
@@ -447,6 +448,7 @@ object SourceMarkerPlugin {
     private fun initMarker(config: SourceMarkerConfig, project: Project) {
         log.info("Initializing marker")
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
+        SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsInlayHints())
 
         val gutterMarkConfig = GutterMarkConfiguration()
         gutterMarkConfig.activateOnMouseHover = false
