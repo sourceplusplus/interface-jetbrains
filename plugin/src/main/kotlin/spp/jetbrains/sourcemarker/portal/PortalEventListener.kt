@@ -41,6 +41,7 @@ import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.average
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
@@ -293,34 +294,40 @@ class PortalEventListener(
 
             //update subscriptions
             if (Instance.liveView != null) {
-                Instance.liveView!!.clearLiveViewSubscriptions().onComplete {
-                    if (it.succeeded()) {
-                        launch(vertx.dispatcher()) {
-                            val sourceMark = SourceMarker.getSourceMark(
-                                portal.viewingArtifact, SourceMark.Type.GUTTER
-                            ) ?: return@launch
-                            val endpointName = sourceMark.getUserData(
-                                ENDPOINT_DETECTOR
-                            )?.getOrFindEndpointName(sourceMark) ?: return@launch
+                launch(vertx.dispatcher()) {
+                    val sourceMark = SourceMarker.getSourceMark(
+                        portal.viewingArtifact, SourceMark.Type.GUTTER
+                    ) ?: return@launch
+                    val endpointName = sourceMark.getUserData(
+                        ENDPOINT_DETECTOR
+                    )?.getOrFindEndpointName(sourceMark) ?: return@launch
 
-                            Instance.liveView!!.addLiveViewSubscription(
-                                LiveViewSubscription(
-                                    null,
-                                    listOf(endpointName),
-                                    portal.viewingArtifact,
-                                    LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                                    LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
+                    Instance.liveView!!.addLiveViewSubscription(
+                        LiveViewSubscription(
+                            null,
+                            listOf(endpointName),
+                            portal.viewingArtifact,
+                            LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
+                            LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
+                        )
+                    ).onComplete {
+                        if (it.succeeded()) {
+                            val subscriptionId = it.result().subscriptionId!!
+                            if (portal.configuration.config["subscriptionId"] != null) {
+                                Instance.liveView!!.removeLiveViewSubscription(
+                                    portal.configuration.config["subscriptionId"].toString()
                                 )
-                            ).onComplete {
-                                if (it.succeeded()) {
-                                    portal.configuration.config["subscriptionId"] = it.result().subscriptionId!!
-                                } else {
-                                    log.error("Failed to add live view subscription", it.cause())
+                            }
+                            portal.configuration.config["subscriptionId"] = subscriptionId
+
+                            sourceMark.addEventListener {
+                                if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
+                                    Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
                                 }
                             }
+                        } else {
+                            log.error("Failed to add live view subscription", it.cause())
                         }
-                    } else {
-                        log.error("Failed to clear live view subscriptions", it.cause())
                     }
                 }
             }
@@ -334,34 +341,40 @@ class PortalEventListener(
 
             //update subscriptions
             if (Instance.liveView != null) {
-                Instance.liveView!!.clearLiveViewSubscriptions().onComplete {
-                    if (it.succeeded()) {
-                        launch(vertx.dispatcher()) {
-                            val sourceMark = SourceMarker.getSourceMark(
-                                portal.viewingArtifact, SourceMark.Type.GUTTER
-                            ) ?: return@launch
-                            val endpointName = sourceMark.getUserData(
-                                ENDPOINT_DETECTOR
-                            )?.getOrFindEndpointName(sourceMark) ?: return@launch
+                launch(vertx.dispatcher()) {
+                    val sourceMark = SourceMarker.getSourceMark(
+                        portal.viewingArtifact, SourceMark.Type.GUTTER
+                    ) ?: return@launch
+                    val endpointName = sourceMark.getUserData(
+                        ENDPOINT_DETECTOR
+                    )?.getOrFindEndpointName(sourceMark) ?: return@launch
 
-                            Instance.liveView!!.addLiveViewSubscription(
-                                LiveViewSubscription(
-                                    null,
-                                    listOf(endpointName),
-                                    portal.viewingArtifact,
-                                    LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                                    LiveViewConfig("TRACES", listOf("endpoint_traces"))
+                    Instance.liveView!!.addLiveViewSubscription(
+                        LiveViewSubscription(
+                            null,
+                            listOf(endpointName),
+                            portal.viewingArtifact,
+                            LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
+                            LiveViewConfig("TRACES", listOf("endpoint_traces"))
+                        )
+                    ).onComplete {
+                        if (it.succeeded()) {
+                            val subscriptionId = it.result().subscriptionId!!
+                            if (portal.configuration.config["subscriptionId"] != null) {
+                                Instance.liveView!!.removeLiveViewSubscription(
+                                    portal.configuration.config["subscriptionId"].toString()
                                 )
-                            ).onComplete {
-                                if (it.succeeded()) {
-                                    portal.configuration.config["subscriptionId"] = it.result().subscriptionId!!
-                                } else {
-                                    log.error("Failed to add live view subscription", it.cause())
+                            }
+                            portal.configuration.config["subscriptionId"] = subscriptionId
+
+                            sourceMark.addEventListener {
+                                if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
+                                    Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
                                 }
                             }
+                        } else {
+                            log.error("Failed to add live view subscription", it.cause())
                         }
-                    } else {
-                        log.error("Failed to clear live view subscriptions", it.cause())
                     }
                 }
             }
@@ -375,44 +388,49 @@ class PortalEventListener(
 
             //update subscriptions
             if (Instance.liveView != null) {
-                Instance.liveView!!.clearLiveViewSubscriptions().onComplete {
-                    if (it.succeeded()) {
-                        launch(vertx.dispatcher()) {
-                            val sourceMark = SourceMarker.getSourceMark(
-                                portal.viewingArtifact, SourceMark.Type.GUTTER
-                            )
+                launch(vertx.dispatcher()) {
+                    val sourceMark = SourceMarker.getSourceMark(
+                        portal.viewingArtifact, SourceMark.Type.GUTTER
+                    ) ?: return@launch
+                    val logPatterns = if (sourceMark is ClassSourceMark) {
+                        sourceMark.sourceFileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
+                            .flatMap {
+                                it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                                    .getOrFindLoggerStatements(it)
+                            }.map { it.logPattern }
+                    } else if (sourceMark is MethodSourceMark) {
+                        sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                            .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
+                    } else {
+                        throw IllegalStateException("Unsupported source mark type")
+                    }
 
-                            val logPatterns = if (sourceMark is ClassSourceMark) {
-                                sourceMark.sourceFileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
-                                    .flatMap {
-                                        it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
-                                            .getOrFindLoggerStatements(it)
-                                    }.map { it.logPattern }
-                            } else if (sourceMark is MethodSourceMark) {
-                                sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
-                                    .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
-                            } else {
-                                throw IllegalStateException("Unsupported source mark type")
-                            }
-
-                            Instance.liveView!!.addLiveViewSubscription(
-                                LiveViewSubscription(
-                                    null,
-                                    logPatterns,
-                                    portal.viewingArtifact,
-                                    LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                                    LiveViewConfig("LOGS", listOf("endpoint_logs"))
+                    Instance.liveView!!.addLiveViewSubscription(
+                        LiveViewSubscription(
+                            null,
+                            logPatterns,
+                            portal.viewingArtifact,
+                            LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
+                            LiveViewConfig("LOGS", listOf("endpoint_logs"))
+                        )
+                    ).onComplete {
+                        if (it.succeeded()) {
+                            val subscriptionId = it.result().subscriptionId!!
+                            if (portal.configuration.config["subscriptionId"] != null) {
+                                Instance.liveView!!.removeLiveViewSubscription(
+                                    portal.configuration.config["subscriptionId"].toString()
                                 )
-                            ).onComplete {
-                                if (it.succeeded()) {
-                                    portal.configuration.config["subscriptionId"] = it.result().subscriptionId!!
-                                } else {
-                                    log.error("Failed to add live view subscription", it.cause())
+                            }
+                            portal.configuration.config["subscriptionId"] = subscriptionId
+
+                            sourceMark.addEventListener {
+                                if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
+                                    Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
                                 }
                             }
+                        } else {
+                            log.error("Failed to add live view subscription", it.cause())
                         }
-                    } else {
-                        log.error("Failed to clear live view subscriptions", it.cause())
                     }
                 }
             }
