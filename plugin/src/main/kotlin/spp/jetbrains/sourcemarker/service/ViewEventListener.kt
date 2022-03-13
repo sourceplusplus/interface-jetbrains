@@ -22,7 +22,7 @@ import spp.protocol.view.LiveViewEvent
 /**
  * todo: description.
  *
- * @since 0.5.0
+ * @since 0.4.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 fun interface ViewEventListener {
