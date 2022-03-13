@@ -11,10 +11,10 @@
         </encoder>
     </appender>
 
-    <logger name="spp.jetbrains" level="INFO">
+    <logger name="spp" level="INFO">
         <appender-ref ref="debug-console"/>
     </logger>
-    <logger name="spp.jetbrains" level="DEBUG">
+    <logger name="spp" level="DEBUG">
         <appender-ref ref="STDOUT"/>
     </logger>
 
