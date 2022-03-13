@@ -312,6 +312,38 @@ object JVMMarkerUtils {
     /**
      * todo: description.
      *
+     * @since 0.4.2
+     */
+    @JvmStatic
+    @JvmOverloads
+    @Synchronized
+    fun createMethodInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): MethodInlayMark {
+        log.trace("createMethodInlayMark: $element")
+        val inlayMark = fileMarker.createMethodSourceMark(
+            element.parent as PsiNameIdentifierOwner,
+            getFullyQualifiedName(element.parent.toUElement() as UMethod),
+            SourceMark.Type.INLAY
+        ) as MethodInlayMark
+        return if (autoApply) {
+            if (inlayMark.canApply()) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                throw IllegalStateException("Could not apply inlay mark: $inlayMark")
+            }
+        } else {
+            inlayMark
+        }
+    }
+
+
+    /**
+     * todo: description.
+     *
      * @since 0.1.0
      */
     @JvmStatic

@@ -22,11 +22,14 @@ import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
-import spp.jetbrains.sourcemarker.service.log.LogHitColumnInfo;
-import spp.jetbrains.sourcemarker.service.log.VariableParser;
+import spp.jetbrains.sourcemarker.service.ViewEventListener;
+import spp.jetbrains.sourcemarker.service.instrument.log.LogHitColumnInfo;
+import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser;
 import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.artifact.log.Log;
+import spp.protocol.artifact.log.LogOrderType;
+import spp.protocol.artifact.log.LogResult;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveLog;
 import spp.protocol.instrument.LiveSourceLocation;
@@ -35,6 +38,8 @@ import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.event.LiveLogHit;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
+import spp.protocol.marshall.ProtocolMarshaller;
+import spp.protocol.view.LiveViewEvent;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -55,9 +60,9 @@ import java.awt.event.WindowEvent;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -74,12 +79,13 @@ import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_17;
 import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.jetbrains.sourcemarker.PluginUI.STATUS_BAR_TXT_BG_COLOR;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_REMOVED;
+import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
-public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener, InstrumentEventListener {
+public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener,
+        InstrumentEventListener, ViewEventListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -93,13 +99,13 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
     private final String placeHolderText = "Input log message (use $ for variables)";
+    private final boolean watchExpression;
     private EditorImpl editor;
     private LiveLog liveLog;
     private Instant latestTime;
     private Log latestLog;
     private JWindow popup;
     private LiveLogConfigurationPanel configurationPanel;
-    private final AtomicBoolean settingFormattedMessage = new AtomicBoolean(false);
     private boolean disposed = false;
     private JLabel expandLabel;
     private boolean expanded;
@@ -108,9 +114,10 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private boolean errored = false;
     private boolean removed = false;
     private ListTableModel commandModel = null;
-    private final Pair<Pattern, Pattern> patternPair;
+    private final Pattern varPattern;
 
-    public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
+    public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
+                        boolean watchExpression) {
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
@@ -126,8 +133,8 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             }
         }).collect(Collectors.toList());
         lookup = text -> scopeVars.stream()
-                .filter(v -> VariableParser.isVariable(text, v)
-                ).map(it -> new AutocompleteFieldRow() {
+                .filter(v -> VariableParser.isVariable(text, v))
+                .map(it -> new AutocompleteFieldRow() {
                     public String getText() {
                         return VariableParser.DOLLAR + it;
                     }
@@ -143,17 +150,28 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 .limit(7)
                 .collect(Collectors.toList());
 
-        patternPair = VariableParser.createPattern(scopeVars);
+        varPattern = VariableParser.createPattern(scopeVars, "$", true, false);
 
         this.inlayMark = inlayMark;
+        this.watchExpression = watchExpression;
 
         initComponents();
         setupComponents();
-        showEditableMode();
 
-        liveLogTextField.setEditMode(true);
-
-        liveLogTextField.addSaveListener(this::saveLiveLog);
+        if (watchExpression) {
+            LiveStatusManager.addViewEventListener(inlayMark, this);
+            liveLogTextField.setCanShowSaveButton(false);
+            liveLogTextField.setEditMode(false);
+            removeActiveDecorations();
+            configDropdownLabel.setVisible(false);
+            displayTimeField();
+            addExpandButton();
+        } else {
+            LiveStatusManager.addStatusBar(inlayMark, this);
+            showEditableMode();
+            liveLogTextField.setEditMode(true);
+            liveLogTextField.addSaveListener(this::saveLiveLog);
+        }
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
@@ -199,7 +217,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
-        if (liveLog == null) return;
+        if (liveLog == null && !watchExpression) return;
         this.latestTime = time;
         this.latestLog = latestLog;
 
@@ -252,6 +270,12 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     public void accept(@NotNull LiveInstrumentEvent event) {
         if (event.getEventType() == LOG_HIT) {
             commandModel.insertRow(0, event);
+
+            LiveLogHit logHit = ProtocolMarshaller.deserializeLiveLogHit(new JsonObject(event.getData()));
+            setLatestLog(
+                    Instant.ofEpochMilli(logHit.getLogResult().getTimestamp().toEpochMilliseconds()),
+                    logHit.getLogResult().getLogs().get(0)
+            );
         } else if (event.getEventType() == LOG_REMOVED) {
             removed = true;
 
@@ -270,6 +294,32 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             removeActiveDecorations();
             repaint();
         }
+    }
+
+    @Override
+    public void accept(@NotNull LiveViewEvent event) {
+        JsonObject rawMetrics = new JsonObject(event.getMetricsData());
+        Log logData = ProtocolMarshaller.deserializeLog(rawMetrics.getJsonObject("log"));
+        LogResult logResult = new LogResult(
+            event.getArtifactQualifiedName(),
+            LogOrderType.NEWEST_LOGS,
+            logData.getTimestamp(),
+            Collections.singletonList(logData),
+            Integer.MAX_VALUE
+        );
+        Log latestLog = logResult.getLogs().get(0);
+        setLatestLog(Instant.now(), latestLog);
+
+        JsonObject logJson = JsonObject.mapFrom(new LiveLogHit( //todo: real hit info
+                "-1", latestLog.getTimestamp(), "null", "null", logResult
+        ));
+        logJson.getJsonObject("logResult").getJsonArray("logs").forEach(it -> {
+            JsonObject log = (JsonObject) it;
+            log.remove("formattedMessage");
+        });
+
+        LiveInstrumentEvent liveInstrumentEvent = new LiveInstrumentEvent(LOG_HIT, logJson.toString());
+        commandModel.insertRow(0, liveInstrumentEvent);
     }
 
     private void addExpandButton() {
@@ -361,7 +411,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.getDocument().addDocumentListener(new DocumentAdapter() {
             @Override
             protected void textChanged(DocumentEvent e) {
-                if (settingFormattedMessage.get()) return;
                 if (liveLog != null) {
                     String originalMessage = liveLog.getLogFormat();
                     for (String var : liveLog.getLogArguments()) {
@@ -402,20 +451,11 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (errored || liveLogTextField.getEditMode()) return;
+                if (watchExpression || errored || liveLogTextField.getEditMode()) return;
                 liveLogTextField.setEditMode(true);
 
                 if (liveLog != null) {
-                    String originalMessage = liveLog.getLogFormat();
-                    for (String var : liveLog.getLogArguments()) {
-                        originalMessage = originalMessage.replaceFirst(
-                                QUOTE_CURLY_BRACES,
-                                Matcher.quoteReplacement(VariableParser.DOLLAR + var)
-                        );
-                    }
-                    settingFormattedMessage.set(true);
-                    liveLogTextField.setText(originalMessage);
-                    settingFormattedMessage.set(false);
+                    liveLogTextField.setText(liveLog.getMeta().get("original_log_pattern").toString());
                 }
             }
 
@@ -443,7 +483,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
-                if (!errored && !removed) showEditableMode();
+                if (!watchExpression && !errored && !removed) showEditableMode();
             }
 
             @Override
@@ -492,7 +532,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!errored && !removed) configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
+                if (!watchExpression && !errored && !removed) configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
             }
         });
 
@@ -500,7 +540,8 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         addRecursiveMouseListener(configPanel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (!errored && !removed && System.currentTimeMillis() - popupLastOpened.get() > 200) {
+                if (!watchExpression && !errored && !removed
+                        && System.currentTimeMillis() - popupLastOpened.get() > 200) {
                     ApplicationManager.getApplication().runWriteAction(() -> showConfigurationPopup(popupLastOpened));
                 }
             }
@@ -580,7 +621,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             });
         }
 
-        Pair<String, List<String>> resp = VariableParser.extractVariables(patternPair, liveLogTextField.getText());
+        Pair<String, List<String>> resp = VariableParser.extractVariables(varPattern, liveLogTextField.getText());
         final String finalLogPattern = resp.first;
 
         String condition = null;
@@ -606,10 +647,11 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         HashMap<String, String> meta = new HashMap<>();
         meta.put("original_source_mark", inlayMark.getId());
+        meta.put("original_log_pattern", liveLogTextField.getText());
 
         LiveLog instrument = new LiveLog(
                 finalLogPattern,
-                resp.second.stream().map(it -> it.substring(1)).collect(Collectors.toList()),
+                resp.second,
                 sourceLocation,
                 condition,
                 expirationDate,
@@ -632,7 +674,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveLog = (LiveLog) it.result();
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getLOG_ID(), it.result().getId());
+                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), it.result().getId());
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
 
                 inlayMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR())
@@ -674,6 +716,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         timeLabel = new JLabel();
         separator1 = new JSeparator();
         liveLogTextField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE);
+        liveLogTextField.setVarPattern(varPattern);
         closeLabel = new JLabel();
 
         //======== this ========

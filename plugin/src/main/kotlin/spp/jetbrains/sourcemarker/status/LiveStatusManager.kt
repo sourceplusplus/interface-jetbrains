@@ -23,6 +23,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.json.Json
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker.creationService
 import spp.jetbrains.marker.SourceMarker.namingService
@@ -36,32 +37,29 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.BREAKPOINT_ID
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOG_ID
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_ID
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_EVENT_LISTENERS
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
+import spp.jetbrains.sourcemarker.service.ViewEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.util.CircularList
-import spp.protocol.ProtocolAddress.Portal.DisplayLogs
 import spp.protocol.SourceServices
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
-import spp.protocol.artifact.log.LogResult
 import spp.protocol.instrument.*
 import spp.protocol.instrument.meter.MeterType
-import spp.protocol.portal.PageType
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewSubscription
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
-import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
@@ -154,10 +152,6 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.visible.set(true)
             inlayMark.apply()
 
-            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-//            sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
-            sourcePortal.configuration.statusBar = true
-
             statusBar.focus()
         }
     }
@@ -165,7 +159,7 @@ object LiveStatusManager : SourceMarkEventListener {
     /**
      * Invoked via control bar. Force visible.
      */
-    fun showLogStatusBar(editor: Editor, lineNumber: Int) {
+    fun showLogStatusBar(editor: Editor, lineNumber: Int, watchExpression: Boolean) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
@@ -178,17 +172,65 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            if (watchExpression) {
+                val logPatterns = mutableListOf<String>()
+                val parentMark = inlayMark.getParentSourceMark()
+                if (parentMark is MethodSourceMark) {
+                    val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
+                    if (loggerDetector != null) {
+                        runBlocking {
+                            val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
+                            val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
+                            if (logOnCurrentLine != null) {
+                                logPatterns.add(logOnCurrentLine.logPattern)
+                            }
+                        }
+                    }
+                }
+
+                SourceServices.Instance.liveView!!.addLiveViewSubscription(
+                    LiveViewSubscription(
+                        null,
+                        logPatterns,
+                        ArtifactQualifiedName(
+                            inlayMark.artifactQualifiedName.identifier,
+                            lineNumber = inlayMark.artifactQualifiedName.lineNumber,
+                            type = ArtifactType.EXPRESSION
+                        ),
+                        LiveSourceLocation(
+                            inlayMark.artifactQualifiedName.identifier,
+                            line = inlayMark.artifactQualifiedName.lineNumber!!
+                        ),
+                        LiveViewConfig("LOGS", listOf("endpoint_logs"))
+                    )
+                ).onComplete {
+                    if (it.succeeded()) {
+                        val subscriptionId = it.result().subscriptionId!!
+                        inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
+                        inlayMark.addEventListener { event ->
+                            if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
+                                SourceServices.Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
+                            }
+                        }
+                    } else {
+                        log.error("Failed to add live view subscription", it.cause())
+                    }
+                }
+            }
+
             val config = Json.decodeValue(
                 PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
                 SourceMarkerConfig::class.java
             )
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier,
+                    lineNumber,
                     service = config.serviceName
                 ),
-                scopeService.getScopeVariables(fileMarker, lineNumber),
-                inlayMark
+                if (watchExpression) emptyList() else scopeService.getScopeVariables(fileMarker, lineNumber),
+                inlayMark,
+                watchExpression
             )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
@@ -203,18 +245,9 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.visible.set(true)
             inlayMark.apply()
 
-            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            sourcePortal.configuration.currentPage = PageType.LOGS
-            sourcePortal.configuration.statusBar = true
-
-            SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
-                val latestLog = it.body().logs.first()
-                statusBar.setLatestLog(
-                    Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog
-                )
+            if (!watchExpression) {
+                statusBar.focus()
             }
-
-            statusBar.focus()
         }
     }
 
@@ -254,10 +287,6 @@ object LiveStatusManager : SourceMarkEventListener {
             }
             inlayMark.visible.set(true)
             inlayMark.apply()
-
-            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-//            sourcePortal.configuration.currentPage = PageType.METERS
-            sourcePortal.configuration.statusBar = true
 
             statusBar.focus()
         }
@@ -300,10 +329,6 @@ object LiveStatusManager : SourceMarkEventListener {
             inlayMark.visible.set(true)
             inlayMark.apply()
 
-            val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-//            sourcePortal.configuration.currentPage = PageType.METERS
-            sourcePortal.configuration.statusBar = true
-
             statusBar.focus()
         }
     }
@@ -315,7 +340,7 @@ object LiveStatusManager : SourceMarkEventListener {
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
-                    inlayMark.putUserData(BREAKPOINT_ID, liveBreakpoint.id)
+                    inlayMark.putUserData(INSTRUMENT_ID, liveBreakpoint.id)
 
                     val wrapperPanel = JPanel()
                     wrapperPanel.layout = BorderLayout()
@@ -337,10 +362,6 @@ object LiveStatusManager : SourceMarkEventListener {
                         override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
                     }
                     inlayMark.apply()
-
-                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                    //sourcePortal.configuration.currentPage = PageType.BREAKPOINTS
-                    sourcePortal.configuration.statusBar = true
                 }
             } else {
                 log.warn("No detected expression at line {}. Inlay mark ignored", liveBreakpoint.location.line)
@@ -355,7 +376,7 @@ object LiveStatusManager : SourceMarkEventListener {
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
-                    inlayMark.putUserData(LOG_ID, liveLog.id)
+                    inlayMark.putUserData(INSTRUMENT_ID, liveLog.id)
 
                     val wrapperPanel = JPanel()
                     wrapperPanel.layout = BorderLayout()
@@ -363,7 +384,8 @@ object LiveStatusManager : SourceMarkEventListener {
                     val statusBar = LogStatusBar(
                         liveLog.location,
                         emptyList(),
-                        inlayMark
+                        inlayMark,
+                        false
                     )
                     inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
                     statusBar.setWrapperPanel(wrapperPanel)
@@ -378,19 +400,8 @@ object LiveStatusManager : SourceMarkEventListener {
                     }
                     inlayMark.apply()
 
-                    val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                    sourcePortal.configuration.currentPage = PageType.LOGS
-                    sourcePortal.configuration.statusBar = true
-
                     val detector = inlayMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
                     detector.addLiveLog(editor, inlayMark, liveLog.logFormat, liveLog.location.line)
-
-                    SourceMarkerPlugin.vertx.eventBus().consumer<LogResult>(DisplayLogs(sourcePortal.portalUuid)) {
-                        val latestLog = it.body().logs.first()
-                        statusBar.setLatestLog(
-                            Instant.ofEpochMilli(latestLog.timestamp.toEpochMilliseconds()), latestLog
-                        )
-                    }
                 }
             } else {
                 log.warn("No detected expression at line {}. Inlay mark ignored", liveLog.location.line)
@@ -400,27 +411,13 @@ object LiveStatusManager : SourceMarkEventListener {
 
     @JvmStatic
     fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
-        SourceServices.Instance.liveView!!.addLiveViewSubscription(
-            LiveViewSubscription(
-                null,
-                listOf(liveMeter.toMetricId()),
-                ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
-                liveMeter.location,
-                LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
-            )
-        ).onComplete {
-            if (it.failed()) {
-                log.error("Failed to add live view subscription", it.cause())
-            }
-        }
-
         //create gutter popup
         ApplicationManager.getApplication().runReadAction {
             val gutterMark = creationService.getOrCreateExpressionGutterMark(
                 sourceFileMarker, liveMeter.location.line, false
             )
             if (gutterMark.isPresent) {
-                gutterMark.get().putUserData(SourceMarkKeys.METER_ID, liveMeter.id!!)
+                gutterMark.get().putUserData(INSTRUMENT_ID, liveMeter.id!!)
                 when (liveMeter.meterType) {
                     MeterType.COUNT -> gutterMark.get().configuration.icon = LIVE_METER_COUNT_ICON
                     MeterType.GAUGE -> gutterMark.get().configuration.icon = LIVE_METER_GAUGE_ICON
@@ -441,6 +438,22 @@ object LiveStatusManager : SourceMarkEventListener {
                 }
                 gutterMark.get().apply(true)
                 addStatusBar(gutterMark.get(), statusBar)
+
+                SourceServices.Instance.liveView!!.addLiveViewSubscription(
+                    LiveViewSubscription(
+                        null,
+                        listOf(liveMeter.toMetricId()),
+                        ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
+                        liveMeter.location,
+                        LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
+                    )
+                ).onComplete {
+                    if (it.succeeded()) {
+                        gutterMark.get().putUserData(VIEW_SUBSCRIPTION_ID, it.result().subscriptionId)
+                    } else {
+                        log.error("Failed to add live view subscription", it.cause())
+                    }
+                }
             } else {
                 log.error("Could not create gutter mark for live meter")
             }
@@ -453,6 +466,14 @@ object LiveStatusManager : SourceMarkEventListener {
             sourceMark.putUserData(INSTRUMENT_EVENT_LISTENERS, mutableSetOf())
         }
         sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
+    }
+
+    @JvmStatic
+    fun addViewEventListener(sourceMark: SourceMark, listener: ViewEventListener) {
+        if (sourceMark.getUserData(VIEW_EVENT_LISTENERS) == null) {
+            sourceMark.putUserData(VIEW_EVENT_LISTENERS, mutableSetOf())
+        }
+        sourceMark.getUserData(VIEW_EVENT_LISTENERS)!!.add(listener)
     }
 
     fun addActiveLiveInstrument(instrument: LiveInstrument) {
@@ -472,12 +493,12 @@ object LiveStatusManager : SourceMarkEventListener {
     }
 
     fun getLogData(inlayMark: InlayMark): List<*> {
-        val logId = inlayMark.getUserData(LOG_ID)
+        val logId = inlayMark.getUserData(INSTRUMENT_ID)
         return logData.getOrPut(logId) { CircularList<Any>(1000) }
     }
 
     fun removeLogData(inlayMark: InlayMark) {
-        val logId = inlayMark.getUserData(LOG_ID)
+        val logId = inlayMark.getUserData(INSTRUMENT_ID)
         logData.remove(logId)
     }
 }

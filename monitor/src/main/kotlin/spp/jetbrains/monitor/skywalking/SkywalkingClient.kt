@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
-import spp.protocol.util.LocalMessageCodec
+import spp.protocol.marshall.LocalMessageCodec
+import spp.protocol.platform.general.Service
 import java.io.IOException
 import java.time.ZoneOffset.ofHours
 import java.time.ZonedDateTime
@@ -63,7 +64,7 @@ class SkywalkingClient(
                 vertx.eventBus().registerDefaultCodec(GetMultipleEndpointMetrics::class.java, LocalMessageCodec())
                 vertx.eventBus().registerDefaultCodec(GetEndpointTraces::class.java, LocalMessageCodec())
                 vertx.eventBus().registerDefaultCodec(GetEndpointMetrics::class.java, LocalMessageCodec())
-                vertx.eventBus().registerDefaultCodec(GetAllServicesQuery.Result::class.java, LocalMessageCodec())
+                vertx.eventBus().registerDefaultCodec(Service::class.java, LocalMessageCodec())
                 vertx.eventBus().registerDefaultCodec(GetServiceInstancesQuery.Result::class.java, LocalMessageCodec())
                 vertx.eventBus().registerDefaultCodec(SearchEndpointQuery.Result::class.java, LocalMessageCodec())
                 vertx.eventBus().registerDefaultCodec(QueryBasicTracesQuery.Result::class.java, LocalMessageCodec())
@@ -219,7 +220,7 @@ class SkywalkingClient(
         }
     }
 
-    suspend fun getServices(duration: Duration): List<GetAllServicesQuery.Result> {
+    suspend fun getServices(duration: Duration): List<Service> {
         metricRegistry.timer("getServices").time().use {
             if (log.isTraceEnabled) log.trace("Get services request. Duration: {}", duration)
 
@@ -231,7 +232,7 @@ class SkywalkingClient(
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Get services response: {}", response.data!!.result)
-                return response.data!!.result
+                return response.data!!.result.map { it.toProtocol() }
             }
         }
     }

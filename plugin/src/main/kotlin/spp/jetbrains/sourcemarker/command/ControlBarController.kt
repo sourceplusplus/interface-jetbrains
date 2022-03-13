@@ -31,17 +31,15 @@ import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.*
+import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.protocol.ProtocolAddress.Global.SetCurrentPage
 import spp.protocol.SourceServices
 import spp.protocol.instrument.LiveInstrumentType.*
-import spp.protocol.portal.PageType
 import java.awt.BorderLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -56,14 +54,42 @@ object ControlBarController {
 
     private val log = LoggerFactory.getLogger(ControlBarController::class.java)
     private var previousControlBar: InlayMark? = null
-    private val availableCommands by lazy {
-        runBlocking {
-            val selfInfo = SourceServices.Instance.liveService!!.getSelf().await()
-            LiveControlCommand.values().toList().filter {
-                @Suppress("UselessCallOnCollection") //unknown enums are null
-                selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
+    private val availableCommands: MutableList<LiveControlCommand> = mutableListOf()
+
+    fun clearAvailableCommands() {
+        availableCommands.clear()
+    }
+
+    private suspend fun syncAvailableCommands() {
+        availableCommands.clear()
+
+        val selfInfo = SourceServices.Instance.liveService!!.getSelf().await()
+        availableCommands.addAll(LiveControlCommand.values().toList().filter {
+            @Suppress("UselessCallOnCollection") //unknown enums are null
+            selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
+        })
+    }
+
+    private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
+        if (availableCommands.isEmpty()) {
+            runBlocking { syncAvailableCommands() }
+        }
+
+        val availableCommandsAtLocation = availableCommands.toMutableList()
+        val parentMark = inlayMark.getParentSourceMark()
+        if (parentMark is MethodSourceMark) {
+            val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
+            if (loggerDetector != null) {
+                runBlocking {
+                    val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
+                    val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
+                    if (logOnCurrentLine != null) {
+                        availableCommandsAtLocation.add(WATCH_LOG)
+                    }
+                }
             }
         }
+        return availableCommandsAtLocation
     }
 
     fun handleCommandInput(input: String, editor: Editor) {
@@ -72,6 +98,16 @@ object ControlBarController {
             VIEW_ACTIVITY.command -> handleViewPortalCommand(editor, VIEW_ACTIVITY)
             VIEW_TRACES.command -> handleViewPortalCommand(editor, VIEW_TRACES)
             VIEW_LOGS.command -> handleViewPortalCommand(editor, VIEW_LOGS)
+            WATCH_LOG.command -> {
+                //replace command inlay with log status inlay
+                val prevCommandBar = previousControlBar!!
+                previousControlBar!!.dispose()
+                previousControlBar = null
+
+                ApplicationManager.getApplication().runWriteAction {
+                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber, true)
+                }
+            }
             ADD_LIVE_BREAKPOINT.command -> {
                 //replace command inlay with breakpoint status inlay
                 val prevCommandBar = previousControlBar!!
@@ -89,7 +125,7 @@ object ControlBarController {
                 previousControlBar = null
 
                 ApplicationManager.getApplication().runWriteAction {
-                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber)
+                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber, false)
                 }
             }
             ADD_LIVE_METER.command -> {
@@ -189,26 +225,12 @@ object ControlBarController {
         }
 
         if (sourceMark != null) {
-            val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            when (command) {
-                VIEW_ACTIVITY -> portal.configuration.currentPage = PageType.ACTIVITY
-                VIEW_TRACES -> portal.configuration.currentPage = PageType.TRACES
-                VIEW_LOGS -> portal.configuration.currentPage = PageType.LOGS
-                else -> throw UnsupportedOperationException("Command input: $command")
-            }
-            SourceMarkerPlugin.vertx.eventBus().request<Any>(SetCurrentPage, portal) {
-                sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.PORTAL_OPENING))
+            sourceMark.triggerEvent(SourceMarkEvent(sourceMark, UPDATE_PORTAL_CONFIG, command)) {
+                sourceMark.triggerEvent(SourceMarkEvent(sourceMark, PORTAL_OPENING))
             }
         } else if (classSourceMark != null) {
-            val portal = classSourceMark!!.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-            when (command) {
-                VIEW_ACTIVITY -> portal.configuration.currentPage = PageType.ACTIVITY
-                VIEW_TRACES -> portal.configuration.currentPage = PageType.TRACES
-                VIEW_LOGS -> portal.configuration.currentPage = PageType.LOGS
-                else -> throw UnsupportedOperationException("Command input: $command")
-            }
-            SourceMarkerPlugin.vertx.eventBus().request<Any>(SetCurrentPage, portal) {
-                classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, SourceMarkEventCode.PORTAL_OPENING))
+            classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, UPDATE_PORTAL_CONFIG, command)) {
+                classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, PORTAL_OPENING))
             }
         } else {
             log.warn("No source mark found for command: {}", command)
@@ -253,7 +275,7 @@ object ControlBarController {
                 val wrapperPanel = JPanel()
                 wrapperPanel.layout = BorderLayout()
 
-                val controlBar = ControlBar(editor, inlayMark, availableCommands)
+                val controlBar = ControlBar(editor, inlayMark, determineAvailableCommandsAtLocation(inlayMark))
                 wrapperPanel.add(controlBar)
                 editor.scrollingModel.addVisibleAreaListener(controlBar)
 
@@ -263,10 +285,6 @@ object ControlBarController {
                 }
                 inlayMark.visible.set(true)
                 inlayMark.apply()
-
-                val sourcePortal = inlayMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                sourcePortal.configuration.currentPage = PageType.LOGS
-                sourcePortal.configuration.statusBar = true
 
                 controlBar.focus()
             }

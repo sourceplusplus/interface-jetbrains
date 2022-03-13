@@ -17,8 +17,6 @@
  */
 package spp.jetbrains.sourcemarker.reporting
 
-import com.google.common.base.Charsets
-import com.google.common.io.Resources
 import com.intellij.diagnostic.AbstractMessage
 import com.intellij.diagnostic.LogMessage
 import com.intellij.diagnostic.ReportMessages
@@ -45,7 +43,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
 import com.intellij.util.io.decodeBase64
-import io.vertx.core.json.JsonObject
 import org.eclipse.egit.github.core.Issue
 import org.eclipse.egit.github.core.Label
 import org.eclipse.egit.github.core.RepositoryId
@@ -53,9 +50,7 @@ import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
 import org.slf4j.LoggerFactory
 import spp.jetbrains.sourcemarker.PluginBundle
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import java.awt.Component
-import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.*
@@ -268,17 +263,8 @@ private fun getKeyValuePairs(
     appInfo: ApplicationInfoEx,
     namesInfo: ApplicationNamesInfo
 ): MutableMap<String, String> {
-    val hardcodedConfig: JsonObject = try {
-        JsonObject(
-            Resources.toString(
-                Resources.getResource(SourceMarkerPlugin::class.java, "/plugin-configuration.json"), Charsets.UTF_8
-            )
-        )
-    } catch (e: IOException) {
-        throw RuntimeException(e)
-    }
     PluginManagerCore.getPlugin(
-        PluginId.findId(hardcodedConfig.getString("plugin_id"), hardcodedConfig.getString("plugin_id"))
+        PluginId.findId("com.sourceplusplus.plugin.intellij", "com.sourceplusplus.plugin.intellij")
     )?.run {
         if (error.pluginName.isBlank()) error.pluginName = name
         if (error.pluginVersion.isBlank()) error.pluginVersion = version

@@ -27,6 +27,8 @@ import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.bridge.*
+import spp.jetbrains.monitor.skywalking.service.SWLiveService
+import spp.protocol.SourceServices
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
@@ -43,7 +45,8 @@ class SkywalkingMonitor(
     private val serverUrl: String,
     private val jwtToken: String? = null,
     private val certificatePins: List<String> = emptyList(),
-    private val verifyHost: Boolean
+    private val verifyHost: Boolean,
+    private val currentService: String? = null
 ) : CoroutineVerticle() {
 
     companion object {
@@ -60,6 +63,13 @@ class SkywalkingMonitor(
     private suspend fun setup() {
         log.debug("Apache SkyWalking server: $serverUrl")
         val httpBuilder = OkHttpClient().newBuilder()
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain.request().newBuilder()
+                        .addHeader("spp-skywalking-reroute", "true")
+                        .build()
+                )
+            }
             .hostnameVerifier { _, _ -> true }
         if (!jwtToken.isNullOrEmpty()) {
             httpBuilder.addInterceptor { chain ->
@@ -99,12 +109,18 @@ class SkywalkingMonitor(
             val timezone = Integer.parseInt(response.data!!.result!!.timezone) / 100
             val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
-            vertx.deployVerticle(ServiceBridge(skywalkingClient)).await()
+            vertx.deployVerticle(ServiceBridge(skywalkingClient, currentService)).await()
             vertx.deployVerticle(ServiceInstanceBridge(skywalkingClient)).await()
             vertx.deployVerticle(EndpointBridge(skywalkingClient)).await()
             vertx.deployVerticle(EndpointMetricsBridge(skywalkingClient)).await()
             vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
             vertx.deployVerticle(LogsBridge(skywalkingClient)).await()
+
+            if (SourceServices.Instance.liveService == null) {
+                val swLiveService = SWLiveService()
+                vertx.deployVerticle(swLiveService).await()
+                SourceServices.Instance.liveService = swLiveService
+            }
         }
     }
 }

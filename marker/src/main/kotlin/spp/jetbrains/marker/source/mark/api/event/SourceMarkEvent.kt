@@ -28,7 +28,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 open class SourceMarkEvent(
     val sourceMark: SourceMark,
     val eventCode: IEventCode,
-    vararg val params: Any
+    vararg val params: Any?
 ) {
 
     override fun toString(): String {

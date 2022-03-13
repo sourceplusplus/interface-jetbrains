@@ -29,23 +29,21 @@ import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
+import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
-import spp.jetbrains.sourcemarker.search.SourceMarkSearch
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointTriggerListener
+import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointTriggerListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.protocol.ProtocolAddress.Global.ArtifactLogUpdated
-import spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
-import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
-import spp.protocol.instrument.event.LiveLogHit
+import spp.protocol.marshall.ProtocolMarshaller
+import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
 
 /**
  * todo: description.
@@ -79,9 +77,9 @@ class LiveInstrumentManager(
                 LiveInstrumentEventType.LOG_HIT -> handleLogHitEvent(liveEvent)
                 LiveInstrumentEventType.BREAKPOINT_HIT -> handleBreakpointHitEvent(liveEvent)
                 LiveInstrumentEventType.BREAKPOINT_ADDED -> handleBreakpointAddedEvent(liveEvent)
-                LiveInstrumentEventType.BREAKPOINT_REMOVED -> handleBreakpointRemovedEvent(liveEvent)
+                LiveInstrumentEventType.BREAKPOINT_REMOVED -> handleInstrumentRemovedEvent(liveEvent)
                 LiveInstrumentEventType.LOG_ADDED -> handleLogAddedEvent(liveEvent)
-                LiveInstrumentEventType.LOG_REMOVED -> handleLogRemovedEvent(liveEvent)
+                LiveInstrumentEventType.LOG_REMOVED -> handleInstrumentRemovedEvent(liveEvent)
                 else -> log.warn("Un-implemented event type: {}", liveEvent.eventType)
             }
         }
@@ -105,19 +103,6 @@ class LiveInstrumentManager(
         }
     }
 
-    private fun handleLogRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val logRemoved = deserializeLiveInstrumentRemoved(JsonObject(liveEvent.data))
-        ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByLogId(logRemoved.liveInstrument.id!!)
-            if (inlayMark != null) {
-                val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
-                if (eventListeners?.isNotEmpty() == true) {
-                    eventListeners.forEach { it.accept(liveEvent) }
-                }
-            }
-        }
-    }
-
     private fun handleLogAddedEvent(liveEvent: LiveInstrumentEvent) {
         if (!SourceMarker.enabled) {
             log.debug("SourceMarker disabled. Ignored log added")
@@ -130,7 +115,7 @@ class LiveInstrumentManager(
             if (fileMarker != null) {
                 val smId = logAdded.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkKeys.LOG_ID, logAdded.id)
+                inlayMark.putUserData(SourceMarkKeys.INSTRUMENT_ID, logAdded.id)
                 inlayMark.getUserData(SourceMarkKeys.STATUS_BAR)!!.setLiveInstrument(logAdded)
             } else {
                 LiveStatusManager.addActiveLiveInstrument(logAdded)
@@ -145,16 +130,16 @@ class LiveInstrumentManager(
             if (fileMarker != null) {
                 val smId = bpAdded.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkKeys.BREAKPOINT_ID, bpAdded.id)
+                inlayMark.putUserData(SourceMarkKeys.INSTRUMENT_ID, bpAdded.id)
                 inlayMark.getUserData(SourceMarkKeys.STATUS_BAR)!!.setLiveInstrument(bpAdded)
             }
         }
     }
 
-    private fun handleBreakpointRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val bpRemoved = deserializeLiveInstrumentRemoved(JsonObject(liveEvent.data))
+    private fun handleInstrumentRemovedEvent(liveEvent: LiveInstrumentEvent) {
+        val instrumentRemoved = deserializeLiveInstrumentRemoved(JsonObject(liveEvent.data))
         ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByBreakpointId(bpRemoved.liveInstrument.id!!)
+            val inlayMark = SourceMarkSearch.findByInstrumentId(instrumentRemoved.liveInstrument.id!!)
             if (inlayMark != null) {
                 val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
@@ -165,18 +150,18 @@ class LiveInstrumentManager(
     }
 
     private fun handleBreakpointHitEvent(liveEvent: LiveInstrumentEvent) {
-        val bpHit = Json.decodeValue(liveEvent.data, LiveBreakpointHit::class.java)
+        if (!SourceMarker.enabled) {
+            log.debug("SourceMarker disabled. Ignored breakpoint hit")
+            return
+        }
+
+        val bpHit = ProtocolMarshaller.deserializeLiveBreakpointHit(JsonObject(liveEvent.data))
         ApplicationManager.getApplication().invokeLater {
             val project = ProjectManager.getInstance().openProjects[0]
             BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
 
-            val inlayMark = SourceMarkSearch.findByBreakpointId(bpHit.breakpointId)
-            if (inlayMark != null) {
-                val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
-                if (eventListeners?.isNotEmpty() == true) {
-                    eventListeners.forEach { it.accept(liveEvent) }
-                }
-            }
+            SourceMarkSearch.findByInstrumentId(bpHit.breakpointId)
+                ?.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
         }
     }
 
@@ -186,24 +171,8 @@ class LiveInstrumentManager(
             return
         }
 
-        //todo: can get log hit without log added (race) try open
-        val logHit = Json.decodeValue(liveEvent.data, LiveLogHit::class.java)
-        ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByLogId(logHit.logId)
-            if (inlayMark != null) {
-                val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
-                if (eventListeners?.isNotEmpty() == true) {
-                    eventListeners.forEach { it.accept(liveEvent) }
-                }
-
-                SourceMarkSearch.findInheritedSourceMarks(inlayMark).forEach {
-                    val portal = it.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-                    vertx.eventBus().send(
-                        ArtifactLogUpdated,
-                        logHit.logResult.copy(artifactQualifiedName = portal.viewingArtifact)
-                    )
-                }
-            }
-        }
+        val logHit = ProtocolMarshaller.deserializeLiveLogHit(JsonObject(liveEvent.data))
+        SourceMarkSearch.findByInstrumentId(logHit.logId)
+            ?.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
     }
 }

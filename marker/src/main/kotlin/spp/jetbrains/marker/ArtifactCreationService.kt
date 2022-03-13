@@ -22,6 +22,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
+import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import java.util.*
 
 /**
@@ -49,6 +50,12 @@ interface ArtifactCreationService {
         lineNumber: Int,
         autoApply: Boolean = false
     ): Optional<ExpressionInlayMark>
+
+    fun createMethodInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): MethodInlayMark
 
     fun createExpressionInlayMark(
         fileMarker: SourceFileMarker,

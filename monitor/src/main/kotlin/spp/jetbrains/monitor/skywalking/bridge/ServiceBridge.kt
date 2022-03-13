@@ -23,9 +23,9 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
-import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
+import spp.protocol.platform.general.Service
 import java.time.ZonedDateTime
 
 /**
@@ -35,10 +35,13 @@ import java.time.ZonedDateTime
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
+class ServiceBridge(
+    private val skywalkingClient: SkywalkingClient,
+    private val initServiceName: String?
+) : CoroutineVerticle() {
 
-    var currentService: GetAllServicesQuery.Result? = null
-    var activeServices: List<GetAllServicesQuery.Result> = emptyList()
+    var currentService: Service? = null
+    var activeServices: List<Service> = emptyList()
 
     override suspend fun start() {
         vertx.setPeriodic(5000) { timerId ->
@@ -51,7 +54,12 @@ class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineV
                     vertx.cancelTimer(timerId)
                     vertx.eventBus().publish(activeServicesUpdatedAddress, activeServices)
 
-                    currentService = activeServices[0]
+                    if (initServiceName != null) {
+                        currentService = activeServices.find { it.name == initServiceName }
+                    }
+                    if (currentService == null) {
+                        currentService = activeServices[0]
+                    }
                     vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
                 }
             }
@@ -99,22 +107,22 @@ class ServiceBridge(private val skywalkingClient: SkywalkingClient) : CoroutineV
         private const val currentServiceUpdatedAddress = "$rootAddress.currentService-Updated"
         private const val activeServicesUpdatedAddress = "$rootAddress.activeServices-Updated"
 
-        fun currentServiceConsumer(vertx: Vertx): MessageConsumer<GetAllServicesQuery.Result> {
+        fun currentServiceConsumer(vertx: Vertx): MessageConsumer<Service> {
             return vertx.eventBus().localConsumer(currentServiceUpdatedAddress)
         }
 
-        fun activeServicesConsumer(vertx: Vertx): MessageConsumer<List<GetAllServicesQuery.Result>> {
+        fun activeServicesConsumer(vertx: Vertx): MessageConsumer<List<Service>> {
             return vertx.eventBus().localConsumer(activeServicesUpdatedAddress)
         }
 
-        suspend fun getCurrentService(vertx: Vertx): GetAllServicesQuery.Result {
+        suspend fun getCurrentService(vertx: Vertx): Service {
             return vertx.eventBus()
-                .request<GetAllServicesQuery.Result>(getCurrentServiceAddress, true).await().body()
+                .request<Service>(getCurrentServiceAddress, true).await().body()
         }
 
-        suspend fun getActiveServices(vertx: Vertx): List<GetAllServicesQuery.Result> {
+        suspend fun getActiveServices(vertx: Vertx): List<Service> {
             return vertx.eventBus()
-                .request<List<GetAllServicesQuery.Result>>(getActiveServicesAddress, true).await().body()
+                .request<List<Service>>(getActiveServicesAddress, true).await().body()
         }
     }
 }

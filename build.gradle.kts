@@ -70,6 +70,7 @@ subprojects {
     apply(plugin = "com.diffplug.spotless")
     configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         kotlin {
+            targetExclude("**/generated/**")
             if (file("../LICENSE-HEADER.txt").exists()) {
                 licenseHeaderFile(file("../LICENSE-HEADER.txt"))
             } else {

@@ -18,7 +18,7 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
-import spp.jetbrains.sourcemarker.service.breakpoint.BreakpointHitColumnInfo;
+import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.protocol.instrument.LiveInstrument;
@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
+import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
 
@@ -225,7 +225,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
-                } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                } else if (e.getKeyChar() == KeyEvent.VK_ENTER && spanOperationNameField.getText().length() > 0) {
                     ApplicationManager.getApplication().runWriteAction(() -> saveLiveSpan());
                 }
             }

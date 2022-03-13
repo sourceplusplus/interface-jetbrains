@@ -32,6 +32,7 @@ import java.awt.Dimension
 class SourceMarkJcefComponentConfiguration : SourceMarkComponentConfiguration() {
 
     var preloadJcefBrowser: Boolean = true
+    var currentUrl: String = "about:blank"
     var initialUrl: String = "about:blank"
     var initialHtml: String? = null
     var componentWidth: Int = 400
@@ -56,6 +57,7 @@ class SourceMarkJcefComponentConfiguration : SourceMarkComponentConfiguration() 
         copy.componentSizeEvaluator = componentSizeEvaluator
 
         copy.preloadJcefBrowser = preloadJcefBrowser
+        copy.currentUrl = currentUrl
         copy.initialUrl = initialUrl
         copy.initialHtml = initialHtml
         copy.componentWidth = componentWidth

@@ -72,9 +72,7 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
         sink: InlayHintsSink,
         representation: InlayPresentation
     ) {
-        val statement = if (element is PsiStatement) element else {
-            element.getParentOfType(true)
-        }!!
+        val statement = if (element is PsiStatement) element else element
         if (virtualText.useInlinePresentation) {
             if (virtualText.showAfterLastChildWhenInline) {
                 sink.addInlineElement(

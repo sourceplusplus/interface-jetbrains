@@ -108,6 +108,7 @@ abstract class MethodSourceMark(
         } else {
             userData.remove(key)
         }
+        triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_USER_DATA_UPDATED, key, value))
     }
 
     override fun hasUserData(): Boolean = userData.isNotEmpty()
