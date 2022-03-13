@@ -12,7 +12,6 @@ pluginManagement {
     }
 }
 
-include 'mapper'
 include 'marker'
 include 'marker:jvm-marker'
 include 'marker:py-marker'
