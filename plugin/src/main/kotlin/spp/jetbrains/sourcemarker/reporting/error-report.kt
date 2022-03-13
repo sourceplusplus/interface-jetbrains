@@ -264,7 +264,7 @@ private fun getKeyValuePairs(
     namesInfo: ApplicationNamesInfo
 ): MutableMap<String, String> {
     PluginManagerCore.getPlugin(
-        PluginId.findId("com.sourceplusplus.plugin.intellij")
+        PluginId.findId("com.sourceplusplus.plugin.intellij", "com.sourceplusplus.plugin.intellij")
     )?.run {
         if (error.pluginName.isBlank()) error.pluginName = name
         if (error.pluginVersion.isBlank()) error.pluginVersion = version
