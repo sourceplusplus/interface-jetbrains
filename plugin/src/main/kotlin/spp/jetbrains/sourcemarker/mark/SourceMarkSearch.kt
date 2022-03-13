@@ -59,6 +59,10 @@ object SourceMarkSearch {
         }
     }
 
+    fun findSourceMarks(artifact: ArtifactQualifiedName): List<SourceMark> {
+        return SourceMarker.getSourceMarks().filter { it.artifactQualifiedName == artifact }
+    }
+
     suspend fun findSourceMark(logPattern: String): MethodSourceMark? {
         return SourceMarker.getSourceMarks()
             .filterIsInstance<MethodSourceMark>()

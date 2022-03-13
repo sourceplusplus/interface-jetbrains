@@ -30,6 +30,7 @@ import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
+import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
@@ -37,8 +38,9 @@ import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
+import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices
 import spp.protocol.artifact.QueryTimeFrame
@@ -62,6 +64,7 @@ class ActivityQuickStatsInlayHints : SourceMarkEventListener {
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ActivityQuickStatsInlayHints::class.java)
         private val inlayForegroundColor = JBColor(Color.decode("#3e464a"), Color.decode("#87939a"))
+        val ACTIVITY_QUICK_STATS = SourceKey<Boolean>("ACTIVITY_QUICK_STATS")
     }
 
     //todo: wait till have all stats for minute before showing
@@ -69,6 +72,8 @@ class ActivityQuickStatsInlayHints : SourceMarkEventListener {
         if (event.eventCode == SourceMarkEventCode.MARK_USER_DATA_UPDATED) {
             if (event.sourceMark.getUserData(EndpointDetector.ENDPOINT_ID) != null) {
                 if (event.sourceMark is InlayMark) return
+                val existingSourceMarks = SourceMarkSearch.findSourceMarks(event.sourceMark.artifactQualifiedName)
+                if (existingSourceMarks.find { it.getUserData(ACTIVITY_QUICK_STATS) == true } != null) return
 
                 //found a method endpoint to show quick activity stats
                 ApplicationManager.getApplication().runReadAction {
@@ -80,8 +85,8 @@ class ActivityQuickStatsInlayHints : SourceMarkEventListener {
                         ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
                     )
 
-                    val currentMetrics = runBlocking(SourceMarkerPlugin.vertx.dispatcher()) {
-                        EndpointMetricsBridge.getMetrics(metricsRequest, SourceMarkerPlugin.vertx)
+                    val currentMetrics = runBlocking(vertx.dispatcher()) {
+                        EndpointMetricsBridge.getMetrics(metricsRequest, vertx)
                     }
                     val metricResult = toProtocol(
                         event.sourceMark.artifactQualifiedName,
@@ -96,6 +101,7 @@ class ActivityQuickStatsInlayHints : SourceMarkEventListener {
                         (event.sourceMark as MethodSourceMark).getPsiElement().nameIdentifier!!,
                         false
                     )
+                    inlay.putUserData(ACTIVITY_QUICK_STATS, true)
                     inlay.configuration.virtualText = InlayMarkVirtualText(inlay, formatMetricResult(metricResult))
                     inlay.configuration.virtualText!!.textAttributes.foregroundColor = inlayForegroundColor
                     inlay.configuration.activateOnMouseClick = false
@@ -117,7 +123,7 @@ class ActivityQuickStatsInlayHints : SourceMarkEventListener {
                             listOf(event.sourceMark.getUserData(EndpointDetector.ENDPOINT_NAME)!!),
                             event.sourceMark.artifactQualifiedName,
                             LiveSourceLocation(event.sourceMark.artifactQualifiedName.identifier, 0), //todo: don't need
-                            LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
+                            LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"), -1)
                         )
                     ).onComplete {
                         if (it.succeeded()) {
