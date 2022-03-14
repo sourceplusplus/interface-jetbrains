@@ -50,13 +50,17 @@ object ArtifactNavigator {
     //todo: remove method from method names and support navigating to classes?
 
     fun navigateTo(project: Project, element: LiveStackTraceElement) {
-        ApplicationManager.getApplication().invokeLater {
+        ApplicationManager.getApplication().runReadAction {
             val foundFiles = getFilesByName(project, element.sourceAsFilename()!!, allScope(project))
             if (foundFiles.isNotEmpty()) {
                 val file = foundFiles[0]
                 val document: Document = PsiDocumentManager.getInstance(file.project).getDocument(file)!!
                 val offset = document.getLineStartOffset(element.sourceAsLineNumber()!! - 1)
-                PsiNavigationSupport.getInstance().createNavigatable(project, file.virtualFile, offset).navigate(true)
+
+                ApplicationManager.getApplication().invokeLater {
+                    PsiNavigationSupport.getInstance().createNavigatable(project, file.virtualFile, offset)
+                        .navigate(true)
+                }
             }
         }
     }

@@ -49,8 +49,8 @@ public interface PluginIcons {
         Icon liveBreakpointSelected = IconLoader.getIcon("/icons/command/live-breakpoint_selected.svg", PluginIcons.class);
         Icon liveBreakpointUnSelected = IconLoader.getIcon("/icons/command/live-breakpoint_unselected.svg", PluginIcons.class);
 
-        Icon livelogSelected = IconLoader.getIcon("/icons/command/live-log_selected.svg", PluginIcons.class);
-        Icon livelogUnSelected = IconLoader.getIcon("/icons/command/live-log_unselected.svg", PluginIcons.class);
+        Icon liveLogSelected = IconLoader.getIcon("/icons/command/live-log_selected.svg", PluginIcons.class);
+        Icon liveLogUnSelected = IconLoader.getIcon("/icons/command/live-log_unselected.svg", PluginIcons.class);
 
         Icon liveMeterSelected = IconLoader.getIcon("/icons/command/live-meter_selected.svg", PluginIcons.class);
         Icon liveMeterUnSelected = IconLoader.getIcon("/icons/command/live-meter_unselected.svg", PluginIcons.class);
@@ -58,6 +58,8 @@ public interface PluginIcons {
         Icon liveSpanSelected = IconLoader.getIcon("/icons/command/live-span_selected.svg", PluginIcons.class);
         Icon liveSpanUnSelected = IconLoader.getIcon("/icons/command/live-span_unselected.svg", PluginIcons.class);
 
+        Icon viewOverviewSelected = IconLoader.getIcon("/icons/command/view-overview_selected.svg", PluginIcons.class);
+        Icon viewOverviewUnSelected = IconLoader.getIcon("/icons/command/view-overview_unselected.svg", PluginIcons.class);
         Icon viewActivitySelected = IconLoader.getIcon("/icons/command/view-activity_selected.svg", PluginIcons.class);
         Icon viewActivityUnSelected = IconLoader.getIcon("/icons/command/view-activity_unselected.svg", PluginIcons.class);
         Icon viewTracesSelected = IconLoader.getIcon("/icons/command/view-traces_selected.svg", PluginIcons.class);

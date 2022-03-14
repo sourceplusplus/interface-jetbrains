@@ -68,6 +68,7 @@ object ControlBarController {
             @Suppress("UselessCallOnCollection") //unknown enums are null
             selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
         })
+        //availableCommands.add(VIEW_OVERVIEW) //todo: remove after v0.4.2
     }
 
     private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
@@ -79,7 +80,7 @@ object ControlBarController {
         val parentMark = inlayMark.getParentSourceMark()
         if (parentMark is MethodSourceMark) {
             val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
-            if (loggerDetector != null) {
+            if (loggerDetector != null && SourceServices.Instance.liveView != null) {
                 runBlocking {
                     val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
                     val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
@@ -95,6 +96,7 @@ object ControlBarController {
     fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
         when (input) {
+            VIEW_OVERVIEW.command -> handleViewPortalCommand(editor, VIEW_OVERVIEW)
             VIEW_ACTIVITY.command -> handleViewPortalCommand(editor, VIEW_ACTIVITY)
             VIEW_TRACES.command -> handleViewPortalCommand(editor, VIEW_TRACES)
             VIEW_LOGS.command -> handleViewPortalCommand(editor, VIEW_LOGS)

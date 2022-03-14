@@ -87,6 +87,7 @@ import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.log.Log
@@ -232,9 +233,9 @@ class PortalEventListener(
         }
         vertx.eventBus().consumer<ArtifactQualifiedName>(FindPortal) {
 //            val artifactQualifiedName = it.body()
-//            val sourceMarks = SourceMarker.getSourceMarks(artifactQualifiedName)
-//            if (sourceMarks.isNotEmpty()) {
-//                it.reply(sourceMarks[0].getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
+//            val portals = SourcePortal.getPortals(artifactQualifiedName)
+//            if (portals.isNotEmpty()) {
+//                it.reply(portals.first())
 //            } else {
 //                launch(vertx.dispatcher()) {
 //                    val classArtifact = findArtifact(
@@ -250,7 +251,8 @@ class PortalEventListener(
 //                        val gutterMark = creationService.getOrCreateMethodGutterMark(
 //                            fileMarker, searchArtifact.nameIdentifier!!
 //                        )!!
-//                        it.reply(gutterMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
+//                        println(gutterMark)
+//                        //it.reply(gutterMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!)
 //                    }
 //                }
 //            }
@@ -264,9 +266,9 @@ class PortalEventListener(
 //                    ApplicationManager.getApplication().invokeLater {
 //                        PsiNavigateUtil.navigate(sourceMark.getPsiElement())
 //
-//                        val portal = sourceMark.getUserData(SourceMarkKeys.SOURCE_PORTAL)!!
-//                        openPortal(portal)
-//                        it.reply(portal)
+//                        val portals = SourcePortal.getPortals(artifactQualifiedName)
+//                        openPortal(portals.first())
+//                        it.reply(portals.first())
 //                    }
 //                } else {
 //                    log.warn("Failed to find portal for artifact: $artifactQualifiedName")
