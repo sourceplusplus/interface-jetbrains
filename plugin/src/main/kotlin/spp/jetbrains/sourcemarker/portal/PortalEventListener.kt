@@ -21,8 +21,6 @@ import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.psi.PsiNameIdentifierOwner
-import com.intellij.util.PsiNavigateUtil
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.json.Json
@@ -37,9 +35,7 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarker.creationService
 import spp.jetbrains.marker.jvm.ArtifactNavigator
-import spp.jetbrains.marker.jvm.ArtifactSearch.findArtifact
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
@@ -90,7 +86,7 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
-import spp.protocol.artifact.ArtifactNameUtils
+import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.QueryTimeFrame
