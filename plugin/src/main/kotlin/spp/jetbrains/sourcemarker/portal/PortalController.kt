@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.portal.SourcePortal
 import spp.jetbrains.portal.backend.PortalServer
 import spp.jetbrains.portal.protocol.portal.PageType
@@ -35,7 +36,9 @@ import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.marshall.KSerializers
+import spp.protocol.marshall.LocalMessageCodec
 import javax.swing.UIManager
 
 class PortalController(private val markerConfig: SourceMarkerConfig) : CoroutineVerticle() {
@@ -54,9 +57,11 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         vertx.deployVerticle(portalServer).await()
         vertx.deployVerticle(PortalEventListener(markerConfig)).await()
 
+//        //todo: remove after v0.4.2
+//        vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
+
         SourceMarker.addGlobalSourceMarkEventListener {
-            if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
-                //todo: only register when needed
+            if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED && it.sourceMark is GutterMark) {
                 //register portal for source mark
                 val portal = SourcePortal.getPortal(
                     SourcePortal.register(it.sourceMark.artifactQualifiedName, false)
@@ -72,6 +77,7 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                 it.sourceMark.addEventListener {
                     if (it.eventCode == SourceMarkEventCode.UPDATE_PORTAL_CONFIG) {
                         when (val command = it.params.first() as LiveControlCommand) {
+                            VIEW_OVERVIEW -> portal.configuration.config["currentPage"] = PageType.OVERVIEW
                             VIEW_ACTIVITY -> portal.configuration.config["currentPage"] = PageType.ACTIVITY
                             VIEW_TRACES -> portal.configuration.config["currentPage"] = PageType.TRACES
                             VIEW_LOGS -> portal.configuration.config["currentPage"] = PageType.LOGS

@@ -34,6 +34,12 @@ enum class LiveControlCommand(
     val unselectedIcon: Icon? = null
 ) : AutocompleteFieldRow {
 
+    VIEW_OVERVIEW(
+        "View Overview",
+        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Overview ➛ Scope: Class</span></html>",
+        PluginIcons.Command.viewOverviewSelected,
+        PluginIcons.Command.viewOverviewUnSelected
+    ),
     VIEW_ACTIVITY(
         "View Activity",
         "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Activity ➛ Scope: Method</span></html>",
@@ -75,8 +81,8 @@ enum class LiveControlCommand(
     ADD_LIVE_LOG(
         "Add Log",
         "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
-        PluginIcons.Command.livelogSelected,
-        PluginIcons.Command.livelogUnSelected
+        PluginIcons.Command.liveLogSelected,
+        PluginIcons.Command.liveLogUnSelected
     ),
     ADD_LIVE_METER(
         "Add Meter",
