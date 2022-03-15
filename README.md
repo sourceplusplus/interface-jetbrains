@@ -12,7 +12,13 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 <!-- Plugin description end -->
 
-# Live Views
+# How to use?
+
+Todo
+
+# Commands
+
+## Live Views
 
 **Live View** commands utilize existing SkyWalking metrics to display live production data directly inside of your IDE.
 
@@ -51,7 +57,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
   
 </details>
 
-# Live Instruments
+## Live Instruments
 
 **Live Instrument** commands require a [Live Probe](https://github.com/sourceplusplus/probe-jvm) to inject additional metrics for live production debugging.
 
