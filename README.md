@@ -48,7 +48,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 # Live Instruments
 
-**Live Instrument** commands require a [Live Probe](#) to inject additional metrics into your code for live debugging.
+**Live Instrument** commands require a [Live Probe](https://github.com/sourceplusplus/probe-jvm) to inject additional metrics into your code for live debugging.
 
 ## Live Breakpoint
 
