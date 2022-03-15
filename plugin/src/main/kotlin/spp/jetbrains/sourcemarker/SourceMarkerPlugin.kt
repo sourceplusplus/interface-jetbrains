@@ -79,7 +79,7 @@ import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.jetbrains.sourcemarker.view.ActivityQuickStatsInlayHints
+import spp.jetbrains.sourcemarker.view.ActivityQuickStatsIndicator
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
@@ -448,7 +448,7 @@ object SourceMarkerPlugin {
     private fun initMarker(config: SourceMarkerConfig, project: Project) {
         log.info("Initializing marker")
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
-        SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsInlayHints())
+        SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator())
 
         val gutterMarkConfig = GutterMarkConfiguration()
         gutterMarkConfig.activateOnMouseHover = false

@@ -59,10 +59,10 @@ import java.time.temporal.ChronoUnit
  * Adds activity quick stats as inlay marks above recognized endpoint methods.
  * Uses a two-minute delay to ensure metrics have been fully collected.
  */
-class ActivityQuickStatsInlayHints : SourceMarkEventListener {
+class ActivityQuickStatsIndicator : SourceMarkEventListener {
 
     companion object {
-        private val log: Logger = LoggerFactory.getLogger(ActivityQuickStatsInlayHints::class.java)
+        private val log: Logger = LoggerFactory.getLogger(ActivityQuickStatsIndicator::class.java)
         private val inlayForegroundColor = JBColor(Color.decode("#3e464a"), Color.decode("#87939a"))
         val ACTIVITY_QUICK_STATS = SourceKey<Boolean>("ACTIVITY_QUICK_STATS")
     }
