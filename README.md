@@ -16,7 +16,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 Todo
 
-# Commands
+# Available Commands
 
 ## Live Views
 
