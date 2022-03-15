@@ -14,7 +14,8 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 # How to use?
 
-Todo
+Once installed, this plugin adds a command bar to the JetBrains IDE, which is accessible by pressing `Ctrl+Alt+S`.
+The commands available are determined by the location the command bar is opened and the accessibility of either [SkyWalking](https://github.com/apache/skywalking) or the [Live Platform](https://github.com/sourceplusplus/live-platform).
 
 # Available Commands
 
