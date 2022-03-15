@@ -8,7 +8,7 @@
 
 <!-- Plugin description -->
 
-This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/live-platform), the open-source live coding platform. This plugin also works for regular [SkyWalking](https://github.com/apache/skywalking) installations, but [Live Instrument](#live-instruments) commands will not be available.
+This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/live-platform), the open-source live coding platform. This plugin also works for regular [SkyWalking](https://github.com/apache/skywalking) installations, but only [Live View](#live-view) commands will be available.
 
 <!-- Plugin description end -->
 
