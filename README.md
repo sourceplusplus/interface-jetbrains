@@ -14,7 +14,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 # Live Views
 
-**Live View** commands utilize existing SkyWalking metrics to bring live data of your code to your IDE.
+**Live View** commands utilize existing SkyWalking metrics to display live production data directly inside of your IDE.
 
 <details>
   <summary><h3>Show Commands</h3></summary>
