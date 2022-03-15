@@ -19,7 +19,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 <details>
   <summary><b>Show Commands</b> &nbsp; 👈 &nbsp; <i>(click to expand)</i></summary>
 
-  ### Display Quick Stats
+  ### Show/Hide Quick Stats
 
   > Inlay hints which indicate an endpoint's current activity.
 
@@ -39,7 +39,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
   ![screencast](https://user-images.githubusercontent.com/3278877/158381411-214285ba-7291-4c70-8e1f-8489140fa239.gif)
   </details>
 
-  ### View Portal
+  ### Display Portal
 
   > Contextual popups for displaying live operational data on the code currently in view.
 
