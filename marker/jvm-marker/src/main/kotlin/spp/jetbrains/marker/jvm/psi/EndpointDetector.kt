@@ -105,7 +105,7 @@ class EndpointDetector(val vertx: Vertx) {
                 log.trace("Determining endpoint name")
                 val detectedEndpoint = determineEndpointName(sourceMark).await().orElse(null)
                 if (detectedEndpoint != null) {
-                    log.debug("Detected endpoint name: ${detectedEndpoint.name}")
+                    log.trace("Detected endpoint name: ${detectedEndpoint.name}")
                     sourceMark.putUserData(ENDPOINT_NAME, detectedEndpoint.name)
                     sourceMark.putUserData(ENDPOINT_INTERNAL, detectedEndpoint.internal)
 
@@ -125,9 +125,9 @@ class EndpointDetector(val vertx: Vertx) {
             val endpoint = EndpointBridge.searchExactEndpoint(endpointName, vertx)
             if (endpoint != null) {
                 sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
-                log.debug("Detected endpoint id: ${endpoint.id}")
+                log.trace("Detected endpoint id: ${endpoint.id}")
             } else {
-                log.debug("Could not find endpoint id for: $endpointName")
+                log.trace("Could not find endpoint id for: $endpointName")
             }
         } catch (ex: ReplyException) {
             if (ex.failureType() == ReplyFailure.TIMEOUT) {
