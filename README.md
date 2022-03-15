@@ -36,7 +36,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
   <details>
     <summary>Screencast</summary>
 
-    ![screencast](https://user-images.githubusercontent.com/3278877/158381411-214285ba-7291-4c70-8e1f-8489140fa239.gif)
+  ![screencast](https://user-images.githubusercontent.com/3278877/158381411-214285ba-7291-4c70-8e1f-8489140fa239.gif)
   </details>
 
   ### View Portal
@@ -46,7 +46,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
   <details>
     <summary>Screencast</summary>
 
-    ![screencast](https://user-images.githubusercontent.com/3278877/149158868-135568d5-20cc-44d4-886a-2202195b594b.gif)
+  ![screencast](https://user-images.githubusercontent.com/3278877/149158868-135568d5-20cc-44d4-886a-2202195b594b.gif)
   </details>
   
 </details>
@@ -65,7 +65,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
   <details>
     <summary>Screencast</summary>
 
-    ![live-breakpoint](https://user-images.githubusercontent.com/3278877/136304451-2c98ad30-032b-4ce0-9f37-f98cd750adb3.gif)
+  ![live-breakpoint](https://user-images.githubusercontent.com/3278877/136304451-2c98ad30-032b-4ce0-9f37-f98cd750adb3.gif)
   </details>
 
   ### Add Log
@@ -75,7 +75,7 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
   <details>
     <summary>Screencast</summary>
 
-    ![live-log](https://user-images.githubusercontent.com/3278877/136304738-d46c2796-4dd3-45a3-81bb-5692547c1c71.gif)
+  ![live-log](https://user-images.githubusercontent.com/3278877/136304738-d46c2796-4dd3-45a3-81bb-5692547c1c71.gif)
   </details>
 
 </details>
