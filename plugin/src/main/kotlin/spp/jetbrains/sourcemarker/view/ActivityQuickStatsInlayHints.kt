@@ -67,7 +67,6 @@ class ActivityQuickStatsInlayHints : SourceMarkEventListener {
         val ACTIVITY_QUICK_STATS = SourceKey<Boolean>("ACTIVITY_QUICK_STATS")
     }
 
-    //todo: wait till have all stats for minute before showing
     override fun handleEvent(event: SourceMarkEvent) {
         if (event.eventCode == SourceMarkEventCode.MARK_USER_DATA_UPDATED) {
             if (event.sourceMark.getUserData(EndpointDetector.ENDPOINT_ID) != null) {
