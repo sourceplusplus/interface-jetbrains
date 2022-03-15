@@ -29,16 +29,6 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
   ![screencast](https://user-images.githubusercontent.com/3278877/158376181-7fe597f9-f3c2-4609-bd07-4ea55e10b579.gif)
   </details>
 
-  ### View Portal
-
-  > Contextual popups for displaying live operational data on the code currently in view.
-
-  <details>
-    <summary>Screencast</summary>
-
-    ![screencast](https://user-images.githubusercontent.com/3278877/149158868-135568d5-20cc-44d4-886a-2202195b594b.gif)
-  </details>
-
   ### Watch Log
 
   > Follow specific logging statements in real-time.
@@ -47,6 +37,16 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
     <summary>Screencast</summary>
 
     ![screencast](https://user-images.githubusercontent.com/3278877/158381411-214285ba-7291-4c70-8e1f-8489140fa239.gif)
+  </details>
+
+  ### View Portal
+
+  > Contextual popups for displaying live operational data on the code currently in view.
+
+  <details>
+    <summary>Screencast</summary>
+
+    ![screencast](https://user-images.githubusercontent.com/3278877/149158868-135568d5-20cc-44d4-886a-2202195b594b.gif)
   </details>
   
 </details>
