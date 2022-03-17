@@ -51,6 +51,12 @@ interface ArtifactCreationService {
         autoApply: Boolean = false
     ): Optional<ExpressionInlayMark>
 
+    fun createMethodGutterMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): MethodGutterMark
+
     fun createMethodInlayMark(
         fileMarker: SourceFileMarker,
         element: PsiElement,
