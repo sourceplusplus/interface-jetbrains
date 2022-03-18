@@ -127,7 +127,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
         val serviceId: String? = null,
         val endpointId: String? = null,
         val zonedDuration: ZonedDuration,
-        val orderType: LogOrderType,
+        val orderType: LogOrderType = LogOrderType.NEWEST_LOGS,
         val pageNumber: Int = 1,
         val pageSize: Int = 10
     )
