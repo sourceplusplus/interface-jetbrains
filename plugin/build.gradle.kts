@@ -115,12 +115,14 @@ tasks {
         )
 
         // Get the latest available change notes from the changelog file
-        val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
-            .readText()
-            .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
-            .substringBefore("\n### ").substringBefore("\n## ")
-            .trim()
-        changeNotes.set(markdownToHTML(changelog))
+        changeNotes.set(project.provider {
+            val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
+                .readText()
+                .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
+                .substringBefore("\n### ").substringBefore("\n## ")
+                .trim()
+            markdownToHTML(changelog)
+        })
     }
 
     publishPlugin {
@@ -134,12 +136,14 @@ tasks {
 
 tasks {
     register("getPluginChangelog") {
-        val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
-            .readText()
-            .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
-            .substringBefore("\n### ").substringBefore("\n## ")
-            .trim()
-        println(changelog)
+        doFirst {
+            val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
+                .readText()
+                .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
+                .substringBefore("\n### ").substringBefore("\n## ")
+                .trim()
+            println(changelog)
+        }
     }
 
     test {
