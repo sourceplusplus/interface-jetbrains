@@ -80,7 +80,7 @@ object ControlBarController {
         val parentMark = inlayMark.getParentSourceMark()
         if (parentMark is MethodSourceMark) {
             val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
-            if (loggerDetector != null && SourceServices.Instance.liveView != null) {
+            if (loggerDetector != null) {
                 runBlocking {
                     val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
                     val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }

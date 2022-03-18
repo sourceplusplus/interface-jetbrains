@@ -40,6 +40,7 @@ import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.TrustOptions
+import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.servicediscovery.ServiceDiscovery
@@ -428,6 +429,12 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initMonitor(config: SourceMarkerConfig) {
+        var developer = "system"
+        if (config.serviceToken != null) {
+            val json = JWT.parse(config.serviceToken)
+            developer = json.getJsonObject("payload").getString("developer_id")
+        }
+
         val scheme = if (config.isSsl()) "https" else "http"
         val skywalkingHost = "$scheme://${config.serviceHostNormalized}:${config.getServicePortNormalized()}/graphql"
         val certificatePins = mutableListOf<String>()
@@ -435,7 +442,8 @@ object SourceMarkerPlugin {
         deploymentIds.add(
             vertx.deployVerticle(
                 SkywalkingMonitor(
-                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName
+                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName,
+                    developer
                 )
             ).await()
         )
