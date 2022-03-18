@@ -205,34 +205,10 @@ object ControlBarController {
     }
 
     private fun handleViewPortalCommand(editor: Editor, command: LiveControlCommand) {
-        var classSourceMark: ClassSourceMark? = null
-        val sourceMark = previousControlBar!!.sourceFileMarker.getSourceMarks().find {
-            if (it is ClassSourceMark) {
-                classSourceMark = it //todo: probably doesn't handle inner classes well
-                false
-            } else if (it is MethodSourceMark) {
-                if (it.configuration.activateOnKeyboardShortcut) {
-                    //+1 on end offset so match is made even right after method end
-                    val incTextRange = TextRange(
-                        it.getPsiMethod().textRange.startOffset,
-                        it.getPsiMethod().textRange.endOffset + 1
-                    )
-                    incTextRange.contains(editor.logicalPositionToOffset(editor.caretModel.logicalPosition))
-                } else {
-                    false
-                }
-            } else {
-                false
-            }
-        }
-
+        val sourceMark = SourceMarkSearch.getClosestSourceMark(previousControlBar!!.sourceFileMarker, editor)
         if (sourceMark != null) {
             sourceMark.triggerEvent(SourceMarkEvent(sourceMark, UPDATE_PORTAL_CONFIG, command)) {
                 sourceMark.triggerEvent(SourceMarkEvent(sourceMark, PORTAL_OPENING))
-            }
-        } else if (classSourceMark != null) {
-            classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, UPDATE_PORTAL_CONFIG, command)) {
-                classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, PORTAL_OPENING))
             }
         } else {
             log.warn("No source mark found for command: {}", command)
