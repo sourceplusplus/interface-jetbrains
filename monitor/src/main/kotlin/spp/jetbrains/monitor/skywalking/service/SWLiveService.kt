@@ -23,6 +23,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
+import spp.protocol.platform.auth.CommandType
 import spp.protocol.platform.auth.RolePermission
 import spp.protocol.platform.developer.Developer
 import spp.protocol.platform.developer.SelfInfo
@@ -37,7 +38,7 @@ class SWLiveService : CoroutineVerticle(), LiveService {
             SelfInfo(
                 Developer("system"),
                 emptyList(),
-                RolePermission.values().filter { it.name.startsWith("VIEW_") },
+                RolePermission.values().filter { it.commandType == CommandType.LIVE_VIEW },
                 emptyList()
             )
         )
@@ -53,6 +54,6 @@ class SWLiveService : CoroutineVerticle(), LiveService {
     }
 
     override fun getActiveProbes(): Future<List<ActiveInstance>> {
-        TODO("Not yet implemented")
+        return Future.failedFuture(UnsupportedOperationException("Not implemented"))
     }
 }

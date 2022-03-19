@@ -40,7 +40,6 @@ intellij {
 }
 tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
 tasks.getByName<JavaExec>("runIde") {
-    systemProperty("sourcemarker.debug.capture_logs", true)
     systemProperty("ide.enable.slow.operations.in.edt", false)
     systemProperty("ide.browser.jcef.contextMenu.devTools.enabled", true)
 }
@@ -115,12 +114,14 @@ tasks {
         )
 
         // Get the latest available change notes from the changelog file
-        val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
-            .readText()
-            .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
-            .substringBefore("\n### ").substringBefore("\n## ")
-            .trim()
-        changeNotes.set(markdownToHTML(changelog))
+        changeNotes.set(project.provider {
+            val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
+                .readText()
+                .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
+                .substringBefore("\n### ").substringBefore("\n## ")
+                .trim()
+            markdownToHTML(changelog)
+        })
     }
 
     publishPlugin {
@@ -134,12 +135,14 @@ tasks {
 
 tasks {
     register("getPluginChangelog") {
-        val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
-            .readText()
-            .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
-            .substringBefore("\n### ").substringBefore("\n## ")
-            .trim()
-        println(changelog)
+        doFirst {
+            val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
+                .readText()
+                .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
+                .substringBefore("\n### ").substringBefore("\n## ")
+                .trim()
+            println(changelog)
+        }
     }
 
     test {

@@ -28,7 +28,7 @@ import org.jetbrains.uast.java.JavaUSimpleNameReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinStringULiteralExpression
 import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinUSimpleReferenceExpression
-import org.jetbrains.uast.kotlin.expressions.KotlinUCollectionLiteralExpression
+import org.jooq.tools.reflect.Reflect
 import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.jvm.psi.EndpointDetector.DetectedEndpoint
 import java.util.*
@@ -206,12 +206,12 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             }
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
-            var value = if (endpointNameExpr is KotlinUCollectionLiteralExpression) {
-                endpointNameExpr.valueArguments[0].evaluate()
+            var value = if (endpointNameExpr?.javaClass?.simpleName?.equals("KotlinUCollectionLiteralExpression") == true) {
+                getField<List<UExpression>>(endpointNameExpr, "valueArguments")[0].evaluate()
             } else {
                 endpointNameExpr?.evaluate() ?: ""
             }
-            val valueArg = (methodExpr as KotlinUCollectionLiteralExpression).valueArguments[0]
+            val valueArg = getField<List<Any>>(methodExpr, "valueArguments")[0]
             val method = if (valueArg is KotlinUSimpleReferenceExpression) {
                 valueArg.resolvedName
             } else if (valueArg is KotlinUQualifiedReferenceExpression) {
@@ -224,8 +224,8 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
-            var value = if (valueExpr is KotlinUCollectionLiteralExpression) {
-                valueExpr.valueArguments[0].evaluate()
+            var value = if (valueExpr?.javaClass?.simpleName?.equals("KotlinUCollectionLiteralExpression") == true) {
+                getField<List<UExpression>>(valueExpr, "valueArguments")[0].evaluate()
             } else if (valueExpr != null) {
                 valueExpr.evaluate()
             } else {
@@ -276,8 +276,8 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
             if (valueExpr is UastEmptyExpression) valueExpr =
                 annotation.findAttributeValue("path") //todo: have to call this twice???
             if (valueExpr is UastEmptyExpression) valueExpr = null
-            var value = if (valueExpr is KotlinUCollectionLiteralExpression) {
-                valueExpr.valueArguments[0].evaluate()
+            var value = if (valueExpr?.javaClass?.simpleName?.equals("KotlinUCollectionLiteralExpression") == true) {
+                getField<List<UExpression>>(valueExpr, "valueArguments")[0].evaluate()
             } else if (valueExpr != null) {
                 valueExpr.evaluate()
             } else {
@@ -287,6 +287,22 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
                 .replace("Mapping", "").toUpperCase()
             if (value?.toString().isNullOrEmpty()) value = "/"
             return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
+        }
+    }
+
+    private fun <T> getField(value: Any, name: String): T {
+        val fields = Reflect.on(value).fields()
+        return if (fields.containsKey(name)) {
+            fields[name]!!.get()
+        } else if (fields.containsKey("$name\$delegate")) {
+            val value = fields["$name\$delegate"]!!.get<Any>()
+            return if (value is Lazy<*>) {
+                value.value as T
+            } else {
+                value as T
+            }
+        } else {
+            throw IllegalArgumentException("Field $name not found")
         }
     }
 }

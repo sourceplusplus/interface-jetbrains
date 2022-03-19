@@ -56,10 +56,6 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
         "java.lang.Float",
         "java.lang.Double"
     )
-    private val gsonPrimitives = setOf(
-        "java.math.BigInteger",
-        "java.lang.Date"
-    )
     private val scheme = DebuggerUIUtil.getColorScheme(null)
 
     override fun getChildren(): Array<SimpleNode> {
@@ -112,28 +108,15 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
             }
             presentation.setIcon(AllIcons.Debugger.Db_primitive)
         } else if (variable.liveClazz != null) {
-            if (variable.liveClazz == "java.lang.Class") {
-                presentation.addText(
-                    "{ " + variable.value.toString().substringAfterLast(".") + " }",
-                    SimpleTextAttributes.GRAYED_ATTRIBUTES
-                )
-                presentation.setIcon(AllIcons.Debugger.Value)
-            } else if (gsonPrimitives.contains(variable.liveClazz)) {
-                val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
-                val identity = variable.liveIdentity
-                presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
-                presentation.addText(" \"" + variable.value + "\"", SimpleTextAttributes.REGULAR_ATTRIBUTES)
-                presentation.setIcon(AllIcons.Debugger.Db_primitive)
+            val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
+            val identity = variable.liveIdentity
+            if (variable.presentation != null) {
+                presentation.addText("{ $simpleClassName@$identity } ", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+                presentation.addText("\"${variable.presentation}\"", SimpleTextAttributes.REGULAR_ATTRIBUTES)
             } else {
-                val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
-                val identity = variable.liveIdentity
-                if (variable.presentation != null) {
-                    presentation.addText("\"${variable.presentation}\"", SimpleTextAttributes.REGULAR_ATTRIBUTES)
-                } else {
-                    presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
-                }
-                presentation.setIcon(AllIcons.Debugger.Value)
+                presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
             }
+            presentation.setIcon(AllIcons.Debugger.Value)
         } else {
             if (variable.value is Number) {
                 presentation.addText(

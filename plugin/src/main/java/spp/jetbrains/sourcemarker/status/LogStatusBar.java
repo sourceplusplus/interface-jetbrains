@@ -60,6 +60,7 @@ import java.awt.event.WindowEvent;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -166,6 +167,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             configDropdownLabel.setVisible(false);
             displayTimeField();
             addExpandButton();
+            initCommandModel();
         } else {
             LiveStatusManager.addStatusBar(inlayMark, this);
             showEditableMode();
@@ -187,20 +189,29 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     }
 
     private void initCommandModel() {
-        List logData = LiveStatusManager.INSTANCE.getLogData(inlayMark);
-        if (logData.isEmpty()) {
+        if (watchExpression) {
             liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
+            commandModel = new ListTableModel(
+                    new ColumnInfo[]{
+                            new LogHitColumnInfo(MESSAGE),
+                            new LogHitColumnInfo(TIME)
+                    }, new ArrayList<>(), 0, SortOrder.DESCENDING);
         } else {
-            LiveInstrumentEvent event = (LiveInstrumentEvent) logData.get(0);
-            LiveLogHit logHit = Json.decodeValue(event.getData(), LiveLogHit.class);
-            Instant logTime = ((kotlinx.datetime.Instant) logHit.getOccurredAt()).getValue$kotlinx_datetime();
-            setLatestLog(logTime, logHit.getLogResult().getLogs().get(0));
+            List logData = LiveStatusManager.INSTANCE.getLogData(inlayMark);
+            if (logData.isEmpty()) {
+                liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
+            } else {
+                LiveInstrumentEvent event = (LiveInstrumentEvent) logData.get(0);
+                LiveLogHit logHit = Json.decodeValue(event.getData(), LiveLogHit.class);
+                Instant logTime = ((kotlinx.datetime.Instant) logHit.getOccurredAt()).getValue$kotlinx_datetime();
+                setLatestLog(logTime, logHit.getLogResult().getLogs().get(0));
+            }
+            commandModel = new ListTableModel(
+                    new ColumnInfo[]{
+                            new LogHitColumnInfo(MESSAGE),
+                            new LogHitColumnInfo(TIME)
+                    }, logData, 0, SortOrder.DESCENDING);
         }
-        commandModel = new ListTableModel(
-                new ColumnInfo[]{
-                        new LogHitColumnInfo(MESSAGE),
-                        new LogHitColumnInfo(TIME)
-                }, logData, 0, SortOrder.DESCENDING);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {

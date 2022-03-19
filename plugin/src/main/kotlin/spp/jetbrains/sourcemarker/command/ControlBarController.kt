@@ -19,14 +19,13 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker.creationService
+import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
@@ -37,7 +36,9 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
+import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
+import spp.jetbrains.sourcemarker.view.ActivityQuickStatsIndicator
 import spp.protocol.SourceServices
 import spp.protocol.instrument.LiveInstrumentType.*
 import java.awt.BorderLayout
@@ -68,7 +69,7 @@ object ControlBarController {
             @Suppress("UselessCallOnCollection") //unknown enums are null
             selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
         })
-        //availableCommands.add(VIEW_OVERVIEW) //todo: remove after v0.4.2
+        //availableCommands.add(VIEW_OVERVIEW) //todo: remove after v0.4.3
     }
 
     private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
@@ -76,11 +77,13 @@ object ControlBarController {
             runBlocking { syncAvailableCommands() }
         }
 
-        val availableCommandsAtLocation = availableCommands.toMutableList()
+        val availableCommandsAtLocation = availableCommands.toMutableSet()
+        availableCommandsAtLocation.remove(SHOW_QUICK_STATS)
+
         val parentMark = inlayMark.getParentSourceMark()
         if (parentMark is MethodSourceMark) {
             val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
-            if (loggerDetector != null && SourceServices.Instance.liveView != null) {
+            if (loggerDetector != null) {
                 runBlocking {
                     val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
                     val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
@@ -89,13 +92,27 @@ object ControlBarController {
                     }
                 }
             }
+
+            if (parentMark.getUserData(EndpointDetector.ENDPOINT_ID) != null) {
+                val existingQuickStats = parentMark.sourceFileMarker.getSourceMarks().find {
+                    it.artifactQualifiedName == parentMark.artifactQualifiedName
+                            && it.getUserData(ActivityQuickStatsIndicator.SHOWING_QUICK_STATS) == true
+                }
+                if (existingQuickStats == null) {
+                    availableCommandsAtLocation.add(SHOW_QUICK_STATS)
+                } else {
+                    availableCommandsAtLocation.add(HIDE_QUICK_STATS)
+                }
+            }
         }
-        return availableCommandsAtLocation
+        return availableCommandsAtLocation.toList()
     }
 
     fun handleCommandInput(input: String, editor: Editor) {
         log.info("Processing command input: {}", input)
         when (input) {
+            SHOW_QUICK_STATS.command -> handleQuickStatsCommand(editor, SHOW_QUICK_STATS)
+            HIDE_QUICK_STATS.command -> handleQuickStatsCommand(editor, HIDE_QUICK_STATS)
             VIEW_OVERVIEW.command -> handleViewPortalCommand(editor, VIEW_OVERVIEW)
             VIEW_ACTIVITY.command -> handleViewPortalCommand(editor, VIEW_ACTIVITY)
             VIEW_TRACES.command -> handleViewPortalCommand(editor, VIEW_TRACES)
@@ -204,35 +221,23 @@ object ControlBarController {
         }
     }
 
-    private fun handleViewPortalCommand(editor: Editor, command: LiveControlCommand) {
-        var classSourceMark: ClassSourceMark? = null
-        val sourceMark = previousControlBar!!.sourceFileMarker.getSourceMarks().find {
-            if (it is ClassSourceMark) {
-                classSourceMark = it //todo: probably doesn't handle inner classes well
-                false
-            } else if (it is MethodSourceMark) {
-                if (it.configuration.activateOnKeyboardShortcut) {
-                    //+1 on end offset so match is made even right after method end
-                    val incTextRange = TextRange(
-                        it.getPsiMethod().textRange.startOffset,
-                        it.getPsiMethod().textRange.endOffset + 1
-                    )
-                    incTextRange.contains(editor.logicalPositionToOffset(editor.caretModel.logicalPosition))
-                } else {
-                    false
-                }
-            } else {
-                false
-            }
+    private fun handleQuickStatsCommand(editor: Editor, command: LiveControlCommand) {
+        val sourceMark = SourceMarkSearch.getClosestSourceMark(previousControlBar!!.sourceFileMarker, editor)
+        if (sourceMark != null) {
+            sourceMark.triggerEvent(CUSTOM_EVENT, listOf(command))
+        } else {
+            log.warn("No source mark found for command: {}", command)
         }
 
+        previousControlBar!!.dispose()
+        previousControlBar = null
+    }
+
+    private fun handleViewPortalCommand(editor: Editor, command: LiveControlCommand) {
+        val sourceMark = SourceMarkSearch.getClosestSourceMark(previousControlBar!!.sourceFileMarker, editor)
         if (sourceMark != null) {
             sourceMark.triggerEvent(SourceMarkEvent(sourceMark, UPDATE_PORTAL_CONFIG, command)) {
                 sourceMark.triggerEvent(SourceMarkEvent(sourceMark, PORTAL_OPENING))
-            }
-        } else if (classSourceMark != null) {
-            classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, UPDATE_PORTAL_CONFIG, command)) {
-                classSourceMark!!.triggerEvent(SourceMarkEvent(classSourceMark!!, PORTAL_OPENING))
             }
         } else {
             log.warn("No source mark found for command: {}", command)

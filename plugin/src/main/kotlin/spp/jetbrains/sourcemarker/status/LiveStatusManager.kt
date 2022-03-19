@@ -23,6 +23,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker.creationService
@@ -37,6 +38,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
@@ -50,11 +52,13 @@ import spp.jetbrains.sourcemarker.service.ViewEventListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.util.CircularList
 import spp.protocol.SourceServices
+import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*
 import spp.protocol.instrument.meter.MeterType
 import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewEvent
 import spp.protocol.view.LiveViewSubscription
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -81,7 +85,7 @@ object LiveStatusManager : SourceMarkEventListener {
         when (event.eventCode) {
             SourceMarkEventCode.MARK_ADDED -> {
                 if (event.sourceMark !is MethodSourceMark) return
-                //todo: shouldn't need to wait for method mark added to add inlay marks
+                //todo: shouldn't need to wait for method mark added to add inlay/gutter marks
                 //  should have events that just mean a method is visible
 
                 ApplicationManager.getApplication().runReadAction {
@@ -172,6 +176,21 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val config = Json.decodeValue(
+                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
+                SourceMarkerConfig::class.java
+            )
+            val statusBar = LogStatusBar(
+                LiveSourceLocation(
+                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier,
+                    lineNumber,
+                    service = config.serviceName
+                ),
+                if (watchExpression) emptyList() else scopeService.getScopeVariables(fileMarker, lineNumber),
+                inlayMark,
+                watchExpression
+            )
+
             if (watchExpression) {
                 val logPatterns = mutableListOf<String>()
                 val parentMark = inlayMark.getParentSourceMark()
@@ -207,6 +226,9 @@ object LiveStatusManager : SourceMarkEventListener {
                     if (it.succeeded()) {
                         val subscriptionId = it.result().subscriptionId!!
                         inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
+                        vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
+                            statusBar.accept(Json.decodeValue(it.body().toString(), LiveViewEvent::class.java))
+                        }
                         inlayMark.addEventListener { event ->
                             if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
                                 SourceServices.Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
@@ -218,20 +240,6 @@ object LiveStatusManager : SourceMarkEventListener {
                 }
             }
 
-            val config = Json.decodeValue(
-                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
-                SourceMarkerConfig::class.java
-            )
-            val statusBar = LogStatusBar(
-                LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier,
-                    lineNumber,
-                    service = config.serviceName
-                ),
-                if (watchExpression) emptyList() else scopeService.getScopeVariables(fileMarker, lineNumber),
-                inlayMark,
-                watchExpression
-            )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)

@@ -87,7 +87,6 @@ import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.log.Log
@@ -295,41 +294,42 @@ class PortalEventListener(
             }
 
             //update subscriptions
-            if (Instance.liveView != null) {
-                launch(vertx.dispatcher()) {
-                    val sourceMark = SourceMarker.getSourceMark(
-                        portal.viewingArtifact, SourceMark.Type.GUTTER
-                    ) ?: return@launch
-                    val endpointName = sourceMark.getUserData(
-                        ENDPOINT_DETECTOR
-                    )?.getOrFindEndpointName(sourceMark) ?: return@launch
+            launch(vertx.dispatcher()) {
+                val sourceMark = SourceMarker.getSourceMark(
+                    portal.viewingArtifact, SourceMark.Type.GUTTER
+                ) ?: return@launch
+                val endpointName = sourceMark.getUserData(
+                    ENDPOINT_DETECTOR
+                )?.getOrFindEndpointName(sourceMark) ?: return@launch
+                val endpointId = sourceMark.getUserData(
+                    ENDPOINT_DETECTOR
+                )?.getOrFindEndpointId(sourceMark) ?: return@launch
 
-                    Instance.liveView!!.addLiveViewSubscription(
-                        LiveViewSubscription(
-                            null,
-                            listOf(endpointName),
-                            portal.viewingArtifact,
-                            LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                            LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
-                        )
-                    ).onComplete {
-                        if (it.succeeded()) {
-                            val subscriptionId = it.result().subscriptionId!!
-                            if (portal.configuration.config["subscriptionId"] != null) {
-                                Instance.liveView!!.removeLiveViewSubscription(
-                                    portal.configuration.config["subscriptionId"].toString()
-                                )
-                            }
-                            portal.configuration.config["subscriptionId"] = subscriptionId
-
-                            sourceMark.addEventListener {
-                                if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
-                                    Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
-                                }
-                            }
-                        } else {
-                            log.error("Failed to add live view subscription", it.cause())
+                Instance.liveView!!.addLiveViewSubscription(
+                    LiveViewSubscription(
+                        null,
+                        listOf(endpointName),
+                        portal.viewingArtifact.copy(operationName = endpointId), //todo: only SWLiveViewService uses
+                        LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
+                        LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
+                    )
+                ).onComplete {
+                    if (it.succeeded()) {
+                        val subscriptionId = it.result().subscriptionId!!
+                        if (portal.configuration.config["subscriptionId"] != null) {
+                            Instance.liveView!!.removeLiveViewSubscription(
+                                portal.configuration.config["subscriptionId"].toString()
+                            )
                         }
+                        portal.configuration.config["subscriptionId"] = subscriptionId
+
+                        sourceMark.addEventListener {
+                            if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
+                                Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
+                            }
+                        }
+                    } else {
+                        log.error("Failed to add live view subscription", it.cause())
                     }
                 }
             }
@@ -342,41 +342,42 @@ class PortalEventListener(
             }
 
             //update subscriptions
-            if (Instance.liveView != null) {
-                launch(vertx.dispatcher()) {
-                    val sourceMark = SourceMarker.getSourceMark(
-                        portal.viewingArtifact, SourceMark.Type.GUTTER
-                    ) ?: return@launch
-                    val endpointName = sourceMark.getUserData(
-                        ENDPOINT_DETECTOR
-                    )?.getOrFindEndpointName(sourceMark) ?: return@launch
+            launch(vertx.dispatcher()) {
+                val sourceMark = SourceMarker.getSourceMark(
+                    portal.viewingArtifact, SourceMark.Type.GUTTER
+                ) ?: return@launch
+                val endpointName = sourceMark.getUserData(
+                    ENDPOINT_DETECTOR
+                )?.getOrFindEndpointName(sourceMark) ?: return@launch
+                val endpointId = sourceMark.getUserData(
+                    ENDPOINT_DETECTOR
+                )?.getOrFindEndpointId(sourceMark) ?: return@launch
 
-                    Instance.liveView!!.addLiveViewSubscription(
-                        LiveViewSubscription(
-                            null,
-                            listOf(endpointName),
-                            portal.viewingArtifact,
-                            LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                            LiveViewConfig("TRACES", listOf("endpoint_traces"))
-                        )
-                    ).onComplete {
-                        if (it.succeeded()) {
-                            val subscriptionId = it.result().subscriptionId!!
-                            if (portal.configuration.config["subscriptionId"] != null) {
-                                Instance.liveView!!.removeLiveViewSubscription(
-                                    portal.configuration.config["subscriptionId"].toString()
-                                )
-                            }
-                            portal.configuration.config["subscriptionId"] = subscriptionId
-
-                            sourceMark.addEventListener {
-                                if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
-                                    Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
-                                }
-                            }
-                        } else {
-                            log.error("Failed to add live view subscription", it.cause())
+                Instance.liveView!!.addLiveViewSubscription(
+                    LiveViewSubscription(
+                        null,
+                        listOf(endpointName),
+                        portal.viewingArtifact.copy(operationName = endpointId), //todo: only SWLiveViewService uses
+                        LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
+                        LiveViewConfig("TRACES", listOf("endpoint_traces"))
+                    )
+                ).onComplete {
+                    if (it.succeeded()) {
+                        val subscriptionId = it.result().subscriptionId!!
+                        if (portal.configuration.config["subscriptionId"] != null) {
+                            Instance.liveView!!.removeLiveViewSubscription(
+                                portal.configuration.config["subscriptionId"].toString()
+                            )
                         }
+                        portal.configuration.config["subscriptionId"] = subscriptionId
+
+                        sourceMark.addEventListener {
+                            if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
+                                Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
+                            }
+                        }
+                    } else {
+                        log.error("Failed to add live view subscription", it.cause())
                     }
                 }
             }
@@ -389,50 +390,48 @@ class PortalEventListener(
             }
 
             //update subscriptions
-            if (Instance.liveView != null) {
-                launch(vertx.dispatcher()) {
-                    val sourceMark = SourceMarker.getSourceMark(
-                        portal.viewingArtifact, SourceMark.Type.GUTTER
-                    ) ?: return@launch
-                    val logPatterns = if (sourceMark is ClassSourceMark) {
-                        sourceMark.sourceFileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
-                            .flatMap {
-                                it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
-                                    .getOrFindLoggerStatements(it)
-                            }.map { it.logPattern }
-                    } else if (sourceMark is MethodSourceMark) {
-                        sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
-                            .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
-                    } else {
-                        throw IllegalStateException("Unsupported source mark type")
-                    }
+            launch(vertx.dispatcher()) {
+                val sourceMark = SourceMarker.getSourceMark(
+                    portal.viewingArtifact, SourceMark.Type.GUTTER
+                ) ?: return@launch
+                val logPatterns = if (sourceMark is ClassSourceMark) {
+                    sourceMark.sourceFileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
+                        .flatMap {
+                            it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                                .getOrFindLoggerStatements(it)
+                        }.map { it.logPattern }
+                } else if (sourceMark is MethodSourceMark) {
+                    sourceMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                        .getOrFindLoggerStatements(sourceMark).map { it.logPattern }
+                } else {
+                    throw IllegalStateException("Unsupported source mark type")
+                }
 
-                    Instance.liveView!!.addLiveViewSubscription(
-                        LiveViewSubscription(
-                            null,
-                            logPatterns,
-                            portal.viewingArtifact,
-                            LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                            LiveViewConfig("LOGS", listOf("endpoint_logs"))
-                        )
-                    ).onComplete {
-                        if (it.succeeded()) {
-                            val subscriptionId = it.result().subscriptionId!!
-                            if (portal.configuration.config["subscriptionId"] != null) {
-                                Instance.liveView!!.removeLiveViewSubscription(
-                                    portal.configuration.config["subscriptionId"].toString()
-                                )
-                            }
-                            portal.configuration.config["subscriptionId"] = subscriptionId
-
-                            sourceMark.addEventListener {
-                                if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
-                                    Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
-                                }
-                            }
-                        } else {
-                            log.error("Failed to add live view subscription", it.cause())
+                Instance.liveView!!.addLiveViewSubscription(
+                    LiveViewSubscription(
+                        null,
+                        logPatterns,
+                        portal.viewingArtifact,
+                        LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
+                        LiveViewConfig("LOGS", listOf("endpoint_logs"))
+                    )
+                ).onComplete {
+                    if (it.succeeded()) {
+                        val subscriptionId = it.result().subscriptionId!!
+                        if (portal.configuration.config["subscriptionId"] != null) {
+                            Instance.liveView!!.removeLiveViewSubscription(
+                                portal.configuration.config["subscriptionId"].toString()
+                            )
                         }
+                        portal.configuration.config["subscriptionId"] = subscriptionId
+
+                        sourceMark.addEventListener {
+                            if (it.eventCode == SourceMarkEventCode.PORTAL_CLOSED) {
+                                Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
+                            }
+                        }
+                    } else {
+                        log.error("Failed to add live view subscription", it.cause())
                     }
                 }
             }
@@ -485,101 +484,89 @@ class PortalEventListener(
         if (sourceMark != null && sourceMark is MethodSourceMark) {
             val endpointId = sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
             if (endpointId != null) {
-                launch(vertx.dispatcher()) {
-                    val traceResult = EndpointTracesBridge.getTraces(
-                        GetEndpointTraces(
-                            artifactQualifiedName = portal.viewingArtifact,
-                            endpointId = endpointId,
-                            zonedDuration = ZonedDuration(
-                                ZonedDateTime.now().minusHours(24),
-                                ZonedDateTime.now(),
-                                SkywalkingClient.DurationStep.MINUTE
-                            ),
-                            orderType = portal.tracesView.orderType,
-                            pageSize = portal.tracesView.viewTraceAmount,
-                            pageNumber = portal.tracesView.pageNumber
-                        ), vertx
-                    )
-
-                    handleTraceResult(traceResult, portal, portal.viewingArtifact)
-                }
+                val traceResult = EndpointTracesBridge.getTraces(
+                    GetEndpointTraces(
+                        artifactQualifiedName = portal.viewingArtifact,
+                        endpointId = endpointId,
+                        zonedDuration = ZonedDuration(
+                            ZonedDateTime.now().minusHours(24),
+                            ZonedDateTime.now(),
+                            SkywalkingClient.DurationStep.MINUTE
+                        ),
+                        orderType = portal.tracesView.orderType,
+                        pageSize = portal.tracesView.viewTraceAmount,
+                        pageNumber = portal.tracesView.pageNumber
+                    ), vertx
+                )
+                vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
+                autoResolveEndpointNamesIfNecessary(traceResult, portal)
             }
         }
     }
 
-    private fun handleTraceResult(
-        traceResult: TraceResult,
-        portal: SourcePortal,
-        artifactQualifiedName: ArtifactQualifiedName
-    ) {
-        //todo: rename {GET} to [GET] in skywalking
+    private suspend fun autoResolveEndpointNamesIfNecessary(traceResult: TraceResult, portal: SourcePortal) {
         if (markerConfig.autoResolveEndpointNames) {
-            launch(vertx.dispatcher()) {
-                //todo: only try to auto resolve endpoint names with dynamic ids
-                //todo: support multiple operationsNames/traceIds
-                traceResult.traces.forEach {
-                    if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
-                        val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
-                        val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
-                        if (entrySpan != null) {
-                            val url = entrySpan.tags["url"]
-                            val httpMethod = entrySpan.tags["http.method"]
-                            if (url != null && httpMethod != null) {
-                                val updatedEndpointName = "{$httpMethod}${URI(url).path}"
-                                vertx.eventBus().send(
-                                    TraceSpanUpdated, entrySpan.copy(
-                                        endpointName = updatedEndpointName,
-                                        artifactQualifiedName = artifactQualifiedName
-                                    )
+            //todo: only try to auto resolve endpoint names with dynamic ids
+            //todo: support multiple operationsNames/traceIds
+            traceResult.traces.forEach {
+                if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
+                    val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
+                    val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
+                    if (entrySpan != null) {
+                        val url = entrySpan.tags["url"]
+                        val httpMethod = entrySpan.tags["http.method"]
+                        if (url != null && httpMethod != null) {
+                            val updatedEndpointName = "$httpMethod:${URI(url).path}"
+                            vertx.eventBus().send(
+                                TraceSpanUpdated, entrySpan.copy(
+                                    endpointName = updatedEndpointName,
+                                    artifactQualifiedName = portal.viewingArtifact
                                 )
-                            }
+                            )
                         }
                     }
                 }
             }
         }
-        vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
     }
 
     private suspend fun pullLatestLogs(portal: SourcePortal) {
         if (log.isTraceEnabled) log.trace("Refreshing logs. Portal: {}", portal.portalUuid)
         val sourceMark = SourceMarker.getSourceMark(portal.viewingArtifact, SourceMark.Type.GUTTER)
-        launch(vertx.dispatcher()) {
-            val logsResult = LogsBridge.queryLogs(
-                GetEndpointLogs(
-                    endpointId = if (sourceMark is MethodSourceMark) {
-                        sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
-                    } else null,
-                    zonedDuration = ZonedDuration(
-                        ZonedDateTime.now().minusMinutes(15), //todo: method filtering in skywalking
-                        ZonedDateTime.now(),
-                        SkywalkingClient.DurationStep.MINUTE
-                    ),
-                    orderType = portal.logsView.orderType,
-                    pageSize = portal.logsView.viewLogAmount * 25, //todo: method filtering in skywalking
-                    pageNumber = portal.logsView.pageNumber
-                ), vertx
-            )
-            if (logsResult.succeeded()) {
-                //todo: impl method filtering in skywalking
-                for ((content, logs) in logsResult.result().logs.groupBy { it.content }) {
-                    SourceMarkSearch.findInheritedSourceMarks(content).forEach {
-                        vertx.eventBus().send(
-                            ArtifactLogUpdated, logsResult.result().copy(
-                                artifactQualifiedName = it.artifactQualifiedName,
-                                total = logs.size,
-                                logs = logs,
-                            )
+        val logsResult = LogsBridge.queryLogs(
+            GetEndpointLogs(
+                endpointId = if (sourceMark is MethodSourceMark) {
+                    sourceMark.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(sourceMark)
+                } else null,
+                zonedDuration = ZonedDuration(
+                    ZonedDateTime.now().minusMinutes(15), //todo: method filtering in skywalking
+                    ZonedDateTime.now(),
+                    SkywalkingClient.DurationStep.MINUTE
+                ),
+                orderType = portal.logsView.orderType,
+                pageSize = portal.logsView.viewLogAmount * 25, //todo: method filtering in skywalking
+                pageNumber = portal.logsView.pageNumber
+            ), vertx
+        )
+        if (logsResult.succeeded()) {
+            //todo: impl method filtering in skywalking
+            for ((content, logs) in logsResult.result().logs.groupBy { it.content }) {
+                SourceMarkSearch.findInheritedSourceMarks(content).forEach {
+                    vertx.eventBus().send(
+                        ArtifactLogUpdated, logsResult.result().copy(
+                            artifactQualifiedName = it.artifactQualifiedName,
+                            total = logs.size,
+                            logs = logs,
                         )
-                    }
+                    )
                 }
+            }
+        } else {
+            val replyException = logsResult.cause() as ReplyException
+            if (replyException.failureCode() == 404) {
+                log.warn("Failed to fetch logs. Service(s) unavailable")
             } else {
-                val replyException = logsResult.cause() as ReplyException
-                if (replyException.failureCode() == 404) {
-                    log.warn("Failed to fetch logs. Service(s) unavailable")
-                } else {
-                    log.error("Failed to fetch logs", logsResult.cause())
-                }
+                log.error("Failed to fetch logs", logsResult.cause())
             }
         }
     }
@@ -745,17 +732,23 @@ class PortalEventListener(
         )
         vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
 
+        //S++ adds trace meta to avoid additional query for auto-resolve endpoints
         val url = trace.meta["url"]
         val httpMethod = trace.meta["http.method"]
-        if (url != null && httpMethod != null) {
+        val entrySpanJson = trace.meta["entrySpan"]
+        if (url != null && httpMethod != null && entrySpanJson != null) {
             val updatedEndpointName = "$httpMethod:${URI(url).path}"
-            val entrySpan = Json.decodeValue(trace.meta["entrySpan"], TraceSpan::class.java)
+            val entrySpan = Json.decodeValue(entrySpanJson, TraceSpan::class.java)
             vertx.eventBus().send(
                 TraceSpanUpdated, entrySpan.copy(
                     endpointName = updatedEndpointName,
                     artifactQualifiedName = event.artifactQualifiedName
                 )
             )
+        } else {
+            launch(vertx.dispatcher()) {
+                autoResolveEndpointNamesIfNecessary(traceResult, portal)
+            }
         }
     }
 

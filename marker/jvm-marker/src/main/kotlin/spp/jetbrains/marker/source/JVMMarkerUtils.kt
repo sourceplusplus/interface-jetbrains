@@ -29,6 +29,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
+import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -312,6 +313,37 @@ object JVMMarkerUtils {
     /**
      * todo: description.
      *
+     * @since 0.4.3
+     */
+    @JvmStatic
+    @JvmOverloads
+    @Synchronized
+    fun createMethodGutterMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): MethodGutterMark {
+        log.trace("createMethodGutterMark: $element")
+        val gutterMark = fileMarker.createMethodSourceMark(
+            element.parent as PsiNameIdentifierOwner,
+            getFullyQualifiedName(element.parent.toUElement() as UMethod),
+            SourceMark.Type.GUTTER
+        ) as MethodGutterMark
+        return if (autoApply) {
+            if (gutterMark.canApply()) {
+                gutterMark.apply(true)
+                gutterMark
+            } else {
+                throw IllegalStateException("Could not apply gutter mark: $gutterMark")
+            }
+        } else {
+            gutterMark
+        }
+    }
+
+    /**
+     * todo: description.
+     *
      * @since 0.4.2
      */
     @JvmStatic
@@ -339,7 +371,6 @@ object JVMMarkerUtils {
             inlayMark
         }
     }
-
 
     /**
      * todo: description.

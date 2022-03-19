@@ -17,7 +17,11 @@
  */
 package spp.jetbrains.sourcemarker.mark
 
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.util.TextRange
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -31,6 +35,30 @@ import spp.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkSearch {
+
+    fun getClosestSourceMark(sourceFileMarker: SourceFileMarker, editor: Editor): SourceMark? {
+        var classSourceMark: ClassSourceMark? = null
+        val sourceMark = sourceFileMarker.getSourceMarks().find {
+            if (it is ClassSourceMark) {
+                classSourceMark = it //todo: probably doesn't handle inner classes well
+                false
+            } else if (it is MethodSourceMark) {
+                if (it.configuration.activateOnKeyboardShortcut) {
+                    //+1 on end offset so match is made even right after method end
+                    val incTextRange = TextRange(
+                        it.getPsiMethod().textRange.startOffset,
+                        it.getPsiMethod().textRange.endOffset + 1
+                    )
+                    incTextRange.contains(editor.logicalPositionToOffset(editor.caretModel.logicalPosition))
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        }
+        return sourceMark ?: classSourceMark
+    }
 
     fun findByEndpointName(endpointName: String): SourceMark? {
         return SourceMarker.getSourceMarks().firstOrNull {

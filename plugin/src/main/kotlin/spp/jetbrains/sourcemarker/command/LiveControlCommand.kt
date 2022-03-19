@@ -58,6 +58,18 @@ enum class LiveControlCommand(
         PluginIcons.Command.viewLogsSelected,
         PluginIcons.Command.viewLogsUnSelected
     ),
+    SHOW_QUICK_STATS(
+        "Show Quick Stats",
+        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Quick Stats ➛ Scope: </span><span style=\"font-size: 80%; color: #E6E6E6\">Endpoint</span></html>",
+        PluginIcons.Command.viewActivitySelected,
+        PluginIcons.Command.viewActivityUnSelected
+    ),
+    HIDE_QUICK_STATS(
+        "Hide Quick Stats",
+        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Quick Stats ➛ Scope: </span><span style=\"font-size: 80%; color: #E6E6E6\">Endpoint</span></html>",
+        PluginIcons.Command.viewActivitySelected,
+        PluginIcons.Command.viewActivityUnSelected
+    ),
     WATCH_LOG(
         "Watch Log",
         "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Log ➛ Scope: </span><span style=\"font-size: 80%; color: #E6E6E6\">Expression</span></html>",

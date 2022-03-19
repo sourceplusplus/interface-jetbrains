@@ -25,7 +25,7 @@ package spp.jetbrains.sourcemarker.settings
  */
 data class SourceMarkerConfig(
     var rootSourcePackages: List<String> = emptyList(),
-    var autoResolveEndpointNames: Boolean = false,
+    var autoResolveEndpointNames: Boolean = true,
     var localMentorEnabled: Boolean = true,
     var pluginConsoleEnabled: Boolean = false,
     var serviceHost: String? = null,
@@ -33,7 +33,8 @@ data class SourceMarkerConfig(
     var certificatePins: List<String> = emptyList(),
     var serviceToken: String? = null,
     var verifyHost: Boolean = true,
-    val serviceName: String? = null
+    val serviceName: String? = null,
+    var autoDisplayEndpointQuickStats: Boolean = true,
 ) {
     companion object {
         const val DEFAULT_SERVICE_PORT = 5445

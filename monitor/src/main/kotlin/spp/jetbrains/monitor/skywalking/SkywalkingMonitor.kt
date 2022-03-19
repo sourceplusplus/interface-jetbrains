@@ -28,6 +28,7 @@ import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.service.SWLiveService
+import spp.jetbrains.monitor.skywalking.service.SWLiveViewService
 import spp.protocol.SourceServices
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -46,7 +47,8 @@ class SkywalkingMonitor(
     private val jwtToken: String? = null,
     private val certificatePins: List<String> = emptyList(),
     private val verifyHost: Boolean,
-    private val currentService: String? = null
+    private val currentService: String? = null,
+    private val developerId: String = "system"
 ) : CoroutineVerticle() {
 
     companion object {
@@ -120,6 +122,11 @@ class SkywalkingMonitor(
                 val swLiveService = SWLiveService()
                 vertx.deployVerticle(swLiveService).await()
                 SourceServices.Instance.liveService = swLiveService
+            }
+            if (SourceServices.Instance.liveView == null) {
+                val swLiveViewService = SWLiveViewService(developerId)
+                vertx.deployVerticle(swLiveViewService).await()
+                SourceServices.Instance.liveView = swLiveViewService
             }
         }
     }

@@ -47,10 +47,7 @@ import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
-import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
+import spp.jetbrains.marker.source.mark.api.event.*
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.event.GutterMarkEventCode
@@ -242,6 +239,11 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun clearEventListeners()
     fun getEventListeners(): List<SourceMarkEventListener>
     fun addEventListener(listener: SourceMarkEventListener)
+
+    fun triggerEvent(eventCode: IEventCode, params: List<Any?>, listen: (() -> Unit)? = null) {
+        triggerEvent(SourceMarkEvent(this, eventCode, *params.toTypedArray()), listen)
+    }
+
     fun triggerEvent(event: SourceMarkEvent, listen: (() -> Unit)? = null) {
         //sync listeners
         getEventListeners()

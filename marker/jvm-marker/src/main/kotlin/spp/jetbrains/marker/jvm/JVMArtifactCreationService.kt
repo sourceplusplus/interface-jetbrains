@@ -119,6 +119,14 @@ class JVMArtifactCreationService : ArtifactCreationService {
         }
     }
 
+    override fun createMethodGutterMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): MethodGutterMark {
+        return JVMMarkerUtils.createMethodGutterMark(fileMarker, element, autoApply)
+    }
+
     override fun createMethodInlayMark(
         fileMarker: SourceFileMarker,
         element: PsiElement,

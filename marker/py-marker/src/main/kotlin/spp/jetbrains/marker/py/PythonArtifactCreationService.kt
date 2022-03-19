@@ -115,6 +115,14 @@ class PythonArtifactCreationService : ArtifactCreationService {
         return Optional.empty()
     }
 
+    override fun createMethodGutterMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): MethodGutterMark {
+        TODO("Not yet implemented")
+    }
+
     override fun createMethodInlayMark(
         fileMarker: SourceFileMarker,
         element: PsiElement,
