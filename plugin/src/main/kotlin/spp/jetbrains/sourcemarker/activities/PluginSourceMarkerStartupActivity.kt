@@ -24,9 +24,6 @@ import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.runBlocking
-import org.apache.log4j.FileAppender
-import org.apache.log4j.Logger
-import org.apache.log4j.PatternLayout
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.sourcemarker.PluginBundle
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
@@ -46,16 +43,6 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
         @JvmField
         val INTELLIJ_PRODUCT_CODES = setOf("IC", "IU")
         val SUPPORTED_PRODUCT_CODES = PYCHARM_PRODUCT_CODES + INTELLIJ_PRODUCT_CODES
-    }
-
-    init {
-        if (System.getProperty("sourcemarker.debug.capture_logs", "false")!!.toBoolean()) {
-            val fa = FileAppender()
-            fa.file = "/tmp/sourcemarker.log"
-            fa.layout = PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n")
-            fa.activateOptions()
-            Logger.getLogger("spp.jetbrains").addAppender(fa)
-        }
     }
 
     override fun runActivity(project: Project) {
