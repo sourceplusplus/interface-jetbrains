@@ -25,7 +25,7 @@ package spp.jetbrains.sourcemarker.settings
  */
 data class SourceMarkerConfig(
     var rootSourcePackages: List<String> = emptyList(),
-    var autoResolveEndpointNames: Boolean = false,
+    var autoResolveEndpointNames: Boolean = true,
     var localMentorEnabled: Boolean = true,
     var pluginConsoleEnabled: Boolean = false,
     var serviceHost: String? = null,
