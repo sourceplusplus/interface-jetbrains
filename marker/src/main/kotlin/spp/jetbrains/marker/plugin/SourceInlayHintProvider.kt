@@ -18,10 +18,7 @@
 package spp.jetbrains.marker.plugin
 
 import com.intellij.codeInsight.hints.*
-import com.intellij.codeInsight.hints.presentation.AttributesTransformerPresentation
-import com.intellij.codeInsight.hints.presentation.BasePresentation
-import com.intellij.codeInsight.hints.presentation.InlayPresentation
-import com.intellij.codeInsight.hints.presentation.MouseButton
+import com.intellij.codeInsight.hints.presentation.*
 import com.intellij.ide.ui.AntialiasingType
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
@@ -38,6 +35,7 @@ import com.intellij.ui.paint.EffectPainter
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarker.getSourceFileMarker
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.MARK_REMOVED
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
@@ -77,9 +75,36 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                                 }
                             FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                                 //todo: smaller range
+                                ?.getAfterLineEndElementsInRange(0, Integer.MAX_VALUE)?.forEach {
+                                    it.repaint()
+                                }
+                            FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
+                                //todo: smaller range
                                 ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
                                     it.repaint()
                                 }
+                        }
+                    }
+                    MARK_REMOVED -> {
+                        ApplicationManager.getApplication().invokeLater {
+                            FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
+                                //todo: smaller range
+                                ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
+                                if (it.renderer is BlockInlayRenderer) {
+                                    if ((it.renderer as BlockInlayRenderer).getCachedPresentation() is RecursivelyUpdatingRootPresentation) {
+                                        val rootPresentation = (it.renderer as BlockInlayRenderer).getCachedPresentation() as RecursivelyUpdatingRootPresentation
+                                        if (rootPresentation.content is StaticDelegatePresentation) {
+                                            val delegatePresentation = rootPresentation.content as StaticDelegatePresentation
+                                            if (delegatePresentation.presentation is DynamicTextInlayPresentation) {
+                                                val dynamicPresentation = delegatePresentation.presentation as DynamicTextInlayPresentation
+                                                if (dynamicPresentation.inlayMark == event.sourceMark) {
+                                                    it.dispose()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -127,7 +152,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                 virtualText.inlayMark = inlayMark
 
                 var representation = AttributesTransformerPresentation(
-                    (DynamicTextInlayPresentation(editor, virtualText))
+                    (DynamicTextInlayPresentation(editor, inlayMark, virtualText))
                 ) {
                     it.withDefault(editor.colorsScheme.getAttributes(INLINE_PARAMETER_HINT) ?: TextAttributes())
                 } as InlayPresentation
@@ -153,7 +178,8 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
         representation: InlayPresentation
     )
 
-    private inner class DynamicTextInlayPresentation(val editor: Editor, val virtualText: InlayMarkVirtualText) :
+    private inner class DynamicTextInlayPresentation(val editor: Editor, val inlayMark: InlayMark,
+                                                     val virtualText: InlayMarkVirtualText) :
         BasePresentation() {
 
         private val font = editor.colorsScheme.getFont(EditorFontType.PLAIN)

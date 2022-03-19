@@ -19,7 +19,9 @@ package spp.jetbrains.sourcemarker.view
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.JBColor
+import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
@@ -29,9 +31,9 @@ import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.CUSTOM_EVENT
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
@@ -39,10 +41,10 @@ import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
-import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
-import spp.jetbrains.sourcemarker.status.LiveStatusManager
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.HIDE_QUICK_STATS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.SHOW_QUICK_STATS
 import spp.protocol.SourceServices
+import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.QueryTimeFrame
 import spp.protocol.artifact.metrics.ArtifactMetricResult
 import spp.protocol.artifact.metrics.MetricType
@@ -64,17 +66,12 @@ class ActivityQuickStatsIndicator : SourceMarkEventListener {
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ActivityQuickStatsIndicator::class.java)
         private val inlayForegroundColor = JBColor(Color.decode("#3e464a"), Color.decode("#87939a"))
-        val ACTIVITY_QUICK_STATS = SourceKey<Boolean>("ACTIVITY_QUICK_STATS")
+        val SHOWING_QUICK_STATS = SourceKey<Boolean>("SHOWING_QUICK_STATS")
     }
 
     override fun handleEvent(event: SourceMarkEvent) {
-        if (event.eventCode == SourceMarkEventCode.MARK_USER_DATA_UPDATED) {
+        if (event.eventCode == CUSTOM_EVENT && event.params.first() == SHOW_QUICK_STATS) {
             if (event.sourceMark.getUserData(EndpointDetector.ENDPOINT_ID) != null) {
-                if (event.sourceMark is InlayMark) return
-                val existingSourceMarks = SourceMarkSearch.findSourceMarks(event.sourceMark.artifactQualifiedName)
-                if (existingSourceMarks.find { it.getUserData(ACTIVITY_QUICK_STATS) == true } != null) return
-
-                //found a method endpoint to show quick activity stats
                 ApplicationManager.getApplication().runReadAction {
                     val endTime = ZonedDateTime.now().minusMinutes(1).truncatedTo(ChronoUnit.MINUTES) //exclusive
                     val startTime = endTime.minusMinutes(2)
@@ -100,34 +97,37 @@ class ActivityQuickStatsIndicator : SourceMarkEventListener {
                         (event.sourceMark as MethodSourceMark).getPsiElement().nameIdentifier!!,
                         false
                     )
-                    inlay.putUserData(ACTIVITY_QUICK_STATS, true)
+                    inlay.putUserData(SHOWING_QUICK_STATS, true)
                     inlay.configuration.virtualText = InlayMarkVirtualText(inlay, formatMetricResult(metricResult))
                     inlay.configuration.virtualText!!.textAttributes.foregroundColor = inlayForegroundColor
                     inlay.configuration.activateOnMouseClick = false
                     inlay.apply(true)
 
-                    val previousMetrics = mutableMapOf<Long, String>()
-                    LiveStatusManager.addViewEventListener(inlay) {
-                        consumeLiveEvent(it, previousMetrics)
-
-                        val twoMinAgoValue = previousMetrics[it.timeBucket.toLong() - 2]
-                        if (twoMinAgoValue != null) {
-                            inlay.configuration.virtualText!!.updateVirtualText(twoMinAgoValue)
-                        }
-                    }
-
                     SourceServices.Instance.liveView!!.addLiveViewSubscription(
                         LiveViewSubscription(
                             null,
                             listOf(event.sourceMark.getUserData(EndpointDetector.ENDPOINT_NAME)!!),
-                            event.sourceMark.artifactQualifiedName,
+                            event.sourceMark.artifactQualifiedName.copy(
+                                operationName = event.sourceMark.getUserData(
+                                    EndpointDetector.ENDPOINT_ID
+                                )!! //todo: only SWLiveViewService uses
+                            ),
                             LiveSourceLocation(event.sourceMark.artifactQualifiedName.identifier, 0), //todo: don't need
                             LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"), -1)
                         )
                     ).onComplete {
                         if (it.succeeded()) {
                             val subscriptionId = it.result().subscriptionId!!
-                            inlay.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
+                            val previousMetrics = mutableMapOf<Long, String>()
+                            vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
+                                val viewEvent = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
+                                consumeLiveEvent(viewEvent, previousMetrics)
+
+                                val twoMinAgoValue = previousMetrics[viewEvent.timeBucket.toLong() - 2]
+                                if (twoMinAgoValue != null) {
+                                    inlay.configuration.virtualText!!.updateVirtualText(twoMinAgoValue)
+                                }
+                            }
                             inlay.addEventListener {
                                 if (it.eventCode == SourceMarkEventCode.MARK_REMOVED) {
                                     SourceServices.Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
@@ -139,6 +139,12 @@ class ActivityQuickStatsIndicator : SourceMarkEventListener {
                     }
                 }
             }
+        } else if (event.eventCode == CUSTOM_EVENT && event.params.first() == HIDE_QUICK_STATS) {
+            val existingQuickStats = event.sourceMark.sourceFileMarker.getSourceMarks().find {
+                it.artifactQualifiedName == event.sourceMark.artifactQualifiedName
+                        && it.getUserData(SHOWING_QUICK_STATS) == true
+            }
+            existingQuickStats?.dispose()
         }
     }
 
