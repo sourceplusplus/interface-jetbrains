@@ -33,7 +33,8 @@ data class SourceMarkerConfig(
     var certificatePins: List<String> = emptyList(),
     var serviceToken: String? = null,
     var verifyHost: Boolean = true,
-    val serviceName: String? = null
+    val serviceName: String? = null,
+    var autoDisplayEndpointQuickStats: Boolean = true,
 ) {
     companion object {
         const val DEFAULT_SERVICE_PORT = 5445

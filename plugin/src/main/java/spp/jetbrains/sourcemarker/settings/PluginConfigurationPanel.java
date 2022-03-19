@@ -37,6 +37,7 @@ public class PluginConfigurationPanel {
     private JComboBox serviceComboBox;
     private JCheckBox verifyHostCheckBox;
     private JLabel verifyHostLabel;
+    private JCheckBox autoDisplayEndpointQuickStatCheckBox;
     private SourceMarkerConfig config;
     private CertificatePinPanel myCertificatePins;
 
@@ -45,19 +46,17 @@ public class PluginConfigurationPanel {
         myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
 
-        if (INSTANCE.getLiveService() != null) {
-            INSTANCE.getLiveService().getServices().onComplete(it -> {
-                if (it.succeeded()) {
-                    it.result().forEach(service -> serviceComboBox.addItem(service.getName()));
+        INSTANCE.getLiveService().getServices().onComplete(it -> {
+            if (it.succeeded()) {
+                it.result().forEach(service -> serviceComboBox.addItem(service.getName()));
 
-                    if (config.getServiceName() != null) {
-                        serviceComboBox.setSelectedItem(config.getServiceName());
-                    }
-                } else {
-                    it.cause().printStackTrace();
+                if (config.getServiceName() != null) {
+                    serviceComboBox.setSelectedItem(config.getServiceName());
                 }
-            });
-        }
+            } else {
+                it.cause().printStackTrace();
+            }
+        });
     }
 
     public JComponent getContentPane() {
@@ -89,6 +88,9 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(serviceComboBox.getSelectedItem(), config.getServiceName())) {
             return config.getServiceName() != null || serviceComboBox.getSelectedItem() != "All Services";
         }
+        if (!Objects.equals(autoDisplayEndpointQuickStatCheckBox.isSelected(), config.getAutoDisplayEndpointQuickStats())) {
+            return true;
+        }
         return false;
     }
 
@@ -108,7 +110,8 @@ public class PluginConfigurationPanel {
                 new ArrayList<>(Collections.list(myCertificatePins.listModel.elements())),
                 null,
                 verifyHostCheckBox.isSelected(),
-                currentService
+                currentService,
+                autoDisplayEndpointQuickStatCheckBox.isSelected()
         );
     }
 
@@ -120,6 +123,7 @@ public class PluginConfigurationPanel {
         serviceHostTextField.setText(config.getServiceHost());
         accessTokenTextField.setText(config.getAccessToken());
         verifyHostCheckBox.setSelected(config.getVerifyHost());
+        autoDisplayEndpointQuickStatCheckBox.setSelected(config.getAutoDisplayEndpointQuickStats());
 
         myCertificatePins = new CertificatePinPanel();
         myCertificatePins.listModel.addAll(config.getCertificatePins());
