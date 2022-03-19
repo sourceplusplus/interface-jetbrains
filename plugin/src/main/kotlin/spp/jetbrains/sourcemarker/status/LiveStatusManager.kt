@@ -81,7 +81,7 @@ object LiveStatusManager : SourceMarkEventListener {
         when (event.eventCode) {
             SourceMarkEventCode.MARK_ADDED -> {
                 if (event.sourceMark !is MethodSourceMark) return
-                //todo: shouldn't need to wait for method mark added to add inlay marks
+                //todo: shouldn't need to wait for method mark added to add inlay/gutter marks
                 //  should have events that just mean a method is visible
 
                 ApplicationManager.getApplication().runReadAction {

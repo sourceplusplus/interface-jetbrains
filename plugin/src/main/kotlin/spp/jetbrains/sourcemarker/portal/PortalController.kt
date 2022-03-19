@@ -57,7 +57,7 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         vertx.deployVerticle(portalServer).await()
         vertx.deployVerticle(PortalEventListener(markerConfig)).await()
 
-//        //todo: remove after v0.4.2
+//        //todo: remove after v0.4.3
 //        vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
 
         SourceMarker.addGlobalSourceMarkEventListener {

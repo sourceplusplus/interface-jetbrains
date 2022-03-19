@@ -69,7 +69,7 @@ object ControlBarController {
             @Suppress("UselessCallOnCollection") //unknown enums are null
             selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
         })
-        //availableCommands.add(VIEW_OVERVIEW) //todo: remove after v0.4.2
+        //availableCommands.add(VIEW_OVERVIEW) //todo: remove after v0.4.3
     }
 
     private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {

@@ -52,6 +52,7 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
                 return@consumer
             }
 
+            //todo: remove in favor of sending events to individual subscribers
             SourceMarkSearch.findBySubscriptionId(event.subscriptionId)
                 ?.getUserData(SourceMarkKeys.VIEW_EVENT_LISTENERS)?.forEach { it.accept(event) }
         }
