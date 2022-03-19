@@ -456,7 +456,7 @@ object SourceMarkerPlugin {
     private fun initMarker(config: SourceMarkerConfig, project: Project) {
         log.info("Initializing marker")
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
-        SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator())
+        SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator(config))
 
         val gutterMarkConfig = GutterMarkConfiguration()
         gutterMarkConfig.activateOnMouseHover = false
