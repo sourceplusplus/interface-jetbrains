@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    val intellijVersion = "213.6777.52"
+    val intellijVersion = "213.7172.25"
 
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
