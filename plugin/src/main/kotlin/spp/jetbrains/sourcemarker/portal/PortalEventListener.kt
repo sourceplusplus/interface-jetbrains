@@ -498,44 +498,36 @@ class PortalEventListener(
                         pageNumber = portal.tracesView.pageNumber
                     ), vertx
                 )
-
-                handleTraceResult(traceResult, portal, portal.viewingArtifact)
+                vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
+                autoResolveEndpointNamesIfNecessary(traceResult, portal)
             }
         }
     }
 
-    private fun handleTraceResult(
-        traceResult: TraceResult,
-        portal: SourcePortal,
-        artifactQualifiedName: ArtifactQualifiedName
-    ) {
-        //todo: rename {GET} to [GET] in skywalking
+    private suspend fun autoResolveEndpointNamesIfNecessary(traceResult: TraceResult, portal: SourcePortal) {
         if (markerConfig.autoResolveEndpointNames) {
-            launch(vertx.dispatcher()) {
-                //todo: only try to auto resolve endpoint names with dynamic ids
-                //todo: support multiple operationsNames/traceIds
-                traceResult.traces.forEach {
-                    if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
-                        val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
-                        val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
-                        if (entrySpan != null) {
-                            val url = entrySpan.tags["url"]
-                            val httpMethod = entrySpan.tags["http.method"]
-                            if (url != null && httpMethod != null) {
-                                val updatedEndpointName = "{$httpMethod}${URI(url).path}"
-                                vertx.eventBus().send(
-                                    TraceSpanUpdated, entrySpan.copy(
-                                        endpointName = updatedEndpointName,
-                                        artifactQualifiedName = artifactQualifiedName
-                                    )
+            //todo: only try to auto resolve endpoint names with dynamic ids
+            //todo: support multiple operationsNames/traceIds
+            traceResult.traces.forEach {
+                if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
+                    val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
+                    val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
+                    if (entrySpan != null) {
+                        val url = entrySpan.tags["url"]
+                        val httpMethod = entrySpan.tags["http.method"]
+                        if (url != null && httpMethod != null) {
+                            val updatedEndpointName = "$httpMethod:${URI(url).path}"
+                            vertx.eventBus().send(
+                                TraceSpanUpdated, entrySpan.copy(
+                                    endpointName = updatedEndpointName,
+                                    artifactQualifiedName = portal.viewingArtifact
                                 )
-                            }
+                            )
                         }
                     }
                 }
             }
         }
-        vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
     }
 
     private suspend fun pullLatestLogs(portal: SourcePortal) {
@@ -740,17 +732,23 @@ class PortalEventListener(
         )
         vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
 
+        //S++ adds trace meta to avoid additional query for auto-resolve endpoints
         val url = trace.meta["url"]
         val httpMethod = trace.meta["http.method"]
-        if (url != null && httpMethod != null) {
+        val entrySpanJson = trace.meta["entrySpan"]
+        if (url != null && httpMethod != null && entrySpanJson != null) {
             val updatedEndpointName = "$httpMethod:${URI(url).path}"
-            val entrySpan = Json.decodeValue(trace.meta["entrySpan"], TraceSpan::class.java)
+            val entrySpan = Json.decodeValue(entrySpanJson, TraceSpan::class.java)
             vertx.eventBus().send(
                 TraceSpanUpdated, entrySpan.copy(
                     endpointName = updatedEndpointName,
                     artifactQualifiedName = event.artifactQualifiedName
                 )
             )
+        } else {
+            launch(vertx.dispatcher()) {
+                autoResolveEndpointNamesIfNecessary(traceResult, portal)
+            }
         }
     }
 
