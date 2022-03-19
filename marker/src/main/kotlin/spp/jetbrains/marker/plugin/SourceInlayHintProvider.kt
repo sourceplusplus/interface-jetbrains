@@ -32,6 +32,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.ui.paint.EffectPainter
+import org.joor.Reflect
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarker.getSourceFileMarker
@@ -91,10 +92,10 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                                 //todo: smaller range
                                 ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
                                 if (it.renderer is BlockInlayRenderer) {
-                                    if ((it.renderer as BlockInlayRenderer).getCachedPresentation() is RecursivelyUpdatingRootPresentation) {
-                                        val rootPresentation = (it.renderer as BlockInlayRenderer).getCachedPresentation() as RecursivelyUpdatingRootPresentation
-                                        if (rootPresentation.content is StaticDelegatePresentation) {
-                                            val delegatePresentation = rootPresentation.content as StaticDelegatePresentation
+                                    val cachedPresentation = Reflect.on(it.renderer).field("cachedPresentation").get<Any>()
+                                    if (cachedPresentation is RecursivelyUpdatingRootPresentation) {
+                                        if (cachedPresentation.content is StaticDelegatePresentation) {
+                                            val delegatePresentation = cachedPresentation.content as StaticDelegatePresentation
                                             if (delegatePresentation.presentation is DynamicTextInlayPresentation) {
                                                 val dynamicPresentation = delegatePresentation.presentation as DynamicTextInlayPresentation
                                                 if (dynamicPresentation.inlayMark == event.sourceMark) {
