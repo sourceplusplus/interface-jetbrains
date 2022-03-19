@@ -57,9 +57,6 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         vertx.deployVerticle(portalServer).await()
         vertx.deployVerticle(PortalEventListener(markerConfig)).await()
 
-//        //todo: remove after v0.4.3
-//        vertx.eventBus().registerDefaultCodec(ArtifactQualifiedName::class.java, LocalMessageCodec())
-
         SourceMarker.addGlobalSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED && it.sourceMark is GutterMark) {
                 //register portal for source mark
