@@ -22,12 +22,13 @@ public class LiveControlBarRow extends JPanel {
         String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
         String defaultHex = "#" + Integer.toHexString(CONTROL_BAR_CMD_FOREGROUND.getRGB()).substring(2);
 
+        int minIndex = 0;
         Map<Integer, Integer> matches = new HashMap<>();
-        Set<String> inputWords = new HashSet<>(Arrays.asList(input.toLowerCase().split(" ")));
-        for (String inputWord : inputWords) {
-            int startIndex = commandName.toLowerCase().indexOf(inputWord);
+        for (String inputWord : input.toLowerCase().split(" ")) {
+            int startIndex = commandName.toLowerCase().indexOf(inputWord, minIndex);
             if (startIndex > -1) {
                 matches.put(startIndex, inputWord.length());
+                minIndex = startIndex + inputWord.length();
             }
         }
 
@@ -36,7 +37,7 @@ public class LiveControlBarRow extends JPanel {
             String updatedCommand = commandName;
             for (Map.Entry<Integer, Integer> entry : matches.entrySet()) {
                 String colored = colorMatchingString(updatedCommand, selectHex, entry.getKey() + diff, entry.getValue());
-                diff = colored.length() - updatedCommand.length();
+                diff += colored.length() - updatedCommand.length();
                 updatedCommand = colored;
             }
             commandName = updatedCommand;
