@@ -60,6 +60,15 @@ object SourceMarker {
         availableSourceFileMarkers.clear()
     }
 
+    suspend fun clearAvailableSourceFileMarkersSuspend() {
+        check(enabled) { "SourceMarker disabled" }
+
+        availableSourceFileMarkers.forEach {
+            deactivateSourceFileMarkerSuspend(it.value)
+        }
+        availableSourceFileMarkers.clear()
+    }
+
     fun refreshAvailableSourceFileMarkers(recreateFileMarkers: Boolean) {
         check(enabled) { "SourceMarker disabled" }
 
@@ -81,6 +90,18 @@ object SourceMarker {
 
         if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
             sourceFileMarker.clearSourceMarks()
+            sourceFileMarker.psiFile.putUserData(SourceFileMarker.KEY, null)
+            log.info("Deactivated source file marker: {}", sourceFileMarker)
+            return true
+        }
+        return false
+    }
+
+    suspend fun deactivateSourceFileMarkerSuspend(sourceFileMarker: SourceFileMarker): Boolean {
+        check(enabled) { "SourceMarker disabled" }
+
+        if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
+            sourceFileMarker.clearSourceMarksSuspend()
             sourceFileMarker.psiFile.putUserData(SourceFileMarker.KEY, null)
             log.info("Deactivated source file marker: {}", sourceFileMarker)
             return true

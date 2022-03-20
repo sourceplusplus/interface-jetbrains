@@ -99,6 +99,12 @@ abstract class ClassSourceMark(
         super.dispose(removeFromMarker, assertRemoval)
     }
 
+    override suspend fun disposeSuspend(removeFromMarker: Boolean, assertRemoval: Boolean) {
+        psiClass.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
+        psiClass.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
+        super.disposeSuspend(removeFromMarker, assertRemoval)
+    }
+
     private val userData = HashMap<Any, Any>()
     override fun <T> getUserData(key: SourceKey<T>): T? = userData[key] as T?
     override fun <T> putUserData(key: SourceKey<T>, value: T?) {

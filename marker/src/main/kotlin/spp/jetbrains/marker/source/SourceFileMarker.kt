@@ -26,6 +26,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
@@ -86,6 +87,16 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     open fun clearSourceMarks() {
         val removed = sourceMarks.removeIf {
             it.dispose(false)
+            true
+        }
+        if (removed) refresh()
+    }
+
+    open suspend fun clearSourceMarksSuspend() {
+        val removed = sourceMarks.removeIf {
+            runBlocking {
+                it.disposeSuspend(false)
+            }
             true
         }
         if (removed) refresh()

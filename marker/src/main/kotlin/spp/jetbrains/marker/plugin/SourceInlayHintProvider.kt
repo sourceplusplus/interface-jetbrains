@@ -29,6 +29,7 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.ui.paint.EffectPainter
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarker.getSourceFileMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.MARK_REMOVED
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
@@ -60,37 +62,32 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
     companion object {
         private val log = LoggerFactory.getLogger(SourceInlayHintProvider::class.java)
 
-        @Volatile
-        @JvmField
-        var latestInlayMarkAddedAt: Long = -1L
-
-        init {
-            SourceMarker.addGlobalSourceMarkEventListener { event ->
-                when (event.eventCode) {
-                    VIRTUAL_TEXT_UPDATED, INLAY_MARK_VISIBLE, INLAY_MARK_HIDDEN -> {
-                        ApplicationManager.getApplication().invokeLater {
-                            FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
-                                //todo: smaller range
-                                ?.getInlineElementsInRange(0, Integer.MAX_VALUE)?.forEach {
-                                    it.repaint()
-                                }
-                            FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
-                                //todo: smaller range
-                                ?.getAfterLineEndElementsInRange(0, Integer.MAX_VALUE)?.forEach {
-                                    it.repaint()
-                                }
-                            FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
-                                //todo: smaller range
-                                ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
-                                    it.repaint()
-                                }
-                        }
+        val EVENT_LISTENER = SourceMarkEventListener { event ->
+            when (event.eventCode) {
+                VIRTUAL_TEXT_UPDATED, INLAY_MARK_VISIBLE, INLAY_MARK_HIDDEN -> {
+                    ApplicationManager.getApplication().invokeLater {
+                        FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
+                            //todo: smaller range
+                            ?.getInlineElementsInRange(0, Integer.MAX_VALUE)?.forEach {
+                                it.repaint()
+                            }
+                        FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
+                            //todo: smaller range
+                            ?.getAfterLineEndElementsInRange(0, Integer.MAX_VALUE)?.forEach {
+                                it.repaint()
+                            }
+                        FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
+                            //todo: smaller range
+                            ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
+                                it.repaint()
+                            }
                     }
-                    MARK_REMOVED -> {
-                        ApplicationManager.getApplication().invokeLater {
-                            FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
-                                //todo: smaller range
-                                ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
+                }
+                MARK_REMOVED -> {
+                    ApplicationManager.getApplication().invokeLater {
+                        FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
+                            //todo: smaller range
+                            ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
                                 if (it.renderer is BlockInlayRenderer) {
                                     val cachedPresentation = Reflect.on(it.renderer).field("cachedPresentation").get<Any>()
                                     if (cachedPresentation is RecursivelyUpdatingRootPresentation) {
@@ -99,18 +96,21 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                                             if (delegatePresentation.presentation is DynamicTextInlayPresentation) {
                                                 val dynamicPresentation = delegatePresentation.presentation as DynamicTextInlayPresentation
                                                 if (dynamicPresentation.inlayMark == event.sourceMark) {
-                                                    it.dispose()
+                                                    Disposer.dispose(it)
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
                     }
                 }
             }
         }
+
+        @Volatile
+        @JvmField
+        var latestInlayMarkAddedAt: Long = -1L
     }
 
     override val key: SettingsKey<NoSettings> = SettingsKey("SourceMarker/InlayHints")

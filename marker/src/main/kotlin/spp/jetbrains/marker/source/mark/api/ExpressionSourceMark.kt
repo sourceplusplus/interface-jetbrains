@@ -98,6 +98,15 @@ abstract class ExpressionSourceMark(
         super.dispose(removeFromMarker, assertRemoval)
     }
 
+    override suspend fun disposeSuspend(removeFromMarker: Boolean, assertRemoval: Boolean) {
+        when (this) {
+            is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
+            is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
+            else -> throw IllegalStateException("ExpressionSourceMark is not a GutterMark or InlayMark")
+        }
+        super.disposeSuspend(removeFromMarker, assertRemoval)
+    }
+
     fun getParentSourceMark(): SourceMark? {
         return SourceMarker.getSourceMark(
             artifactQualifiedName.copy(

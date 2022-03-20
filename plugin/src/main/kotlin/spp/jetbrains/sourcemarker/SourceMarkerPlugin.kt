@@ -55,6 +55,7 @@ import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.*
+import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.py.PythonArtifactCreationService
 import spp.jetbrains.marker.py.PythonArtifactNamingService
 import spp.jetbrains.marker.py.PythonArtifactScopeService
@@ -326,18 +327,13 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun restartIfNecessary() {
-        val clearMarkers = Promise.promise<Nothing>()
-        ApplicationManager.getApplication().runReadAction {
-            if (SourceMarker.enabled) {
-                SourceMarker.clearAvailableSourceFileMarkers()
-                SourceMarker.clearGlobalSourceMarkEventListeners()
-            }
-            clearMarkers.complete()
+        if (SourceMarker.enabled) {
+            SourceMarker.clearAvailableSourceFileMarkersSuspend()
+            SourceMarker.clearGlobalSourceMarkEventListeners()
         }
 
         deploymentIds.forEach { vertx.undeploy(it).await() }
         deploymentIds.clear()
-        clearMarkers.future().await()
 
         TCPServiceDiscoveryBackend.socket?.close()?.await()
         TCPServiceDiscoveryBackend.socket = null
@@ -450,11 +446,12 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initUI(config: SourceMarkerConfig) {
-        vertx.deployVerticle(PortalController(config)).await()
+        deploymentIds.add(vertx.deployVerticle(PortalController(config)).await())
     }
 
     private fun initMarker(config: SourceMarkerConfig, project: Project) {
         log.info("Initializing marker")
+        SourceMarker.addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
         SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator(config))
 
