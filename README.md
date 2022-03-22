@@ -14,8 +14,8 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 # How to use?
 
-Once installed, this plugin adds a command bar to the JetBrains IDE, which is accessible by pressing `Ctrl+Shift+S`.
-The commands available are determined by the location the command bar is opened and the accessibility of either [SkyWalking](https://github.com/apache/skywalking) or the [Live Platform](https://github.com/sourceplusplus/live-platform).
+Once installed, this plugin adds the Live Command Palette to the JetBrains IDE, which is accessible by pressing `Ctrl+Shift+S`.
+The available commands are determined by the location the live command palette is opened and the accessibility of either [SkyWalking](https://github.com/apache/skywalking) or the [Live Platform](https://github.com/sourceplusplus/live-platform).
 
 # Available Commands
 
