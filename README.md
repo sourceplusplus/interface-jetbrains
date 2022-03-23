@@ -53,7 +53,7 @@ The available commands are determined by the location the live command palette i
   <details>
     <summary>Screencast</summary>
 
-  ![screencast](https://user-images.githubusercontent.com/3278877/149158868-135568d5-20cc-44d4-886a-2202195b594b.gif)
+  ![screencast](https://user-images.githubusercontent.com/3278877/159803045-9b92dbe1-df08-4275-9ec8-1cbfed6e542d.gif)
   </details>
   
 </details>
