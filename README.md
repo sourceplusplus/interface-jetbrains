@@ -33,7 +33,7 @@ The available commands are determined by the location the live command palette i
   <details>
     <summary>Screencast</summary>
 
-  ![screencast](https://user-images.githubusercontent.com/3278877/158376181-7fe597f9-f3c2-4609-bd07-4ea55e10b579.gif)
+  ![screencast](https://user-images.githubusercontent.com/3278877/159804991-9882aa60-abd4-43d9-8a3f-db7f1f5f38d5.gif)
   </details>
 
   ### Watch Log
