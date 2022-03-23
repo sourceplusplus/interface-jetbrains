@@ -46,7 +46,7 @@ The available commands are determined by the location the live command palette i
   ![screencast](https://user-images.githubusercontent.com/3278877/158381411-214285ba-7291-4c70-8e1f-8489140fa239.gif)
   </details>
 
-  ### Display Portal
+  ### View Overview/Activity/Traces/Logs
 
   > Contextual popups for displaying live operational data on the code currently in view.
 
