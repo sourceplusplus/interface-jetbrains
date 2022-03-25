@@ -33,7 +33,6 @@ import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointTriggerListener
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices.Instance
@@ -67,7 +66,6 @@ class LiveInstrumentManager(
             val json = JWT.parse(pluginConfig.serviceToken)
             developer = json.getJsonObject("payload").getString("developer_id")
         }
-        EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(BreakpointTriggerListener, project)
 
         vertx.eventBus().consumer<JsonObject>(toLiveInstrumentSubscriberAddress(developer)) {
             val liveEvent = Json.decodeValue(it.body().toString(), LiveInstrumentEvent::class.java)

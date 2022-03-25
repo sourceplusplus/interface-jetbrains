@@ -135,7 +135,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
     }
 
-    fun removeExecutionShower() {
+    private fun removeExecutionShower() {
         executionPointHighlighter.hide()
     }
 
