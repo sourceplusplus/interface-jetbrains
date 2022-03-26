@@ -145,7 +145,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- statusLabel ----
             statusLabel.setText(message("status"));
-            statusLabel.setFont(SMALLER_FONT);
+            statusLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(statusLabel, cc.xy(1, 1));
 
             //---- statusValueLabel ----
@@ -164,7 +164,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- hitsLabel ----
             hitsLabel.setText(message("hits"));
-            hitsLabel.setFont(SMALLER_FONT);
+            hitsLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(hitsLabel, cc.xy(7, 1));
 
             //---- hitsValueLabel ----
@@ -174,7 +174,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- rateLabel ----
             rateLabel.setText(message("rate"));
-            rateLabel.setFont(SMALLER_FONT);
+            rateLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(rateLabel, cc.xy(11, 1));
 
             //---- rateValueLabel ----
@@ -184,7 +184,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- expiresLabel ----
             expiresLabel.setText(message("expires"));
-            expiresLabel.setFont(SMALLER_FONT);
+            expiresLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(expiresLabel, cc.xy(15, 1));
 
             //---- expiresValueLabel ----
