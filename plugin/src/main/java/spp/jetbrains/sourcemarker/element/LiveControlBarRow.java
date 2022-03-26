@@ -50,7 +50,7 @@ public class LiveControlBarRow extends JPanel {
         int endIndex = startIndex + length;
         StringBuilder sb = new StringBuilder(commandName.substring(0, startIndex));
         sb.append("<span style=\"color: " + selectHex + "\">");
-        sb.append(commandName.substring(startIndex, endIndex));
+        sb.append(commandName, startIndex, endIndex);
         sb.append("</span>");
         sb.append(commandName.substring(endIndex));
         commandName = sb.toString();
@@ -109,19 +109,18 @@ public class LiveControlBarRow extends JPanel {
             //---- commandLabel ----
             commandLabel.setBackground(null);
             commandLabel.setEditable(false);
-            commandLabel.setFont(ROBOTO_PLAIN_15);
-            commandLabel.setText("<html><span style=\"color: gray; font-size: 15%\">Manual Tracing \u279b Watched Variables \u279b Scope: Local</span></html>");
+            commandLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             commandLabel.setContentType("text/html");
             commandLabel.setMaximumSize(new Dimension(2147483647, 12));
+            commandLabel.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
             panel1.add(commandLabel, cc.xy(1, 1));
 
             //---- descriptionLabel ----
-            descriptionLabel.setText("<html><span style=\"color: gray; font-size: 15%\">Manual Tracing \u279b Watched Variables \u279b Scope: Local</span></html>");
             descriptionLabel.setBackground(null);
-            descriptionLabel.setFont(ROBOTO_PLAIN_11);
-            descriptionLabel.setForeground(Color.gray);
+            descriptionLabel.setFont(SMALLER_FONT);
             descriptionLabel.setContentType("text/html");
             descriptionLabel.setEditable(false);
+            descriptionLabel.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
             panel1.add(descriptionLabel, new CellConstraints(1, 2, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(-7, 0, 0, 0)));
         }
         add(panel1, new CellConstraints(1, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(3, 10, 0, 0)));
