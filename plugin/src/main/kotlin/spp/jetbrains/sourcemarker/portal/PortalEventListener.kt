@@ -42,6 +42,7 @@ import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.average
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
@@ -572,7 +573,7 @@ class PortalEventListener(
     }
 
     private suspend fun refreshOverview(fileMarker: SourceFileMarker, portal: SourcePortal) {
-        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>().filter {
+        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodGutterMark>().filter {
             it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
         }
 
