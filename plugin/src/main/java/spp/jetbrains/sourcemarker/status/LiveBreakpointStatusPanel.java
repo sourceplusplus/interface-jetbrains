@@ -16,7 +16,6 @@ import static spp.jetbrains.sourcemarker.PluginUI.EXPIRY_FOREGROUND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR1;
 import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
 import static spp.jetbrains.sourcemarker.PluginUI.SMALLER_FONT;
-import static spp.jetbrains.sourcemarker.PluginUI.SMALL_FONT;
 
 public class LiveBreakpointStatusPanel extends JPanel {
 
@@ -150,7 +149,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- statusValueLabel ----
             statusValueLabel.setText(message("active"));
-            statusValueLabel.setFont(SMALL_FONT);
+            statusValueLabel.setFont(SMALLER_FONT);
             statusValueLabel.setForeground(LABEL_FOREGROUND_COLOR1);
             panel1.add(statusValueLabel, cc.xy(3, 1));
 
@@ -169,7 +168,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- hitsValueLabel ----
             hitsValueLabel.setText(message("not_available"));
-            hitsValueLabel.setFont(SMALL_FONT);
+            hitsValueLabel.setFont(SMALLER_FONT);
             panel1.add(hitsValueLabel, cc.xy(9, 1));
 
             //---- rateLabel ----
@@ -179,7 +178,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- rateValueLabel ----
             rateValueLabel.setText(message("not_available"));
-            rateValueLabel.setFont(SMALL_FONT);
+            rateValueLabel.setFont(SMALLER_FONT);
             panel1.add(rateValueLabel, cc.xy(13, 1));
 
             //---- expiresLabel ----
@@ -189,7 +188,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- expiresValueLabel ----
             expiresValueLabel.setText(message("not_available"));
-            expiresValueLabel.setFont(SMALL_FONT);
+            expiresValueLabel.setFont(SMALLER_FONT);
             panel1.add(expiresValueLabel, cc.xy(17, 1));
         }
         add(panel1, new CellConstraints(1, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(2, 4, 2, 2)));
