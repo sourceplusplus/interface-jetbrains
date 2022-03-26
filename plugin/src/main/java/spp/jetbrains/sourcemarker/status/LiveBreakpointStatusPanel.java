@@ -3,7 +3,6 @@ package spp.jetbrains.sourcemarker.status;
 import com.codahale.metrics.Meter;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
-import spp.jetbrains.sourcemarker.PluginUI;
 import spp.protocol.utils.TimeUtilsKt;
 
 import javax.swing.*;
@@ -151,7 +150,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- statusValueLabel ----
             statusValueLabel.setText(message("active"));
-            statusValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+            statusValueLabel.setFont(SMALL_FONT);
             statusValueLabel.setForeground(LABEL_FOREGROUND_COLOR1);
             panel1.add(statusValueLabel, cc.xy(3, 1));
 

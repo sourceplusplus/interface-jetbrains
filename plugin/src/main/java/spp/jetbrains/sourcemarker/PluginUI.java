@@ -14,14 +14,14 @@ public class PluginUI {
     public static final LineBorder PANEL_BORDER = new LineBorder(Gray._85);
 
     public static Font ROBOTO_LIGHT_BOLD_14;
-    public static Font ROBOTO_LIGHT_PLAIN_14;
-    public static Font ROBOTO_LIGHT_PLAIN_15;
-    public static Font ROBOTO_LIGHT_PLAIN_16;
-    public static Font ROBOTO_LIGHT_PLAIN_17;
-    public static Font MICROSOFT_YAHEI_PLAIN_13;
+    private static Font ROBOTO_LIGHT_PLAIN_14;
+    private static Font ROBOTO_LIGHT_PLAIN_15;
+    private static Font ROBOTO_LIGHT_PLAIN_16;
+    private static Font ROBOTO_LIGHT_PLAIN_17;
+    private static Font MICROSOFT_YAHEI_PLAIN_13;
     public static Font MICROSOFT_YAHEI_PLAIN_14;
-    public static Font MICROSOFT_YAHEI_PLAIN_15;
-    public static Font MICROSOFT_YAHEI_PLAIN_16;
+    private static Font MICROSOFT_YAHEI_PLAIN_15;
+    private static Font MICROSOFT_YAHEI_PLAIN_16;
 
     static {
         try {

@@ -362,7 +362,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         LiveMeter instrument = new LiveMeter(
                 meterNameField.getText(),
-                MeterType.valueOf(meterTypeComboBox.getSelectedItem().toString().toUpperCase()),
+                MeterType.values()[meterTypeComboBox.getSelectedIndex()],
                 new MetricValue(MetricValueType.NUMBER, "1"),
                 sourceLocation,
                 condition,

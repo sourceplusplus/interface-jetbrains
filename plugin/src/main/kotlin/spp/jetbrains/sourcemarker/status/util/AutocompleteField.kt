@@ -100,7 +100,7 @@ class AutocompleteField(
             }
         })
 
-        list.font = ROBOTO_LIGHT_PLAIN_14
+        list.font = SMALLEST_FONT
         list.setCellRenderer(AutoCompleteCellRenderer(artifactQualifiedName))
 
         list.setBackground(AUTO_COMPLETE_HIGHLIGHT_COLOR)

@@ -764,7 +764,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         //---- timeLabel ----
         timeLabel.setIcon(PluginIcons.clock);
-        timeLabel.setFont(ROBOTO_LIGHT_PLAIN_14);
+        timeLabel.setFont(SMALLEST_FONT);
         timeLabel.setIconTextGap(8);
         timeLabel.setVisible(false);
         add(timeLabel, "cell 1 0,gapx null 8");
