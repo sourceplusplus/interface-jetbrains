@@ -103,7 +103,7 @@ class AutocompleteField(
         list.font = SMALLEST_FONT
         list.setCellRenderer(AutoCompleteCellRenderer(artifactQualifiedName))
 
-        list.setBackground(AUTO_COMPLETE_HIGHLIGHT_COLOR)
+        list.setBackground(BGND_FOCUS_COLOR)
         list.setBorder(JBUI.Borders.empty())
         val scroll: JScrollPane = object : JScrollPane(list) {
             override fun getPreferredSize(): Dimension {

@@ -17,7 +17,7 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.sourcemarker.PluginUI
+import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
@@ -59,7 +59,7 @@ class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) :
         }
 
         if (isSelected) {
-            row.background = PluginUI.AUTO_COMPLETE_HIGHLIGHT_COLOR
+            row.background = BGND_FOCUS_COLOR
             if (entry is LiveControlCommand) {
                 row.setCommandIcon(entry.selectedIcon)
             }
