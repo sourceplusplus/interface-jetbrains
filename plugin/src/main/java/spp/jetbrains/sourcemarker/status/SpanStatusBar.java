@@ -272,7 +272,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
+                    configPanel.setBackground(BGND_FOCUS_COLOR);
                 }
             }
         });

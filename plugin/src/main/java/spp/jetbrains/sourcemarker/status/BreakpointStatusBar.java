@@ -361,7 +361,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
+                    configPanel.setBackground(BGND_FOCUS_COLOR);
                 }
             }
         });

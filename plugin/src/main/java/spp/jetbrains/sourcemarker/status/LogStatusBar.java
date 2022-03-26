@@ -537,7 +537,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!watchExpression && !errored && !removed) configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
+                if (!watchExpression && !errored && !removed) configPanel.setBackground(BGND_FOCUS_COLOR);
             }
         });
 
