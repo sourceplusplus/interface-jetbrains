@@ -472,8 +472,8 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
             @Override
             public void focusLost(FocusEvent e) {
-                if (!liveLogTextField.getEditMode() ||
-                        (liveLogTextField.getEditMode() && !liveLogTextField.isShowingSaveButton())) {
+                if (!liveLogTextField.getEditMode() || (liveLogTextField.getEditMode() &&
+                        (!liveLogTextField.isShowingSaveButton() && !liveLogTextField.getText().isEmpty()))) {
                     liveLogTextField.setEditMode(false);
                     removeActiveDecorations();
 
