@@ -144,12 +144,12 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- statusLabel ----
             statusLabel.setText(message("status"));
-            statusLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
+            statusLabel.setFont(SMALLER_FONT);
             panel1.add(statusLabel, cc.xy(1, 1));
 
             //---- statusValueLabel ----
             statusValueLabel.setText(message("active"));
-            statusValueLabel.setFont(SMALLER_FONT);
+            statusValueLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             statusValueLabel.setForeground(LABEL_FOREGROUND_COLOR1);
             panel1.add(statusValueLabel, cc.xy(3, 1));
 
@@ -163,32 +163,32 @@ public class LiveBreakpointStatusPanel extends JPanel {
 
             //---- hitsLabel ----
             hitsLabel.setText(message("hits"));
-            hitsLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
+            hitsLabel.setFont(SMALLER_FONT);
             panel1.add(hitsLabel, cc.xy(7, 1));
 
             //---- hitsValueLabel ----
             hitsValueLabel.setText(message("not_available"));
-            hitsValueLabel.setFont(SMALLER_FONT);
+            hitsValueLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(hitsValueLabel, cc.xy(9, 1));
 
             //---- rateLabel ----
             rateLabel.setText(message("rate"));
-            rateLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
+            rateLabel.setFont(SMALLER_FONT);
             panel1.add(rateLabel, cc.xy(11, 1));
 
             //---- rateValueLabel ----
             rateValueLabel.setText(message("not_available"));
-            rateValueLabel.setFont(SMALLER_FONT);
+            rateValueLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(rateValueLabel, cc.xy(13, 1));
 
             //---- expiresLabel ----
             expiresLabel.setText(message("expires"));
-            expiresLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
+            expiresLabel.setFont(SMALLER_FONT);
             panel1.add(expiresLabel, cc.xy(15, 1));
 
             //---- expiresValueLabel ----
             expiresValueLabel.setText(message("not_available"));
-            expiresValueLabel.setFont(SMALLER_FONT);
+            expiresValueLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(expiresValueLabel, cc.xy(17, 1));
         }
         add(panel1, new CellConstraints(1, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(2, 4, 2, 2)));
