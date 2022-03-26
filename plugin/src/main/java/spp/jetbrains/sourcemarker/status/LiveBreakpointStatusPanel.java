@@ -89,10 +89,10 @@ public class LiveBreakpointStatusPanel extends JPanel {
         long sec = diffSec % 60;
         if (min > 0) {
             expiresValueLabel.setForeground(EXPIRY_FOREGROUND_COLOR);
-            expiresValueLabel.setText(min + message("min") + " " + sec + "s");
+            expiresValueLabel.setText(min + message("min") + " " + sec + message("sec_letter"));
         } else {
             expiresValueLabel.setForeground(SELECT_COLOR_RED);
-            expiresValueLabel.setText(sec + "s");
+            expiresValueLabel.setText(sec + message("sec_letter"));
         }
     }
 
