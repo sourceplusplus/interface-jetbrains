@@ -201,13 +201,13 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                 if (virtualText.icon != null) {
                     virtualText.icon!!.paintIcon(null, g, virtualText.iconLocation.x, virtualText.iconLocation.y)
                 }
-                g.font = font
+                g.font = virtualText.font ?: font
                 g.setRenderingHint(
                     RenderingHints.KEY_TEXT_ANTIALIASING,
                     AntialiasingType.getKeyForCurrentScope(false)
                 )
                 g.color = foreground
-                g.drawString(virtualText.getRenderedVirtualText(), 0, ascent)
+                g.drawString(virtualText.getRenderedVirtualText(), virtualText.xOffset, ascent)
                 val effectColor = virtualText.textAttributes.effectColor
                 if (effectColor != null) {
                     g.color = effectColor

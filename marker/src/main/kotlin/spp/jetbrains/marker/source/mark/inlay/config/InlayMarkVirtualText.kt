@@ -23,6 +23,7 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.event.InlayMarkEventCode
+import java.awt.Font
 import java.awt.Point
 import javax.swing.Icon
 
@@ -47,6 +48,8 @@ open class InlayMarkVirtualText {
     var showBeforeAnnotationsWhenBlock: Boolean = true
     var spacingTillMethodText = 0
     var autoAddingSpacingTillMethodText = true
+    var font: Font? = null
+    var xOffset: Int = 0
 
     constructor(inlayMark: InlayMark, virtualText: String) {
         this.inlayMark = inlayMark
