@@ -52,6 +52,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
@@ -69,7 +70,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
     private boolean disposed = false;
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
-    private final String placeHolderText = "Breakpoint Condition";
+    private final String placeHolderText = message("breakpoint_condition");
     private LiveBreakpoint liveBreakpoint;
     private LiveBreakpointStatusPanel statusPanel;
     private JPanel wrapper;
@@ -78,8 +79,8 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
     private boolean expanded = false;
     private final ListTableModel commandModel = new ListTableModel<>(
             new ColumnInfo[]{
-                    new BreakpointHitColumnInfo("Breakpoint Data"),
-                    new BreakpointHitColumnInfo("Time")
+                    new BreakpointHitColumnInfo(message("breakpoint_data")),
+                    new BreakpointHitColumnInfo(message("time"))
             },
             new ArrayList<>(), 0, SortOrder.DESCENDING);
 
@@ -178,10 +179,10 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
                 LiveInstrumentRemoved removed = deserializeLiveInstrumentRemoved(new JsonObject(event.getData()));
                 if (removed.getCause() == null) {
-                    statusPanel.setStatus("Complete", COMPLETE_COLOR_PURPLE);
+                    statusPanel.setStatus(message("complete"), COMPLETE_COLOR_PURPLE);
                 } else {
                     commandModel.insertRow(0, event);
-                    statusPanel.setStatus("Error", SELECT_COLOR_RED);
+                    statusPanel.setStatus(message("error"), SELECT_COLOR_RED);
                 }
             }
         });
@@ -559,14 +560,14 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
             breakpointConditionField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-            breakpointConditionField.setFont(ROBOTO_LIGHT_PLAIN_17);
+            breakpointConditionField.setFont(BIG_FONT);
             breakpointConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(breakpointConditionField, "cell 0 0");
 
             //---- label1 ----
-            label1.setText("Hit Limit");
+            label1.setText(message("hit_limit"));
             label1.setForeground(Color.gray);
-            label1.setFont(ROBOTO_LIGHT_PLAIN_15);
+            label1.setFont(SMALLER_FONT);
             mainPanel.add(label1, "cell 1 0");
 
             //---- hitLimitSpinner ----
@@ -576,7 +577,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
             //---- timeLabel ----
             timeLabel.setIcon(PluginIcons.clock);
-            timeLabel.setFont(ROBOTO_LIGHT_PLAIN_14);
+            timeLabel.setFont(SMALLEST_FONT);
             timeLabel.setIconTextGap(8);
             timeLabel.setVisible(false);
             mainPanel.add(timeLabel, "cell 1 0,gapx null 8");

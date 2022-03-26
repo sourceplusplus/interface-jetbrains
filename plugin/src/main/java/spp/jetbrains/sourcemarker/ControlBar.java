@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.util.ui.UIUtil;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import net.miginfocom.swing.MigLayout;
+import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
@@ -197,7 +199,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
             location = className + "." + shortFuncName;
         }
         textField1 = new AutocompleteField(
-                "Location: " + location + "#" + inlayMark.getLineNumber(),
+                message("location") + ": " + location + "#" + inlayMark.getLineNumber(),
                 availableCommands, lookup, inlayMark.getArtifactQualifiedName(), true, true, SELECT_COLOR_RED);
         textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
         label2 = new JLabel();
@@ -224,7 +226,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         textField1.setBorder(new CompoundBorder(
             new LineBorder(UIUtil.getBoundsColor(), 1, true),
             new EmptyBorder(2, 6, 0, 0)));
-        textField1.setFont(ROBOTO_LIGHT_PLAIN_17);
+        textField1.setFont(BIG_FONT);
         textField1.setMinimumSize(new Dimension(0, 27));
         add(textField1, "cell 1 0");
 

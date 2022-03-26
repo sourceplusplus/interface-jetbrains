@@ -71,14 +71,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
-import static spp.jetbrains.sourcemarker.PluginUI.CNFG_PANEL_BGND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.CNFG_PANEL_FOCUS_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.COMPLETE_COLOR_PURPLE;
-import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_14;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_17;
-import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
-import static spp.jetbrains.sourcemarker.PluginUI.STATUS_BAR_TXT_BG_COLOR;
+import static spp.jetbrains.sourcemarker.PluginBundle.message;
+import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
@@ -90,16 +84,16 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
-    private static final String WAITING_FOR_LIVE_LOG_DATA = "Waiting for live log data...";
-    private static final String MESSAGE = "Message";
-    private static final String TIME = "Time";
+    private static final String WAITING_FOR_LIVE_LOG_DATA = message("waiting_for_live_log_data");
+    private static final String MESSAGE = message("message");
+    private static final String TIME = message("time");
     private static final String QUOTE_CURLY_BRACES = Pattern.quote("{}");
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
-    private final String placeHolderText = "Input log message (use $ for variables)";
+    private final String placeHolderText = message("input_log_message");
     private final boolean watchExpression;
     private EditorImpl editor;
     private LiveLog liveLog;
@@ -788,7 +782,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-        liveLogTextField.setFont(ROBOTO_LIGHT_PLAIN_17);
+        liveLogTextField.setFont(BIG_FONT);
         liveLogTextField.setMinimumSize(new Dimension(0, 27));
         add(liveLogTextField, "cell 2 0");
 

@@ -223,10 +223,10 @@ class PortalEventListener(
         if (hostTranslations) {
             vertx.eventBus().consumer<String>(GetPortalTranslations) {
                 val map = HashMap<String, String>()
-                val keys = PluginBundle.resourceBundle.keys
+                val keys = PluginBundle.LOCALE_BUNDLE.keys
                 while (keys.hasMoreElements()) {
                     val key = keys.nextElement()
-                    map[key] = PluginBundle.resourceBundle.getString(key)
+                    map[key] = PluginBundle.LOCALE_BUNDLE.getString(key)
                 }
                 it.reply(JsonObject.mapFrom(map))
             }

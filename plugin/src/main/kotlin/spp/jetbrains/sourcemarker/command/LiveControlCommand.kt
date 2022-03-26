@@ -17,6 +17,7 @@
  */
 package spp.jetbrains.sourcemarker.command
 
+import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.PluginIcons
 import javax.swing.Icon
 
@@ -35,105 +36,105 @@ enum class LiveControlCommand(
 ) : AutocompleteFieldRow {
 
     VIEW_OVERVIEW(
-        "View Overview",
-        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Overview ➛ Scope: Class</span></html>",
+        message("view_overview"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("overview") + " ➛ " + message("scope") + ": " + message("class") + "</span></html>",
         PluginIcons.Command.viewOverviewSelected,
         PluginIcons.Command.viewOverviewUnSelected
     ),
     VIEW_ACTIVITY(
-        "View Activity",
-        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Activity ➛ Scope: Method</span></html>",
+        message("view_activity"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("activity") + " ➛ " + message("scope") + ": " + message("method") + "</span></html>",
         PluginIcons.Command.viewActivitySelected,
         PluginIcons.Command.viewActivityUnSelected
     ),
     VIEW_TRACES(
-        "View Traces",
-        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Traces ➛ Scope: Method</span></html>",
+        message("view_traces"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("traces") + " ➛ " + message("scope") + ": " + message("method") + "</span></html>",
         PluginIcons.Command.viewTracesSelected,
         PluginIcons.Command.viewTracesUnSelected
     ),
     VIEW_LOGS(
-        "View Logs",
-        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Logs ➛ Scope: Method</span></html>",
+        message("view_logs"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("logs") + " ➛ " + message("scope") + ": " + message("method") + "</span></html>",
         PluginIcons.Command.viewLogsSelected,
         PluginIcons.Command.viewLogsUnSelected
     ),
     SHOW_QUICK_STATS(
-        "Show Quick Stats",
-        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Quick Stats ➛ Scope: </span><span style=\"font-size: 80%; color: #E6E6E6\">Endpoint</span></html>",
+        message("show_quick_stats"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("quick_stats") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("endpoint") + "</span></html>",
         PluginIcons.Command.viewActivitySelected,
         PluginIcons.Command.viewActivityUnSelected
     ),
     HIDE_QUICK_STATS(
-        "Hide Quick Stats",
-        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Quick Stats ➛ Scope: </span><span style=\"font-size: 80%; color: #E6E6E6\">Endpoint</span></html>",
+        message("hide_quick_stats"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("quick_stats") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("endpoint") + "</span></html>",
         PluginIcons.Command.viewActivitySelected,
         PluginIcons.Command.viewActivityUnSelected
     ),
     WATCH_LOG(
-        "Watch Log",
-        "<html><span style=\"font-size: 80%; color: gray\">Live View ➛ Log ➛ Scope: </span><span style=\"font-size: 80%; color: #E6E6E6\">Expression</span></html>",
+        message("watch_log"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("log") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("Expression") + "</span></html>",
         PluginIcons.Command.viewLogsSelected,
         PluginIcons.Command.viewLogsUnSelected
     ),
-    WATCH_VARIABLE(
-        "watch",
-        "Manual Tracing ➛ Watched Variables ➛ Scope: Local / Add *variable* to watched variables"
-    ),
-    TRACE_METHOD(
-        "trace",
-        "Add method to distributed tracing system"
-    ),
+//    WATCH_VARIABLE(
+//        "watch",
+//        "Manual Tracing ➛ Watched Variables ➛ Scope: Local / Add *variable* to watched variables"
+//    ),
+//    TRACE_METHOD(
+//        "trace",
+//        "Add method to distributed tracing system"
+//    ),
     ADD_LIVE_BREAKPOINT(
-        "Add Breakpoint",
-        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
+        message("add_breakpoint"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_instrument") + " ➛ " + message("add") + " ➛ " + message("location") +": </span><span style=\"font-size: 80%; color: #E6E6E6\">"+ message("on_line") + " *lineNumber*</span></html>",
         PluginIcons.Command.liveBreakpointSelected,
         PluginIcons.Command.liveBreakpointUnSelected
     ),
     ADD_LIVE_LOG(
-        "Add Log",
-        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
+        message("add_log"),
+        "<html><span style=\"font-size: 80%; color: gray\">"  + message("live_instrument") + " ➛ " + message("add") + " ➛ " + message("location") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">"+ message("on_line") + " *lineNumber*</span></html>",
         PluginIcons.Command.liveLogSelected,
         PluginIcons.Command.liveLogUnSelected
     ),
     ADD_LIVE_METER(
-        "Add Meter",
-        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On line *lineNumber*</span></html>",
+        message("add_meter"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_instrument") + " ➛ " + message("add") + " ➛ " + message("location") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("on_line") + " *lineNumber*</span></html>",
         PluginIcons.Command.liveMeterSelected,
         PluginIcons.Command.liveMeterUnSelected
     ),
     ADD_LIVE_SPAN(
-        "Add Span",
-        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Add ➛ Location: </span><span style=\"font-size: 80%; color: #E6E6E6\">On method *methodName*</span></html>",
+        message("add_span"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_instrument") + " ➛ " + message("add") + " ➛ " + message("location") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("on_method") + " *methodName*</span></html>",
         PluginIcons.Command.liveSpanSelected,
         PluginIcons.Command.liveSpanUnSelected
     ),
     CLEAR_LIVE_INSTRUMENTS(
-        "Clear Instruments",
-        "<html><span style=\"font-size: 80%; color: gray\">Live Instrument ➛ Clear All</span></html>",
+        message("clear_instruments"),
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_instrument") + " ➛ " + message("clear_all") + "</span></html>",
         PluginIcons.Command.clearInstrumentSelected,
         PluginIcons.Command.clearInstrumentUnSelected
     ),
     CLEAR_LIVE_BREAKPOINTS(
-        "Clear Breakpoints",
+        message("clear_breakpoints"),
         "Clear all self-created live breakpoints",
         PluginIcons.Command.clearInstrumentSelected,
         PluginIcons.Command.clearInstrumentUnSelected
     ),
     CLEAR_LIVE_LOGS(
-        "Clear Logs",
+        message("clear_logs"),
         "Clear all self-created live logs",
         PluginIcons.Command.clearInstrumentSelected,
         PluginIcons.Command.clearInstrumentUnSelected
     ),
     CLEAR_LIVE_METERS(
-        "Clear Meters",
+        message("clear_meters"),
         "Clear all self-created live meters",
         PluginIcons.Command.clearInstrumentSelected,
         PluginIcons.Command.clearInstrumentUnSelected
     ),
     CLEAR_LIVE_SPANS(
-        "Clear Spans",
+        message("clear_spans"),
         "Clear all self-created live spans",
         PluginIcons.Command.clearInstrumentSelected,
         PluginIcons.Command.clearInstrumentUnSelected

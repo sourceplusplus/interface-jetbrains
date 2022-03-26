@@ -1,5 +1,6 @@
 package spp.jetbrains.sourcemarker;
 
+import com.intellij.DynamicBundle;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 
@@ -18,6 +19,10 @@ public class PluginUI {
     public static Font ROBOTO_LIGHT_PLAIN_15;
     public static Font ROBOTO_LIGHT_PLAIN_16;
     public static Font ROBOTO_LIGHT_PLAIN_17;
+    public static Font MICROSOFT_YAHEI_PLAIN_13;
+    public static Font MICROSOFT_YAHEI_PLAIN_14;
+    public static Font MICROSOFT_YAHEI_PLAIN_15;
+    public static Font MICROSOFT_YAHEI_PLAIN_16;
 
     static {
         try {
@@ -31,11 +36,21 @@ public class PluginUI {
             ROBOTO_LIGHT_PLAIN_15 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(15f);
             ROBOTO_LIGHT_PLAIN_16 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(16f);
             ROBOTO_LIGHT_PLAIN_17 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(17f);
+
+            Font YAHEI = Font.createFont(Font.TRUETYPE_FONT, PluginUI.class.getResourceAsStream("/fonts/chinese.msyh.ttf"));
+            MICROSOFT_YAHEI_PLAIN_13 =  YAHEI.deriveFont(Font.PLAIN).deriveFont(13f);
+            MICROSOFT_YAHEI_PLAIN_14 =  YAHEI.deriveFont(Font.PLAIN).deriveFont(14f);
+            MICROSOFT_YAHEI_PLAIN_15 =  YAHEI.deriveFont(Font.PLAIN).deriveFont(15f);
+            MICROSOFT_YAHEI_PLAIN_16 =  YAHEI.deriveFont(Font.PLAIN).deriveFont(16f);
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
     }
 
+    public static final Font BIG_FONT = (DynamicBundle.getLocale().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_16 : ROBOTO_LIGHT_PLAIN_17;
+    public static final Font SMALL_FONT = (DynamicBundle.getLocale().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_15 : ROBOTO_LIGHT_PLAIN_16;
+    public static final Font SMALLER_FONT = (DynamicBundle.getLocale().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_14 : ROBOTO_LIGHT_PLAIN_15;
+    public static final Font SMALLEST_FONT = (DynamicBundle.getLocale().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_13 : ROBOTO_LIGHT_PLAIN_14;
     public static final Color PANEL_BACKGROUND_COLOR = new Color(37, 37, 37);
     public static final Color LABEL_FOREGROUND_COLOR = new Color(152, 118, 170);
     public static final Color LABEL_FOREGROUND_COLOR1 = new Color(106, 135, 89);
