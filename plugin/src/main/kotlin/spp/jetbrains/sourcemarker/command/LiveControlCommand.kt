@@ -37,25 +37,25 @@ enum class LiveControlCommand(
 
     VIEW_OVERVIEW(
         message("view_overview"),
-        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("overview") + " ➛ " + message("scope") + ": " + message("class") + "</span></html>",
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("overview") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("class") + "</span></html>",
         PluginIcons.Command.viewOverviewSelected,
         PluginIcons.Command.viewOverviewUnSelected
     ),
     VIEW_ACTIVITY(
         message("view_activity"),
-        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("activity") + " ➛ " + message("scope") + ": " + message("method") + "</span></html>",
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("activity") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("method") + "</span></html>",
         PluginIcons.Command.viewActivitySelected,
         PluginIcons.Command.viewActivityUnSelected
     ),
     VIEW_TRACES(
         message("view_traces"),
-        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("traces") + " ➛ " + message("scope") + ": " + message("method") + "</span></html>",
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("traces") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("method") + "</span></html>",
         PluginIcons.Command.viewTracesSelected,
         PluginIcons.Command.viewTracesUnSelected
     ),
     VIEW_LOGS(
         message("view_logs"),
-        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("logs") + " ➛ " + message("scope") + ": " + message("method") + "</span></html>",
+        "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("logs") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("method") + "</span></html>",
         PluginIcons.Command.viewLogsSelected,
         PluginIcons.Command.viewLogsUnSelected
     ),
