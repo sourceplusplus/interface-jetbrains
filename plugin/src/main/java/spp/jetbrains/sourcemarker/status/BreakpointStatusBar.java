@@ -535,7 +535,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(PluginIcons.eye);
+            configLabel.setIcon(PluginIcons.breakpointConfig);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----

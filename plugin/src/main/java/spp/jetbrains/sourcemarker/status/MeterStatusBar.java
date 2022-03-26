@@ -458,7 +458,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(PluginIcons.analytics);
+            configLabel.setIcon(PluginIcons.meterConfig);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----

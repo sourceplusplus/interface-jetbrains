@@ -753,7 +753,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(PluginIcons.alignLeft);
+            configLabel.setIcon(PluginIcons.logConfig);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----

@@ -437,7 +437,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(PluginIcons.mapMarkedAlt);
+            configLabel.setIcon(PluginIcons.spanConfig);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----

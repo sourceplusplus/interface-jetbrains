@@ -62,20 +62,20 @@ enum class LiveControlCommand(
     SHOW_QUICK_STATS(
         message("show_quick_stats"),
         "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("quick_stats") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("endpoint") + "</span></html>",
-        PluginIcons.Command.viewActivitySelected,
-        PluginIcons.Command.viewActivityUnSelected
+        PluginIcons.Command.quickStatsSelected,
+        PluginIcons.Command.quickStatsUnSelected
     ),
     HIDE_QUICK_STATS(
         message("hide_quick_stats"),
         "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("quick_stats") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("endpoint") + "</span></html>",
-        PluginIcons.Command.viewActivitySelected,
-        PluginIcons.Command.viewActivityUnSelected
+        PluginIcons.Command.quickStatsSelected,
+        PluginIcons.Command.quickStatsUnSelected
     ),
     WATCH_LOG(
         message("watch_log"),
         "<html><span style=\"font-size: 80%; color: gray\">" + message("live_view") + " ➛ " + message("log") + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: #E6E6E6\">" + message("Expression") + "</span></html>",
-        PluginIcons.Command.viewLogsSelected,
-        PluginIcons.Command.viewLogsUnSelected
+        PluginIcons.Command.watchLogSelected,
+        PluginIcons.Command.watchLogUnSelected
     ),
 //    WATCH_VARIABLE(
 //        "watch",

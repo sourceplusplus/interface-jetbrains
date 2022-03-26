@@ -14,15 +14,15 @@ public interface PluginIcons {
     Icon closePressed = IconLoader.getIcon("/icons/closeIconPressed.svg", PluginIcons.class);
 
     Icon clock = IconLoader.getIcon("/icons/clock.svg", PluginIcons.class);
-    Icon alignLeft = IconLoader.getIcon("/icons/align-left.svg", PluginIcons.class);
+    Icon logConfig = IconLoader.getIcon("/icons/log-config.svg", PluginIcons.class);
     Icon angleDown = IconLoader.getIcon("/icons/angle-down.svg", PluginIcons.class);
 
-    Icon eye = IconLoader.getIcon("/icons/eye.svg", PluginIcons.class);
+    Icon breakpointConfig = IconLoader.getIcon("/icons/breakpoint-config.svg", PluginIcons.class);
     Icon eyeSlash = IconLoader.getIcon("/icons/eye-slash.svg", PluginIcons.class);
 
-    Icon analytics = IconLoader.getIcon("/icons/analytics.svg", PluginIcons.class);
+    Icon meterConfig = IconLoader.getIcon("/icons/meter-config.svg", PluginIcons.class);
 
-    Icon mapMarkedAlt = IconLoader.getIcon("/icons/map-marked-alt.svg", PluginIcons.class);
+    Icon spanConfig = IconLoader.getIcon("/icons/span-config.svg", PluginIcons.class);
 
     Icon config = IconLoader.getIcon("/icons/configIcon.svg", PluginIcons.class);
     Icon configHovered = IconLoader.getIcon("/icons/configIconHovered.svg", PluginIcons.class);
@@ -66,6 +66,12 @@ public interface PluginIcons {
         Icon viewTracesUnSelected = IconLoader.getIcon("/icons/command/view-traces_unselected.svg", PluginIcons.class);
         Icon viewLogsSelected = IconLoader.getIcon("/icons/command/view-logs_selected.svg", PluginIcons.class);
         Icon viewLogsUnSelected = IconLoader.getIcon("/icons/command/view-logs_unselected.svg", PluginIcons.class);
+
+        Icon quickStatsSelected = IconLoader.getIcon("/icons/command/quick-stats_selected.svg", PluginIcons.class);
+        Icon quickStatsUnSelected = IconLoader.getIcon("/icons/command/quick-stats_unselected.svg", PluginIcons.class);
+
+        Icon watchLogSelected = IconLoader.getIcon("/icons/command/watch-log_selected.svg", PluginIcons.class);
+        Icon watchLogUnSelected = IconLoader.getIcon("/icons/command/watch-log_unselected.svg", PluginIcons.class);
     }
 
     interface Instrument {
