@@ -31,7 +31,7 @@ import javax.swing.JList
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ControlBarCellRenderer(private val autocompleteField: AutocompleteField, val sourceMark: ExpressionSourceMark) : DefaultListCellRenderer() {
+class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) : DefaultListCellRenderer() {
     init {
         isOpaque = false
     }
