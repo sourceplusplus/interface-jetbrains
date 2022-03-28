@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.intellij.psi.PsiFile
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -56,18 +55,12 @@ object SourceMarker {
         check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.forEach {
-            deactivateSourceFileMarkerSuspend(it.value)
+            deactivateSourceFileMarker(it.value)
         }
         availableSourceFileMarkers.clear()
     }
 
-    fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
-        return runBlocking {
-            return@runBlocking deactivateSourceFileMarkerSuspend(sourceFileMarker)
-        }
-    }
-
-    suspend fun deactivateSourceFileMarkerSuspend(sourceFileMarker: SourceFileMarker): Boolean {
+    suspend fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
         check(enabled) { "SourceMarker disabled" }
 
         if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
