@@ -120,8 +120,8 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun setVisible(visible: Boolean)
 
     fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
-    fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true)
-    fun apply(addToMarker: Boolean = true) {
+    fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true, editor: Editor? = null)
+    fun apply(addToMarker: Boolean = true, editor: Editor? = null) {
         SourceMarker.getGlobalSourceMarkEventListeners().forEach(::addEventListener)
 
         if (addToMarker) {
@@ -144,12 +144,12 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 }
             } else if (this is InlayMark) {
                 if (configuration.showComponentInlay) {
-                    val editor = FileEditorManager.getInstance(project).selectedTextEditor
-                    if (editor == null) {
+                    val selectedEditor = editor ?: FileEditorManager.getInstance(project).selectedTextEditor
+                    if (selectedEditor == null) {
                         TODO()
                     } else {
-                        val provider = SourceInlayComponentProvider.from(editor)
-                        val viewport = (editor as? EditorImpl)?.scrollPane?.viewport!!
+                        val provider = SourceInlayComponentProvider.from(selectedEditor)
+                        val viewport = (selectedEditor as? EditorImpl)?.scrollPane?.viewport!!
                         var displayLineIndex = lineNumber - 1
                         if (this is ExpressionInlayMark) {
                             if (showAboveExpression) {
