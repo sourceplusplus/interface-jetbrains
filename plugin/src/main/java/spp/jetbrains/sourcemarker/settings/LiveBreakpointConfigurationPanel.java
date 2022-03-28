@@ -8,7 +8,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
+import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.SMALLER_FONT;
 
 public class LiveBreakpointConfigurationPanel extends JPanel {
 
@@ -88,7 +90,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
     public void setRateLimitStep(String step) {
         this.rateLimitStep = step;
-        rateLimitStepCombobox.setSelectedItem(step);
+        rateLimitStepCombobox.setSelectedItem(message(step));
     }
 
     public boolean isChanged() {
@@ -149,8 +151,8 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                 "[]"));
 
             //---- label3 ----
-            label3.setText("Expiration Date");
-            label3.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+            label3.setText(message("expiration_date"));
+            label3.setFont(SMALLER_FONT);
             panel3.add(label3, "cell 0 0");
 
             //======== panel1 ========
@@ -171,46 +173,46 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                     "[]"));
 
                 //---- expiration15MinButton ----
-                expiration15MinButton.setText("15 Minutes");
+                expiration15MinButton.setText("15 " + message("minutes"));
                 expiration15MinButton.setSelected(true);
                 expiration15MinButton.setBackground(null);
-                expiration15MinButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+                expiration15MinButton.setFont(SMALLER_FONT);
                 panel1.add(expiration15MinButton, "cell 0 0");
 
                 //---- expiration30MinButton ----
-                expiration30MinButton.setText("30 Minutes");
+                expiration30MinButton.setText("30 " + message("minutes"));
                 expiration30MinButton.setBackground(null);
-                expiration30MinButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+                expiration30MinButton.setFont(SMALLER_FONT);
                 panel1.add(expiration30MinButton, "cell 1 0");
 
                 //---- expiration1HrButton ----
-                expiration1HrButton.setText("1 Hour");
+                expiration1HrButton.setText("1 " + message("hour"));
                 expiration1HrButton.setBackground(null);
-                expiration1HrButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+                expiration1HrButton.setFont(SMALLER_FONT);
                 panel1.add(expiration1HrButton, "cell 2 0");
 
                 //---- expiration3HrsButton ----
-                expiration3HrsButton.setText("3 Hours");
+                expiration3HrsButton.setText("3 " + message("hours"));
                 expiration3HrsButton.setBackground(null);
-                expiration3HrsButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+                expiration3HrsButton.setFont(SMALLER_FONT);
                 panel1.add(expiration3HrsButton, "cell 3 0");
 
                 //---- expiration6HrsButton ----
-                expiration6HrsButton.setText("6 Hours");
+                expiration6HrsButton.setText("6 " + message("hours"));
                 expiration6HrsButton.setBackground(null);
-                expiration6HrsButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+                expiration6HrsButton.setFont(SMALLER_FONT);
                 panel1.add(expiration6HrsButton, "cell 4 0");
 
                 //---- expiration12HrsButton ----
-                expiration12HrsButton.setText("12 Hours");
+                expiration12HrsButton.setText("12 " + message("hours"));
                 expiration12HrsButton.setBackground(null);
-                expiration12HrsButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+                expiration12HrsButton.setFont(SMALLER_FONT);
                 panel1.add(expiration12HrsButton, "cell 5 0");
 
                 //---- expiration24HrsButton ----
-                expiration24HrsButton.setText("24 Hours");
+                expiration24HrsButton.setText("24 " + message("hours"));
                 expiration24HrsButton.setBackground(null);
-                expiration24HrsButton.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+                expiration24HrsButton.setFont(SMALLER_FONT);
                 panel1.add(expiration24HrsButton, "cell 6 0");
             }
             panel3.add(panel1, "cell 0 1 3 1");
@@ -234,8 +236,8 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                 "[grow]"));
 
             //---- label6 ----
-            label6.setText("Hit Throttle");
-            label6.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_15);
+            label6.setText(message("hit_throttle"));
+            label6.setFont(SMALLER_FONT);
             panel5.add(label6, "cell 0 0");
 
             //======== panel2 ========
@@ -256,14 +258,14 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                 panel2.add(rateLimitCountSpinner, "cell 0 0");
 
                 //---- label7 ----
-                label7.setText("per");
+                label7.setText(message("per"));
                 panel2.add(label7, "cell 1 0");
 
                 //---- rateLimitStepCombobox ----
                 rateLimitStepCombobox.setModel(new DefaultComboBoxModel<>(new String[] {
-                    "second",
-                    "minute",
-                    "hour"
+                    message("second"),
+                    message("minute"),
+                    message("hour")
                 }));
                 panel2.add(rateLimitStepCombobox, "cell 2 0");
             }

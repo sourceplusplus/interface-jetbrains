@@ -80,13 +80,13 @@ abstract class ExpressionSourceMark(
         }
 
     @Synchronized
-    override fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean) {
+    override fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean, editor: Editor?) {
         this.sourceMarkComponent = sourceMarkComponent
-        super.apply(addToMarker)
+        super.apply(addToMarker, editor)
     }
 
-    override fun apply(addToMarker: Boolean) {
-        apply(configuration.componentProvider.getComponent(this), addToMarker)
+    override fun apply(addToMarker: Boolean, editor: Editor?) {
+        apply(configuration.componentProvider.getComponent(this), addToMarker, editor)
     }
 
     override fun dispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
@@ -96,6 +96,15 @@ abstract class ExpressionSourceMark(
             else -> throw IllegalStateException("ExpressionSourceMark is not a GutterMark or InlayMark")
         }
         super.dispose(removeFromMarker, assertRemoval)
+    }
+
+    override suspend fun disposeSuspend(removeFromMarker: Boolean, assertRemoval: Boolean) {
+        when (this) {
+            is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
+            is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
+            else -> throw IllegalStateException("ExpressionSourceMark is not a GutterMark or InlayMark")
+        }
+        super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 
     fun getParentSourceMark(): SourceMark? {

@@ -31,6 +31,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -61,7 +62,9 @@ class FileActivityListener : FileEditorManagerListener {
             val psiFile = PsiManager.getInstance(source.project).findFile(file)
             val fileMarker = psiFile?.getUserData(SourceFileMarker.KEY)
             if (fileMarker != null) {
-                SourceMarker.deactivateSourceFileMarker(fileMarker)
+                runBlocking {
+                    SourceMarker.deactivateSourceFileMarker(fileMarker)
+                }
             }
         }
     }

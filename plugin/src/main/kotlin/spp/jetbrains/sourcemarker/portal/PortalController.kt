@@ -36,9 +36,7 @@ import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.marshall.KSerializers
-import spp.protocol.marshall.LocalMessageCodec
 import javax.swing.UIManager
 
 class PortalController(private val markerConfig: SourceMarkerConfig) : CoroutineVerticle() {

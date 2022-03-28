@@ -51,7 +51,7 @@ object SourceMarker {
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
 
-    fun clearAvailableSourceFileMarkers() {
+    suspend fun clearAvailableSourceFileMarkers() {
         check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.forEach {
@@ -60,23 +60,7 @@ object SourceMarker {
         availableSourceFileMarkers.clear()
     }
 
-    fun refreshAvailableSourceFileMarkers(recreateFileMarkers: Boolean) {
-        check(enabled) { "SourceMarker disabled" }
-
-        if (recreateFileMarkers) {
-            val previousFileMarkers = getAvailableSourceFileMarkers()
-            clearAvailableSourceFileMarkers()
-            previousFileMarkers.forEach {
-                getSourceFileMarker(it.psiFile)!!.refresh()
-            }
-        } else {
-            availableSourceFileMarkers.forEach {
-                it.value.refresh()
-            }
-        }
-    }
-
-    fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
+    suspend fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
         check(enabled) { "SourceMarker disabled" }
 
         if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {

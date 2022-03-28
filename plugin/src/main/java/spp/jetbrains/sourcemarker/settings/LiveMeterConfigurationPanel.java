@@ -23,8 +23,9 @@ import java.awt.*;
 import java.util.Objects;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
+import static spp.jetbrains.sourcemarker.PluginUI.SMALLER_FONT;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.INTELLIJ_PRODUCT_CODES;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES;
 
@@ -202,8 +203,8 @@ public class LiveMeterConfigurationPanel extends JPanel {
                 "[]"));
 
             //---- label1 ----
-            label1.setText("Condtion");
-            label1.setFont(ROBOTO_LIGHT_PLAIN_15);
+            label1.setText(message("condition"));
+            label1.setFont(SMALLER_FONT);
             panel4.add(label1, "cell 0 0");
 
             //======== conditionPanel ========
@@ -230,8 +231,8 @@ public class LiveMeterConfigurationPanel extends JPanel {
                 "[]"));
 
             //---- label3 ----
-            label3.setText("Expiration Date");
-            label3.setFont(ROBOTO_LIGHT_PLAIN_15);
+            label3.setText(message("expiration_date"));
+            label3.setFont(SMALLER_FONT);
             panel3.add(label3, "cell 0 0");
 
             //======== panel1 ========
@@ -254,52 +255,52 @@ public class LiveMeterConfigurationPanel extends JPanel {
                     "[]"));
 
                 //---- expirationNeverButton ----
-                expirationNeverButton.setText("Never");
+                expirationNeverButton.setText(message("never"));
                 expirationNeverButton.setBackground(null);
-                expirationNeverButton.setFont(ROBOTO_LIGHT_PLAIN_15);
+                expirationNeverButton.setFont(SMALLER_FONT);
                 expirationNeverButton.setSelected(true);
                 panel1.add(expirationNeverButton, "cell 0 0,alignx center,growx 0");
 
                 //---- expiration15MinButton ----
-                expiration15MinButton.setText("15 Minutes");
+                expiration15MinButton.setText("15 " + message("minutes"));
                 expiration15MinButton.setBackground(null);
-                expiration15MinButton.setFont(ROBOTO_LIGHT_PLAIN_15);
+                expiration15MinButton.setFont(SMALLER_FONT);
                 panel1.add(expiration15MinButton, "cell 1 0,alignx center,growx 0");
 
                 //---- expiration30MinButton ----
-                expiration30MinButton.setText("30 Minutes");
+                expiration30MinButton.setText("30 " + message("minutes"));
                 expiration30MinButton.setBackground(null);
-                expiration30MinButton.setFont(ROBOTO_LIGHT_PLAIN_15);
+                expiration30MinButton.setFont(SMALLER_FONT);
                 panel1.add(expiration30MinButton, "cell 2 0,alignx center,growx 0");
 
                 //---- expiration1HrButton ----
-                expiration1HrButton.setText("1 Hour");
+                expiration1HrButton.setText("1 " + message("hour"));
                 expiration1HrButton.setBackground(null);
-                expiration1HrButton.setFont(ROBOTO_LIGHT_PLAIN_15);
+                expiration1HrButton.setFont(SMALLER_FONT);
                 panel1.add(expiration1HrButton, "cell 3 0,alignx center,growx 0");
 
                 //---- expiration3HrsButton ----
-                expiration3HrsButton.setText("3 Hours");
+                expiration3HrsButton.setText("3 " + message("hours"));
                 expiration3HrsButton.setBackground(null);
-                expiration3HrsButton.setFont(ROBOTO_LIGHT_PLAIN_15);
+                expiration3HrsButton.setFont(SMALLER_FONT);
                 panel1.add(expiration3HrsButton, "cell 4 0,alignx center,growx 0");
 
                 //---- expiration6HrsButton ----
-                expiration6HrsButton.setText("6 Hours");
+                expiration6HrsButton.setText("6 " + message("hours"));
                 expiration6HrsButton.setBackground(null);
-                expiration6HrsButton.setFont(ROBOTO_LIGHT_PLAIN_15);
+                expiration6HrsButton.setFont(SMALLER_FONT);
                 panel1.add(expiration6HrsButton, "cell 5 0,alignx center,growx 0");
 
                 //---- expiration12HrsButton ----
-                expiration12HrsButton.setText("12 Hours");
+                expiration12HrsButton.setText("12 " + message("hours"));
                 expiration12HrsButton.setBackground(null);
-                expiration12HrsButton.setFont(ROBOTO_LIGHT_PLAIN_15);
+                expiration12HrsButton.setFont(SMALLER_FONT);
                 panel1.add(expiration12HrsButton, "cell 6 0,alignx center,growx 0");
 
                 //---- expiration24HrsButton ----
-                expiration24HrsButton.setText("24 Hours");
+                expiration24HrsButton.setText("24 " + message("hours"));
                 expiration24HrsButton.setBackground(null);
-                expiration24HrsButton.setFont(ROBOTO_LIGHT_PLAIN_15);
+                expiration24HrsButton.setFont(SMALLER_FONT);
                 panel1.add(expiration24HrsButton, "cell 7 0,alignx center,growx 0");
             }
             panel3.add(panel1, "cell 0 1 3 1");

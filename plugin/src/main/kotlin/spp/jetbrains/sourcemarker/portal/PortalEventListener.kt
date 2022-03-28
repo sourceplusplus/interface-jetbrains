@@ -42,6 +42,7 @@ import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.average
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
@@ -222,10 +223,10 @@ class PortalEventListener(
         if (hostTranslations) {
             vertx.eventBus().consumer<String>(GetPortalTranslations) {
                 val map = HashMap<String, String>()
-                val keys = PluginBundle.resourceBundle.keys
+                val keys = PluginBundle.LOCALE_BUNDLE.keys
                 while (keys.hasMoreElements()) {
                     val key = keys.nextElement()
-                    map[key] = PluginBundle.resourceBundle.getString(key)
+                    map[key] = PluginBundle.LOCALE_BUNDLE.getString(key)
                 }
                 it.reply(JsonObject.mapFrom(map))
             }
@@ -499,31 +500,32 @@ class PortalEventListener(
                     ), vertx
                 )
                 vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
-                autoResolveEndpointNamesIfNecessary(traceResult, portal)
+
+                if (markerConfig.autoResolveEndpointNames) {
+                    autoResolveEndpointNames(traceResult, portal)
+                }
             }
         }
     }
 
-    private suspend fun autoResolveEndpointNamesIfNecessary(traceResult: TraceResult, portal: SourcePortal) {
-        if (markerConfig.autoResolveEndpointNames) {
-            //todo: only try to auto resolve endpoint names with dynamic ids
-            //todo: support multiple operationsNames/traceIds
-            traceResult.traces.forEach {
-                if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
-                    val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
-                    val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
-                    if (entrySpan != null) {
-                        val url = entrySpan.tags["url"]
-                        val httpMethod = entrySpan.tags["http.method"]
-                        if (url != null && httpMethod != null) {
-                            val updatedEndpointName = "$httpMethod:${URI(url).path}"
-                            vertx.eventBus().send(
-                                TraceSpanUpdated, entrySpan.copy(
-                                    endpointName = updatedEndpointName,
-                                    artifactQualifiedName = portal.viewingArtifact
-                                )
+    private suspend fun autoResolveEndpointNames(traceResult: TraceResult, portal: SourcePortal) {
+        //todo: only try to auto resolve endpoint names with dynamic ids
+        //todo: support multiple operationsNames/traceIds
+        traceResult.traces.forEach {
+            if (!portal.tracesView.resolvedEndpointNames.containsKey(it.traceIds[0])) {
+                val traceStack = EndpointTracesBridge.getTraceStack(it.traceIds[0], vertx)
+                val entrySpan: TraceSpan? = traceStack.traceSpans.firstOrNull { it.type == "Entry" }
+                if (entrySpan != null) {
+                    val url = entrySpan.tags["url"]
+                    val httpMethod = entrySpan.tags["http.method"]
+                    if (url != null && httpMethod != null) {
+                        val updatedEndpointName = "$httpMethod:${URI(url).path}"
+                        vertx.eventBus().send(
+                            TraceSpanUpdated, entrySpan.copy(
+                                endpointName = updatedEndpointName,
+                                artifactQualifiedName = portal.viewingArtifact
                             )
-                        }
+                        )
                     }
                 }
             }
@@ -572,7 +574,7 @@ class PortalEventListener(
     }
 
     private suspend fun refreshOverview(fileMarker: SourceFileMarker, portal: SourcePortal) {
-        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>().filter {
+        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodGutterMark>().filter {
             it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
         }
 
@@ -732,22 +734,24 @@ class PortalEventListener(
         )
         vertx.eventBus().send(ArtifactTracesUpdated, traceResult)
 
-        //S++ adds trace meta to avoid additional query for auto-resolve endpoints
-        val url = trace.meta["url"]
-        val httpMethod = trace.meta["http.method"]
-        val entrySpanJson = trace.meta["entrySpan"]
-        if (url != null && httpMethod != null && entrySpanJson != null) {
-            val updatedEndpointName = "$httpMethod:${URI(url).path}"
-            val entrySpan = Json.decodeValue(entrySpanJson, TraceSpan::class.java)
-            vertx.eventBus().send(
-                TraceSpanUpdated, entrySpan.copy(
-                    endpointName = updatedEndpointName,
-                    artifactQualifiedName = event.artifactQualifiedName
+        if (markerConfig.autoResolveEndpointNames) {
+            //S++ adds trace meta to avoid additional query for auto-resolve endpoints
+            val url = trace.meta["url"]
+            val httpMethod = trace.meta["http.method"]
+            val entrySpanJson = trace.meta["entrySpan"]
+            if (url != null && httpMethod != null && entrySpanJson != null) {
+                val updatedEndpointName = "$httpMethod:${URI(url).path}"
+                val entrySpan = Json.decodeValue(entrySpanJson, TraceSpan::class.java)
+                vertx.eventBus().send(
+                    TraceSpanUpdated, entrySpan.copy(
+                        endpointName = updatedEndpointName,
+                        artifactQualifiedName = event.artifactQualifiedName
+                    )
                 )
-            )
-        } else {
-            launch(vertx.dispatcher()) {
-                autoResolveEndpointNamesIfNecessary(traceResult, portal)
+            } else {
+                launch(vertx.dispatcher()) {
+                    autoResolveEndpointNames(traceResult, portal)
+                }
             }
         }
     }
