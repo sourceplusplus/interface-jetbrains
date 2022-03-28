@@ -18,7 +18,6 @@
 package spp.jetbrains.sourcemarker.status.util
 
 import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
@@ -32,7 +31,7 @@ import javax.swing.JList
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) : DefaultListCellRenderer() {
+class ControlBarCellRenderer(private val autocompleteField: AutocompleteField, val sourceMark: ExpressionSourceMark) : DefaultListCellRenderer() {
     init {
         isOpaque = false
     }
@@ -40,7 +39,7 @@ class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) :
     override fun getListCellRendererComponent(
         list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean
     ): Component {
-        val entry = value as AutocompleteFieldRow
+        val entry = value as LiveControlCommand
         val row = LiveControlBarRow()
         row.setCommandName(entry.getText(), autocompleteField.text)
         row.setCommandIcon(entry.getIcon())
@@ -60,9 +59,7 @@ class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) :
 
         if (isSelected) {
             row.background = BGND_FOCUS_COLOR
-            if (entry is LiveControlCommand) {
-                row.setCommandIcon(entry.selectedIcon)
-            }
+            row.setCommandIcon(entry.selectedIcon)
         }
         return row
     }
