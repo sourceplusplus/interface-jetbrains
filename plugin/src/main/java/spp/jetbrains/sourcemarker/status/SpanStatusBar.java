@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static spp.jetbrains.marker.SourceMarker.conditionParser;
+import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
@@ -55,7 +56,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
     private JWindow popup;
     private LiveMeterConfigurationPanel configurationPanel;
     private boolean disposed = false;
-    private final String placeHolderText = "Operation Name";
+    private final String placeHolderText = message("operation_name");
     private LiveSpan liveSpan;
     private LiveBreakpointStatusPanel statusPanel;
     private JPanel wrapper;
@@ -64,8 +65,8 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
     private boolean expanded = false;
     private final ListTableModel commandModel = new ListTableModel<>(
             new ColumnInfo[]{
-                    new BreakpointHitColumnInfo("Meter Data"),
-                    new BreakpointHitColumnInfo("Time")
+                    new BreakpointHitColumnInfo(message("meter_data")),
+                    new BreakpointHitColumnInfo(message("time"))
             },
             new ArrayList<>(), 0, SortOrder.DESCENDING);
 
@@ -271,7 +272,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(CNFG_PANEL_FOCUS_COLOR);
+                    configPanel.setBackground(BGND_FOCUS_COLOR);
                 }
             }
         });
@@ -436,7 +437,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(PluginIcons.mapMarkedAlt);
+            configLabel.setIcon(PluginIcons.spanConfig);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----
@@ -461,13 +462,13 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             spanOperationNameField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-            spanOperationNameField.setFont(ROBOTO_LIGHT_PLAIN_17);
+            spanOperationNameField.setFont(BIG_FONT);
             spanOperationNameField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(spanOperationNameField, "cell 0 0 2 1");
 
             //---- timeLabel ----
             timeLabel.setIcon(PluginIcons.clock);
-            timeLabel.setFont(ROBOTO_LIGHT_PLAIN_14);
+            timeLabel.setFont(SMALLEST_FONT);
             timeLabel.setIconTextGap(8);
             timeLabel.setVisible(false);
             mainPanel.add(timeLabel, "cell 1 0,gapx null 8");

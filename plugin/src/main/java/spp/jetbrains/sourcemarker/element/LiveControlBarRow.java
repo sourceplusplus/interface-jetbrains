@@ -22,12 +22,13 @@ public class LiveControlBarRow extends JPanel {
         String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
         String defaultHex = "#" + Integer.toHexString(CONTROL_BAR_CMD_FOREGROUND.getRGB()).substring(2);
 
+        int minIndex = 0;
         Map<Integer, Integer> matches = new HashMap<>();
-        Set<String> inputWords = new HashSet<>(Arrays.asList(input.toLowerCase().split(" ")));
-        for (String inputWord : inputWords) {
-            int startIndex = commandName.toLowerCase().indexOf(inputWord);
+        for (String inputWord : input.toLowerCase().split(" ")) {
+            int startIndex = commandName.toLowerCase().indexOf(inputWord, minIndex);
             if (startIndex > -1) {
                 matches.put(startIndex, inputWord.length());
+                minIndex = startIndex + inputWord.length();
             }
         }
 
@@ -36,7 +37,7 @@ public class LiveControlBarRow extends JPanel {
             String updatedCommand = commandName;
             for (Map.Entry<Integer, Integer> entry : matches.entrySet()) {
                 String colored = colorMatchingString(updatedCommand, selectHex, entry.getKey() + diff, entry.getValue());
-                diff = colored.length() - updatedCommand.length();
+                diff += colored.length() - updatedCommand.length();
                 updatedCommand = colored;
             }
             commandName = updatedCommand;
@@ -49,7 +50,7 @@ public class LiveControlBarRow extends JPanel {
         int endIndex = startIndex + length;
         StringBuilder sb = new StringBuilder(commandName.substring(0, startIndex));
         sb.append("<span style=\"color: " + selectHex + "\">");
-        sb.append(commandName.substring(startIndex, endIndex));
+        sb.append(commandName, startIndex, endIndex);
         sb.append("</span>");
         sb.append(commandName.substring(endIndex));
         commandName = sb.toString();
@@ -108,19 +109,18 @@ public class LiveControlBarRow extends JPanel {
             //---- commandLabel ----
             commandLabel.setBackground(null);
             commandLabel.setEditable(false);
-            commandLabel.setFont(ROBOTO_PLAIN_15);
-            commandLabel.setText("<html><span style=\"color: gray; font-size: 15%\">Manual Tracing \u279b Watched Variables \u279b Scope: Local</span></html>");
+            commandLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             commandLabel.setContentType("text/html");
             commandLabel.setMaximumSize(new Dimension(2147483647, 12));
+            commandLabel.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
             panel1.add(commandLabel, cc.xy(1, 1));
 
             //---- descriptionLabel ----
-            descriptionLabel.setText("<html><span style=\"color: gray; font-size: 15%\">Manual Tracing \u279b Watched Variables \u279b Scope: Local</span></html>");
             descriptionLabel.setBackground(null);
-            descriptionLabel.setFont(ROBOTO_PLAIN_11);
-            descriptionLabel.setForeground(Color.gray);
+            descriptionLabel.setFont(SMALLER_FONT);
             descriptionLabel.setContentType("text/html");
             descriptionLabel.setEditable(false);
+            descriptionLabel.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
             panel1.add(descriptionLabel, new CellConstraints(1, 2, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(-7, 0, 0, 0)));
         }
         add(panel1, new CellConstraints(1, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(3, 10, 0, 0)));

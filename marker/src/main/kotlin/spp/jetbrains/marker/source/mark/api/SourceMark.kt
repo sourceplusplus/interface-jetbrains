@@ -40,6 +40,7 @@ import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
@@ -119,8 +120,8 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun setVisible(visible: Boolean)
 
     fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
-    fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true)
-    fun apply(addToMarker: Boolean = true) {
+    fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true, editor: Editor? = null)
+    fun apply(addToMarker: Boolean = true, editor: Editor? = null) {
         SourceMarker.getGlobalSourceMarkEventListeners().forEach(::addEventListener)
 
         if (addToMarker) {
@@ -143,12 +144,12 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 }
             } else if (this is InlayMark) {
                 if (configuration.showComponentInlay) {
-                    val editor = FileEditorManager.getInstance(project).selectedTextEditor
-                    if (editor == null) {
+                    val selectedEditor = editor ?: FileEditorManager.getInstance(project).selectedTextEditor
+                    if (selectedEditor == null) {
                         TODO()
                     } else {
-                        val provider = SourceInlayComponentProvider.from(editor)
-                        val viewport = (editor as? EditorImpl)?.scrollPane?.viewport!!
+                        val provider = SourceInlayComponentProvider.from(selectedEditor)
+                        val viewport = (selectedEditor as? EditorImpl)?.scrollPane?.viewport!!
                         var displayLineIndex = lineNumber - 1
                         if (this is ExpressionInlayMark) {
                             if (showAboveExpression) {
@@ -232,6 +233,24 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         }
     }
 
+    suspend fun disposeSuspend(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
+        if (this is InlayMark) {
+            configuration.inlayRef?.get()?.dispose()
+            configuration.inlayRef = null
+        }
+        closePopup()
+
+        if (removeFromMarker) {
+            if (assertRemoval) {
+                check(sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false))
+            } else {
+                sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false)
+            }
+        }
+        triggerEventSuspend(SourceMarkEvent(this, SourceMarkEventCode.MARK_REMOVED))
+        clearEventListeners()
+    }
+
     fun <T> getUserData(key: SourceKey<T>): T?
     fun <T> putUserData(key: SourceKey<T>, value: T?)
     fun hasUserData(): Boolean
@@ -258,6 +277,22 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 }
             }
             listen?.invoke()
+        }
+    }
+
+    suspend fun triggerEventSuspend(event: SourceMarkEvent) {
+        //sync listeners
+        getEventListeners()
+            .filterIsInstance<SynchronousSourceMarkEventListener>()
+            .forEach { it.handleEvent(event) }
+
+        //async listeners
+        runBlocking {
+            getEventListeners().forEach {
+                if (it !is SynchronousSourceMarkEventListener) {
+                    it.handleEvent(event)
+                }
+            }
         }
     }
 

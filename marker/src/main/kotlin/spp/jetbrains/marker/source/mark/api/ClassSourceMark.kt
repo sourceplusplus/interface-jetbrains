@@ -84,19 +84,25 @@ abstract class ClassSourceMark(
             false
         }
 
-    override fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean) {
+    override fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean, editor: Editor?) {
         this.sourceMarkComponent = sourceMarkComponent
-        super.apply(addToMarker)
+        super.apply(addToMarker, editor)
     }
 
-    override fun apply(addToMarker: Boolean) {
-        apply(configuration.componentProvider.getComponent(this), addToMarker)
+    override fun apply(addToMarker: Boolean, editor: Editor?) {
+        apply(configuration.componentProvider.getComponent(this), addToMarker, editor)
     }
 
     override fun dispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
         psiClass.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
         psiClass.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
         super.dispose(removeFromMarker, assertRemoval)
+    }
+
+    override suspend fun disposeSuspend(removeFromMarker: Boolean, assertRemoval: Boolean) {
+        psiClass.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
+        psiClass.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
+        super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 
     private val userData = HashMap<Any, Any>()

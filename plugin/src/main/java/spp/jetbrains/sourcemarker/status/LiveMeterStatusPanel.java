@@ -5,10 +5,10 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
-import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
 import spp.jetbrains.sourcemarker.service.ViewEventListener;
 import spp.protocol.instrument.LiveMeter;
@@ -23,8 +23,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.ROBOTO_LIGHT_PLAIN_15;
+import static spp.jetbrains.sourcemarker.PluginBundle.message;
+import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 
@@ -54,7 +54,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
         String meterType = liveMeter.getMeterType().name().toLowerCase();
         meterType = meterType.substring(0, 1).toUpperCase() + meterType.substring(1);
-        meterTypeValueLabel.setText(meterType);
+        meterTypeValueLabel.setText(message(meterType.toLowerCase()));
 
         if (liveMeter.getMeterType() == MeterType.GAUGE) {
             minuteLabel.setText("Value");
@@ -151,7 +151,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
 
         //======== this ========
         setBorder(new EtchedBorder());
-        setFont(ROBOTO_LIGHT_PLAIN_15);
+        setFont(SMALLER_FONT);
         setMinimumSize(new Dimension(385, 70));
         setPreferredSize(new Dimension(385, 70));
         setLayout(new FormLayout(
@@ -168,7 +168,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
             //======== panel1 ========
             {
                 panel1.setBackground(null);
-                panel1.setFont(ROBOTO_LIGHT_PLAIN_15);
+                panel1.setFont(SMALLER_FONT);
                 panel1.setLayout(new FormLayout(
                     new ColumnSpec[] {
                         FormFactory.DEFAULT_COLSPEC,
@@ -188,8 +188,8 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                     RowSpec.decodeSpecs("fill:default:grow")));
 
                 //---- meterTypeValueLabel ----
-                meterTypeValueLabel.setText("Count");
-                meterTypeValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+                meterTypeValueLabel.setText(message("count"));
+                meterTypeValueLabel.setFont(SMALL_FONT);
                 meterTypeValueLabel.setForeground(LABEL_FOREGROUND_COLOR);
                 meterTypeValueLabel.setMinimumSize(new Dimension(46, 25));
                 panel1.add(meterTypeValueLabel, cc.xy(1, 1));
@@ -203,23 +203,23 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                 panel1.add(separator1, new CellConstraints(3, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(5, 0, 5, 0)));
 
                 //---- minuteLabel ----
-                minuteLabel.setText("Minute");
-                minuteLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
+                minuteLabel.setText(WordUtils.capitalize(message("minute")));
+                minuteLabel.setFont(SMALLER_FONT);
                 panel1.add(minuteLabel, cc.xy(5, 1));
 
                 //---- minuteValueLabel ----
-                minuteValueLabel.setText("n/a");
-                minuteValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+                minuteValueLabel.setText(message("not_available"));
+                minuteValueLabel.setFont(SMALL_FONT);
                 panel1.add(minuteValueLabel, cc.xy(7, 1));
 
                 //---- hourLabel ----
-                hourLabel.setText("Hour");
-                hourLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
+                hourLabel.setText(WordUtils.capitalize(message("hour")));
+                hourLabel.setFont(SMALLER_FONT);
                 panel1.add(hourLabel, cc.xy(9, 1));
 
                 //---- hourValueLabel ----
-                hourValueLabel.setText("n/a");
-                hourValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+                hourValueLabel.setText(message("not_available"));
+                hourValueLabel.setFont(SMALL_FONT);
                 panel1.add(hourValueLabel, cc.xy(11, 1));
 
                 //======== panel3 ========
@@ -234,13 +234,13 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                         RowSpec.decodeSpecs("fill:default:grow")));
 
                     //---- dayLabel ----
-                    dayLabel.setText("Day");
-                    dayLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
+                    dayLabel.setText(WordUtils.capitalize(message("day")));
+                    dayLabel.setFont(SMALLER_FONT);
                     panel3.add(dayLabel, cc.xy(1, 1));
 
                     //---- dayValueLabel ----
-                    dayValueLabel.setText("n/a");
-                    dayValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+                    dayValueLabel.setText(message("not_available"));
+                    dayValueLabel.setFont(SMALL_FONT);
                     panel3.add(dayValueLabel, cc.xy(3, 1));
                 }
                 panel1.add(panel3, cc.xy(13, 1));

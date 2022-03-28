@@ -18,8 +18,10 @@
 package spp.jetbrains.sourcemarker
 
 import com.intellij.AbstractBundle
+import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
+import java.util.*
 
 @NonNls
 private const val BUNDLE = "messages.PluginBundle"
@@ -32,7 +34,14 @@ private const val BUNDLE = "messages.PluginBundle"
  */
 object PluginBundle : AbstractBundle(BUNDLE) {
 
+    //todo: shouldn't need to manually load bundle.
+    val LOCALE_BUNDLE: ResourceBundle by lazy {
+        ResourceBundle.getBundle(BUNDLE, DynamicBundle.getLocale(), PluginBundle::class.java.classLoader)
+    }
+
     @Suppress("SpreadOperator")
     @JvmStatic
-    fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) = getMessage(key, *params)
+    fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any): String {
+        return LOCALE_BUNDLE.getString(key) ?: getMessage(key, *params)
+    }
 }

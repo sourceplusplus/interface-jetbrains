@@ -3,7 +3,6 @@ package spp.jetbrains.sourcemarker.status;
 import com.codahale.metrics.Meter;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
-import spp.jetbrains.sourcemarker.PluginUI;
 import spp.protocol.utils.TimeUtilsKt;
 
 import javax.swing.*;
@@ -12,7 +11,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static spp.jetbrains.sourcemarker.PluginUI.*;
+import static spp.jetbrains.sourcemarker.PluginBundle.message;
+import static spp.jetbrains.sourcemarker.PluginUI.EXPIRY_FOREGROUND_COLOR;
+import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR1;
+import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
+import static spp.jetbrains.sourcemarker.PluginUI.SMALLER_FONT;
 
 public class LiveBreakpointStatusPanel extends JPanel {
 
@@ -84,10 +87,10 @@ public class LiveBreakpointStatusPanel extends JPanel {
         long sec = diffSec % 60;
         if (min > 0) {
             expiresValueLabel.setForeground(EXPIRY_FOREGROUND_COLOR);
-            expiresValueLabel.setText(min + "min " + sec + "s");
+            expiresValueLabel.setText(min + message("min") + " " + sec + message("sec_letter"));
         } else {
             expiresValueLabel.setForeground(SELECT_COLOR_RED);
-            expiresValueLabel.setText(sec + "s");
+            expiresValueLabel.setText(sec + message("sec_letter"));
         }
     }
 
@@ -108,7 +111,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
         //======== this ========
 
         //setBorder(PluginUI.PANEL_BORDER);
-        setFont(ROBOTO_LIGHT_PLAIN_15);
+        setFont(SMALLER_FONT);
         setLayout(new FormLayout(
             "default:grow",
             "fill:default:grow"));
@@ -116,7 +119,7 @@ public class LiveBreakpointStatusPanel extends JPanel {
         //======== panel1 ========
         {
             panel1.setBackground(null);
-            panel1.setFont(ROBOTO_LIGHT_PLAIN_15);
+            panel1.setFont(SMALLER_FONT);
             panel1.setLayout(new FormLayout(
                 new ColumnSpec[] {
                     FormFactory.DEFAULT_COLSPEC,
@@ -140,13 +143,13 @@ public class LiveBreakpointStatusPanel extends JPanel {
                 RowSpec.decodeSpecs("fill:default:grow")));
 
             //---- statusLabel ----
-            statusLabel.setText("Status");
-            statusLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
+            statusLabel.setText(message("status"));
+            statusLabel.setFont(SMALLER_FONT);
             panel1.add(statusLabel, cc.xy(1, 1));
 
             //---- statusValueLabel ----
-            statusValueLabel.setText("Active");
-            statusValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+            statusValueLabel.setText(message("active"));
+            statusValueLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             statusValueLabel.setForeground(LABEL_FOREGROUND_COLOR1);
             panel1.add(statusValueLabel, cc.xy(3, 1));
 
@@ -159,33 +162,33 @@ public class LiveBreakpointStatusPanel extends JPanel {
             panel1.add(separator1, new CellConstraints(5, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(5, 0, 5, 0)));
 
             //---- hitsLabel ----
-            hitsLabel.setText("Hits");
-            hitsLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
+            hitsLabel.setText(message("hits"));
+            hitsLabel.setFont(SMALLER_FONT);
             panel1.add(hitsLabel, cc.xy(7, 1));
 
             //---- hitsValueLabel ----
-            hitsValueLabel.setText("n/a");
-            hitsValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+            hitsValueLabel.setText(message("not_available"));
+            hitsValueLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(hitsValueLabel, cc.xy(9, 1));
 
             //---- rateLabel ----
-            rateLabel.setText("Rate");
-            rateLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
+            rateLabel.setText(message("rate"));
+            rateLabel.setFont(SMALLER_FONT);
             panel1.add(rateLabel, cc.xy(11, 1));
 
             //---- rateValueLabel ----
-            rateValueLabel.setText("n/a");
-            rateValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+            rateValueLabel.setText(message("not_available"));
+            rateValueLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(rateValueLabel, cc.xy(13, 1));
 
             //---- expiresLabel ----
-            expiresLabel.setText("Expires");
-            expiresLabel.setFont(ROBOTO_LIGHT_PLAIN_15);
+            expiresLabel.setText(message("expires"));
+            expiresLabel.setFont(SMALLER_FONT);
             panel1.add(expiresLabel, cc.xy(15, 1));
 
             //---- expiresValueLabel ----
-            expiresValueLabel.setText("n/a");
-            expiresValueLabel.setFont(PluginUI.ROBOTO_LIGHT_PLAIN_16);
+            expiresValueLabel.setText(message("not_available"));
+            expiresValueLabel.setFont(SMALLER_FONT.deriveFont(Font.BOLD));
             panel1.add(expiresValueLabel, cc.xy(17, 1));
         }
         add(panel1, new CellConstraints(1, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(2, 4, 2, 2)));

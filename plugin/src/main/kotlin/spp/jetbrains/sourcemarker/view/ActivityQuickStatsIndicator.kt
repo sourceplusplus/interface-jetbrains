@@ -17,6 +17,7 @@
  */
 package spp.jetbrains.sourcemarker.view
 
+import com.intellij.DynamicBundle
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.JBColor
 import io.vertx.core.json.Json
@@ -41,6 +42,8 @@ import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
+import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.jetbrains.sourcemarker.PluginUI
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.HIDE_QUICK_STATS
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.SHOW_QUICK_STATS
@@ -120,6 +123,10 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
         inlay.putUserData(SHOWING_QUICK_STATS, true)
         inlay.configuration.virtualText = InlayMarkVirtualText(inlay, formatMetricResult(metricResult))
         inlay.configuration.virtualText!!.textAttributes.foregroundColor = inlayForegroundColor
+        if (DynamicBundle.getLocale().language == "zh") {
+            inlay.configuration.virtualText!!.font = PluginUI.MICROSOFT_YAHEI_PLAIN_14
+            inlay.configuration.virtualText!!.xOffset = 15
+        }
         inlay.configuration.activateOnMouseClick = false
         inlay.apply(true)
 
@@ -160,12 +167,12 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
     private fun formatMetricResult(result: ArtifactMetricResult): String {
         val sb = StringBuilder()
         val resp = result.artifactMetrics.find { it.metricType == MetricType.Throughput_Average }!!
-        val respValue = (resp.values.last() / 60.0).fromPerSecondToPrettyFrequency()
-        sb.append(resp.metricType.simpleName).append(": ").append(respValue).append(" | ")
+        val respValue = (resp.values.last() / 60.0).fromPerSecondToPrettyFrequency({ message(it) })
+        sb.append(message(resp.metricType.simpleName)).append(": ").append(respValue).append(" | ")
         val cpm = result.artifactMetrics.find { it.metricType == MetricType.ResponseTime_Average }!!
-        sb.append(cpm.metricType.simpleName).append(": ").append(cpm.values.last().toInt()).append("ms | ")
+        sb.append(message(cpm.metricType.simpleName)).append(": ").append(cpm.values.last().toInt()).append(message("ms")).append(" | ")
         val sla = result.artifactMetrics.find { it.metricType == MetricType.ServiceLevelAgreement_Average }!!
-        sb.append(sla.metricType.simpleName).append(": ").append(sla.values.last().toDouble() / 100.0).append("%")
+        sb.append(message(sla.metricType.simpleName)).append(": ").append(sla.values.last().toDouble() / 100.0).append("%")
         return "/#/ " + sb.toString() + " \\#\\"
     }
 
@@ -182,12 +189,12 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
 
             val metricType = MetricType.realValueOf(metric.getJsonObject("meta").getString("metricsName"))
             if (metricType == MetricType.Throughput_Average) {
-                value = (metric.getNumber("value").toDouble() / 60.0).fromPerSecondToPrettyFrequency()
+                value = (metric.getNumber("value").toDouble() / 60.0).fromPerSecondToPrettyFrequency({ message(it) })
             }
             if (metricType == MetricType.ResponseTime_Average) {
-                value += "ms"
+                value += message("ms")
             }
-            sb.append("${metricType.simpleName}: $value")
+            sb.append("${message(metricType.simpleName)}: $value")
             if (i < metrics.size() - 1) {
                 sb.append(" | ")
             }
