@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.intellij.psi.PsiFile
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -51,16 +52,7 @@ object SourceMarker {
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
 
-    fun clearAvailableSourceFileMarkers() {
-        check(enabled) { "SourceMarker disabled" }
-
-        availableSourceFileMarkers.forEach {
-            deactivateSourceFileMarker(it.value)
-        }
-        availableSourceFileMarkers.clear()
-    }
-
-    suspend fun clearAvailableSourceFileMarkersSuspend() {
+    suspend fun clearAvailableSourceFileMarkers() {
         check(enabled) { "SourceMarker disabled" }
 
         availableSourceFileMarkers.forEach {
@@ -69,39 +61,17 @@ object SourceMarker {
         availableSourceFileMarkers.clear()
     }
 
-    fun refreshAvailableSourceFileMarkers(recreateFileMarkers: Boolean) {
-        check(enabled) { "SourceMarker disabled" }
-
-        if (recreateFileMarkers) {
-            val previousFileMarkers = getAvailableSourceFileMarkers()
-            clearAvailableSourceFileMarkers()
-            previousFileMarkers.forEach {
-                getSourceFileMarker(it.psiFile)!!.refresh()
-            }
-        } else {
-            availableSourceFileMarkers.forEach {
-                it.value.refresh()
-            }
-        }
-    }
-
     fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
-        check(enabled) { "SourceMarker disabled" }
-
-        if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
-            sourceFileMarker.clearSourceMarks()
-            sourceFileMarker.psiFile.putUserData(SourceFileMarker.KEY, null)
-            log.info("Deactivated source file marker: {}", sourceFileMarker)
-            return true
+        return runBlocking {
+            return@runBlocking deactivateSourceFileMarkerSuspend(sourceFileMarker)
         }
-        return false
     }
 
     suspend fun deactivateSourceFileMarkerSuspend(sourceFileMarker: SourceFileMarker): Boolean {
         check(enabled) { "SourceMarker disabled" }
 
         if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
-            sourceFileMarker.clearSourceMarksSuspend()
+            sourceFileMarker.clearSourceMarks()
             sourceFileMarker.psiFile.putUserData(SourceFileMarker.KEY, null)
             log.info("Deactivated source file marker: {}", sourceFileMarker)
             return true

@@ -328,7 +328,7 @@ object SourceMarkerPlugin {
 
     private suspend fun restartIfNecessary() {
         if (SourceMarker.enabled) {
-            SourceMarker.clearAvailableSourceFileMarkersSuspend()
+            SourceMarker.clearAvailableSourceFileMarkers()
             SourceMarker.clearGlobalSourceMarkEventListeners()
         }
 

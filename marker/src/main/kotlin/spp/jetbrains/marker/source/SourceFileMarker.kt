@@ -84,15 +84,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         }
     }
 
-    open fun clearSourceMarks() {
-        val removed = sourceMarks.removeIf {
-            it.dispose(false)
-            true
-        }
-        if (removed) refresh()
-    }
-
-    open suspend fun clearSourceMarksSuspend() {
+    open suspend fun clearSourceMarks() {
         val removed = sourceMarks.removeIf {
             runBlocking {
                 it.disposeSuspend(false)
