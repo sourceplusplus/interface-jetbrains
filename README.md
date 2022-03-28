@@ -8,14 +8,14 @@
 
 <!-- Plugin description -->
 
-This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/live-platform), the open-source live coding platform. This plugin also works with regular [SkyWalking](https://github.com/apache/skywalking) installations, but only [Live View](#live-view) commands will be available.
+This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/live-platform), the open-source live coding platform. This plugin also works with regular [SkyWalking](https://github.com/apache/skywalking) installations, but only [Live View](#live-view) commands are currently supported.
 
 <!-- Plugin description end -->
 
 # How to use?
 
-Once installed, this plugin adds a command bar to the JetBrains IDE, which is accessible by pressing `Ctrl+Shift+S`.
-The commands available are determined by the location the command bar is opened and the accessibility of either [SkyWalking](https://github.com/apache/skywalking) or the [Live Platform](https://github.com/sourceplusplus/live-platform).
+Once installed, this plugin adds the Live Command Palette to the JetBrains IDE, which is accessible by pressing `Ctrl+Shift+S`.
+The available commands are determined by the location the live command palette is opened and the accessibility of either [SkyWalking](https://github.com/apache/skywalking) or the [Live Platform](https://github.com/sourceplusplus/live-platform).
 
 # Available Commands
 
@@ -33,7 +33,7 @@ The commands available are determined by the location the command bar is opened 
   <details>
     <summary>Screencast</summary>
 
-  ![screencast](https://user-images.githubusercontent.com/3278877/158376181-7fe597f9-f3c2-4609-bd07-4ea55e10b579.gif)
+  ![screencast](https://user-images.githubusercontent.com/3278877/159804991-9882aa60-abd4-43d9-8a3f-db7f1f5f38d5.gif)
   </details>
 
   ### Watch Log
@@ -46,14 +46,14 @@ The commands available are determined by the location the command bar is opened 
   ![screencast](https://user-images.githubusercontent.com/3278877/158381411-214285ba-7291-4c70-8e1f-8489140fa239.gif)
   </details>
 
-  ### Display Portal
+  ### View Overview/Activity/Traces/Logs
 
   > Contextual popups for displaying live operational data on the code currently in view.
 
   <details>
     <summary>Screencast</summary>
 
-  ![screencast](https://user-images.githubusercontent.com/3278877/149158868-135568d5-20cc-44d4-886a-2202195b594b.gif)
+  ![screencast](https://user-images.githubusercontent.com/3278877/159803045-9b92dbe1-df08-4275-9ec8-1cbfed6e542d.gif)
   </details>
   
 </details>
