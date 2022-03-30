@@ -46,7 +46,6 @@ public class PluginConfigurationPanel {
         myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
 
-        //todo: properly ensure live service can never be null
         if (INSTANCE.getLiveService() != null) {
             INSTANCE.getLiveService().getServices().onComplete(it -> {
                 if (it.succeeded()) {
