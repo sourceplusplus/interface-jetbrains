@@ -61,8 +61,8 @@ dependencies {
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
-        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:0.4.4") { isTransitive = false }
-        implementation("com.github.sourceplusplus.protocol:protocol:0.4.4")
+        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$projectVersion") { isTransitive = false }
+        implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     }
 
     implementation("org.jooq:joor:$joorVersion")

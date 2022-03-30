@@ -83,10 +83,10 @@ subprojects {
 tasks {
     register("downloadProbe") {
         doLast {
-            val f = File(projectDir, "test/e2e/spp-probe-0.4.4.jar")
+            val f = File(projectDir, "test/e2e/spp-probe-$projectVersion.jar")
             if (!f.exists()) {
                 println("Downloading Source++ JVM probe")
-                java.net.URL("https://github.com/sourceplusplus/probe-jvm/releases/download/0.4.4/spp-probe-0.4.4.jar")
+                java.net.URL("https://github.com/sourceplusplus/probe-jvm/releases/download/$projectVersion/spp-probe-$projectVersion.jar")
                     .openStream().use { input ->
                         java.io.FileOutputStream(f).use { output ->
                             input.copyTo(output)
