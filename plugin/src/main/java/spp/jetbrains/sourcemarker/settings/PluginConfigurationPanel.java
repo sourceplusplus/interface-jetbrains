@@ -29,7 +29,7 @@ public class PluginConfigurationPanel {
     private JPanel myGlobalSettingsPanel;
     private JTextField rootSourcePackageTextField;
     private JCheckBox autoResolveEndpointNamesCheckBox;
-    private JCheckBox consoleCheckBox;
+    private JCheckBox debugConsoleCheckBox;
     private JPanel myServiceSettingsPanel;
     private JTextField serviceHostTextField;
     private JTextField accessTokenTextField;
@@ -37,7 +37,12 @@ public class PluginConfigurationPanel {
     private JComboBox serviceComboBox;
     private JCheckBox verifyHostCheckBox;
     private JLabel verifyHostLabel;
-    private JCheckBox autoDisplayEndpointQuickStatCheckBox;
+    private JCheckBox autoDisplayEndpointQuickStatsCheckBox;
+    private JLabel hostLabel;
+    private JLabel accessTokenLabel;
+    private JLabel certificatePinsLabel;
+    private JLabel serviceLabel;
+    private JLabel rootSourcePackageLabel;
     private SourceMarkerConfig config;
     private CertificatePinPanel myCertificatePins;
 
@@ -59,6 +64,17 @@ public class PluginConfigurationPanel {
                 }
             });
         }
+
+        //todo: shouldn't need to manually update locale text
+        hostLabel.setText(message("service_host"));
+        accessTokenLabel.setText(message("access_token"));
+        verifyHostLabel.setText(message("verify_host"));
+        certificatePinsLabel.setText(message("certificate_pins"));
+        serviceLabel.setText(message("service"));
+        rootSourcePackageLabel.setText(message("root_source_package"));
+        debugConsoleCheckBox.setText(message("debug_console"));
+        autoResolveEndpointNamesCheckBox.setText(message("auto_resolve_endpoint_names"));
+        autoDisplayEndpointQuickStatsCheckBox.setText(message("auto_display_endpoint_quick_stats"));
     }
 
     public JComponent getContentPane() {
@@ -72,7 +88,7 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {
             return true;
         }
-        if (!Objects.equals(consoleCheckBox.isSelected(), config.getPluginConsoleEnabled())) {
+        if (!Objects.equals(debugConsoleCheckBox.isSelected(), config.getPluginConsoleEnabled())) {
             return true;
         }
         if (!Objects.equals(serviceHostTextField.getText(), config.getServiceHost())) {
@@ -90,7 +106,7 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(serviceComboBox.getSelectedItem(), config.getServiceName())) {
             return config.getServiceName() != null || serviceComboBox.getSelectedItem() != "All Services";
         }
-        if (!Objects.equals(autoDisplayEndpointQuickStatCheckBox.isSelected(), config.getAutoDisplayEndpointQuickStats())) {
+        if (!Objects.equals(autoDisplayEndpointQuickStatsCheckBox.isSelected(), config.getAutoDisplayEndpointQuickStats())) {
             return true;
         }
         return false;
@@ -106,14 +122,14 @@ public class PluginConfigurationPanel {
                 Arrays.stream(rootSourcePackageTextField.getText().split(","))
                         .map(String::trim).collect(Collectors.toList()),
                 autoResolveEndpointNamesCheckBox.isSelected(),
-                true, consoleCheckBox.isSelected(),
+                true, debugConsoleCheckBox.isSelected(),
                 serviceHostTextField.getText(),
                 accessTokenTextField.getText(),
                 new ArrayList<>(Collections.list(myCertificatePins.listModel.elements())),
                 null,
                 verifyHostCheckBox.isSelected(),
                 currentService,
-                autoDisplayEndpointQuickStatCheckBox.isSelected()
+                autoDisplayEndpointQuickStatsCheckBox.isSelected()
         );
     }
 
@@ -121,11 +137,11 @@ public class PluginConfigurationPanel {
         this.config = config;
         rootSourcePackageTextField.setText(String.join(",", config.getRootSourcePackages()));
         autoResolveEndpointNamesCheckBox.setSelected(config.getAutoResolveEndpointNames());
-        consoleCheckBox.setSelected(config.getPluginConsoleEnabled());
+        debugConsoleCheckBox.setSelected(config.getPluginConsoleEnabled());
         serviceHostTextField.setText(config.getServiceHost());
         accessTokenTextField.setText(config.getAccessToken());
         verifyHostCheckBox.setSelected(config.getVerifyHost());
-        autoDisplayEndpointQuickStatCheckBox.setSelected(config.getAutoDisplayEndpointQuickStats());
+        autoDisplayEndpointQuickStatsCheckBox.setSelected(config.getAutoDisplayEndpointQuickStats());
 
         myCertificatePins = new CertificatePinPanel();
         myCertificatePins.listModel.addAll(config.getCertificatePins());
