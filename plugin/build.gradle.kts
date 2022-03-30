@@ -115,12 +115,17 @@ tasks {
 
         // Get the latest available change notes from the changelog file
         changeNotes.set(project.provider {
-            val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
+            val pluginChangesHeader = "### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n"
+            val fullChangelog = URL("https://raw.githubusercontent.com/sourceplusplus/documentation/master/docs/changelog/unreleased.md")
                 .readText()
-                .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
-                .substringBefore("\n### ").substringBefore("\n## ")
-                .trim()
-            markdownToHTML(changelog)
+            if (fullChangelog.contains(pluginChangesHeader)) {
+                val changelog = fullChangelog.substringAfter(pluginChangesHeader)
+                    .substringBefore("\n### ").substringBefore("\n## ")
+                    .trim()
+                markdownToHTML(changelog)
+            } else {
+                markdownToHTML("")
+            }
         })
     }
 
@@ -136,12 +141,15 @@ tasks {
 tasks {
     register("getPluginChangelog") {
         doFirst {
-            val changelog = URL("https://raw.githubusercontent.com/sourceplusplus/live-platform/master/CHANGELOG.md")
+            val pluginChangesHeader = "### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n"
+            val fullChangelog = URL("https://raw.githubusercontent.com/sourceplusplus/documentation/master/docs/changelog/unreleased.md")
                 .readText()
-                .substringAfter("### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n")
-                .substringBefore("\n### ").substringBefore("\n## ")
-                .trim()
-            println(changelog)
+            if (fullChangelog.contains(pluginChangesHeader)) {
+                val changelog = fullChangelog.substringAfter(pluginChangesHeader)
+                    .substringBefore("\n### ").substringBefore("\n## ")
+                    .trim()
+                println(changelog)
+            }
         }
     }
 
