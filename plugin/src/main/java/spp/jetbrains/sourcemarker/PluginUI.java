@@ -1,6 +1,5 @@
 package spp.jetbrains.sourcemarker;
 
-import com.intellij.DynamicBundle;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
@@ -42,10 +41,10 @@ public class PluginUI {
         }
     }
 
-    public static final Font BIG_FONT = (DynamicBundle.getLocale().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_16 : ROBOTO_LIGHT_PLAIN_17;
-    public static final Font SMALL_FONT = (DynamicBundle.getLocale().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_15 : ROBOTO_LIGHT_PLAIN_16;
-    public static final Font SMALLER_FONT = (DynamicBundle.getLocale().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_14 : ROBOTO_LIGHT_PLAIN_15;
-    public static final Font SMALLEST_FONT = (DynamicBundle.getLocale().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_13 : ROBOTO_LIGHT_PLAIN_14;
+    public static final Font BIG_FONT = (PluginBundle.INSTANCE.getLOCALE().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_16 : ROBOTO_LIGHT_PLAIN_17;
+    public static final Font SMALL_FONT = (PluginBundle.INSTANCE.getLOCALE().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_15 : ROBOTO_LIGHT_PLAIN_16;
+    public static final Font SMALLER_FONT = (PluginBundle.INSTANCE.getLOCALE().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_14 : ROBOTO_LIGHT_PLAIN_15;
+    public static final Font SMALLEST_FONT = (PluginBundle.INSTANCE.getLOCALE().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_13 : ROBOTO_LIGHT_PLAIN_14;
     public static final Color PANEL_BACKGROUND_COLOR = Gray._37;
     public static final Color LABEL_FOREGROUND_COLOR = new Color(152, 118, 170);
     public static final Color LABEL_FOREGROUND_COLOR1 = new Color(106, 135, 89);
@@ -69,6 +68,6 @@ public class PluginUI {
     }
 
     public static Color getEditCompleteColor() {
-        return UIUtil.getWindowColor();//Color.decode("#2B2B2B");
+        return UIUtil.getWindowColor();
     }
 }

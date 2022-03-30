@@ -37,7 +37,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="b854b" class="javax.swing.JLabel">
+                  <component id="b854b" class="javax.swing.JLabel" binding="rootSourcePackageLabel">
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -56,7 +56,7 @@
                   </component>
                 </children>
               </grid>
-              <component id="77432" class="javax.swing.JCheckBox" binding="consoleCheckBox">
+              <component id="77432" class="javax.swing.JCheckBox" binding="debugConsoleCheckBox">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -74,7 +74,7 @@
                   <text resource-bundle="messages/PluginBundle" key="auto_resolve_endpoint_names"/>
                 </properties>
               </component>
-              <component id="27dfe" class="javax.swing.JCheckBox" binding="autoDisplayEndpointQuickStatCheckBox">
+              <component id="27dfe" class="javax.swing.JCheckBox" binding="autoDisplayEndpointQuickStatsCheckBox">
                 <constraints>
                   <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -92,7 +92,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="57fd0" class="javax.swing.JLabel">
+              <component id="57fd0" class="javax.swing.JLabel" binding="hostLabel">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -109,7 +109,7 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="afa10" class="javax.swing.JLabel">
+              <component id="afa10" class="javax.swing.JLabel" binding="accessTokenLabel">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -125,7 +125,7 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="9bd2e" class="javax.swing.JLabel">
+              <component id="9bd2e" class="javax.swing.JLabel" binding="certificatePinsLabel">
                 <constraints>
                   <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -141,7 +141,7 @@
                 <border type="none"/>
                 <children/>
               </grid>
-              <component id="99c47" class="javax.swing.JLabel">
+              <component id="99c47" class="javax.swing.JLabel" binding="serviceLabel">
                 <constraints>
                   <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>

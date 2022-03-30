@@ -17,7 +17,6 @@
  */
 package spp.jetbrains.sourcemarker.view
 
-import com.intellij.DynamicBundle
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.JBColor
 import io.vertx.core.json.Json
@@ -42,6 +41,7 @@ import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
+import spp.jetbrains.sourcemarker.PluginBundle
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.PluginUI
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
@@ -123,7 +123,7 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
         inlay.putUserData(SHOWING_QUICK_STATS, true)
         inlay.configuration.virtualText = InlayMarkVirtualText(inlay, formatMetricResult(metricResult))
         inlay.configuration.virtualText!!.textAttributes.foregroundColor = inlayForegroundColor
-        if (DynamicBundle.getLocale().language == "zh") {
+        if (PluginBundle.LOCALE.language == "zh") {
             inlay.configuration.virtualText!!.font = PluginUI.MICROSOFT_YAHEI_PLAIN_14
             inlay.configuration.virtualText!!.xOffset = 15
         }
