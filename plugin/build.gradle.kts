@@ -116,7 +116,7 @@ tasks {
         // Get the latest available change notes from the changelog file
         changeNotes.set(project.provider {
             val pluginChangesHeader = "### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n"
-            val fullChangelog = URL("https://raw.githubusercontent.com/sourceplusplus/documentation/master/docs/changelog/unreleased.md")
+            val fullChangelog = URL("https://raw.githubusercontent.com/sourceplusplus/documentation/master/docs/changelog/README.md")
                 .readText()
             if (fullChangelog.contains(pluginChangesHeader)) {
                 val changelog = fullChangelog.substringAfter(pluginChangesHeader)
@@ -142,7 +142,7 @@ tasks {
     register("getPluginChangelog") {
         doFirst {
             val pluginChangesHeader = "### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n"
-            val fullChangelog = URL("https://raw.githubusercontent.com/sourceplusplus/documentation/master/docs/changelog/unreleased.md")
+            val fullChangelog = URL("https://raw.githubusercontent.com/sourceplusplus/documentation/master/docs/changelog/README.md")
                 .readText()
             if (fullChangelog.contains(pluginChangesHeader)) {
                 val changelog = fullChangelog.substringAfter(pluginChangesHeader)
