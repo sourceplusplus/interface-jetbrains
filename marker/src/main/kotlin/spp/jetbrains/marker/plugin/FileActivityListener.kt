@@ -27,7 +27,6 @@ import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.DumbService
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
@@ -96,7 +95,7 @@ class FileActivityListener : FileEditorManagerListener {
                         return
                     }
 
-                    val lineNumber = convertPointToLineNumber(psiFile.project, e.mouseEvent.point)
+                    val lineNumber = convertPointToLineNumber(editor, e.mouseEvent.point)
                     if (lineNumber == -1) {
                         return
                     }
@@ -140,13 +139,12 @@ class FileActivityListener : FileEditorManagerListener {
             }
         }
 
-        private fun convertPointToLineNumber(project: Project, p: Point): Int {
-            val myEditor = FileEditorManager.getInstance(project).selectedTextEditor
-            val document = myEditor!!.document
-            val line = EditorUtil.yPositionToLogicalLine(myEditor, p)
+        private fun convertPointToLineNumber(editor: Editor, p: Point): Int {
+            val document = editor.document
+            val line = EditorUtil.yPositionToLogicalLine(editor, p)
             if (!isValidLine(document, line)) return -1
             val startOffset = document.getLineStartOffset(line)
-            val region = myEditor.foldingModel.getCollapsedRegionAtOffset(startOffset)
+            val region = editor.foldingModel.getCollapsedRegionAtOffset(startOffset)
             return if (region != null) {
                 document.getLineNumber(region.endOffset)
             } else line
