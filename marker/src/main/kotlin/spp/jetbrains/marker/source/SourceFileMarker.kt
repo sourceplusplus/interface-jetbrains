@@ -32,6 +32,9 @@ import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
+import spp.jetbrains.marker.source.mark.guide.ExpressionGuideMark
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
@@ -146,6 +149,10 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
                         SourceKey.GutterMark,
                         sourceMark
                     )
+                    is ClassGuideMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
+                        SourceKey.GuideMark,
+                        sourceMark
+                    )
                     is MethodGutterMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
                         SourceKey.GutterMark,
                         sourceMark
@@ -154,8 +161,13 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
                         SourceKey.InlayMark,
                         sourceMark
                     )
+                    is MethodGuideMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
+                        SourceKey.GuideMark,
+                        sourceMark
+                    )
                     is ExpressionGutterMark -> sourceMark.getPsiElement().putUserData(SourceKey.GutterMark, sourceMark)
                     is ExpressionInlayMark -> sourceMark.getPsiElement().putUserData(SourceKey.InlayMark, sourceMark)
+                    is ExpressionGuideMark -> sourceMark.getPsiElement().putUserData(SourceKey.GuideMark, sourceMark)
                 }
 
                 if (autoRefresh) refresh()
@@ -223,13 +235,13 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             SourceMark.Type.INLAY -> {
                 ExpressionInlayMark(this, psiExpression)
             }
+            SourceMark.Type.GUIDE -> {
+                ExpressionGuideMark(this, psiExpression)
+            }
         }
     }
 
-    override fun createMethodSourceMark(
-        psiMethod: PsiNameIdentifierOwner, qualifiedName: ArtifactQualifiedName, type: SourceMark.Type
-    ): MethodSourceMark {
-        log.trace("Creating source mark. Method: $qualifiedName - Type: $type")
+    override fun createMethodSourceMark(psiMethod: PsiNameIdentifierOwner, type: SourceMark.Type): MethodSourceMark {
         return when (type) {
             SourceMark.Type.GUTTER -> {
                 MethodGutterMark(this, psiMethod)
@@ -237,19 +249,22 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             SourceMark.Type.INLAY -> {
                 MethodInlayMark(this, psiMethod)
             }
+            SourceMark.Type.GUIDE -> {
+                MethodGuideMark(this, psiMethod)
+            }
         }
     }
 
-    override fun createClassSourceMark(
-        psiClass: PsiNameIdentifierOwner, qualifiedName: ArtifactQualifiedName, type: SourceMark.Type
-    ): ClassSourceMark {
-        log.trace("Creating source mark. Class: $qualifiedName - Type: $type")
+    override fun createClassSourceMark(psiClass: PsiNameIdentifierOwner, type: SourceMark.Type): ClassSourceMark {
         return when (type) {
             SourceMark.Type.GUTTER -> {
                 ClassGutterMark(this, psiClass)
             }
             SourceMark.Type.INLAY -> {
                 TODO("Not yet implemented")
+            }
+            SourceMark.Type.GUIDE -> {
+                ClassGuideMark(this, psiClass)
             }
         }
     }

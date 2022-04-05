@@ -29,6 +29,9 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 
@@ -95,14 +98,22 @@ abstract class MethodSourceMark(
     }
 
     override fun dispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
-        psiMethod.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
-        psiMethod.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
+        when (this) {
+            is GutterMark -> psiMethod.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
+            is InlayMark -> psiMethod.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
+            is GuideMark -> psiMethod.nameIdentifier?.putUserData(SourceKey.GuideMark, null)
+            else -> throw IllegalStateException("Unsupported source mark type: $this")
+        }
         super.dispose(removeFromMarker, assertRemoval)
     }
 
     override suspend fun disposeSuspend(removeFromMarker: Boolean, assertRemoval: Boolean) {
-        psiMethod.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
-        psiMethod.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
+        when (this) {
+            is GutterMark -> psiMethod.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
+            is InlayMark -> psiMethod.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
+            is GuideMark -> psiMethod.nameIdentifier?.putUserData(SourceKey.GuideMark, null)
+            else -> throw IllegalStateException("Unsupported source mark type: $this")
+        }
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 

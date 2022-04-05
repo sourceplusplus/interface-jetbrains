@@ -31,7 +31,6 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
-import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.core.http.HttpClientOptions
@@ -64,7 +63,7 @@ import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEv
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
 import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
-import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
+import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
@@ -122,6 +121,7 @@ object SourceMarkerPlugin {
             SourceMarker.scopeService = PythonArtifactScopeService()
             SourceMarker.conditionParser = PythonConditionParser()
         } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
+            SourceMarker.guideProvider = JVMGuideProvider()
             SourceMarker.creationService = JVMArtifactCreationService()
             SourceMarker.namingService = JVMArtifactNamingService()
             SourceMarker.scopeService = JVMArtifactScopeService()
@@ -455,9 +455,8 @@ object SourceMarkerPlugin {
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
         SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator(config))
 
-        val gutterMarkConfig = GutterMarkConfiguration()
-        gutterMarkConfig.activateOnMouseHover = false
-        gutterMarkConfig.activateOnKeyboardShortcut = true
+        val guideMarkConfig = GuideMarkConfiguration()
+        guideMarkConfig.activateOnKeyboardShortcut = true
         val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
             defaultConfiguration.preloadJcefBrowser = false
             defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
@@ -473,9 +472,9 @@ object SourceMarkerPlugin {
                 }
             }
         }
-        gutterMarkConfig.componentProvider = componentProvider
+        guideMarkConfig.componentProvider = componentProvider
 
-        SourceMarker.configuration.gutterMarkConfiguration = gutterMarkConfig
+        SourceMarker.configuration.guideMarkConfiguration = guideMarkConfig
         SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
         SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true
 

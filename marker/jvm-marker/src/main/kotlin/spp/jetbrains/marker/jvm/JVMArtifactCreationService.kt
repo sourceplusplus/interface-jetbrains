@@ -73,7 +73,6 @@ class JVMArtifactCreationService : ArtifactCreationService {
         if (gutterMark == null) {
             gutterMark = fileMarker.createMethodSourceMark(
                 element.parent as PsiNameIdentifierOwner,
-                JVMMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UMethod),
                 SourceMark.Type.GUTTER
             ) as MethodGutterMark
             return if (autoApply) {

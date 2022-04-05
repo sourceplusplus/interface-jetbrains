@@ -21,10 +21,12 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 
@@ -36,13 +38,13 @@ import spp.protocol.artifact.ArtifactType
  */
 object SourceMarkSearch {
 
-    fun getClosestSourceMark(sourceFileMarker: SourceFileMarker, editor: Editor): SourceMark? {
-        var classSourceMark: ClassSourceMark? = null
-        val sourceMark = sourceFileMarker.getSourceMarks().find {
-            if (it is ClassSourceMark) {
+    fun getClosestSourceMark(sourceFileMarker: SourceFileMarker, editor: Editor): GuideMark? {
+        var classSourceMark: ClassGuideMark? = null
+        val sourceMark = sourceFileMarker.getSourceMarks().filterIsInstance(GuideMark::class.java).find {
+            if (it is ClassGuideMark) {
                 classSourceMark = it //todo: probably doesn't handle inner classes well
                 false
-            } else if (it is MethodSourceMark) {
+            } else if (it is MethodGuideMark) {
                 if (it.configuration.activateOnKeyboardShortcut) {
                     //+1 on end offset so match is made even right after method end
                     val incTextRange = TextRange(

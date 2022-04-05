@@ -15,28 +15,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.source.mark.api.key
+package spp.jetbrains.marker.source.mark.guide.config
 
-import com.intellij.openapi.util.Key
+import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponentProvider
+import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
+import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
+import spp.jetbrains.marker.source.mark.api.filter.ApplySourceMarkFilter
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.marker.source.mark.gutter.GutterMark
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 
 /**
- * Used to associate custom data to PSI elements.
+ * Used to configure [GuideMark]s.
  *
- * @since 0.1.0
+ * @since 0.4.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-data class SourceKey<T>(val name: String) {
-    companion object {
-        @JvmField
-        val GutterMark = Key.create<GutterMark>("sm.GutterMark")
-
-        @JvmField
-        val InlayMark = Key.create<InlayMark>("sm.InlayMark")
-
-        @JvmField
-        val GuideMark = Key.create<GuideMark>("sm.GuideMark")
-    }
-}
+data class GuideMarkConfiguration(
+    override var applySourceMarkFilter: ApplySourceMarkFilter = ApplySourceMarkFilter.ALL,
+    override var activateOnKeyboardShortcut: Boolean = false,
+    override var componentProvider: SourceMarkComponentProvider = SourceMarkJcefComponentProvider()
+) : SourceMarkConfiguration

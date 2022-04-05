@@ -15,25 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker
+package spp.jetbrains.marker.source.mark.guide
 
+import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.SourceFileMarkerProvider
-import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
+import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
-import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
-import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkConfiguration
+import java.util.*
+import spp.jetbrains.marker.SourceMarker.configuration as pluginConfiguration
 
 /**
- * Used to configure [SourceFileMarker]s.
+ * Represents a [GuideMark] associated to an expression artifact.
  *
- * @since 0.1.0
+ * @since 0.4.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SourceMarkerConfiguration {
-    var createSourceMarkFilter: CreateSourceMarkFilter = CreateSourceMarkFilter.ALL
-    var sourceFileMarkerProvider: SourceFileMarkerProvider = object : SourceFileMarkerProvider {}
-    var gutterMarkConfiguration: GutterMarkConfiguration = GutterMarkConfiguration()
-    var inlayMarkConfiguration: InlayMarkConfiguration = InlayMarkConfiguration()
-    var guideMarkConfiguration: GuideMarkConfiguration = GuideMarkConfiguration()
+open class ExpressionGuideMark(
+    override val sourceFileMarker: SourceFileMarker,
+    override var psiExpression: PsiElement
+) : ExpressionSourceMark(sourceFileMarker, psiExpression), GuideMark {
+
+    override val id: String = UUID.randomUUID().toString()
+    override val configuration: GuideMarkConfiguration = pluginConfiguration.guideMarkConfiguration.copy()
 }

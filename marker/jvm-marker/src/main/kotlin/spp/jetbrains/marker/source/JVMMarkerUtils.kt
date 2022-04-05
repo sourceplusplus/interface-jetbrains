@@ -326,7 +326,6 @@ object JVMMarkerUtils {
         log.trace("createMethodGutterMark: $element")
         val gutterMark = fileMarker.createMethodSourceMark(
             element.parent as PsiNameIdentifierOwner,
-            getFullyQualifiedName(element.parent.toUElement() as UMethod),
             SourceMark.Type.GUTTER
         ) as MethodGutterMark
         return if (autoApply) {
@@ -357,7 +356,6 @@ object JVMMarkerUtils {
         log.trace("createMethodInlayMark: $element")
         val inlayMark = fileMarker.createMethodSourceMark(
             element.parent as PsiNameIdentifierOwner,
-            getFullyQualifiedName(element.parent.toUElement() as UMethod),
             SourceMark.Type.INLAY
         ) as MethodInlayMark
         return if (autoApply) {
@@ -400,7 +398,6 @@ object JVMMarkerUtils {
         return if (inlayMark == null) {
             inlayMark = fileMarker.createMethodSourceMark(
                 element.parent as PsiNameIdentifierOwner,
-                getFullyQualifiedName(element.parent.toUElement() as UMethod),
                 SourceMark.Type.INLAY
             ) as MethodInlayMark
             return if (autoApply) {
@@ -456,7 +453,6 @@ object JVMMarkerUtils {
             }
             gutterMark = fileMarker.createClassSourceMark(
                 element.parent as PsiNameIdentifierOwner,
-                getFullyQualifiedName(uClass),
                 SourceMark.Type.GUTTER
             ) as ClassGutterMark
             return if (autoApply) {

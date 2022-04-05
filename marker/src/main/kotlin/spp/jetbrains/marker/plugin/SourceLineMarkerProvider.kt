@@ -72,7 +72,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             }
         }
 
-        return null
+        return el
     }
 
     override fun collectSlowLineMarkers(

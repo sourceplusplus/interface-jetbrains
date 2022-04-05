@@ -29,6 +29,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -93,7 +94,8 @@ abstract class ExpressionSourceMark(
         when (this) {
             is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
             is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
-            else -> throw IllegalStateException("ExpressionSourceMark is not a GutterMark or InlayMark")
+            is GuideMark -> getPsiElement().putUserData(SourceKey.GuideMark, null)
+            else -> throw IllegalStateException("Unsupported source mark type: $this")
         }
         super.dispose(removeFromMarker, assertRemoval)
     }
@@ -102,7 +104,8 @@ abstract class ExpressionSourceMark(
         when (this) {
             is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
             is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
-            else -> throw IllegalStateException("ExpressionSourceMark is not a GutterMark or InlayMark")
+            is GuideMark -> getPsiElement().putUserData(SourceKey.GuideMark, null)
+            else -> throw IllegalStateException("Unsupported source mark type: $this")
         }
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }
@@ -113,7 +116,7 @@ abstract class ExpressionSourceMark(
                 identifier = artifactQualifiedName.identifier.substringBefore("#"),
                 type = ArtifactType.METHOD
             ),
-            SourceMark.Type.GUTTER
+            SourceMark.Type.GUIDE
         )
     }
 

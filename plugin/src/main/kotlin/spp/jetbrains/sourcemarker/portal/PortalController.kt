@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
-import spp.jetbrains.marker.source.mark.gutter.GutterMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.portal.SourcePortal
 import spp.jetbrains.portal.backend.PortalServer
 import spp.jetbrains.portal.protocol.portal.PageType
@@ -56,7 +56,7 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         vertx.deployVerticle(PortalEventListener(markerConfig)).await()
 
         SourceMarker.addGlobalSourceMarkEventListener {
-            if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED && it.sourceMark is GutterMark) {
+            if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED && it.sourceMark is GuideMark) {
                 //register portal for source mark
                 val portal = SourcePortal.getPortal(
                     SourcePortal.register(it.sourceMark.artifactQualifiedName, false)
