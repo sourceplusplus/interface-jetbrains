@@ -155,6 +155,7 @@ object LiveStatusManager : SourceMarkEventListener {
             }
             inlayMark.visible.set(true)
             inlayMark.apply()
+            addStatusBar(inlayMark, statusBar)
 
             statusBar.focus()
         }
@@ -370,6 +371,7 @@ object LiveStatusManager : SourceMarkEventListener {
                         override fun makeSwingComponent(sourceMark: SourceMark): JComponent = wrapperPanel
                     }
                     inlayMark.apply()
+                    addStatusBar(inlayMark, statusBar)
                 }
             } else {
                 log.warn("No detected expression at line {}. Inlay mark ignored", liveBreakpoint.location.line)
