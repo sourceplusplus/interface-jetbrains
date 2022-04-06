@@ -45,6 +45,7 @@ public class PluginConfigurationPanel {
     private JLabel rootSourcePackageLabel;
     private SourceMarkerConfig config;
     private CertificatePinPanel myCertificatePins;
+    private JCheckBox overrideCheckBox;
 
     public PluginConfigurationPanel(SourceMarkerConfig config) {
         this.config = config;
@@ -75,6 +76,24 @@ public class PluginConfigurationPanel {
         debugConsoleCheckBox.setText(message("debug_console"));
         autoResolveEndpointNamesCheckBox.setText(message("auto_resolve_endpoint_names"));
         autoDisplayEndpointQuickStatsCheckBox.setText(message("auto_display_endpoint_quick_stats"));
+        enableAll(config.getOverride());
+        overrideCheckBox.addItemListener(e -> {
+            JCheckBox checkbox = (JCheckBox) e.getSource();
+            enableAll(checkbox.isSelected());
+        });
+    }
+
+    private void enableAll(boolean state) {
+        rootSourcePackageTextField.setEnabled(state);
+        autoResolveEndpointNamesCheckBox.setEnabled(state);
+        debugConsoleCheckBox.setEnabled(state);
+        serviceHostTextField.setEnabled(state);
+        accessTokenTextField.setEnabled(state);
+        serviceComboBox.setEnabled(state);
+        verifyHostCheckBox.setEnabled(state);
+        autoDisplayEndpointQuickStatsCheckBox.setEnabled(state);
+        if(myCertificatePins != null)
+            myCertificatePins.setEnabled(state);
     }
 
     public JComponent getContentPane() {
@@ -82,6 +101,9 @@ public class PluginConfigurationPanel {
     }
 
     boolean isModified() {
+        if (!Objects.equals(overrideCheckBox.isSelected(), config.getOverride())) {
+            return true;
+        }
         if (!Arrays.equals(rootSourcePackageTextField.getText().split(","), config.getRootSourcePackages().toArray())) {
             return true;
         }
@@ -129,7 +151,8 @@ public class PluginConfigurationPanel {
                 null,
                 verifyHostCheckBox.isSelected(),
                 currentService,
-                autoDisplayEndpointQuickStatsCheckBox.isSelected()
+                autoDisplayEndpointQuickStatsCheckBox.isSelected(),
+                overrideCheckBox.isSelected()
         );
     }
 
@@ -146,18 +169,19 @@ public class PluginConfigurationPanel {
         myCertificatePins = new CertificatePinPanel();
         myCertificatePins.listModel.addAll(config.getCertificatePins());
         testPanel.add(myCertificatePins);
+        overrideCheckBox.setSelected(config.getOverride());
     }
 
     class CertificatePinPanel extends JPanel {
         final DefaultListModel<String> listModel = new DefaultListModel<>();
         final JBList<String> myList = new JBList<>(listModel);
-
+        final ToolbarDecorator decorator;
         CertificatePinPanel() {
             setLayout(new BorderLayout());
             myList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             myList.setBorder(JBUI.Borders.empty());
 
-            ToolbarDecorator decorator = ToolbarDecorator.createDecorator(myList)
+            decorator = ToolbarDecorator.createDecorator(myList)
                     .setToolbarPosition(ActionToolbarPosition.RIGHT)
                     .setScrollPaneBorder(JBUI.Borders.empty())
                     .setPanelBorder(JBUI.Borders.empty())

@@ -31,7 +31,6 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
-import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.core.http.HttpClientOptions
@@ -67,6 +66,7 @@ import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.jetbrains.sourcemarker.PluginIcons.config
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.command.ControlBarController
@@ -140,7 +140,7 @@ object SourceMarkerPlugin {
         }
     }
 
-    private fun loadDefaultConfiguration(project: Project): SourceMarkerConfig {
+    private fun loadSppPluginFileConfiguration(project: Project): SourceMarkerConfig? {
         if (project.basePath != null) {
             val configFile = File(project.basePath, ".spp/spp-plugin.yml")
             if (configFile.exists()) {
@@ -155,8 +155,7 @@ object SourceMarkerPlugin {
                 return Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
             }
         }
-
-        return SourceMarkerConfig()
+        return null
     }
 
     suspend fun init(project: Project) {
@@ -164,20 +163,10 @@ object SourceMarkerPlugin {
         restartIfNecessary()
 
         val projectSettings = PropertiesComponent.getInstance(project)
-        val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
-            try {
-                Json.decodeValue(
-                    projectSettings.getValue("sourcemarker_plugin_config"),
-                    SourceMarkerConfig::class.java
-                )
-            } catch (ex: DecodeException) {
-                log.warn("Failed to decode SourceMarker configuration", ex)
-                projectSettings.unsetValue("sourcemarker_plugin_config")
-                SourceMarkerConfig()
-            }
-        } else {
-            loadDefaultConfiguration(project)
-        }
+        var config = getPersistedConfig(projectSettings)
+
+        config = if(config!=null && config.override) config else
+            loadSppPluginFileConfiguration(project) ?: SourceMarkerConfig(override = true)
 
         //attempt to determine root source package automatically (if necessary)
         if (config.rootSourcePackages.isEmpty()) {
@@ -256,6 +245,21 @@ object SourceMarkerPlugin {
                 initMarker(config, project)
             }
         }
+    }
+
+    private fun getPersistedConfig(projectSettings: PropertiesComponent): SourceMarkerConfig? {
+        if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
+            try {
+                return Json.decodeValue(
+                    projectSettings.getValue("sourcemarker_plugin_config"),
+                    SourceMarkerConfig::class.java
+                )
+            } catch (ex: DecodeException) {
+                log.warn("Failed to decode SourceMarker configuration", ex)
+                projectSettings.unsetValue("sourcemarker_plugin_config")
+            }
+        }
+        return null
     }
 
     private suspend fun discoverAvailableServices(config: SourceMarkerConfig, project: Project) {
