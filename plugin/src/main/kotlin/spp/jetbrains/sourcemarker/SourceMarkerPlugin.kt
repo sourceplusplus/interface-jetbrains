@@ -28,7 +28,12 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.vfs.newvfs.BulkFileListener
+import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.Vertx
@@ -46,10 +51,7 @@ import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.impl.DiscoveryImpl
 import io.vertx.serviceproxy.ServiceProxyBuilder
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
@@ -66,7 +68,6 @@ import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.sourcemarker.PluginBundle.message
-import spp.jetbrains.sourcemarker.PluginIcons.config
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.command.ControlBarController
@@ -90,6 +91,8 @@ import spp.protocol.service.LiveViewService
 import java.awt.Dimension
 import java.io.File
 
+private const val SPP_PLUGIN_YML_PATH = ".spp/spp-plugin.yml"
+
 /**
  * Sets up the SourceMarker plugin by configuring and initializing the various plugin modules.
  *
@@ -104,6 +107,25 @@ object SourceMarkerPlugin {
     val vertx: Vertx
     private var connectionJob: Job? = null
     private var discovery: ServiceDiscovery? = null
+
+    private val listener = object : BulkFileListener {
+        override fun after(events: MutableList<out VFileEvent>) {
+            events.forEach {
+                if (it.isFromSave && it.path.endsWith(SPP_PLUGIN_YML_PATH)) {
+                    val activeProject = ProjectManager.getInstance().openProjects[0]
+                    DumbService.getInstance(activeProject).smartInvokeLater {
+                        val config = loadSppPluginFileConfiguration(activeProject)
+                        if (config != null && config.override) {
+                            runBlocking {
+                                init(activeProject, config)
+                            }
+                        }
+                    }
+                    return@forEach
+                }
+            }
+        }
+    }
 
     init {
         SourceMarker.enabled = false
@@ -142,31 +164,32 @@ object SourceMarkerPlugin {
 
     private fun loadSppPluginFileConfiguration(project: Project): SourceMarkerConfig? {
         if (project.basePath != null) {
-            val configFile = File(project.basePath, ".spp/spp-plugin.yml")
+            val configFile = File(project.basePath, SPP_PLUGIN_YML_PATH)
             if (configFile.exists()) {
                 val config = JsonObject(
                     ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
                 )
                 config.fieldNames().toList().forEach {
-                    config.put(CaseUtils.toCamelCase(it, false, '_'), config.getValue(it))
-                    config.remove(it)
+                    val value = config.remove(it)
+                    config.put(CaseUtils.toCamelCase(it, false, '_'), value)
                 }
-                PropertiesComponent.getInstance(project).setValue("sourcemarker_plugin_config", config.toString())
-                return Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
+                return try {
+                    Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
+                } catch (ex: DecodeException) {
+                    log.warn("Failed to decode spp-plugin.xml file ", ex)
+                    return null
+                }
             }
         }
         return null
     }
 
-    suspend fun init(project: Project) {
+    suspend fun init(project: Project, configInput: SourceMarkerConfig? = null) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
 
         val projectSettings = PropertiesComponent.getInstance(project)
-        var config = getPersistedConfig(projectSettings)
-
-        config = if(config!=null && config.override) config else
-            loadSppPluginFileConfiguration(project) ?: SourceMarkerConfig(override = true)
+        val config = configInput ?: loadConfig(projectSettings, project)
 
         //attempt to determine root source package automatically (if necessary)
         if (config.rootSourcePackages.isEmpty()) {
@@ -245,6 +268,26 @@ object SourceMarkerPlugin {
                 initMarker(config, project)
             }
         }
+
+        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, listener)
+    }
+
+    private fun loadConfig(
+        projectSettings: PropertiesComponent,
+        project: Project
+    ): SourceMarkerConfig {
+        val fileConfig = loadSppPluginFileConfiguration(project)
+        val config = if (fileConfig != null && fileConfig.override) {
+            fileConfig
+        } else {
+            val persistedConfig = getPersistedConfig(projectSettings)
+            if (persistedConfig == null && fileConfig != null) {
+                fileConfig
+            } else {
+                SourceMarkerConfig(override = true)
+            }
+        }
+        return config
     }
 
     private fun getPersistedConfig(projectSettings: PropertiesComponent): SourceMarkerConfig? {
