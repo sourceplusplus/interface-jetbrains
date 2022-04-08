@@ -105,6 +105,7 @@ import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewEvent
 import spp.protocol.view.LiveViewSubscription
 import java.net.URI
+import java.net.URISyntaxException
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
@@ -519,13 +520,17 @@ class PortalEventListener(
                     val url = entrySpan.tags["url"]
                     val httpMethod = entrySpan.tags["http.method"]
                     if (url != null && httpMethod != null) {
-                        val updatedEndpointName = "$httpMethod:${URI(url).path}"
-                        vertx.eventBus().send(
-                            TraceSpanUpdated, entrySpan.copy(
-                                endpointName = updatedEndpointName,
-                                artifactQualifiedName = portal.viewingArtifact
+                        try {
+                            val updatedEndpointName = "$httpMethod:${URI(url).path}"
+                            vertx.eventBus().send(
+                                TraceSpanUpdated, entrySpan.copy(
+                                    endpointName = updatedEndpointName,
+                                    artifactQualifiedName = portal.viewingArtifact
+                                )
                             )
-                        )
+                        } catch (e: URISyntaxException) {
+                            log.warn("Failed to parse url $url")
+                        }
                     }
                 }
             }
