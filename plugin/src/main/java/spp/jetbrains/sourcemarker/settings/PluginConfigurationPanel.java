@@ -94,7 +94,7 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(serviceHostTextField.getText(), config.getServiceHost())) {
             return true;
         }
-        if (!Objects.equals(accessTokenTextField.getText(), config.getAccessToken())) {
+        if (!Objects.equals(accessTokenTextField.getText(), config.getAccessToken() != null ? config.getAccessToken() : "")) {
             return true;
         }
         if (!Arrays.equals(myCertificatePins.listModel.toArray(), config.getCertificatePins().toArray())) {
@@ -103,8 +103,9 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(verifyHostCheckBox.isSelected(), config.getVerifyHost())) {
             return true;
         }
-        if (!Objects.equals(serviceComboBox.getSelectedItem(), config.getServiceName())) {
-            return config.getServiceName() != null || serviceComboBox.getSelectedItem() != "All Services";
+        if (!Objects.equals(serviceComboBox.getSelectedItem(), config.getServiceName()) &&
+                !(config.getServiceName() == null && Objects.equals(serviceComboBox.getSelectedItem(), "All Services"))) {
+            return true;
         }
         if (!Objects.equals(autoDisplayEndpointQuickStatsCheckBox.isSelected(), config.getAutoDisplayEndpointQuickStats())) {
             return true;
