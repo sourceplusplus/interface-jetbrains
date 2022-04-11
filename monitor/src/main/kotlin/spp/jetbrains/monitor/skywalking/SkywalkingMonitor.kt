@@ -47,8 +47,7 @@ class SkywalkingMonitor(
     private val jwtToken: String? = null,
     private val certificatePins: List<String> = emptyList(),
     private val verifyHost: Boolean,
-    private val currentService: String? = null,
-    private val developerId: String = "system"
+    private val currentService: String? = null
 ) : CoroutineVerticle() {
 
     companion object {
@@ -124,7 +123,7 @@ class SkywalkingMonitor(
                 SourceServices.Instance.liveService = swLiveService
             }
             if (SourceServices.Instance.liveView == null) {
-                val swLiveViewService = SWLiveViewService(developerId)
+                val swLiveViewService = SWLiveViewService()
                 vertx.deployVerticle(swLiveViewService).await()
                 SourceServices.Instance.liveView = swLiveViewService
             }
