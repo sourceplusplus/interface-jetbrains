@@ -21,6 +21,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.codahale.metrics.MetricRegistry
 import io.vertx.core.Vertx
+import monitor.skywalking.protocol.general.GetVersionQuery
 import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
@@ -78,6 +79,25 @@ class SkywalkingClient(
 
     init {
         registerCodecs(vertx)
+    }
+
+    suspend fun getVersion(): String? {
+        metricRegistry.timer("getVersion").time().use {
+            if (log.isTraceEnabled) {
+                log.trace("Get version request")
+            }
+
+            val response = apolloClient.query(
+                GetVersionQuery()
+            ).execute()
+            if (response.hasErrors()) {
+                response.errors!!.forEach { log.error(it.message) }
+                throw IOException(response.errors!![0].message)
+            } else {
+                if (log.isTraceEnabled) log.trace("Get version response: {}", response.data!!.result)
+                return response.data!!.result
+            }
+        }
     }
 
     suspend fun queryTraceStack(
