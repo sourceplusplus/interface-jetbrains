@@ -35,6 +35,7 @@ data class SourceMarkerConfig(
     var verifyHost: Boolean = true,
     val serviceName: String? = null,
     var autoDisplayEndpointQuickStats: Boolean = true,
+    val override: Boolean = false
 ) {
     companion object {
         const val DEFAULT_SERVICE_PORT = 5445

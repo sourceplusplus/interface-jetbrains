@@ -21,10 +21,8 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
-import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import javax.swing.JComponent
@@ -37,7 +35,6 @@ import javax.swing.JComponent
  */
 class SourceMarkerConfigurable : Configurable {
 
-    private val log = LoggerFactory.getLogger(SourceMarkerConfigurable::class.java)
     private var form: PluginConfigurationPanel? = null
     override fun getDisplayName(): String = message("plugin_name")
 
@@ -62,21 +59,7 @@ class SourceMarkerConfigurable : Configurable {
 
     override fun createComponent(): JComponent {
         if (form == null) {
-            val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
-            val config = if (projectSettings.isValueSet("sourcemarker_plugin_config")) {
-                try {
-                    Json.decodeValue(
-                        projectSettings.getValue("sourcemarker_plugin_config"),
-                        SourceMarkerConfig::class.java
-                    )
-                } catch (ex: DecodeException) {
-                    log.warn("Failed to decode SourceMarker configuration", ex)
-                    projectSettings.unsetValue("sourcemarker_plugin_config")
-                    SourceMarkerConfig()
-                }
-            } else {
-                SourceMarkerConfig()
-            }
+            val config = SourceMarkerPlugin.getConfig(ProjectManager.getInstance().openProjects[0])
             form = PluginConfigurationPanel(config)
             form!!.applySourceMarkerConfig(config)
         }
