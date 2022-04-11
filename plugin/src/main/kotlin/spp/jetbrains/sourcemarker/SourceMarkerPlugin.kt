@@ -30,9 +30,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
+import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
@@ -91,8 +91,6 @@ import spp.protocol.service.LiveViewService
 import java.awt.Dimension
 import java.io.File
 
-private const val SPP_PLUGIN_YML_PATH = ".spp/spp-plugin.yml"
-
 /**
  * Sets up the SourceMarker plugin by configuring and initializing the various plugin modules.
  *
@@ -102,30 +100,13 @@ private const val SPP_PLUGIN_YML_PATH = ".spp/spp-plugin.yml"
 @Suppress("MagicNumber")
 object SourceMarkerPlugin {
 
+    private const val SPP_PLUGIN_YML_PATH = ".spp/spp-plugin.yml"
     private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
     private val deploymentIds = mutableListOf<String>()
     val vertx: Vertx
     private var connectionJob: Job? = null
     private var discovery: ServiceDiscovery? = null
-
-    private val listener = object : BulkFileListener {
-        override fun after(events: MutableList<out VFileEvent>) {
-            events.forEach {
-                if (it.isFromSave && it.path.endsWith(SPP_PLUGIN_YML_PATH)) {
-                    val activeProject = ProjectManager.getInstance().openProjects[0]
-                    DumbService.getInstance(activeProject).smartInvokeLater {
-                        val config = loadSppPluginFileConfiguration(activeProject)
-                        if (config != null && config.override) {
-                            runBlocking {
-                                init(activeProject, config)
-                            }
-                        }
-                    }
-                    return@forEach
-                }
-            }
-        }
-    }
+    private var addedConfigListener = false
 
     init {
         SourceMarker.enabled = false
@@ -162,34 +143,34 @@ object SourceMarkerPlugin {
         }
     }
 
-    private fun loadSppPluginFileConfiguration(project: Project): SourceMarkerConfig? {
-        if (project.basePath != null) {
-            val configFile = File(project.basePath, SPP_PLUGIN_YML_PATH)
-            if (configFile.exists()) {
-                val config = JsonObject(
-                    ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
-                )
-                config.fieldNames().toList().forEach {
-                    val value = config.remove(it)
-                    config.put(CaseUtils.toCamelCase(it, false, '_'), value)
-                }
-                return try {
-                    Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
-                } catch (ex: DecodeException) {
-                    log.warn("Failed to decode spp-plugin.xml file ", ex)
-                    return null
-                }
-            }
-        }
-        return null
-    }
-
-    suspend fun init(project: Project, configInput: SourceMarkerConfig? = null) {
+    suspend fun init(
+        project: Project, configInput: SourceMarkerConfig? = null, notifySuccessfulConnection: Boolean = false
+    ) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
 
-        val projectSettings = PropertiesComponent.getInstance(project)
-        val config = configInput ?: loadConfig(projectSettings, project)
+        val config = configInput ?: getConfig(project)
+        if (!addedConfigListener) {
+            addedConfigListener = true
+            val localConfigListener = object : BulkFileListener {
+                var lastUpdated = -1L
+                override fun after(events: MutableList<out VFileEvent>) {
+                    val event = events.firstOrNull() ?: return
+                    if (event is VFileContentChangeEvent && event.isFromSave && event.path.endsWith(SPP_PLUGIN_YML_PATH)) {
+                        if (event.oldTimestamp <= lastUpdated) return else lastUpdated = event.oldTimestamp
+                        DumbService.getInstance(project).smartInvokeLater {
+                            val localConfig = loadSppPluginFileConfiguration(project)
+                            if (localConfig != null && localConfig.override) {
+                                runBlocking {
+                                    init(project, localConfig, true)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, localConfigListener)
+        }
 
         //attempt to determine root source package automatically (if necessary)
         if (config.rootSourcePackages.isEmpty()) {
@@ -198,7 +179,8 @@ object SourceMarkerPlugin {
                 if (rootPackage != null) {
                     log.info("Detected root source package: $rootPackage")
                     config.rootSourcePackages = listOf(rootPackage)
-                    projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
+                    PropertiesComponent.getInstance(project)
+                        .setValue("sourcemarker_plugin_config", Json.encode(config))
                 }
             }
         }
@@ -212,6 +194,17 @@ object SourceMarkerPlugin {
                 initServices(project, config)
                 initMonitor(config)
                 connectedMonitor = true
+
+                if (notifySuccessfulConnection) {
+                    val pluginName = message("plugin_name")
+                    Notifications.Bus.notify(
+                        Notification(
+                            message("plugin_name"), "Connection established",
+                            "You have successfully connected. $pluginName is now fully activated.",
+                            NotificationType.INFORMATION
+                        )
+                    )
+                }
             } catch (ignored: CancellationException) {
             } catch (throwable: ApolloHttpException) {
                 val pluginName = message("plugin_name")
@@ -249,6 +242,16 @@ object SourceMarkerPlugin {
                             NotificationType.ERROR
                         )
                     )
+                } else if (throwable.message == "Failed to create SSL connection") {
+                    Notifications.Bus.notify(
+                        Notification(
+                            pluginName, "SSL connection failed",
+                            "Failed to create SSL connection to $pluginName. " +
+                                    "Please ensure the correct configuration " +
+                                    "is set at: Settings -> Tools -> $pluginName",
+                            NotificationType.ERROR
+                        )
+                    )
                 } else {
                     Notifications.Bus.notify(
                         Notification(
@@ -268,19 +271,36 @@ object SourceMarkerPlugin {
                 initMarker(config, project)
             }
         }
-
-        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, listener)
     }
 
-    private fun loadConfig(
-        projectSettings: PropertiesComponent,
-        project: Project
-    ): SourceMarkerConfig {
+    fun loadSppPluginFileConfiguration(project: Project): SourceMarkerConfig? {
+        if (project.basePath != null) {
+            val configFile = File(project.basePath, SPP_PLUGIN_YML_PATH)
+            if (configFile.exists()) {
+                val config = JsonObject(
+                    ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
+                )
+                config.fieldNames().toList().forEach {
+                    val value = config.remove(it)
+                    config.put(CaseUtils.toCamelCase(it, false, '_'), value)
+                }
+                return try {
+                    Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
+                } catch (ex: DecodeException) {
+                    log.warn("Failed to decode $SPP_PLUGIN_YML_PATH", ex)
+                    return null
+                }
+            }
+        }
+        return null
+    }
+
+    fun getConfig(project: Project): SourceMarkerConfig {
         val fileConfig = loadSppPluginFileConfiguration(project)
         val config = if (fileConfig != null && fileConfig.override) {
             fileConfig
         } else {
-            val persistedConfig = getPersistedConfig(projectSettings)
+            val persistedConfig = getPersistedConfig(PropertiesComponent.getInstance(project))
             if (persistedConfig == null && fileConfig != null) {
                 fileConfig
             } else {

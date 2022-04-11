@@ -77,6 +77,17 @@ public class PluginConfigurationPanel {
         autoDisplayEndpointQuickStatsCheckBox.setText(message("auto_display_endpoint_quick_stats"));
     }
 
+    private void setUIEnabled(boolean enabled) {
+        rootSourcePackageTextField.setEnabled(enabled);
+        autoResolveEndpointNamesCheckBox.setEnabled(enabled);
+        debugConsoleCheckBox.setEnabled(enabled);
+        serviceHostTextField.setEnabled(enabled);
+        accessTokenTextField.setEnabled(enabled);
+        serviceComboBox.setEnabled(enabled);
+        verifyHostCheckBox.setEnabled(enabled);
+        autoDisplayEndpointQuickStatsCheckBox.setEnabled(enabled);
+    }
+
     public JComponent getContentPane() {
         return myWholePanel;
     }
@@ -144,34 +155,48 @@ public class PluginConfigurationPanel {
         verifyHostCheckBox.setSelected(config.getVerifyHost());
         autoDisplayEndpointQuickStatsCheckBox.setSelected(config.getAutoDisplayEndpointQuickStats());
 
-        myCertificatePins = new CertificatePinPanel();
+        myCertificatePins = new CertificatePinPanel(!config.getOverride());
         myCertificatePins.listModel.addAll(config.getCertificatePins());
         testPanel.add(myCertificatePins);
+
+        setUIEnabled(!config.getOverride());
     }
 
     class CertificatePinPanel extends JPanel {
         final DefaultListModel<String> listModel = new DefaultListModel<>();
         final JBList<String> myList = new JBList<>(listModel);
 
-        CertificatePinPanel() {
+        CertificatePinPanel(boolean enabled) {
             setLayout(new BorderLayout());
             myList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             myList.setBorder(JBUI.Borders.empty());
+            myList.setEnabled(enabled);
 
-            ToolbarDecorator decorator = ToolbarDecorator.createDecorator(myList)
-                    .setToolbarPosition(ActionToolbarPosition.RIGHT)
-                    .setScrollPaneBorder(JBUI.Borders.empty())
-                    .setPanelBorder(JBUI.Borders.empty())
-                    .setAddAction(__ -> editCertificatePin(null))
-                    .setEditAction(__ -> editCertificatePin())
-                    .setRemoveAction(__ -> removeCertificatePin())
-                    .disableUpDownActions();
+            ToolbarDecorator decorator;
+            if (enabled) {
+                decorator = ToolbarDecorator.createDecorator(myList)
+                        .setToolbarPosition(ActionToolbarPosition.RIGHT)
+                        .setScrollPaneBorder(JBUI.Borders.empty())
+                        .setPanelBorder(JBUI.Borders.empty())
+                        .setAddAction(__ -> editCertificatePin(null))
+                        .setEditAction(__ -> editCertificatePin())
+                        .setRemoveAction(__ -> removeCertificatePin())
+                        .disableUpDownActions();
+            } else {
+                decorator = ToolbarDecorator.createDecorator(myList)
+                        .setToolbarPosition(ActionToolbarPosition.RIGHT)
+                        .setScrollPaneBorder(JBUI.Borders.empty())
+                        .setPanelBorder(JBUI.Borders.empty())
+                        .disableAddAction()
+                        .disableRemoveAction()
+                        .disableUpDownActions();
+            }
 
             add(decorator.createPanel(), BorderLayout.EAST);
             JScrollPane scrollPane = new JBScrollPane(myList);
             add(scrollPane, BorderLayout.CENTER);
 
-            scrollPane.setPreferredSize(new Dimension(100, 0));
+            scrollPane.setMinimumSize(new Dimension(100, 0));
             scrollPane.setMaximumSize(new Dimension(100, 0));
         }
 
