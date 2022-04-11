@@ -35,9 +35,11 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.CUSTOM_EVENT
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
+import spp.jetbrains.monitor.skywalking.bridge.GeneralBridge
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
@@ -77,7 +79,7 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
 
     override fun handleEvent(event: SourceMarkEvent) {
         if (config.autoDisplayEndpointQuickStats && event.eventCode == SourceMarkEventCode.MARK_USER_DATA_UPDATED) {
-            if (event.sourceMark.getUserData(EndpointDetector.ENDPOINT_ID) != null) {
+            if (event.sourceMark is GuideMark && event.sourceMark.getUserData(EndpointDetector.ENDPOINT_ID) != null) {
                 val existingMarks = SourceMarkSearch.findSourceMarks(event.sourceMark.artifactQualifiedName)
                 if (existingMarks.find { it.getUserData(SHOWING_QUICK_STATS) == true } != null) return
 
@@ -98,10 +100,16 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
 
     private fun displayQuickStatsInlay(sourceMark: SourceMark) = ApplicationManager.getApplication().runReadAction {
         log.info("Displaying quick stats inlay for {}", sourceMark.artifactQualifiedName.identifier)
+        val swVersion = runBlocking(vertx.dispatcher()) { GeneralBridge.getVersion(vertx) }
+        val listenMetrics = if (swVersion.startsWith("9")) {
+            listOf("endpoint_cpm", "endpoint_resp_time", "endpoint_sla")
+        } else {
+            listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
+        }
         val endTime = ZonedDateTime.now().minusMinutes(1).truncatedTo(ChronoUnit.MINUTES) //exclusive
         val startTime = endTime.minusMinutes(2)
         val metricsRequest = GetEndpointMetrics(
-            listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+            listenMetrics,
             sourceMark.getUserData(EndpointDetector.ENDPOINT_ID)!!,
             ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
         )
@@ -138,7 +146,7 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
                     operationName = sourceMark.getUserData(EndpointDetector.ENDPOINT_ID)!! //todo: only SWLiveViewService uses
                 ),
                 LiveSourceLocation(sourceMark.artifactQualifiedName.identifier, 0), //todo: don't need
-                LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"), -1)
+                LiveViewConfig("ACTIVITY", listenMetrics, -1)
             )
         ).onComplete {
             if (it.succeeded()) {
@@ -146,6 +154,7 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
                 val previousMetrics = mutableMapOf<Long, String>()
                 vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
                     val viewEvent = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
+                    log.trace("Received updated quick stats for {}", sourceMark.artifactQualifiedName.identifier)
                     consumeLiveEvent(viewEvent, previousMetrics)
 
                     val twoMinAgoValue = previousMetrics[viewEvent.timeBucket.toLong() - 2]
