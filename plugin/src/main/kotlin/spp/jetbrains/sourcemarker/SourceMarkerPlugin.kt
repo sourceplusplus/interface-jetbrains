@@ -81,6 +81,7 @@ import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.jetbrains.sourcemarker.view.ActivityQuickStatsIndicator
+import spp.jetbrains.sourcemarker.view.FailingEndpointIndicator
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
@@ -447,6 +448,7 @@ object SourceMarkerPlugin {
         SourceMarker.addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
         SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator(config))
+        SourceMarker.addGlobalSourceMarkEventListener(FailingEndpointIndicator(config))
 
         val guideMarkConfig = GuideMarkConfiguration()
         guideMarkConfig.activateOnKeyboardShortcut = true
