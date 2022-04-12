@@ -90,10 +90,12 @@ object LiveStatusManager : SourceMarkEventListener {
 
                 ApplicationManager.getApplication().runReadAction {
                     val methodSourceMark = event.sourceMark as MethodSourceMark
-                    val qualifiedClassName = namingService.getClassQualifiedNames(
+                    val qualifiedClassNames = namingService.getQualifiedClassNames(
                         methodSourceMark.sourceFileMarker.psiFile
-                    )[0].identifier
+                    )
+                    if (qualifiedClassNames.isEmpty()) return@runReadAction
 
+                    val qualifiedClassName = qualifiedClassNames[0].identifier
                     val textRange = methodSourceMark.getPsiElement().textRange
                     val document = PsiDocumentManager.getInstance(methodSourceMark.project)
                         .getDocument(methodSourceMark.sourceFileMarker.psiFile)!!
@@ -137,7 +139,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = BreakpointStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
                 scopeService.getScopeVariables(fileMarker, lineNumber),
@@ -183,7 +185,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier,
+                    namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier,
                     lineNumber,
                     service = config.serviceName
                 ),
@@ -279,7 +281,7 @@ object LiveStatusManager : SourceMarkEventListener {
             )
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
-                    namingService.getClassQualifiedNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
                 inlayMark
