@@ -55,10 +55,7 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.*
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.py.PythonArtifactCreationService
-import spp.jetbrains.marker.py.PythonArtifactNamingService
-import spp.jetbrains.marker.py.PythonArtifactScopeService
-import spp.jetbrains.marker.py.PythonConditionParser
+import spp.jetbrains.marker.py.*
 import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
@@ -117,6 +114,7 @@ object SourceMarkerPlugin {
 
         val productCode = ApplicationInfo.getInstance().build.productCode
         if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
+            SourceMarker.guideProvider = PythonGuideProvider()
             SourceMarker.creationService = PythonArtifactCreationService()
             SourceMarker.namingService = PythonArtifactNamingService()
             SourceMarker.scopeService = PythonArtifactScopeService()

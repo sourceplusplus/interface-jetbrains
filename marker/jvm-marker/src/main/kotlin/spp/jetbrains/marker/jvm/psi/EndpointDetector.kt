@@ -141,7 +141,12 @@ class EndpointDetector(val vertx: Vertx) {
     private suspend fun determineEndpointName(sourceMark: MethodSourceMark): Future<Optional<DetectedEndpoint>> {
         return withContext(Dispatchers.Default) {
             ApplicationManager.getApplication().runReadAction(Computable {
-                determineEndpointName(sourceMark.getPsiMethod().toUElement() as UMethod)
+                val uMethod = sourceMark.getPsiMethod().toUElement() as UMethod?
+                if (uMethod != null) {
+                    determineEndpointName(sourceMark.getPsiMethod().toUElement() as UMethod)
+                } else { //todo: python functions don't have UMethod
+                    Future.succeededFuture(Optional.empty())
+                }
             })
         }
     }

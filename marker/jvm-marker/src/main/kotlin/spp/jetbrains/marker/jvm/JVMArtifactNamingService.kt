@@ -46,7 +46,7 @@ class JVMArtifactNamingService : ArtifactNamingService {
         }
     }
 
-    override fun getClassQualifiedNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
+    override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
         return when (psiFile) {
             is PsiClassOwner -> psiFile.classes.map {
                 ArtifactQualifiedName(it.qualifiedName!!, type = ArtifactType.CLASS)

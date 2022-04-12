@@ -101,7 +101,7 @@ object SourceMarker {
         check(enabled) { "SourceMarker disabled" }
 
         return availableSourceFileMarkers.values.find {
-            namingService.getClassQualifiedNames(it.psiFile).find { it.identifier.contains(classQualifiedName) } != null
+            namingService.getQualifiedClassNames(it.psiFile).find { it.identifier.contains(classQualifiedName) } != null
         }
     }
 
@@ -113,7 +113,7 @@ object SourceMarker {
             type = ArtifactType.CLASS
         )
         return availableSourceFileMarkers.values.find {
-            namingService.getClassQualifiedNames(it.psiFile).contains(classArtifactQualifiedName)
+            namingService.getQualifiedClassNames(it.psiFile).contains(classArtifactQualifiedName)
         }
     }
 
