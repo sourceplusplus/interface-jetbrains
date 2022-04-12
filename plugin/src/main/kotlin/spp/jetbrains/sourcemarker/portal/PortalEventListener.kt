@@ -42,7 +42,7 @@ import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
-import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.average
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
@@ -105,6 +105,7 @@ import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewEvent
 import spp.protocol.view.LiveViewSubscription
 import java.net.URI
+import java.net.URISyntaxException
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
@@ -519,13 +520,17 @@ class PortalEventListener(
                     val url = entrySpan.tags["url"]
                     val httpMethod = entrySpan.tags["http.method"]
                     if (url != null && httpMethod != null) {
-                        val updatedEndpointName = "$httpMethod:${URI(url).path}"
-                        vertx.eventBus().send(
-                            TraceSpanUpdated, entrySpan.copy(
-                                endpointName = updatedEndpointName,
-                                artifactQualifiedName = portal.viewingArtifact
+                        try {
+                            val updatedEndpointName = "$httpMethod:${URI(url).path}"
+                            vertx.eventBus().send(
+                                TraceSpanUpdated, entrySpan.copy(
+                                    endpointName = updatedEndpointName,
+                                    artifactQualifiedName = portal.viewingArtifact
+                                )
                             )
-                        )
+                        } catch (e: URISyntaxException) {
+                            log.warn("Failed to parse url $url")
+                        }
                     }
                 }
             }
@@ -574,7 +579,7 @@ class PortalEventListener(
     }
 
     private suspend fun refreshOverview(fileMarker: SourceFileMarker, portal: SourcePortal) {
-        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodGutterMark>().filter {
+        val endpointMarks = fileMarker.getSourceMarks().filterIsInstance<MethodGuideMark>().filter {
             it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
         }
 

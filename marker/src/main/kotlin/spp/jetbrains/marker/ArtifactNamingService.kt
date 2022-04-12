@@ -30,6 +30,5 @@ import spp.protocol.artifact.ArtifactQualifiedName
 interface ArtifactNamingService {
 
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
-
-    fun getClassQualifiedNames(psiFile: PsiFile): List<ArtifactQualifiedName>
+    fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName>
 }

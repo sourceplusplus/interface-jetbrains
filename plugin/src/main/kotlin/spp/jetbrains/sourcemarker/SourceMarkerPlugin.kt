@@ -57,15 +57,12 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.*
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.py.PythonArtifactCreationService
-import spp.jetbrains.marker.py.PythonArtifactNamingService
-import spp.jetbrains.marker.py.PythonArtifactScopeService
-import spp.jetbrains.marker.py.PythonConditionParser
+import spp.jetbrains.marker.py.*
 import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
 import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
-import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
+import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
@@ -83,6 +80,7 @@ import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.jetbrains.sourcemarker.view.ActivityQuickStatsIndicator
+import spp.jetbrains.sourcemarker.view.FailingEndpointIndicator
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
@@ -120,11 +118,13 @@ object SourceMarkerPlugin {
 
         val productCode = ApplicationInfo.getInstance().build.productCode
         if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
+            SourceMarker.guideProvider = PythonGuideProvider()
             SourceMarker.creationService = PythonArtifactCreationService()
             SourceMarker.namingService = PythonArtifactNamingService()
             SourceMarker.scopeService = PythonArtifactScopeService()
             SourceMarker.conditionParser = PythonConditionParser()
         } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
+            SourceMarker.guideProvider = JVMGuideProvider()
             SourceMarker.creationService = JVMArtifactCreationService()
             SourceMarker.namingService = JVMArtifactNamingService()
             SourceMarker.scopeService = JVMArtifactScopeService()
@@ -492,12 +492,6 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initMonitor(config: SourceMarkerConfig) {
-        var developer = "system"
-        if (config.serviceToken != null) {
-            val json = JWT.parse(config.serviceToken)
-            developer = json.getJsonObject("payload").getString("developer_id")
-        }
-
         val scheme = if (config.isSsl()) "https" else "http"
         val skywalkingHost = "$scheme://${config.serviceHostNormalized}:${config.getServicePortNormalized()}/graphql"
         val certificatePins = mutableListOf<String>()
@@ -505,8 +499,7 @@ object SourceMarkerPlugin {
         deploymentIds.add(
             vertx.deployVerticle(
                 SkywalkingMonitor(
-                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName,
-                    developer
+                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName
                 )
             ).await()
         )
@@ -521,10 +514,10 @@ object SourceMarkerPlugin {
         SourceMarker.addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
         SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator(config))
+        SourceMarker.addGlobalSourceMarkEventListener(FailingEndpointIndicator(config))
 
-        val gutterMarkConfig = GutterMarkConfiguration()
-        gutterMarkConfig.activateOnMouseHover = false
-        gutterMarkConfig.activateOnKeyboardShortcut = true
+        val guideMarkConfig = GuideMarkConfiguration()
+        guideMarkConfig.activateOnKeyboardShortcut = true
         val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
             defaultConfiguration.preloadJcefBrowser = false
             defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
@@ -540,9 +533,9 @@ object SourceMarkerPlugin {
                 }
             }
         }
-        gutterMarkConfig.componentProvider = componentProvider
+        guideMarkConfig.componentProvider = componentProvider
 
-        SourceMarker.configuration.gutterMarkConfiguration = gutterMarkConfig
+        SourceMarker.configuration.guideMarkConfiguration = guideMarkConfig
         SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
         SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true
 

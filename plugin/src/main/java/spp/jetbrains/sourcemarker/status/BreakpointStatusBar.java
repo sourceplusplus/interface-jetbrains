@@ -15,12 +15,14 @@ import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
+import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService;
 import spp.jetbrains.sourcemarker.settings.LiveBreakpointConfigurationPanel;
@@ -60,7 +62,7 @@ import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 
-public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
+public class BreakpointStatusBar extends JPanel implements StatusBar, InstrumentEventListener,  VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -123,6 +125,13 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, VisibleAre
 
         initComponents();
         setupComponents();
+    }
+
+    @Override
+    public void accept(@NotNull LiveInstrumentEvent event) {
+        if (event.getEventType() == BREAKPOINT_REMOVED) {
+            this.liveBreakpoint = null;
+        }
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {

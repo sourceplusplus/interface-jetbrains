@@ -15,25 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker
+package spp.jetbrains.marker.source.mark.guide
 
-import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.SourceFileMarkerProvider
-import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
-import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
-import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkConfiguration
 
 /**
- * Used to configure [SourceFileMarker]s.
+ * A [SourceMark] with no visual display used for internal purposes.
  *
- * @since 0.1.0
+ * @since 0.4.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SourceMarkerConfiguration {
-    var createSourceMarkFilter: CreateSourceMarkFilter = CreateSourceMarkFilter.ALL
-    var sourceFileMarkerProvider: SourceFileMarkerProvider = object : SourceFileMarkerProvider {}
-    var gutterMarkConfiguration: GutterMarkConfiguration = GutterMarkConfiguration()
-    var inlayMarkConfiguration: InlayMarkConfiguration = InlayMarkConfiguration()
-    var guideMarkConfiguration: GuideMarkConfiguration = GuideMarkConfiguration()
+interface GuideMark : SourceMark {
+
+    override val type: SourceMark.Type
+        get() = SourceMark.Type.GUIDE
+    override val configuration: GuideMarkConfiguration
+
+    //todo: remove
+    override fun isVisible(): Boolean = false
+    override fun setVisible(visible: Boolean): Unit = throw UnsupportedOperationException()
 }

@@ -79,7 +79,8 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
      */
     enum class Type {
         GUTTER,
-        INLAY
+        INLAY,
+        GUIDE
     }
 
     companion object {

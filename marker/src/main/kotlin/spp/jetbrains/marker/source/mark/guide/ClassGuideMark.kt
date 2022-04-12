@@ -15,25 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker
+package spp.jetbrains.marker.source.mark.guide
 
+import com.intellij.psi.PsiNameIdentifierOwner
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.SourceFileMarkerProvider
-import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
+import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
-import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
-import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkConfiguration
+import java.util.*
 
 /**
- * Used to configure [SourceFileMarker]s.
+ * Represents a [GuideMark] associated to a class artifact.
  *
- * @since 0.1.0
+ * @since 0.4.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SourceMarkerConfiguration {
-    var createSourceMarkFilter: CreateSourceMarkFilter = CreateSourceMarkFilter.ALL
-    var sourceFileMarkerProvider: SourceFileMarkerProvider = object : SourceFileMarkerProvider {}
-    var gutterMarkConfiguration: GutterMarkConfiguration = GutterMarkConfiguration()
-    var inlayMarkConfiguration: InlayMarkConfiguration = InlayMarkConfiguration()
-    var guideMarkConfiguration: GuideMarkConfiguration = GuideMarkConfiguration()
+open class ClassGuideMark(
+    override val sourceFileMarker: SourceFileMarker,
+    override var psiClass: PsiNameIdentifierOwner
+) : ClassSourceMark(sourceFileMarker, psiClass), GuideMark {
+
+    override val id: String = UUID.randomUUID().toString()
+    override val configuration: GuideMarkConfiguration = SourceMarker.configuration.guideMarkConfiguration
 }

@@ -21,7 +21,10 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.intellij.psi.PsiFile
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.plugin.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
@@ -43,6 +46,7 @@ object SourceMarker {
     @Volatile
     var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
+    lateinit var guideProvider: SourceGuideProvider
     lateinit var namingService: ArtifactNamingService
     lateinit var creationService: ArtifactCreationService
     lateinit var scopeService: ArtifactScopeService
@@ -86,6 +90,10 @@ object SourceMarker {
         availableSourceFileMarkers.putIfAbsent(psiFile.hashCode(), fileMarker)
         fileMarker = availableSourceFileMarkers[psiFile.hashCode()]!!
         psiFile.putUserData(SourceFileMarker.KEY, fileMarker)
+
+        GlobalScope.launch {
+            guideProvider.determineGuideMarks(fileMarker)
+        }
         return fileMarker
     }
 
@@ -93,7 +101,7 @@ object SourceMarker {
         check(enabled) { "SourceMarker disabled" }
 
         return availableSourceFileMarkers.values.find {
-            namingService.getClassQualifiedNames(it.psiFile).find { it.identifier.contains(classQualifiedName) } != null
+            namingService.getQualifiedClassNames(it.psiFile).find { it.identifier.contains(classQualifiedName) } != null
         }
     }
 
@@ -105,7 +113,7 @@ object SourceMarker {
             type = ArtifactType.CLASS
         )
         return availableSourceFileMarkers.values.find {
-            namingService.getClassQualifiedNames(it.psiFile).contains(classArtifactQualifiedName)
+            namingService.getQualifiedClassNames(it.psiFile).contains(classArtifactQualifiedName)
         }
     }
 

@@ -51,7 +51,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Emulates a subscription-based [LiveViewService] for SkyWalking-standalone installations.
  */
-class SWLiveViewService(private val developerId: String) : CoroutineVerticle(), LiveViewService {
+class SWLiveViewService : CoroutineVerticle(), LiveViewService {
 
     companion object {
         private val formatter = DateTimeFormatterBuilder()
@@ -66,6 +66,7 @@ class SWLiveViewService(private val developerId: String) : CoroutineVerticle(), 
         val lastMetricsByTimeBucket: ConcurrentHashMap<Long, JsonArray> = ConcurrentHashMap<Long, JsonArray>()
     )
 
+    private val developerId: String = "system"
     private val subscriptionMap = ConcurrentHashMap<String, SWLiveViewSubscription>()
     private var currentService: Service? = null
 

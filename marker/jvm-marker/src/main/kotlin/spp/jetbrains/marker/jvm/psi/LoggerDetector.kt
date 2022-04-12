@@ -92,9 +92,14 @@ class LoggerDetector(val vertx: Vertx) {
             log.trace("Found logger statements: $loggerStatements")
             loggerStatements
         } else {
-            val foundLoggerStatements = getOrFindLoggerStatements(sourceMark.getPsiMethod().toUElement() as UMethod).await()
-            sourceMark.putUserData(LOGGER_STATEMENTS, foundLoggerStatements)
-            foundLoggerStatements
+            val uMethod = sourceMark.getPsiMethod().toUElement() as UMethod?
+            if (uMethod != null) {
+                val foundLoggerStatements = getOrFindLoggerStatements(uMethod).await()
+                sourceMark.putUserData(LOGGER_STATEMENTS, foundLoggerStatements)
+                foundLoggerStatements
+            } else { //todo: python functions don't have UMethod
+                emptyList()
+            }
         }
     }
 

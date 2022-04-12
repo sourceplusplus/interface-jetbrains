@@ -47,8 +47,7 @@ class SkywalkingMonitor(
     private val jwtToken: String? = null,
     private val certificatePins: List<String> = emptyList(),
     private val verifyHost: Boolean,
-    private val currentService: String? = null,
-    private val developerId: String = "system"
+    private val currentService: String? = null
 ) : CoroutineVerticle() {
 
     companion object {
@@ -111,6 +110,7 @@ class SkywalkingMonitor(
             val timezone = Integer.parseInt(response.data!!.result!!.timezone) / 100
             val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
+            vertx.deployVerticle(GeneralBridge(skywalkingClient)).await()
             vertx.deployVerticle(ServiceBridge(skywalkingClient, currentService)).await()
             vertx.deployVerticle(ServiceInstanceBridge(skywalkingClient)).await()
             vertx.deployVerticle(EndpointBridge(skywalkingClient)).await()
@@ -124,7 +124,7 @@ class SkywalkingMonitor(
                 SourceServices.Instance.liveService = swLiveService
             }
             if (SourceServices.Instance.liveView == null) {
-                val swLiveViewService = SWLiveViewService(developerId)
+                val swLiveViewService = SWLiveViewService()
                 vertx.deployVerticle(swLiveViewService).await()
                 SourceServices.Instance.liveView = swLiveViewService
             }

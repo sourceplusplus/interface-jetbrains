@@ -34,10 +34,10 @@ interface SourceMarkProvider {
     ): ExpressionSourceMark
 
     fun createMethodSourceMark(
-        psiMethod: PsiNameIdentifierOwner, qualifiedName: ArtifactQualifiedName, type: SourceMark.Type
+        psiMethod: PsiNameIdentifierOwner, type: SourceMark.Type
     ): MethodSourceMark
 
     fun createClassSourceMark(
-        psiClass: PsiNameIdentifierOwner, qualifiedName: ArtifactQualifiedName, type: SourceMark.Type
+        psiClass: PsiNameIdentifierOwner, type: SourceMark.Type
     ): ClassSourceMark
 }

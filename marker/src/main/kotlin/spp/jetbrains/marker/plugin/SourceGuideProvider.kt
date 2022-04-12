@@ -15,28 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.source.mark.api.key
+package spp.jetbrains.marker.plugin
 
-import com.intellij.openapi.util.Key
-import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.marker.source.mark.gutter.GutterMark
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.marker.source.SourceFileMarker
 
-/**
- * Used to associate custom data to PSI elements.
- *
- * @since 0.1.0
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-data class SourceKey<T>(val name: String) {
-    companion object {
-        @JvmField
-        val GutterMark = Key.create<GutterMark>("sm.GutterMark")
-
-        @JvmField
-        val InlayMark = Key.create<InlayMark>("sm.InlayMark")
-
-        @JvmField
-        val GuideMark = Key.create<GuideMark>("sm.GuideMark")
-    }
+interface SourceGuideProvider {
+    fun determineGuideMarks(fileMarker: SourceFileMarker)
 }
