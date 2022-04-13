@@ -304,7 +304,7 @@ object SourceMarkerPlugin {
             if (persistedConfig == null && fileConfig != null) {
                 fileConfig
             } else {
-                SourceMarkerConfig(override = true)
+                persistedConfig ?: SourceMarkerConfig()
             }
         }
         return config
