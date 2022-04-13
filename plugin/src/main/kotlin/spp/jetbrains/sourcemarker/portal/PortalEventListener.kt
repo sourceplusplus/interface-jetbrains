@@ -142,7 +142,7 @@ class PortalEventListener(
             if (lastDisplayedInternalPortal != null) {
                 lastDisplayedInternalPortal!!.configuration.darkMode = (it.newValue !is IntelliJLaf)
                 val sourceMark = SourceMarker.getSourceMark(
-                    lastDisplayedInternalPortal!!.viewingArtifact, SourceMark.Type.GUTTER
+                    lastDisplayedInternalPortal!!.viewingArtifact, SourceMark.Type.GUIDE
                 )
                 if (sourceMark != null) {
                     val jcefComponent = sourceMark.sourceMarkComponent as SourceMarkJcefComponent
@@ -300,7 +300,7 @@ class PortalEventListener(
             //update subscriptions
             launch(vertx.dispatcher()) {
                 val sourceMark = SourceMarker.getSourceMark(
-                    portal.viewingArtifact, SourceMark.Type.GUTTER
+                    portal.viewingArtifact, SourceMark.Type.GUIDE
                 ) ?: return@launch
                 val endpointName = sourceMark.getUserData(
                     ENDPOINT_DETECTOR
@@ -354,7 +354,7 @@ class PortalEventListener(
             //update subscriptions
             launch(vertx.dispatcher()) {
                 val sourceMark = SourceMarker.getSourceMark(
-                    portal.viewingArtifact, SourceMark.Type.GUTTER
+                    portal.viewingArtifact, SourceMark.Type.GUIDE
                 ) ?: return@launch
                 val endpointName = sourceMark.getUserData(
                     ENDPOINT_DETECTOR
@@ -402,7 +402,7 @@ class PortalEventListener(
             //update subscriptions
             launch(vertx.dispatcher()) {
                 val sourceMark = SourceMarker.getSourceMark(
-                    portal.viewingArtifact, SourceMark.Type.GUTTER
+                    portal.viewingArtifact, SourceMark.Type.GUIDE
                 ) ?: return@launch
                 val logPatterns = if (sourceMark is ClassSourceMark) {
                     sourceMark.sourceFileMarker.getSourceMarks().filterIsInstance<MethodSourceMark>()
