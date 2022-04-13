@@ -36,12 +36,9 @@ import javax.swing.JComponent
 class SourceMarkerConfigurable : Configurable {
 
     private var form: PluginConfigurationPanel? = null
-    override fun getDisplayName(): String = message("plugin_name")
 
-    override fun isModified(): Boolean {
-        val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
-        return !projectSettings.isValueSet("sourcemarker_plugin_config") || form!!.isModified
-    }
+    override fun getDisplayName(): String = message("plugin_name")
+    override fun isModified(): Boolean = form!!.isModified
 
     override fun apply() {
         val updatedConfig = form!!.pluginConfig
