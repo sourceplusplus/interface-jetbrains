@@ -127,7 +127,6 @@ class SkywalkingClient(
                         serviceId = Optional.presentIfNotNull(request.serviceId),
                         serviceInstanceId = Optional.presentIfNotNull(request.serviceInstanceId),
                         endpointId = Optional.presentIfNotNull(request.endpointId),
-                        endpointName = Optional.presentIfNotNull(request.endpointName),
                         queryDuration = Optional.Present(request.zonedDuration.toDuration(this)),
                         queryOrder = request.orderType.toQueryOrder(),
                         traceState = request.orderType.toTraceState(),
