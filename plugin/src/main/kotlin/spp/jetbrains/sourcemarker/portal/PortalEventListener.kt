@@ -47,6 +47,7 @@ import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.average
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
 import spp.jetbrains.monitor.skywalking.bridge.EndpointTracesBridge
+import spp.jetbrains.monitor.skywalking.bridge.GeneralBridge
 import spp.jetbrains.monitor.skywalking.bridge.LogsBridge
 import spp.jetbrains.monitor.skywalking.bridge.LogsBridge.GetEndpointLogs
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
@@ -81,6 +82,7 @@ import spp.jetbrains.portal.protocol.artifact.metrics.ArtifactSummarizedMetrics
 import spp.jetbrains.portal.protocol.artifact.metrics.ArtifactSummarizedResult
 import spp.jetbrains.portal.protocol.portal.PageType
 import spp.jetbrains.sourcemarker.PluginBundle
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
@@ -307,13 +309,19 @@ class PortalEventListener(
                     ENDPOINT_DETECTOR
                 )?.getOrFindEndpointId(sourceMark) ?: return@launch
 
+                val swVersion = GeneralBridge.getVersion(SourceMarkerPlugin.vertx)
+                val fetchMetricTypes = if (swVersion.startsWith("9")) {
+                    listOf("endpoint_cpm", "endpoint_resp_time", "endpoint_sla")
+                } else {
+                    listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
+                }
                 Instance.liveView!!.addLiveViewSubscription(
                     LiveViewSubscription(
                         null,
                         listOf(endpointName),
                         portal.viewingArtifact.copy(operationName = endpointId), //todo: only SWLiveViewService uses
                         LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
-                        LiveViewConfig("ACTIVITY", listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"))
+                        LiveViewConfig("ACTIVITY", fetchMetricTypes)
                     )
                 ).onComplete {
                     if (it.succeeded()) {
@@ -583,7 +591,12 @@ class PortalEventListener(
             it.getUserData(ENDPOINT_DETECTOR)!!.getOrFindEndpointId(it) != null
         }
 
-        val fetchMetricTypes = listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
+        val swVersion = GeneralBridge.getVersion(SourceMarkerPlugin.vertx)
+        val fetchMetricTypes = if (swVersion.startsWith("9")) {
+            listOf("endpoint_cpm", "endpoint_resp_time", "endpoint_sla")
+        } else {
+            listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
+        }
         val requestDuration = ZonedDuration(
             ZonedDateTime.now().minusMinutes(portal.overviewView.timeFrame.minutes.toLong()),
             ZonedDateTime.now(),
@@ -642,10 +655,16 @@ class PortalEventListener(
     }
 
     private suspend fun pullLatestActivity(portal: SourcePortal, endpointId: String) {
+        val swVersion = GeneralBridge.getVersion(SourceMarkerPlugin.vertx)
+        val fetchMetricTypes = if (swVersion.startsWith("9")) {
+            listOf("endpoint_cpm", "endpoint_resp_time", "endpoint_sla")
+        } else {
+            listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
+        }
         val endTime = ZonedDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MINUTES)
         val startTime = endTime.minusMinutes(portal.activityView.timeFrame.minutes.toLong())
         val metricsRequest = GetEndpointMetrics(
-            listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla"),
+            fetchMetricTypes,
             endpointId,
             ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
         )

@@ -101,7 +101,7 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
     private fun displayQuickStatsInlay(sourceMark: SourceMark) = ApplicationManager.getApplication().runReadAction {
         log.info("Displaying quick stats inlay for {}", sourceMark.artifactQualifiedName.identifier)
         val swVersion = runBlocking(vertx.dispatcher()) { GeneralBridge.getVersion(vertx) }
-        val listenMetrics = if (swVersion.startsWith("9")) {
+        val fetchMetricTypes = if (swVersion.startsWith("9")) {
             listOf("endpoint_cpm", "endpoint_resp_time", "endpoint_sla")
         } else {
             listOf("endpoint_cpm", "endpoint_avg", "endpoint_sla")
@@ -109,7 +109,7 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
         val endTime = ZonedDateTime.now().minusMinutes(1).truncatedTo(ChronoUnit.MINUTES) //exclusive
         val startTime = endTime.minusMinutes(2)
         val metricsRequest = GetEndpointMetrics(
-            listenMetrics,
+            fetchMetricTypes,
             sourceMark.getUserData(EndpointDetector.ENDPOINT_ID)!!,
             ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
         )
@@ -146,7 +146,7 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
                     operationName = sourceMark.getUserData(EndpointDetector.ENDPOINT_ID)!! //todo: only SWLiveViewService uses
                 ),
                 LiveSourceLocation(sourceMark.artifactQualifiedName.identifier, 0), //todo: don't need
-                LiveViewConfig("ACTIVITY", listenMetrics, -1)
+                LiveViewConfig("ACTIVITY", fetchMetricTypes, -1)
             )
         ).onComplete {
             if (it.succeeded()) {
