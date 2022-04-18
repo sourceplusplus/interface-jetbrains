@@ -93,6 +93,8 @@ public class PluginConfigurationPanel {
     }
 
     boolean isModified() {
+        if (config.getOverride()) return false;
+
         if (!Arrays.equals(rootSourcePackageTextField.getText().split(","), config.getRootSourcePackages().toArray())) {
             return true;
         }
