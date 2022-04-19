@@ -95,7 +95,7 @@ public class PluginConfigurationPanel {
     boolean isModified() {
         if (config.getOverride()) return false;
 
-        if (!Arrays.equals(rootSourcePackageTextField.getText().split(","), config.getRootSourcePackages().toArray())) {
+        if (!Arrays.equals(Arrays.stream(rootSourcePackageTextField.getText().split(",")).filter(s -> !s.isEmpty()).toArray(), config.getRootSourcePackages().toArray())) {
             return true;
         }
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {
@@ -104,7 +104,7 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(debugConsoleCheckBox.isSelected(), config.getPluginConsoleEnabled())) {
             return true;
         }
-        if (!Objects.equals(serviceHostTextField.getText(), config.getServiceHost())) {
+        if (!Objects.equals(serviceHostTextField.getText(), config.getServiceHost() != null ? config.getServiceHost() : "")) {
             return true;
         }
         if (!Objects.equals(accessTokenTextField.getText(), config.getAccessToken() != null ? config.getAccessToken() : "")) {
