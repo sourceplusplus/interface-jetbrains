@@ -38,14 +38,14 @@ data class SourceMarkerConfig(
     val override: Boolean = false
 ) {
     companion object {
-        const val DEFAULT_SERVICE_PORT = 5445
+        const val DEFAULT_SERVICE_PORT = 12800
         const val DEFAULT_TCP_SERVICE_PORT = 5455
     }
 }
 
-val SourceMarkerConfig.serviceHostNormalized: String?
+val SourceMarkerConfig.serviceHostNormalized: String
     get() {
-        if (serviceHost == null) return null
+        if (serviceHost == null) return "localhost"
         var serviceHost = serviceHost!!
             .substringAfter("https://").substringAfter("http://")
         if (serviceHost.contains(":")) {
@@ -55,8 +55,8 @@ val SourceMarkerConfig.serviceHostNormalized: String?
         return serviceHost
     }
 
-fun SourceMarkerConfig.getServicePortNormalized(): Int? {
-    if (serviceHost == null) return null
+fun SourceMarkerConfig.getServicePortNormalized(): Int {
+    if (serviceHost == null) return SourceMarkerConfig.DEFAULT_SERVICE_PORT
     val hostStr = serviceHost!!.substringAfter("https://").substringAfter("http://")
     if (hostStr.contains(":")) {
         return hostStr.split(":")[1].toInt()

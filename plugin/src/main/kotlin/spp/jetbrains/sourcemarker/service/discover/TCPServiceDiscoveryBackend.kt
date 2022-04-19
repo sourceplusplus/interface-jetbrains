@@ -74,7 +74,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             config.getJsonObject("sourcemarker_plugin_config").toString(), SourceMarkerConfig::class.java
         )
 
-        val serviceHost = pluginConfig.serviceHostNormalized!!
+        val serviceHost = pluginConfig.serviceHostNormalized
         val certificatePins = mutableListOf<String>()
         certificatePins.addAll(pluginConfig.certificatePins)
 

@@ -36,6 +36,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
+import io.vertx.core.MultiMap
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.core.http.HttpClientOptions
@@ -44,7 +45,6 @@ import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.TrustOptions
-import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.servicediscovery.ServiceDiscovery
@@ -88,6 +88,7 @@ import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.awt.Dimension
 import java.io.File
+import javax.net.ssl.SSLHandshakeException
 
 /**
  * Sets up the SourceMarker plugin by configuring and initializing the various plugin modules.
@@ -413,7 +414,7 @@ object SourceMarkerPlugin {
 
     private suspend fun initServices(project: Project, config: SourceMarkerConfig) {
         if (!config.serviceHost.isNullOrBlank()) {
-            val servicePort = config.getServicePortNormalized()!!
+            val servicePort = config.getServicePortNormalized()
             val certificatePins = mutableListOf<String>()
             certificatePins.addAll(config.certificatePins)
             val httpClientOptions = if (certificatePins.isNotEmpty()) {
@@ -437,8 +438,9 @@ object SourceMarkerPlugin {
             val tokenUri = "/api/new-token?access_token=" + config.accessToken
             val req = vertx.createHttpClient(httpClientOptions).request(
                 RequestOptions()
+                    .setHeaders(MultiMap.caseInsensitiveMultiMap().add("spp-platform-request", "true"))
                     .setSsl(config.isSsl())
-                    .setHost(config.serviceHostNormalized!!)
+                    .setHost(config.serviceHostNormalized)
                     .setPort(servicePort)
                     .setURI(tokenUri)
             ).await()
@@ -456,38 +458,73 @@ object SourceMarkerPlugin {
             }
         } else {
             //try default local access
-            val defaultAccessToken = "change-me"
-            val tokenUri = "/api/new-token?access_token=$defaultAccessToken"
-            val req = vertx.createHttpClient(HttpClientOptions().setSsl(true).setVerifyHost(false).setTrustAll(true))
-                .request(
-                    RequestOptions()
-                        .setHost("localhost")
-                        .setPort(SourceMarkerConfig.DEFAULT_SERVICE_PORT)
-                        .setURI(tokenUri)
-                ).await()
-            req.end().await()
-            val resp = req.response().await()
-            if (resp.statusCode() in 200..299) {
-                val body = resp.body().await().toString()
-                config.serviceToken = body
-                config.serviceHost = "https://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
-                config.accessToken = defaultAccessToken
-                config.verifyHost = false
-
-                val projectSettings = PropertiesComponent.getInstance(project)
-                projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
-
-                discoverAvailableServices(config, project)
-
-                //auto-established notification
-                Notifications.Bus.notify(
-                    Notification(
-                        message("plugin_name"), "Connection auto-established",
-                        "You have successfully auto-connected. ${message("plugin_name")} is now fully activated.",
-                        NotificationType.INFORMATION
-                    )
-                )
+            try {
+                tryDefaultAccess(true, config, project)
+            } catch (e: SSLHandshakeException) {
+                tryDefaultAccess(false, config, project)
+            } catch (e: Exception) {
+                log.warn("Unable to find local live platform", e)
             }
+        }
+    }
+
+    private suspend fun tryDefaultAccess(ssl: Boolean, config: SourceMarkerConfig, project: Project) {
+        val defaultAccessToken = "change-me"
+        val tokenUri = "/api/new-token?access_token=$defaultAccessToken"
+        val req = vertx.createHttpClient(HttpClientOptions().setSsl(ssl).setVerifyHost(false).setTrustAll(true))
+            .request(
+                RequestOptions()
+                    .setHeaders(MultiMap.caseInsensitiveMultiMap().add("spp-platform-request", "true"))
+                    .setHost("localhost")
+                    .setPort(SourceMarkerConfig.DEFAULT_SERVICE_PORT)
+                    .setURI(tokenUri)
+            ).await()
+        req.end().await()
+
+        val resp = req.response().await()
+        if (resp.statusCode() in 200..299) {
+            val body = resp.body().await().toString()
+            config.serviceToken = body
+            if (ssl) {
+                config.serviceHost = "https://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
+            } else {
+                config.serviceHost = "http://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
+            }
+            config.accessToken = defaultAccessToken
+            config.verifyHost = false
+
+            val projectSettings = PropertiesComponent.getInstance(project)
+            projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
+
+            discoverAvailableServices(config, project)
+
+            //auto-established notification
+            Notifications.Bus.notify(
+                Notification(
+                    message("plugin_name"), "Connection auto-established",
+                    "You have successfully auto-connected to Live Platform. ${message("plugin_name")} is now fully activated.",
+                    NotificationType.INFORMATION
+                )
+            )
+        } else if (resp.statusCode() == 405) {
+            //found skywalking OAP server
+            if (ssl) {
+                config.serviceHost = "https://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
+            } else {
+                config.serviceHost = "http://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
+                config.verifyHost = false
+            }
+            val projectSettings = PropertiesComponent.getInstance(project)
+            projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
+
+            //auto-established notification
+            Notifications.Bus.notify(
+                Notification(
+                    message("plugin_name"), "Connection auto-established",
+                    "You have successfully auto-connected to Apache SkyWalking. ${message("plugin_name")} is now fully activated.",
+                    NotificationType.INFORMATION
+                )
+            )
         }
     }
 

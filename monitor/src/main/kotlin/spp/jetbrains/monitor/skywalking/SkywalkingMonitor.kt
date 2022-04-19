@@ -64,13 +64,6 @@ class SkywalkingMonitor(
     private suspend fun setup() {
         log.debug("Apache SkyWalking server: $serverUrl")
         val httpBuilder = OkHttpClient().newBuilder()
-            .addInterceptor { chain ->
-                chain.proceed(
-                    chain.request().newBuilder()
-                        .addHeader("spp-skywalking-reroute", "true")
-                        .build()
-                )
-            }
             .hostnameVerifier { _, _ -> true }
         if (!jwtToken.isNullOrEmpty()) {
             httpBuilder.addInterceptor { chain ->
