@@ -18,7 +18,7 @@ dependencies {
     } else {
         compileOnly(project(":marker"))
     }
-    compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
+    compileOnly("com.github.sourceplusplus.protocol:protocol:05b144c6ba")
     val intellijVersion = "213.7172.25"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
