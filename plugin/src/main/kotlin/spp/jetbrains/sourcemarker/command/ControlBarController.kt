@@ -29,7 +29,6 @@ import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.*
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
@@ -236,8 +235,8 @@ object ControlBarController {
     private fun handleViewPortalCommand(editor: Editor, command: LiveControlCommand) {
         val sourceMark = SourceMarkSearch.getClosestSourceMark(previousControlBar!!.sourceFileMarker, editor)
         if (sourceMark != null) {
-            sourceMark.triggerEvent(SourceMarkEvent(sourceMark, UPDATE_PORTAL_CONFIG, command)) {
-                sourceMark.triggerEvent(SourceMarkEvent(sourceMark, PORTAL_OPENING))
+            sourceMark.triggerEvent(UPDATE_PORTAL_CONFIG, listOf(command)) {
+                sourceMark.triggerEvent(PORTAL_OPENING, listOf(PORTAL_OPENING))
             }
         } else {
             log.warn("No source mark found for command: {}", command)

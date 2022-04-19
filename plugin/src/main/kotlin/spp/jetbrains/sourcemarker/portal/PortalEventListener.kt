@@ -75,7 +75,7 @@ import spp.jetbrains.portal.protocol.ProtocolAddress.Global.RefreshPortal
 import spp.jetbrains.portal.protocol.ProtocolAddress.Global.RefreshTraces
 import spp.jetbrains.portal.protocol.ProtocolAddress.Global.SetCurrentPage
 import spp.jetbrains.portal.protocol.ProtocolAddress.Global.TraceSpanUpdated
-import spp.jetbrains.portal.protocol.ProtocolAddress.Portal.UpdateEndpoints
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.UpdateEndpoints
 import spp.jetbrains.portal.protocol.artifact.endpoint.EndpointResult
 import spp.jetbrains.portal.protocol.artifact.endpoint.EndpointType
 import spp.jetbrains.portal.protocol.artifact.metrics.ArtifactSummarizedMetrics
@@ -629,7 +629,7 @@ class PortalEventListener(
         }
 
         vertx.eventBus().send(
-            UpdateEndpoints(portal.portalUuid),
+            UpdateEndpoints,
             JsonObject(
                 Json.encode(
                     EndpointResult(

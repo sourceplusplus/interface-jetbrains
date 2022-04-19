@@ -20,6 +20,7 @@ package spp.jetbrains.sourcemarker.portal
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
+import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
@@ -31,6 +32,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.portal.SourcePortal
 import spp.jetbrains.portal.backend.PortalServer
+import spp.jetbrains.portal.protocol.ProtocolAddress.Global.RenderPage
 import spp.jetbrains.portal.protocol.portal.PageType
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
@@ -71,27 +73,36 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                 val genUrl = "http://localhost:${portalServer.serverPort}?portalUuid=${portal.portalUuid}"
                 it.sourceMark.addEventListener {
                     if (it.eventCode == SourceMarkEventCode.UPDATE_PORTAL_CONFIG) {
-                        when (val command = it.params.first() as LiveControlCommand) {
-                            VIEW_OVERVIEW -> portal.configuration.config["currentPage"] = PageType.OVERVIEW
-                            VIEW_ACTIVITY -> portal.configuration.config["currentPage"] = PageType.ACTIVITY
-                            VIEW_TRACES -> portal.configuration.config["currentPage"] = PageType.TRACES
-                            VIEW_LOGS -> portal.configuration.config["currentPage"] = PageType.LOGS
+                        val newPage = when (val command = it.params.first() as LiveControlCommand) {
+                            VIEW_OVERVIEW -> PageType.OVERVIEW
+                            VIEW_ACTIVITY -> PageType.ACTIVITY
+                            VIEW_TRACES -> PageType.TRACES
+                            VIEW_LOGS -> PageType.LOGS
                             else -> throw UnsupportedOperationException("Command input: $command")
                         }
 
-                        val jcefComponent = it.sourceMark.sourceMarkComponent as SourceMarkJcefComponent
-                        jcefComponent.configuration.currentUrl = "#"
+                        if (newPage != portal.configuration.config["currentPage"]) {
+                            log.info("Setting portal page to $newPage")
+                            portal.configuration.config["currentPage"] = newPage
+                        }
                     } else if (it.eventCode == SourceMarkEventCode.PORTAL_OPENING) {
+                        SourcePortal.getPortals().filter { it.portalUuid != portal.portalUuid }.forEach {
+                            it.configuration.config["active"] = false
+                        }
+                        portal.configuration.config["active"] = true
+
                         val jcefComponent = it.sourceMark.sourceMarkComponent as SourceMarkJcefComponent
                         portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
 
-                        if (jcefComponent.configuration.currentUrl != genUrl) {
+                        if (jcefComponent.configuration.currentUrl == "about:blank") {
                             jcefComponent.configuration.initialUrl = genUrl
                             jcefComponent.configuration.currentUrl = genUrl
                             jcefComponent.getBrowser().cefBrowser.executeJavaScript(
                                 "window.location.href = '$genUrl';", genUrl, 0
                             )
                         }
+                        portal.configuration.config["portal_uuid"] = portal.portalUuid
+                        vertx.eventBus().publish(RenderPage, JsonObject.mapFrom(portal.configuration))
                         ApplicationManager.getApplication().invokeLater(it.sourceMark::displayPopup)
                     }
                 }
