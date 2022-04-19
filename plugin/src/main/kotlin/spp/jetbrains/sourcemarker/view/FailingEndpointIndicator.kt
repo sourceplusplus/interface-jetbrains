@@ -58,9 +58,7 @@ class FailingEndpointIndicator(val config: SourceMarkerConfig) : SourceMarkEvent
             SourceServices.Instance.liveView!!.addLiveViewSubscription(
                 LiveViewSubscription(
                     entityIds = listOf(event.sourceMark.getUserData(ENDPOINT_ID)!!),
-                    artifactQualifiedName = artifactQualifiedName.copy(
-                        operationName = event.sourceMark.getUserData(ENDPOINT_ID)!! //todo: only SWLiveViewService uses
-                    ),
+                    artifactQualifiedName = artifactQualifiedName,
                     artifactLocation = LiveSourceLocation(artifactQualifiedName.identifier, -1),
                     liveViewConfig = LiveViewConfig("FAILING_ENDPOINT_INDICATOR", listOf("endpoint_sla"), -1)
                 )

@@ -319,7 +319,7 @@ class PortalEventListener(
                     LiveViewSubscription(
                         null,
                         listOf(endpointName),
-                        portal.viewingArtifact.copy(operationName = endpointId), //todo: only SWLiveViewService uses
+                        portal.viewingArtifact,
                         LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
                         LiveViewConfig("ACTIVITY", fetchMetricTypes)
                     )
@@ -367,7 +367,7 @@ class PortalEventListener(
                     LiveViewSubscription(
                         null,
                         listOf(endpointName),
-                        portal.viewingArtifact.copy(operationName = endpointId), //todo: only SWLiveViewService uses
+                        portal.viewingArtifact,
                         LiveSourceLocation(portal.viewingArtifact.identifier, 0), //todo: fix
                         LiveViewConfig("TRACES", listOf("endpoint_traces"))
                     )

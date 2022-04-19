@@ -142,9 +142,7 @@ class ActivityQuickStatsIndicator(val config: SourceMarkerConfig) : SourceMarkEv
             LiveViewSubscription(
                 null,
                 listOf(sourceMark.getUserData(EndpointDetector.ENDPOINT_NAME)!!),
-                sourceMark.artifactQualifiedName.copy(
-                    operationName = sourceMark.getUserData(EndpointDetector.ENDPOINT_ID)!! //todo: only SWLiveViewService uses
-                ),
+                sourceMark.artifactQualifiedName,
                 LiveSourceLocation(sourceMark.artifactQualifiedName.identifier, 0), //todo: don't need
                 LiveViewConfig("ACTIVITY", fetchMetricTypes, -1)
             )

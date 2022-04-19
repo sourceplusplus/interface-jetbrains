@@ -91,7 +91,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
 
     private suspend fun sendTracesSubscriptionUpdate(swSubscription: SWLiveViewSubscription) {
         val subscription = swSubscription.subscription
-        val endpointId = subscription.artifactQualifiedName.operationName!! //todo: PortalEventListener sets temp
+        val endpointId = subscription.entityIds.first()
         val traceResult = EndpointTracesBridge.getTraces(
             GetEndpointTraces(
                 artifactQualifiedName = subscription.artifactQualifiedName,
@@ -168,13 +168,12 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
 
     private suspend fun sendEndpointMetricSubscriptionUpdate(swSubscription: SWLiveViewSubscription) {
         val subscription = swSubscription.subscription
-        val endpointId = subscription.artifactQualifiedName.operationName!! //todo: PortalEventListener & ActivityQuickStatsIndicator sets temp
         val lastMetricsByTimeBucket = swSubscription.lastMetricsByTimeBucket
         val endTime = ZonedDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MINUTES) //exclusive
         val startTime = endTime.minusMinutes(3)
         val metricsRequest = GetEndpointMetrics(
             subscription.liveViewConfig.viewMetrics,
-            endpointId, //subscription.entityIds.first(),
+            subscription.entityIds.first(),
             ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
         )
 
@@ -215,8 +214,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         value: Any
     ): JsonObject {
         return JsonObject()
-            .put("entityId", subscription.artifactQualifiedName.operationName) //todo: PortalEventListener sets temp
-            .put("entityName", subscription.entityIds.first())
+            .put("entityId", subscription.entityIds.first())
             .put("serviceId", "todo")
             .put("value", value)
             .put("total", value)
