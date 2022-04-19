@@ -75,10 +75,9 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
             subscriptionMap.forEach { (_, subscription) ->
                 launch(vertx.dispatcher()) {
                     when (subscription.subscription.liveViewConfig.viewName) {
-                        "ACTIVITY" -> sendActivitySubscriptionUpdate(subscription)
                         "LOGS" -> pullLatestLogs(subscription)
                         "TRACES" -> sendTracesSubscriptionUpdate(subscription)
-                        else -> TODO("not implemented")
+                        else -> sendEndpointMetricSubscriptionUpdate(subscription)
                     }
                 }
             }
@@ -167,7 +166,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         }
     }
 
-    private suspend fun sendActivitySubscriptionUpdate(swSubscription: SWLiveViewSubscription) {
+    private suspend fun sendEndpointMetricSubscriptionUpdate(swSubscription: SWLiveViewSubscription) {
         val subscription = swSubscription.subscription
         val endpointId = subscription.artifactQualifiedName.operationName!! //todo: PortalEventListener & ActivityQuickStatsIndicator sets temp
         val lastMetricsByTimeBucket = swSubscription.lastMetricsByTimeBucket
