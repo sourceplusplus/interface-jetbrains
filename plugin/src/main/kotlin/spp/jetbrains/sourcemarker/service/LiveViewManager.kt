@@ -55,6 +55,8 @@ class LiveViewManager(private val pluginConfig: SourceMarkerConfig) : CoroutineV
             //todo: remove in favor of sending events to individual subscribers
             SourceMarkSearch.findBySubscriptionId(event.subscriptionId)
                 ?.getUserData(SourceMarkKeys.VIEW_EVENT_LISTENERS)?.forEach { it.accept(event) }
+
+            vertx.eventBus().publish(toLiveViewSubscriberAddress(event.subscriptionId), it.body())
         }
 
         FrameHelper.sendFrame(
