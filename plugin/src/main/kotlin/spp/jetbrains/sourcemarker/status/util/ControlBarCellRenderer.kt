@@ -17,6 +17,8 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
+import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.UPDATE_PORTAL_CONFIG
 import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
@@ -31,7 +33,9 @@ import javax.swing.JList
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) : DefaultListCellRenderer() {
+class ControlBarCellRenderer(
+    private val autocompleteField: AutocompleteField, val sourceMark: ExpressionSourceMark
+) : DefaultListCellRenderer() {
     init {
         isOpaque = false
     }
@@ -60,6 +64,9 @@ class ControlBarCellRenderer(private val autocompleteField: AutocompleteField) :
         if (isSelected) {
             row.background = BGND_FOCUS_COLOR
             row.setCommandIcon(entry.selectedIcon)
+            if (entry.name.startsWith("VIEW_")) {
+                sourceMark.getParentSourceMark()!!.triggerEvent(UPDATE_PORTAL_CONFIG, listOf(entry))
+            }
         }
         return row
     }

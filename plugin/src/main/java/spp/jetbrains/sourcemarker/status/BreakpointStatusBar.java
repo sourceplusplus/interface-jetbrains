@@ -57,12 +57,12 @@ import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
+import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
-public class BreakpointStatusBar extends JPanel implements StatusBar, InstrumentEventListener,  VisibleAreaListener {
+public class BreakpointStatusBar extends JPanel implements StatusBar, InstrumentEventListener, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -146,7 +146,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, Instrument
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
         breakpointConditionField.hideAutocompletePopup();
-        if(popup != null) {
+        if (popup != null) {
             popup.dispose();
             popup = null;
         }
