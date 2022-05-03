@@ -17,7 +17,6 @@
  */
 package spp.jetbrains.sourcemarker.status
 
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -38,6 +37,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
@@ -49,7 +49,6 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener
 import spp.jetbrains.sourcemarker.service.ViewEventListener
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.util.CircularList
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
@@ -133,10 +132,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = Json.decodeValue(
-                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
-                SourceMarkerConfig::class.java
-            )
+            val config = SourceMarkerPlugin.getConfig(editor.project!!)
             val statusBar = BreakpointStatusBar(
                 LiveSourceLocation(
                     namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
@@ -179,10 +175,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = Json.decodeValue(
-                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
-                SourceMarkerConfig::class.java
-            )
+            val config = SourceMarkerPlugin.getConfig(editor.project!!)
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
                     namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier,
@@ -275,10 +268,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = Json.decodeValue(
-                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
-                SourceMarkerConfig::class.java
-            )
+            val config = SourceMarkerPlugin.getConfig(editor.project!!)
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
                     namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
@@ -316,10 +306,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = Json.decodeValue(
-                PropertiesComponent.getInstance(editor.project!!).getValue("sourcemarker_plugin_config"),
-                SourceMarkerConfig::class.java
-            )
+            val config = SourceMarkerPlugin.getConfig(editor.project!!)
             val statusBar = SpanStatusBar(
                 LiveSourceLocation(
                     inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,
