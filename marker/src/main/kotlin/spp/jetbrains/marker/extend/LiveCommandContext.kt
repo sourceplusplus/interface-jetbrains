@@ -28,7 +28,7 @@ class LiveCommandContext(
     val lineNumber: Int,
     val artifactQualifiedName: ArtifactQualifiedName,
     val guideArtifactQualifiedName: ArtifactQualifiedName? = null,
-    val eventConsumer: Consumer<Array<Any?>>
+    internal val eventConsumer: Consumer<Array<Any?>>
 ) {
     private val userData: MutableMap<Any, Any> = mutableMapOf()
 

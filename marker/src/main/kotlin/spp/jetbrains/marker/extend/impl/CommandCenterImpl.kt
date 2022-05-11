@@ -31,23 +31,24 @@ class CommandCenterImpl(val project: Project) : CommandCenter {
     private val commands = mutableSetOf<LiveCommand>()
 
     override fun init() {
-        project.putUserData(CommandCenter.UNREGISTER, Consumer<String> { data ->
-            val command = JsonObject(data)
-            unregisterLiveCommand(command.mapTo(LiveCommand::class.java))
-        })
-        project.putUserData(CommandCenter.REGISTER, BiConsumer<String, BiConsumer<String, Consumer<Array<Any?>>>> { data, trigger ->
-            val command = JsonObject(data)
-            registerLiveCommand(DevLiveCommand(command, trigger))
-        })
+        project.putUserData(CommandCenter.UNREGISTER,
+            Consumer<String> { data ->
+                val command = JsonObject(data)
+                unregisterLiveCommand(command.mapTo(LiveCommand::class.java))
+            })
+        project.putUserData(
+            CommandCenter.REGISTER,
+            BiConsumer<String, BiConsumer<String, Consumer<Array<Any?>>>> { data, trigger ->
+                val command = JsonObject(data)
+                registerLiveCommand(DevLiveCommand(command, trigger))
+            })
     }
 
     override fun registerLiveCommand(command: LiveCommand) {
-        println("register: " + command)
         commands.add(command)
     }
 
     override fun unregisterLiveCommand(command: LiveCommand) {
-        println("unregister: " + command)
         commands.remove(command)
     }
 
@@ -55,7 +56,9 @@ class CommandCenterImpl(val project: Project) : CommandCenter {
         return commands.toList()
     }
 
-    private inner class DevLiveCommand(val command: JsonObject, val trigger: BiConsumer<String, Consumer<Array<Any?>>>) : LiveCommand(project) {
+    private inner class DevLiveCommand(
+        val command: JsonObject, val trigger: BiConsumer<String, Consumer<Array<Any?>>>
+    ) : LiveCommand(project) {
         override val name: String
             get() = command.getString("name")
         override val description: String
