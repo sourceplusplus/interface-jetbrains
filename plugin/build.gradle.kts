@@ -58,7 +58,7 @@ dependencies {
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
         implementation(project(":interfaces:jetbrains:monitor"))
-        //implementation(project(":interfaces:booster-ui"))
+        implementation(project(":interfaces:booster-ui"))
         implementation(project(":protocol"))
     } else {
         implementation(project(":commander"))
@@ -67,9 +67,10 @@ dependencies {
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
+//        implementation(project(":booster-ui"))
+        implementation(files("/home/brandon/IdeaProjects/live-platform/interfaces/booster-ui/build/libs/spp-booster-ui-0.4.7.jar"))
         implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     }
-    implementation(files("/home/brandon/IdeaProjects/live-platform/interfaces/booster-ui/build/libs/spp-booster-ui-0.4.7.jar"))
 
     implementation("org.jooq:joor:$joorVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")

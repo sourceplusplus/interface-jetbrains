@@ -20,6 +20,7 @@ package spp.jetbrains.sourcemarker.portal
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Editor
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -30,14 +31,21 @@ import spp.booster.PageType
 import spp.booster.PortalServer
 import spp.booster.SourcePortal
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
+import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
+import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.VIEW_OVERVIEW
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.marshall.KSerializers
+import java.awt.Dimension
 import javax.swing.UIManager
+import kotlin.math.ceil
+import kotlin.math.floor
 
 class PortalController(private val markerConfig: SourceMarkerConfig) : CoroutineVerticle() {
 
@@ -54,37 +62,37 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         log.info("Initializing portal server")
         val portalServer = PortalServer(8081)
         vertx.deployVerticle(portalServer).await()
-        vertx.deployVerticle(PortalEventListener(markerConfig)).await()
         log.info("Portal server initialized")
 
-//        val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
-////            defaultConfiguration.initialUrl = "http://localhost:8080/general?portal=true&fullview=true"
-//            defaultConfiguration.initialUrl = "https://google.com"
-//            defaultConfiguration.zoomLevel = markerConfig.portalConfig.zoomLevel
-//            defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
-//                override fun getDynamicSize(
-//                    editor: Editor,
-//                    configuration: SourceMarkComponentConfiguration
-//                ): Dimension {
-//                    val widthDouble = 963 * markerConfig.portalConfig.zoomLevel
-//                    val heightDouble = 350 * markerConfig.portalConfig.zoomLevel
-//                    var width: Int = widthDouble.toInt()
-//                    if (ceil(widthDouble) != floor(widthDouble)) {
-//                        width = ceil(widthDouble).toInt() + 1
-//                    }
-//                    var height = heightDouble.toInt()
-//                    if (ceil(heightDouble) != floor(heightDouble)) {
-//                        height = ceil(heightDouble).toInt() + 1
-//                    }
-//                    return Dimension(width, height)
-//                }
-//            }
-//        }
-//        SourceMarker.configuration.guideMarkConfiguration.componentProvider = componentProvider
-//        SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
-//        log.info("Booting JCEF browser")
-//        componentProvider.jcefComponent.initialize()
-//        log.info("JCEF browser booted")
+        val guideMarkConfig = GuideMarkConfiguration()
+        guideMarkConfig.activateOnKeyboardShortcut = true
+        val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
+            defaultConfiguration.initialUrl =
+                "http://localhost:8080/dashboard/GENERAL/Endpoint/c3Bw.1/c3Bw.1_R0VUOi9wcmltaXRpdmUtbG9jYWwtdmFycw==/Endpoint-Activity?portal=true&fullview=true"
+            defaultConfiguration.zoomLevel = markerConfig.portalConfig.zoomLevel
+            defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
+                override fun getDynamicSize(
+                    editor: Editor,
+                    configuration: SourceMarkComponentConfiguration
+                ): Dimension {
+                    val widthDouble = 963 * markerConfig.portalConfig.zoomLevel
+                    val heightDouble = 350 * markerConfig.portalConfig.zoomLevel
+                    var width: Int = widthDouble.toInt()
+                    if (ceil(widthDouble) != floor(widthDouble)) {
+                        width = ceil(widthDouble).toInt() + 1
+                    }
+                    var height = heightDouble.toInt()
+                    if (ceil(heightDouble) != floor(heightDouble)) {
+                        height = ceil(heightDouble).toInt() + 1
+                    }
+                    return Dimension(width, height)
+                }
+            }
+        }
+        guideMarkConfig.componentProvider = componentProvider
+
+        SourceMarker.configuration.guideMarkConfiguration = guideMarkConfig
+        SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
 
         SourceMarker.addGlobalSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED && it.sourceMark is GuideMark) {
@@ -93,11 +101,6 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                     SourcePortal.register(it.sourceMark.artifactQualifiedName, false)
                 )!!
                 it.sourceMark.putUserData(SourceMarkKeys.PORTAL_CONFIGURATION, portal.configuration)
-                portal.configuration.config["visibleOverview"] = it.sourceMark.isClassMark
-                portal.configuration.config["visibleActivity"] = true
-                portal.configuration.config["visibleTraces"] = true
-                portal.configuration.config["visibleLogs"] = true
-                portal.configuration.config["visibleConfiguration"] = false
 
                 it.sourceMark.addEventListener {
                     if (it.eventCode == SourceMarkEventCode.UPDATE_PORTAL_CONFIG) {
@@ -141,7 +144,6 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
 
                         portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
                         portal.configuration.config["portal_uuid"] = portal.portalUuid
-//                        vertx.eventBus().publish(RenderPage, JsonObject.mapFrom(portal.configuration))
                         ApplicationManager.getApplication().invokeLater(it.sourceMark::displayPopup)
                     }
                 }

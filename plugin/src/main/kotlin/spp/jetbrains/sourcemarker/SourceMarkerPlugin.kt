@@ -27,7 +27,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -60,11 +59,7 @@ import spp.jetbrains.marker.extend.impl.CommandCenterImpl
 import spp.jetbrains.marker.jvm.*
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.py.*
-import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
-import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
-import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
 import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
-import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
@@ -88,10 +83,7 @@ import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
-import java.awt.Dimension
 import java.io.File
-import java.lang.Math.ceil
-import java.lang.Math.floor
 import java.util.function.Function
 import javax.net.ssl.SSLHandshakeException
 
@@ -585,36 +577,6 @@ object SourceMarkerPlugin {
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
         SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator(config))
         SourceMarker.addGlobalSourceMarkEventListener(FailingEndpointIndicator(config))
-
-        val guideMarkConfig = GuideMarkConfiguration()
-        guideMarkConfig.activateOnKeyboardShortcut = true
-        val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
-            defaultConfiguration.initialUrl =
-                "http://localhost:8080/dashboard/GENERAL/Endpoint/c3Bw.1/c3Bw.1_R0VUOi9wcmltaXRpdmUtbG9jYWwtdmFycw==/Endpoint-Activity?portal=true&fullview=true"
-            defaultConfiguration.zoomLevel = config.portalConfig.zoomLevel
-            defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
-                override fun getDynamicSize(
-                    editor: Editor,
-                    configuration: SourceMarkComponentConfiguration
-                ): Dimension {
-                    val widthDouble = 963 * config.portalConfig.zoomLevel
-                    val heightDouble = 350 * config.portalConfig.zoomLevel
-                    var width: Int = widthDouble.toInt()
-                    if (ceil(widthDouble) != floor(widthDouble)) {
-                        width = ceil(widthDouble).toInt() + 1
-                    }
-                    var height = heightDouble.toInt()
-                    if (ceil(heightDouble) != floor(heightDouble)) {
-                        height = ceil(heightDouble).toInt() + 1
-                    }
-                    return Dimension(width, height)
-                }
-            }
-        }
-        guideMarkConfig.componentProvider = componentProvider
-
-        SourceMarker.configuration.guideMarkConfiguration = guideMarkConfig
-        SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
 
         SourceMarker.configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true
