@@ -67,8 +67,7 @@ dependencies {
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
-//        implementation(project(":booster-ui"))
-        implementation(files("/home/brandon/IdeaProjects/live-platform/interfaces/booster-ui/build/libs/spp-booster-ui-0.4.7.jar"))
+        implementation("com.github.sourceplusplus:interface-booster-ui:cc4bb6dce0")
         implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     }
 
@@ -150,8 +149,13 @@ tasks {
 
     register<Copy>("getKotlinCompilerWrapper") {
         dependsOn(":commander:kotlin-compiler-wrapper:installDist")
-        from("/home/brandon/IdeaProjects/live-platform/interfaces/jetbrains/commander/kotlin-compiler-wrapper/build/install/kotlin-compiler-wrapper/lib")
-        into("/home/brandon/IdeaProjects/live-platform/interfaces/jetbrains/plugin/build/idea-sandbox/plugins/interface-jetbrains/kotlin-compiler")
+        val wrapperBuildDir = if (findProject(":interfaces:jetbrains") != null) {
+            project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper").buildDir
+        } else {
+            project(":commander:kotlin-compiler-wrapper").buildDir
+        }
+        from(File(wrapperBuildDir, "install/kotlin-compiler-wrapper/lib"))
+        into(File(buildDir, "idea-sandbox/plugins/interface-jetbrains/kotlin-compiler"))
     }
 
     register("getPluginChangelog") {
