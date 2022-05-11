@@ -47,8 +47,8 @@ import spp.jetbrains.sourcemarker.PluginBundle
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.PluginUI
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.HIDE_QUICK_STATS
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.SHOW_QUICK_STATS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.HIDE_QUICK_STATS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.SHOW_QUICK_STATS
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.SourceServices

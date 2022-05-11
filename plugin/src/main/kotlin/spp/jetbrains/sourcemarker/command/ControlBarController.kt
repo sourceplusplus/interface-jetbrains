@@ -19,21 +19,39 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
+import liveplugin.implementation.common.toFilePath
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarker.creationService
+import spp.jetbrains.marker.extend.LiveCommandContext
 import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
+import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.*
+import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.ADD_LIVE_BREAKPOINT
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.ADD_LIVE_LOG
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.ADD_LIVE_METER
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.ADD_LIVE_SPAN
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_BREAKPOINTS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_INSTRUMENTS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_LOGS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_METERS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_SPANS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.HIDE_QUICK_STATS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.SHOW_QUICK_STATS
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.VIEW_OVERVIEW
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.WATCH_LOG
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
@@ -41,6 +59,7 @@ import spp.jetbrains.sourcemarker.view.ActivityQuickStatsIndicator
 import spp.protocol.SourceServices
 import spp.protocol.instrument.LiveInstrumentType.*
 import java.awt.BorderLayout
+import java.io.File
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -69,6 +88,35 @@ object ControlBarController {
             selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
         })
         //availableCommands.add(VIEW_OVERVIEW) //todo: remove after v0.4.3
+
+        SourceMarker.commandCenter.getRegisteredLiveCommands().forEach {
+            val basePath = it.project.basePath ?: ""
+            availableCommands.add(
+                LiveControlCommand(
+                    it.name,
+                    it.name,
+                    { it.description },
+                    it.selectedIcon?.let {
+                        val iconPath = if (File(basePath, it).exists()) {
+                            basePath + File.separator + it
+                        } else {
+                            it
+                        }
+                        IconLoader.findIcon(File(iconPath).toURL())!!
+                    },
+                    it.unselectedIcon?.let {
+                        val iconPath = if (File(basePath, it).exists()) {
+                            basePath + File.separator + it
+                        } else {
+                            it
+                        }
+                        IconLoader.findIcon(File(iconPath).toURL())!!
+                    },
+                    liveCommand = it
+                )
+            )
+            log.info("Registered developer command: ${it.name}")
+        }
     }
 
     private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
@@ -113,9 +161,6 @@ object ControlBarController {
             SHOW_QUICK_STATS.command -> handleQuickStatsCommand(editor, SHOW_QUICK_STATS)
             HIDE_QUICK_STATS.command -> handleQuickStatsCommand(editor, HIDE_QUICK_STATS)
             VIEW_OVERVIEW.command -> handleViewPortalCommand(editor, VIEW_OVERVIEW)
-            VIEW_ACTIVITY.command -> handleViewPortalCommand(editor, VIEW_ACTIVITY)
-            VIEW_TRACES.command -> handleViewPortalCommand(editor, VIEW_TRACES)
-            VIEW_LOGS.command -> handleViewPortalCommand(editor, VIEW_LOGS)
             WATCH_LOG.command -> {
                 //replace command inlay with log status inlay
                 val prevCommandBar = previousControlBar!!
@@ -216,7 +261,40 @@ object ControlBarController {
                     }
                 }
             }
-            else -> throw UnsupportedOperationException("Command input: $input")
+            else -> {
+                availableCommands.find { it.name == input }?.let {
+                    val prevCommandBar = previousControlBar!!
+                    previousControlBar!!.dispose()
+                    previousControlBar = null
+
+                    val sourceMark = SourceMarkSearch.getClosestSourceMark(prevCommandBar.sourceFileMarker, editor)
+                    val context = LiveCommandContext(
+                        prevCommandBar.sourceFileMarker.psiFile.virtualFile.toFilePath().toFile(),
+                        prevCommandBar.lineNumber,
+                        prevCommandBar.artifactQualifiedName,
+                        sourceMark?.artifactQualifiedName
+                    ) { event ->
+                        log.debug("Received developer command event: $event")
+                        sourceMark?.let {
+                            log.info("Triggering developer command event: $event - Source mark: $it")
+                            val eventCode = SourceMarkEventCode.fromName(event[0].toString())!!
+                            val convertedParams = (event[1] as List<Any?>).map {
+                                when {
+                                    it == null -> null
+                                    it::class.java.name.matches(Regex("^spp..+SourceMarkEventCode$")) ->
+                                        SourceMarkEventCode.fromName(it.toString())
+                                    else -> it
+                                }
+                            }
+                            it.triggerEvent(eventCode, convertedParams, event[2] as (() -> Unit)?)
+                        }
+                    }
+                    sourceMark?.getUserData()?.forEach {
+                        context.putUserData((it.key as SourceKey<*>).name, it.value)
+                    }
+                    it.liveCommand?.trigger(context)
+                }
+            }
         }
     }
 

@@ -24,6 +24,7 @@ import com.intellij.psi.PsiFile
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import spp.jetbrains.marker.extend.CommandCenter
 import spp.jetbrains.marker.plugin.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -46,6 +47,7 @@ object SourceMarker {
     @Volatile
     var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
+    lateinit var commandCenter: CommandCenter
     lateinit var guideProvider: SourceGuideProvider
     lateinit var namingService: ArtifactNamingService
     lateinit var creationService: ArtifactCreationService

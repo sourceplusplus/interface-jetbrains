@@ -47,26 +47,24 @@ class ControlBarCellRenderer(
         val row = LiveControlBarRow()
         row.setCommandName(entry.getText(), autocompleteField.text)
         row.setCommandIcon(entry.getIcon())
-        if (entry.getDescription() != null) {
-            row.setDescription(
-                entry.getDescription()!!
-                    .replace(
-                        "*lineNumber*",
-                        autocompleteField.artifactQualifiedName.lineNumber.toString()
-                    )
-                    .replace(
-                        "*methodName*",
-                        getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
-                    )
-            )
-        }
+        row.setDescription(
+            entry.getDescription()
+                .replace(
+                    "*lineNumber*",
+                    autocompleteField.artifactQualifiedName.lineNumber.toString()
+                )
+                .replace(
+                    "*methodName*",
+                    getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
+                )
+        )
 
         if (isSelected) {
             row.background = BGND_FOCUS_COLOR
             row.setCommandIcon(entry.selectedIcon)
-            if (entry.name.startsWith("VIEW_")) {
-                sourceMark.getParentSourceMark()!!.triggerEvent(UPDATE_PORTAL_CONFIG, listOf(entry))
-            }
+//            if (entry.name.startsWith("VIEW_")) {
+//                sourceMark.getParentSourceMark()!!.triggerEvent(UPDATE_PORTAL_CONFIG, listOf(entry))
+//            }
         }
         return row
     }

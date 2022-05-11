@@ -55,6 +55,8 @@ import kotlinx.coroutines.*
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.extend.CommandCenter
+import spp.jetbrains.marker.extend.impl.CommandCenterImpl
 import spp.jetbrains.marker.jvm.*
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.py.*
@@ -88,6 +90,9 @@ import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.awt.Dimension
 import java.io.File
+import java.lang.Math.ceil
+import java.lang.Math.floor
+import java.util.function.Function
 import javax.net.ssl.SSLHandshakeException
 
 /**
@@ -149,6 +154,25 @@ object SourceMarkerPlugin {
     ) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
+        SourceMarker.commandCenter = CommandCenterImpl(project)
+        project.putUserData(CommandCenter.PLUGIN_UI_FUNCTIONS, Function<Array<Any?>, String> { func ->
+            return@Function when (func[0] as String) {
+                "message" -> {
+                    message(func[1] as String)
+                }
+                "getCommandTypeColor" -> {
+                    PluginUI.getCommandTypeColor()
+                }
+                "getCommandHighlightColor" -> {
+                    PluginUI.getCommandHighlightColor()
+                }
+                else -> {
+                    log.error("Unknown function: {}", func[0])
+                    throw IllegalStateException("Unknown function: ${func[0]}")
+                }
+            }
+        })
+        SourceMarker.commandCenter.init()
 
         val config = configInput ?: getConfig(project)
         if (!addedConfigListener) {
@@ -281,12 +305,8 @@ object SourceMarkerPlugin {
                 val config = JsonObject(
                     ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
                 )
-                config.fieldNames().toList().forEach {
-                    val value = config.remove(it)
-                    config.put(CaseUtils.toCamelCase(it, false, '_'), value)
-                }
                 return try {
-                    Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
+                    Json.decodeValue(convertConfigToCamelCase(config).toString(), SourceMarkerConfig::class.java)
                 } catch (ex: DecodeException) {
                     log.warn("Failed to decode $SPP_PLUGIN_YML_PATH", ex)
                     return null
@@ -294,6 +314,19 @@ object SourceMarkerPlugin {
             }
         }
         return null
+    }
+
+    private fun convertConfigToCamelCase(jsonObject: JsonObject): JsonObject {
+        val result = JsonObject(jsonObject.toString())
+        result.fieldNames().toList().forEach {
+            val value = result.remove(it)
+            if (value is JsonObject) {
+                result.put(CaseUtils.toCamelCase(it, false, '_'), convertConfigToCamelCase(value))
+            } else {
+                result.put(CaseUtils.toCamelCase(it, false, '_'), value)
+            }
+        }
+        return result
     }
 
     fun getConfig(project: Project): SourceMarkerConfig {
@@ -556,17 +589,25 @@ object SourceMarkerPlugin {
         val guideMarkConfig = GuideMarkConfiguration()
         guideMarkConfig.activateOnKeyboardShortcut = true
         val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
-            defaultConfiguration.preloadJcefBrowser = false
+            defaultConfiguration.initialUrl =
+                "http://localhost:8080/dashboard/GENERAL/Endpoint/c3Bw.1/c3Bw.1_R0VUOi9wcmltaXRpdmUtbG9jYWwtdmFycw==/Endpoint-Activity?portal=true&fullview=true"
+            defaultConfiguration.zoomLevel = config.portalConfig.zoomLevel
             defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
                 override fun getDynamicSize(
                     editor: Editor,
                     configuration: SourceMarkComponentConfiguration
                 ): Dimension {
-                    var portalWidth = (editor.contentComponent.width * 0.8).toInt()
-                    if (portalWidth > 775) {
-                        portalWidth = 775
+                    val widthDouble = 963 * config.portalConfig.zoomLevel
+                    val heightDouble = 350 * config.portalConfig.zoomLevel
+                    var width: Int = widthDouble.toInt()
+                    if (ceil(widthDouble) != floor(widthDouble)) {
+                        width = ceil(widthDouble).toInt() + 1
                     }
-                    return Dimension(portalWidth, 250)
+                    var height = heightDouble.toInt()
+                    if (ceil(heightDouble) != floor(heightDouble)) {
+                        height = ceil(heightDouble).toInt() + 1
+                    }
+                    return Dimension(width, height)
                 }
             }
         }
@@ -574,6 +615,8 @@ object SourceMarkerPlugin {
 
         SourceMarker.configuration.guideMarkConfiguration = guideMarkConfig
         SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
+
+        SourceMarker.configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true
 
         if (config.rootSourcePackages.isNotEmpty()) {

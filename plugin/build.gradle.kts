@@ -37,9 +37,11 @@ intellij {
     updateSinceUntilBuild.set(false)
 
     plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
+    //plugins.add("com.intellij.zh:202.413") //test chinese locale
 }
 tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
 tasks.getByName<JavaExec>("runIde") {
+    //systemProperty("sourcemarker.debug.unblocked_threads", true)
     systemProperty("ide.enable.slow.operations.in.edt", false)
     systemProperty("ide.browser.jcef.contextMenu.devTools.enabled", true)
 }
@@ -50,20 +52,24 @@ changelog {
 
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
+        implementation(project(":interfaces:jetbrains:commander"))
+        implementation(project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper"))
         implementation(project(":interfaces:jetbrains:marker"))
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
         implementation(project(":interfaces:jetbrains:monitor"))
-        implementation(project(":interfaces:portal"))
+        //implementation(project(":interfaces:booster-ui"))
         implementation(project(":protocol"))
     } else {
+        implementation(project(":commander"))
+        implementation(project(":commander:kotlin-compiler-wrapper"))
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
-        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$projectVersion") { isTransitive = false }
         implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     }
+    implementation(files("/home/brandon/IdeaProjects/live-platform/interfaces/booster-ui/build/libs/spp-booster-ui-0.4.7.jar"))
 
     implementation("org.jooq:joor:$joorVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
@@ -136,9 +142,17 @@ tasks {
     runPluginVerifier {
         ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })
     }
-}
 
-tasks {
+    prepareSandbox {
+        dependsOn("getKotlinCompilerWrapper")
+    }
+
+    register<Copy>("getKotlinCompilerWrapper") {
+        dependsOn(":commander:kotlin-compiler-wrapper:installDist")
+        from("/home/brandon/IdeaProjects/live-platform/interfaces/jetbrains/commander/kotlin-compiler-wrapper/build/install/kotlin-compiler-wrapper/lib")
+        into("/home/brandon/IdeaProjects/live-platform/interfaces/jetbrains/plugin/build/idea-sandbox/plugins/interface-jetbrains/kotlin-compiler")
+    }
+
     register("getPluginChangelog") {
         doFirst {
             val pluginChangesHeader = "### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n"

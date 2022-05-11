@@ -26,16 +26,14 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
+import spp.booster.PageType
+import spp.booster.PortalServer
+import spp.booster.SourcePortal
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.portal.SourcePortal
-import spp.jetbrains.portal.backend.PortalServer
-import spp.jetbrains.portal.protocol.ProtocolAddress.Global.RenderPage
-import spp.jetbrains.portal.protocol.portal.PageType
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.*
+import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.VIEW_OVERVIEW
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.marshall.KSerializers
@@ -53,9 +51,40 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         module.addDeserializer(Instant::class.java, KSerializers.KotlinInstantDeserializer())
         DatabindCodec.mapper().registerModule(module)
 
-        val portalServer = PortalServer(0)
+        log.info("Initializing portal server")
+        val portalServer = PortalServer(8081)
         vertx.deployVerticle(portalServer).await()
         vertx.deployVerticle(PortalEventListener(markerConfig)).await()
+        log.info("Portal server initialized")
+
+//        val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
+////            defaultConfiguration.initialUrl = "http://localhost:8080/general?portal=true&fullview=true"
+//            defaultConfiguration.initialUrl = "https://google.com"
+//            defaultConfiguration.zoomLevel = markerConfig.portalConfig.zoomLevel
+//            defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
+//                override fun getDynamicSize(
+//                    editor: Editor,
+//                    configuration: SourceMarkComponentConfiguration
+//                ): Dimension {
+//                    val widthDouble = 963 * markerConfig.portalConfig.zoomLevel
+//                    val heightDouble = 350 * markerConfig.portalConfig.zoomLevel
+//                    var width: Int = widthDouble.toInt()
+//                    if (ceil(widthDouble) != floor(widthDouble)) {
+//                        width = ceil(widthDouble).toInt() + 1
+//                    }
+//                    var height = heightDouble.toInt()
+//                    if (ceil(heightDouble) != floor(heightDouble)) {
+//                        height = ceil(heightDouble).toInt() + 1
+//                    }
+//                    return Dimension(width, height)
+//                }
+//            }
+//        }
+//        SourceMarker.configuration.guideMarkConfiguration.componentProvider = componentProvider
+//        SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
+//        log.info("Booting JCEF browser")
+//        componentProvider.jcefComponent.initialize()
+//        log.info("JCEF browser booted")
 
         SourceMarker.addGlobalSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED && it.sourceMark is GuideMark) {
@@ -70,43 +99,55 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                 portal.configuration.config["visibleLogs"] = true
                 portal.configuration.config["visibleConfiguration"] = false
 
-                val genUrl = "http://localhost:${portalServer.serverPort}?portalUuid=${portal.portalUuid}"
                 it.sourceMark.addEventListener {
                     if (it.eventCode == SourceMarkEventCode.UPDATE_PORTAL_CONFIG) {
-                        val newPage = when (val command = it.params.first() as LiveControlCommand) {
-                            VIEW_OVERVIEW -> PageType.OVERVIEW
-                            VIEW_ACTIVITY -> PageType.ACTIVITY
-                            VIEW_TRACES -> PageType.TRACES
-                            VIEW_LOGS -> PageType.LOGS
-                            else -> throw UnsupportedOperationException("Command input: $command")
-                        }
+                        if (it.params.first() is String && it.params.first() == "setPage") {
+                            vertx.eventBus().publish(
+                                "portal.SetCurrentPage",
+                                JsonObject().put("page", it.params.get(1) as String)
+                            )
+                        } else {
+                            val newPage = when (val command = it.params.first() as LiveControlCommand) {
+                                VIEW_OVERVIEW -> PageType.OVERVIEW
+                                else -> {
+                                    log.error("Unknown command: $command")
+                                    return@addEventListener
+                                }
+                            }
 
-                        if (newPage != portal.configuration.config["currentPage"]) {
-                            log.info("Setting portal page to $newPage")
-                            portal.configuration.config["currentPage"] = newPage
+                            if (newPage != portal.configuration.config["currentPage"]) {
+                                log.info("Setting portal page to $newPage")
+                                portal.configuration.config["currentPage"] = newPage
+
+                                val pageType =
+                                    (portal.configuration.config["currentPage"] as PageType).name.toLowerCase()
+                                        .capitalize()
+                                val endpointId = it.sourceMark.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)!!
+                                    .getEndpointId(it.sourceMark)!!
+                                vertx.eventBus().publish(
+                                    "portal.SetCurrentPage",
+                                    JsonObject().put(
+                                        "page",
+                                        "/dashboard/GENERAL/Endpoint/${endpointId.substringBefore("_")}/$endpointId/Endpoint-$pageType?portal=true&fullview=true"
+                                    )
+                                )
+                            }
                         }
                     } else if (it.eventCode == SourceMarkEventCode.PORTAL_OPENING) {
-                        SourcePortal.getPortals().filter { it.portalUuid != portal.portalUuid }.forEach {
-                            it.configuration.config["active"] = false
-                        }
-                        portal.configuration.config["active"] = true
+//                        SourcePortal.getPortals().filter { it.portalUuid != portal.portalUuid }.forEach {
+//                            it.configuration.config["active"] = false
+//                        }
+//                        portal.configuration.config["active"] = true
 
-                        val jcefComponent = it.sourceMark.sourceMarkComponent as SourceMarkJcefComponent
                         portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
-
-                        if (jcefComponent.configuration.currentUrl == "about:blank") {
-                            jcefComponent.configuration.initialUrl = genUrl
-                            jcefComponent.configuration.currentUrl = genUrl
-                            jcefComponent.getBrowser().cefBrowser.executeJavaScript(
-                                "window.location.href = '$genUrl';", genUrl, 0
-                            )
-                        }
                         portal.configuration.config["portal_uuid"] = portal.portalUuid
-                        vertx.eventBus().publish(RenderPage, JsonObject.mapFrom(portal.configuration))
+//                        vertx.eventBus().publish(RenderPage, JsonObject.mapFrom(portal.configuration))
                         ApplicationManager.getApplication().invokeLater(it.sourceMark::displayPopup)
                     }
                 }
             }
         }
+
+        log.info("Portal initialized")
     }
 }

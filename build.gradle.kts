@@ -4,7 +4,7 @@ plugins {
     id("com.diffplug.spotless") apply false
     id("com.avast.gradle.docker-compose")
     id("org.jetbrains.kotlin.jvm") apply false
-    id("io.gitlab.arturbosch.detekt")
+//    id("io.gitlab.arturbosch.detekt") apply false
     id("maven-publish")
 }
 
@@ -35,12 +35,12 @@ subprojects {
     }
 
     apply<MavenPublishPlugin>()
-    apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
+//    apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
     tasks {
-        withType<io.gitlab.arturbosch.detekt.Detekt> {
-            parallel = true
-            buildUponDefaultConfig = true
-        }
+//        withType<io.gitlab.arturbosch.detekt.Detekt> {
+//            parallel = true
+//            buildUponDefaultConfig = true
+//        }
 
         withType<JavaCompile> {
             sourceCompatibility = "1.8"

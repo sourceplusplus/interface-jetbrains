@@ -31,7 +31,16 @@ import spp.jetbrains.marker.source.mark.gutter.event.GutterMarkEventCode
  */
 class SourceMarkSingleJcefComponentProvider : SourceMarkJcefComponentProvider(), SourceMarkEventListener {
 
-    private val jcefComponent: SourceMarkJcefComponent by lazy {
+    companion object {
+        var singleton: SourceMarkSingleJcefComponentProvider? = null
+    }
+
+    init {
+        singleton?.jcefComponent?.dispose()
+        singleton = this
+    }
+
+    val jcefComponent: SourceMarkJcefComponent by lazy {
         SourceMarkJcefComponent(defaultConfiguration.copy())
     }
 

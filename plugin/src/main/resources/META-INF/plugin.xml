@@ -30,7 +30,38 @@
                 serviceImplementation="spp.jetbrains.sourcemarker.console.SourceMarkerConsoleService"/>
         <toolWindow id="Source++ Console"
                     factoryClass="spp.jetbrains.sourcemarker.console.SourceMarkerToolWindowFactory"/>
+
+        <applicationService serviceImplementation="liveplugin.implementation.Settings"/>
+        <scratch.rootType implementation="liveplugin.implementation.ScratchLivePluginRootType"/>
+        <nonProjectFileWritingAccessExtension implementation="liveplugin.implementation.MakePluginFilesAlwaysEditable"/>
+        <syntaxHighlighter factoryClass="liveplugin.implementation.EnableSyntaxHighlighterInLivePlugins" order="first"/>
+        <indexedRootsProvider implementation="liveplugin.implementation.IndexSetContributor"/>
+        <usageTypeProvider implementation="liveplugin.implementation.UsageTypeExtension" order="last"/>
+        <useScopeEnlarger implementation="liveplugin.implementation.UseScopeExtension"/>
+        <createDirectoryCompletionContributor implementation="liveplugin.implementation.LivePluginDirectoryCompletionContributor"/>
+        <intentionAction>
+            <className>liveplugin.implementation.pluginrunner.AddToClassPathGroovyIntention</className>
+            <category>LivePlugin</category>
+        </intentionAction>
+        <intentionAction>
+            <className>liveplugin.implementation.pluginrunner.AddPluginDependencyGroovyIntention</className>
+            <category>LivePlugin</category>
+        </intentionAction>
+        <intentionAction>
+            <className>liveplugin.implementation.pluginrunner.AddToClassPathKotlinIntention</className>
+            <category>LivePlugin</category>
+        </intentionAction>
+        <intentionAction>
+            <className>liveplugin.implementation.pluginrunner.AddPluginDependencyKotlinIntention</className>
+            <category>LivePlugin</category>
+        </intentionAction>
     </extensions>
+
+    <applicationListeners>
+        <listener class="liveplugin.implementation.LivePluginAppListener" topic="com.intellij.ide.AppLifecycleListener"/>
+        <listener class="liveplugin.implementation.LivePluginProjectListener" topic="com.intellij.openapi.project.ProjectManagerListener"/>
+        <listener class="liveplugin.implementation.LivePluginDeletedListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+    </applicationListeners>
 
     <projectListeners>
         <listener class="spp.jetbrains.marker.plugin.FileActivityListener"
@@ -52,5 +83,14 @@
                 class="spp.jetbrains.marker.source.mark.SourceMarkPopupAction"
                 text="SourcePortal Popup Action" description="SourcePortal popup action">
         </action>
+
+        <action id="LivePlugin.RunPlugin" class="liveplugin.implementation.actions.RunPluginAction" text="Run Current Plugin">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt c" second-keystroke="alt e"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="control shift l"/>
+        </action>
+        <action id="LivePlugin.UnloadPlugin" class="liveplugin.implementation.actions.UnloadPluginAction" text="Unload Current Plugin"/>
+        <group id="LivePlugin.LivePluginActions" class="liveplugin.implementation.actions.RunLivePluginsGroup">
+            <add-to-group group-id="RunContextGroup"/>
+        </group>
     </actions>
 </idea-plugin>

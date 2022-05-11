@@ -8,6 +8,7 @@ val pluginGroup: String by project
 val projectVersion: String by project
 val slf4jVersion: String by project
 val joorVersion: String by project
+val vertxVersion: String by project
 
 publishing {
     publications {
@@ -29,6 +30,7 @@ repositories {
 dependencies {
     val intellijVersion = "213.7172.25"
 
+    compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")

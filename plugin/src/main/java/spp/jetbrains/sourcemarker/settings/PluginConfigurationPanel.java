@@ -43,6 +43,8 @@ public class PluginConfigurationPanel {
     private JLabel certificatePinsLabel;
     private JLabel serviceLabel;
     private JLabel rootSourcePackageLabel;
+    private JPanel myPortalSettingsPanel;
+    private JSpinner portalZoomSpinner;
     private SourceMarkerConfig config;
     private CertificatePinPanel myCertificatePins;
 
@@ -50,6 +52,8 @@ public class PluginConfigurationPanel {
         this.config = config;
         myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
+        myPortalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("portal_settings")));
+        portalZoomSpinner.setModel(new SpinnerNumberModel(1.0, 0.5, 2.0, 0.1));
 
         if (INSTANCE.getLiveService() != null) {
             INSTANCE.getLiveService().getServices().onComplete(it -> {
@@ -86,6 +90,7 @@ public class PluginConfigurationPanel {
         serviceComboBox.setEnabled(enabled);
         verifyHostCheckBox.setEnabled(enabled);
         autoDisplayEndpointQuickStatsCheckBox.setEnabled(enabled);
+        portalZoomSpinner.setEnabled(enabled);
     }
 
     public JComponent getContentPane() {
@@ -123,6 +128,9 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(autoDisplayEndpointQuickStatsCheckBox.isSelected(), config.getAutoDisplayEndpointQuickStats())) {
             return true;
         }
+        if (!Objects.equals(portalZoomSpinner.getValue(), config.getPortalConfig().getZoomLevel())) {
+            return true;
+        }
         return false;
     }
 
@@ -144,7 +152,8 @@ public class PluginConfigurationPanel {
                 verifyHostCheckBox.isSelected(),
                 currentService,
                 autoDisplayEndpointQuickStatsCheckBox.isSelected(),
-                false
+                false,
+                new PortalConfig((Double) portalZoomSpinner.getValue())
         );
     }
 
@@ -161,6 +170,8 @@ public class PluginConfigurationPanel {
         myCertificatePins = new CertificatePinPanel(!config.getOverride());
         myCertificatePins.listModel.addAll(config.getCertificatePins());
         testPanel.add(myCertificatePins);
+
+        portalZoomSpinner.setValue(config.getPortalConfig().getZoomLevel());
 
         setUIEnabled(!config.getOverride());
     }

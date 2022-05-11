@@ -15,36 +15,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.source.mark.api.event
+package spp.jetbrains.marker.extend
 
-import spp.jetbrains.marker.source.mark.api.SourceMark
+import com.intellij.openapi.util.Key
+import java.util.function.BiConsumer
+import java.util.function.Consumer
+import java.util.function.Function
 
-/**
- * Represents general [SourceMark] events.
- *
- * @since 0.1.0
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-@Suppress("MagicNumber")
-enum class SourceMarkEventCode(private val code: Int) : IEventCode {
-    MARK_ADDED(1000),
-    MARK_BEFORE_ADDED(1001),
-    MARK_REMOVED(1002),
-    NAME_CHANGED(1003),
-    PORTAL_OPENING(1004),
-    PORTAL_OPENED(1005),
-    PORTAL_CLOSED(1006),
-    UPDATE_PORTAL_CONFIG(1007),
-    MARK_USER_DATA_UPDATED(1008),
-    CUSTOM_EVENT(1009);
-
-    override fun code(): Int {
-        return this.code
-    }
-
+interface CommandCenter {
     companion object {
-        fun fromName(name: String): SourceMarkEventCode? {
-            return values().firstOrNull { it.name == name }
-        }
+        val PLUGIN_UI_FUNCTIONS = Key.create<Function<Array<Any?>, String>>("PLUGIN_UI_FUNCTIONS")
+        val REGISTER = Key.create<BiConsumer<String, BiConsumer<String, Consumer<Array<Any?>>>>>("SPP_COMMAND_REGISTER")
+        val UNREGISTER = Key.create<Consumer<String>>("SPP_COMMAND_UNREGISTER")
     }
+
+    fun init()
+    fun registerLiveCommand(command: LiveCommand)
+    fun unregisterLiveCommand(command: LiveCommand)
+    fun getRegisteredLiveCommands(): List<LiveCommand>
 }
