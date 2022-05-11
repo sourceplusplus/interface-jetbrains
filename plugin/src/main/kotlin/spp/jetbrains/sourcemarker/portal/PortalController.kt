@@ -34,15 +34,17 @@ import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
+import spp.jetbrains.marker.source.mark.api.component.jcef.config.BrowserLoadingListener
+import spp.jetbrains.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.VIEW_OVERVIEW
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.marshall.KSerializers
 import java.awt.Dimension
+import java.util.concurrent.atomic.AtomicReference
 import javax.swing.UIManager
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -64,11 +66,13 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         vertx.deployVerticle(portalServer).await()
         log.info("Portal server initialized")
 
-        val guideMarkConfig = GuideMarkConfiguration()
-        guideMarkConfig.activateOnKeyboardShortcut = true
+        val initialUrl = AtomicReference("")
         val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
-            defaultConfiguration.initialUrl =
-                "http://localhost:8080/dashboard/GENERAL/Endpoint/c3Bw.1/c3Bw.1_R0VUOi9wcmltaXRpdmUtbG9jYWwtdmFycw==/Endpoint-Activity?portal=true&fullview=true"
+            defaultConfiguration.browserLoadingListener = object: BrowserLoadingListener() {
+                override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
+                    configuration.initialUrl = initialUrl.get()
+                }
+            }
             defaultConfiguration.zoomLevel = markerConfig.portalConfig.zoomLevel
             defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
                 override fun getDynamicSize(
@@ -89,9 +93,7 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                 }
             }
         }
-        guideMarkConfig.componentProvider = componentProvider
-
-        SourceMarker.configuration.guideMarkConfiguration = guideMarkConfig
+        SourceMarker.configuration.guideMarkConfiguration.componentProvider = componentProvider
         SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
 
         SourceMarker.addGlobalSourceMarkEventListener {
@@ -105,6 +107,7 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                 it.sourceMark.addEventListener {
                     if (it.eventCode == SourceMarkEventCode.UPDATE_PORTAL_CONFIG) {
                         if (it.params.first() is String && it.params.first() == "setPage") {
+                            initialUrl.set("http://localhost:8080${it.params.get(1)}")
                             vertx.eventBus().publish(
                                 "portal.SetCurrentPage",
                                 JsonObject().put("page", it.params.get(1) as String)
