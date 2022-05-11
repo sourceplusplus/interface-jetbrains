@@ -88,58 +88,6 @@ class LiveControlCommand(
         //        "trace",
         //        "Add method to distributed tracing system"
         //    ),
-        val ADD_LIVE_BREAKPOINT = LiveControlCommand(
-            "ADD_LIVE_BREAKPOINT",
-            message("add_breakpoint"),
-            {
-                "<html><span style=\"font-size: 80%; color: ${getCommandTypeColor()}\">" + message("live_instrument") + " ➛ " + message(
-                    "add"
-                ) + " ➛ " + message("location") + ": </span><span style=\"font-size: 80%; color: ${getCommandHighlightColor()}\">" + message(
-                    "on_line"
-                ) + " *lineNumber*</span></html>"
-            },
-            PluginIcons.Command.liveBreakpointSelected,
-            PluginIcons.Command.liveBreakpointUnSelected
-        )
-        val ADD_LIVE_LOG = LiveControlCommand(
-            "ADD_LIVE_LOG",
-            message("add_log"),
-            {
-                "<html><span style=\"font-size: 80%; color: ${getCommandTypeColor()}\">" + message("live_instrument") + " ➛ " + message(
-                    "add"
-                ) + " ➛ " + message("location") + ": </span><span style=\"font-size: 80%; color: ${getCommandHighlightColor()}\">" + message(
-                    "on_line"
-                ) + " *lineNumber*</span></html>"
-            },
-            PluginIcons.Command.liveLogSelected,
-            PluginIcons.Command.liveLogUnSelected
-        )
-        val ADD_LIVE_METER = LiveControlCommand(
-            "ADD_LIVE_METER",
-            message("add_meter"),
-            {
-                "<html><span style=\"font-size: 80%; color: ${getCommandTypeColor()}\">" + message("live_instrument") + " ➛ " + message(
-                    "add"
-                ) + " ➛ " + message("location") + ": </span><span style=\"font-size: 80%; color: ${getCommandHighlightColor()}\">" + message(
-                    "on_line"
-                ) + " *lineNumber*</span></html>"
-            },
-            PluginIcons.Command.liveMeterSelected,
-            PluginIcons.Command.liveMeterUnSelected
-        )
-        val ADD_LIVE_SPAN = LiveControlCommand(
-            "ADD_LIVE_SPAN",
-            message("add_span"),
-            {
-                "<html><span style=\"font-size: 80%; color: ${getCommandTypeColor()}\">" + message("live_instrument") + " ➛ " + message(
-                    "add"
-                ) + " ➛ " + message("location") + ": </span><span style=\"font-size: 80%; color: ${getCommandHighlightColor()}\">" + message(
-                    "on_method"
-                ) + " *methodName*</span></html>"
-            },
-            PluginIcons.Command.liveSpanSelected,
-            PluginIcons.Command.liveSpanUnSelected
-        )
         val CLEAR_LIVE_INSTRUMENTS = LiveControlCommand(
             "CLEAR_LIVE_INSTRUMENTS",
             message("clear_instruments"),
@@ -184,10 +132,6 @@ class LiveControlCommand(
             SHOW_QUICK_STATS,
             HIDE_QUICK_STATS,
             WATCH_LOG,
-            ADD_LIVE_BREAKPOINT,
-            ADD_LIVE_LOG,
-            ADD_LIVE_METER,
-            ADD_LIVE_SPAN,
             CLEAR_LIVE_INSTRUMENTS,
             CLEAR_LIVE_BREAKPOINTS,
             CLEAR_LIVE_LOGS,

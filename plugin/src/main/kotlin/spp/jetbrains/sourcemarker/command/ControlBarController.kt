@@ -39,10 +39,6 @@ import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.ADD_LIVE_BREAKPOINT
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.ADD_LIVE_LOG
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.ADD_LIVE_METER
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.ADD_LIVE_SPAN
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_BREAKPOINTS
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_INSTRUMENTS
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_LOGS
@@ -166,46 +162,6 @@ object ControlBarController {
 
                 ApplicationManager.getApplication().runWriteAction {
                     LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber, true)
-                }
-            }
-            ADD_LIVE_BREAKPOINT.command -> {
-                //replace command inlay with breakpoint status inlay
-                val prevCommandBar = previousControlBar!!
-                previousControlBar!!.dispose()
-                previousControlBar = null
-
-                ApplicationManager.getApplication().runWriteAction {
-                    LiveStatusManager.showBreakpointStatusBar(editor, prevCommandBar.lineNumber)
-                }
-            }
-            ADD_LIVE_LOG.command -> {
-                //replace command inlay with log status inlay
-                val prevCommandBar = previousControlBar!!
-                previousControlBar!!.dispose()
-                previousControlBar = null
-
-                ApplicationManager.getApplication().runWriteAction {
-                    LiveStatusManager.showLogStatusBar(editor, prevCommandBar.lineNumber, false)
-                }
-            }
-            ADD_LIVE_METER.command -> {
-                //replace command inlay with meter status inlay
-                val prevCommandBar = previousControlBar!!
-                previousControlBar!!.dispose()
-                previousControlBar = null
-
-                ApplicationManager.getApplication().runWriteAction {
-                    LiveStatusManager.showMeterStatusBar(editor, prevCommandBar.lineNumber)
-                }
-            }
-            ADD_LIVE_SPAN.command -> {
-                //replace command inlay with span status inlay
-                val prevCommandBar = previousControlBar!!
-                previousControlBar!!.dispose()
-                previousControlBar = null
-
-                ApplicationManager.getApplication().runWriteAction {
-                    LiveStatusManager.showSpanStatusBar(editor, prevCommandBar.lineNumber)
                 }
             }
             CLEAR_LIVE_BREAKPOINTS.command -> {
