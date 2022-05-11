@@ -27,7 +27,6 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import kotlinx.datetime.Instant
 import org.slf4j.LoggerFactory
-import spp.booster.PageType
 import spp.booster.PortalServer
 import spp.booster.SourcePortal
 import spp.jetbrains.marker.SourceMarker
@@ -38,8 +37,6 @@ import spp.jetbrains.marker.source.mark.api.component.jcef.config.BrowserLoading
 import spp.jetbrains.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.sourcemarker.command.LiveControlCommand
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.VIEW_OVERVIEW
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.marshall.KSerializers
@@ -112,32 +109,6 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                                 "portal.SetCurrentPage",
                                 JsonObject().put("page", it.params.get(1) as String)
                             )
-                        } else {
-                            val newPage = when (val command = it.params.first() as LiveControlCommand) {
-                                VIEW_OVERVIEW -> PageType.OVERVIEW
-                                else -> {
-                                    log.error("Unknown command: $command")
-                                    return@addEventListener
-                                }
-                            }
-
-                            if (newPage != portal.configuration.config["currentPage"]) {
-                                log.info("Setting portal page to $newPage")
-                                portal.configuration.config["currentPage"] = newPage
-
-                                val pageType =
-                                    (portal.configuration.config["currentPage"] as PageType).name.toLowerCase()
-                                        .capitalize()
-                                val endpointId = it.sourceMark.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)!!
-                                    .getEndpointId(it.sourceMark)!!
-                                vertx.eventBus().publish(
-                                    "portal.SetCurrentPage",
-                                    JsonObject().put(
-                                        "page",
-                                        "/dashboard/GENERAL/Endpoint/${endpointId.substringBefore("_")}/$endpointId/Endpoint-$pageType?portal=true&fullview=true"
-                                    )
-                                )
-                            }
                         }
                     } else if (it.eventCode == SourceMarkEventCode.PORTAL_OPENING) {
 //                        SourcePortal.getPortals().filter { it.portalUuid != portal.portalUuid }.forEach {

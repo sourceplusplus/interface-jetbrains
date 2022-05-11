@@ -40,58 +40,6 @@ class LiveControlCommand(
     val liveCommand: LiveCommand? = null
 ) : AutocompleteFieldRow {
     companion object {
-        val VIEW_OVERVIEW = LiveControlCommand(
-            "VIEW_OVERVIEW",
-            message("view_overview"),
-            {
-                "<html><span style=\"font-size: 80%; color: ${getCommandTypeColor()}\">" + message("live_view") + " ➛ " + message(
-                    "overview"
-                ) + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: ${getCommandHighlightColor()}\">" + message(
-                    "class"
-                ) + "</span></html>"
-            },
-            PluginIcons.Command.viewOverviewSelected,
-            PluginIcons.Command.viewOverviewUnSelected
-        )
-//        val VIEW_ACTIVITY = LiveControlCommand(
-//            "VIEW_ACTIVITY",
-//            message("view_activity"),
-//            {
-//                "<html><span style=\"font-size: 80%; color: ${getCommandTypeColor()}\">" + message("live_view") + " ➛ " + message(
-//                    "activity"
-//                ) + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: ${getCommandHighlightColor()}\">" + message(
-//                    "method"
-//                ) + "</span></html>"
-//            },
-//            PluginIcons.Command.viewActivitySelected,
-//            PluginIcons.Command.viewActivityUnSelected
-//        )
-//        val VIEW_TRACES = LiveControlCommand(
-//            "VIEW_TRACES",
-//            message("view_traces"),
-//            {
-//                "<html><span style=\"font-size: 80%; color: ${getCommandTypeColor()}\">" + message("live_view") + " ➛ " + message(
-//                    "traces"
-//                ) + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: ${getCommandHighlightColor()}\">" + message(
-//                    "method"
-//                ) + "</span></html>"
-//            },
-//            PluginIcons.Command.viewTracesSelected,
-//            PluginIcons.Command.viewTracesUnSelected
-//        )
-//        val VIEW_LOGS = LiveControlCommand(
-//            "VIEW_LOGS",
-//            message("view_logs"),
-//            {
-//                "<html><span style=\"font-size: 80%; color: ${getCommandTypeColor()}\">" + message("live_view") + " ➛ " + message(
-//                    "logs"
-//                ) + " ➛ " + message("scope") + ": </span><span style=\"font-size: 80%; color: ${getCommandHighlightColor()}\">" + message(
-//                    "method"
-//                ) + "</span></html>"
-//            },
-//            PluginIcons.Command.viewLogsSelected,
-//            PluginIcons.Command.viewLogsUnSelected
-//        )
         val SHOW_QUICK_STATS = LiveControlCommand(
             "SHOW_QUICK_STATS",
             message("show_quick_stats"),
@@ -233,7 +181,6 @@ class LiveControlCommand(
         )
 
         fun values() = arrayOf(
-            VIEW_OVERVIEW,
             SHOW_QUICK_STATS,
             HIDE_QUICK_STATS,
             WATCH_LOG,

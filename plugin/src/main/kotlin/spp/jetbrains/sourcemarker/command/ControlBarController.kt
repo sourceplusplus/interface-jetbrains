@@ -50,7 +50,6 @@ import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIV
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.CLEAR_LIVE_SPANS
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.HIDE_QUICK_STATS
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.SHOW_QUICK_STATS
-import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.VIEW_OVERVIEW
 import spp.jetbrains.sourcemarker.command.LiveControlCommand.Companion.WATCH_LOG
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
@@ -87,7 +86,6 @@ object ControlBarController {
             @Suppress("UselessCallOnCollection") //unknown enums are null
             selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
         })
-        //availableCommands.add(VIEW_OVERVIEW) //todo: remove after v0.4.3
 
         SourceMarker.commandCenter.getRegisteredLiveCommands().forEach {
             val basePath = it.project.basePath ?: ""
@@ -160,7 +158,6 @@ object ControlBarController {
         when (input) {
             SHOW_QUICK_STATS.command -> handleQuickStatsCommand(editor, SHOW_QUICK_STATS)
             HIDE_QUICK_STATS.command -> handleQuickStatsCommand(editor, HIDE_QUICK_STATS)
-            VIEW_OVERVIEW.command -> handleViewPortalCommand(editor, VIEW_OVERVIEW)
             WATCH_LOG.command -> {
                 //replace command inlay with log status inlay
                 val prevCommandBar = previousControlBar!!
@@ -302,20 +299,6 @@ object ControlBarController {
         val sourceMark = SourceMarkSearch.getClosestSourceMark(previousControlBar!!.sourceFileMarker, editor)
         if (sourceMark != null) {
             sourceMark.triggerEvent(CUSTOM_EVENT, listOf(command))
-        } else {
-            log.warn("No source mark found for command: {}", command)
-        }
-
-        previousControlBar!!.dispose()
-        previousControlBar = null
-    }
-
-    private fun handleViewPortalCommand(editor: Editor, command: LiveControlCommand) {
-        val sourceMark = SourceMarkSearch.getClosestSourceMark(previousControlBar!!.sourceFileMarker, editor)
-        if (sourceMark != null) {
-            sourceMark.triggerEvent(UPDATE_PORTAL_CONFIG, listOf(command)) {
-                sourceMark.triggerEvent(PORTAL_OPENING, listOf(PORTAL_OPENING))
-            }
         } else {
             log.warn("No source mark found for command: {}", command)
         }
