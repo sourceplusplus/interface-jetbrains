@@ -24,6 +24,7 @@ import java.util.function.Function
 
 interface CommandCenter {
     companion object {
+        val LIVE_STATUS_MANAGER_FUNCTIONS = Key.create<Function<Array<Any?>, Any?>>("SPP_LIVE_STATUS_MANAGER_FUNCTIONS")
         val PLUGIN_UI_FUNCTIONS = Key.create<Function<Array<Any?>, String>>("PLUGIN_UI_FUNCTIONS")
         val REGISTER = Key.create<BiConsumer<String, BiConsumer<String, Consumer<Array<Any?>>>>>("SPP_COMMAND_REGISTER")
         val UNREGISTER = Key.create<Consumer<String>>("SPP_COMMAND_UNREGISTER")

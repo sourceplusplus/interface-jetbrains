@@ -27,6 +27,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -84,7 +85,7 @@ import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.io.File
-import java.util.MissingResourceException
+import java.util.*
 import java.util.function.Function
 import javax.net.ssl.SSLHandshakeException
 
@@ -162,6 +163,30 @@ object SourceMarkerPlugin {
                 }
                 "getCommandHighlightColor" -> {
                     PluginUI.getCommandHighlightColor()
+                }
+                else -> {
+                    log.error("Unknown function: {}", func[0])
+                    throw IllegalStateException("Unknown function: ${func[0]}")
+                }
+            }
+        })
+        project.putUserData(CommandCenter.LIVE_STATUS_MANAGER_FUNCTIONS, Function<Array<Any?>, Any?> { func ->
+            return@Function when (func[0] as String) {
+                "showBreakpointStatusBar" -> {
+                    LiveStatusManager.showBreakpointStatusBar(func[1] as Editor, func[2] as Int)
+                    null
+                }
+                "showLogStatusBar" -> {
+                    LiveStatusManager.showLogStatusBar(func[1] as Editor, func[2] as Int, false)
+                    null
+                }
+                "showMeterStatusBar" -> {
+                    LiveStatusManager.showMeterStatusBar(func[1] as Editor, func[2] as Int)
+                    null
+                }
+                "showSpanStatusBar" -> {
+                    LiveStatusManager.showSpanStatusBar(func[1] as Editor, func[2] as Int)
+                    null
                 }
                 else -> {
                     log.error("Unknown function: {}", func[0])

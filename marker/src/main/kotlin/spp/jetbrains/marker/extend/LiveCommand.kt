@@ -64,22 +64,4 @@ abstract class LiveCommand(val project: Project) {
             put("unselectedIcon", unselectedIcon)
         }.toString()
     }
-
-    fun message(message: String): String {
-        val pluginUIFunctions = Key.findKeyByName("PLUGIN_UI_FUNCTIONS")!!
-        val consumer = project.getUserData(pluginUIFunctions) as Function<Array<Any?>, String>
-        return consumer.apply(arrayOf("message", message))
-    }
-
-    fun getCommandTypeColor(): String {
-        val pluginUIFunctions = Key.findKeyByName("PLUGIN_UI_FUNCTIONS")!!
-        val consumer = project.getUserData(pluginUIFunctions) as Function<Array<Any?>, String>
-        return consumer.apply(arrayOf("getCommandTypeColor"))
-    }
-
-    fun getCommandHighlightColor(): String {
-        val pluginUIFunctions = Key.findKeyByName("PLUGIN_UI_FUNCTIONS")!!
-        val consumer = project.getUserData(pluginUIFunctions) as Function<Array<Any?>, String>
-        return consumer.apply(arrayOf("getCommandHighlightColor"))
-    }
 }
