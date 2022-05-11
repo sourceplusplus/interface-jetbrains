@@ -84,6 +84,7 @@ import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.io.File
+import java.util.MissingResourceException
 import java.util.function.Function
 import javax.net.ssl.SSLHandshakeException
 
@@ -150,7 +151,11 @@ object SourceMarkerPlugin {
         project.putUserData(CommandCenter.PLUGIN_UI_FUNCTIONS, Function<Array<Any?>, String> { func ->
             return@Function when (func[0] as String) {
                 "message" -> {
-                    message(func[1] as String)
+                    try {
+                        message(func[1] as String)
+                    } catch (e: MissingResourceException) {
+                        func[1] as String
+                    }
                 }
                 "getCommandTypeColor" -> {
                     PluginUI.getCommandTypeColor()
