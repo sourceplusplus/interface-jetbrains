@@ -20,6 +20,7 @@ package spp.jetbrains.sourcemarker.command
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.IconLoader
+import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
@@ -84,14 +85,18 @@ object ControlBarController {
         })
 
         SourceMarker.commandCenter.getRegisteredLiveCommands().forEach {
-            val basePath = it.project.basePath ?: ""
+            val basePath = it.project.basePath?.let { File(it, ".spp").absolutePath } ?: ""
+            val internalBasePath = Key.findKeyByName("SPP_COMMANDS_LOCATION")
+                ?.let { key -> it.project.getUserData(key).toString() } ?: ""
             availableCommands.add(
                 LiveControlCommand(
                     it.name,
                     it.name,
                     { it.description },
                     it.selectedIcon?.let {
-                        val iconPath = if (File(basePath, it).exists()) {
+                        val iconPath = if (File(internalBasePath, it).exists()) {
+                            internalBasePath + File.separator + it
+                        } else if (File(basePath, it).exists()) {
                             basePath + File.separator + it
                         } else {
                             it
@@ -99,7 +104,9 @@ object ControlBarController {
                         IconLoader.findIcon(File(iconPath).toURL())!!
                     },
                     it.unselectedIcon?.let {
-                        val iconPath = if (File(basePath, it).exists()) {
+                        val iconPath = if (File(internalBasePath, it).exists()) {
+                            internalBasePath + File.separator + it
+                        } else if (File(basePath, it).exists()) {
                             basePath + File.separator + it
                         } else {
                             it
