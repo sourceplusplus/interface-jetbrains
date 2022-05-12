@@ -101,7 +101,7 @@ object ControlBarController {
                         } else {
                             it
                         }
-                        IconLoader.findIcon(File(iconPath).toURL())!!
+                        IconLoader.findIcon(File(iconPath).toURL())
                     },
                     it.unselectedIcon?.let {
                         val iconPath = if (File(internalBasePath, it).exists()) {
@@ -111,7 +111,7 @@ object ControlBarController {
                         } else {
                             it
                         }
-                        IconLoader.findIcon(File(iconPath).toURL())!!
+                        IconLoader.findIcon(File(iconPath).toURL())
                     },
                     liveCommand = it
                 )
