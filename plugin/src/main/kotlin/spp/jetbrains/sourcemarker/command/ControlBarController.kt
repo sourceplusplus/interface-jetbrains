@@ -83,12 +83,15 @@ object ControlBarController {
             @Suppress("UselessCallOnCollection") //unknown enums are null
             selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
         })
+    }
 
+    private fun getDeveloperCommands(): List<LiveControlCommand> {
+        val developerCommands = mutableListOf<LiveControlCommand>()
         SourceMarker.commandCenter.getRegisteredLiveCommands().forEach {
-            val basePath = it.project.basePath?.let { File(it, ".spp").absolutePath } ?: ""
+            val basePath = SourceMarker.commandCenter.project.basePath?.let { File(it, ".spp").absolutePath } ?: ""
             val internalBasePath = Key.findKeyByName("SPP_COMMANDS_LOCATION")
-                ?.let { key -> it.project.getUserData(key).toString() } ?: ""
-            availableCommands.add(
+                ?.let { key -> SourceMarker.commandCenter.project.getUserData(key).toString() } ?: ""
+            developerCommands.add(
                 LiveControlCommand(
                     it.name,
                     it.name,
@@ -116,8 +119,8 @@ object ControlBarController {
                     liveCommand = it
                 )
             )
-            log.info("Registered developer command: ${it.name}")
         }
+        return developerCommands
     }
 
     private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveControlCommand> {
@@ -127,6 +130,7 @@ object ControlBarController {
 
         val availableCommandsAtLocation = availableCommands.toMutableSet()
         availableCommandsAtLocation.remove(SHOW_QUICK_STATS)
+        availableCommandsAtLocation.addAll(getDeveloperCommands())
 
         val parentMark = inlayMark.getParentSourceMark()
         if (parentMark is MethodSourceMark) {
@@ -226,7 +230,7 @@ object ControlBarController {
                 }
             }
             else -> {
-                availableCommands.find { it.name == input }?.let {
+                (availableCommands + getDeveloperCommands()).find { it.name == input }?.let {
                     val prevCommandBar = previousControlBar!!
                     previousControlBar!!.dispose()
                     previousControlBar = null

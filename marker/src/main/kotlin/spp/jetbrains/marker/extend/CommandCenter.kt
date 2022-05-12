@@ -17,6 +17,7 @@
  */
 package spp.jetbrains.marker.extend
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import java.util.function.BiConsumer
 import java.util.function.Consumer
@@ -30,8 +31,9 @@ interface CommandCenter {
         val UNREGISTER = Key.create<Consumer<String>>("SPP_COMMAND_UNREGISTER")
     }
 
+    val project: Project
     fun init()
     fun registerLiveCommand(command: LiveCommand)
-    fun unregisterLiveCommand(command: LiveCommand)
+    fun unregisterLiveCommand(commandName: String)
     fun getRegisteredLiveCommands(): List<LiveCommand>
 }

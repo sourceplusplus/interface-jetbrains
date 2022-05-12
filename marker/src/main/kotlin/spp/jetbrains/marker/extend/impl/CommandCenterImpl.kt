@@ -26,15 +26,14 @@ import spp.jetbrains.marker.extend.LiveCommandContext
 import java.util.function.BiConsumer
 import java.util.function.Consumer
 
-class CommandCenterImpl(val project: Project) : CommandCenter {
+class CommandCenterImpl(override val project: Project) : CommandCenter {
 
     private val commands = mutableSetOf<LiveCommand>()
 
     override fun init() {
         project.putUserData(CommandCenter.UNREGISTER,
-            Consumer<String> { data ->
-                val command = JsonObject(data)
-                unregisterLiveCommand(command.mapTo(LiveCommand::class.java))
+            Consumer<String> { commandName ->
+                unregisterLiveCommand(commandName)
             })
         project.putUserData(
             CommandCenter.REGISTER,
@@ -48,8 +47,8 @@ class CommandCenterImpl(val project: Project) : CommandCenter {
         commands.add(command)
     }
 
-    override fun unregisterLiveCommand(command: LiveCommand) {
-        commands.remove(command)
+    override fun unregisterLiveCommand(commandName: String) {
+        commands.removeIf { it.name == commandName }
     }
 
     override fun getRegisteredLiveCommands(): List<LiveCommand> {
@@ -58,7 +57,7 @@ class CommandCenterImpl(val project: Project) : CommandCenter {
 
     private inner class DevLiveCommand(
         val command: JsonObject, val trigger: BiConsumer<String, Consumer<Array<Any?>>>
-    ) : LiveCommand(project) {
+    ) : LiveCommand() {
         override val name: String
             get() = command.getString("name")
         override val description: String

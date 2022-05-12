@@ -17,17 +17,14 @@
  */
 package spp.jetbrains.marker.extend
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import io.vertx.core.json.JsonObject
 import spp.protocol.marshall.ProtocolMarshaller
 import java.io.File
 import java.util.function.BiConsumer
 import java.util.function.Consumer
-import java.util.function.Function
 
 @Suppress("unused")
-abstract class LiveCommand(val project: Project) {
+abstract class LiveCommand {
     abstract val name: String
     abstract val description: String
     open val params: List<String> = emptyList()
