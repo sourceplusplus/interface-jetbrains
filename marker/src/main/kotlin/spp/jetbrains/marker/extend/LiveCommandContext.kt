@@ -24,6 +24,7 @@ import java.io.File
 import java.util.function.Consumer
 
 class LiveCommandContext(
+    val args: List<String>,
     val sourceFile: File,
     val lineNumber: Int,
     val artifactQualifiedName: ArtifactQualifiedName,

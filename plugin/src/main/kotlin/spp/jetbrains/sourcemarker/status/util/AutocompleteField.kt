@@ -67,6 +67,8 @@ class AutocompleteField(
     var canShowSaveButton = true
     var varPattern: Pattern = Pattern.compile("")
     var includeCurlyPattern: Boolean = false
+    var actualText: String = ""
+        private set
 
     val matchAndApplyStyle = { m: Matcher ->
         if (varPattern.pattern().isNotEmpty()) {
@@ -262,9 +264,11 @@ class AutocompleteField(
             }
         } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
             if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) {
+                actualText = text
                 hideAutocompletePopup()
                 return
             }
+            actualText = text
 
             val text = list.selectedValue
             if (text != null) {

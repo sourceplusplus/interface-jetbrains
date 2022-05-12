@@ -30,14 +30,18 @@ import java.util.function.Function
 abstract class LiveCommand(val project: Project) {
     abstract val name: String
     abstract val description: String
+    open val params: List<String> = emptyList()
     open val aliases: Set<String> = emptySet()
-    abstract val selectedIcon: String?
-    abstract val unselectedIcon: String?
+    open val selectedIcon: String? = null
+    open val unselectedIcon: String? = null
 
     val triggerConsumer: BiConsumer<String, Consumer<Array<Any?>>> =
         BiConsumer<String, Consumer<Array<Any?>>> { context, eventConsumer ->
             val contextMap = JsonObject(context)
             val liveCommandContext = LiveCommandContext(
+                contextMap.getJsonArray("args")?.let {
+                    it.map { it.toString() }.toList()
+                } ?: emptyList(),
                 File(contextMap.getString("sourceFile")),
                 contextMap.getInteger("lineNumber"),
                 ProtocolMarshaller.deserializeArtifactQualifiedName(contextMap.getJsonObject("artifactQualifiedName")),
@@ -59,6 +63,7 @@ abstract class LiveCommand(val project: Project) {
         return JsonObject().apply {
             put("name", name)
             put("description", description)
+            put("params", params)
             put("aliases", aliases)
             put("selectedIcon", selectedIcon)
             put("unselectedIcon", unselectedIcon)

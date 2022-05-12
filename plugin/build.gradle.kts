@@ -143,11 +143,12 @@ tasks {
         ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })
     }
 
-    prepareSandbox {
+    runIde {
         dependsOn("getKotlinCompilerWrapper")
     }
 
     register<Copy>("getKotlinCompilerWrapper") {
+        mustRunAfter("prepareSandbox")
         dependsOn(":commander:kotlin-compiler-wrapper:installDist")
         val wrapperBuildDir = if (findProject(":interfaces:jetbrains") != null) {
             project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper").buildDir

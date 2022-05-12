@@ -63,6 +63,8 @@ class CommandCenterImpl(val project: Project) : CommandCenter {
             get() = command.getString("name")
         override val description: String
             get() = command.getString("description")
+        override val params: List<String>
+            get() = command.getJsonArray("params").map { it.toString() }
         override val aliases: Set<String>
             get() = command.getJsonArray("aliases")?.map { it.toString() }?.toSet() ?: emptySet()
         override val selectedIcon: String?
@@ -72,6 +74,7 @@ class CommandCenterImpl(val project: Project) : CommandCenter {
 
         override fun trigger(context: LiveCommandContext) {
             val contextJson = JsonObject()
+            contextJson.put("args", context.args)
             contextJson.put("sourceFile", context.sourceFile.absolutePath)
             contextJson.put("lineNumber", context.lineNumber)
             contextJson.put("artifactQualifiedName", context.artifactQualifiedName)

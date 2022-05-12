@@ -157,6 +157,10 @@ object ControlBarController {
     }
 
     fun handleCommandInput(input: String, editor: Editor) {
+        handleCommandInput(input, input, editor)
+    }
+
+    fun handleCommandInput(input: String, fullText: String, editor: Editor) {
         log.info("Processing command input: {}", input)
         when (input) {
             SHOW_QUICK_STATS.command -> handleQuickStatsCommand(editor, SHOW_QUICK_STATS)
@@ -227,8 +231,12 @@ object ControlBarController {
                     previousControlBar!!.dispose()
                     previousControlBar = null
 
+                    val argsString = substringAfterIgnoreCase(fullText, input).trim()
+                    val args = if (argsString.isEmpty()) emptyList() else argsString.split(" ")
+
                     val sourceMark = SourceMarkSearch.getClosestSourceMark(prevCommandBar.sourceFileMarker, editor)
                     val context = LiveCommandContext(
+                        args,
                         prevCommandBar.sourceFileMarker.psiFile.virtualFile.toFilePath().toFile(),
                         prevCommandBar.lineNumber,
                         prevCommandBar.artifactQualifiedName,
@@ -323,5 +331,13 @@ object ControlBarController {
         } else {
             showControlBar(editor, lineNumber - 1, true)
         }
+    }
+
+    private fun substringAfterIgnoreCase(str: String, search: String): String {
+        val index = str.indexOf(search, ignoreCase = true)
+        if (index == -1) {
+            return str
+        }
+        return str.substring(index + search.length)
     }
 }
