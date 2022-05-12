@@ -238,7 +238,9 @@ class AutocompleteField(
     override fun keyPressed(e: KeyEvent) {
         if (e.keyCode == KeyEvent.VK_SPACE && hasControlHeld) {
             results.clear()
-            results.addAll(allLookup)
+            results.addAll(allLookup
+                .filter { it.getText().toLowerCase().contains(text) }
+                .sortedBy { it.getText() })
             model.updateView()
             list.visibleRowCount = results.size.coerceAtMost(10)
             if (results.size > 0) {
