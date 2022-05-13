@@ -18,8 +18,6 @@
 package spp.jetbrains.sourcemarker.status.util
 
 import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
-import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.AutocompleteRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -44,7 +42,7 @@ class AutoCompleteCellRenderer(private val artifactQualifiedName: ArtifactQualif
         val entry = value as AutocompleteFieldRow
         val row = AutocompleteRow()
         row.setCommandName(entry.getText())
-        row.setCommandIcon(entry.getIcon())
+        row.setCommandIcon(entry.getUnselectedIcon())
         if (entry.getDescription() != null) {
             row.setDescription(
                 entry.getDescription()!!
@@ -54,10 +52,8 @@ class AutoCompleteCellRenderer(private val artifactQualifiedName: ArtifactQualif
         }
 
         if (isSelected) {
-            row.background = BGND_FOCUS_COLOR;
-            if (entry is LiveControlCommand) {
-                row.setCommandIcon(entry.selectedIcon)
-            }
+            row.background = BGND_FOCUS_COLOR
+            row.setCommandIcon(entry.getSelectedIcon())
         }
         return row
     }

@@ -23,7 +23,6 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.*
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*
@@ -43,10 +42,10 @@ import javax.swing.text.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class AutocompleteField(
+class AutocompleteField<T: AutocompleteFieldRow>(
     var placeHolderText: String?,
-    private val allLookup: List<AutocompleteFieldRow>,
-    private val lookup: Function<String, List<AutocompleteFieldRow>>? = null,
+    private val allLookup: List<T>,
+    private val lookup: Function<String, List<T>>? = null,
     internal val artifactQualifiedName: ArtifactQualifiedName,
     private val replaceCommandOnTab: Boolean = false,
     private val autocompleteOnEnter: Boolean = true,
@@ -70,7 +69,7 @@ class AutocompleteField(
     var actualText: String = ""
         private set
 
-    val matchAndApplyStyle = { m: Matcher ->
+    private val matchAndApplyStyle = { m: Matcher ->
         if (varPattern.pattern().isNotEmpty()) {
             while (m.find()) {
                 val variable: String = m.group(1)

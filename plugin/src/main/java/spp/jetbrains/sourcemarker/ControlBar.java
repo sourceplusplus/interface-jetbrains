@@ -6,13 +6,13 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.util.ui.UIUtil;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import net.miginfocom.swing.MigLayout;
+import spp.command.LiveCommand;
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
-import spp.jetbrains.sourcemarker.command.LiveControlCommand;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
+import spp.jetbrains.sourcemarker.status.util.LiveCommandFieldRow;
 import spp.protocol.artifact.ArtifactNameUtils;
 
 import javax.swing.*;
@@ -22,6 +22,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,20 +33,24 @@ import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouse
 public class ControlBar extends JPanel implements VisibleAreaListener {
 
     private static final JaroWinkler sift4 = new JaroWinkler(1.0d);
-    private final List<LiveControlCommand> availableCommands;
-    private final Function<String, List<AutocompleteFieldRow>> lookup;
+    private final List<LiveCommandFieldRow> availableCommands;
+    private final Function<String, List<LiveCommandFieldRow>> lookup;
     private final Editor editor;
     private final InlayMark inlayMark;
     private boolean disposed = false;
 
-    public ControlBar(Editor editor, InlayMark inlayMark, List<LiveControlCommand> availableCommands) {
+    public ControlBar(Editor editor, InlayMark inlayMark, List<LiveCommand> availableCommands) {
         this.editor = editor;
         this.inlayMark = inlayMark;
-        this.availableCommands = availableCommands;
-        this.lookup = text -> availableCommands.stream()
+
+        List<LiveCommandFieldRow> commands = availableCommands.stream()
+                .map(it -> new LiveCommandFieldRow(it, Objects.requireNonNull(editor.getProject())))
+                .collect(Collectors.toList());
+        this.availableCommands = commands;
+        this.lookup = text -> commands.stream()
             .sorted((c1, c2) -> {
-                String c1Command = c1.getCommand().replace("_", "").toLowerCase();
-                String c2Command = c2.getCommand().replace("_", "").toLowerCase();
+                String c1Command = c1.getText().toLowerCase();
+                String c2Command = c2.getText().toLowerCase();
                 double c1Distance = sift4.distance(text.toLowerCase(), c1Command);
                 double c2Distance = sift4.distance(text.toLowerCase(), c2Command);
                 if (c1Command.contains(text.toLowerCase())) {
@@ -121,7 +126,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                     if (autoCompleteText != null) {
                         ControlBarController.INSTANCE.handleCommandInput(autoCompleteText, textField1.getActualText(), editor);
                     } else if (!textField1.getText().isEmpty()) {
-                        List<AutocompleteFieldRow> commands = lookup.apply(textField1.getText());
+                        List<LiveCommandFieldRow> commands = lookup.apply(textField1.getText());
                         if (commands.isEmpty()) {
                             ControlBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
                         } else {
@@ -238,7 +243,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JLabel label1;
-    private AutocompleteField textField1;
+    private AutocompleteField<LiveCommandFieldRow> textField1;
     private JLabel label2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

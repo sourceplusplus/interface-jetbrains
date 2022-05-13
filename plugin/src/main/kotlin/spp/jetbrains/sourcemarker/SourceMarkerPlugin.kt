@@ -52,11 +52,12 @@ import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.impl.DiscoveryImpl
 import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
+import liveplugin.implementation.command.SourceCommander
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.extend.CommandCenter
-import spp.jetbrains.marker.extend.impl.CommandCenterImpl
+import liveplugin.implementation.command.LiveCommandService
+import liveplugin.implementation.command.impl.LiveCommandServiceImpl
 import spp.jetbrains.marker.jvm.*
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.py.*
@@ -77,8 +78,6 @@ import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.jetbrains.sourcemarker.view.ActivityQuickStatsIndicator
-import spp.jetbrains.sourcemarker.view.FailingEndpointIndicator
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
@@ -148,8 +147,8 @@ object SourceMarkerPlugin {
     ) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
-        SourceMarker.commandCenter = CommandCenterImpl(project)
-        project.putUserData(CommandCenter.PLUGIN_UI_FUNCTIONS, Function<Array<Any?>, String> { func ->
+        SourceCommander.commandService = LiveCommandServiceImpl(project)
+        project.putUserData(LiveCommandService.PLUGIN_UI_FUNCTIONS, Function<Array<Any?>, String> { func ->
             return@Function when (func[0] as String) {
                 "message" -> {
                     try {
@@ -170,7 +169,7 @@ object SourceMarkerPlugin {
                 }
             }
         })
-        project.putUserData(CommandCenter.LIVE_STATUS_MANAGER_FUNCTIONS, Function<Array<Any?>, Any?> { func ->
+        project.putUserData(LiveCommandService.LIVE_STATUS_MANAGER_FUNCTIONS, Function<Array<Any?>, Any?> { func ->
             return@Function when (func[0] as String) {
                 "showBreakpointStatusBar" -> {
                     LiveStatusManager.showBreakpointStatusBar(func[1] as Editor, func[2] as Int)
@@ -194,7 +193,7 @@ object SourceMarkerPlugin {
                 }
             }
         })
-        SourceMarker.commandCenter.init()
+        SourceCommander.commandService.init()
 
         val config = configInput ?: getConfig(project)
         if (!addedConfigListener) {
@@ -605,8 +604,6 @@ object SourceMarkerPlugin {
         log.info("Initializing marker")
         SourceMarker.addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
-        SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator(config))
-        SourceMarker.addGlobalSourceMarkEventListener(FailingEndpointIndicator(config))
 
         SourceMarker.configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true

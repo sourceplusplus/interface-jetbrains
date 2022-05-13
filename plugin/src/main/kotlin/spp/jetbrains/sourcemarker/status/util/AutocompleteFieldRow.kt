@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.command
+package spp.jetbrains.sourcemarker.status.util
 
 import javax.swing.Icon
 
@@ -28,5 +28,6 @@ import javax.swing.Icon
 interface AutocompleteFieldRow {
     fun getText(): String
     fun getDescription(): String?
-    fun getIcon(): Icon?
+    fun getSelectedIcon(): Icon?
+    fun getUnselectedIcon(): Icon?
 }
