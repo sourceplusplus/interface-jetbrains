@@ -145,6 +145,7 @@ tasks {
 
     runIde {
         dependsOn("getKotlinCompilerWrapper")
+        jvmArgs = listOf("-Xmx2G")
     }
 
     register<Copy>("getKotlinCompilerWrapper") {
