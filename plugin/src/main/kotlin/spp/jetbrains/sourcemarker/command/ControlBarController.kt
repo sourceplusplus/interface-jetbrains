@@ -29,8 +29,6 @@ import spp.command.LiveCommandContext
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
@@ -118,32 +116,13 @@ object ControlBarController {
                 val args = if (argsString.isEmpty()) emptyList() else argsString.split(" ")
 
                 val sourceMark = SourceMarkSearch.getClosestSourceMark(prevCommandBar.sourceFileMarker, editor)
-                val context = LiveCommandContext(
+                it.trigger(LiveCommandContext(
                     args,
                     prevCommandBar.sourceFileMarker.psiFile.virtualFile.toFilePath().toFile(),
                     prevCommandBar.lineNumber,
                     prevCommandBar.artifactQualifiedName,
-                    sourceMark?.artifactQualifiedName
-                ) { event ->
-                    log.debug("Received developer command event: $event")
-                    sourceMark?.let {
-                        log.info("Triggering developer command event: $event - Source mark: $it")
-                        val eventCode = SourceMarkEventCode.fromName(event[0].toString())!!
-                        val convertedParams = (event[1] as List<Any?>).map {
-                            when {
-                                it == null -> null
-                                it::class.java.name.matches(Regex("^spp..+SourceMarkEventCode$")) ->
-                                    SourceMarkEventCode.fromName(it.toString())
-                                else -> it
-                            }
-                        }
-                        it.triggerEvent(eventCode, convertedParams, event[2] as (() -> Unit)?)
-                    }
-                }
-                sourceMark?.getUserData()?.forEach {
-                    context.putUserData((it.key as SourceKey<*>).name, it.value)
-                }
-                it.trigger(context)
+                    sourceMark
+                ))
             }
     }
 

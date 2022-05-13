@@ -21,15 +21,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.Key
 import spp.command.LiveCommand
-import liveplugin.implementation.command.SourceCommander
 import java.io.File
 import javax.swing.Icon
 
 class LiveCommandFieldRow(val liveCommand: LiveCommand, val project: Project) : AutocompleteFieldRow {
 
-    private val basePath = SourceCommander.commandService.project.basePath?.let { File(it, ".spp").absolutePath } ?: ""
+    private val basePath = project.basePath?.let { File(it, ".spp").absolutePath } ?: ""
     private val internalBasePath = Key.findKeyByName("SPP_COMMANDS_LOCATION")
-        ?.let { key -> SourceCommander.commandService.project.getUserData(key).toString() } ?: ""
+        ?.let { key -> project.getUserData(key).toString() } ?: ""
 
     override fun getText(): String = liveCommand.name
     override fun getDescription(): String = liveCommand.description

@@ -27,7 +27,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -52,12 +51,9 @@ import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.impl.DiscoveryImpl
 import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
-import liveplugin.implementation.command.SourceCommander
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import liveplugin.implementation.command.LiveCommandService
-import liveplugin.implementation.command.impl.LiveCommandServiceImpl
 import spp.jetbrains.marker.jvm.*
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.py.*
@@ -84,8 +80,6 @@ import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.io.File
-import java.util.*
-import java.util.function.Function
 import javax.net.ssl.SSLHandshakeException
 
 /**
@@ -147,53 +141,6 @@ object SourceMarkerPlugin {
     ) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
-        SourceCommander.commandService = LiveCommandServiceImpl(project)
-        project.putUserData(LiveCommandService.PLUGIN_UI_FUNCTIONS, Function<Array<Any?>, String> { func ->
-            return@Function when (func[0] as String) {
-                "message" -> {
-                    try {
-                        message(func[1] as String)
-                    } catch (e: MissingResourceException) {
-                        func[1] as String
-                    }
-                }
-                "getCommandTypeColor" -> {
-                    PluginUI.getCommandTypeColor()
-                }
-                "getCommandHighlightColor" -> {
-                    PluginUI.getCommandHighlightColor()
-                }
-                else -> {
-                    log.error("Unknown function: {}", func[0])
-                    throw IllegalStateException("Unknown function: ${func[0]}")
-                }
-            }
-        })
-        project.putUserData(LiveCommandService.LIVE_STATUS_MANAGER_FUNCTIONS, Function<Array<Any?>, Any?> { func ->
-            return@Function when (func[0] as String) {
-                "showBreakpointStatusBar" -> {
-                    LiveStatusManager.showBreakpointStatusBar(func[1] as Editor, func[2] as Int)
-                    null
-                }
-                "showLogStatusBar" -> {
-                    LiveStatusManager.showLogStatusBar(func[1] as Editor, func[2] as Int, false)
-                    null
-                }
-                "showMeterStatusBar" -> {
-                    LiveStatusManager.showMeterStatusBar(func[1] as Editor, func[2] as Int)
-                    null
-                }
-                "showSpanStatusBar" -> {
-                    LiveStatusManager.showSpanStatusBar(func[1] as Editor, func[2] as Int)
-                    null
-                }
-                else -> {
-                    log.error("Unknown function: {}", func[0])
-                    throw IllegalStateException("Unknown function: ${func[0]}")
-                }
-            }
-        })
-        SourceCommander.commandService.init()
 
         val config = configInput ?: getConfig(project)
         if (!addedConfigListener) {
