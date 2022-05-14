@@ -19,6 +19,7 @@ package spp.jetbrains.monitor.skywalking
 
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.okHttpClient
+import com.intellij.openapi.project.Project
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -27,6 +28,7 @@ import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.bridge.*
+import spp.jetbrains.monitor.skywalking.impl.SkywalkingMonitorServiceImpl
 import spp.jetbrains.monitor.skywalking.service.SWLiveService
 import spp.jetbrains.monitor.skywalking.service.SWLiveViewService
 import spp.protocol.SourceServices
@@ -47,7 +49,8 @@ class SkywalkingMonitor(
     private val jwtToken: String? = null,
     private val certificatePins: List<String> = emptyList(),
     private val verifyHost: Boolean,
-    private val currentService: String? = null
+    private val currentService: String? = null,
+    private val project: Project
 ) : CoroutineVerticle() {
 
     companion object {
@@ -121,6 +124,8 @@ class SkywalkingMonitor(
                 vertx.deployVerticle(swLiveViewService).await()
                 SourceServices.Instance.liveView = swLiveViewService
             }
+
+            project.putUserData(SkywalkingMonitorService.KEY, SkywalkingMonitorServiceImpl(skywalkingClient))
         }
     }
 }

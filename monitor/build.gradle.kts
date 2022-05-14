@@ -9,6 +9,11 @@ val apolloVersion: String by project
 val projectVersion: String by project
 val slf4jVersion: String by project
 
+repositories {
+    maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
+    maven(url = "https://cache-redirector.jetbrains.com/intellij-dependencies/") { name = "intellij-dependencies" }
+}
+
 dependencies {
     implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -22,6 +27,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
     implementation("io.dropwizard.metrics:metrics-core:4.2.9")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
+
+    val intellijVersion = "213.7172.25"
+    compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
 }
 
 apollo {

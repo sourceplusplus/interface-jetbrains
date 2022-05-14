@@ -19,19 +19,21 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocumentManager
+import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.runBlocking
+import liveplugin.implementation.command.LiveCommandService
 import liveplugin.implementation.common.toFilePath
-import liveplugin.implementation.command.SourceCommander
 import org.slf4j.LoggerFactory
-import spp.jetbrains.marker.SourceMarker.creationService
 import spp.command.LiveCommand
 import spp.command.LiveCommandContext
+import spp.jetbrains.marker.SourceMarker.creationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import java.awt.BorderLayout
 import javax.swing.JComponent
@@ -70,7 +72,9 @@ object ControlBarController {
 
         val availableCommandsAtLocation = availableCommands.toMutableSet()
 //        availableCommandsAtLocation.remove(SHOW_QUICK_STATS)
-        availableCommandsAtLocation.addAll(SourceCommander.commandService.getRegisteredLiveCommands())
+        availableCommandsAtLocation.addAll(
+            LiveCommandService.getInstance(inlayMark.project).getRegisteredLiveCommands()
+        )
 
 //        val parentMark = inlayMark.getParentSourceMark()
 //        if (parentMark is MethodSourceMark) {
@@ -106,7 +110,8 @@ object ControlBarController {
 
     fun handleCommandInput(input: String, fullText: String, editor: Editor) {
         log.info("Processing command input: {}", input)
-        (availableCommands + SourceCommander.commandService.getRegisteredLiveCommands()).find { it.name == input }
+        (availableCommands + LiveCommandService.getInstance(editor.project!!)
+            .getRegisteredLiveCommands()).find { it.name == input }
             ?.let {
                 val prevCommandBar = previousControlBar!!
                 previousControlBar!!.dispose()
@@ -116,13 +121,16 @@ object ControlBarController {
                 val args = if (argsString.isEmpty()) emptyList() else argsString.split(" ")
 
                 val sourceMark = SourceMarkSearch.getClosestSourceMark(prevCommandBar.sourceFileMarker, editor)
-                it.trigger(LiveCommandContext(
+                val context = LiveCommandContext(
                     args,
                     prevCommandBar.sourceFileMarker.psiFile.virtualFile.toFilePath().toFile(),
                     prevCommandBar.lineNumber,
                     prevCommandBar.artifactQualifiedName,
                     sourceMark
-                ))
+                )
+                runBlocking(vertx.dispatcher()) {
+                    it.trigger(context)
+                }
             }
     }
 

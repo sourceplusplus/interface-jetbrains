@@ -51,6 +51,7 @@ import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.impl.DiscoveryImpl
 import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
+import liveplugin.implementation.command.LiveCommandService
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
@@ -185,7 +186,7 @@ object SourceMarkerPlugin {
             var connectedMonitor = false
             try {
                 initServices(project, config)
-                initMonitor(config)
+                initMonitor(project, config)
                 connectedMonitor = true
 
                 if (notifySuccessfulConnection) {
@@ -262,6 +263,7 @@ object SourceMarkerPlugin {
             if (connectedMonitor) {
                 initUI(config)
                 initMarker(config, project)
+                project.getUserData(LiveCommandService.LIVE_COMMAND_LOADER)!!.invoke()
             }
         }
     }
@@ -534,7 +536,7 @@ object SourceMarkerPlugin {
         }
     }
 
-    private suspend fun initMonitor(config: SourceMarkerConfig) {
+    private suspend fun initMonitor(project: Project, config: SourceMarkerConfig) {
         val scheme = if (config.isSsl()) "https" else "http"
         val skywalkingHost = "$scheme://${config.serviceHostNormalized}:${config.getServicePortNormalized()}/graphql"
         val certificatePins = mutableListOf<String>()
@@ -542,7 +544,7 @@ object SourceMarkerPlugin {
         deploymentIds.add(
             vertx.deployVerticle(
                 SkywalkingMonitor(
-                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName
+                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName, project
                 )
             ).await()
         )

@@ -26,7 +26,7 @@ import javax.swing.Icon
 
 class LiveCommandFieldRow(val liveCommand: LiveCommand, val project: Project) : AutocompleteFieldRow {
 
-    private val basePath = project.basePath?.let { File(it, ".spp").absolutePath } ?: ""
+    private val basePath = project.basePath?.let { File(it, ".spp${File.separatorChar}commands").absolutePath } ?: ""
     private val internalBasePath = Key.findKeyByName("SPP_COMMANDS_LOCATION")
         ?.let { key -> project.getUserData(key).toString() } ?: ""
 
