@@ -19,7 +19,6 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocumentManager
-import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.command.LiveCommandService
 import liveplugin.implementation.common.toFilePath
@@ -33,7 +32,6 @@ import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkCompo
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.ControlBar
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import java.awt.BorderLayout
 import javax.swing.JComponent
@@ -121,16 +119,15 @@ object ControlBarController {
                 val args = if (argsString.isEmpty()) emptyList() else argsString.split(" ")
 
                 val sourceMark = SourceMarkSearch.getClosestSourceMark(prevCommandBar.sourceFileMarker, editor)
-                val context = LiveCommandContext(
-                    args,
-                    prevCommandBar.sourceFileMarker.psiFile.virtualFile.toFilePath().toFile(),
-                    prevCommandBar.lineNumber,
-                    prevCommandBar.artifactQualifiedName,
-                    sourceMark
+                it.trigger(
+                    LiveCommandContext(
+                        args,
+                        prevCommandBar.sourceFileMarker.psiFile.virtualFile.toFilePath().toFile(),
+                        prevCommandBar.lineNumber,
+                        prevCommandBar.artifactQualifiedName,
+                        sourceMark
+                    )
                 )
-                runBlocking(vertx.dispatcher()) {
-                    it.trigger(context)
-                }
             }
     }
 
