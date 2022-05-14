@@ -270,11 +270,16 @@ object SourceMarkerPlugin {
         if (project.basePath != null) {
             val configFile = File(project.basePath, SPP_PLUGIN_YML_PATH)
             if (configFile.exists()) {
-                val config = JsonObject(
+                var config = JsonObject(
                     ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
                 )
+
+                val commandConfig = config.remove("command_config")
+                config = convertConfigToCamelCase(config)
+                config.put("commandConfig", commandConfig)
+
                 return try {
-                    Json.decodeValue(convertConfigToCamelCase(config).toString(), SourceMarkerConfig::class.java)
+                    Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
                 } catch (ex: DecodeException) {
                     log.warn("Failed to decode $SPP_PLUGIN_YML_PATH", ex)
                     return null

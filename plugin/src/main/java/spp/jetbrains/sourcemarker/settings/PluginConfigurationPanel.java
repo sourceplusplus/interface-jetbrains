@@ -15,10 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
@@ -37,7 +34,6 @@ public class PluginConfigurationPanel {
     private JComboBox serviceComboBox;
     private JCheckBox verifyHostCheckBox;
     private JLabel verifyHostLabel;
-    private JCheckBox autoDisplayEndpointQuickStatsCheckBox;
     private JLabel hostLabel;
     private JLabel accessTokenLabel;
     private JLabel certificatePinsLabel;
@@ -78,7 +74,6 @@ public class PluginConfigurationPanel {
         rootSourcePackageLabel.setText(message("root_source_package"));
         debugConsoleCheckBox.setText(message("debug_console"));
         autoResolveEndpointNamesCheckBox.setText(message("auto_resolve_endpoint_names"));
-        autoDisplayEndpointQuickStatsCheckBox.setText(message("auto_display_endpoint_quick_stats"));
     }
 
     private void setUIEnabled(boolean enabled) {
@@ -89,7 +84,6 @@ public class PluginConfigurationPanel {
         accessTokenTextField.setEnabled(enabled);
         serviceComboBox.setEnabled(enabled);
         verifyHostCheckBox.setEnabled(enabled);
-        autoDisplayEndpointQuickStatsCheckBox.setEnabled(enabled);
         portalZoomSpinner.setEnabled(enabled);
     }
 
@@ -125,9 +119,6 @@ public class PluginConfigurationPanel {
                 !(config.getServiceName() == null && Objects.equals(serviceComboBox.getSelectedItem(), "All Services"))) {
             return true;
         }
-        if (!Objects.equals(autoDisplayEndpointQuickStatsCheckBox.isSelected(), config.getAutoDisplayEndpointQuickStats())) {
-            return true;
-        }
         if (!Objects.equals(portalZoomSpinner.getValue(), config.getPortalConfig().getZoomLevel())) {
             return true;
         }
@@ -151,9 +142,9 @@ public class PluginConfigurationPanel {
                 null,
                 verifyHostCheckBox.isSelected(),
                 currentService,
-                autoDisplayEndpointQuickStatsCheckBox.isSelected(),
                 false,
-                new PortalConfig((Double) portalZoomSpinner.getValue())
+                new PortalConfig((Double) portalZoomSpinner.getValue()),
+                new HashMap<>()
         );
     }
 
@@ -165,7 +156,6 @@ public class PluginConfigurationPanel {
         serviceHostTextField.setText(config.getServiceHost());
         accessTokenTextField.setText(config.getAccessToken());
         verifyHostCheckBox.setSelected(config.getVerifyHost());
-        autoDisplayEndpointQuickStatsCheckBox.setSelected(config.getAutoDisplayEndpointQuickStats());
 
         myCertificatePins = new CertificatePinPanel(!config.getOverride());
         myCertificatePins.listModel.addAll(config.getCertificatePins());
