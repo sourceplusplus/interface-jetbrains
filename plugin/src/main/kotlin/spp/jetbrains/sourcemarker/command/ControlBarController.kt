@@ -18,7 +18,9 @@
 package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.editor.Editor
+import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiLocalVariable
 import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.command.LiveCommandService
 import liveplugin.implementation.common.toFilePath
@@ -118,6 +120,17 @@ object ControlBarController {
                 val argsString = substringAfterIgnoreCase(fullText, input).trim()
                 val args = if (argsString.isEmpty()) emptyList() else argsString.split(" ")
 
+                val variableName = if (prevCommandBar.getPsiElement() is PsiDeclarationStatement) {
+                    val localVar = prevCommandBar.getPsiElement().firstChild as? PsiLocalVariable
+                    if (localVar != null) {
+                        localVar.name
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+
                 val sourceMark = SourceMarkSearch.getClosestSourceMark(prevCommandBar.sourceFileMarker, editor)
                 it.trigger(
                     LiveCommandContext(
@@ -125,7 +138,10 @@ object ControlBarController {
                         prevCommandBar.sourceFileMarker.psiFile.virtualFile.toFilePath().toFile(),
                         prevCommandBar.lineNumber,
                         prevCommandBar.artifactQualifiedName,
-                        sourceMark
+                        prevCommandBar.sourceFileMarker,
+                        sourceMark,
+                        prevCommandBar.getPsiElement(),
+                        variableName
                     )
                 )
             }
