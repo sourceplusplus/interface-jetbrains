@@ -117,7 +117,7 @@ public class LiveControlBarRow extends JPanel {
 
             //---- descriptionLabel ----
             descriptionLabel.setBackground(null);
-            descriptionLabel.setFont(SMALLER_FONT);
+            descriptionLabel.setFont(SUPER_SMALLEST_FONT);
             descriptionLabel.setContentType("text/html");
             descriptionLabel.setEditable(false);
             descriptionLabel.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
