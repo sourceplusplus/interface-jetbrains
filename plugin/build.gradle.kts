@@ -167,6 +167,9 @@ tasks {
         from(File(wrapperBuildDir, "install/kotlin-compiler-wrapper/lib"))
         into(File(buildDir, "idea-sandbox/plugins/interface-jetbrains/kotlin-compiler"))
     }
+    getByName("buildPlugin") {
+        dependsOn("getKotlinCompilerWrapper")
+    }
 
     register("getPluginChangelog") {
         doFirst {
