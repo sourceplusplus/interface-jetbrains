@@ -148,10 +148,6 @@ object ControlBarController {
             }
     }
 
-    fun canShowControlBar(fileMarker: SourceFileMarker, lineNumber: Int): Boolean {
-        return creationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber).isPresent
-    }
-
     /**
      * Attempts to display live control bar below [lineNumber].
      */
@@ -203,9 +199,15 @@ object ControlBarController {
         }
     }
 
+    fun canShowControlBar(fileMarker: SourceFileMarker, lineNumber: Int): Boolean {
+        val expressionInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
+        return expressionInlayMark.isPresent && canShowControlBar(expressionInlayMark.get().getPsiElement())
+    }
+
     private fun canShowControlBar(psiElement: PsiElement): Boolean {
         return when (psiElement::class.java.name) {
             "org.jetbrains.kotlin.psi.KtObjectDeclaration" -> false
+            "org.jetbrains.kotlin.psi.KtProperty" -> false
             else -> true
         }
     }
