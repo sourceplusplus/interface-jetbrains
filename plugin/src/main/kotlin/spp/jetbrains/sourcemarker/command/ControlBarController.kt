@@ -20,6 +20,7 @@ package spp.jetbrains.sourcemarker.command
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLocalVariable
 import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.command.LiveCommandService
@@ -168,7 +169,7 @@ object ControlBarController {
         }
 
         val findInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
-        if (findInlayMark.isPresent) {
+        if (findInlayMark.isPresent && canShowControlBar(findInlayMark.get().getPsiElement())) {
             val inlayMark = findInlayMark.get()
             if (fileMarker.containsSourceMark(inlayMark)) {
                 if (!tryingAboveLine) {
@@ -199,6 +200,13 @@ object ControlBarController {
             log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
         } else {
             showControlBar(editor, lineNumber - 1, true)
+        }
+    }
+
+    private fun canShowControlBar(psiElement: PsiElement): Boolean {
+        return when (psiElement::class.java.name) {
+            "org.jetbrains.kotlin.psi.KtObjectDeclaration" -> false
+            else -> true
         }
     }
 
