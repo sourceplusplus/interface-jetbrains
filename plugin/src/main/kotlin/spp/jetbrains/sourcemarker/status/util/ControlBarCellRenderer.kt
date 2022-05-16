@@ -63,9 +63,6 @@ class ControlBarCellRenderer(
         if (isSelected) {
             row.background = BGND_FOCUS_COLOR
             row.setCommandIcon(rowValue.getSelectedIcon())
-//            if (entry.name.startsWith("VIEW_")) {
-//                sourceMark.getParentSourceMark()!!.triggerEvent(UPDATE_PORTAL_CONFIG, listOf(entry))
-//            }
         }
         return row
     }
