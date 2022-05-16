@@ -528,9 +528,12 @@ object JVMMarkerUtils {
     @JvmStatic
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         val expression = element.toUElement()!!
-        val qualifiedMethodName = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
+        var parentIdentifier = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
+        if (parentIdentifier == null) {
+            parentIdentifier = expression.getContainingUClass()?.let { getFullyQualifiedName(it) }
+        }
         return ArtifactQualifiedName(
-            """${qualifiedMethodName!!.identifier}#${
+            """${parentIdentifier!!.identifier}#${
                 Base64.getEncoder().encodeToString(expression.toString().toByteArray())
             }""",
             type = ArtifactType.EXPRESSION,
