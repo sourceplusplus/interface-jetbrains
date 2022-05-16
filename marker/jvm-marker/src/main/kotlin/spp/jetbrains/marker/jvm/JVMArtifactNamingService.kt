@@ -20,10 +20,7 @@ package spp.jetbrains.marker.jvm
 import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import org.jetbrains.uast.UClass
-import org.jetbrains.uast.UExpression
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.toUElement
+import org.jetbrains.uast.*
 import spp.jetbrains.marker.ArtifactNamingService
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -42,6 +39,7 @@ class JVMArtifactNamingService : ArtifactNamingService {
             is UClass -> JVMMarkerUtils.getFullyQualifiedName(uElement)
             is UMethod -> JVMMarkerUtils.getFullyQualifiedName(uElement)
             is UExpression -> JVMMarkerUtils.getFullyQualifiedName(element)
+            is UDeclaration -> JVMMarkerUtils.getFullyQualifiedName(element)
             else -> TODO("Not yet implemented")
         }
     }

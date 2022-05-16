@@ -18,8 +18,8 @@
 package spp.jetbrains.marker.jvm
 
 import com.intellij.icons.AllIcons
-import com.intellij.ide.highlighter.JavaHighlightingColors
 import com.intellij.ide.projectView.PresentationData
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
@@ -98,12 +98,12 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
             } else if (variable.liveClazz == "java.lang.String") {
                 presentation.addText(
                     "\"" + variable.value + "\"",
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.STRING))
+                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.STRING))
                 )
             } else if (numerals.contains(variable.liveClazz)) {
                 presentation.addText(
                     variable.value.toString(),
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.NUMBER))
+                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.NUMBER))
                 )
             }
             presentation.setIcon(AllIcons.Debugger.Db_primitive)
@@ -121,12 +121,12 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
             if (variable.value is Number) {
                 presentation.addText(
                     variable.value.toString(),
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.NUMBER))
+                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.NUMBER))
                 )
             } else {
                 presentation.addText(
                     "\"" + variable.value + "\"",
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(JavaHighlightingColors.STRING))
+                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.STRING))
                 )
             }
 

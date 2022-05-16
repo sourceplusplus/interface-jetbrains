@@ -19,7 +19,7 @@ dependencies {
         compileOnly(project(":marker"))
     }
     compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
-    val intellijVersion = "213.7172.25"
+    val intellijVersion = "221.5080.210"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -40,4 +40,8 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:debugger-impl:$intellijVersion") { isTransitive = false }
 
     compileOnly("io.vertx:vertx-core:$vertxVersion")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "11"
 }

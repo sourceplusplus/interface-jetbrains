@@ -52,8 +52,12 @@ changelog {
 
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
-        implementation(project(":interfaces:jetbrains:commander"))
-        implementation(project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper"))
+        implementation(project(":interfaces:jetbrains:commander")) {
+            exclude(group = "org.jetbrains.kotlin")
+        }
+        implementation(project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper")) {
+            exclude(group = "org.jetbrains.kotlin")
+        }
         implementation(project(":interfaces:jetbrains:marker"))
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
@@ -61,8 +65,12 @@ dependencies {
         implementation(project(":interfaces:booster-ui"))
         implementation(project(":protocol"))
     } else {
-        implementation(project(":commander"))
-        implementation(project(":commander:kotlin-compiler-wrapper"))
+        implementation(project(":commander")) {
+            exclude(group = "org.jetbrains.kotlin")
+        }
+        implementation(project(":commander:kotlin-compiler-wrapper")) {
+            exclude(group = "org.jetbrains.kotlin")
+        }
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))

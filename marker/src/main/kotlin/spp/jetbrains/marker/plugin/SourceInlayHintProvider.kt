@@ -57,6 +57,7 @@ import javax.swing.JPanel
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("UnstableApiUsage")
+@JvmDefaultWithoutCompatibility
 abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
