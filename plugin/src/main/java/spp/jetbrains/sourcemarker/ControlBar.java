@@ -122,6 +122,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    if (!textField1.getReady()) return;
                     String autoCompleteText = textField1.getSelectedText();
                     if (autoCompleteText != null) {
                         ControlBarController.INSTANCE.handleCommandInput(autoCompleteText, textField1.getActualText(), editor);

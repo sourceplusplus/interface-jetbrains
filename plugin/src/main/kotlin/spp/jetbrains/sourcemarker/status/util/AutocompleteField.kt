@@ -42,7 +42,7 @@ import javax.swing.text.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class AutocompleteField<T: AutocompleteFieldRow>(
+class AutocompleteField<T : AutocompleteFieldRow>(
     var placeHolderText: String?,
     private val allLookup: List<T>,
     private val lookup: Function<String, List<T>>? = null,
@@ -67,6 +67,8 @@ class AutocompleteField<T: AutocompleteFieldRow>(
     var varPattern: Pattern = Pattern.compile("")
     var includeCurlyPattern: Boolean = false
     var actualText: String = ""
+        private set
+    var ready: Boolean = false
         private set
 
     private val matchAndApplyStyle = { m: Matcher ->
@@ -265,6 +267,7 @@ class AutocompleteField<T: AutocompleteFieldRow>(
             }
         } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
             if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) {
+                ready = true
                 actualText = text
                 hideAutocompletePopup()
                 return
@@ -272,13 +275,32 @@ class AutocompleteField<T: AutocompleteFieldRow>(
             actualText = text
 
             val text = list.selectedValue
-            if (text != null) {
+            if (text is LiveCommandFieldRow) {
+                val liveCommand = text.liveCommand
+                if (liveCommand.params.isNotEmpty()) {
+                    if (!getText().toLowerCase().startsWith(liveCommand.name.toLowerCase())) {
+                        setText(text.getText() + " ")
+                        caretPosition = getText().length
+                    } else {
+                        val params = substringAfterIgnoreCase(getText(), liveCommand.name).split(" ").filter { it.isNotEmpty() }
+                        if (params.size < liveCommand.params.size) {
+                            setText(getText().trimEnd() + " ")
+                            caretPosition = getText().length
+                        } else {
+                            ready = true
+                        }
+                    }
+                } else {
+                    ready = true
+                }
+            } else if (text != null) {
                 if (replaceCommandOnTab) {
                     setText(text.getText())
                     caretPosition = getText().length
                 } else {
                     addAutoCompleteToInput(text)
                 }
+                ready = true
             }
         }
     }
@@ -355,6 +377,28 @@ class AutocompleteField<T: AutocompleteFieldRow>(
                 pG.getFontMetrics().maxAscent + insets.top
             )
         }
+
+        //paint live command argument hints
+        if (list.selectedValue is LiveCommandFieldRow) {
+            val liveCommand = (list.selectedValue as LiveCommandFieldRow).liveCommand
+            if (!text.toLowerCase().startsWith(liveCommand.name.toLowerCase())) return
+            val params = substringAfterIgnoreCase(text, liveCommand.name).split(" ").filter { it.isNotEmpty() }
+
+            var textOffset = 0
+            for ((index, param) in liveCommand.params.withIndex()) {
+                if (index < params.size) continue
+
+                val paramTextX = insets.left + pG.getFontMetrics().stringWidth(text.trimEnd() + " ") + textOffset
+                g.color = Color(
+                    UIUtil.getTextFieldForeground().red,
+                    UIUtil.getTextFieldForeground().green,
+                    UIUtil.getTextFieldForeground().blue,
+                    75
+                )
+                g.drawString("[$param]", paramTextX, pG.getFontMetrics().maxAscent + insets.top)
+                textOffset += pG.getFontMetrics().stringWidth("[$param] ")
+            }
+        }
     }
 
     override fun mouseDragged(e: MouseEvent) {
@@ -418,5 +462,13 @@ class AutocompleteField<T: AutocompleteFieldRow>(
 
     fun interface SaveListener {
         fun onSave()
+    }
+
+    private fun substringAfterIgnoreCase(str: String, search: String): String {
+        val index = str.indexOf(search, ignoreCase = true)
+        if (index == -1) {
+            return str
+        }
+        return str.substring(index + search.length)
     }
 }
