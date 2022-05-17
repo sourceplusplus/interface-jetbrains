@@ -266,6 +266,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
                 list.selectedIndex = index + 1
             }
         } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
+            if (text.isBlank()) return
             if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) {
                 ready = true
                 actualText = text
@@ -278,11 +279,12 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             if (text is LiveCommandFieldRow) {
                 val liveCommand = text.liveCommand
                 if (liveCommand.params.isNotEmpty()) {
-                    if (!getText().toLowerCase().startsWith(liveCommand.name.toLowerCase())) {
+                    if (!getText().toLowerCase().startsWith(liveCommand.name.toLowerCase() + " ")) {
                         setText(text.getText() + " ")
                         caretPosition = getText().length
                     } else {
-                        val params = substringAfterIgnoreCase(getText(), liveCommand.name).split(" ").filter { it.isNotEmpty() }
+                        val params = substringAfterIgnoreCase(getText(), liveCommand.name)
+                            .split(" ").filter { it.isNotEmpty() }
                         if (params.size < liveCommand.params.size) {
                             setText(getText().trimEnd() + " ")
                             caretPosition = getText().length
