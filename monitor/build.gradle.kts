@@ -4,7 +4,7 @@ plugins {
 }
 
 val vertxVersion: String by project
-val kotlinVersion = ext.get("kotlinVersion")
+val kotlinVersion: String by project
 val apolloVersion: String by project
 val projectVersion: String by project
 val slf4jVersion: String by project

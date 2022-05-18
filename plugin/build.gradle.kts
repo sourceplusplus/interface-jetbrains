@@ -12,7 +12,7 @@ plugins {
 val joorVersion: String by project
 val jacksonVersion: String by project
 val vertxVersion: String by project
-val kotlinVersion = ext.get("kotlinVersion")
+val kotlinVersion: String by project
 val projectVersion: String by project
 
 // Import variables from gradle.properties file
