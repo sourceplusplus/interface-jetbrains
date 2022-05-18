@@ -25,6 +25,7 @@ import com.intellij.psi.PsiLocalVariable
 import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.command.LiveCommandService
 import liveplugin.implementation.common.toFilePath
+import org.joor.Reflect
 import org.slf4j.LoggerFactory
 import spp.command.LiveCommand
 import spp.command.LiveCommandContext
@@ -207,7 +208,9 @@ object ControlBarController {
     private fun canShowControlBar(psiElement: PsiElement): Boolean {
         return when (psiElement::class.java.name) {
             "org.jetbrains.kotlin.psi.KtObjectDeclaration" -> false
-            "org.jetbrains.kotlin.psi.KtProperty" -> false
+            "org.jetbrains.kotlin.psi.KtProperty" -> {
+                Reflect.on(psiElement).call("isLocal").get<Boolean>() == true
+            }
             else -> true
         }
     }
