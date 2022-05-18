@@ -265,9 +265,20 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             if (index != -1 && list.model.size > index + 1) {
                 list.selectedIndex = index + 1
             }
-        } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
-            if (text.isBlank()) return
-            if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) {
+        } else if (e.keyCode == KeyEvent.VK_TAB) {
+            if (text.isBlank() || list.selectedValue == null || !replaceCommandOnTab) return
+            val autocompleteRow = list.selectedValue
+            if (autocompleteRow is LiveCommandFieldRow && autocompleteRow.liveCommand.params.isNotEmpty()) {
+                if (getText().toLowerCase().startsWith(autocompleteRow.liveCommand.name.toLowerCase() + " ")) {
+                    return //do nothing
+                }
+                setText(autocompleteRow.getText() + " ")
+            } else {
+                setText(autocompleteRow.getText())
+            }
+            caretPosition = getText().length
+        } else if (e.keyCode == KeyEvent.VK_ENTER) {
+            if (!autocompleteOnEnter) {
                 ready = true
                 actualText = text
                 hideAutocompletePopup()
@@ -275,7 +286,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             }
             actualText = text
 
-            val text = list.selectedValue
+            val text = if (isPopupVisible()) list.selectedValue else null
             if (text is LiveCommandFieldRow) {
                 val liveCommand = text.liveCommand
                 if (liveCommand.params.isNotEmpty()) {
@@ -296,12 +307,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
                     ready = true
                 }
             } else if (text != null) {
-                if (replaceCommandOnTab) {
-                    setText(text.getText())
-                    caretPosition = getText().length
-                } else {
-                    addAutoCompleteToInput(text)
-                }
+                addAutoCompleteToInput(text)
                 ready = true
             }
         }
