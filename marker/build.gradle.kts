@@ -20,7 +20,7 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.1-jre")
     compileOnly("org.jetbrains:annotations:23.0.0")

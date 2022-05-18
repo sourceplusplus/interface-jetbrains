@@ -26,7 +26,7 @@ repositories {
 
 subprojects {
     ext {
-        set("kotlinVersion", "1.5.0")
+        set("kotlinVersion", "1.6.10")
     }
 
     repositories {

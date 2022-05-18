@@ -21,7 +21,7 @@ dependencies {
     compileOnly("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     val intellijVersion = "221.5080.210"
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.guava:guava:31.1-jre")
     implementation("org.jetbrains:annotations:23.0.0")
