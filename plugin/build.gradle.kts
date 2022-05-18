@@ -158,7 +158,11 @@ tasks {
 
     register<Copy>("getKotlinCompilerWrapper") {
         mustRunAfter("prepareSandbox")
-        dependsOn(":commander:kotlin-compiler-wrapper:installDist")
+        if (findProject(":interfaces:jetbrains") != null) {
+            dependsOn(":interfaces:jetbrains:commander:kotlin-compiler-wrapper:installDist")
+        } else {
+            dependsOn(":commander:kotlin-compiler-wrapper:installDist")
+        }
         val wrapperBuildDir = if (findProject(":interfaces:jetbrains") != null) {
             project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper").buildDir
         } else {
