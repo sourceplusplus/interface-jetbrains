@@ -25,10 +25,6 @@ repositories {
 }
 
 subprojects {
-    ext {
-        set("kotlinVersion", "1.6.10")
-    }
-
     repositories {
         mavenCentral()
         maven(url = "https://jitpack.io")
