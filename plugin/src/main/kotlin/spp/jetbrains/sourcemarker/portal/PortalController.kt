@@ -59,7 +59,7 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         DatabindCodec.mapper().registerModule(module)
 
         log.info("Initializing portal server")
-        val portalServer = PortalServer(8081)
+        val portalServer = PortalServer()
         vertx.deployVerticle(portalServer).await()
         log.info("Portal server initialized")
 
@@ -104,18 +104,13 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                 it.sourceMark.addEventListener {
                     if (it.eventCode == SourceMarkEventCode.UPDATE_PORTAL_CONFIG) {
                         if (it.params.first() is String && it.params.first() == "setPage") {
-                            initialUrl.set("http://localhost:8080${it.params.get(1)}")
+                            initialUrl.set("http://localhost:${portalServer.serverPort}${it.params.get(1)}")
                             vertx.eventBus().publish(
                                 "portal.SetCurrentPage",
                                 JsonObject().put("page", it.params.get(1) as String)
                             )
                         }
                     } else if (it.eventCode == SourceMarkEventCode.PORTAL_OPENING) {
-//                        SourcePortal.getPortals().filter { it.portalUuid != portal.portalUuid }.forEach {
-//                            it.configuration.config["active"] = false
-//                        }
-//                        portal.configuration.config["active"] = true
-
                         portal.configuration.darkMode = UIManager.getLookAndFeel() !is IntelliJLaf
                         portal.configuration.config["portal_uuid"] = portal.portalUuid
                         ApplicationManager.getApplication().invokeLater(it.sourceMark::displayPopup)
