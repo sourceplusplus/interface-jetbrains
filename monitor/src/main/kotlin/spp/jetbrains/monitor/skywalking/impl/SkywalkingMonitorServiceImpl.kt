@@ -18,19 +18,14 @@
 package spp.jetbrains.monitor.skywalking.impl
 
 import io.vertx.core.AsyncResult
-import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
-import monitor.skywalking.protocol.type.Duration
-import monitor.skywalking.protocol.type.LogQueryCondition
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
-import spp.jetbrains.monitor.skywalking.bridge.LogsBridge
-import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
-import spp.jetbrains.monitor.skywalking.bridge.ServiceInstanceBridge
+import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
@@ -42,76 +37,41 @@ import spp.protocol.platform.general.Service
 class SkywalkingMonitorServiceImpl(
     private val skywalkingClient: SkywalkingClient
 ) : SkywalkingMonitorService() {
-    override val currentService: String
-        get() = TODO("Not yet implemented")
+
+    override suspend fun getVersion(): String {
+        return skywalkingClient.getVersion()!!
+    }
 
     override suspend fun getTimeInfo(): GetTimeInfoQuery.Data {
         return skywalkingClient.getTimeInfo()
     }
 
-    override suspend fun getEndpointMetrics(
-        metricName: String,
-        endpointId: String,
-        duration: Duration
-    ): GetLinearIntValuesQuery.Result? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getMultipleEndpointMetrics(
-        metricName: String,
-        endpointId: String,
-        numOfLinear: Int,
-        duration: Duration
-    ): List<GetMultipleLinearIntValuesQuery.Result> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun searchEndpoint(
-        keyword: String,
-        serviceId: String,
-        limit: Int
-    ): List<SearchEndpointQuery.Result> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun queryLogs(condition: LogQueryCondition): QueryLogsQuery.Result? {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getServices(duration: Duration): List<Service> {
-        TODO("Not yet implemented")
+        return LogsBridge.queryLogs(query, skywalkingClient.vertx)
     }
 
     override suspend fun searchExactEndpoint(keyword: String): SearchEndpointQuery.Result? {
-        TODO("Not yet implemented")
+        return EndpointBridge.searchExactEndpoint(keyword, skywalkingClient.vertx)
     }
 
     override suspend fun getEndpoints(serviceId: String?, limit: Int): List<SearchEndpointQuery.Result> {
-        TODO("Not yet implemented")
+        return EndpointBridge.getEndpoints(serviceId, limit, skywalkingClient.vertx)
     }
 
     override suspend fun getMetrics(request: GetEndpointMetrics): List<GetLinearIntValuesQuery.Result> {
-        TODO("Not yet implemented")
+        return EndpointMetricsBridge.getMetrics(request, skywalkingClient.vertx)
     }
 
     override suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result> {
-        TODO("Not yet implemented")
+        return EndpointMetricsBridge.getMultipleMetrics(request, skywalkingClient.vertx)
     }
 
     override suspend fun getTraces(request: GetEndpointTraces): TraceResult {
-        TODO("Not yet implemented")
+        return EndpointTracesBridge.getTraces(request, skywalkingClient.vertx)
     }
 
     override suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getVersion(): String {
-        return skywalkingClient.getVersion()!!
+        return EndpointTracesBridge.getTraceStack(traceId, skywalkingClient.vertx)
     }
 
     override suspend fun getCurrentService(): Service {
