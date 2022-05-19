@@ -25,6 +25,7 @@ import monitor.skywalking.protocol.general.GetVersionQuery
 import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
+import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
@@ -96,6 +97,25 @@ class SkywalkingClient(
             } else {
                 if (log.isTraceEnabled) log.trace("Get version response: {}", response.data!!.result)
                 return response.data!!.result
+            }
+        }
+    }
+
+    suspend fun getTimeInfo(): GetTimeInfoQuery.Data {
+        metricRegistry.timer("getTimeInfo").time().use {
+            if (log.isTraceEnabled) {
+                log.trace("Get time info request")
+            }
+
+            val response = apolloClient.query(
+                GetTimeInfoQuery()
+            ).execute()
+            if (response.hasErrors()) {
+                response.errors!!.forEach { log.error(it.message) }
+                throw IOException(response.errors!![0].message)
+            } else {
+                if (log.isTraceEnabled) log.trace("Get time info response: {}", response.data!!.result)
+                return response.data!!
             }
         }
     }

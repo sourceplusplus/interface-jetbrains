@@ -23,7 +23,6 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.*
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*
@@ -43,10 +42,10 @@ import javax.swing.text.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class AutocompleteField(
+class AutocompleteField<T : AutocompleteFieldRow>(
     var placeHolderText: String?,
-    private val allLookup: List<AutocompleteFieldRow>,
-    private val lookup: Function<String, List<AutocompleteFieldRow>>? = null,
+    private val allLookup: List<T>,
+    private val lookup: Function<String, List<T>>? = null,
     internal val artifactQualifiedName: ArtifactQualifiedName,
     private val replaceCommandOnTab: Boolean = false,
     private val autocompleteOnEnter: Boolean = true,
@@ -67,8 +66,12 @@ class AutocompleteField(
     var canShowSaveButton = true
     var varPattern: Pattern = Pattern.compile("")
     var includeCurlyPattern: Boolean = false
+    var actualText: String = ""
+        private set
+    var ready: Boolean = false
+        private set
 
-    val matchAndApplyStyle = { m: Matcher ->
+    private val matchAndApplyStyle = { m: Matcher ->
         if (varPattern.pattern().isNotEmpty()) {
             while (m.find()) {
                 val variable: String = m.group(1)
@@ -236,7 +239,9 @@ class AutocompleteField(
     override fun keyPressed(e: KeyEvent) {
         if (e.keyCode == KeyEvent.VK_SPACE && hasControlHeld) {
             results.clear()
-            results.addAll(allLookup)
+            results.addAll(allLookup
+                .filter { it.getText().toLowerCase().contains(text) }
+                .sortedBy { it.getText() })
             model.updateView()
             list.visibleRowCount = results.size.coerceAtMost(10)
             if (results.size > 0) {
@@ -260,20 +265,50 @@ class AutocompleteField(
             if (index != -1 && list.model.size > index + 1) {
                 list.selectedIndex = index + 1
             }
-        } else if (e.keyCode == KeyEvent.VK_TAB || e.keyCode == KeyEvent.VK_ENTER) {
-            if (e.keyCode == KeyEvent.VK_ENTER && !autocompleteOnEnter) {
+        } else if (e.keyCode == KeyEvent.VK_TAB) {
+            if (text.isBlank() || list.selectedValue == null || !replaceCommandOnTab) return
+            val autocompleteRow = list.selectedValue
+            if (autocompleteRow is LiveCommandFieldRow && autocompleteRow.liveCommand.params.isNotEmpty()) {
+                if (getText().toLowerCase().startsWith(autocompleteRow.liveCommand.name.toLowerCase() + " ")) {
+                    return //do nothing
+                }
+                setText(autocompleteRow.getText() + " ")
+            } else {
+                setText(autocompleteRow.getText())
+            }
+            caretPosition = getText().length
+        } else if (e.keyCode == KeyEvent.VK_ENTER) {
+            if (!autocompleteOnEnter) {
+                ready = true
+                actualText = text
                 hideAutocompletePopup()
                 return
             }
+            actualText = text
 
-            val text = list.selectedValue
-            if (text != null) {
-                if (replaceCommandOnTab) {
-                    setText(text.getText())
-                    caretPosition = getText().length
+            val text = if (isPopupVisible()) list.selectedValue else null
+            if (text is LiveCommandFieldRow) {
+                val liveCommand = text.liveCommand
+                if (liveCommand.params.isNotEmpty()) {
+                    if (!getText().toLowerCase().startsWith(liveCommand.name.toLowerCase() + " ")) {
+                        setText(text.getText() + " ")
+                        caretPosition = getText().length
+                    } else {
+                        val params = substringAfterIgnoreCase(getText(), liveCommand.name)
+                            .split(" ").filter { it.isNotEmpty() }
+                        if (params.size < liveCommand.params.size) {
+                            setText(getText().trimEnd() + " ")
+                            caretPosition = getText().length
+                        } else {
+                            ready = true
+                        }
+                    }
                 } else {
-                    addAutoCompleteToInput(text)
+                    ready = true
                 }
+            } else if (text != null) {
+                addAutoCompleteToInput(text)
+                ready = true
             }
         }
     }
@@ -350,6 +385,28 @@ class AutocompleteField(
                 pG.getFontMetrics().maxAscent + insets.top
             )
         }
+
+        //paint live command argument hints
+        if (list.selectedValue is LiveCommandFieldRow) {
+            val liveCommand = (list.selectedValue as LiveCommandFieldRow).liveCommand
+            if (!text.toLowerCase().startsWith(liveCommand.name.toLowerCase())) return
+            val params = substringAfterIgnoreCase(text, liveCommand.name).split(" ").filter { it.isNotEmpty() }
+
+            var textOffset = 0
+            for ((index, param) in liveCommand.params.withIndex()) {
+                if (index < params.size) continue
+
+                val paramTextX = insets.left + pG.getFontMetrics().stringWidth(text.trimEnd() + " ") + textOffset
+                g.color = Color(
+                    UIUtil.getTextFieldForeground().red,
+                    UIUtil.getTextFieldForeground().green,
+                    UIUtil.getTextFieldForeground().blue,
+                    75
+                )
+                g.drawString("[$param]", paramTextX, pG.getFontMetrics().maxAscent + insets.top)
+                textOffset += pG.getFontMetrics().stringWidth("[$param] ")
+            }
+        }
     }
 
     override fun mouseDragged(e: MouseEvent) {
@@ -413,5 +470,13 @@ class AutocompleteField(
 
     fun interface SaveListener {
         fun onSave()
+    }
+
+    private fun substringAfterIgnoreCase(str: String, search: String): String {
+        val index = str.indexOf(search, ignoreCase = true)
+        if (index == -1) {
+            return str
+        }
+        return str.substring(index + search.length)
     }
 }

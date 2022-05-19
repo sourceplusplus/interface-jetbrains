@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
+import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
 import spp.jetbrains.sourcemarker.service.ViewEventListener;
@@ -123,7 +123,11 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 return null;
             }
 
-            public Icon getIcon() {
+            public Icon getSelectedIcon() {
+                return PluginIcons.Nodes.variable;
+            }
+
+            public Icon getUnselectedIcon() {
                 return PluginIcons.Nodes.variable;
             }
         }).collect(Collectors.toList());
@@ -138,7 +142,11 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                         return null;
                     }
 
-                    public Icon getIcon() {
+                    public Icon getSelectedIcon() {
+                        return PluginIcons.Nodes.variable;
+                    }
+
+                    public Icon getUnselectedIcon() {
                         return PluginIcons.Nodes.variable;
                     }
                 })

@@ -20,7 +20,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
-import spp.jetbrains.sourcemarker.command.AutocompleteFieldRow;
+import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
@@ -97,7 +97,11 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, Instrument
                 return null;
             }
 
-            public Icon getIcon() {
+            public Icon getSelectedIcon() {
+                return PluginIcons.Nodes.variable;
+            }
+
+            public Icon getUnselectedIcon() {
                 return PluginIcons.Nodes.variable;
             }
         }).collect(Collectors.toList());
@@ -114,7 +118,11 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, Instrument
                         return null;
                     }
 
-                    public Icon getIcon() {
+                    public Icon getSelectedIcon() {
+                        return PluginIcons.Nodes.variable;
+                    }
+
+                    public Icon getUnselectedIcon() {
                         return PluginIcons.Nodes.variable;
                     }
                 })
@@ -612,7 +620,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, Instrument
     private JLabel configLabel;
     private JLabel configDropdownLabel;
     private JPanel mainPanel;
-    private AutocompleteField breakpointConditionField;
+    private AutocompleteField<AutocompleteFieldRow> breakpointConditionField;
     private JLabel label1;
     private JBIntSpinner hitLimitSpinner;
     private JLabel timeLabel;

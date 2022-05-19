@@ -31,7 +31,7 @@ import java.awt.Dimension
 @Suppress("MagicNumber")
 class SourceMarkJcefComponentConfiguration : SourceMarkComponentConfiguration() {
 
-    var preloadJcefBrowser: Boolean = true
+    var preloadJcefBrowser: Boolean = false
     var currentUrl: String = "about:blank"
     var initialUrl: String = "about:blank"
     var initialHtml: String? = null
@@ -63,6 +63,7 @@ class SourceMarkJcefComponentConfiguration : SourceMarkComponentConfiguration() 
         copy.componentWidth = componentWidth
         copy.componentHeight = componentHeight
         copy.autoDisposeBrowser = autoDisposeBrowser
+        copy.zoomLevel = zoomLevel
         copy.browserLoadingListener = browserLoadingListener
         return copy
     }

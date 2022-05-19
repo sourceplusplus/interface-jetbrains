@@ -18,9 +18,7 @@
 package spp.jetbrains.sourcemarker.status.util
 
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.UPDATE_PORTAL_CONFIG
 import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
-import spp.jetbrains.sourcemarker.command.LiveControlCommand
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component
@@ -34,7 +32,8 @@ import javax.swing.JList
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ControlBarCellRenderer(
-    private val autocompleteField: AutocompleteField, val sourceMark: ExpressionSourceMark
+    private val autocompleteField: AutocompleteField<LiveCommandFieldRow>,
+    val sourceMark: ExpressionSourceMark
 ) : DefaultListCellRenderer() {
     init {
         isOpaque = false
@@ -43,30 +42,27 @@ class ControlBarCellRenderer(
     override fun getListCellRendererComponent(
         list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean
     ): Component {
-        val entry = value as LiveControlCommand
+        val rowValue = value as LiveCommandFieldRow
+        val entry = rowValue.liveCommand
+
         val row = LiveControlBarRow()
-        row.setCommandName(entry.getText(), autocompleteField.text)
-        row.setCommandIcon(entry.getIcon())
-        if (entry.getDescription() != null) {
-            row.setDescription(
-                entry.getDescription()!!
-                    .replace(
-                        "*lineNumber*",
-                        autocompleteField.artifactQualifiedName.lineNumber.toString()
-                    )
-                    .replace(
-                        "*methodName*",
-                        getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
-                    )
-            )
-        }
+        row.setCommandName(entry.name, autocompleteField.text)
+        row.setCommandIcon(rowValue.getUnselectedIcon())
+        row.setDescription(
+            entry.description
+                .replace(
+                    "*lineNumber*",
+                    autocompleteField.artifactQualifiedName.lineNumber.toString()
+                )
+                .replace(
+                    "*methodName*",
+                    getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
+                )
+        )
 
         if (isSelected) {
             row.background = BGND_FOCUS_COLOR
-            row.setCommandIcon(entry.selectedIcon)
-            if (entry.name.startsWith("VIEW_")) {
-                sourceMark.getParentSourceMark()!!.triggerEvent(UPDATE_PORTAL_CONFIG, listOf(entry))
-            }
+            row.setCommandIcon(rowValue.getSelectedIcon())
         }
         return row
     }

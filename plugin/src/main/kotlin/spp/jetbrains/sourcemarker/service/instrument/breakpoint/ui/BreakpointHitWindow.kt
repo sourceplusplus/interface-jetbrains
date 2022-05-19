@@ -20,7 +20,6 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 import com.intellij.execution.ui.RunnerLayoutUi
 import com.intellij.execution.ui.layout.PlaceInGrid
 import com.intellij.icons.AllIcons
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
@@ -29,12 +28,11 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.content.Content
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import io.vertx.core.json.Json
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.ExecutionPointManager
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.LiveBreakpointConstants
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.artifact.exception.LiveStackTrace
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import java.util.concurrent.CopyOnWriteArrayList
@@ -77,10 +75,7 @@ class BreakpointHitWindow(
     }
 
     private fun addFramesTab() {
-        val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
-        val config = Json.decodeValue(
-            projectSettings.getValue("sourcemarker_plugin_config"), SourceMarkerConfig::class.java
-        )
+        val config = SourceMarkerPlugin.getConfig(ProjectManager.getInstance().openProjects[0])
         val framesTab = FramesTab(this, config)
         val content = layoutUi.createContent(
             LiveBreakpointConstants.LIVE_RECORDER_STACK_FRAMES, framesTab.component, "Frames",

@@ -13,10 +13,12 @@ public class PluginUI {
     public static final LineBorder PANEL_BORDER = new LineBorder(Gray._85);
 
     public static Font ROBOTO_LIGHT_BOLD_14;
+    private static Font ROBOTO_LIGHT_PLAIN_13;
     private static Font ROBOTO_LIGHT_PLAIN_14;
     private static Font ROBOTO_LIGHT_PLAIN_15;
     private static Font ROBOTO_LIGHT_PLAIN_16;
     private static Font ROBOTO_LIGHT_PLAIN_17;
+    private static Font MICROSOFT_YAHEI_PLAIN_12;
     private static Font MICROSOFT_YAHEI_PLAIN_13;
     public static Font MICROSOFT_YAHEI_PLAIN_14;
     private static Font MICROSOFT_YAHEI_PLAIN_15;
@@ -26,12 +28,14 @@ public class PluginUI {
         try {
             Font ROBOTO_LIGHT = Font.createFont(Font.TRUETYPE_FONT, PluginUI.class.getResourceAsStream("/fonts/Roboto-Light.ttf"));
             ROBOTO_LIGHT_BOLD_14 = ROBOTO_LIGHT.deriveFont(Font.BOLD).deriveFont(14f);
+            ROBOTO_LIGHT_PLAIN_13 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(13f);
             ROBOTO_LIGHT_PLAIN_14 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(14f);
             ROBOTO_LIGHT_PLAIN_15 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(15f);
             ROBOTO_LIGHT_PLAIN_16 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(16f);
             ROBOTO_LIGHT_PLAIN_17 = ROBOTO_LIGHT.deriveFont(Font.PLAIN).deriveFont(17f);
 
             Font YAHEI = Font.createFont(Font.TRUETYPE_FONT, PluginUI.class.getResourceAsStream("/fonts/chinese.msyh.ttf"));
+            MICROSOFT_YAHEI_PLAIN_12 = YAHEI.deriveFont(Font.PLAIN).deriveFont(12f);
             MICROSOFT_YAHEI_PLAIN_13 = YAHEI.deriveFont(Font.PLAIN).deriveFont(13f);
             MICROSOFT_YAHEI_PLAIN_14 = YAHEI.deriveFont(Font.PLAIN).deriveFont(14f);
             MICROSOFT_YAHEI_PLAIN_15 = YAHEI.deriveFont(Font.PLAIN).deriveFont(15f);
@@ -45,6 +49,7 @@ public class PluginUI {
     public static final Font SMALL_FONT = (PluginBundle.INSTANCE.getLOCALE().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_15 : ROBOTO_LIGHT_PLAIN_16;
     public static final Font SMALLER_FONT = (PluginBundle.INSTANCE.getLOCALE().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_14 : ROBOTO_LIGHT_PLAIN_15;
     public static final Font SMALLEST_FONT = (PluginBundle.INSTANCE.getLOCALE().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_13 : ROBOTO_LIGHT_PLAIN_14;
+    public static final Font SUPER_SMALLEST_FONT = (PluginBundle.INSTANCE.getLOCALE().getLanguage().equals("zh")) ? MICROSOFT_YAHEI_PLAIN_12 : ROBOTO_LIGHT_PLAIN_13;
     public static final Color PANEL_BACKGROUND_COLOR = Gray._37;
     public static final Color LABEL_FOREGROUND_COLOR = new Color(152, 118, 170);
     public static final Color LABEL_FOREGROUND_COLOR1 = new Color(106, 135, 89);

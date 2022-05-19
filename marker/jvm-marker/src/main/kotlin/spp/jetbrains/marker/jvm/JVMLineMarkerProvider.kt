@@ -20,11 +20,12 @@ package spp.jetbrains.marker.jvm
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.openapi.editor.markup.GutterIconRenderer
-import com.intellij.psi.*
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiIdentifier
+import com.intellij.psi.PsiJavaFile
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
@@ -58,15 +59,7 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
     ): LineMarkerInfo<PsiElement>? {
         return when {
             parent is PsiClass && element === parent.nameIdentifier -> getClassGutterMark(element)
-            parent is PsiMethod && element === parent.nameIdentifier -> getMethodGutterMark(element)
-            parent?.javaClass?.simpleName?.equals("GrMethod") == true
-                    && (parent is GrMethod && element === parent.nameIdentifierGroovy) -> {
-                getMethodGutterMark(element)
-            }
-            parent?.javaClass?.simpleName?.equals("KtNamedFunction") == true
-                    && (parent is KtNamedFunction && element === parent.nameIdentifier) -> {
-                getMethodGutterMark(element)
-            }
+            element == JVMMarkerUtils.getNameIdentifier(parent) -> getMethodGutterMark(element)
             else -> null
         }
     }

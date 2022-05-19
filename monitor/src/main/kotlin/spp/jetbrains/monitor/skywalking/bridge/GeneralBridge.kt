@@ -27,7 +27,7 @@ import spp.jetbrains.monitor.skywalking.SkywalkingClient
 /**
  * todo: description.
  *
- * @since 0.5.0
+ * @since 0.4.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class GeneralBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {

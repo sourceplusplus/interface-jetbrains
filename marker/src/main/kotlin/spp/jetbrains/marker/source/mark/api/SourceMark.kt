@@ -252,6 +252,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         clearEventListeners()
     }
 
+    fun getUserData(): Map<Any, Any>
     fun <T> getUserData(key: SourceKey<T>): T?
     fun <T> putUserData(key: SourceKey<T>, value: T?)
     fun hasUserData(): Boolean

@@ -12,7 +12,7 @@ plugins {
 val joorVersion: String by project
 val jacksonVersion: String by project
 val vertxVersion: String by project
-val kotlinVersion = ext.get("kotlinVersion")
+val kotlinVersion: String by project
 val projectVersion: String by project
 
 // Import variables from gradle.properties file
@@ -37,9 +37,11 @@ intellij {
     updateSinceUntilBuild.set(false)
 
     plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
+    //plugins.add("com.intellij.zh:202.413") //test chinese locale
 }
 tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
 tasks.getByName<JavaExec>("runIde") {
+    //systemProperty("sourcemarker.debug.unblocked_threads", true)
     systemProperty("ide.enable.slow.operations.in.edt", false)
     systemProperty("ide.browser.jcef.contextMenu.devTools.enabled", true)
 }
@@ -50,18 +52,30 @@ changelog {
 
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
+        implementation(project(":interfaces:jetbrains:commander")) {
+            exclude(group = "org.jetbrains.kotlin")
+        }
+        implementation(project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper")) {
+            exclude(group = "org.jetbrains.kotlin")
+        }
         implementation(project(":interfaces:jetbrains:marker"))
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
         implementation(project(":interfaces:jetbrains:monitor"))
-        implementation(project(":interfaces:portal"))
+        implementation(project(":interfaces:booster-ui"))
         implementation(project(":protocol"))
     } else {
+        implementation(project(":commander")) {
+            exclude(group = "org.jetbrains.kotlin")
+        }
+        implementation(project(":commander:kotlin-compiler-wrapper")) {
+            exclude(group = "org.jetbrains.kotlin")
+        }
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
-        implementation("com.github.sourceplusplus.interface-portal:portal-jvm:$projectVersion") { isTransitive = false }
+        implementation("com.github.sourceplusplus:interface-booster-ui:$projectVersion")
         implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
     }
 
@@ -69,7 +83,7 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
     implementation("org.apache.commons:commons-text:1.9")
     implementation("com.github.sh5i:git-stein:v0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
@@ -136,9 +150,31 @@ tasks {
     runPluginVerifier {
         ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })
     }
-}
 
-tasks {
+    runIde {
+        dependsOn("getKotlinCompilerWrapper")
+        jvmArgs = listOf("-Xmx2G")
+    }
+
+    register<Copy>("getKotlinCompilerWrapper") {
+        mustRunAfter("prepareSandbox")
+        if (findProject(":interfaces:jetbrains") != null) {
+            dependsOn(":interfaces:jetbrains:commander:kotlin-compiler-wrapper:installDist")
+        } else {
+            dependsOn(":commander:kotlin-compiler-wrapper:installDist")
+        }
+        val wrapperBuildDir = if (findProject(":interfaces:jetbrains") != null) {
+            project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper").buildDir
+        } else {
+            project(":commander:kotlin-compiler-wrapper").buildDir
+        }
+        from(File(wrapperBuildDir, "install/kotlin-compiler-wrapper/lib"))
+        into(File(buildDir, "idea-sandbox/plugins/interface-jetbrains/kotlin-compiler"))
+    }
+    getByName("buildPlugin") {
+        dependsOn("getKotlinCompilerWrapper")
+    }
+
     register("getPluginChangelog") {
         doFirst {
             val pluginChangesHeader = "### [JetBrains Plugin](https://github.com/sourceplusplus/interface-jetbrains)\n"

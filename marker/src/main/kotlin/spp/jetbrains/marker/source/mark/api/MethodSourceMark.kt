@@ -118,6 +118,7 @@ abstract class MethodSourceMark(
     }
 
     private val userData = HashMap<Any, Any>()
+    override fun getUserData() = userData
     override fun <T> getUserData(key: SourceKey<T>): T? = userData[key] as T?
     override fun <T> putUserData(key: SourceKey<T>, value: T?) {
         if (value != null) {

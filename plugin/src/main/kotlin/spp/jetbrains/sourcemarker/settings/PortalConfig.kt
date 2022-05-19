@@ -15,18 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.sourcemarker.command
+package spp.jetbrains.sourcemarker.settings
 
-import javax.swing.Icon
-
-/**
- * todo: description.
- *
- * @since 0.3.0
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-interface AutocompleteFieldRow {
-    fun getText(): String
-    fun getDescription(): String?
-    fun getIcon(): Icon?
-}
+data class PortalConfig(
+    val zoomLevel: Double = 1.0
+)

@@ -27,7 +27,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -52,17 +51,14 @@ import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.impl.DiscoveryImpl
 import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
+import liveplugin.implementation.command.LiveCommandService
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.*
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.py.*
-import spp.jetbrains.marker.source.mark.api.component.api.config.ComponentSizeEvaluator
-import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
-import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkSingleJcefComponentProvider
 import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
-import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
@@ -79,14 +75,11 @@ import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.jetbrains.sourcemarker.view.ActivityQuickStatsIndicator
-import spp.jetbrains.sourcemarker.view.FailingEndpointIndicator
 import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
-import java.awt.Dimension
 import java.io.File
 import javax.net.ssl.SSLHandshakeException
 
@@ -193,7 +186,7 @@ object SourceMarkerPlugin {
             var connectedMonitor = false
             try {
                 initServices(project, config)
-                initMonitor(config)
+                initMonitor(project, config)
                 connectedMonitor = true
 
                 if (notifySuccessfulConnection) {
@@ -270,6 +263,7 @@ object SourceMarkerPlugin {
             if (connectedMonitor) {
                 initUI(config)
                 initMarker(config, project)
+                project.getUserData(LiveCommandService.LIVE_COMMAND_LOADER)!!.invoke()
             }
         }
     }
@@ -278,13 +272,14 @@ object SourceMarkerPlugin {
         if (project.basePath != null) {
             val configFile = File(project.basePath, SPP_PLUGIN_YML_PATH)
             if (configFile.exists()) {
-                val config = JsonObject(
+                var config = JsonObject(
                     ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
                 )
-                config.fieldNames().toList().forEach {
-                    val value = config.remove(it)
-                    config.put(CaseUtils.toCamelCase(it, false, '_'), value)
-                }
+
+                val commandConfig = config.remove("command_config")
+                config = convertConfigToCamelCase(config)
+                config.put("commandConfig", commandConfig)
+
                 return try {
                     Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
                 } catch (ex: DecodeException) {
@@ -294,6 +289,19 @@ object SourceMarkerPlugin {
             }
         }
         return null
+    }
+
+    private fun convertConfigToCamelCase(jsonObject: JsonObject): JsonObject {
+        val result = JsonObject(jsonObject.toString())
+        result.fieldNames().toList().forEach {
+            val value = result.remove(it)
+            if (value is JsonObject) {
+                result.put(CaseUtils.toCamelCase(it, false, '_'), convertConfigToCamelCase(value))
+            } else {
+                result.put(CaseUtils.toCamelCase(it, false, '_'), value)
+            }
+        }
+        return result
     }
 
     fun getConfig(project: Project): SourceMarkerConfig {
@@ -353,6 +361,7 @@ object SourceMarkerPlugin {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_SERVICE)
                 .build(LiveService::class.java)
+            project.putUserData(SkywalkingMonitor.LIVE_SERVICE, Instance.liveService)
         } else {
             log.warn("Live service unavailable")
         }
@@ -366,6 +375,8 @@ object SourceMarkerPlugin {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
                 .build(LiveInstrumentService::class.java)
+            project.putUserData(SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE, Instance.liveInstrument)
+
             ApplicationManager.getApplication().invokeLater {
                 BreakpointHitWindowService.getInstance(project).showEventsWindow()
             }
@@ -384,6 +395,7 @@ object SourceMarkerPlugin {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_VIEW)
                 .build(LiveViewService::class.java)
+            project.putUserData(SkywalkingMonitor.LIVE_VIEW_SERVICE, Instance.liveView)
 
             val viewListener = LiveViewManager(config)
             GlobalScope.launch(vertx.dispatcher()) {
@@ -528,7 +540,7 @@ object SourceMarkerPlugin {
         }
     }
 
-    private suspend fun initMonitor(config: SourceMarkerConfig) {
+    private suspend fun initMonitor(project: Project, config: SourceMarkerConfig) {
         val scheme = if (config.isSsl()) "https" else "http"
         val skywalkingHost = "$scheme://${config.serviceHostNormalized}:${config.getServicePortNormalized()}/graphql"
         val certificatePins = mutableListOf<String>()
@@ -536,7 +548,7 @@ object SourceMarkerPlugin {
         deploymentIds.add(
             vertx.deployVerticle(
                 SkywalkingMonitor(
-                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName
+                    skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName, project
                 )
             ).await()
         )
@@ -550,30 +562,8 @@ object SourceMarkerPlugin {
         log.info("Initializing marker")
         SourceMarker.addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
         SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
-        SourceMarker.addGlobalSourceMarkEventListener(ActivityQuickStatsIndicator(config))
-        SourceMarker.addGlobalSourceMarkEventListener(FailingEndpointIndicator(config))
 
-        val guideMarkConfig = GuideMarkConfiguration()
-        guideMarkConfig.activateOnKeyboardShortcut = true
-        val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
-            defaultConfiguration.preloadJcefBrowser = false
-            defaultConfiguration.componentSizeEvaluator = object : ComponentSizeEvaluator() {
-                override fun getDynamicSize(
-                    editor: Editor,
-                    configuration: SourceMarkComponentConfiguration
-                ): Dimension {
-                    var portalWidth = (editor.contentComponent.width * 0.8).toInt()
-                    if (portalWidth > 775) {
-                        portalWidth = 775
-                    }
-                    return Dimension(portalWidth, 250)
-                }
-            }
-        }
-        guideMarkConfig.componentProvider = componentProvider
-
-        SourceMarker.configuration.guideMarkConfiguration = guideMarkConfig
-        SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
+        SourceMarker.configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true
 
         if (config.rootSourcePackages.isNotEmpty()) {

@@ -19,6 +19,7 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.JavaRecursiveElementVisitor
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.plugin.SourceGuideProvider
@@ -29,15 +30,22 @@ class JVMGuideProvider : SourceGuideProvider {
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
         fileMarker.psiFile.acceptChildren(object : JavaRecursiveElementVisitor() {
-            override fun visitMethod(method: PsiMethod) {
-                super.visitMethod(method)
-
-                ApplicationManager.getApplication().runReadAction {
-                    fileMarker.createMethodSourceMark(
-                        method as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
-                    ).apply(true)
+            override fun visitElement(element: PsiElement) {
+                super.visitElement(element)
+                if (element is PsiMethod) {
+                    makeMethodGuideMark(fileMarker, element)
+                } else if (element::class.java.name == "org.jetbrains.kotlin.psi.KtNamedFunction") {
+                    makeMethodGuideMark(fileMarker, element)
                 }
             }
         })
+    }
+
+    private fun makeMethodGuideMark(fileMarker: SourceFileMarker, element: PsiElement) {
+        ApplicationManager.getApplication().runReadAction {
+            fileMarker.createMethodSourceMark(
+                element as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
+            ).apply(true)
+        }
     }
 }

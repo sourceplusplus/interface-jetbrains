@@ -17,12 +17,10 @@
  */
 package spp.jetbrains.marker.source
 
-import com.intellij.lang.Language
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
-import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.*
+import org.jooq.tools.reflect.Reflect
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -146,7 +144,7 @@ object JVMMarkerUtils {
 
         return if (inlayMark == null) {
             val uExpression = element.toUElement()
-            if (uExpression !is UExpression) return null
+            if (uExpression !is UExpression && uExpression !is UDeclaration) return null
             inlayMark = fileMarker.createExpressionSourceMark(
                 element,
                 SourceMark.Type.INLAY
@@ -483,25 +481,14 @@ object JVMMarkerUtils {
         }
     }
 
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    fun getNameIdentifier(nameIdentifierOwner: PsiNameIdentifierOwner): PsiElement? {
-        return when {
-            nameIdentifierOwner.language === Language.findLanguageByID("kotlin") -> {
-                when (nameIdentifierOwner) {
-                    is KtNamedFunction -> nameIdentifierOwner.nameIdentifier
-                    else -> (nameIdentifierOwner.navigationElement as KtNamedFunction).nameIdentifier
-                }
-            }
-            nameIdentifierOwner.language === Language.findLanguageByID("Groovy") -> {
-                (nameIdentifierOwner.navigationElement as GrMethod).nameIdentifierGroovy //todo: why can't be null?
-            }
-            else -> nameIdentifierOwner.nameIdentifier
+    fun getNameIdentifier(element: PsiElement?): PsiElement? {
+        if (element?.javaClass?.simpleName?.equals("GrMethod") == true) {
+            return Reflect.on(element).call("getNameIdentifierGroovy").get()
         }
+        if (element?.javaClass?.simpleName?.equals("KtNamedFunction") == true) {
+            return Reflect.on(element).call("getNameIdentifier").get()
+        }
+        return null
     }
 
     /**
@@ -541,9 +528,12 @@ object JVMMarkerUtils {
     @JvmStatic
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         val expression = element.toUElement()!!
-        val qualifiedMethodName = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
+        var parentIdentifier = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
+        if (parentIdentifier == null) {
+            parentIdentifier = expression.getContainingUClass()?.let { getFullyQualifiedName(it) }
+        }
         return ArtifactQualifiedName(
-            """${qualifiedMethodName!!.identifier}#${
+            """${parentIdentifier!!.identifier}#${
                 Base64.getEncoder().encodeToString(expression.toString().toByteArray())
             }""",
             type = ArtifactType.EXPRESSION,

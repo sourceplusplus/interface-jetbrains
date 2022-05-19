@@ -44,6 +44,8 @@ jobs:
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v2.4.0
+        with:
+          submodules: true
 
       # Validate wrapper
       - name: Gradle Wrapper Validation
@@ -108,9 +110,11 @@ jobs:
           name: pluginVerifier-result
           path: ${{ github.workspace }}/plugin/build/reports/pluginVerifier
 
-      # Run Qodana inspections
-      - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v4.2.3
+#       # Run Qodana inspections
+#       - name: Qodana - Code Inspection
+#         uses: JetBrains/qodana-action@v4.2.3
+#         with:
+#           upload-result: false
 
       # Prepare plugin archive content for creating artifact
       - name: Prepare Plugin Artifact

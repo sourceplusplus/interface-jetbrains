@@ -34,8 +34,9 @@ data class SourceMarkerConfig(
     var serviceToken: String? = null,
     var verifyHost: Boolean = true,
     val serviceName: String? = null,
-    var autoDisplayEndpointQuickStats: Boolean = true,
-    val override: Boolean = false
+    val override: Boolean = false,
+    val portalConfig: PortalConfig = PortalConfig(),
+    val commandConfig: Map<String, Map<String, Any>> = emptyMap(),
 ) {
     companion object {
         const val DEFAULT_SERVICE_PORT = 12800

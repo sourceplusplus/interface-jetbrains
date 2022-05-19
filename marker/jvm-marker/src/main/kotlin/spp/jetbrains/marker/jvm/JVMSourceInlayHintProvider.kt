@@ -19,13 +19,9 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.codeInsight.hints.InlayHintsSink
 import com.intellij.codeInsight.hints.presentation.InlayPresentation
-import com.intellij.openapi.editor.BlockInlayPriority
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
-import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.kotlin.psi.psiUtil.getParentOfType
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
@@ -46,8 +42,7 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
     override fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? {
         val parent = element.parent
         if ((parent is PsiMethod && element === parent.nameIdentifier)
-            || (parent is GrMethod && element === parent.nameIdentifierGroovy)
-            || (parent is KtNamedFunction && element === parent.nameIdentifier)
+            || (JVMMarkerUtils.getNameIdentifier(parent) === element)
         ) {
             val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
             val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(parent.toUElement() as UMethod)
@@ -106,7 +101,7 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
                 startOffset,
                 virtualText.relatesToPrecedingText,
                 virtualText.showAbove,
-                BlockInlayPriority.CODE_VISION,
+                0,
                 representation
             )
         }

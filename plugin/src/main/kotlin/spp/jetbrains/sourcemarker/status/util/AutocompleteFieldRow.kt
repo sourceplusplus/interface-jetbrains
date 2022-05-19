@@ -15,36 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.source.mark.api.event
+package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.marker.source.mark.api.SourceMark
+import javax.swing.Icon
 
 /**
- * Represents general [SourceMark] events.
+ * todo: description.
  *
- * @since 0.1.0
+ * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("MagicNumber")
-enum class SourceMarkEventCode(private val code: Int) : IEventCode {
-    MARK_ADDED(1000),
-    MARK_BEFORE_ADDED(1001),
-    MARK_REMOVED(1002),
-    NAME_CHANGED(1003),
-    PORTAL_OPENING(1004),
-    PORTAL_OPENED(1005),
-    PORTAL_CLOSED(1006),
-    UPDATE_PORTAL_CONFIG(1007),
-    MARK_USER_DATA_UPDATED(1008),
-    CUSTOM_EVENT(1009);
-
-    override fun code(): Int {
-        return this.code
-    }
-
-    companion object {
-        fun fromName(name: String): SourceMarkEventCode? {
-            return values().firstOrNull { it.name == name }
-        }
-    }
+interface AutocompleteFieldRow {
+    fun getText(): String
+    fun getDescription(): String?
+    fun getSelectedIcon(): Icon?
+    fun getUnselectedIcon(): Icon?
 }

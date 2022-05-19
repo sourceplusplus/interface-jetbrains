@@ -1,3 +1,6 @@
 [submodule "test/e2e/example-web-app"]
 	path = test/e2e/example-web-app
 	url = https://github.com/sourceplusplus/example-web-app
+[submodule "commander"]
+	path = commander
+	url = https://github.com/sourceplusplus/jetbrains-commander

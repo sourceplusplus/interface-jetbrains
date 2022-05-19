@@ -5,4 +5,7 @@
         <codeInsight.inlayProvider language="kotlin"
                                    implementationClass="spp.jetbrains.marker.jvm.JVMSourceInlayHintProvider"/>
     </extensions>
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <scriptDefinitionsProvider implementation="liveplugin.implementation.pluginrunner.kotlin.LivePluginKotlinScriptProvider"/>
+    </extensions>
 </idea-plugin>

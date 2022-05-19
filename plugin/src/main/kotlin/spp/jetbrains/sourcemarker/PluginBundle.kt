@@ -52,6 +52,10 @@ object PluginBundle : AbstractBundle(BUNDLE) {
     @Suppress("SpreadOperator")
     @JvmStatic
     fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any): String {
-        return LOCALE_BUNDLE.getString(key) ?: getMessage(key, *params)
+        return try {
+            LOCALE_BUNDLE.getString(key) ?: getMessage(key, *params)
+        } catch (e: MissingResourceException) {
+            key // no translation found
+        }
     }
 }
