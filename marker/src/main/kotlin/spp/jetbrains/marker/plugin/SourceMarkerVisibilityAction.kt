@@ -21,6 +21,7 @@ import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 
 /**
  * todo: description.
@@ -36,7 +37,7 @@ class SourceMarkerVisibilityAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         globalVisibility = !globalVisibility
-        val currentMarks = SourceMarker.getSourceMarks()
+        val currentMarks = SourceMarker.getSourceMarks().filter { it !is GuideMark }
         if (currentMarks.isNotEmpty()) {
             currentMarks.forEach { it.setVisible(globalVisibility) }
             DaemonCodeAnalyzer.getInstance(e.project).restart()
