@@ -28,6 +28,7 @@ subprojects {
     repositories {
         mavenCentral()
         maven(url = "https://jitpack.io")
+        maven(url = "https://pkg.sourceplus.plus/sourceplusplus/protocol")
     }
 
     apply<MavenPublishPlugin>()
