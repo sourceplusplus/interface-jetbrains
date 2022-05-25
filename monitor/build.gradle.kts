@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.sourceplusplus.protocol:protocol:$projectVersion")
+    implementation("plus.sourceplus:protocol:$projectVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")
