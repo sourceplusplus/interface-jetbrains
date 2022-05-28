@@ -83,8 +83,13 @@ tasks {
         doLast {
             val f = File(projectDir, "test/e2e/spp-probe-$projectVersion.jar")
             if (!f.exists()) {
+                println("Fetching Source++ JVM probe metadata")
+                val depUrl = "https://pkg.sourceplus.plus/sourceplusplus/probe-jvm/plus/sourceplus/probe/probe-jvm/${project.version}"
+                val timestamp = Regex("<timestamp>([0-9\\.]+)<\\/timestamp>")
+                    .find(java.net.URL("$depUrl/maven-metadata.xml").readText())!!.groupValues[1]
+                val versionNum = project.version.toString().replace("-SNAPSHOT", "")
                 println("Downloading Source++ JVM probe")
-                java.net.URL("https://github.com/sourceplusplus/probe-jvm/releases/download/$projectVersion/spp-probe-$projectVersion.jar")
+                java.net.URL("$depUrl/probe-jvm-$versionNum-$timestamp-1.jar")
                     .openStream().use { input ->
                         java.io.FileOutputStream(f).use { output ->
                             input.copyTo(output)
