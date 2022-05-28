@@ -66,6 +66,7 @@ jobs:
         run: |
           PROPERTIES="$(./gradlew properties --console=plain -q)"
           VERSION="$(echo "$PROPERTIES" | grep "^version:" | cut -f2- -d ' ')"
+          echo "SPP_RELEASE_VERSION=${VERSION/-SNAPSHOT/}" >> $GITHUB_ENV
           NAME="$(echo "$PROPERTIES" | grep "^pluginName:" | cut -f2- -d ' ')"
           CHANGELOG="$(./gradlew getPluginChangelog --console=plain -q)"
           CHANGELOG="${CHANGELOG//'%'/'%25'}"
@@ -161,9 +162,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create v${{ needs.build.outputs.version }} \
+          gh release create v${{ env.SPP_RELEASE_VERSION }} \
             --draft \
-            --title "v${{ needs.build.outputs.version }}" \
+            --title "v${{ env.SPP_RELEASE_VERSION }}" \
             --notes "$(cat << 'EOM'
           ${{ needs.build.outputs.changelog }}
           EOM

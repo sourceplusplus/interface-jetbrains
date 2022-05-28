@@ -75,7 +75,7 @@ dependencies {
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
         implementation(project(":monitor"))
-        implementation("plus.sourceplus:interface-booster-ui:$projectVersion")
+        implementation("plus.sourceplus.interface:interface-booster-ui:$projectVersion")
         implementation("plus.sourceplus:protocol:$projectVersion")
     }
 
