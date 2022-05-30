@@ -38,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.properties.outputs.version }}
+      release_version: ${{ steps.properties.outputs.release_version }}
       changelog: ${{ steps.properties.outputs.changelog }}
     steps:
 
