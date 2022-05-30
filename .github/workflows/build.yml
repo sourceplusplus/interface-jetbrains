@@ -66,7 +66,7 @@ jobs:
         run: |
           PROPERTIES="$(./gradlew properties --console=plain -q)"
           VERSION="$(echo "$PROPERTIES" | grep "^version:" | cut -f2- -d ' ')"
-          echo "SPP_RELEASE_VERSION=${VERSION/-SNAPSHOT/}" >> $GITHUB_ENV
+          SPP_RELEASE_VERSION=${VERSION/-SNAPSHOT/}
           NAME="$(echo "$PROPERTIES" | grep "^pluginName:" | cut -f2- -d ' ')"
           CHANGELOG="$(./gradlew getPluginChangelog --console=plain -q)"
           CHANGELOG="${CHANGELOG//'%'/'%25'}"
@@ -74,6 +74,7 @@ jobs:
           CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
 
           echo "::set-output name=version::$VERSION"
+          echo "::set-output name=release_version::$SPP_RELEASE_VERSION"
           echo "::set-output name=name::$NAME"
           echo "::set-output name=changelog::$CHANGELOG"
           echo "::set-output name=pluginVerifierHomeDir::~/.pluginVerifier"
@@ -162,9 +163,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create v${{ env.SPP_RELEASE_VERSION }} \
+          gh release create v${{ needs.build.outputs.release_version }} \
             --draft \
-            --title "v${{ env.SPP_RELEASE_VERSION }}" \
+            --title "v${{ needs.build.outputs.release_version }}" \
             --notes "$(cat << 'EOM'
           ${{ needs.build.outputs.changelog }}
           EOM
