@@ -19,7 +19,6 @@ val projectVersion: String by project
 val pluginGroup: String by project
 val pluginName: String by project
 val pluginSinceBuild: String by project
-val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
 val ideVersion: String by project
@@ -146,9 +145,6 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
         channels.set(listOf(projectVersion.split('-').getOrElse(1) { "default" }.split('.').first()))
-    }
-    runPluginVerifier {
-        ideVersions.set(pluginVerifierIdeVersions.split(",").map { it.trim() })
     }
 
     runIde {
