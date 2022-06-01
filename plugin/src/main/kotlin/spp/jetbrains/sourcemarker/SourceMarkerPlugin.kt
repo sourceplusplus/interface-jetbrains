@@ -495,8 +495,11 @@ object SourceMarkerPlugin {
 
         val resp = req.response().await()
         if (resp.statusCode() in 200..299) {
-            val body = resp.body().await().toString()
-            config.serviceToken = body
+            if (resp.statusCode() != 202) {
+                val body = resp.body().await().toString()
+                config.serviceToken = body
+            }
+
             if (ssl) {
                 config.serviceHost = "https://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
             } else {
