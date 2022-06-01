@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    val intellijVersion = "221.5080.210"
+    val intellijVersion = "221.5787.30"
 
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("org.jooq:joor:$joorVersion")
