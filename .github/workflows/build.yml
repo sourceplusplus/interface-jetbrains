@@ -164,7 +164,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create v${{ needs.build.outputs.release_version }} \
+          gh release create ${{ needs.build.outputs.release_version }} \
             --draft \
             --title "v${{ needs.build.outputs.release_version }}" \
             --notes "$(cat << 'EOM'
