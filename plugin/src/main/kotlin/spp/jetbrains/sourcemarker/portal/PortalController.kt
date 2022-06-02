@@ -59,7 +59,7 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         DatabindCodec.mapper().registerModule(module)
 
         log.info("Initializing portal server")
-        val portalServer = PortalServer()
+        val portalServer = PortalServer(jwtToken = markerConfig.serviceToken)
         vertx.deployVerticle(portalServer).await()
         log.info("Portal server initialized")
 
