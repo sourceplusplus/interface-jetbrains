@@ -19,7 +19,7 @@ package spp.jetbrains.sourcemarker.status.util
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
-import com.intellij.openapi.util.Key
+import liveplugin.implementation.LivePluginProjectLoader.SPP_COMMANDS_LOCATION
 import spp.command.LiveCommand
 import java.io.File
 import javax.swing.Icon
@@ -27,8 +27,7 @@ import javax.swing.Icon
 class LiveCommandFieldRow(val liveCommand: LiveCommand, val project: Project) : AutocompleteFieldRow {
 
     private val basePath = project.basePath?.let { File(it, ".spp${File.separatorChar}commands").absolutePath } ?: ""
-    private val internalBasePath = Key.findKeyByName("SPP_COMMANDS_LOCATION")
-        ?.let { key -> project.getUserData(key).toString() } ?: ""
+    private val internalBasePath = SPP_COMMANDS_LOCATION.let { project.getUserData(it).toString() }
 
     override fun getText(): String = liveCommand.name
     override fun getDescription(): String = liveCommand.description
