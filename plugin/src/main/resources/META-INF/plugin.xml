@@ -82,12 +82,12 @@
                 text="SourcePortal Popup Action" description="SourcePortal popup action">
         </action>
 
-        <action id="LivePlugin.RunPlugin" class="liveplugin.implementation.actions.RunPluginAction" text="Run Current Command">
+        <action id="spp.RunCommand" class="liveplugin.implementation.actions.RunPluginAction" text="Run Current Command">
             <keyboard-shortcut keymap="$default" first-keystroke="alt c" second-keystroke="alt e"/>
             <keyboard-shortcut keymap="$default" first-keystroke="control shift l"/>
         </action>
-        <action id="LivePlugin.UnloadPlugin" class="liveplugin.implementation.actions.UnloadPluginAction" text="Unload Current Command"/>
-        <group id="LivePlugin.LivePluginActions" class="liveplugin.implementation.actions.RunLivePluginsGroup">
+        <action id="spp.UnloadCommand" class="liveplugin.implementation.actions.UnloadPluginAction" text="Unload Current Command"/>
+        <group id="spp.CommandActions" class="liveplugin.implementation.actions.RunLivePluginsGroup">
             <add-to-group group-id="RunContextGroup"/>
         </group>
     </actions>
