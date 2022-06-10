@@ -31,7 +31,6 @@
         <toolWindow id="Source++ Console"
                     factoryClass="spp.jetbrains.sourcemarker.console.SourceMarkerToolWindowFactory"/>
 
-        <applicationService serviceImplementation="liveplugin.implementation.Settings"/>
         <scratch.rootType implementation="liveplugin.implementation.ScratchLivePluginRootType"/>
         <nonProjectFileWritingAccessExtension implementation="liveplugin.implementation.MakePluginFilesAlwaysEditable"/>
         <syntaxHighlighter factoryClass="liveplugin.implementation.EnableSyntaxHighlighterInLivePlugins" order="first"/>
