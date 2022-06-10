@@ -51,6 +51,7 @@ import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.impl.DiscoveryImpl
 import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
+import liveplugin.implementation.LivePluginProjectLoader
 import liveplugin.implementation.command.LiveCommandService
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
@@ -142,6 +143,7 @@ object SourceMarkerPlugin {
     ) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
+        LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig(project)
         if (!addedConfigListener) {
