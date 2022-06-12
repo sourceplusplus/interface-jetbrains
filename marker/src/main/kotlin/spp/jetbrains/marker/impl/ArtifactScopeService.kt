@@ -26,7 +26,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object ArtifactScopeService {
+object ArtifactScopeService : AbstractArtifactScopeService {
 
     private val services = mutableMapOf<String, AbstractArtifactScopeService>()
 
@@ -39,7 +39,7 @@ object ArtifactScopeService {
         return services[language] ?: throw IllegalArgumentException("No service for language $language")
     }
 
-    fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
+    override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         return getService(fileMarker.psiFile.language.id).getScopeVariables(fileMarker, lineNumber)
     }
 }

@@ -28,7 +28,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object ArtifactNamingService {
+object ArtifactNamingService : AbstractArtifactNamingService {
 
     private val services = mutableMapOf<String, AbstractArtifactNamingService>()
 
@@ -41,11 +41,11 @@ object ArtifactNamingService {
         return services[language] ?: throw IllegalArgumentException("No service for language $language")
     }
 
-    fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
+    override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return getService(element.language.id).getFullyQualifiedName(element)
     }
 
-    fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
+    override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
         return getService(psiFile.language.id).getQualifiedClassNames(psiFile)
     }
 }
