@@ -29,8 +29,9 @@ import org.jetbrains.uast.kotlin.KotlinStringULiteralExpression
 import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinUSimpleReferenceExpression
 import org.jooq.tools.reflect.Reflect
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
-import spp.jetbrains.marker.jvm.psi.EndpointDetector.DetectedEndpoint
+import spp.jetbrains.marker.jvm.JVMEndpointDetector.JVMEndpointNameDeterminer
+import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import java.util.*
 
 /**
@@ -39,7 +40,7 @@ import java.util.*
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
+class SpringMVCEndpoint : JVMEndpointNameDeterminer {
 
     private val requestMappingAnnotation = "org.springframework.web.bind.annotation.RequestMapping"
     private val qualifiedNameSet = setOf(
@@ -50,6 +51,12 @@ class SpringMVCEndpoint : EndpointDetector.EndpointNameDeterminer {
         "org.springframework.web.bind.annotation.DeleteMapping",
         "org.springframework.web.bind.annotation.PatchMapping"
     )
+
+    override fun determineEndpointName(guideMark: MethodGuideMark): Future<Optional<DetectedEndpoint>> {
+        val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
+            ?: return Future.succeededFuture(Optional.empty())
+        return determineEndpointName(uMethod)
+    }
 
     override fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
         val promise = Promise.promise<Optional<DetectedEndpoint>>()

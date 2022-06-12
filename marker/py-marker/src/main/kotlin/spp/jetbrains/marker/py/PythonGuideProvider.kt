@@ -21,11 +21,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.jetbrains.python.psi.PyFunction
 import com.jetbrains.python.psi.PyRecursiveElementVisitor
-import spp.jetbrains.marker.plugin.SourceGuideProvider
+import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 
-class PythonGuideProvider : SourceGuideProvider {
+class PythonGuideProvider : AbstractSourceGuideProvider {
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
         fileMarker.psiFile.acceptChildren(object : PyRecursiveElementVisitor() {

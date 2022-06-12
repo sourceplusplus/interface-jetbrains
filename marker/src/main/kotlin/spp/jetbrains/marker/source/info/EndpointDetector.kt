@@ -15,39 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.jvm.psi
+package spp.jetbrains.marker.source.info
 
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.util.Computable
 import io.vertx.core.Future
-import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.kotlin.coroutines.await
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
-import spp.jetbrains.marker.jvm.psi.endpoint.SkywalkingTraceEndpoint
-import spp.jetbrains.marker.jvm.psi.endpoint.SpringMVCEndpoint
-import spp.jetbrains.marker.source.mark.api.MethodSourceMark
-import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.monitor.skywalking.bridge.EndpointBridge
 import java.util.*
 
 /**
  * todo: description.
  *
- * @since 0.1.0
+ * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class EndpointDetector(val vertx: Vertx) {
+abstract class EndpointDetector<T: EndpointDetector.EndpointNameDeterminer>(val vertx: Vertx) {
 
     companion object {
         private val log = LoggerFactory.getLogger(EndpointDetector::class.java)
@@ -56,29 +44,26 @@ class EndpointDetector(val vertx: Vertx) {
         val ENDPOINT_INTERNAL = SourceKey<Boolean>("ENDPOINT_INTERNAL")
     }
 
-    private val detectorSet = setOf(
-        SkywalkingTraceEndpoint(),
-        SpringMVCEndpoint()
-    )
+    abstract val detectorSet: Set<T>
 
-    fun getEndpointName(sourceMark: SourceMark): String? {
+    fun getEndpointName(sourceMark: GuideMark): String? {
         return sourceMark.getUserData(ENDPOINT_NAME)
     }
 
-    fun getEndpointId(sourceMark: SourceMark): String? {
+    fun getEndpointId(sourceMark: GuideMark): String? {
         return sourceMark.getUserData(ENDPOINT_ID)
     }
 
-    fun isExternalEndpoint(sourceMark: SourceMark): Boolean {
+    fun isExternalEndpoint(sourceMark: GuideMark): Boolean {
         return sourceMark.getUserData(ENDPOINT_INTERNAL) == false
     }
 
-    suspend fun getOrFindEndpointId(sourceMark: SourceMark): String? {
+    suspend fun getOrFindEndpointId(sourceMark: GuideMark): String? {
         val cachedEndpointId = sourceMark.getUserData(ENDPOINT_ID)
         return if (cachedEndpointId != null) {
             log.trace("Found cached endpoint id: $cachedEndpointId")
             cachedEndpointId
-        } else if (sourceMark is MethodSourceMark) {
+        } else if (sourceMark is MethodGuideMark) {
             getOrFindEndpoint(sourceMark)
             sourceMark.getUserData(ENDPOINT_ID)
         } else {
@@ -86,12 +71,12 @@ class EndpointDetector(val vertx: Vertx) {
         }
     }
 
-    suspend fun getOrFindEndpointName(sourceMark: SourceMark): String? {
+    suspend fun getOrFindEndpointName(sourceMark: GuideMark): String? {
         val cachedEndpointName = sourceMark.getUserData(ENDPOINT_NAME)
         return if (cachedEndpointName != null) {
             log.trace("Found cached endpoint name: $cachedEndpointName")
             cachedEndpointName
-        } else if (sourceMark is MethodSourceMark) {
+        } else if (sourceMark is MethodGuideMark) {
             getOrFindEndpoint(sourceMark)
             sourceMark.getUserData(ENDPOINT_NAME)
         } else {
@@ -99,11 +84,11 @@ class EndpointDetector(val vertx: Vertx) {
         }
     }
 
-    private suspend fun getOrFindEndpoint(sourceMark: MethodSourceMark) {
+    private suspend fun getOrFindEndpoint(sourceMark: MethodGuideMark) {
         if (sourceMark.getUserData(ENDPOINT_NAME) == null || sourceMark.getUserData(ENDPOINT_ID) == null) {
             if (sourceMark.getUserData(ENDPOINT_NAME) == null) {
                 log.trace("Determining endpoint name")
-                val detectedEndpoint = determineEndpointName(sourceMark).await().orElse(null)
+                val detectedEndpoint = determineEndpointName(sourceMark)
                 if (detectedEndpoint != null) {
                     log.trace("Detected endpoint name: ${detectedEndpoint.name}")
                     sourceMark.putUserData(ENDPOINT_NAME, detectedEndpoint.name)
@@ -119,7 +104,7 @@ class EndpointDetector(val vertx: Vertx) {
         }
     }
 
-    private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodSourceMark) {
+    private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodGuideMark) {
         log.trace("Determining endpoint id")
         try {
             val endpoint = EndpointBridge.searchExactEndpoint(endpointName, vertx)
@@ -138,33 +123,12 @@ class EndpointDetector(val vertx: Vertx) {
         }
     }
 
-    private suspend fun determineEndpointName(sourceMark: MethodSourceMark): Future<Optional<DetectedEndpoint>> {
-        return withContext(Dispatchers.Default) {
-            ApplicationManager.getApplication().runReadAction(Computable {
-                val uMethod = sourceMark.getPsiMethod().toUElement() as UMethod?
-                if (uMethod != null) {
-                    determineEndpointName(sourceMark.getPsiMethod().toUElement() as UMethod)
-                } else { //todo: python functions don't have UMethod
-                    Future.succeededFuture(Optional.empty())
-                }
-            })
+    private suspend fun determineEndpointName(guideMark: MethodGuideMark): DetectedEndpoint? {
+        detectorSet.forEach {
+            val detectedEndpoint = it.determineEndpointName(guideMark).await()
+            if (detectedEndpoint.isPresent) return detectedEndpoint.get()
         }
-    }
-
-    fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
-        val promise = Promise.promise<Optional<DetectedEndpoint>>()
-        GlobalScope.launch(vertx.dispatcher()) {
-            detectorSet.forEach {
-                try {
-                    val detectedEndpoint = it.determineEndpointName(uMethod).await()
-                    if (detectedEndpoint.isPresent) promise.complete(detectedEndpoint)
-                } catch (throwable: Throwable) {
-                    promise.fail(throwable)
-                }
-            }
-            promise.tryComplete(Optional.empty())
-        }
-        return promise.future()
+        return null
     }
 
     /**
@@ -181,6 +145,6 @@ class EndpointDetector(val vertx: Vertx) {
      * todo: description.
      */
     interface EndpointNameDeterminer {
-        fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>>
+        fun determineEndpointName(guideMark: MethodGuideMark): Future<Optional<DetectedEndpoint>>
     }
 }

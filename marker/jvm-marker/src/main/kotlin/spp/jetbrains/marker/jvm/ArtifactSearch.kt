@@ -38,7 +38,6 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
 import org.slf4j.LoggerFactory
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -147,7 +146,7 @@ object ArtifactSearch {
                     KotlinFileType.INSTANCE, GlobalSearchScope.projectScope(project)
                 )
 
-                val endpointDetector = EndpointDetector(vertx)
+                val endpointDetector = JVMEndpointDetector(vertx) //todo: python
                 var keepSearching = true
                 for (virtualFile in groovySourceFiles.union(javaSourceFiles).union(kotlinSourceFiles)) {
                     val file = PsiManager.getInstance(project).findFile(virtualFile)!!

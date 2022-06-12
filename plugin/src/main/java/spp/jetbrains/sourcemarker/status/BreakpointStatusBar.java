@@ -16,6 +16,7 @@ import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
@@ -53,7 +54,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
@@ -436,7 +436,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, Instrument
 
         String condition = null;
         if (!breakpointConditionField.getText().isEmpty()) {
-            condition = conditionParser.getCondition(
+            condition = InstrumentConditionParser.INSTANCE.getCondition(
                     breakpointConditionField.getText(), inlayMark.getPsiElement()
             );
         }

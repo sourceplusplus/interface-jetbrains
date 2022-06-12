@@ -25,9 +25,9 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import spp.jetbrains.marker.SourceMarker.creationService
-import spp.jetbrains.marker.SourceMarker.namingService
-import spp.jetbrains.marker.SourceMarker.scopeService
+import spp.jetbrains.marker.impl.ArtifactCreationService
+import spp.jetbrains.marker.impl.ArtifactNamingService
+import spp.jetbrains.marker.impl.ArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -89,7 +89,7 @@ object LiveStatusManager : SourceMarkEventListener {
 
                 ApplicationManager.getApplication().runReadAction {
                     val methodSourceMark = event.sourceMark as MethodSourceMark
-                    val qualifiedClassNames = namingService.getQualifiedClassNames(
+                    val qualifiedClassNames = ArtifactNamingService.getQualifiedClassNames(
                         methodSourceMark.sourceFileMarker.psiFile
                     )
                     if (qualifiedClassNames.isEmpty()) return@runReadAction
@@ -127,7 +127,7 @@ object LiveStatusManager : SourceMarkEventListener {
             return
         }
 
-        val inlayMark = creationService.createExpressionInlayMark(fileMarker, lineNumber)
+        val inlayMark = ArtifactCreationService.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
@@ -135,10 +135,10 @@ object LiveStatusManager : SourceMarkEventListener {
             val config = SourceMarkerPlugin.getConfig(editor.project!!)
             val statusBar = BreakpointStatusBar(
                 LiveSourceLocation(
-                    namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
-                scopeService.getScopeVariables(fileMarker, lineNumber),
+                ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
@@ -170,7 +170,7 @@ object LiveStatusManager : SourceMarkEventListener {
             return
         }
 
-        val inlayMark = creationService.createExpressionInlayMark(fileMarker, lineNumber)
+        val inlayMark = ArtifactCreationService.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
@@ -178,11 +178,11 @@ object LiveStatusManager : SourceMarkEventListener {
             val config = SourceMarkerPlugin.getConfig(editor.project!!)
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier,
+                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier,
                     lineNumber,
                     service = config.serviceName
                 ),
-                if (watchExpression) emptyList() else scopeService.getScopeVariables(fileMarker, lineNumber),
+                if (watchExpression) emptyList() else ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark,
                 watchExpression
             )
@@ -263,7 +263,7 @@ object LiveStatusManager : SourceMarkEventListener {
             return
         }
 
-        val inlayMark = creationService.createExpressionInlayMark(fileMarker, lineNumber)
+        val inlayMark = ArtifactCreationService.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
@@ -271,7 +271,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val config = SourceMarkerPlugin.getConfig(editor.project!!)
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
-                    namingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
                     service = config.serviceName
                 ),
                 inlayMark
@@ -301,7 +301,7 @@ object LiveStatusManager : SourceMarkEventListener {
             return
         }
 
-        val inlayMark = creationService.createExpressionInlayMark(fileMarker, lineNumber)
+        val inlayMark = ArtifactCreationService.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
@@ -334,7 +334,7 @@ object LiveStatusManager : SourceMarkEventListener {
     fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
-            val findInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
+            val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
@@ -371,7 +371,7 @@ object LiveStatusManager : SourceMarkEventListener {
     fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
-            val findInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
+            val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
@@ -412,7 +412,7 @@ object LiveStatusManager : SourceMarkEventListener {
     fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
         //create gutter popup
         ApplicationManager.getApplication().runReadAction {
-            val gutterMark = creationService.getOrCreateExpressionGutterMark(
+            val gutterMark = ArtifactCreationService.getOrCreateExpressionGutterMark(
                 sourceFileMarker, liveMeter.location.line, false
             )
             if (gutterMark.isPresent) {

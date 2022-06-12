@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker
+package spp.jetbrains.marker.impl
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import spp.jetbrains.marker.AbstractArtifactNamingService
 import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
@@ -27,8 +28,24 @@ import spp.protocol.artifact.ArtifactQualifiedName
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface ArtifactNamingService {
+object ArtifactNamingService : AbstractArtifactNamingService {
 
-    fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
-    fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName>
+    private val services = mutableMapOf<String, AbstractArtifactNamingService>()
+
+    fun addService(namingService: AbstractArtifactNamingService, language: String, vararg languages: String) {
+        services[language] = namingService
+        languages.forEach { services[it] = namingService }
+    }
+
+    private fun getService(language: String): AbstractArtifactNamingService {
+        return services[language] ?: throw IllegalArgumentException("No service for language $language")
+    }
+
+    override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
+        return getService(element.language.id).getFullyQualifiedName(element)
+    }
+
+    override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
+        return getService(psiFile.language.id).getQualifiedClassNames(psiFile)
+    }
 }

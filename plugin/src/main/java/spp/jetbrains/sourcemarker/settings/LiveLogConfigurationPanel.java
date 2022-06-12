@@ -14,6 +14,7 @@ import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
@@ -22,7 +23,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
 import static spp.jetbrains.sourcemarker.PluginUI.SMALLER_FONT;
@@ -99,7 +99,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         if (condition == null) {
             setCondition(null);
         } else {
-            setCondition(XExpressionImpl.fromText(conditionParser.fromLiveConditional(condition)));
+            setCondition(XExpressionImpl.fromText(InstrumentConditionParser.fromLiveConditional(condition)));
         }
     }
 

@@ -15,12 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.impl
 
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
 import spp.jetbrains.marker.AbstractArtifactScopeService
-import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
@@ -29,20 +26,20 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactScopeService : AbstractArtifactScopeService {
+object ArtifactScopeService : AbstractArtifactScopeService {
 
-    //todo: shouldn't need to use reflection
-    private val getScopeOwnerMethod = Class.forName("com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil")
-        .getMethod("getScopeOwner", PsiElement::class.java)
-    private val getScopeMethod = Class.forName("com.jetbrains.python.codeInsight.controlflow.ControlFlowCache")
-        .getMethod("getScope", Class.forName("com.jetbrains.python.codeInsight.controlflow.ScopeOwner"))
+    private val services = mutableMapOf<String, AbstractArtifactScopeService>()
+
+    fun addService(scopeService: AbstractArtifactScopeService, language: String, vararg languages: String) {
+        services[language] = scopeService
+        languages.forEach { services[it] = scopeService }
+    }
+
+    private fun getService(language: String): AbstractArtifactScopeService {
+        return services[language] ?: throw IllegalArgumentException("No service for language $language")
+    }
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
-        val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
-        val scope = getScopeOwnerMethod.invoke(null, position)
-        val els = getScopeMethod.invoke(null, scope)
-        val vars = Class.forName("com.jetbrains.python.codeInsight.dataflow.scope.Scope")
-            .getMethod("getNamedElements").invoke(els) as Collection<PsiNamedElement>
-        return vars.mapNotNull { it.name }
+        return getService(fileMarker.psiFile.language.id).getScopeVariables(fileMarker, lineNumber)
     }
 }

@@ -17,7 +17,9 @@
  */
 package spp.jetbrains.marker
 
-import spp.jetbrains.marker.source.SourceFileMarker
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
  * todo: description.
@@ -25,7 +27,8 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface ArtifactScopeService {
+interface AbstractArtifactNamingService {
 
-    fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
+    fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
+    fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName>
 }

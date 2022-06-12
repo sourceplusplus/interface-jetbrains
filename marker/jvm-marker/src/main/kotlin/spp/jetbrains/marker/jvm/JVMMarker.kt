@@ -15,20 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.jvm
 
-import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import spp.jetbrains.marker.impl.*
 
 /**
  * todo: description.
  *
- * @since 0.4.0
+ * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonConditionParser : AbstractInstrumentConditionParser() {
+object JVMMarker {
 
-    override fun getCondition(condition: String, context: PsiElement): String {
-        return condition
+    fun canSetup(): Boolean = true
+
+    fun setup() {
+        ArtifactCreationService.addService(JVMArtifactCreationService(), "JAVA", "kotlin", "Groovy", "Scala")
+        ArtifactNamingService.addService(JVMArtifactNamingService(), "JAVA", "kotlin", "Groovy", "Scala")
+        ArtifactScopeService.addService(JVMArtifactScopeService(), "JAVA", "kotlin", "Groovy", "Scala")
+        InstrumentConditionParser.addService(JVMConditionParser(), "JAVA", "kotlin", "Groovy", "Scala")
+        SourceGuideProvider.addProvider(JVMGuideProvider(), "JAVA", "kotlin", "Groovy", "Scala")
     }
 }

@@ -17,18 +17,20 @@
  */
 package spp.jetbrains.marker.py
 
-import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import io.vertx.core.Vertx
+import spp.jetbrains.marker.py.psi.endpoint.FlaskEndpoint
+import spp.jetbrains.marker.source.info.EndpointDetector
+import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
 
 /**
  * todo: description.
  *
- * @since 0.4.0
+ * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonConditionParser : AbstractInstrumentConditionParser() {
+class PythonEndpointDetector(vertx: Vertx) : EndpointDetector<EndpointNameDeterminer>(vertx) {
 
-    override fun getCondition(condition: String, context: PsiElement): String {
-        return condition
-    }
+    override val detectorSet: Set<EndpointNameDeterminer> = setOf(
+        FlaskEndpoint()
+    )
 }

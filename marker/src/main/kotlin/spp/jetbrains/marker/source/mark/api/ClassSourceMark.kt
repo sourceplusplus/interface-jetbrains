@@ -22,7 +22,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.psi.PsiNameIdentifierOwner
-import spp.jetbrains.marker.SourceMarker.namingService
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
@@ -45,7 +45,7 @@ import java.util.*
 abstract class ClassSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiClass: PsiNameIdentifierOwner,
-    override var artifactQualifiedName: ArtifactQualifiedName = namingService.getFullyQualifiedName(psiClass)
+    override var artifactQualifiedName: ArtifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiClass)
 ) : SourceMark {
 
     override var editor: Editor? = null
@@ -56,7 +56,7 @@ abstract class ClassSourceMark(
     override val isExpressionMark: Boolean = false
     override val valid: Boolean; get() {
         return try {
-            psiClass.isValid && artifactQualifiedName == namingService.getFullyQualifiedName(psiClass)
+            psiClass.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiClass)
         } catch (ignore: PsiInvalidElementAccessException) {
             false
         }
@@ -136,7 +136,7 @@ abstract class ClassSourceMark(
 
     fun updatePsiClass(psiClass: PsiNameIdentifierOwner): Boolean {
         this.psiClass = psiClass
-        val newArtifactQualifiedName = namingService.getFullyQualifiedName(psiClass)
+        val newArtifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiClass)
         if (artifactQualifiedName != newArtifactQualifiedName) {
             check(sourceFileMarker.removeSourceMark(this, autoRefresh = false, autoDispose = false))
             val oldArtifactQualifiedName = artifactQualifiedName

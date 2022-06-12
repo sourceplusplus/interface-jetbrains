@@ -17,18 +17,30 @@
  */
 package spp.jetbrains.marker.py
 
-import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import spp.jetbrains.marker.impl.*
 
 /**
  * todo: description.
  *
- * @since 0.4.0
+ * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonConditionParser : AbstractInstrumentConditionParser() {
+object PythonMarker {
 
-    override fun getCondition(condition: String, context: PsiElement): String {
-        return condition
+    fun canSetup(): Boolean {
+        return try {
+            Class.forName("com.jetbrains.python.psi.PyElement")
+            true
+        } catch (e: ClassNotFoundException) {
+            false
+        }
+    }
+
+    fun setup() {
+        ArtifactCreationService.addService(PythonArtifactCreationService(), "Python")
+        ArtifactNamingService.addService(PythonArtifactNamingService(), "Python")
+        ArtifactScopeService.addService(PythonArtifactScopeService(), "Python")
+        InstrumentConditionParser.addService(PythonConditionParser(), "Python")
+        SourceGuideProvider.addProvider(PythonGuideProvider(), "Python")
     }
 }
