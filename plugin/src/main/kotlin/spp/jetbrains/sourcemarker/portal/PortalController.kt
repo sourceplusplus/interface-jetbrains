@@ -39,6 +39,9 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
+import spp.jetbrains.sourcemarker.settings.isSsl
+import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.protocol.marshall.KSerializers
 import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicReference
@@ -59,7 +62,12 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
         DatabindCodec.mapper().registerModule(module)
 
         log.info("Initializing portal server")
-        val portalServer = PortalServer(jwtToken = markerConfig.serviceToken)
+        val portalServer = PortalServer(
+            skywalkingHost = markerConfig.serviceHostNormalized,
+            skywalkingPort = markerConfig.getServicePortNormalized(),
+            ssl = markerConfig.isSsl(),
+            jwtToken = markerConfig.serviceToken
+        )
         vertx.deployVerticle(portalServer).await()
         log.info("Portal server initialized")
 
