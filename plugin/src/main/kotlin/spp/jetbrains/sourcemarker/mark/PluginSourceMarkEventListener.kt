@@ -21,12 +21,14 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
+import spp.jetbrains.marker.jvm.JVMEndpointDetector
 import spp.jetbrains.marker.jvm.psi.LoggerDetector
-import spp.jetbrains.marker.source.mark.api.MethodSourceMark
+import spp.jetbrains.marker.py.PythonEndpointDetector
+import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
@@ -41,8 +43,17 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
 
     companion object {
         private val log = LoggerFactory.getLogger(PluginSourceMarkEventListener::class.java)
-        private val endpointDetector = EndpointDetector(vertx)
         private val loggerDetector = LoggerDetector(vertx)
+        private val endpointDetectors = mutableMapOf<String, EndpointDetector<*>>()
+            .apply {
+                JVMEndpointDetector(vertx).let {
+                    put("JAVA", it)
+                    put("kotlin", it)
+                    put("Scala", it)
+                    put("Groovy", it)
+                }
+                put("Python", PythonEndpointDetector(vertx))
+            }.toMap()
     }
 
     override fun handleEvent(event: SourceMarkEvent) {
@@ -53,11 +64,11 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
         if (event.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
             val sourceMark = event.sourceMark
 
-            if (sourceMark is MethodSourceMark) {
+            if (sourceMark is MethodGuideMark) {
                 //setup endpoint detector and attempt detection
-                sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
+                sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetectors[sourceMark.language.id])
                 GlobalScope.launch(vertx.dispatcher()) {
-                    endpointDetector.getOrFindEndpointId(sourceMark)
+                    endpointDetectors[sourceMark.language.id]!!.getOrFindEndpointId(sourceMark)
                 }
             }
 

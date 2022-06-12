@@ -17,8 +17,8 @@
  */
 package spp.jetbrains.sourcemarker.mark
 
-import spp.jetbrains.marker.jvm.psi.EndpointDetector
 import spp.jetbrains.marker.jvm.psi.LoggerDetector
+import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.protocol.portal.PortalConfiguration
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -34,7 +34,7 @@ import spp.jetbrains.sourcemarker.status.StatusBar
  */
 object SourceMarkKeys {
     val PORTAL_CONFIGURATION = SourceKey<PortalConfiguration>("PORTAL_CONFIGURATION")
-    val ENDPOINT_DETECTOR = SourceKey<EndpointDetector>("ENDPOINT_DETECTOR")
+    val ENDPOINT_DETECTOR = SourceKey<EndpointDetector<*>>("ENDPOINT_DETECTOR")
     val LOGGER_DETECTOR = SourceKey<LoggerDetector>("LOGGER_DETECTOR")
     val INSTRUMENT_ID = SourceKey<String>("INSTRUMENT_ID")
     val VIEW_SUBSCRIPTION_ID = SourceKey<String>("VIEW_SUBSCRIPTION_ID")
