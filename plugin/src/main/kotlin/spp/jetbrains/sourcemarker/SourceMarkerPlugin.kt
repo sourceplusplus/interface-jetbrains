@@ -18,6 +18,7 @@
 package spp.jetbrains.sourcemarker
 
 import com.apollographql.apollo3.exception.ApolloHttpException
+import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
@@ -56,9 +57,10 @@ import liveplugin.implementation.command.LiveCommandService
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.jvm.*
+import spp.jetbrains.marker.jvm.ArtifactSearch
+import spp.jetbrains.marker.jvm.JVMMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.py.*
+import spp.jetbrains.marker.py.PythonMarker
 import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.sourcemarker.PluginBundle.message
@@ -256,9 +258,14 @@ object SourceMarkerPlugin {
         if (project.basePath != null) {
             val configFile = File(project.basePath, SPP_PLUGIN_YML_PATH)
             if (configFile.exists()) {
-                var config = JsonObject(
-                    ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
-                )
+                var config = try {
+                    JsonObject(
+                        ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
+                    )
+                } catch (ex: JacksonException) {
+                    log.error("Failed to parse config file {}", configFile.absolutePath, ex)
+                    return null
+                }
 
                 val commandConfig = config.remove("command_config")
                 config = convertConfigToCamelCase(config)
