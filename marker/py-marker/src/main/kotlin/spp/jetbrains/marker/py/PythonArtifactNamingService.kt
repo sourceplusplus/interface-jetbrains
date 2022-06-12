@@ -21,7 +21,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import com.jetbrains.python.psi.*
-import spp.jetbrains.marker.ArtifactNamingService
+import spp.jetbrains.marker.AbstractArtifactNamingService
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 
@@ -31,7 +31,7 @@ import spp.protocol.artifact.ArtifactType
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactNamingService : ArtifactNamingService {
+class PythonArtifactNamingService : AbstractArtifactNamingService {
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return when (element) {

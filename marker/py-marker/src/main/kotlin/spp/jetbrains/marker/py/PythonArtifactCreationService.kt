@@ -18,9 +18,9 @@
 package spp.jetbrains.marker.py
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.ArtifactCreationService
-import spp.jetbrains.marker.SourceMarker.namingService
+import spp.jetbrains.marker.AbstractArtifactCreationService
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -36,7 +36,7 @@ import java.util.*
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactCreationService : ArtifactCreationService {
+class PythonArtifactCreationService : AbstractArtifactCreationService {
 
     override fun getOrCreateExpressionGutterMark(
         fileMarker: SourceFileMarker,
@@ -70,7 +70,7 @@ class PythonArtifactCreationService : ArtifactCreationService {
                 SourceMark.Type.GUTTER
             ) as ExpressionGutterMark?
             if (gutterMark != null) {
-                if (gutterMark.updatePsiExpression(element, namingService.getFullyQualifiedName(element))) {
+                if (gutterMark.updatePsiExpression(element, ArtifactNamingService.getFullyQualifiedName(element))) {
                     element.putUserData(SourceKey.GutterMark, gutterMark)
                 } else {
                     gutterMark = null
@@ -165,7 +165,7 @@ class PythonArtifactCreationService : ArtifactCreationService {
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark?
             if (inlayMark != null) {
-                if (inlayMark.updatePsiExpression(element, namingService.getFullyQualifiedName(element))) {
+                if (inlayMark.updatePsiExpression(element, ArtifactNamingService.getFullyQualifiedName(element))) {
                     element.putUserData(SourceKey.InlayMark, inlayMark)
                 } else {
                     inlayMark = null

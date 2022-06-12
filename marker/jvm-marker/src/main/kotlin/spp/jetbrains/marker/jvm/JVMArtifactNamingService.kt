@@ -21,7 +21,7 @@ import com.intellij.psi.PsiClassOwner
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.jetbrains.uast.*
-import spp.jetbrains.marker.ArtifactNamingService
+import spp.jetbrains.marker.AbstractArtifactNamingService
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
@@ -32,7 +32,7 @@ import spp.protocol.artifact.ArtifactType
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMArtifactNamingService : ArtifactNamingService {
+class JVMArtifactNamingService : AbstractArtifactNamingService {
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return when (val uElement = element.toUElement()) {

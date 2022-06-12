@@ -20,7 +20,7 @@ package spp.jetbrains.marker.jvm
 import com.intellij.psi.*
 import com.intellij.psi.scope.processor.VariablesProcessor
 import com.intellij.psi.scope.util.PsiScopesUtil
-import spp.jetbrains.marker.ArtifactScopeService
+import spp.jetbrains.marker.AbstractArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -30,7 +30,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMArtifactScopeService : ArtifactScopeService {
+class JVMArtifactScopeService : AbstractArtifactScopeService {
 
     fun isMethodAtLine(psiFile: PsiFile, lineNumber: Int): Boolean {
         var el = SourceMarkerUtils.getElementAtLine(psiFile, lineNumber)

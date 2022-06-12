@@ -13,6 +13,7 @@ import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
+import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
@@ -40,7 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
@@ -333,7 +333,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         int hitLimit = -1;
         if (configurationPanel != null) {
             if (configurationPanel.getCondition() != null) {
-                condition = conditionParser.getCondition(
+                condition = InstrumentConditionParser.INSTANCE.getCondition(
                         configurationPanel.getCondition().getExpression(), inlayMark.getPsiElement()
                 );
             }

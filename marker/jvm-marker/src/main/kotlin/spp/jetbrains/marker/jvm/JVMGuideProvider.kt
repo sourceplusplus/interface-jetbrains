@@ -22,11 +22,11 @@ import com.intellij.psi.JavaRecursiveElementVisitor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiNameIdentifierOwner
-import spp.jetbrains.marker.plugin.SourceGuideProvider
+import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 
-class JVMGuideProvider : SourceGuideProvider {
+class JVMGuideProvider : AbstractSourceGuideProvider {
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
         fileMarker.psiFile.acceptChildren(object : JavaRecursiveElementVisitor() {

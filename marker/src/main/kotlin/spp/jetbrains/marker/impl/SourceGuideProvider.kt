@@ -15,20 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.impl
 
-import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import spp.jetbrains.marker.AbstractSourceGuideProvider
+import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * todo: description.
  *
- * @since 0.4.0
+ * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonConditionParser : AbstractInstrumentConditionParser() {
+object SourceGuideProvider : AbstractSourceGuideProvider {
 
-    override fun getCondition(condition: String, context: PsiElement): String {
-        return condition
+    private val providers = mutableMapOf<String, AbstractSourceGuideProvider>()
+
+    fun addProvider(guideProvider: AbstractSourceGuideProvider, language: String, vararg languages: String) {
+        providers[language] = guideProvider
+        languages.forEach { providers[it] = guideProvider }
+    }
+
+    private fun getProvider(language: String): AbstractSourceGuideProvider {
+        return providers[language] ?: throw IllegalArgumentException("No provider for language $language")
+    }
+
+    override fun determineGuideMarks(fileMarker: SourceFileMarker) {
+        getProvider(fileMarker.psiFile.language.id).determineGuideMarks(fileMarker)
     }
 }

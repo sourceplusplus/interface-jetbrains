@@ -24,7 +24,8 @@ import com.intellij.psi.PsiFile
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import spp.jetbrains.marker.plugin.SourceGuideProvider
+import spp.jetbrains.marker.impl.ArtifactNamingService
+import spp.jetbrains.marker.impl.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
@@ -46,11 +47,6 @@ object SourceMarker {
     @Volatile
     var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
-    lateinit var guideProvider: SourceGuideProvider
-    lateinit var namingService: ArtifactNamingService
-    lateinit var creationService: ArtifactCreationService
-    lateinit var scopeService: ArtifactScopeService
-    lateinit var conditionParser: InstrumentConditionParser
     private val log = LoggerFactory.getLogger(javaClass)
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
@@ -92,7 +88,7 @@ object SourceMarker {
         psiFile.putUserData(SourceFileMarker.KEY, fileMarker)
 
         GlobalScope.launch {
-            guideProvider.determineGuideMarks(fileMarker)
+            SourceGuideProvider.determineGuideMarks(fileMarker)
         }
         return fileMarker
     }
@@ -101,7 +97,8 @@ object SourceMarker {
         check(enabled) { "SourceMarker disabled" }
 
         return availableSourceFileMarkers.values.find {
-            namingService.getQualifiedClassNames(it.psiFile).find { it.identifier.contains(classQualifiedName) } != null
+            ArtifactNamingService.getQualifiedClassNames(it.psiFile)
+                .find { it.identifier.contains(classQualifiedName) } != null
         }
     }
 
@@ -113,7 +110,7 @@ object SourceMarker {
             type = ArtifactType.CLASS
         )
         return availableSourceFileMarkers.values.find {
-            namingService.getQualifiedClassNames(it.psiFile).contains(classArtifactQualifiedName)
+            ArtifactNamingService.getQualifiedClassNames(it.psiFile).contains(classArtifactQualifiedName)
         }
     }
 

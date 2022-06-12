@@ -31,7 +31,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import spp.jetbrains.marker.InstrumentConditionParser
+import spp.jetbrains.marker.impl.InstrumentConditionParser
 import spp.jetbrains.marker.jvm.JVMConditionParser
 
 class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {

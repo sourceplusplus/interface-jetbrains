@@ -31,7 +31,7 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarker.creationService
+import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.plugin.SourceLineMarkerProvider
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker.Companion.SUPPORTED_FILE_TYPES
@@ -110,7 +110,7 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
             SourceMark.Type.GUTTER
         ) as MethodGutterMark?
         if (gutterMark == null) {
-            gutterMark = creationService.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
+            gutterMark = ArtifactCreationService.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
         }
         if (!gutterMark.isVisible()) {
             return null

@@ -21,7 +21,7 @@ import com.intellij.debugger.engine.evaluation.TextWithImportsImpl
 import com.intellij.debugger.impl.DebuggerUtilsEx
 import com.intellij.psi.*
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
-import spp.jetbrains.marker.InstrumentConditionParser
+import spp.jetbrains.marker.AbstractInstrumentConditionParser
 
 /**
  * todo: description.
@@ -29,7 +29,7 @@ import spp.jetbrains.marker.InstrumentConditionParser
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMConditionParser : InstrumentConditionParser() {
+class JVMConditionParser : AbstractInstrumentConditionParser() {
 
     override fun getCondition(condition: String, context: PsiElement): String {
         val expressionText = TextWithImportsImpl.fromXExpression(

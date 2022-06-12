@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.impl
 
-import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import spp.jetbrains.marker.AbstractArtifactScopeService
+import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * todo: description.
@@ -26,9 +26,20 @@ import spp.jetbrains.marker.AbstractInstrumentConditionParser
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonConditionParser : AbstractInstrumentConditionParser() {
+object ArtifactScopeService {
 
-    override fun getCondition(condition: String, context: PsiElement): String {
-        return condition
+    private val services = mutableMapOf<String, AbstractArtifactScopeService>()
+
+    fun addService(scopeService: AbstractArtifactScopeService, language: String, vararg languages: String) {
+        services[language] = scopeService
+        languages.forEach { services[it] = scopeService }
+    }
+
+    private fun getService(language: String): AbstractArtifactScopeService {
+        return services[language] ?: throw IllegalArgumentException("No service for language $language")
+    }
+
+    fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
+        return getService(fileMarker.psiFile.language.id).getScopeVariables(fileMarker, lineNumber)
     }
 }

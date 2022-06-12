@@ -29,7 +29,7 @@ import org.joor.Reflect
 import org.slf4j.LoggerFactory
 import spp.command.LiveCommand
 import spp.command.LiveCommandContext
-import spp.jetbrains.marker.SourceMarker.creationService
+import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
@@ -165,7 +165,7 @@ object ControlBarController {
             return
         }
 
-        val findInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
+        val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
         if (findInlayMark.isPresent && canShowControlBar(findInlayMark.get().getPsiElement())) {
             val inlayMark = findInlayMark.get()
             if (fileMarker.containsSourceMark(inlayMark)) {
@@ -201,7 +201,7 @@ object ControlBarController {
     }
 
     fun canShowControlBar(fileMarker: SourceFileMarker, lineNumber: Int): Boolean {
-        val expressionInlayMark = creationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
+        val expressionInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
         return expressionInlayMark.isPresent && canShowControlBar(expressionInlayMark.get().getPsiElement())
     }
 

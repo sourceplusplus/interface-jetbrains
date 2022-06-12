@@ -15,10 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker
 
-import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * todo: description.
@@ -26,9 +25,7 @@ import spp.jetbrains.marker.AbstractInstrumentConditionParser
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonConditionParser : AbstractInstrumentConditionParser() {
+interface AbstractArtifactScopeService {
 
-    override fun getCondition(condition: String, context: PsiElement): String {
-        return condition
-    }
+    fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
 }

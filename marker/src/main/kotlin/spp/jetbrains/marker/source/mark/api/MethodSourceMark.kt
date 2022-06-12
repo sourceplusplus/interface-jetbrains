@@ -22,7 +22,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.psi.PsiNameIdentifierOwner
-import spp.jetbrains.marker.SourceMarker.namingService
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
@@ -45,7 +45,7 @@ import java.util.*
 abstract class MethodSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiMethod: PsiNameIdentifierOwner,
-    override var artifactQualifiedName: ArtifactQualifiedName = namingService.getFullyQualifiedName(psiMethod)
+    override var artifactQualifiedName: ArtifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiMethod)
 ) : SourceMark {
 
     override var editor: Editor? = null
@@ -56,7 +56,7 @@ abstract class MethodSourceMark(
     override val isExpressionMark: Boolean = false
     override val valid: Boolean; get() {
         return try {
-            psiMethod.isValid && artifactQualifiedName == namingService.getFullyQualifiedName(psiMethod)
+            psiMethod.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiMethod)
         } catch (ignore: PsiInvalidElementAccessException) {
             false
         }
@@ -141,7 +141,7 @@ abstract class MethodSourceMark(
 
     fun updatePsiMethod(psiMethod: PsiNameIdentifierOwner): Boolean {
         this.psiMethod = psiMethod
-        val newArtifactQualifiedName = namingService.getFullyQualifiedName(psiMethod)
+        val newArtifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiMethod)
         if (artifactQualifiedName != newArtifactQualifiedName) {
             check(sourceFileMarker.removeSourceMark(this, autoRefresh = false, autoDispose = false))
             val oldArtifactQualifiedName = artifactQualifiedName

@@ -63,7 +63,6 @@ import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
-import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.command.ControlBarController
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.portal.PortalController
@@ -111,30 +110,13 @@ object SourceMarkerPlugin {
         }
         vertx = Vertx.vertx(options)
 
-        val productCode = ApplicationInfo.getInstance().build.productCode
-        if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
-            SourceMarker.guideProvider = PythonGuideProvider()
-            SourceMarker.creationService = PythonArtifactCreationService()
-            SourceMarker.namingService = PythonArtifactNamingService()
-            SourceMarker.scopeService = PythonArtifactScopeService()
-            SourceMarker.conditionParser = PythonConditionParser()
-        } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
-            SourceMarker.guideProvider = JVMGuideProvider()
-            SourceMarker.creationService = JVMArtifactCreationService()
-            SourceMarker.namingService = JVMArtifactNamingService()
-            SourceMarker.scopeService = JVMArtifactScopeService()
-            SourceMarker.conditionParser = JVMConditionParser()
-        } else {
-            val pluginName = message("plugin_name")
-            Notifications.Bus.notify(
-                Notification(
-                    pluginName,
-                    "Unsupported product code",
-                    "Unsupported product code: $productCode.",
-                    NotificationType.ERROR
-                )
-            )
-            throw IllegalStateException("Unsupported product code: $productCode")
+        if (JVMMarker.canSetup()) {
+            log.info("Setting up JVM marker")
+            JVMMarker.setup()
+        }
+        if (PythonMarker.canSetup()) {
+            log.info("Setting up Python marker")
+            PythonMarker.setup()
         }
     }
 

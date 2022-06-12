@@ -22,7 +22,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarker.namingService
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
@@ -46,7 +46,7 @@ import java.util.*
 abstract class ExpressionSourceMark(
     override val sourceFileMarker: SourceFileMarker,
     internal open var psiExpression: PsiElement,
-    override var artifactQualifiedName: ArtifactQualifiedName = namingService.getFullyQualifiedName(psiExpression)
+    override var artifactQualifiedName: ArtifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiExpression)
 ) : SourceMark {
 
     override var editor: Editor? = null
@@ -57,7 +57,7 @@ abstract class ExpressionSourceMark(
     override val isExpressionMark: Boolean = true
     override val valid: Boolean; get() {
         return try {
-            psiExpression.isValid && artifactQualifiedName == namingService.getFullyQualifiedName(psiExpression)
+            psiExpression.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiExpression)
         } catch (ignore: PsiInvalidElementAccessException) {
             false
         }

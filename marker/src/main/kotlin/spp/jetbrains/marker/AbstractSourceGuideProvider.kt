@@ -15,10 +15,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package spp.jetbrains.marker.plugin
+package spp.jetbrains.marker
 
 import spp.jetbrains.marker.source.SourceFileMarker
 
-interface SourceGuideProvider {
+/**
+ * todo: description.
+ *
+ * @since 0.5.5
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
+interface AbstractSourceGuideProvider {
+
     fun determineGuideMarks(fileMarker: SourceFileMarker)
 }

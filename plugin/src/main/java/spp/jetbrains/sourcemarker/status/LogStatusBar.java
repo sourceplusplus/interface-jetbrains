@@ -16,6 +16,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
@@ -70,7 +71,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static spp.jetbrains.marker.SourceMarker.conditionParser;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
@@ -643,7 +643,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         int hitLimit = 100;
         if (configurationPanel != null) {
             if (configurationPanel.getCondition() != null) {
-                condition = conditionParser.getCondition(
+                condition = InstrumentConditionParser.INSTANCE.getCondition(
                         configurationPanel.getCondition().getExpression(), inlayMark.getPsiElement()
                 );
             }

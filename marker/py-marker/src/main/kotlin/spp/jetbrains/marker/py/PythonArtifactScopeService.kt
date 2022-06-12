@@ -19,7 +19,7 @@ package spp.jetbrains.marker.py
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
-import spp.jetbrains.marker.ArtifactScopeService
+import spp.jetbrains.marker.AbstractArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -29,7 +29,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactScopeService : ArtifactScopeService {
+class PythonArtifactScopeService : AbstractArtifactScopeService {
 
     //todo: shouldn't need to use reflection
     private val getScopeOwnerMethod = Class.forName("com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil")
