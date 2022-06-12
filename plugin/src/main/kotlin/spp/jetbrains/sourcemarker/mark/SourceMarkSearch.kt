@@ -68,14 +68,14 @@ object SourceMarkSearch {
         }
     }
 
-    fun findByInstrumentId(instrumentId: String): GuideMark? {
-        return SourceMarker.getSourceMarks().filterIsInstance<GuideMark>().firstOrNull {
+    fun findByInstrumentId(instrumentId: String): SourceMark? {
+        return SourceMarker.getSourceMarks().firstOrNull {
             it.getUserData(SourceMarkKeys.INSTRUMENT_ID) == instrumentId
         }
     }
 
-    fun findBySubscriptionId(subscriptionId: String): GuideMark? {
-        return SourceMarker.getSourceMarks().filterIsInstance<GuideMark>().firstOrNull {
+    fun findBySubscriptionId(subscriptionId: String): SourceMark? {
+        return SourceMarker.getSourceMarks().firstOrNull {
             it.getUserData(SourceMarkKeys.VIEW_SUBSCRIPTION_ID) == subscriptionId
         }
     }
