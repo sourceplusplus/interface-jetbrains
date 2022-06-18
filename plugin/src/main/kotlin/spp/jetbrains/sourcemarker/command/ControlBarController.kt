@@ -133,7 +133,7 @@ object ControlBarController {
                     null
                 }
 
-                val sourceMark = SourceMarkSearch.getClosestSourceMark(prevCommandBar.sourceFileMarker, editor)
+                val sourceMark = SourceMarkSearch.getClosestGuideMark(prevCommandBar.sourceFileMarker, editor)
                 it.trigger(
                     LiveCommandContext(
                         args,

@@ -38,7 +38,7 @@ import spp.protocol.artifact.ArtifactType
  */
 object SourceMarkSearch {
 
-    fun getClosestSourceMark(sourceFileMarker: SourceFileMarker, editor: Editor): GuideMark? {
+    fun getClosestGuideMark(sourceFileMarker: SourceFileMarker, editor: Editor): GuideMark? {
         var classSourceMark: ClassGuideMark? = null
         val sourceMark = sourceFileMarker.getSourceMarks().filterIsInstance<GuideMark>().find {
             if (it is ClassGuideMark) {
