@@ -19,7 +19,7 @@ dependencies {
         compileOnly(project(":marker"))
     }
     compileOnly("plus.sourceplus:protocol:$projectVersion")
-    val intellijVersion = "221.5787.30"
+    val intellijVersion = "221.5921.22"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

@@ -28,7 +28,7 @@ dependencies {
     implementation("io.dropwizard.metrics:metrics-core:4.2.10")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 
-    val intellijVersion = "221.5787.30"
+    val intellijVersion = "221.5921.22"
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
 }
 
