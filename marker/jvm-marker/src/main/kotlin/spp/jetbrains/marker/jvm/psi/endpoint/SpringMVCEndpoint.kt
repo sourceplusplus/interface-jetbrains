@@ -28,7 +28,7 @@ import org.jetbrains.uast.java.JavaUSimpleNameReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinStringULiteralExpression
 import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinUSimpleReferenceExpression
-import org.jooq.tools.reflect.Reflect
+import org.joor.Reflect
 import spp.jetbrains.marker.jvm.JVMEndpointDetector.JVMEndpointNameDeterminer
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark

@@ -20,7 +20,7 @@ package spp.jetbrains.marker.source
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
 import org.jetbrains.uast.*
-import org.jooq.tools.reflect.Reflect
+import org.joor.Reflect
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
