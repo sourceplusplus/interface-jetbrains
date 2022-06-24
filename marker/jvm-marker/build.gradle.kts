@@ -6,6 +6,7 @@ val kotlinVersion: String by project
 val vertxVersion: String by project
 val projectVersion: String by project
 val slf4jVersion: String by project
+val joorVersion: String by project
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
@@ -32,7 +33,7 @@ dependencies {
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
-    compileOnly("org.jooq:jooq:3.16.7")
+    compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
     compileOnly("com.android.tools.external.org-jetbrains:uast:30.2.1")
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
