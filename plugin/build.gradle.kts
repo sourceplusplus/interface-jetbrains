@@ -96,7 +96,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("io.dropwizard.metrics:metrics-core:4.2.10")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("org.jooq:joor:$joorVersion")
     implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
     implementation("org.apache.commons:commons-lang3:3.12.0")
