@@ -23,14 +23,14 @@ dependencies {
     compileOnly("plus.sourceplus:protocol:$projectVersion")
     val intellijVersion = "221.5787.30"
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("plus.sourceplus:protocol:$projectVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.1-jre")
     compileOnly("org.jetbrains:annotations:23.0.0")
