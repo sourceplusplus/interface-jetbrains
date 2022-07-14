@@ -30,19 +30,22 @@ fun interface IEventCode {
 
     companion object {
         private val usedEventCodes = mutableListOf<Int>()
+        private val codeLock = Any()
 
-        @Synchronized
         fun getNewEventCode(): Int {
-            var code = 10_000
-            while (true) {
-                code++
-                if (!usedEventCodes.contains(code)) {
-                    usedEventCodes.add(code)
-                    return code
+            synchronized(codeLock) {
+                if (usedEventCodes.isEmpty()) {
+                    usedEventCodes.add(100_000)
+                } else {
+                    usedEventCodes.add(usedEventCodes.last() + 1)
                 }
+                return usedEventCodes.last()
             }
         }
 
-        fun getNewIEventCode(): IEventCode = IEventCode { getNewEventCode() }
+        fun getNewIEventCode(): IEventCode {
+            val code = getNewEventCode()
+            return IEventCode { code }
+        }
     }
 }
