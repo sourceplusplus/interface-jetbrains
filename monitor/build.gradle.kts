@@ -30,6 +30,7 @@ dependencies {
 
     val intellijVersion = "221.5787.30"
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
+    compileOnly("com.google.guava:guava:31.1-jre")
 }
 
 apollo {

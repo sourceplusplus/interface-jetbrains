@@ -97,7 +97,7 @@ class SkywalkingMonitorServiceImpl(
         return ServiceInstanceBridge.getServiceInstances(serviceId, skywalkingClient.vertx)
     }
 
-    override suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration): JsonArray {
-        return skywalkingClient.sortMetrics(condition, duration)
+    override suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration, cache: Boolean): JsonArray {
+        return skywalkingClient.sortMetrics(condition, duration, cache)
     }
 }

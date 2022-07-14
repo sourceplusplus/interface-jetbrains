@@ -60,5 +60,9 @@ abstract class SkywalkingMonitorService {
     abstract suspend fun getCurrentServiceInstance(): GetServiceInstancesQuery.Result?
     abstract suspend fun getActiveServiceInstances(): List<GetServiceInstancesQuery.Result>
     abstract suspend fun getServiceInstances(serviceId: String): List<GetServiceInstancesQuery.Result>
-    abstract suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration): JsonArray
+    abstract suspend fun sortMetrics(
+        condition: TopNCondition,
+        duration: ZonedDuration,
+        cache: Boolean = true
+    ): JsonArray
 }

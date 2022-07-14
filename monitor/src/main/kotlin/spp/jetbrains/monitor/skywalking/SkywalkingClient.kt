@@ -20,6 +20,7 @@ package spp.jetbrains.monitor.skywalking
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.codahale.metrics.MetricRegistry
+import com.google.common.cache.CacheBuilder
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -46,6 +47,7 @@ import java.io.IOException
 import java.time.ZoneOffset.ofHours
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 /**
  * Used to communicate with Apache SkyWalking.
@@ -81,6 +83,10 @@ class SkywalkingClient(
             }
         }
     }
+
+    private val oneMinRespCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.MINUTES)
+        .build<Any, Any>()
 
     init {
         registerCodecs(vertx)
@@ -299,7 +305,13 @@ class SkywalkingClient(
         }
     }
 
-    suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration): JsonArray {
+    suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration, cache: Boolean): JsonArray {
+        if (cache) {
+            oneMinRespCache.getIfPresent(Pair(condition, duration))?.let {
+                return it as JsonArray
+            }
+        }
+
         metricRegistry.timer("sortMetrics").time().use {
             if (log.isTraceEnabled) {
                 log.trace("Sort metrics request. Condition: {} - Duration: {}", condition, duration)
@@ -313,7 +325,9 @@ class SkywalkingClient(
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Sort metrics response: {}", response.data!!.result)
-                return JsonArray(Json.encode(response.data!!.result))
+                val resp = JsonArray(Json.encode(response.data!!.result))
+                oneMinRespCache.put(Pair(condition, duration), resp)
+                return resp
             }
         }
     }
