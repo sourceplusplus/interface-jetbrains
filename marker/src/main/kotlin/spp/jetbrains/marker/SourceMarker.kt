@@ -121,7 +121,13 @@ object SourceMarker {
     }
 
     fun addGlobalSourceMarkEventListener(sourceMarkEventListener: SourceMarkEventListener) {
+        log.info("Adding global source mark event listener: {}", sourceMarkEventListener)
         globalSourceMarkEventListeners.add(sourceMarkEventListener)
+    }
+
+    fun removeGlobalSourceMarkEventListener(sourceMarkEventListener: SourceMarkEventListener) {
+        log.info("Removing global source mark event listener: {}", sourceMarkEventListener)
+        globalSourceMarkEventListeners.remove(sourceMarkEventListener)
     }
 
     fun getGlobalSourceMarkEventListeners(): List<SourceMarkEventListener> {
