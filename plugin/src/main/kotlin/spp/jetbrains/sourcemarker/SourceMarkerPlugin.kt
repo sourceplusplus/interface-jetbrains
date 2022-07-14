@@ -28,6 +28,9 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -249,11 +252,17 @@ object SourceMarkerPlugin {
 
             if (connectedMonitor) {
                 initUI(config)
-                initMarker(config, project)
-                log.info("Loading live indicators")
-                project.getUserData(LiveIndicatorService.LIVE_INDICATOR_LOADER)!!.invoke()
-                log.info("Loading live commands")
-                project.getUserData(LiveCommandService.LIVE_COMMAND_LOADER)!!.invoke()
+
+                ProgressManager.getInstance().run(object: Task.Backgroundable(project, "Starting Source++", false, ALWAYS_BACKGROUND) {
+                    override fun run(indicator: ProgressIndicator) {
+                        log.info("Loading live indicators")
+                        project.getUserData(LiveIndicatorService.LIVE_INDICATOR_LOADER)!!.invoke()
+                        log.info("Loading live commands")
+                        project.getUserData(LiveCommandService.LIVE_COMMAND_LOADER)!!.invoke()
+
+                        initMarker(config, project)
+                    }
+                })
             }
         }
     }
