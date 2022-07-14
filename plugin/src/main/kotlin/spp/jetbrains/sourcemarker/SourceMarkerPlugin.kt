@@ -256,6 +256,7 @@ object SourceMarkerPlugin {
                     override fun run(indicator: ProgressIndicator) {
                         log.info("Loading live indicators")
                         project.getUserData(LiveIndicatorService.LIVE_INDICATOR_LOADER)!!.invoke()
+                        log.info("Loaded live indicators")
                         indicatorPromise.complete()
                     }
                 })
@@ -264,6 +265,7 @@ object SourceMarkerPlugin {
                     override fun run(indicator: ProgressIndicator) {
                         log.info("Loading live commands")
                         project.getUserData(LiveCommandService.LIVE_COMMAND_LOADER)!!.invoke()
+                        log.info("Loaded live commands")
                         commandPromise.complete()
                     }
                 })
