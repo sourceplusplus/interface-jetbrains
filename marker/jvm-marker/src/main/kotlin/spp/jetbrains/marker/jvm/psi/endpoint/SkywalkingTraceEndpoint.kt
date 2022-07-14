@@ -18,6 +18,7 @@
 package spp.jetbrains.marker.jvm.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.util.Computable
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
@@ -39,9 +40,11 @@ class SkywalkingTraceEndpoint : JVMEndpointNameDeterminer {
     private val skywalkingTraceAnnotation = "org.apache.skywalking.apm.toolkit.trace.Trace"
 
     override fun determineEndpointName(guideMark: MethodGuideMark): Future<Optional<DetectedEndpoint>> {
-        val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
-            ?: return Future.succeededFuture(Optional.empty())
-        return determineEndpointName(uMethod)
+        return ApplicationManager.getApplication().runReadAction(Computable {
+            val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
+                ?: return@Computable Future.succeededFuture(Optional.empty())
+            determineEndpointName(uMethod)
+        })
     }
 
     override fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
