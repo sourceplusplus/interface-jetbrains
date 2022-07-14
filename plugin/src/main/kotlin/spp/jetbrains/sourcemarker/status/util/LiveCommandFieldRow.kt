@@ -19,7 +19,7 @@ package spp.jetbrains.sourcemarker.status.util
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
-import liveplugin.implementation.LivePluginProjectLoader.SPP_COMMANDS_LOCATION
+import liveplugin.implementation.command.LiveCommandService.Companion.SPP_COMMANDS_LOCATION
 import spp.command.LiveCommand
 import java.io.File
 import javax.swing.Icon

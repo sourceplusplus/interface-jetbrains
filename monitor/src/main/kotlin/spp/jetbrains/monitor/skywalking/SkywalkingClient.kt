@@ -21,6 +21,8 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.codahale.metrics.MetricRegistry
 import io.vertx.core.Vertx
+import io.vertx.core.json.Json
+import io.vertx.core.json.JsonArray
 import monitor.skywalking.protocol.general.GetVersionQuery
 import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
@@ -29,6 +31,7 @@ import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
+import monitor.skywalking.protocol.metrics.SortMetricsQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.*
@@ -36,6 +39,7 @@ import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
+import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.marshall.LocalMessageCodec
 import spp.protocol.platform.general.Service
 import java.io.IOException
@@ -291,6 +295,25 @@ class SkywalkingClient(
             } else {
                 if (log.isTraceEnabled) log.trace("Get service instances: {}", response.data!!.result)
                 return response.data!!.result
+            }
+        }
+    }
+
+    suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration): JsonArray {
+        metricRegistry.timer("sortMetrics").time().use {
+            if (log.isTraceEnabled) {
+                log.trace("Sort metrics request. Condition: {} - Duration: {}", condition, duration)
+            }
+
+            val response = apolloClient.query(
+                SortMetricsQuery(condition, duration.toDuration(this))
+            ).execute()
+            if (response.hasErrors()) {
+                response.errors!!.forEach { log.error(it.message) }
+                throw IOException(response.errors!![0].message)
+            } else {
+                if (log.isTraceEnabled) log.trace("Sort metrics response: {}", response.data!!.result)
+                return JsonArray(Json.encode(response.data!!.result))
             }
         }
     }

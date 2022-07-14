@@ -54,6 +54,7 @@ import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
 import liveplugin.implementation.LivePluginProjectLoader
 import liveplugin.implementation.command.LiveCommandService
+import liveplugin.implementation.indicator.LiveIndicatorService
 import org.apache.commons.text.CaseUtils
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
@@ -249,6 +250,9 @@ object SourceMarkerPlugin {
             if (connectedMonitor) {
                 initUI(config)
                 initMarker(config, project)
+                log.info("Loading live indicators")
+                project.getUserData(LiveIndicatorService.LIVE_INDICATOR_LOADER)!!.invoke()
+                log.info("Loading live commands")
                 project.getUserData(LiveCommandService.LIVE_COMMAND_LOADER)!!.invoke()
             }
         }

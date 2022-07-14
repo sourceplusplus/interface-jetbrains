@@ -37,7 +37,8 @@
         <indexedRootsProvider implementation="liveplugin.implementation.IndexSetContributor"/>
         <usageTypeProvider implementation="liveplugin.implementation.UsageTypeExtension" order="last"/>
         <useScopeEnlarger implementation="liveplugin.implementation.UseScopeExtension"/>
-        <createDirectoryCompletionContributor implementation="liveplugin.implementation.LivePluginDirectoryCompletionContributor"/>
+        <createDirectoryCompletionContributor implementation="liveplugin.implementation.LiveCommandDirectoryCompletionContributor"/>
+        <createDirectoryCompletionContributor implementation="liveplugin.implementation.LiveIndicatorDirectoryCompletionContributor"/>
         <intentionAction>
             <className>liveplugin.implementation.pluginrunner.AddToClassPathGroovyIntention</className>
             <category>LivePlugin</category>

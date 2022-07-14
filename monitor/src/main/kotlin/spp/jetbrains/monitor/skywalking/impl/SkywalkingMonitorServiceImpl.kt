@@ -18,17 +18,20 @@
 package spp.jetbrains.monitor.skywalking.impl
 
 import io.vertx.core.AsyncResult
+import io.vertx.core.json.JsonArray
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
+import monitor.skywalking.protocol.type.TopNCondition
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
 import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
+import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpanStackQueryResult
@@ -92,5 +95,9 @@ class SkywalkingMonitorServiceImpl(
 
     override suspend fun getServiceInstances(serviceId: String): List<GetServiceInstancesQuery.Result> {
         return ServiceInstanceBridge.getServiceInstances(serviceId, skywalkingClient.vertx)
+    }
+
+    override suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration): JsonArray {
+        return skywalkingClient.sortMetrics(condition, duration)
     }
 }
