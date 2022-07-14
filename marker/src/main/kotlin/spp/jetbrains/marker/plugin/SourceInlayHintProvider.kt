@@ -180,9 +180,11 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
         representation: InlayPresentation
     )
 
-    private inner class DynamicTextInlayPresentation(val editor: Editor, val inlayMark: InlayMark,
-                                                     val virtualText: InlayMarkVirtualText) :
-        BasePresentation() {
+    private inner class DynamicTextInlayPresentation(
+        val editor: Editor,
+        val inlayMark: InlayMark,
+        val virtualText: InlayMarkVirtualText
+    ) : BasePresentation() {
 
         private val font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
         override val width: Int
@@ -202,7 +204,17 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                 if (virtualText.icon != null) {
                     virtualText.icon!!.paintIcon(null, g, virtualText.iconLocation.x, virtualText.iconLocation.y)
                 }
-                g.font = virtualText.font ?: font
+                g.font = virtualText.font ?: font.let {
+                    if (virtualText.fontSize != null) {
+                        if (virtualText.relativeFontSize) {
+                            font.deriveFont(it.size + virtualText.fontSize!!)
+                        } else {
+                            font.deriveFont(virtualText.fontSize!!)
+                        }
+                    } else {
+                        font
+                    }
+                }
                 g.setRenderingHint(
                     RenderingHints.KEY_TEXT_ANTIALIASING,
                     AntialiasingType.getKeyForCurrentScope(false)

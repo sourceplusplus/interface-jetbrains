@@ -49,6 +49,8 @@ open class InlayMarkVirtualText {
     var spacingTillMethodText = 0
     var autoAddingSpacingTillMethodText = true
     var font: Font? = null
+    var fontSize: Float? = null
+    var relativeFontSize: Boolean = false
     var xOffset: Int = 0
 
     constructor(inlayMark: InlayMark, virtualText: String) {
