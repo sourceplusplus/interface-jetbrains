@@ -25,6 +25,24 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IEventCode {
+fun interface IEventCode {
     fun code(): Int
+
+    companion object {
+        private val usedEventCodes = mutableListOf<Int>()
+
+        @Synchronized
+        fun getNewEventCode(): Int {
+            var code = 10_000
+            while (true) {
+                code++
+                if (!usedEventCodes.contains(code)) {
+                    usedEventCodes.add(code)
+                    return code
+                }
+            }
+        }
+
+        fun getNewIEventCode(): IEventCode = IEventCode { getNewEventCode() }
+    }
 }
