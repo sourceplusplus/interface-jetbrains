@@ -39,9 +39,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
-import io.vertx.core.MultiMap
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
+import io.vertx.core.*
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.DecodeException
@@ -253,16 +251,24 @@ object SourceMarkerPlugin {
             if (connectedMonitor) {
                 initUI(config)
 
-                ProgressManager.getInstance().run(object: Task.Backgroundable(project, "Starting Source++", false, ALWAYS_BACKGROUND) {
+                val indicatorPromise = Promise.promise<Nothing>()
+                ProgressManager.getInstance().run(object: Task.Backgroundable(project, "Loading live indicators", false, ALWAYS_BACKGROUND) {
                     override fun run(indicator: ProgressIndicator) {
                         log.info("Loading live indicators")
                         project.getUserData(LiveIndicatorService.LIVE_INDICATOR_LOADER)!!.invoke()
-                        log.info("Loading live commands")
-                        project.getUserData(LiveCommandService.LIVE_COMMAND_LOADER)!!.invoke()
-
-                        initMarker(config, project)
+                        indicatorPromise.complete()
                     }
                 })
+                val commandPromise = Promise.promise<Nothing>()
+                ProgressManager.getInstance().run(object: Task.Backgroundable(project, "Loading live commands", false, ALWAYS_BACKGROUND) {
+                    override fun run(indicator: ProgressIndicator) {
+                        log.info("Loading live commands")
+                        project.getUserData(LiveCommandService.LIVE_COMMAND_LOADER)!!.invoke()
+                        commandPromise.complete()
+                    }
+                })
+                CompositeFuture.all(indicatorPromise.future(), commandPromise.future()).await()
+                initMarker(config, project)
             }
         }
     }
