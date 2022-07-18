@@ -50,7 +50,7 @@ class LoggerDetector(val vertx: Vertx) {
 
     companion object {
         private val log = LoggerFactory.getLogger(LoggerDetector::class.java)
-        private val LOGGER_STATEMENTS = SourceKey<List<DetectedLogger>>("LOGGER_STATEMENTS")
+        val LOGGER_STATEMENTS = SourceKey<List<DetectedLogger>>("LOGGER_STATEMENTS")
 
         private val LOGGER_CLASSES = setOf(
             "org.apache.logging.log4j.spi.AbstractLogger",

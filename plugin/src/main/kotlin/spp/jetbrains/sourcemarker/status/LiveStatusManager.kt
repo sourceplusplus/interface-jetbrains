@@ -119,6 +119,7 @@ object LiveStatusManager : SourceMarkEventListener {
     /**
      * Invoked via control bar. Force visible.
      */
+    @Suppress("unused")
     fun showBreakpointStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
@@ -162,6 +163,7 @@ object LiveStatusManager : SourceMarkEventListener {
     /**
      * Invoked via control bar. Force visible.
      */
+    @Suppress("unused")
     fun showLogStatusBar(editor: Editor, lineNumber: Int, watchExpression: Boolean) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
@@ -255,6 +257,7 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
+    @Suppress("unused")
     fun showMeterStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
@@ -293,6 +296,7 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
+    @Suppress("unused")
     fun showSpanStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)

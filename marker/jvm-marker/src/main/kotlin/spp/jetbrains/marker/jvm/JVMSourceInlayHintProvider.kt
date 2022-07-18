@@ -21,6 +21,7 @@ import com.intellij.codeInsight.hints.InlayHintsSink
 import com.intellij.codeInsight.hints.presentation.InlayPresentation
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiStatement
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
@@ -67,9 +68,12 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
         sink: InlayHintsSink,
         representation: InlayPresentation
     ) {
-        val statement = if (element is PsiStatement) element else element
+        var statement = if (element is PsiStatement) element else element
         if (virtualText.useInlinePresentation) {
             if (virtualText.showAfterLastChildWhenInline) {
+                if (statement is PsiMethodCallExpression) {
+                    statement = statement.parent //todo: more dynamic
+                }
                 sink.addInlineElement(
                     statement.lastChild.textRange.endOffset,
                     virtualText.relatesToPrecedingText,
