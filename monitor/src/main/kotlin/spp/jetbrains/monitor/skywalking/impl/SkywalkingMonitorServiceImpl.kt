@@ -19,9 +19,9 @@ package spp.jetbrains.monitor.skywalking.impl
 
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
-import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.type.TopNCondition
@@ -53,12 +53,13 @@ class SkywalkingMonitorServiceImpl(
         return LogsBridge.queryLogs(query, skywalkingClient.vertx)
     }
 
-    override suspend fun searchExactEndpoint(keyword: String): SearchEndpointQuery.Result? {
-        return EndpointBridge.searchExactEndpoint(keyword, skywalkingClient.vertx)
+    override suspend fun searchExactEndpoint(keyword: String, cache: Boolean): JsonObject? {
+        val endpoints = skywalkingClient.searchEndpoint(keyword, getCurrentService().id, 1, cache)
+        return endpoints.map { it as JsonObject }.find { it.getString("name") == keyword }
     }
 
-    override suspend fun getEndpoints(serviceId: String?, limit: Int): List<SearchEndpointQuery.Result> {
-        return EndpointBridge.getEndpoints(serviceId, limit, skywalkingClient.vertx)
+    override suspend fun getEndpoints(serviceId: String, limit: Int, cache: Boolean): JsonArray {
+        return skywalkingClient.searchEndpoint("", serviceId, limit, cache)
     }
 
     override suspend fun getMetrics(request: GetEndpointMetrics): List<GetLinearIntValuesQuery.Result> {

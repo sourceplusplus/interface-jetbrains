@@ -231,7 +231,13 @@ class SkywalkingClient(
         }
     }
 
-    suspend fun searchEndpoint(keyword: String, serviceId: String, limit: Int): List<SearchEndpointQuery.Result> {
+    suspend fun searchEndpoint(keyword: String, serviceId: String, limit: Int, cache: Boolean): JsonArray {
+        if (cache) {
+            oneMinRespCache.getIfPresent(Triple(keyword, serviceId, limit))?.let {
+                return it as JsonArray
+            }
+        }
+
         metricRegistry.timer("searchEndpoint").time().use {
             if (log.isTraceEnabled) {
                 log.trace(
@@ -247,7 +253,9 @@ class SkywalkingClient(
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Search endpoint response: {}", response.data!!.result)
-                return response.data!!.result
+                val resp = JsonArray(Json.encode(response.data!!.result))
+                oneMinRespCache.put(Triple(keyword, serviceId, limit), resp)
+                return resp
             }
         }
     }

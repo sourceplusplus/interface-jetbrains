@@ -109,8 +109,8 @@ abstract class EndpointDetector<T: EndpointDetector.EndpointNameDeterminer>(val 
         try {
             val endpoint = EndpointBridge.searchExactEndpoint(endpointName, vertx)
             if (endpoint != null) {
-                sourceMark.putUserData(ENDPOINT_ID, endpoint.id)
-                log.trace("Detected endpoint id: ${endpoint.id}")
+                sourceMark.putUserData(ENDPOINT_ID, endpoint.getString("id"))
+                log.trace("Detected endpoint id: ${endpoint.getString("id")}")
             } else {
                 log.trace("Could not find endpoint id for: $endpointName")
             }

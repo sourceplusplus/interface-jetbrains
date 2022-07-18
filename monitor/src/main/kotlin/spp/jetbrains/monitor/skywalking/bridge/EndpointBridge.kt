@@ -20,6 +20,7 @@ package spp.jetbrains.monitor.skywalking.bridge
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.eventbus.ReplyFailure
+import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
@@ -65,9 +66,9 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                 }
 
                 val endpointName = it.body()
-                val endpoints = skywalkingClient.searchEndpoint(endpointName, service.id, 10)
-                if (endpoints.isNotEmpty()) {
-                    val exactEndpoint = endpoints.find { it.name == endpointName }
+                val endpoints = skywalkingClient.searchEndpoint(endpointName, service.id, 10, true)
+                if (endpoints.size() != 0) {
+                    val exactEndpoint = endpoints.map { it as JsonObject }.find { it.getString("name") == endpointName }
                     if (exactEndpoint != null) {
                         it.reply(exactEndpoint)
                     } else {
@@ -76,34 +77,6 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                 } else {
                     it.reply(null)
                 }
-            }
-        }
-
-        vertx.eventBus().localConsumer<EndpointQuery>(getEndpointsAddress) {
-            launch(vertx.dispatcher()) {
-                val service = try {
-                    ServiceBridge.getCurrentService(vertx)
-                } catch (ex: ReplyException) {
-                    if (ex.failureType() == ReplyFailure.TIMEOUT) {
-                        log.debug("Timed out looking for current service")
-                        it.reply(null)
-                        return@launch
-                    } else {
-                        ex.printStackTrace()
-                        it.fail(500, ex.message)
-                        return@launch
-                    }
-                } catch (throwable: Throwable) {
-                    throwable.printStackTrace()
-                    it.fail(404, "Apache SkyWalking current service unavailable")
-                    return@launch
-                }
-
-                val endpointQuery = it.body()
-                val endpoints = skywalkingClient.searchEndpoint(
-                    "", endpointQuery.serviceId ?: service.id, endpointQuery.limit
-                )
-                it.reply(endpoints)
             }
         }
     }
@@ -118,26 +91,11 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
         private val log = LoggerFactory.getLogger(EndpointBridge::class.java)
         private const val rootAddress = "monitor.skywalking.endpoint"
         private const val searchExactEndpointAddress = "$rootAddress.searchExactEndpoint"
-        private const val getEndpointsAddress = "$rootAddress.getEndpoints"
 
-        suspend fun searchExactEndpoint(keyword: String, vertx: Vertx): SearchEndpointQuery.Result? {
+        suspend fun searchExactEndpoint(keyword: String, vertx: Vertx): JsonObject? {
             return vertx.eventBus()
-                .request<SearchEndpointQuery.Result?>(searchExactEndpointAddress, keyword)
+                .request<JsonObject?>(searchExactEndpointAddress, keyword)
                 .await().body()
-        }
-
-        suspend fun getEndpoints(
-            serviceId: String? = null,
-            limit: Int,
-            vertx: Vertx
-        ): List<SearchEndpointQuery.Result> {
-            return vertx.eventBus()
-                .request<List<SearchEndpointQuery.Result>>(
-                    getEndpointsAddress, EndpointQuery(
-                        serviceId = serviceId,
-                        limit = limit
-                    )
-                ).await().body()
         }
     }
 

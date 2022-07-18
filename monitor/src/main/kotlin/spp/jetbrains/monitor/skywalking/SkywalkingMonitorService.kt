@@ -21,9 +21,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
-import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.type.TopNCondition
@@ -48,8 +48,13 @@ abstract class SkywalkingMonitorService {
 
     abstract suspend fun getVersion(): String
     abstract suspend fun getTimeInfo(): GetTimeInfoQuery.Data
-    abstract suspend fun searchExactEndpoint(keyword: String): SearchEndpointQuery.Result?
-    abstract suspend fun getEndpoints(serviceId: String? = null, limit: Int): List<SearchEndpointQuery.Result>
+    abstract suspend fun searchExactEndpoint(keyword: String, cache: Boolean = false): JsonObject?
+    abstract suspend fun getEndpoints(
+        serviceId: String,
+        limit: Int,
+        cache: Boolean = true
+    ): JsonArray
+
     abstract suspend fun getMetrics(request: GetEndpointMetrics): List<GetLinearIntValuesQuery.Result>
     abstract suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result>
     abstract suspend fun getTraces(request: GetEndpointTraces): TraceResult
