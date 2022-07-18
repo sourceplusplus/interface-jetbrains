@@ -192,6 +192,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
         override val height = editor.lineHeight
 
         override fun paint(g: Graphics2D, attributes: TextAttributes) {
+            if (!inlayMark.isVisible()) return
             val ascent = editor.ascent
             val descent = (editor as EditorImpl).descent
             val savedHint = g.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING)
