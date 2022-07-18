@@ -23,7 +23,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLocalVariable
 import kotlinx.coroutines.runBlocking
-import liveplugin.implementation.command.LiveCommandService
+import liveplugin.implementation.plugin.LivePluginService
 import liveplugin.implementation.common.toFilePath
 import org.joor.Reflect
 import org.slf4j.LoggerFactory
@@ -75,7 +75,7 @@ object ControlBarController {
         val availableCommandsAtLocation = availableCommands.toMutableSet()
 //        availableCommandsAtLocation.remove(SHOW_QUICK_STATS)
         availableCommandsAtLocation.addAll(
-            LiveCommandService.getInstance(inlayMark.project).getRegisteredLiveCommands()
+            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands()
         )
 
 //        val parentMark = inlayMark.getParentSourceMark()
@@ -112,7 +112,7 @@ object ControlBarController {
 
     fun handleCommandInput(input: String, fullText: String, editor: Editor) {
         log.info("Processing command input: {}", input)
-        (availableCommands + LiveCommandService.getInstance(editor.project!!)
+        (availableCommands + LivePluginService.getInstance(editor.project!!)
             .getRegisteredLiveCommands()).find { it.name == input }
             ?.let {
                 val prevCommandBar = previousControlBar!!
