@@ -354,6 +354,7 @@ object SourceMarkerPlugin {
 
         log.info("Discovering available services")
         val availableRecords = discovery!!.getRecords { true }.await()
+        log.info("Discovered {} services", availableRecords.size)
 
         //live service
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_SERVICE }) {
