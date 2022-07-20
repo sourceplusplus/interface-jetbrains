@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 plugins {
     id("com.diffplug.spotless") apply false
     id("com.avast.gradle.docker-compose")
@@ -76,43 +74,4 @@ subprojects {
             }
         }
     }
-}
-
-tasks {
-    register("downloadProbe") {
-        doLast {
-            val f = File(projectDir, "test/e2e/spp-probe-$projectVersion.jar")
-            if (!f.exists()) {
-                println("Downloading Source++ JVM probe")
-                java.net.URL("https://github.com/sourceplusplus/probe-jvm/releases/download/${project.version}/spp-probe-${project.version}.jar")
-                    .openStream().use { input ->
-                        java.io.FileOutputStream(f).use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                println("Downloaded Source++ JVM probe")
-            }
-        }
-    }
-    register<Exec>("buildExampleWebApp") {
-        mustRunAfter("downloadProbe")
-        workingDir = File("./test/e2e/example-web-app")
-
-        if (Os.isFamily(Os.FAMILY_UNIX)) {
-            commandLine("./gradlew", "build")
-        } else {
-            commandLine("cmd", "/c", "gradlew.bat", "build")
-        }
-    }
-
-    register("assembleUp") {
-        dependsOn("downloadProbe", "buildExampleWebApp", "composeUp")
-    }
-    getByName("composeUp").shouldRunAfter("buildExampleWebApp")
-}
-
-dockerCompose {
-    dockerComposeWorkingDirectory.set(File("./test/e2e"))
-    useComposeFiles.add("./docker-compose.yml")
-    //captureContainersOutput = true
 }
