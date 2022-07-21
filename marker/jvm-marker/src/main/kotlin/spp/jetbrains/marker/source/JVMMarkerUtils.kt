@@ -532,8 +532,11 @@ object JVMMarkerUtils {
         if (parentIdentifier == null) {
             parentIdentifier = expression.getContainingUClass()?.let { getFullyQualifiedName(it) }
         }
+        if (parentIdentifier == null) {
+            error("Could not determine parent of element: $element")
+        }
         return ArtifactQualifiedName(
-            """${parentIdentifier!!.identifier}#${
+            """${parentIdentifier.identifier}#${
                 Base64.getEncoder().encodeToString(expression.toString().toByteArray())
             }""",
             type = ArtifactType.EXPRESSION,
