@@ -8,6 +8,7 @@ val kotlinVersion: String by project
 val apolloVersion: String by project
 val projectVersion: String by project
 val slf4jVersion: String by project
+val intellijVersion: String by project
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
@@ -28,7 +29,6 @@ dependencies {
     implementation("io.dropwizard.metrics:metrics-core:4.2.10")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 
-    val intellijVersion = "221.6008.13"
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
     compileOnly("com.google.guava:guava:31.1-jre")
 }

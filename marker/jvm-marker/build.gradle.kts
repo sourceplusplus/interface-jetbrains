@@ -7,6 +7,7 @@ val vertxVersion: String by project
 val projectVersion: String by project
 val slf4jVersion: String by project
 val joorVersion: String by project
+val intellijVersion: String by project
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
@@ -23,7 +24,6 @@ dependencies {
         compileOnly(project(":monitor"))
     }
     compileOnly("plus.sourceplus:protocol:$projectVersion")
-    val intellijVersion = "221.6008.13"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
