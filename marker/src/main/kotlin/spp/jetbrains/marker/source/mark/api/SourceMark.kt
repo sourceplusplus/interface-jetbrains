@@ -266,14 +266,16 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     }
 
     fun triggerEvent(event: SourceMarkEvent, listen: (() -> Unit)? = null) {
+        val eventListeners = getEventListeners()
+
         //sync listeners
-        getEventListeners()
+        eventListeners
             .filterIsInstance<SynchronousSourceMarkEventListener>()
             .forEach { it.handleEvent(event) }
 
         //async listeners
         GlobalScope.launch {
-            getEventListeners().forEach {
+            eventListeners.forEach {
                 if (it !is SynchronousSourceMarkEventListener) {
                     it.handleEvent(event)
                 }
