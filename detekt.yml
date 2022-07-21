@@ -33,8 +33,6 @@ exceptions:
     active: false
   TooGenericExceptionThrown:
     excludes: ['**/test/**']
-  PrintStackTrace:
-    excludes: ['**/SourcePlatform.kt', '**/ServiceProvider.kt']
 
 complexity:
   LongParameterList:
