@@ -18,43 +18,12 @@
 package spp.jetbrains.sourcemarker.status.util
 
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.IconLoader
-import liveplugin.implementation.plugin.LivePluginService.Companion.SPP_PLUGINS_LOCATION
 import spp.command.LiveCommand
-import java.io.File
 import javax.swing.Icon
 
 class LiveCommandFieldRow(val liveCommand: LiveCommand, val project: Project) : AutocompleteFieldRow {
-
-    private val basePath = project.basePath?.let { File(it, ".spp${File.separatorChar}commands").absolutePath } ?: ""
-    private val internalBasePath = SPP_PLUGINS_LOCATION.let { project.getUserData(it).toString() }
-
     override fun getText(): String = liveCommand.name
     override fun getDescription(): String = liveCommand.description
-
-    override fun getSelectedIcon(): Icon? {
-        return liveCommand.selectedIcon?.let {
-            val iconPath = if (File(internalBasePath, it).exists()) {
-                internalBasePath + File.separator + it
-            } else if (File(basePath, it).exists()) {
-                basePath + File.separator + it
-            } else {
-                it
-            }
-            IconLoader.findIcon(File(iconPath).toURL())
-        }
-    }
-
-    override fun getUnselectedIcon(): Icon? {
-        return liveCommand.unselectedIcon?.let {
-            val iconPath = if (File(internalBasePath, it).exists()) {
-                internalBasePath + File.separator + it
-            } else if (File(basePath, it).exists()) {
-                basePath + File.separator + it
-            } else {
-                it
-            }
-            IconLoader.findIcon(File(iconPath).toURL())
-        }
-    }
+    override fun getSelectedIcon(): Icon? = liveCommand.selectedIcon
+    override fun getUnselectedIcon(): Icon? = liveCommand.unselectedIcon
 }
