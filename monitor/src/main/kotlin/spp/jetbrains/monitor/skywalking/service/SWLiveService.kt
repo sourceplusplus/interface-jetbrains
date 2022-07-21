@@ -19,6 +19,7 @@ package spp.jetbrains.monitor.skywalking.service
 
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
@@ -31,7 +32,24 @@ import spp.protocol.platform.general.Service
 import spp.protocol.platform.status.ActiveInstance
 import spp.protocol.service.LiveService
 
+/**
+ * Implements [LiveService] for SkyWalking-only environments.
+ */
 class SWLiveService : CoroutineVerticle(), LiveService {
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun getClients(): Future<JsonObject> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun getStats(): Future<JsonObject> {
+        return Future.failedFuture("Illegal operation")
+    }
 
     override fun getSelf(): Future<SelfInfo> {
         return Future.succeededFuture(
