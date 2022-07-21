@@ -39,7 +39,7 @@ import spp.protocol.platform.general.Service
 
 class SkywalkingMonitorServiceImpl(
     private val skywalkingClient: SkywalkingClient
-) : SkywalkingMonitorService() {
+) : SkywalkingMonitorService {
 
     override suspend fun getVersion(): String {
         return skywalkingClient.getVersion()!!

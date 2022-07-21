@@ -101,7 +101,7 @@ abstract class ClassSourceMark(
             is GutterMark -> psiClass.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
             is InlayMark -> psiClass.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
             is GuideMark -> psiClass.nameIdentifier?.putUserData(SourceKey.GuideMark, null)
-            else -> throw IllegalStateException("Unsupported source mark type: $this")
+            else -> error("Unsupported source mark type: $this")
         }
         super.dispose(removeFromMarker, assertRemoval)
     }
@@ -111,7 +111,7 @@ abstract class ClassSourceMark(
             is GutterMark -> psiClass.nameIdentifier?.putUserData(SourceKey.GutterMark, null)
             is InlayMark -> psiClass.nameIdentifier?.putUserData(SourceKey.InlayMark, null)
             is GuideMark -> psiClass.nameIdentifier?.putUserData(SourceKey.GuideMark, null)
-            else -> throw IllegalStateException("Unsupported source mark type: $this")
+            else -> error("Unsupported source mark type: $this")
         }
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }

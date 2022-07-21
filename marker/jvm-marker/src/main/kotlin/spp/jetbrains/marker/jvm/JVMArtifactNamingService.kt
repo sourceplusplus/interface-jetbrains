@@ -49,7 +49,7 @@ class JVMArtifactNamingService : AbstractArtifactNamingService {
             is PsiClassOwner -> psiFile.classes.map {
                 ArtifactQualifiedName(it.qualifiedName!!, type = ArtifactType.CLASS)
             }.toList()
-            else -> throw IllegalStateException("Unsupported file: $psiFile")
+            else -> error("Unsupported file: $psiFile")
         }
     }
 }

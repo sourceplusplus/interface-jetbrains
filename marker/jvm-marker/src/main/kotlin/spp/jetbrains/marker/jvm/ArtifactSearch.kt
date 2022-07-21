@@ -37,7 +37,6 @@ import org.jetbrains.plugins.groovy.GroovyFileType
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -51,8 +50,6 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object ArtifactSearch {
-
-    private val log = LoggerFactory.getLogger(ArtifactSearch::class.java)
 
     @JvmStatic
     suspend fun detectRootPackage(project: Project): String? {

@@ -31,7 +31,7 @@ object PythonMarker {
         return try {
             Class.forName("com.jetbrains.python.psi.PyElement")
             true
-        } catch (e: ClassNotFoundException) {
+        } catch (ignore: ClassNotFoundException) {
             false
         }
     }

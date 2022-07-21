@@ -35,7 +35,7 @@ import java.util.*
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-abstract class EndpointDetector<T: EndpointDetector.EndpointNameDeterminer>(val vertx: Vertx) {
+abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val vertx: Vertx) {
 
     companion object {
         private val log = LoggerFactory.getLogger(EndpointDetector::class.java)

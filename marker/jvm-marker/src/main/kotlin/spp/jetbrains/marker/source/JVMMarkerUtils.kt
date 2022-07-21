@@ -193,7 +193,7 @@ object JVMMarkerUtils {
                 inlayMark.apply(true)
                 inlayMark
             } else {
-                throw IllegalStateException("Could not apply inlay mark: $inlayMark")
+                error("Could not apply inlay mark: $inlayMark")
             }
         } else {
             inlayMark
@@ -223,7 +223,7 @@ object JVMMarkerUtils {
                 inlayMark.apply(true)
                 inlayMark
             } else {
-                throw IllegalStateException("Could not apply inlay mark: $inlayMark")
+                error("Could not apply inlay mark: $inlayMark")
             }
         } else {
             inlayMark
@@ -331,7 +331,7 @@ object JVMMarkerUtils {
                 gutterMark.apply(true)
                 gutterMark
             } else {
-                throw IllegalStateException("Could not apply gutter mark: $gutterMark")
+                error("Could not apply gutter mark: $gutterMark")
             }
         } else {
             gutterMark
@@ -361,7 +361,7 @@ object JVMMarkerUtils {
                 inlayMark.apply(true)
                 inlayMark
             } else {
-                throw IllegalStateException("Could not apply inlay mark: $inlayMark")
+                error("Could not apply inlay mark: $inlayMark")
             }
         } else {
             inlayMark

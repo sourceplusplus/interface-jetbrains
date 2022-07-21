@@ -39,7 +39,10 @@ import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
-import io.vertx.core.*
+import io.vertx.core.MultiMap
+import io.vertx.core.Promise
+import io.vertx.core.Vertx
+import io.vertx.core.VertxOptions
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.DecodeException
@@ -124,7 +127,9 @@ object SourceMarkerPlugin {
     }
 
     suspend fun init(
-        project: Project, configInput: SourceMarkerConfig? = null, notifySuccessfulConnection: Boolean = false
+        project: Project,
+        configInput: SourceMarkerConfig? = null,
+        notifySuccessfulConnection: Boolean = false
     ) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
@@ -251,14 +256,15 @@ object SourceMarkerPlugin {
                 initUI(config)
 
                 val pluginsPromise = Promise.promise<Nothing>()
-                ProgressManager.getInstance().run(object: Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
-                    override fun run(indicator: ProgressIndicator) {
-                        log.info("Loading live plugins")
-                        project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
-                        log.info("Loaded live plugins")
-                        pluginsPromise.complete()
-                    }
-                })
+                ProgressManager.getInstance()
+                    .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
+                        override fun run(indicator: ProgressIndicator) {
+                            log.info("Loading live plugins")
+                            project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
+                            log.info("Loaded live plugins")
+                            pluginsPromise.complete()
+                        }
+                    })
                 pluginsPromise.future().await()
                 initMarker(config, project)
             }
@@ -475,7 +481,7 @@ object SourceMarkerPlugin {
             //try default local access
             try {
                 tryDefaultAccess(true, config, project)
-            } catch (e: SSLHandshakeException) {
+            } catch (ignore: SSLHandshakeException) {
                 tryDefaultAccess(false, config, project)
             } catch (e: Exception) {
                 log.warn("Unable to find local live platform", e)

@@ -26,12 +26,12 @@ import com.intellij.psi.PsiElement
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-abstract class AbstractInstrumentConditionParser {
+interface AbstractInstrumentConditionParser {
 
     data class ParseRange(
         val textRange: TextRange,
         val variable: PsiElement
     )
 
-    abstract fun getCondition(condition: String, context: PsiElement): String
+    fun getCondition(condition: String, context: PsiElement): String
 }

@@ -1,9 +1,7 @@
 plugins {
     id("com.diffplug.spotless") apply false
-    id("com.avast.gradle.docker-compose")
     id("org.jetbrains.kotlin.jvm") apply false
-//    id("io.gitlab.arturbosch.detekt") apply false
-    id("maven-publish")
+    id("io.gitlab.arturbosch.detekt") apply false
 }
 
 val pluginGroup: String by project
@@ -18,10 +16,6 @@ val platformDownloadSources: String by project
 group = pluginGroup
 version = projectVersion
 
-repositories {
-    mavenCentral()
-}
-
 subprojects {
     repositories {
         mavenCentral()
@@ -31,12 +25,18 @@ subprojects {
     }
 
     apply<MavenPublishPlugin>()
-//    apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
+    apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
+    val detektPlugins by configurations
+    dependencies {
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
+    }
+
     tasks {
-//        withType<io.gitlab.arturbosch.detekt.Detekt> {
-//            parallel = true
-//            buildUponDefaultConfig = true
-//        }
+        withType<io.gitlab.arturbosch.detekt.Detekt> {
+            parallel = true
+            buildUponDefaultConfig = true
+            config.setFrom(arrayOf(File(project.rootDir, "detekt.yml")))
+        }
 
         withType<JavaCompile> {
             sourceCompatibility = "1.8"

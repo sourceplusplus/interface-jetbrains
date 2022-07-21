@@ -146,7 +146,7 @@ class PythonArtifactCreationService : AbstractArtifactCreationService {
                 inlayMark.apply(true)
                 inlayMark
             } else {
-                throw IllegalStateException("Could not apply inlay mark: $inlayMark")
+                error("Could not apply inlay mark: $inlayMark")
             }
         } else {
             inlayMark

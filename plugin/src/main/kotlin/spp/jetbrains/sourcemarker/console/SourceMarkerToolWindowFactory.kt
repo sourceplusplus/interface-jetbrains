@@ -50,7 +50,6 @@ class SourceMarkerToolWindowFactory : ToolWindowFactory {
                 config.pluginConsoleEnabled
             } catch (ignore: DecodeException) {
                 false
-
             }
         } else {
             false

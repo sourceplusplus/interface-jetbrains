@@ -37,7 +37,7 @@ import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import spp.protocol.platform.general.Service
 
-abstract class SkywalkingMonitorService {
+interface SkywalkingMonitorService {
     companion object {
         val KEY = Key.create<SkywalkingMonitorService>("SPP_SKYWALKING_MONITOR_SERVICE")
 
@@ -46,26 +46,26 @@ abstract class SkywalkingMonitorService {
         }
     }
 
-    abstract suspend fun getVersion(): String
-    abstract suspend fun getTimeInfo(): GetTimeInfoQuery.Data
-    abstract suspend fun searchExactEndpoint(keyword: String, cache: Boolean = false): JsonObject?
-    abstract suspend fun getEndpoints(
+    suspend fun getVersion(): String
+    suspend fun getTimeInfo(): GetTimeInfoQuery.Data
+    suspend fun searchExactEndpoint(keyword: String, cache: Boolean = false): JsonObject?
+    suspend fun getEndpoints(
         serviceId: String,
         limit: Int,
         cache: Boolean = true
     ): JsonArray
 
-    abstract suspend fun getMetrics(request: GetEndpointMetrics): List<GetLinearIntValuesQuery.Result>
-    abstract suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result>
-    abstract suspend fun getTraces(request: GetEndpointTraces): TraceResult
-    abstract suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult
-    abstract suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult>
-    abstract suspend fun getCurrentService(): Service
-    abstract suspend fun getActiveServices(): List<Service>
-    abstract suspend fun getCurrentServiceInstance(): GetServiceInstancesQuery.Result?
-    abstract suspend fun getActiveServiceInstances(): List<GetServiceInstancesQuery.Result>
-    abstract suspend fun getServiceInstances(serviceId: String): List<GetServiceInstancesQuery.Result>
-    abstract suspend fun sortMetrics(
+    suspend fun getMetrics(request: GetEndpointMetrics): List<GetLinearIntValuesQuery.Result>
+    suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result>
+    suspend fun getTraces(request: GetEndpointTraces): TraceResult
+    suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult
+    suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult>
+    suspend fun getCurrentService(): Service
+    suspend fun getActiveServices(): List<Service>
+    suspend fun getCurrentServiceInstance(): GetServiceInstancesQuery.Result?
+    suspend fun getActiveServiceInstances(): List<GetServiceInstancesQuery.Result>
+    suspend fun getServiceInstances(serviceId: String): List<GetServiceInstancesQuery.Result>
+    suspend fun sortMetrics(
         condition: TopNCondition,
         duration: ZonedDuration,
         cache: Boolean = true

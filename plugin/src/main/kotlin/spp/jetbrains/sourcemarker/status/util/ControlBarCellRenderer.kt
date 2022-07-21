@@ -40,7 +40,11 @@ class ControlBarCellRenderer(
     }
 
     override fun getListCellRendererComponent(
-        list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean
+        list: JList<*>,
+        value: Any,
+        index: Int,
+        isSelected: Boolean,
+        cellHasFocus: Boolean
     ): Component {
         val rowValue = value as LiveCommandFieldRow
         val entry = rowValue.liveCommand

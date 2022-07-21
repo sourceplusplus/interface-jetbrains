@@ -73,7 +73,7 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
 
         val initialUrl = AtomicReference("")
         val componentProvider = SourceMarkSingleJcefComponentProvider().apply {
-            defaultConfiguration.browserLoadingListener = object: BrowserLoadingListener() {
+            defaultConfiguration.browserLoadingListener = object : BrowserLoadingListener() {
                 override fun beforeBrowserCreated(configuration: SourceMarkJcefComponentConfiguration) {
                     configuration.initialUrl = initialUrl.get()
                 }

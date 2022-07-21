@@ -25,7 +25,6 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
-import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.protocol.marshall.LocalMessageCodec
@@ -61,6 +60,7 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                         return@launch
                     }
                 } catch (throwable: Throwable) {
+                    throwable.printStackTrace()
                     it.fail(404, "Apache SkyWalking current service unavailable")
                     return@launch
                 }

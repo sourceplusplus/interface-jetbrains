@@ -95,7 +95,7 @@ abstract class ExpressionSourceMark(
             is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
             is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
             is GuideMark -> getPsiElement().putUserData(SourceKey.GuideMark, null)
-            else -> throw IllegalStateException("Unsupported source mark type: $this")
+            else -> error("Unsupported source mark type: $this")
         }
         super.dispose(removeFromMarker, assertRemoval)
     }
@@ -105,7 +105,7 @@ abstract class ExpressionSourceMark(
             is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
             is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
             is GuideMark -> getPsiElement().putUserData(SourceKey.GuideMark, null)
-            else -> throw IllegalStateException("Unsupported source mark type: $this")
+            else -> error("Unsupported source mark type: $this")
         }
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }

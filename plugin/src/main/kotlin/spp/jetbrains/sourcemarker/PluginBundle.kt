@@ -54,7 +54,7 @@ object PluginBundle : AbstractBundle(BUNDLE) {
     fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any): String {
         return try {
             LOCALE_BUNDLE.getString(key) ?: getMessage(key, *params)
-        } catch (e: MissingResourceException) {
+        } catch (ignore: MissingResourceException) {
             key // no translation found
         }
     }

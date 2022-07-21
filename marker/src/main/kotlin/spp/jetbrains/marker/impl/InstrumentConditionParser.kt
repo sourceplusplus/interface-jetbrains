@@ -26,7 +26,7 @@ import spp.jetbrains.marker.AbstractInstrumentConditionParser
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object InstrumentConditionParser: AbstractInstrumentConditionParser() {
+object InstrumentConditionParser : AbstractInstrumentConditionParser {
 
     private val LOCAL_VAR_REGEX: Regex = Regex("localVariables\\[(.+)\\]")
     private val FIELD_VAR_REGEX: Regex = Regex("fields\\[(.+)\\]")

@@ -37,7 +37,11 @@ class AutoCompleteCellRenderer(private val artifactQualifiedName: ArtifactQualif
     }
 
     override fun getListCellRendererComponent(
-        list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean
+        list: JList<*>,
+        value: Any,
+        index: Int,
+        isSelected: Boolean,
+        cellHasFocus: Boolean
     ): Component {
         val entry = value as AutocompleteFieldRow
         val row = AutocompleteRow()

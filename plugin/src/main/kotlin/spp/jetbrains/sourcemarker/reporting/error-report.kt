@@ -245,7 +245,9 @@ class GitHubErrorBean(
  * todo: description.
  */
 private class AnonymousFeedbackTask(
-    project: Project?, title: String, canBeCancelled: Boolean,
+    project: Project?,
+    title: String,
+    canBeCancelled: Boolean,
     private val params: MutableMap<String, String>,
     private val callback: Consumer<SubmittedReportInfo>
 ) : Task.Backgroundable(project, title, canBeCancelled) {

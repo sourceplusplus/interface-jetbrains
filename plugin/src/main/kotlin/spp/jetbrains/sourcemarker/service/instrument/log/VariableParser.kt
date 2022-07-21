@@ -30,7 +30,8 @@ object VariableParser {
 
     @JvmStatic
     fun createPattern(
-        scopeVars: List<String>, varInitChar: String = DOLLAR,
+        scopeVars: List<String>,
+        varInitChar: String = DOLLAR,
         includeCurlyPattern: Boolean = true,
         ignoreCase: Boolean = false
     ): Pattern {

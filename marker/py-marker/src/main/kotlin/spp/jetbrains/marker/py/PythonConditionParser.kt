@@ -26,7 +26,7 @@ import spp.jetbrains.marker.AbstractInstrumentConditionParser
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonConditionParser : AbstractInstrumentConditionParser() {
+class PythonConditionParser : AbstractInstrumentConditionParser {
 
     override fun getCondition(condition: String, context: PsiElement): String {
         return condition

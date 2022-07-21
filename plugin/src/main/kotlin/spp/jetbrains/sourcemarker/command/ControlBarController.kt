@@ -23,8 +23,8 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLocalVariable
 import kotlinx.coroutines.runBlocking
-import liveplugin.implementation.plugin.LivePluginService
 import liveplugin.implementation.common.toFilePath
+import liveplugin.implementation.plugin.LivePluginService
 import org.joor.Reflect
 import org.slf4j.LoggerFactory
 import spp.command.LiveCommand
