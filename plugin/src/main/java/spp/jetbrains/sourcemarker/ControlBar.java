@@ -200,9 +200,13 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                 fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"));
             }
             String className = ArtifactNameUtils.INSTANCE.getClassName(fullyQualified);
-            String shortFuncName = ArtifactNameUtils.INSTANCE.getShortFunctionSignature(
-                    ArtifactNameUtils.INSTANCE.removePackageNames(fullyQualified));
-            location = className + "." + shortFuncName;
+            if (fullyQualified.contains("(")) {
+                String shortFuncName = ArtifactNameUtils.INSTANCE
+                        .getShortFunctionSignature(ArtifactNameUtils.INSTANCE.removePackageNames(fullyQualified));
+                location = className + "." + shortFuncName;
+            } else {
+                location = className;
+            }
         }
         textField1 = new AutocompleteField(
                 message("location") + ": " + location + "#" + inlayMark.getLineNumber(),
