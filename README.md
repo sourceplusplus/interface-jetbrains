@@ -4,7 +4,7 @@
 ![GitHub release](https://img.shields.io/github/v/release/sourceplusplus/interface-jetbrains?include_prereleases)
 [![Build](https://github.com/sourceplusplus/interface-jetbrains/actions/workflows/build.yml/badge.svg)](https://github.com/sourceplusplus/interface-jetbrains/actions/workflows/build.yml)
 
-# What is this?
+## What is this?
 
 <!-- Plugin description -->
 
@@ -12,77 +12,13 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 <!-- Plugin description end -->
 
-# How to use?
+## How to use?
 
-Once installed, this plugin adds the Live Command Palette to the JetBrains IDE, which is accessible by pressing `Ctrl+Shift+S`.
+Once installed, this plugin adds the Live Command Palette to the JetBrains IDE, which is accessible by typing `Ctrl+Shift+S`.
 The available commands are determined by the location the live command palette is opened and the accessibility of either [SkyWalking](https://github.com/apache/skywalking) or the [Live Platform](https://github.com/sourceplusplus/live-platform).
 
-# Available Commands
+For more information, please see the [documentation](https://docs.sourceplus.plus/features/).
 
-## Live Views
+## Bugs & Features
 
-**Live View** commands utilize existing SkyWalking metrics to display live production data directly inside of your IDE.
-
-<details>
-  <summary><b>Show Commands</b> &nbsp; 👈 &nbsp; <i>(click to expand)</i></summary>
-
-  ### Show/Hide Quick Stats
-
-  > Inlay hints which indicate an endpoint's current activity.
-
-  <details>
-    <summary>Screencast</summary>
-
-  ![screencast](https://user-images.githubusercontent.com/3278877/159804991-9882aa60-abd4-43d9-8a3f-db7f1f5f38d5.gif)
-  </details>
-
-  ### Watch Log
-
-  > Follow specific logging statements in real-time.
-
-  <details>
-    <summary>Screencast</summary>
-
-  ![screencast](https://user-images.githubusercontent.com/3278877/158381411-214285ba-7291-4c70-8e1f-8489140fa239.gif)
-  </details>
-
-  ### View Overview/Activity/Traces/Logs
-
-  > Contextual popups for displaying live operational data on the code currently in view.
-
-  <details>
-    <summary>Screencast</summary>
-
-  ![screencast](https://user-images.githubusercontent.com/3278877/159803045-9b92dbe1-df08-4275-9ec8-1cbfed6e542d.gif)
-  </details>
-  
-</details>
-
-## Live Instruments
-
-**Live Instrument** commands require a [Live Probe](https://github.com/sourceplusplus/probe-jvm) to inject additional metrics for live production debugging.
-
-<details>
-  <summary><b>Show Commands</b> &nbsp; 👈 &nbsp; <i>(click to expand)</i></summary>
-
-  ### Add Breakpoint
-
-  > Live Breakpoints (a.k.a. non-breaking breakpoints) are useful debugging instruments for gaining insight into the live variables available in production at a given scope.
-
-  <details>
-    <summary>Screencast</summary>
-
-  ![live-breakpoint](https://user-images.githubusercontent.com/3278877/136304451-2c98ad30-032b-4ce0-9f37-f98cd750adb3.gif)
-  </details>
-
-  ### Add Log
-
-  > Live Logs (a.k.a. just-in-time logging) are quick and easy debugging instruments for instantly outputting live data from production without redeploying or restarting your application.
-
-  <details>
-    <summary>Screencast</summary>
-
-  ![live-log](https://user-images.githubusercontent.com/3278877/136304738-d46c2796-4dd3-45a3-81bb-5692547c1c71.gif)
-  </details>
-
-</details>
+Bug reports and feature requests can be created [here](https://github.com/sourceplusplus/live-platform/issues).
