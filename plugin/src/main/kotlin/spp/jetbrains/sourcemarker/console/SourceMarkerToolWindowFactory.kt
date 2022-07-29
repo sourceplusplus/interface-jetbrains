@@ -16,16 +16,13 @@
  */
 package spp.jetbrains.sourcemarker.console
 
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowFactory
-import io.vertx.core.json.DecodeException
-import io.vertx.core.json.Json
 import org.slf4j.LoggerFactory
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 
 /**
  * Displays logs from the SourceMarker plugin to a console window.
@@ -40,19 +37,7 @@ class SourceMarkerToolWindowFactory : ToolWindowFactory {
     }
 
     override fun isApplicable(project: Project): Boolean {
-        return if (PropertiesComponent.getInstance(project).isValueSet("sourcemarker_plugin_config")) {
-            try {
-                val config = Json.decodeValue(
-                    PropertiesComponent.getInstance(project).getValue("sourcemarker_plugin_config"),
-                    SourceMarkerConfig::class.java
-                )
-                config.pluginConsoleEnabled
-            } catch (ignore: DecodeException) {
-                false
-            }
-        } else {
-            false
-        }
+        return SourceMarkerPlugin.getConfig(project).pluginConsoleEnabled
     }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
