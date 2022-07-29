@@ -86,6 +86,7 @@ import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.io.File
+import java.net.ConnectException
 import javax.net.ssl.SSLHandshakeException
 
 /**
@@ -434,7 +435,6 @@ object SourceMarkerPlugin {
 
     private suspend fun initServices(project: Project, config: SourceMarkerConfig) {
         if (!config.serviceHost.isNullOrBlank()) {
-            val servicePort = config.getServicePortNormalized()
             val certificatePins = mutableListOf<String>()
             certificatePins.addAll(config.certificatePins)
             val httpClientOptions = if (certificatePins.isNotEmpty()) {
@@ -456,14 +456,32 @@ object SourceMarkerPlugin {
             }
 
             val tokenUri = "/api/new-token?access_token=" + config.accessToken
-            val req = vertx.createHttpClient(httpClientOptions).request(
-                RequestOptions()
-                    .setHeaders(MultiMap.caseInsensitiveMultiMap().add("spp-platform-request", "true"))
-                    .setSsl(config.isSsl())
-                    .setHost(config.serviceHostNormalized)
-                    .setPort(servicePort)
-                    .setURI(tokenUri)
-            ).await()
+            val req = try {
+                vertx.createHttpClient(httpClientOptions).request(
+                    RequestOptions()
+                        .setHeaders(MultiMap.caseInsensitiveMultiMap().add("spp-platform-request", "true"))
+                        .setSsl(config.isSsl())
+                        .setHost(config.serviceHostNormalized)
+                        .setPort(config.getServicePortNormalized())
+                        .setURI(tokenUri)
+                ).await()
+            } catch (ignore: ConnectException) {
+                vertx.createHttpClient(httpClientOptions).request(
+                    RequestOptions()
+                        .setHeaders(MultiMap.caseInsensitiveMultiMap().add("spp-platform-request", "true"))
+                        .setSsl(config.isSsl())
+                        .setHost(config.serviceHostNormalized)
+                        .setPort(config.isSsl().let { if (it) 443 else 80 }) //try default HTTP ports
+                        .setURI(tokenUri)
+                ).await().apply {
+                    //update config with successful port
+                    config.serviceHost = if (config.isSsl()) {
+                        "https://${config.serviceHostNormalized}:443"
+                    } else {
+                        "http://${config.serviceHostNormalized}:80"
+                    }
+                }
+            }
             req.end().await()
             val resp = req.response().await()
             if (resp.statusCode() in 200..299) {
