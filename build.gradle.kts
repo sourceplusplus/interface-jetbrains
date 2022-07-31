@@ -28,7 +28,6 @@ version = projectVersion
 subprojects {
     repositories {
         mavenCentral()
-        maven(url = "https://jitpack.io")
         maven(url = "https://pkg.sourceplus.plus/sourceplusplus/protocol")
         maven(url = "https://pkg.sourceplus.plus/sourceplusplus/interface-booster-ui")
     }
