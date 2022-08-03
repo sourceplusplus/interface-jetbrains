@@ -133,6 +133,7 @@ object SourceMarkerPlugin {
     ) {
         log.info("Initializing SourceMarkerPlugin on project: {}", project)
         restartIfNecessary()
+        LivePluginProjectLoader.projectClosing(project)
         LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig(project)

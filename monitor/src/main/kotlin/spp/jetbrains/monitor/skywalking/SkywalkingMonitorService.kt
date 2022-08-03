@@ -59,7 +59,7 @@ interface SkywalkingMonitorService {
     suspend fun getTraces(request: GetEndpointTraces): TraceResult
     suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult
     suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult>
-    suspend fun getCurrentService(): Service
+    suspend fun getCurrentService(): Service?
     suspend fun getActiveServices(): List<Service>
     suspend fun getCurrentServiceInstance(): GetServiceInstancesQuery.Result?
     suspend fun getActiveServiceInstances(): List<GetServiceInstancesQuery.Result>
