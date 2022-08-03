@@ -28,14 +28,15 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.Nullable;
+import spp.protocol.platform.general.Service;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 
 public class PluginConfigurationPanel {
     private JPanel myWholePanel;
@@ -60,25 +61,19 @@ public class PluginConfigurationPanel {
     private SourceMarkerConfig config;
     private CertificatePinPanel myCertificatePins;
 
-    public PluginConfigurationPanel(SourceMarkerConfig config) {
+    public PluginConfigurationPanel(SourceMarkerConfig config, List<Service> availableServices) {
         this.config = config;
         myServiceSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("service_settings")));
         myGlobalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("plugin_settings")));
         myPortalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder(message("portal_settings")));
         portalZoomSpinner.setModel(new SpinnerNumberModel(1.0, 0.5, 2.0, 0.1));
 
-        if (INSTANCE.getLiveService() != null) {
-            INSTANCE.getLiveService().getServices().onComplete(it -> {
-                if (it.succeeded()) {
-                    it.result().forEach(service -> serviceComboBox.addItem(service.getName()));
-
-                    if (config.getServiceName() != null) {
-                        serviceComboBox.setSelectedItem(config.getServiceName());
-                    }
-                } else {
-                    it.cause().printStackTrace();
-                }
-            });
+        availableServices.forEach(service -> serviceComboBox.addItem(service.getName()));
+        if (config.getServiceName() != null) {
+            if (availableServices.stream().noneMatch(service -> service.getName().equals(config.getServiceName()))) {
+                serviceComboBox.addItem(config.getServiceName());
+            }
+            serviceComboBox.setSelectedItem(config.getServiceName());
         }
 
         //todo: shouldn't need to manually update locale text
@@ -110,7 +105,10 @@ public class PluginConfigurationPanel {
     boolean isModified() {
         if (config.getOverride()) return false;
 
-        if (!Arrays.equals(Arrays.stream(rootSourcePackageTextField.getText().split(",")).filter(s -> !s.isEmpty()).toArray(), config.getRootSourcePackages().toArray())) {
+        if (!Arrays.equals(
+                Arrays.stream(rootSourcePackageTextField.getText().split(",")).filter(s -> !s.isEmpty()).toArray(),
+                config.getRootSourcePackages().stream().filter(s -> !s.isEmpty()).toArray())
+        ) {
             return true;
         }
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {

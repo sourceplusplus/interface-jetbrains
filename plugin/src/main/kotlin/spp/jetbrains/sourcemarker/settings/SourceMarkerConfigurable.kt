@@ -21,9 +21,11 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
 import io.vertx.core.json.Json
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.protocol.SourceServices
 import javax.swing.JComponent
 
 /**
@@ -56,7 +58,10 @@ class SourceMarkerConfigurable : Configurable {
     override fun createComponent(): JComponent {
         if (form == null) {
             val config = SourceMarkerPlugin.getConfig(ProjectManager.getInstance().openProjects[0])
-            form = PluginConfigurationPanel(config)
+            val availServices = runBlocking {
+                SourceServices.Instance.liveService?.getServices()?.let { it.await() } ?: emptyList()
+            }
+            form = PluginConfigurationPanel(config, availServices)
             form!!.applySourceMarkerConfig(config)
         }
         return form!!.contentPane as JComponent
