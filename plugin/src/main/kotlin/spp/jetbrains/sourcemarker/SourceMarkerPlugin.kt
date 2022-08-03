@@ -420,6 +420,7 @@ object SourceMarkerPlugin {
             SourceMarker.clearAvailableSourceFileMarkers()
             SourceMarker.clearGlobalSourceMarkEventListeners()
         }
+        SourceMarker.enabled = false
 
         deploymentIds.forEach { vertx.undeploy(it).await() }
         deploymentIds.clear()
