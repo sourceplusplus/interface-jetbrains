@@ -66,6 +66,11 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
             when (event.eventCode) {
                 VIRTUAL_TEXT_UPDATED, INLAY_MARK_VISIBLE, INLAY_MARK_HIDDEN -> {
                     ApplicationManager.getApplication().invokeLater {
+                        if (event.sourceMark.project.isDisposed) {
+                            log.warn("Project is disposed, ignoring event: ${event.eventCode}")
+                            return@invokeLater
+                        }
+
                         FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                             //todo: smaller range
                             ?.getInlineElementsInRange(0, Integer.MAX_VALUE)?.forEach {
@@ -83,8 +88,14 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                             }
                     }
                 }
+
                 MARK_REMOVED -> {
                     ApplicationManager.getApplication().invokeLater {
+                        if (event.sourceMark.project.isDisposed) {
+                            log.warn("Project is disposed, ignoring event: ${event.eventCode}")
+                            return@invokeLater
+                        }
+
                         FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                             //todo: smaller range
                             ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
