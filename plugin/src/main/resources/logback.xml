@@ -17,6 +17,12 @@
     <logger name="spp" level="DEBUG">
         <appender-ref ref="STDOUT"/>
     </logger>
+    <logger name="liveplugin" level="INFO">
+        <appender-ref ref="debug-console"/>
+    </logger>
+    <logger name="liveplugin" level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+    </logger>
 
     <logger name="io.vertx" level="DEBUG">
         <appender-ref ref="STDOUT"/>
