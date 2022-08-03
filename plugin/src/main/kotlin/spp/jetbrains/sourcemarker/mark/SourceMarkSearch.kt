@@ -20,14 +20,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
-import spp.jetbrains.marker.source.mark.guide.ExpressionGuideMark
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 
 /**
  * todo: description.
@@ -61,12 +57,6 @@ object SourceMarkSearch {
         return sourceMark ?: classSourceMark
     }
 
-    fun findByEndpointName(endpointName: String): GuideMark? {
-        return SourceMarker.getSourceMarks().filterIsInstance<GuideMark>().firstOrNull {
-            it.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)?.getEndpointName(it) == endpointName
-        }
-    }
-
     fun findByInstrumentId(instrumentId: String): SourceMark? {
         return SourceMarker.getSourceMarks().firstOrNull {
             it.getUserData(SourceMarkKeys.INSTRUMENT_ID) == instrumentId
@@ -77,72 +67,5 @@ object SourceMarkSearch {
         return SourceMarker.getSourceMarks().firstOrNull {
             it.getUserData(SourceMarkKeys.VIEW_SUBSCRIPTION_ID) == subscriptionId
         }
-    }
-
-    suspend fun findSourceMark(artifact: ArtifactQualifiedName): GuideMark? {
-        return when (artifact.type) {
-            ArtifactType.ENDPOINT -> findEndpointSourceMark(artifact)
-            ArtifactType.STATEMENT -> findExpressionSourceMark(artifact)
-            ArtifactType.EXPRESSION -> findExpressionSourceMark(artifact)
-            else -> TODO("impl")
-        }
-    }
-
-    fun findSourceMarks(artifact: ArtifactQualifiedName): List<SourceMark> {
-        return SourceMarker.getSourceMarks().filter { it.artifactQualifiedName == artifact }
-    }
-
-    suspend fun findSourceMark(logPattern: String): MethodSourceMark? {
-        return SourceMarker.getSourceMarks()
-            .filterIsInstance<MethodSourceMark>()
-            .firstOrNull {
-                it.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!.getOrFindLoggerStatements(it)
-                    .map { it.logPattern }.contains(logPattern)
-            }
-    }
-
-    suspend fun findInheritedSourceMarks(logPattern: String): List<SourceMark> {
-        val rootMark = findSourceMark(logPattern) ?: return emptyList()
-        return findInheritedSourceMarks(rootMark)
-    }
-
-    fun findInheritedSourceMarks(rootMark: SourceMark): List<SourceMark> {
-        return if (rootMark.isExpressionMark) {
-            val methodMark = SourceMarker.getSourceMark(
-                rootMark.artifactQualifiedName.copy(
-                    identifier = rootMark.artifactQualifiedName.identifier.substringBefore("#"),
-                    type = ArtifactType.METHOD
-                ),
-                SourceMark.Type.GUTTER
-            )
-            //todo: proper class crawl
-            listOfNotNull(rootMark, methodMark) + rootMark.sourceFileMarker.getClassSourceMarks()
-        } else if (rootMark.isMethodMark) {
-            //todo: proper class crawl
-            listOf(rootMark) + rootMark.sourceFileMarker.getClassSourceMarks()
-        } else {
-            listOf(rootMark)
-        }
-    }
-
-    private suspend fun findEndpointSourceMark(artifact: ArtifactQualifiedName): MethodGuideMark? {
-        val operationName = artifact.identifier
-        return SourceMarker.getSourceMarks()
-            .filterIsInstance<MethodGuideMark>()
-            .firstOrNull {
-                it.getUserData(SourceMarkKeys.ENDPOINT_DETECTOR)!!.getOrFindEndpointName(it) == operationName
-            }
-    }
-
-    private fun findExpressionSourceMark(artifact: ArtifactQualifiedName): ExpressionGuideMark? {
-        if (artifact.type == ArtifactType.EXPRESSION) {
-            return SourceMarker.getSourceMarks().filterIsInstance<ExpressionGuideMark>()
-                .find { it.artifactQualifiedName == artifact }
-        }
-
-        val qualifiedClassName = artifact.identifier.substring(0, artifact.identifier.lastIndexOf("."))
-        val fileMarker = SourceMarker.getSourceFileMarker(qualifiedClassName)
-        return fileMarker?.getSourceMarks()?.filterIsInstance<ExpressionGuideMark>()
-            ?.find { it.lineNumber == artifact.lineNumber!! }
     }
 }
