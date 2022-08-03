@@ -17,8 +17,6 @@
 package spp.jetbrains.monitor.skywalking.bridge
 
 import io.vertx.core.Vertx
-import io.vertx.core.eventbus.ReplyException
-import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
@@ -46,21 +44,10 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
 
         vertx.eventBus().localConsumer<String>(searchExactEndpointAddress) {
             launch(vertx.dispatcher()) {
-                val service = try {
-                    ServiceBridge.getCurrentService(vertx)
-                } catch (ex: ReplyException) {
-                    if (ex.failureType() == ReplyFailure.TIMEOUT) {
-                        log.debug("Timed out looking for current service")
-                        it.reply(null)
-                        return@launch
-                    } else {
-                        ex.printStackTrace()
-                        it.fail(500, ex.message)
-                        return@launch
-                    }
-                } catch (throwable: Throwable) {
-                    throwable.printStackTrace()
-                    it.fail(404, "Apache SkyWalking current service unavailable")
+                val service = ServiceBridge.getCurrentService(vertx)
+                if (service == null) {
+                    log.warn("Unable to determine current service for endpoint search")
+                    it.reply(null)
                     return@launch
                 }
 

@@ -22,6 +22,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
 import spp.protocol.platform.general.Service
@@ -43,63 +44,58 @@ class ServiceBridge(
     var activeServices: List<Service> = emptyList()
 
     override suspend fun start() {
-        vertx.setPeriodic(5000) { timerId ->
-            launch(vertx.dispatcher()) {
-                activeServices = skywalkingClient.run {
-                    getServices(getDuration(ZonedDateTime.now().minusMinutes(15), DurationStep.MINUTE))
-                }
-
-                if (activeServices.isNotEmpty()) {
-                    vertx.cancelTimer(timerId)
-                    vertx.eventBus().publish(activeServicesUpdatedAddress, activeServices)
-
-                    if (initServiceName != null) {
-                        currentService = activeServices.find { it.name == initServiceName }
+        if (!setCurrentService()) {
+            //periodically check for current service
+            log.info("No current service set, starting periodic check for current service")
+            vertx.setPeriodic(5000) { timerId ->
+                launch(vertx.dispatcher()) {
+                    if (setCurrentService()) {
+                        vertx.cancelTimer(timerId)
                     }
-                    if (currentService == null) {
-                        currentService = activeServices[0]
-                    }
-                    vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
                 }
             }
         }
 
         //async accessors
         vertx.eventBus().localConsumer<Boolean>(getCurrentServiceAddress) { msg ->
-            if (msg.body() && currentService == null) {
-                val consumer = currentServiceConsumer(vertx)
-                if (currentService != null) {
-                    consumer.unregister()
-                    msg.reply(currentService)
-                } else {
-                    consumer.handler {
-                        msg.reply(it.body())
-                        consumer.unregister()
-                    }
-                }
-            } else {
-                msg.reply(currentService)
+            if (currentService == null) {
+                log.warn("No current service set")
             }
+            msg.reply(currentService)
         }
         vertx.eventBus().localConsumer<Boolean>(getActiveServicesAddress) { msg ->
-            if (msg.body() && activeServices.isEmpty()) {
-                val consumer = activeServicesConsumer(vertx)
-                if (activeServices.isNotEmpty()) {
-                    consumer.unregister()
-                    msg.reply(activeServices)
-                } else {
-                    consumer.handler {
-                        msg.reply(it.body())
-                        consumer.unregister()
-                    }
-                }
-            } else {
-                msg.reply(activeServices)
+            if (activeServices.isEmpty()) {
+                log.warn("No active services set")
             }
+            msg.reply(activeServices)
         }
     }
 
+    private suspend fun setCurrentService(): Boolean {
+        activeServices = skywalkingClient.run {
+            getServices(getDuration(ZonedDateTime.now().minusMinutes(15), DurationStep.MINUTE))
+        }
+
+        if (activeServices.isNotEmpty()) {
+            vertx.eventBus().publish(activeServicesUpdatedAddress, activeServices)
+
+            if (initServiceName != null) {
+                currentService = activeServices.find { it.name == initServiceName }
+                currentService?.let { log.info("Current service set to: {}", it.name) }
+            }
+            if (currentService == null) {
+                currentService = activeServices[0]
+                log.info("Current service set to: {}", currentService!!.name)
+            }
+            vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
+            return true
+        }
+        return false
+    }
+
     companion object {
+        private val log = LoggerFactory.getLogger(ServiceBridge::class.java)
+
         private const val rootAddress = "monitor.skywalking.service"
         private const val getCurrentServiceAddress = "$rootAddress.currentService"
         private const val getActiveServicesAddress = "$rootAddress.activeServices"
@@ -114,7 +110,7 @@ class ServiceBridge(
             return vertx.eventBus().localConsumer(activeServicesUpdatedAddress)
         }
 
-        suspend fun getCurrentService(vertx: Vertx): Service {
+        suspend fun getCurrentService(vertx: Vertx): Service? {
             return vertx.eventBus()
                 .request<Service>(getCurrentServiceAddress, true).await().body()
         }

@@ -18,8 +18,6 @@ package spp.jetbrains.marker.source.info
 
 import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.eventbus.ReplyException
-import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.kotlin.coroutines.await
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -105,20 +103,12 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
 
     private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodGuideMark) {
         log.trace("Determining endpoint id")
-        try {
-            val endpoint = EndpointBridge.searchExactEndpoint(endpointName, vertx)
-            if (endpoint != null) {
-                sourceMark.putUserData(ENDPOINT_ID, endpoint.getString("id"))
-                log.trace("Detected endpoint id: ${endpoint.getString("id")}")
-            } else {
-                log.trace("Could not find endpoint id for: $endpointName")
-            }
-        } catch (ex: ReplyException) {
-            if (ex.failureType() == ReplyFailure.TIMEOUT) {
-                log.debug("Timed out looking for endpoint id for: $endpointName")
-            } else {
-                throw ex
-            }
+        val endpoint = EndpointBridge.searchExactEndpoint(endpointName, vertx)
+        if (endpoint != null) {
+            sourceMark.putUserData(ENDPOINT_ID, endpoint.getString("id"))
+            log.trace("Detected endpoint id: ${endpoint.getString("id")}")
+        } else {
+            log.trace("Could not find endpoint id for: $endpointName")
         }
     }
 
