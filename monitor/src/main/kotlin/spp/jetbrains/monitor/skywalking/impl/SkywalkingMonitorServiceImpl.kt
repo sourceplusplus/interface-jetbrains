@@ -53,7 +53,8 @@ class SkywalkingMonitorServiceImpl(
     }
 
     override suspend fun searchExactEndpoint(keyword: String, cache: Boolean): JsonObject? {
-        val endpoints = skywalkingClient.searchEndpoint(keyword, getCurrentService().id, 1, cache)
+        val service = getCurrentService() ?: return null
+        val endpoints = skywalkingClient.searchEndpoint(keyword, service.id, 1, cache)
         return endpoints.map { it as JsonObject }.find { it.getString("name") == keyword }
     }
 
@@ -77,7 +78,7 @@ class SkywalkingMonitorServiceImpl(
         return EndpointTracesBridge.getTraceStack(traceId, skywalkingClient.vertx)
     }
 
-    override suspend fun getCurrentService(): Service {
+    override suspend fun getCurrentService(): Service? {
         return ServiceBridge.getCurrentService(skywalkingClient.vertx)
     }
 
