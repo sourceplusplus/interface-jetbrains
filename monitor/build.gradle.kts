@@ -26,7 +26,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-    implementation("io.dropwizard.metrics:metrics-core:4.2.10")
+    implementation("io.dropwizard.metrics:metrics-core:4.2.11")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
