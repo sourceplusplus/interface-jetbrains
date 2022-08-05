@@ -4,7 +4,7 @@ import java.net.URL
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "1.7.0"
+    id("org.jetbrains.intellij") version "1.8.0"
     id("org.jetbrains.changelog") version "1.3.1"
 }
 
