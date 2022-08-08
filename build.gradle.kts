@@ -36,6 +36,7 @@ subprojects {
     configure<app.cash.licensee.LicenseeExtension> {
         ignoreDependencies("plus.sourceplus", "protocol")
         ignoreDependencies("plus.sourceplus", "protocol-jvm")
+        ignoreDependencies("plus.sourceplus.interface", "interface-booster-ui")
         allow("Apache-2.0")
         allow("MIT")
         allow("EPL-1.0")
@@ -95,11 +96,40 @@ subprojects {
     configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         kotlin {
             targetExclude("**/generated/**", "**/liveplugin/**")
-            if (file("../LICENSE-HEADER.txt").exists()) {
-                licenseHeaderFile(file("../LICENSE-HEADER.txt"))
+
+            val startYear = 2022
+            val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+            val copyrightYears = if (startYear == currentYear) {
+                "$startYear"
             } else {
-                licenseHeaderFile(file("../../LICENSE-HEADER.txt"))
+                "$startYear-$currentYear"
             }
+
+            val jetbrainsProject = findProject(":interfaces:jetbrains") ?: rootProject
+            val licenseHeader = Regex("( . Copyright [\\S\\s]+)")
+                .find(File(jetbrainsProject.projectDir, "LICENSE").readText())!!
+                .value.lines().joinToString("\n") {
+                    if (it.trim().isEmpty()) {
+                        " *"
+                    } else {
+                        " * " + it.trim()
+                    }
+                }
+            val formattedLicenseHeader = buildString {
+                append("/*\n")
+                append(
+                    licenseHeader.replace(
+                        "Copyright [yyyy] [name of copyright owner]",
+                        "Source++, the open-source live coding platform.\n" +
+                                " * Copyright (C) $copyrightYears CodeBrig, Inc."
+                    ).replace(
+                        "http://www.apache.org/licenses/LICENSE-2.0",
+                        "    http://www.apache.org/licenses/LICENSE-2.0"
+                    )
+                )
+                append("/")
+            }
+            licenseHeader(formattedLicenseHeader)
         }
     }
 }
