@@ -32,7 +32,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.toUElement
+import org.jetbrains.uast.toUElementOfType
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
@@ -91,7 +91,7 @@ class LoggerDetector(val vertx: Vertx) {
             log.trace("Found logger statements: $loggerStatements")
             loggerStatements
         } else {
-            val uMethod = sourceMark.getPsiMethod().toUElement() as UMethod?
+            val uMethod = sourceMark.getPsiMethod().toUElementOfType<UMethod>()
             if (uMethod != null) {
                 val foundLoggerStatements = getOrFindLoggerStatements(uMethod).await()
                 sourceMark.putUserData(LOGGER_STATEMENTS, foundLoggerStatements)

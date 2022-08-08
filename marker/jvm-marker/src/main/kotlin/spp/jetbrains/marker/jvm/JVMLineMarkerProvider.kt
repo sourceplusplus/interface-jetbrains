@@ -28,6 +28,7 @@ import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
+import org.jetbrains.uast.toUElementOfType
 import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.impl.ArtifactCreationService
@@ -95,7 +96,7 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
 
     private fun getMethodGutterMark(element: PsiElement): LineMarkerInfo<PsiElement>? {
         val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
-        val uMethod = element.parent.toUElement() as UMethod?
+        val uMethod = element.parent.toUElementOfType<UMethod>()
         if (uMethod == null) {
             log.warn("Unable to transform to UMethod: {}", element.parent)
             return null
