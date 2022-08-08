@@ -82,9 +82,9 @@ jobs:
 
           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
 
-      # Run tests
-      - name: Run Tests
-        run: ./gradlew test --refresh-dependencies
+      # Check plugin
+      - name: Check plugin
+        run: ./gradlew check -x :commander:kotlin-compiler-wrapper:test
 
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
