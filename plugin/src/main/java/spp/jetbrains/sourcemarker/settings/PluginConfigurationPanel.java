@@ -43,7 +43,6 @@ public class PluginConfigurationPanel {
     private JPanel myGlobalSettingsPanel;
     private JTextField rootSourcePackageTextField;
     private JCheckBox autoResolveEndpointNamesCheckBox;
-    private JCheckBox debugConsoleCheckBox;
     private JPanel myServiceSettingsPanel;
     private JTextField serviceHostTextField;
     private JTextField accessTokenTextField;
@@ -83,14 +82,12 @@ public class PluginConfigurationPanel {
         certificatePinsLabel.setText(message("certificate_pins"));
         serviceLabel.setText(message("service"));
         rootSourcePackageLabel.setText(message("root_source_package"));
-        debugConsoleCheckBox.setText(message("debug_console"));
         autoResolveEndpointNamesCheckBox.setText(message("auto_resolve_endpoint_names"));
     }
 
     private void setUIEnabled(boolean enabled) {
         rootSourcePackageTextField.setEnabled(enabled);
         autoResolveEndpointNamesCheckBox.setEnabled(enabled);
-        debugConsoleCheckBox.setEnabled(enabled);
         serviceHostTextField.setEnabled(enabled);
         accessTokenTextField.setEnabled(enabled);
         serviceComboBox.setEnabled(enabled);
@@ -112,9 +109,6 @@ public class PluginConfigurationPanel {
             return true;
         }
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {
-            return true;
-        }
-        if (!Objects.equals(debugConsoleCheckBox.isSelected(), config.getPluginConsoleEnabled())) {
             return true;
         }
         if (!Objects.equals(serviceHostTextField.getText(), config.getServiceHost() != null ? config.getServiceHost() : "")) {
@@ -149,7 +143,7 @@ public class PluginConfigurationPanel {
                 Arrays.stream(rootSourcePackageTextField.getText().split(","))
                         .map(String::trim).collect(Collectors.toList()),
                 autoResolveEndpointNamesCheckBox.isSelected(),
-                true, debugConsoleCheckBox.isSelected(),
+                true,
                 serviceHostTextField.getText(),
                 accessTokenTextField.getText(),
                 new ArrayList<>(Collections.list(myCertificatePins.listModel.elements())),
@@ -166,7 +160,6 @@ public class PluginConfigurationPanel {
         this.config = config;
         rootSourcePackageTextField.setText(String.join(",", config.getRootSourcePackages()));
         autoResolveEndpointNamesCheckBox.setSelected(config.getAutoResolveEndpointNames());
-        debugConsoleCheckBox.setSelected(config.getPluginConsoleEnabled());
         serviceHostTextField.setText(config.getServiceHost());
         accessTokenTextField.setText(config.getAccessToken());
         verifyHostCheckBox.setSelected(config.getVerifyHost());

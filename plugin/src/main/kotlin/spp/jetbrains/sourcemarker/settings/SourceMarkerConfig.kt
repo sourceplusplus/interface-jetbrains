@@ -26,7 +26,6 @@ data class SourceMarkerConfig(
     var rootSourcePackages: List<String> = emptyList(),
     var autoResolveEndpointNames: Boolean = true,
     var localMentorEnabled: Boolean = true,
-    var pluginConsoleEnabled: Boolean = false,
     var serviceHost: String? = null,
     var accessToken: String? = null,
     var certificatePins: List<String> = emptyList(),
