@@ -148,7 +148,6 @@ class SourceMarkerPlugin(val project: Project) {
     ) {
         log.info("Initializing SourceMarkerPlugin on project: $project")
         restartIfNecessary()
-        LivePluginProjectLoader.projectClosing(project)
         LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig()
@@ -275,9 +274,9 @@ class SourceMarkerPlugin(val project: Project) {
                 ProgressManager.getInstance()
                     .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
                         override fun run(indicator: ProgressIndicator) {
-                            log.info("Loading live plugins")
+                            log.info("Loading live plugins for project: $project")
                             project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
-                            log.info("Loaded live plugins")
+                            log.info("Loaded live plugins for project: $project")
                             pluginsPromise.complete()
                         }
                     })
@@ -440,6 +439,8 @@ class SourceMarkerPlugin(val project: Project) {
             SourceMarker.getInstance(project).clearGlobalSourceMarkEventListeners()
         }
         SourceMarker.getInstance(project).enabled = false
+
+        project.getUserData(LivePluginService.KEY)?.reset()
 
         deploymentIds.forEach { vertx.undeploy(it).await() }
         deploymentIds.clear()
