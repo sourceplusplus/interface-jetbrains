@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.sourcemarker.service
 
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -23,7 +24,6 @@ import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
@@ -37,7 +37,7 @@ class LiveViewManager(
     private val pluginConfig: SourceMarkerConfig
 ) : CoroutineVerticle() {
 
-    private val log = LoggerFactory.getLogger(LiveViewManager::class.java)
+    private val log = logger<LiveViewManager>()
 
     override suspend fun start() {
         //register listener
@@ -49,9 +49,9 @@ class LiveViewManager(
 
         vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developer)) {
             val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
-            if (log.isTraceEnabled) log.trace("Received live event: {}", event)
+            if (log.isTraceEnabled) log.trace("Received live event: $event")
             if (!SourceMarker.getInstance(project).enabled) {
-                log.warn("SourceMarker is not enabled, ignoring live event: {}", event)
+                log.warn("SourceMarker is not enabled, ignoring live event: $event")
                 return@consumer
             }
 

@@ -17,6 +17,7 @@
 package spp.jetbrains.sourcemarker.service
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -24,7 +25,6 @@ import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
@@ -54,7 +54,7 @@ class LiveInstrumentManager(
 ) : CoroutineVerticle() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(LiveInstrumentManager::class.java)
+        private val log = logger<LiveInstrumentManager>()
     }
 
     override suspend fun start() {
@@ -66,7 +66,7 @@ class LiveInstrumentManager(
 
         vertx.eventBus().consumer<JsonObject>(toLiveInstrumentSubscriberAddress(developer)) {
             val liveEvent = Json.decodeValue(it.body().toString(), LiveInstrumentEvent::class.java)
-            log.debug("Received instrument event. Type: {}", liveEvent.eventType)
+            log.debug("Received instrument event. Type: ${liveEvent.eventType}")
 
             when (liveEvent.eventType) {
                 LiveInstrumentEventType.LOG_HIT -> handleLogHitEvent(liveEvent)
@@ -75,7 +75,7 @@ class LiveInstrumentManager(
                 LiveInstrumentEventType.BREAKPOINT_REMOVED -> handleInstrumentRemovedEvent(liveEvent)
                 LiveInstrumentEventType.LOG_ADDED -> handleLogAddedEvent(liveEvent)
                 LiveInstrumentEventType.LOG_REMOVED -> handleInstrumentRemovedEvent(liveEvent)
-                else -> log.warn("Un-implemented event type: {}", liveEvent.eventType)
+                else -> log.warn("Un-implemented event type: ${liveEvent.eventType}")
             }
         }
 
@@ -90,7 +90,7 @@ class LiveInstrumentManager(
         //show live status bars
         Instance.liveInstrument!!.getLiveInstruments(null).onComplete {
             if (it.succeeded()) {
-                log.info("Found {} active live status bars", it.result().size)
+                log.info("Found ${it.result().size} active live status bars")
                 LiveStatusManager.addActiveLiveInstruments(it.result())
             } else {
                 log.error("Failed to get live status bars", it.cause())

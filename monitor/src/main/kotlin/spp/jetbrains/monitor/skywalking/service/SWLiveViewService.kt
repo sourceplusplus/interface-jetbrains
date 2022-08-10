@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.monitor.skywalking.service
 
+import com.intellij.openapi.diagnostic.logger
 import io.vertx.core.Future
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.json.JsonArray
@@ -24,7 +25,6 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
-import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
 import spp.jetbrains.monitor.skywalking.bridge.EndpointTracesBridge
@@ -57,7 +57,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
             .appendPattern("yyyyMMddHHmm")
             .toFormatter()
             .withZone(ZoneOffset.UTC)
-        private val log = LoggerFactory.getLogger(SWLiveViewService::class.java)
+        private val log = logger<SWLiveViewService>()
     }
 
     data class SWLiveViewSubscription(

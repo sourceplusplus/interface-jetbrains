@@ -26,11 +26,6 @@
 
         <errorHandler implementation="spp.jetbrains.sourcemarker.reporting.GitHubErrorReporter"/>
 
-        <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.console.SourceMarkerConsoleService"/>
-        <toolWindow id="Source++ Console"
-                    factoryClass="spp.jetbrains.sourcemarker.console.SourceMarkerToolWindowFactory"/>
-
         <scratch.rootType implementation="liveplugin.implementation.ScratchLivePluginRootType"/>
         <nonProjectFileWritingAccessExtension implementation="liveplugin.implementation.MakePluginFilesAlwaysEditable"/>
         <syntaxHighlighter factoryClass="liveplugin.implementation.EnableSyntaxHighlighterInLivePlugins" order="first"/>

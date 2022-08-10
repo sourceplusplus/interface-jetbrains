@@ -18,6 +18,7 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.ide.util.PsiNavigationSupport
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
@@ -29,7 +30,6 @@ import io.vertx.core.*
 import io.vertx.kotlin.coroutines.await
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.exception.LiveStackTraceElement
@@ -44,7 +44,7 @@ import spp.protocol.artifact.exception.sourceAsLineNumber
  */
 object ArtifactNavigator {
 
-    private val log = LoggerFactory.getLogger(ArtifactNavigator::class.java)
+    private val log = logger<ArtifactNavigator>()
 
     //todo: remove method from method names and support navigating to classes?
 
@@ -77,7 +77,7 @@ object ArtifactNavigator {
                 handler.handle(Future.succeededFuture(true))
             }
         } else {
-            log.warn("Could not find artifact: {}", artifactQualifiedName)
+            log.warn("Could not find artifact: $artifactQualifiedName")
             handler.handle(Future.succeededFuture(false))
         }
     }

@@ -27,6 +27,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -59,7 +60,6 @@ import kotlinx.coroutines.*
 import liveplugin.implementation.LivePluginProjectLoader
 import liveplugin.implementation.plugin.LivePluginService
 import org.apache.commons.text.CaseUtils
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
@@ -101,7 +101,7 @@ class SourceMarkerPlugin(val project: Project) {
 
     companion object {
         private const val SPP_PLUGIN_YML_PATH = ".spp/spp-plugin.yml"
-        private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
+        private val log = logger<SourceMarkerPlugin>()
         private val KEY = Key.create<SourceMarkerPlugin>("SPP_SOURCE_MARKER_PLUGIN")
 
         @Synchronized
@@ -145,7 +145,7 @@ class SourceMarkerPlugin(val project: Project) {
         configInput: SourceMarkerConfig? = null,
         notifySuccessfulConnection: Boolean = false
     ) {
-        log.info("Initializing SourceMarkerPlugin on project: {}", project)
+        log.info("Initializing SourceMarkerPlugin on project: $project")
         restartIfNecessary()
         LivePluginProjectLoader.projectClosing(project)
         LivePluginProjectLoader.projectOpened(project)
@@ -264,7 +264,7 @@ class SourceMarkerPlugin(val project: Project) {
                         )
                     )
                 }
-                log.error("Connection failed. Reason: {}", throwable.message)
+                log.error("Connection failed", throwable)
             }
 
             if (connectedMonitor) {
@@ -295,7 +295,7 @@ class SourceMarkerPlugin(val project: Project) {
                         ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
                     )
                 } catch (ex: JacksonException) {
-                    log.error("Failed to parse config file {}", configFile.absolutePath, ex)
+                    log.error("Failed to parse config file ${configFile.absolutePath}", ex)
                     return null
                 }
 
@@ -375,7 +375,7 @@ class SourceMarkerPlugin(val project: Project) {
 
         log.info("Discovering available services")
         val availableRecords = discovery!!.getRecords { true }.await()
-        log.info("Discovered {} services", availableRecords.size)
+        log.info("Discovered $availableRecords.size services")
 
         //live service
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_SERVICE }) {

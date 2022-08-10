@@ -19,13 +19,13 @@ package spp.jetbrains.marker
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
 import io.vertx.core.Vertx
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.impl.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -47,7 +47,7 @@ class SourceMarker {
     companion object {
         var PLUGIN_NAME = "SourceMarker"
 
-        private val log = LoggerFactory.getLogger(SourceMarker::class.java)
+        private val log = logger<SourceMarker>()
         private val KEY = Key.create<SourceMarker>("SPP_SOURCE_MARKER")
         val VERTX_KEY = Key.create<Vertx>("SPP_VERTX")
 
@@ -64,7 +64,6 @@ class SourceMarker {
     @Volatile
     var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
-    private val log = LoggerFactory.getLogger(javaClass)
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
 
@@ -83,7 +82,7 @@ class SourceMarker {
         if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
             sourceFileMarker.clearSourceMarks()
             sourceFileMarker.psiFile.putUserData(SourceFileMarker.KEY, null)
-            log.info("Deactivated source file marker: {}", sourceFileMarker)
+            log.info("Deactivated source file marker: $sourceFileMarker")
             return true
         }
         return false
@@ -138,12 +137,12 @@ class SourceMarker {
     }
 
     fun addGlobalSourceMarkEventListener(sourceMarkEventListener: SourceMarkEventListener) {
-        log.info("Adding global source mark event listener: {}", sourceMarkEventListener)
+        log.info("Adding global source mark event listener: $sourceMarkEventListener")
         globalSourceMarkEventListeners.add(sourceMarkEventListener)
     }
 
     fun removeGlobalSourceMarkEventListener(sourceMarkEventListener: SourceMarkEventListener) {
-        log.info("Removing global source mark event listener: {}", sourceMarkEventListener)
+        log.info("Removing global source mark event listener: $sourceMarkEventListener")
         globalSourceMarkEventListeners.remove(sourceMarkEventListener)
     }
 

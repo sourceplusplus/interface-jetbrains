@@ -17,13 +17,13 @@
 package spp.jetbrains.sourcemarker.status
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.impl.ArtifactScopeService
@@ -74,7 +74,7 @@ import javax.swing.JPanel
  */
 object LiveStatusManager : SourceMarkEventListener {
 
-    private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
+    private val log = logger<LiveStatusManager>()
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
     private val logData = ConcurrentHashMap<String, List<*>>()
 
@@ -122,7 +122,7 @@ object LiveStatusManager : SourceMarkEventListener {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -166,7 +166,7 @@ object LiveStatusManager : SourceMarkEventListener {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -261,7 +261,7 @@ object LiveStatusManager : SourceMarkEventListener {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -300,7 +300,7 @@ object LiveStatusManager : SourceMarkEventListener {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -366,7 +366,7 @@ object LiveStatusManager : SourceMarkEventListener {
                     addStatusBar(inlayMark, statusBar)
                 }
             } else {
-                log.warn("No detected expression at line {}. Inlay mark ignored", liveBreakpoint.location.line)
+                log.warn("No detected expression at line ${liveBreakpoint.location.line}. Inlay mark ignored")
             }
         }
     }
@@ -406,7 +406,7 @@ object LiveStatusManager : SourceMarkEventListener {
                     detector.addLiveLog(editor, inlayMark, liveLog.logFormat, liveLog.location.line)
                 }
             } else {
-                log.warn("No detected expression at line {}. Inlay mark ignored", liveLog.location.line)
+                log.warn("No detected expression at line ${liveLog.location.line}. Inlay mark ignored")
             }
         }
     }

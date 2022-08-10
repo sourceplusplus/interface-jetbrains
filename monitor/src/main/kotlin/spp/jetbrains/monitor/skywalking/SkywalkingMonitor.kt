@@ -18,6 +18,7 @@ package spp.jetbrains.monitor.skywalking
 
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.okHttpClient
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import eu.geekplace.javapinning.JavaPinning
@@ -26,7 +27,6 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import okhttp3.OkHttpClient
-import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.impl.SkywalkingMonitorServiceImpl
 import spp.jetbrains.monitor.skywalking.service.SWLiveService
@@ -57,7 +57,7 @@ class SkywalkingMonitor(
 ) : CoroutineVerticle() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(SkywalkingMonitor::class.java)
+        private val log = logger<SkywalkingMonitor>()
 
         val LIVE_SERVICE = Key.create<LiveService>("SPP_LIVE_SERVICE")
         val LIVE_VIEW_SERVICE = Key.create<LiveViewService>("SPP_LIVE_VIEW_SERVICE")

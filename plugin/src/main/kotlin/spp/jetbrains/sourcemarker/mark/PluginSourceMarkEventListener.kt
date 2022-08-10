@@ -16,11 +16,11 @@
  */
 package spp.jetbrains.sourcemarker.mark
 
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 import spp.jetbrains.marker.jvm.psi.LoggerDetector
 import spp.jetbrains.marker.py.PythonEndpointDetector
@@ -42,7 +42,7 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 class PluginSourceMarkEventListener(val project: Project) : SynchronousSourceMarkEventListener {
 
     companion object {
-        private val log = LoggerFactory.getLogger(PluginSourceMarkEventListener::class.java)
+        private val log = logger<PluginSourceMarkEventListener>()
     }
 
     private val loggerDetector = LoggerDetector(SourceMarkerPlugin.getInstance(project).vertx)

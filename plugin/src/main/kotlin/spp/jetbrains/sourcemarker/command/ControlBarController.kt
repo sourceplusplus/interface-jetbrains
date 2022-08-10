@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.sourcemarker.command
 
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiDocumentManager
@@ -25,7 +26,6 @@ import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.common.toFilePath
 import liveplugin.implementation.plugin.LivePluginService
 import org.joor.Reflect
-import org.slf4j.LoggerFactory
 import spp.command.LiveCommand
 import spp.command.LiveCommandContext
 import spp.jetbrains.marker.impl.ArtifactCreationService
@@ -48,7 +48,7 @@ import javax.swing.JPanel
  */
 object ControlBarController {
 
-    private val log = LoggerFactory.getLogger(ControlBarController::class.java)
+    private val log = logger<ControlBarController>()
     private var previousControlBar: InlayMark? = null
     private val availableCommands: MutableList<LiveCommand> = mutableListOf()
 
@@ -110,7 +110,7 @@ object ControlBarController {
     }
 
     fun handleCommandInput(input: String, fullText: String, editor: Editor) {
-        log.info("Processing command input: {}", input)
+        log.info("Processing command input: $input")
         (availableCommands + LivePluginService.getInstance(editor.project!!)
             .getRegisteredLiveCommands()).find { it.name == input }
             ?.let {
@@ -160,7 +160,7 @@ object ControlBarController {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -193,7 +193,7 @@ object ControlBarController {
                 controlBar.focus()
             }
         } else if (tryingAboveLine) {
-            log.warn("No detected expression at line {}. Inlay mark ignored", lineNumber)
+            log.warn("No detected expression at line $lineNumber. Inlay mark ignored")
         } else {
             showControlBar(editor, lineNumber - 1, true)
         }

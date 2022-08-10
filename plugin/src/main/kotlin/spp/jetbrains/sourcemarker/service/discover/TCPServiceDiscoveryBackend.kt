@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.sourcemarker.service.discover
 
+import com.intellij.openapi.diagnostic.logger
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
@@ -37,7 +38,6 @@ import io.vertx.servicediscovery.Record
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
@@ -57,7 +57,7 @@ import java.util.*
 class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
     companion object {
-        private val log = LoggerFactory.getLogger(TCPServiceDiscoveryBackend::class.java)
+        private val log = logger<TCPServiceDiscoveryBackend>()
         var socket: NetSocket? = null
     }
 

@@ -21,6 +21,7 @@ import com.intellij.codeInsight.hints.presentation.*
 import com.intellij.ide.ui.AntialiasingType
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.INLINE_PARAMETER_HINT
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorFontType
@@ -33,7 +34,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.ui.paint.EffectPainter
 import org.joor.Reflect
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.MARK_REMOVED
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
@@ -59,7 +59,7 @@ import javax.swing.JPanel
 abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
-        private val log = LoggerFactory.getLogger(SourceInlayHintProvider::class.java)
+        private val log = logger<SourceInlayHintProvider>()
 
         val EVENT_LISTENER = SourceMarkEventListener { event ->
             when (event.eventCode) {

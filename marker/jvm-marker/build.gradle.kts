@@ -32,7 +32,6 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
     compileOnly("com.android.tools.external.org-jetbrains:uast:30.2.2")

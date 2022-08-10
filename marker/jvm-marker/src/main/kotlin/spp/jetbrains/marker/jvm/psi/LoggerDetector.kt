@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.jvm.psi
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.util.TextRange
@@ -33,7 +34,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElementOfType
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -48,7 +48,7 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
 class LoggerDetector(val vertx: Vertx) {
 
     companion object {
-        private val log = LoggerFactory.getLogger(LoggerDetector::class.java)
+        private val log = logger<LoggerDetector>()
         val LOGGER_STATEMENTS = SourceKey<List<DetectedLogger>>("LOGGER_STATEMENTS")
 
         private val LOGGER_CLASSES = setOf(

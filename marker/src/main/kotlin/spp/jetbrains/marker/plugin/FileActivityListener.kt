@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.plugin
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.EditorMouseEvent
@@ -30,7 +31,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
@@ -68,8 +68,7 @@ class FileActivityListener : FileEditorManagerListener {
     }
 
     companion object {
-
-        private val log = LoggerFactory.getLogger(FileActivityListener::class.java)
+        private val log = logger<FileActivityListener>()
 
         @JvmStatic
         fun triggerFileOpened(source: FileEditorManager, file: VirtualFile) {

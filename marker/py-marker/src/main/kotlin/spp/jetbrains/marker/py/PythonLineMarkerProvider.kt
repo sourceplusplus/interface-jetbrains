@@ -19,7 +19,6 @@ package spp.jetbrains.marker.py
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyFile
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceLineMarkerProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -32,8 +31,6 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PythonLineMarkerProvider : SourceLineMarkerProvider() {
-
-    private val log = LoggerFactory.getLogger(PythonLineMarkerProvider::class.java)
 
     companion object {
         init {
