@@ -18,6 +18,7 @@ package spp.jetbrains.sourcemarker
 
 import com.apollographql.apollo3.exception.ApolloHttpException
 import com.fasterxml.jackson.core.JacksonException
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
@@ -304,7 +305,10 @@ class SourceMarkerPlugin(val project: Project) {
                 config.put("commandConfig", commandConfig)
 
                 return try {
-                    Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
+                    val objectMapper = ObjectMapper()
+                    //ignore unknown properties (i.e old settings)
+                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    objectMapper.readValue(config.toString(), SourceMarkerConfig::class.java)
                 } catch (ex: DecodeException) {
                     log.warn("Failed to decode $SPP_PLUGIN_YML_PATH", ex)
                     return null
