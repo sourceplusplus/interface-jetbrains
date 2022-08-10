@@ -19,7 +19,7 @@ package spp.jetbrains.sourcemarker.settings
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.DumbService
-import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.project.Project
 import io.vertx.core.json.Json
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
@@ -34,7 +34,7 @@ import javax.swing.JComponent
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SourceMarkerConfigurable : Configurable {
+class SourceMarkerConfigurable(val project: Project) : Configurable {
 
     private var form: PluginConfigurationPanel? = null
 
@@ -43,21 +43,20 @@ class SourceMarkerConfigurable : Configurable {
 
     override fun apply() {
         val updatedConfig = form!!.pluginConfig
-        val projectSettings = PropertiesComponent.getInstance(ProjectManager.getInstance().openProjects[0])
+        val projectSettings = PropertiesComponent.getInstance(project)
         projectSettings.setValue("sourcemarker_plugin_config", Json.encode(updatedConfig))
         form!!.applySourceMarkerConfig(updatedConfig)
 
-        val activeProject = ProjectManager.getInstance().openProjects[0]
-        DumbService.getInstance(activeProject).smartInvokeLater {
+        DumbService.getInstance(project).smartInvokeLater {
             runBlocking {
-                SourceMarkerPlugin.init(activeProject)
+                SourceMarkerPlugin.getInstance(project).init()
             }
         }
     }
 
     override fun createComponent(): JComponent {
         if (form == null) {
-            val config = SourceMarkerPlugin.getConfig(ProjectManager.getInstance().openProjects[0])
+            val config = SourceMarkerPlugin.getInstance(project).getConfig()
             val availServices = runBlocking {
                 SourceServices.Instance.liveService?.getServices()?.let { it.await() } ?: emptyList()
             }

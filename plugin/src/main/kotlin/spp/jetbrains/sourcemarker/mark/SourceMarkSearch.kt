@@ -17,6 +17,7 @@
 package spp.jetbrains.sourcemarker.mark
 
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -57,14 +58,14 @@ object SourceMarkSearch {
         return sourceMark ?: classSourceMark
     }
 
-    fun findByInstrumentId(instrumentId: String): SourceMark? {
-        return SourceMarker.getSourceMarks().firstOrNull {
+    fun findByInstrumentId(project: Project, instrumentId: String): SourceMark? {
+        return SourceMarker.getInstance(project).getSourceMarks().firstOrNull {
             it.getUserData(SourceMarkKeys.INSTRUMENT_ID) == instrumentId
         }
     }
 
-    fun findBySubscriptionId(subscriptionId: String): SourceMark? {
-        return SourceMarker.getSourceMarks().firstOrNull {
+    fun findBySubscriptionId(project: Project, subscriptionId: String): SourceMark? {
+        return SourceMarker.getInstance(project).getSourceMarks().firstOrNull {
             it.getUserData(SourceMarkKeys.VIEW_SUBSCRIPTION_ID) == subscriptionId
         }
     }

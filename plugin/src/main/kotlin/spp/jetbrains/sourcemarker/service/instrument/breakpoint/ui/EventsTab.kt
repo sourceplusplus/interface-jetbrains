@@ -19,7 +19,7 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
@@ -43,7 +43,7 @@ import javax.swing.SortOrder
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class EventsTab : Disposable {
+class EventsTab(val project: Project) : Disposable {
 
     val component: JPanel = JPanel(BorderLayout())
     val model: ListTableModel<LiveBreakpointHit> = ListTableModel<LiveBreakpointHit>(
@@ -77,7 +77,6 @@ class EventsTab : Disposable {
                 val row = table.rowAtPoint(point)
                 if (mouseEvent.clickCount == 2 && row >= 0) {
                     ApplicationManager.getApplication().invokeLater {
-                        val project = ProjectManager.getInstance().openProjects[0]
                         BreakpointHitWindowService.getInstance(project)
                             .showBreakpointHit(model.getItem(table.convertRowIndexToModel(row)))
                     }

@@ -55,7 +55,7 @@ class ExecutionPointManager(
         if (indexOfDollarSign >= 0) {
             fromClass = fromClass.substring(0, indexOfDollarSign)
         }
-        val fileMarker = SourceMarker.getSourceFileMarker(fromClass) ?: return
+        val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(fromClass) ?: return
         val virtualFile = fileMarker.psiFile.containingFile.virtualFile ?: return
         val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return
         val lineStartOffset = document.getLineStartOffset(currentFrame.sourceAsLineNumber()!!) - 1

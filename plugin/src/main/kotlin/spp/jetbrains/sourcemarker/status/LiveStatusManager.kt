@@ -37,7 +37,6 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
@@ -132,7 +131,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = SourceMarkerPlugin.getConfig(editor.project!!)
+            val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = BreakpointStatusBar(
                 LiveSourceLocation(
                     ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
@@ -176,7 +175,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = SourceMarkerPlugin.getConfig(editor.project!!)
+            val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
                     ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier,
@@ -223,9 +222,10 @@ object LiveStatusManager : SourceMarkEventListener {
                     if (it.succeeded()) {
                         val subscriptionId = it.result().subscriptionId!!
                         inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
-                        vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
-                            statusBar.accept(Json.decodeValue(it.body().toString(), LiveViewEvent::class.java))
-                        }
+                        SourceMarkerPlugin.getInstance(editor.project!!).vertx.eventBus()
+                            .consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
+                                statusBar.accept(Json.decodeValue(it.body().toString(), LiveViewEvent::class.java))
+                            }
                         inlayMark.addEventListener { event ->
                             if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
                                 SourceServices.Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
@@ -270,7 +270,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = SourceMarkerPlugin.getConfig(editor.project!!)
+            val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
                     ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
@@ -309,7 +309,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = SourceMarkerPlugin.getConfig(editor.project!!)
+            val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = SpanStatusBar(
                 LiveSourceLocation(
                     inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,

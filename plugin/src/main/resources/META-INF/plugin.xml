@@ -16,7 +16,7 @@
                 serviceImplementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService"/>
         <editor.linePainter
                 implementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.painter.VariableEditorLinePainter"/>
-        <applicationConfigurable
+        <projectConfigurable
                 instance="spp.jetbrains.sourcemarker.settings.SourceMarkerConfigurable"
                 groupId="tools"
                 id="Source++"

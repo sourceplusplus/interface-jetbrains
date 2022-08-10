@@ -61,7 +61,7 @@ class FileActivityListener : FileEditorManagerListener {
             val fileMarker = psiFile?.getUserData(SourceFileMarker.KEY)
             if (fileMarker != null) {
                 runBlocking {
-                    SourceMarker.deactivateSourceFileMarker(fileMarker)
+                    SourceMarker.getInstance(source.project).deactivateSourceFileMarker(fileMarker)
                 }
             }
         }

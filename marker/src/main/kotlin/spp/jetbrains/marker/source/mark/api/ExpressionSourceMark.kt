@@ -110,7 +110,7 @@ abstract class ExpressionSourceMark(
     }
 
     fun getParentSourceMark(): SourceMark? {
-        return SourceMarker.getSourceMark(
+        return SourceMarker.getInstance(project).getSourceMark(
             artifactQualifiedName.copy(
                 identifier = artifactQualifiedName.identifier.substringBefore("#"),
                 type = ArtifactType.METHOD

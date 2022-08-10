@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.project.Project
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -48,7 +49,10 @@ import javax.swing.UIManager
 import kotlin.math.ceil
 import kotlin.math.floor
 
-class PortalController(private val markerConfig: SourceMarkerConfig) : CoroutineVerticle() {
+class PortalController(
+    private val project: Project,
+    private val markerConfig: SourceMarkerConfig
+) : CoroutineVerticle() {
 
     private val log = LoggerFactory.getLogger(PortalController::class.java)
 
@@ -97,10 +101,10 @@ class PortalController(private val markerConfig: SourceMarkerConfig) : Coroutine
                 }
             }
         }
-        SourceMarker.configuration.guideMarkConfiguration.componentProvider = componentProvider
-        SourceMarker.configuration.inlayMarkConfiguration.componentProvider = componentProvider
+        SourceMarker.getInstance(project).configuration.guideMarkConfiguration.componentProvider = componentProvider
+        SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.componentProvider = componentProvider
 
-        SourceMarker.addGlobalSourceMarkEventListener {
+        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED && it.sourceMark is GuideMark) {
                 //register portal for source mark
                 val portal = SourcePortal.getPortal(

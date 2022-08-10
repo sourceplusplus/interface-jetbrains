@@ -19,7 +19,10 @@ package spp.jetbrains.marker
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
+import io.vertx.core.Vertx
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
@@ -39,9 +42,24 @@ import spp.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("TooManyFunctions")
-object SourceMarker {
+class SourceMarker {
 
-    var PLUGIN_NAME = "SourceMarker"
+    companion object {
+        var PLUGIN_NAME = "SourceMarker"
+
+        private val log = LoggerFactory.getLogger(SourceMarker::class.java)
+        private val KEY = Key.create<SourceMarker>("SPP_SOURCE_MARKER")
+        val VERTX_KEY = Key.create<Vertx>("SPP_VERTX")
+
+        @Synchronized
+        fun getInstance(project: Project): SourceMarker {
+            if (project.getUserData(KEY) == null) {
+                val sourceMarker = SourceMarker()
+                project.putUserData(KEY, sourceMarker)
+            }
+            return project.getUserData(KEY)!!
+        }
+    }
 
     @Volatile
     var enabled = true

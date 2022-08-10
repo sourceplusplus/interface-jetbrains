@@ -44,17 +44,17 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
         if ((parent is PsiMethod && element === parent.nameIdentifier)
             || (JVMMarkerUtils.getNameIdentifier(parent) === element)
         ) {
-            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
+            val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile)!!
             val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(parent.toUElement() as UMethod)
-            return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
+            return if (!SourceMarker.getInstance(element.project).configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
                 JVMMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
             }
         } else if (element is PsiStatement) {
-            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
+            val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile)!!
             val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(
                 JVMMarkerUtils.getUniversalExpression(element).toUElement() as UExpression
             )
-            return if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
+            return if (!SourceMarker.getInstance(element.project).configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
                 JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
             }
         }

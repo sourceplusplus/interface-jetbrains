@@ -37,7 +37,7 @@ class SourceMarkerToolWindowFactory : ToolWindowFactory {
     }
 
     override fun isApplicable(project: Project): Boolean {
-        return SourceMarkerPlugin.getConfig(project).pluginConsoleEnabled
+        return SourceMarkerPlugin.getInstance(project).getConfig().pluginConsoleEnabled
     }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {

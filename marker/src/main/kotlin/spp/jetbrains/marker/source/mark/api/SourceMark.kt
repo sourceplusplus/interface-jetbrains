@@ -122,7 +122,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
     fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true, editor: Editor? = null)
     fun apply(addToMarker: Boolean = true, editor: Editor? = null) {
-        SourceMarker.getGlobalSourceMarkEventListeners().forEach(::addEventListener)
+        SourceMarker.getInstance(project).getGlobalSourceMarkEventListeners().forEach(::addEventListener)
 
         if (addToMarker) {
             check(sourceFileMarker.applySourceMark(this, autoRefresh = true, overrideFilter = true))

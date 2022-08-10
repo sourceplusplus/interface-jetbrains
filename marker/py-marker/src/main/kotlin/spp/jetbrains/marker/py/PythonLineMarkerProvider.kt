@@ -42,7 +42,7 @@ class PythonLineMarkerProvider : SourceLineMarkerProvider() {
     }
 
     override fun getLineMarkerInfo(parent: PsiElement?, element: PsiElement): LineMarkerInfo<PsiElement>? {
-        val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)
+        val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile)
         return null //todo: this
     }
 

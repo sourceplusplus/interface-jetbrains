@@ -43,7 +43,7 @@ open class SourceMarkPopupAction : AnAction() {
     private val log = LoggerFactory.getLogger(SourceMarkPopupAction::class.java)
 
     override fun update(@NotNull e: AnActionEvent) {
-        if (!SourceMarker.enabled) {
+        if (!SourceMarker.getInstance(e.project!!).enabled) {
             log.warn("SourceMarker disabled. Ignoring popup action.")
             return
         }
