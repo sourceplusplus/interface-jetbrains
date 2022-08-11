@@ -28,6 +28,7 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
+import liveplugin.implementation.plugin.LiveStatusManager;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
@@ -138,7 +139,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
     }
 
     private void setupAsActive() {
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, event -> {
+        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, event -> {
             if (statusPanel == null) return;
             if (event.getEventType() == METER_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
@@ -379,7 +380,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveSpan = (LiveSpan) it.result();
-                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveSpan);
+                LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveSpan);
 
                 ApplicationManager.getApplication().invokeLater(() -> {
                     inlayMark.dispose(); //dispose this bar
@@ -405,7 +406,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         if (liveSpan != null) {
             inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveSpan.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveSpan);
+                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveSpan);
                 } else {
                     it.cause().printStackTrace();
                 }

@@ -25,6 +25,7 @@ import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import liveplugin.implementation.plugin.LiveStatusManager
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor.Companion.LIVE_INSTRUMENT_SERVICE
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
@@ -32,7 +33,6 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
@@ -90,7 +90,7 @@ class LiveInstrumentManager(
         project.getUserData(LIVE_INSTRUMENT_SERVICE)!!.getLiveInstruments(null).onComplete {
             if (it.succeeded()) {
                 log.info("Found ${it.result().size} active live status bars")
-                LiveStatusManager.addActiveLiveInstruments(it.result())
+                LiveStatusManager.getInstance(project).addActiveLiveInstruments(it.result())
             } else {
                 log.error("Failed to get live status bars", it.cause())
             }
@@ -112,7 +112,7 @@ class LiveInstrumentManager(
                 inlayMark.putUserData(SourceMarkKeys.INSTRUMENT_ID, logAdded.id)
                 inlayMark.getUserData(SourceMarkKeys.STATUS_BAR)!!.setLiveInstrument(logAdded)
             } else {
-                LiveStatusManager.addActiveLiveInstrument(logAdded)
+                LiveStatusManager.getInstance(project).addActiveLiveInstrument(logAdded)
             }
         }
     }

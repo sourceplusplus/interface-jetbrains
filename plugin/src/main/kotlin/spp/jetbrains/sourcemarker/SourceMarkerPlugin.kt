@@ -60,6 +60,7 @@ import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
 import liveplugin.implementation.LivePluginProjectLoader
 import liveplugin.implementation.plugin.LivePluginService
+import liveplugin.implementation.plugin.LiveStatusManager
 import org.apache.commons.text.CaseUtils
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.ArtifactSearch
@@ -81,7 +82,7 @@ import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
-import spp.jetbrains.sourcemarker.status.LiveStatusManager
+import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.protocol.SourceServices
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
@@ -376,6 +377,9 @@ class SourceMarkerPlugin(val project: Project) {
             Thread.currentThread().contextClassLoader = originalClassLoader
         }
 
+        val liveStatusManager = LiveStatusManagerImpl(project)
+        project.putUserData(LiveStatusManager.KEY, liveStatusManager)
+
         log.info("Discovering available services")
         val availableRecords = discovery!!.getRecords { true }.await()
         log.info("Discovered $availableRecords.size services")
@@ -396,7 +400,7 @@ class SourceMarkerPlugin(val project: Project) {
         //live instrument
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_INSTRUMENT }) {
             log.info("Live instruments available")
-            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(LiveStatusManager)
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(liveStatusManager)
 
             val liveInstrument = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }

@@ -21,16 +21,17 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import liveplugin.implementation.plugin.LiveStatusManager;
 import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
-import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
-import spp.jetbrains.sourcemarker.service.ViewEventListener;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentEventType;
 import spp.protocol.instrument.meter.MeterType;
+import spp.protocol.service.listen.LiveInstrumentEventListener;
+import spp.protocol.service.listen.LiveViewEventListener;
 import spp.protocol.view.LiveViewEvent;
 
 import javax.swing.*;
@@ -44,7 +45,7 @@ import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener, ViewEventListener {
+public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentEventListener, LiveViewEventListener {
 
     private final LiveMeter liveMeter;
     private final GutterMark gutterMark;
@@ -79,7 +80,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
             dayLabel.setVisible(false);
             dayValueLabel.setVisible(false);
         }
-        LiveStatusManager.addViewEventListener(gutterMark, this);
+        LiveStatusManager.getInstance(gutterMark.getProject()).addViewEventListener(gutterMark, this);
     }
 
     @Override
@@ -125,7 +126,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
                 gutterMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                     if (it.succeeded()) {
                         gutterMark.dispose();
-                        LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);
+                        LiveStatusManager.getInstance(gutterMark.getProject()).removeActiveLiveInstrument(liveMeter);
                     } else {
                         it.cause().printStackTrace();
                     }

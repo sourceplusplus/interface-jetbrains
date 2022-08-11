@@ -28,6 +28,7 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
+import liveplugin.implementation.plugin.LiveStatusManager;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
@@ -141,7 +142,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     private void setupAsActive() {
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, event -> {
+        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, event -> {
             if (statusPanel == null) return;
             if (event.getEventType() == METER_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
@@ -394,14 +395,14 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveMeter = (LiveMeter) it.result();
-                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveMeter);
+                LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveMeter);
 
                 ApplicationManager.getApplication().invokeLater(() -> {
                     inlayMark.dispose(); //dispose this bar
 
                     //create gutter popup
                     ApplicationManager.getApplication().runReadAction(()
-                            -> LiveStatusManager.showMeterStatusIcon(liveMeter, inlayMark.getSourceFileMarker()));
+                            -> LiveStatusManager.getInstance(inlayMark.getProject()).showMeterStatusIcon(liveMeter, inlayMark.getSourceFileMarker()));
                 });
             } else {
                 it.cause().printStackTrace();
@@ -424,7 +425,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         if (liveMeter != null) {
             inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);
+                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveMeter);
                 } else {
                     it.cause().printStackTrace();
                 }
