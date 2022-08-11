@@ -39,10 +39,10 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 
 public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener, ViewEventListener {
 
@@ -122,7 +122,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
+                gutterMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                     if (it.succeeded()) {
                         gutterMark.dispose();
                         LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);

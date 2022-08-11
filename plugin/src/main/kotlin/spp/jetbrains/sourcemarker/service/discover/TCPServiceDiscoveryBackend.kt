@@ -17,6 +17,7 @@
 package spp.jetbrains.sourcemarker.service.discover
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
@@ -58,9 +59,19 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
     companion object {
         private val log = logger<TCPServiceDiscoveryBackend>()
-        var socket: NetSocket? = null
+        private val projectMap = mutableMapOf<String, TCPServiceDiscoveryBackend>()
+
+        fun getSocket(project: Project): NetSocket? {
+            return projectMap[project.locationHash]?.socket
+        }
+
+        suspend fun closeSocket(project: Project) {
+            projectMap[project.locationHash]?.socket?.close()?.await()
+            projectMap[project.locationHash]?.socket = null
+        }
     }
 
+    var socket: NetSocket? = null
     private lateinit var vertx: Vertx
     private lateinit var client: NetClient
     private lateinit var pluginConfig: SourceMarkerConfig
@@ -72,6 +83,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         pluginConfig = Json.decodeValue(
             config.getJsonObject("sourcemarker_plugin_config").toString(), SourceMarkerConfig::class.java
         )
+        projectMap[config.getString("project_location_hash")] = this
 
         val serviceHost = pluginConfig.serviceHostNormalized
         val certificatePins = mutableListOf<String>()

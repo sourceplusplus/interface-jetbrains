@@ -57,11 +57,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
 
 public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
@@ -376,7 +376,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
                 null,
                 meta
         );
-        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
+        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveSpan = (LiveSpan) it.result();
                 LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveSpan);
@@ -403,7 +403,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveSpan != null) {
-            INSTANCE.getLiveInstrument().removeLiveInstrument(liveSpan.getId()).onComplete(it -> {
+            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveSpan.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveSpan);
                 } else {

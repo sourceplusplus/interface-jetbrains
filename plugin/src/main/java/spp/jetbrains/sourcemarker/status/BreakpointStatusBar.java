@@ -70,10 +70,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
@@ -486,7 +486,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, Instrument
                 throttle,
                 meta
         );
-        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
+        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveBreakpoint = (LiveBreakpoint) it.result();
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), liveBreakpoint.getId());
@@ -510,7 +510,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, Instrument
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveBreakpoint != null) {
-            INSTANCE.getLiveInstrument().removeLiveInstrument(liveBreakpoint.getId()).onComplete(it -> {
+            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveBreakpoint.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveBreakpoint);
                 } else {

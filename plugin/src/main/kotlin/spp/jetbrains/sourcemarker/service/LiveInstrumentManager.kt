@@ -26,13 +26,13 @@ import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.monitor.skywalking.SkywalkingMonitor.Companion.LIVE_INSTRUMENT_SERVICE
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
-import spp.protocol.SourceServices.Instance
 import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
@@ -47,7 +47,6 @@ import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("UNCHECKED_CAST")
 class LiveInstrumentManager(
     private val project: Project,
     private val pluginConfig: SourceMarkerConfig
@@ -84,11 +83,11 @@ class LiveInstrumentManager(
             BridgeEventType.REGISTER.name.toLowerCase(),
             toLiveInstrumentSubscriberAddress(developer), null,
             JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
-            null, null, TCPServiceDiscoveryBackend.socket!!
+            null, null, TCPServiceDiscoveryBackend.getSocket(project)
         )
 
         //show live status bars
-        Instance.liveInstrument!!.getLiveInstruments(null).onComplete {
+        project.getUserData(LIVE_INSTRUMENT_SERVICE)!!.getLiveInstruments(null).onComplete {
             if (it.succeeded()) {
                 log.info("Found ${it.result().size} active live status bars")
                 LiveStatusManager.addActiveLiveInstruments(it.result())

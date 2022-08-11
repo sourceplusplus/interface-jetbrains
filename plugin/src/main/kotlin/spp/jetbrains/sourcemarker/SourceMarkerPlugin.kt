@@ -83,7 +83,6 @@ import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.status.LiveStatusManager
 import spp.protocol.SourceServices
-import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
@@ -370,6 +369,7 @@ class SourceMarkerPlugin(val project: Project) {
                     JsonObject()
                         .put("backend-name", "tcp-service-discovery")
                         .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
+                        .put("project_location_hash", project.locationHash)
                 )
             )
         } finally {
@@ -384,11 +384,11 @@ class SourceMarkerPlugin(val project: Project) {
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_SERVICE }) {
             log.info("Live service available")
 
-            Instance.liveService = ServiceProxyBuilder(vertx)
+            val liveService = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_SERVICE)
                 .build(LiveService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_SERVICE, Instance.liveService)
+            project.putUserData(SkywalkingMonitor.LIVE_SERVICE, liveService)
         } else {
             log.warn("Live service unavailable")
         }
@@ -398,11 +398,11 @@ class SourceMarkerPlugin(val project: Project) {
             log.info("Live instruments available")
             SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(LiveStatusManager)
 
-            Instance.liveInstrument = ServiceProxyBuilder(vertx)
+            val liveInstrument = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
                 .build(LiveInstrumentService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE, Instance.liveInstrument)
+            project.putUserData(SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE, liveInstrument)
 
             ApplicationManager.getApplication().invokeLater {
                 BreakpointHitWindowService.getInstance(project).showEventsWindow()
@@ -418,11 +418,11 @@ class SourceMarkerPlugin(val project: Project) {
         //live view
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_VIEW }) {
             log.info("Live views available")
-            Instance.liveView = ServiceProxyBuilder(vertx)
+            val liveView = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_VIEW)
                 .build(LiveViewService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_VIEW_SERVICE, Instance.liveView)
+            project.putUserData(SkywalkingMonitor.LIVE_VIEW_SERVICE, liveView)
 
             val viewListener = LiveViewManager(project, config)
             GlobalScope.launch(vertx.dispatcher()) {
@@ -445,12 +445,10 @@ class SourceMarkerPlugin(val project: Project) {
         deploymentIds.forEach { vertx.undeploy(it).await() }
         deploymentIds.clear()
 
-        TCPServiceDiscoveryBackend.socket?.close()?.await()
-        TCPServiceDiscoveryBackend.socket = null
+        TCPServiceDiscoveryBackend.closeSocket(project)
         discovery?.close()
         discovery = null
 
-        Instance.clearServices()
         ControlBarController.clearAvailableCommands()
     }
 

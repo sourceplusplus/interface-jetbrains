@@ -87,10 +87,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_REMOVED;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
@@ -641,7 +641,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             latestTime = null;
             latestLog = null;
 
-            INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId()).onComplete(it -> {
+            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(oldLiveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(oldLiveLog);
                 } else {
@@ -700,7 +700,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         displayTimeField();
         wrapper.grabFocus();
 
-        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
+        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveLog = (LiveLog) it.result();
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), it.result().getId());
@@ -725,7 +725,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         if (liveLog != null) {
             LiveStatusManager.INSTANCE.removeLogData(inlayMark);
-            INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId()).onComplete(it -> {
+            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveLog);
                 } else {
