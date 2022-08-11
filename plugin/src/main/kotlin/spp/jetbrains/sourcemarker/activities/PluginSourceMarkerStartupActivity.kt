@@ -62,7 +62,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
 
         //setup plugin
         runBlocking {
-            SourceMarkerPlugin.init(project)
+            SourceMarkerPlugin.getInstance(project).init()
         }
         super.runActivity(project)
     }

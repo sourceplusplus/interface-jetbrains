@@ -18,6 +18,7 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
@@ -29,7 +30,6 @@ import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.plugin.SourceLineMarkerProvider
@@ -50,7 +50,7 @@ import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(JVMLineMarkerProvider::class.java)
+        private val log = logger<JVMLineMarkerProvider>()
     }
 
     override fun getLineMarkerInfo(
@@ -65,9 +65,9 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
     }
 
     private fun getClassGutterMark(element: PsiIdentifier): LineMarkerInfo<PsiElement>? {
-        val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
+        val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile) ?: return null
         val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
-        if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
+        if (!SourceMarker.getInstance(element.project).configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
 
         //check by artifact name first due to user can erroneously name same class twice
         var gutterMark = fileMarker.getSourceMark(artifactQualifiedName, SourceMark.Type.GUTTER) as ClassGutterMark?
@@ -95,14 +95,14 @@ abstract class JVMLineMarkerProvider : SourceLineMarkerProvider() {
     }
 
     private fun getMethodGutterMark(element: PsiElement): LineMarkerInfo<PsiElement>? {
-        val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
+        val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile) ?: return null
         val uMethod = element.parent.toUElementOfType<UMethod>()
         if (uMethod == null) {
-            log.warn("Unable to transform to UMethod: {}", element.parent)
+            log.warn("Unable to transform to UMethod: ${element.parent}")
             return null
         }
         val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(uMethod)
-        if (!SourceMarker.configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
+        if (!SourceMarker.getInstance(element.project).configuration.createSourceMarkFilter.test(artifactQualifiedName)) return null
 
         //check by artifact name first due to user can erroneously name same method twice
         var gutterMark = fileMarker.getSourceMark(

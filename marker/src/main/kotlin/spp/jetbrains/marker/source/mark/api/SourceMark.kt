@@ -20,6 +20,7 @@ import com.intellij.codeInsight.hints.InlayHintsPassFactory
 import com.intellij.lang.Language
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
@@ -40,7 +41,6 @@ import com.intellij.util.ui.JBUI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -83,7 +83,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(SourceMark::class.java)
+        private val log = logger<SourceMark>()
         private val buildingPopup = AtomicBoolean()
         private var openedMarks: MutableList<SourceMark> = ArrayList()
 
@@ -122,7 +122,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
     fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true, editor: Editor? = null)
     fun apply(addToMarker: Boolean = true, editor: Editor? = null) {
-        SourceMarker.getGlobalSourceMarkEventListeners().forEach(::addEventListener)
+        SourceMarker.getInstance(project).getGlobalSourceMarkEventListeners().forEach(::addEventListener)
 
         if (addToMarker) {
             check(sourceFileMarker.applySourceMark(this, autoRefresh = true, overrideFilter = true))

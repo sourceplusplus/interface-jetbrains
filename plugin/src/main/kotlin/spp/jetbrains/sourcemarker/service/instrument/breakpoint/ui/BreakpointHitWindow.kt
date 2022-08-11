@@ -22,7 +22,6 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.content.Content
 import com.intellij.util.concurrency.AppExecutorUtil
@@ -44,7 +43,7 @@ import javax.swing.JComponent
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class BreakpointHitWindow(
-    project: Project,
+    val project: Project,
     executionPointHighlighter: ExecutionPointHighlighter,
     showExecutionPoint: Boolean
 ) : Disposable {
@@ -74,7 +73,7 @@ class BreakpointHitWindow(
     }
 
     private fun addFramesTab() {
-        val config = SourceMarkerPlugin.getConfig(ProjectManager.getInstance().openProjects[0])
+        val config = SourceMarkerPlugin.getInstance(project).getConfig()
         val framesTab = FramesTab(this, config)
         val content = layoutUi.createContent(
             LiveBreakpointConstants.LIVE_RECORDER_STACK_FRAMES, framesTab.component, "Frames",

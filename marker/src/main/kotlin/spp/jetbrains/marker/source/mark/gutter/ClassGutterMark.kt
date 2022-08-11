@@ -40,7 +40,7 @@ open class ClassGutterMark(
 
     override val id: String = UUID.randomUUID().toString()
 
-    final override val configuration: GutterMarkConfiguration = SourceMarker.configuration.gutterMarkConfiguration
+    final override val configuration: GutterMarkConfiguration = SourceMarker.getInstance(project).configuration.gutterMarkConfiguration.copy()
     private var visible: AtomicBoolean = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
 
     override fun isVisible(): Boolean {

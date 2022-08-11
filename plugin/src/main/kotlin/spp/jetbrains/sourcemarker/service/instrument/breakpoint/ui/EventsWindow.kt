@@ -34,7 +34,7 @@ import javax.swing.JComponent
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class EventsWindow(project: Project) : Disposable {
+class EventsWindow(val project: Project) : Disposable {
 
     lateinit var stackFrameManager: StackFrameManager
     private val listeners: MutableList<DebugStackFrameListener>
@@ -42,7 +42,7 @@ class EventsWindow(project: Project) : Disposable {
     lateinit var eventsTab: EventsTab
 
     private fun addEventsTab() {
-        eventsTab = EventsTab()
+        eventsTab = EventsTab(project)
         val content = layoutUi.createContent(
             LiveBreakpointConstants.LIVE_RECORDER_STACK_FRAMES, eventsTab.component, "Events",
             AllIcons.Debugger.Console, null

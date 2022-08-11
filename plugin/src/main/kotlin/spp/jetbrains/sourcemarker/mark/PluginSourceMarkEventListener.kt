@@ -16,10 +16,11 @@
  */
 package spp.jetbrains.sourcemarker.mark
 
+import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 import spp.jetbrains.marker.jvm.psi.LoggerDetector
 import spp.jetbrains.marker.py.PythonEndpointDetector
@@ -28,7 +29,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
+import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 
@@ -38,22 +39,23 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
+class PluginSourceMarkEventListener(val project: Project) : SynchronousSourceMarkEventListener {
 
     companion object {
-        private val log = LoggerFactory.getLogger(PluginSourceMarkEventListener::class.java)
-        private val loggerDetector = LoggerDetector(vertx)
-        private val endpointDetectors = mutableMapOf<String, EndpointDetector<*>>()
-            .apply {
-                JVMEndpointDetector(vertx).let {
-                    put("JAVA", it)
-                    put("kotlin", it)
-                    put("Scala", it)
-                    put("Groovy", it)
-                }
-                put("Python", PythonEndpointDetector(vertx))
-            }.toMap()
+        private val log = logger<PluginSourceMarkEventListener>()
     }
+
+    private val loggerDetector = LoggerDetector(SourceMarkerPlugin.getInstance(project).vertx)
+    private val endpointDetectors = mutableMapOf<String, EndpointDetector<*>>()
+        .apply {
+            JVMEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx).let {
+                put("JAVA", it)
+                put("kotlin", it)
+                put("Scala", it)
+                put("Groovy", it)
+            }
+            put("Python", PythonEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx))
+        }.toMap()
 
     override fun handleEvent(event: SourceMarkEvent) {
         if (log.isTraceEnabled) {
@@ -66,7 +68,7 @@ class PluginSourceMarkEventListener : SynchronousSourceMarkEventListener {
             if (sourceMark is MethodGuideMark) {
                 //setup endpoint detector and attempt detection
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetectors[sourceMark.language.id])
-                GlobalScope.launch(vertx.dispatcher()) {
+                GlobalScope.launch(SourceMarkerPlugin.getInstance(project).vertx.dispatcher()) {
                     endpointDetectors[sourceMark.language.id]!!.getOrFindEndpointId(sourceMark)
                 }
             }

@@ -19,6 +19,7 @@ package spp.jetbrains.marker.source
 import com.google.common.collect.ImmutableList
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -26,7 +27,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
@@ -54,7 +54,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     companion object {
         val KEY = Key.create<SourceFileMarker>("sm.SourceFileMarker")
-        private val log = LoggerFactory.getLogger(SourceFileMarker::class.java)
+        private val log = logger<SourceFileMarker>()
         val SUPPORTED_FILE_TYPES = mutableListOf<Class<out PsiFile>>()
 
         @JvmStatic

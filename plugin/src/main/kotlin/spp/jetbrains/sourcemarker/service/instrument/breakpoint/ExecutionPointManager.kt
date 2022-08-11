@@ -18,13 +18,13 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.protocol.artifact.exception.qualifiedClassName
 import spp.protocol.artifact.exception.sourceAsLineNumber
@@ -42,7 +42,7 @@ class ExecutionPointManager(
 ) : DebugStackFrameListener, Disposable {
 
     companion object {
-        private val log = LoggerFactory.getLogger(ExecutionPointManager::class.java)
+        private val log = logger<ExecutionPointManager>()
     }
 
     override fun onChanged(stackFrameManager: StackFrameManager) {
@@ -55,7 +55,7 @@ class ExecutionPointManager(
         if (indexOfDollarSign >= 0) {
             fromClass = fromClass.substring(0, indexOfDollarSign)
         }
-        val fileMarker = SourceMarker.getSourceFileMarker(fromClass) ?: return
+        val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(fromClass) ?: return
         val virtualFile = fileMarker.psiFile.containingFile.virtualFile ?: return
         val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return
         val lineStartOffset = document.getLineStartOffset(currentFrame.sourceAsLineNumber()!!) - 1

@@ -21,16 +21,17 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import liveplugin.implementation.plugin.LiveStatusManager;
 import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
 import spp.jetbrains.sourcemarker.PluginIcons;
-import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
-import spp.jetbrains.sourcemarker.service.ViewEventListener;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentEventType;
 import spp.protocol.instrument.meter.MeterType;
+import spp.protocol.service.listen.LiveInstrumentEventListener;
+import spp.protocol.service.listen.LiveViewEventListener;
 import spp.protocol.view.LiveViewEvent;
 
 import javax.swing.*;
@@ -39,12 +40,12 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 
-public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListener, ViewEventListener {
+public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentEventListener, LiveViewEventListener {
 
     private final LiveMeter liveMeter;
     private final GutterMark gutterMark;
@@ -79,7 +80,7 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
             dayLabel.setVisible(false);
             dayValueLabel.setVisible(false);
         }
-        LiveStatusManager.addViewEventListener(gutterMark, this);
+        LiveStatusManager.getInstance(gutterMark.getProject()).addViewEventListener(gutterMark, this);
     }
 
     @Override
@@ -122,10 +123,10 @@ public class LiveMeterStatusPanel extends JPanel implements InstrumentEventListe
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
+                gutterMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                     if (it.succeeded()) {
                         gutterMark.dispose();
-                        LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);
+                        LiveStatusManager.getInstance(gutterMark.getProject()).removeActiveLiveInstrument(liveMeter);
                     } else {
                         it.cause().printStackTrace();
                     }

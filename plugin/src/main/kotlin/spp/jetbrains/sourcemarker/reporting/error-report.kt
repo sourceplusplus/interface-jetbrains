@@ -28,10 +28,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.application.ex.ApplicationInfoEx
-import com.intellij.openapi.diagnostic.Attachment
-import com.intellij.openapi.diagnostic.ErrorReportSubmitter
-import com.intellij.openapi.diagnostic.IdeaLoggingEvent
-import com.intellij.openapi.diagnostic.SubmittedReportInfo
+import com.intellij.openapi.diagnostic.*
 import com.intellij.openapi.diagnostic.SubmittedReportInfo.SubmissionStatus
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.progress.EmptyProgressIndicator
@@ -47,7 +44,6 @@ import org.eclipse.egit.github.core.Label
 import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
-import org.slf4j.LoggerFactory
 import spp.jetbrains.sourcemarker.PluginBundle
 import java.awt.Component
 import java.io.PrintWriter
@@ -63,7 +59,7 @@ import java.util.*
  */
 private object AnonymousFeedback {
 
-    private val log = LoggerFactory.getLogger(AnonymousFeedback::class.java)
+    private val log = logger<AnonymousFeedback>()
     private const val gitRepoUser = "sourceplusplus"
     private const val gitRepo = "interface-jetbrains"
 

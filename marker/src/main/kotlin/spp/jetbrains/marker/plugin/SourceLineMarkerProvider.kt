@@ -36,7 +36,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
     abstract fun getLineMarkerInfo(parent: PsiElement?, element: PsiElement): LineMarkerInfo<PsiElement>?
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
-        if (!SourceMarker.enabled) {
+        if (!SourceMarker.getInstance(element.project).enabled) {
             return null
         }
 
@@ -75,12 +75,12 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         elements: MutableList<out PsiElement>,
         result: MutableCollection<in LineMarkerInfo<*>>
     ) {
-        if (!SourceMarker.enabled) {
+        if (elements.firstOrNull() == null || !SourceMarker.getInstance(elements.first().project).enabled) {
             return
         }
 
         elements.stream().map { it.containingFile }.distinct().forEach {
-            SourceMarker.getSourceFileMarker(it)?.removeInvalidSourceMarks()
+            SourceMarker.getInstance(it.project).getSourceFileMarker(it)?.removeInvalidSourceMarks()
         }
     }
 

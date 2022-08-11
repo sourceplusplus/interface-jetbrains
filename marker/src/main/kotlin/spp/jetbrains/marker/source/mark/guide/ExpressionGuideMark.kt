@@ -17,11 +17,11 @@
 package spp.jetbrains.marker.source.mark.guide
 
 import com.intellij.psi.PsiElement
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import java.util.*
-import spp.jetbrains.marker.SourceMarker.configuration as pluginConfiguration
 
 /**
  * Represents a [GuideMark] associated to an expression artifact.
@@ -35,5 +35,5 @@ open class ExpressionGuideMark(
 ) : ExpressionSourceMark(sourceFileMarker, psiExpression), GuideMark {
 
     override val id: String = UUID.randomUUID().toString()
-    override val configuration: GuideMarkConfiguration = pluginConfiguration.guideMarkConfiguration.copy()
+    override val configuration: GuideMarkConfiguration = SourceMarker.getInstance(project).configuration.guideMarkConfiguration.copy()
 }

@@ -18,6 +18,7 @@ package spp.jetbrains.sourcemarker
 
 import com.apollographql.apollo3.exception.ApolloHttpException
 import com.fasterxml.jackson.core.JacksonException
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
@@ -27,11 +28,13 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
@@ -57,8 +60,8 @@ import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
 import liveplugin.implementation.LivePluginProjectLoader
 import liveplugin.implementation.plugin.LivePluginService
+import liveplugin.implementation.plugin.LiveStatusManager
 import org.apache.commons.text.CaseUtils
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
@@ -79,9 +82,8 @@ import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
-import spp.jetbrains.sourcemarker.status.LiveStatusManager
+import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.protocol.SourceServices
-import spp.protocol.SourceServices.Instance
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
@@ -96,18 +98,32 @@ import javax.net.ssl.SSLHandshakeException
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-object SourceMarkerPlugin {
+class SourceMarkerPlugin(val project: Project) {
 
-    private const val SPP_PLUGIN_YML_PATH = ".spp/spp-plugin.yml"
-    private val log = LoggerFactory.getLogger(SourceMarkerPlugin::class.java)
+    companion object {
+        private const val SPP_PLUGIN_YML_PATH = ".spp/spp-plugin.yml"
+        private val log = logger<SourceMarkerPlugin>()
+        private val KEY = Key.create<SourceMarkerPlugin>("SPP_SOURCE_MARKER_PLUGIN")
+
+        @Synchronized
+        fun getInstance(project: Project): SourceMarkerPlugin {
+            if (project.getUserData(KEY) == null) {
+                val sourceMarkerPlugin = SourceMarkerPlugin(project)
+                project.putUserData(KEY, sourceMarkerPlugin)
+                project.putUserData(SourceMarker.VERTX_KEY, sourceMarkerPlugin.vertx)
+            }
+            return project.getUserData(KEY)!!
+        }
+    }
+
     private val deploymentIds = mutableListOf<String>()
-    val vertx: Vertx
     private var connectionJob: Job? = null
     private var discovery: ServiceDiscovery? = null
     private var addedConfigListener = false
+    val vertx: Vertx
 
     init {
-        SourceMarker.enabled = false
+        SourceMarker.getInstance(project).enabled = false
         val options = if (System.getProperty("sourcemarker.debug.unblocked_threads", "false")!!.toBoolean()) {
             log.info("Removed blocked thread checker")
             VertxOptions().setBlockedThreadCheckInterval(Int.MAX_VALUE.toLong())
@@ -127,16 +143,14 @@ object SourceMarkerPlugin {
     }
 
     suspend fun init(
-        project: Project,
         configInput: SourceMarkerConfig? = null,
         notifySuccessfulConnection: Boolean = false
     ) {
-        log.info("Initializing SourceMarkerPlugin on project: {}", project)
+        log.info("Initializing SourceMarkerPlugin on project: $project")
         restartIfNecessary()
-        LivePluginProjectLoader.projectClosing(project)
         LivePluginProjectLoader.projectOpened(project)
 
-        val config = configInput ?: getConfig(project)
+        val config = configInput ?: getConfig()
         if (!addedConfigListener) {
             addedConfigListener = true
             val localConfigListener = object : BulkFileListener {
@@ -146,10 +160,10 @@ object SourceMarkerPlugin {
                     if (event is VFileContentChangeEvent && event.isFromSave && event.path.endsWith(SPP_PLUGIN_YML_PATH)) {
                         if (event.oldTimestamp <= lastUpdated) return else lastUpdated = event.oldTimestamp
                         DumbService.getInstance(project).smartInvokeLater {
-                            val localConfig = loadSppPluginFileConfiguration(project)
+                            val localConfig = loadSppPluginFileConfiguration()
                             if (localConfig != null && localConfig.override) {
                                 runBlocking {
-                                    init(project, localConfig, true)
+                                    init(localConfig, true)
                                 }
                             }
                         }
@@ -178,8 +192,8 @@ object SourceMarkerPlugin {
         connectionJob = GlobalScope.launch(vertx.dispatcher()) {
             var connectedMonitor = false
             try {
-                initServices(project, config)
-                initMonitor(project, config)
+                initServices(config)
+                initMonitor(config)
                 connectedMonitor = true
 
                 if (notifySuccessfulConnection) {
@@ -250,7 +264,7 @@ object SourceMarkerPlugin {
                         )
                     )
                 }
-                log.error("Connection failed. Reason: {}", throwable.message)
+                log.error("Connection failed", throwable)
             }
 
             if (connectedMonitor) {
@@ -260,19 +274,19 @@ object SourceMarkerPlugin {
                 ProgressManager.getInstance()
                     .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
                         override fun run(indicator: ProgressIndicator) {
-                            log.info("Loading live plugins")
+                            log.info("Loading live plugins for project: $project")
                             project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
-                            log.info("Loaded live plugins")
+                            log.info("Loaded live plugins for project: $project")
                             pluginsPromise.complete()
                         }
                     })
                 pluginsPromise.future().await()
-                initMarker(config, project)
+                initMarker(config)
             }
         }
     }
 
-    fun loadSppPluginFileConfiguration(project: Project): SourceMarkerConfig? {
+    fun loadSppPluginFileConfiguration(): SourceMarkerConfig? {
         if (project.basePath != null) {
             val configFile = File(project.basePath, SPP_PLUGIN_YML_PATH)
             if (configFile.exists()) {
@@ -281,7 +295,7 @@ object SourceMarkerPlugin {
                         ObjectMapper().writeValueAsString(YAMLMapper().readValue(configFile, Object::class.java))
                     )
                 } catch (ex: JacksonException) {
-                    log.error("Failed to parse config file {}", configFile.absolutePath, ex)
+                    log.error("Failed to parse config file ${configFile.absolutePath}", ex)
                     return null
                 }
 
@@ -290,7 +304,10 @@ object SourceMarkerPlugin {
                 config.put("commandConfig", commandConfig)
 
                 return try {
-                    Json.decodeValue(config.toString(), SourceMarkerConfig::class.java)
+                    val objectMapper = ObjectMapper()
+                    //ignore unknown properties (i.e old settings)
+                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    objectMapper.readValue(config.toString(), SourceMarkerConfig::class.java)
                 } catch (ex: DecodeException) {
                     log.warn("Failed to decode $SPP_PLUGIN_YML_PATH", ex)
                     return null
@@ -313,8 +330,8 @@ object SourceMarkerPlugin {
         return result
     }
 
-    fun getConfig(project: Project): SourceMarkerConfig {
-        val fileConfig = loadSppPluginFileConfiguration(project)
+    fun getConfig(): SourceMarkerConfig {
+        val fileConfig = loadSppPluginFileConfiguration()
         val config = if (fileConfig != null && fileConfig.override) {
             fileConfig
         } else {
@@ -343,7 +360,7 @@ object SourceMarkerPlugin {
         return null
     }
 
-    private suspend fun discoverAvailableServices(config: SourceMarkerConfig, project: Project) {
+    private suspend fun discoverAvailableServices(config: SourceMarkerConfig) {
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
             Thread.currentThread().contextClassLoader = javaClass.classLoader
@@ -353,25 +370,29 @@ object SourceMarkerPlugin {
                     JsonObject()
                         .put("backend-name", "tcp-service-discovery")
                         .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
+                        .put("project_location_hash", project.locationHash)
                 )
             )
         } finally {
             Thread.currentThread().contextClassLoader = originalClassLoader
         }
 
+        val liveStatusManager = LiveStatusManagerImpl(project)
+        project.putUserData(LiveStatusManager.KEY, liveStatusManager)
+
         log.info("Discovering available services")
         val availableRecords = discovery!!.getRecords { true }.await()
-        log.info("Discovered {} services", availableRecords.size)
+        log.info("Discovered $availableRecords.size services")
 
         //live service
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_SERVICE }) {
             log.info("Live service available")
 
-            Instance.liveService = ServiceProxyBuilder(vertx)
+            val liveService = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_SERVICE)
                 .build(LiveService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_SERVICE, Instance.liveService)
+            project.putUserData(SkywalkingMonitor.LIVE_SERVICE, liveService)
         } else {
             log.warn("Live service unavailable")
         }
@@ -379,13 +400,13 @@ object SourceMarkerPlugin {
         //live instrument
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_INSTRUMENT }) {
             log.info("Live instruments available")
-            SourceMarker.addGlobalSourceMarkEventListener(LiveStatusManager)
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(liveStatusManager)
 
-            Instance.liveInstrument = ServiceProxyBuilder(vertx)
+            val liveInstrument = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
                 .build(LiveInstrumentService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE, Instance.liveInstrument)
+            project.putUserData(SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE, liveInstrument)
 
             ApplicationManager.getApplication().invokeLater {
                 BreakpointHitWindowService.getInstance(project).showEventsWindow()
@@ -401,13 +422,13 @@ object SourceMarkerPlugin {
         //live view
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_VIEW }) {
             log.info("Live views available")
-            Instance.liveView = ServiceProxyBuilder(vertx)
+            val liveView = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_VIEW)
                 .build(LiveViewService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_VIEW_SERVICE, Instance.liveView)
+            project.putUserData(SkywalkingMonitor.LIVE_VIEW_SERVICE, liveView)
 
-            val viewListener = LiveViewManager(config)
+            val viewListener = LiveViewManager(project, config)
             GlobalScope.launch(vertx.dispatcher()) {
                 deploymentIds.add(vertx.deployVerticle(viewListener).await())
             }
@@ -417,25 +438,25 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun restartIfNecessary() {
-        if (SourceMarker.enabled) {
-            SourceMarker.clearAvailableSourceFileMarkers()
-            SourceMarker.clearGlobalSourceMarkEventListeners()
+        if (SourceMarker.getInstance(project).enabled) {
+            SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
+            SourceMarker.getInstance(project).clearGlobalSourceMarkEventListeners()
         }
-        SourceMarker.enabled = false
+        SourceMarker.getInstance(project).enabled = false
+
+        project.getUserData(LivePluginService.KEY)?.reset()
 
         deploymentIds.forEach { vertx.undeploy(it).await() }
         deploymentIds.clear()
 
-        TCPServiceDiscoveryBackend.socket?.close()?.await()
-        TCPServiceDiscoveryBackend.socket = null
+        TCPServiceDiscoveryBackend.closeSocket(project)
         discovery?.close()
         discovery = null
 
-        Instance.clearServices()
         ControlBarController.clearAvailableCommands()
     }
 
-    private suspend fun initServices(project: Project, config: SourceMarkerConfig) {
+    private suspend fun initServices(config: SourceMarkerConfig) {
         if (!config.serviceHost.isNullOrBlank()) {
             val certificatePins = mutableListOf<String>()
             certificatePins.addAll(config.certificatePins)
@@ -492,23 +513,23 @@ object SourceMarkerPlugin {
                     config.serviceToken = body
                 }
 
-                discoverAvailableServices(config, project)
+                discoverAvailableServices(config)
             } else {
                 config.serviceToken = null
             }
         } else {
             //try default local access
             try {
-                tryDefaultAccess(true, config, project)
+                tryDefaultAccess(true, config)
             } catch (ignore: SSLHandshakeException) {
-                tryDefaultAccess(false, config, project)
+                tryDefaultAccess(false, config)
             } catch (e: Exception) {
                 log.warn("Unable to find local live platform", e)
             }
         }
     }
 
-    private suspend fun tryDefaultAccess(ssl: Boolean, config: SourceMarkerConfig, project: Project) {
+    private suspend fun tryDefaultAccess(ssl: Boolean, config: SourceMarkerConfig) {
         val defaultAccessToken = "change-me"
         val tokenUri = "/api/new-token?access_token=$defaultAccessToken"
         val req = vertx.createHttpClient(HttpClientOptions().setSsl(ssl).setVerifyHost(false).setTrustAll(true))
@@ -539,7 +560,7 @@ object SourceMarkerPlugin {
             val projectSettings = PropertiesComponent.getInstance(project)
             projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
 
-            discoverAvailableServices(config, project)
+            discoverAvailableServices(config)
 
             //auto-established notification
             Notifications.Bus.notify(
@@ -571,7 +592,7 @@ object SourceMarkerPlugin {
         }
     }
 
-    private suspend fun initMonitor(project: Project, config: SourceMarkerConfig) {
+    private suspend fun initMonitor(config: SourceMarkerConfig) {
         val scheme = if (config.isSsl()) "https" else "http"
         val skywalkingHost = "$scheme://${config.serviceHostNormalized}:${config.getServicePortNormalized()}/graphql"
         val certificatePins = mutableListOf<String>()
@@ -586,19 +607,19 @@ object SourceMarkerPlugin {
     }
 
     private suspend fun initUI(config: SourceMarkerConfig) {
-        deploymentIds.add(vertx.deployVerticle(PortalController(config)).await())
+        deploymentIds.add(vertx.deployVerticle(PortalController(project, config)).await())
     }
 
-    private fun initMarker(config: SourceMarkerConfig, project: Project) {
+    private fun initMarker(config: SourceMarkerConfig) {
         log.info("Initializing marker")
-        SourceMarker.addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
-        SourceMarker.addGlobalSourceMarkEventListener(PluginSourceMarkEventListener())
+        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
+        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(project))
 
-        SourceMarker.configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
-        SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation = true
+        SourceMarker.getInstance(project).configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
+        SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.strictlyManualCreation = true
 
         if (config.rootSourcePackages.isNotEmpty()) {
-            SourceMarker.configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->
+            SourceMarker.getInstance(project).configuration.createSourceMarkFilter = CreateSourceMarkFilter { artifactQualifiedName ->
                 config.rootSourcePackages.any { artifactQualifiedName.identifier.startsWith(it) }
             }
         } else {
@@ -607,7 +628,7 @@ object SourceMarkerPlugin {
                 log.warn("Could not determine root source package. Skipped adding create source mark filter...")
             }
         }
-        SourceMarker.enabled = true
+        SourceMarker.getInstance(project).enabled = true
         log.info("Source marker enabled")
 
         //force marker re-processing

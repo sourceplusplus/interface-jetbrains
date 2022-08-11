@@ -28,6 +28,7 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
+import liveplugin.implementation.plugin.LiveStatusManager;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
@@ -57,11 +58,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
 
 public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
@@ -138,7 +139,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
     }
 
     private void setupAsActive() {
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, event -> {
+        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, event -> {
             if (statusPanel == null) return;
             if (event.getEventType() == METER_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
@@ -376,10 +377,10 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
                 null,
                 meta
         );
-        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
+        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveSpan = (LiveSpan) it.result();
-                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveSpan);
+                LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveSpan);
 
                 ApplicationManager.getApplication().invokeLater(() -> {
                     inlayMark.dispose(); //dispose this bar
@@ -403,9 +404,9 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveSpan != null) {
-            INSTANCE.getLiveInstrument().removeLiveInstrument(liveSpan.getId()).onComplete(it -> {
+            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveSpan.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveSpan);
+                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveSpan);
                 } else {
                     it.cause().printStackTrace();
                 }

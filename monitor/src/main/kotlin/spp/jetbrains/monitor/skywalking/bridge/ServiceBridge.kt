@@ -16,13 +16,13 @@
  */
 package spp.jetbrains.monitor.skywalking.bridge
 
+import com.intellij.openapi.diagnostic.logger
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
 import spp.protocol.platform.general.Service
@@ -81,11 +81,11 @@ class ServiceBridge(
 
             if (initServiceName != null) {
                 currentService = activeServices.find { it.name == initServiceName }
-                currentService?.let { log.info("Current service set to: {}", it.name) }
+                currentService?.let { log.info("Current service set to: ${it.name}") }
             }
             if (currentService == null) {
                 currentService = activeServices[0]
-                log.info("Current service set to: {}", currentService!!.name)
+                log.info("Current service set to: ${currentService!!.name}")
             }
             vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
             return true
@@ -94,7 +94,7 @@ class ServiceBridge(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(ServiceBridge::class.java)
+        private val log = logger<ServiceBridge>()
 
         private const val rootAddress = "monitor.skywalking.service"
         private const val getCurrentServiceAddress = "$rootAddress.currentService"

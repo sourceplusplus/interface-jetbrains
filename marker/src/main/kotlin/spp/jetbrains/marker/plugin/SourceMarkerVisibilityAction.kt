@@ -36,7 +36,7 @@ class SourceMarkerVisibilityAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         globalVisibility = !globalVisibility
-        val currentMarks = SourceMarker.getSourceMarks().filter { it !is GuideMark }
+        val currentMarks = SourceMarker.getInstance(e.project!!).getSourceMarks().filter { it !is GuideMark }
         if (currentMarks.isNotEmpty()) {
             currentMarks.forEach { it.setVisible(globalVisibility) }
             DaemonCodeAnalyzer.getInstance(e.project).restart()

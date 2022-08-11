@@ -109,7 +109,7 @@ object ArtifactSearch {
     @Suppress("UnstableApiUsage")
     suspend fun findArtifact(vertx: Vertx, artifact: ArtifactQualifiedName): PsiElement? {
         val promise = Promise.promise<Optional<PsiElement>>()
-        val project = ProjectManager.getInstance().openProjects[0]
+        val project = ProjectManager.getInstance().openProjects[0] //todo: support multiple projects
 
         ApplicationManager.getApplication().runReadAction {
             if (artifact.type == ArtifactType.CLASS) {

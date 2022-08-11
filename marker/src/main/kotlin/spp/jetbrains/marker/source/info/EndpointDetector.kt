@@ -16,10 +16,10 @@
  */
 package spp.jetbrains.marker.source.info
 
+import com.intellij.openapi.diagnostic.logger
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
@@ -35,7 +35,7 @@ import java.util.*
 abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val vertx: Vertx) {
 
     companion object {
-        private val log = LoggerFactory.getLogger(EndpointDetector::class.java)
+        private val log = logger<EndpointDetector<*>>()
         val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
         val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
         val ENDPOINT_INTERNAL = SourceKey<Boolean>("ENDPOINT_INTERNAL")

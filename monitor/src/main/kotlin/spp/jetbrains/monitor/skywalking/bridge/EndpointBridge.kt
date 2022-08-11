@@ -16,13 +16,13 @@
  */
 package spp.jetbrains.monitor.skywalking.bridge
 
+import com.intellij.openapi.diagnostic.logger
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.protocol.marshall.LocalMessageCodec
 
@@ -74,7 +74,7 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
      * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
      */
     companion object {
-        private val log = LoggerFactory.getLogger(EndpointBridge::class.java)
+        private val log = logger<EndpointBridge>()
         private const val rootAddress = "monitor.skywalking.endpoint"
         private const val searchExactEndpointAddress = "$rootAddress.searchExactEndpoint"
 

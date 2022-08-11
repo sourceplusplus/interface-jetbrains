@@ -30,6 +30,7 @@ import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import liveplugin.implementation.plugin.LiveStatusManager;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
@@ -38,8 +39,6 @@ import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
-import spp.jetbrains.sourcemarker.service.InstrumentEventListener;
-import spp.jetbrains.sourcemarker.service.ViewEventListener;
 import spp.jetbrains.sourcemarker.service.instrument.log.LogHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser;
 import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
@@ -56,6 +55,8 @@ import spp.protocol.instrument.event.LiveLogHit;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
 import spp.protocol.marshall.ProtocolMarshaller;
+import spp.protocol.service.listen.LiveInstrumentEventListener;
+import spp.protocol.service.listen.LiveViewEventListener;
 import spp.protocol.view.LiveViewEvent;
 
 import javax.swing.*;
@@ -87,16 +88,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_REMOVED;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
 public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener,
-        InstrumentEventListener, ViewEventListener {
+        LiveInstrumentEventListener, LiveViewEventListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -178,7 +179,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         setupComponents();
 
         if (watchExpression) {
-            LiveStatusManager.addViewEventListener(inlayMark, this);
+            LiveStatusManager.getInstance(inlayMark.getProject()).addViewEventListener(inlayMark, this);
             liveLogTextField.setCanShowSaveButton(false);
             liveLogTextField.setEditMode(false);
             removeActiveDecorations();
@@ -187,7 +188,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             addExpandButton();
             initCommandModel();
         } else {
-            LiveStatusManager.addStatusBar(inlayMark, this);
+            LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
             showEditableMode();
             liveLogTextField.setEditMode(true);
             liveLogTextField.addSaveListener(this::saveLiveLog);
@@ -203,7 +204,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         displayTimeField();
         addExpandButton();
         repaint();
-        LiveStatusManager.addStatusBar(inlayMark, this);
+        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
     }
 
     private void initCommandModel() {
@@ -215,7 +216,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                             new LogHitColumnInfo(TIME)
                     }, new ArrayList<>(), 0, SortOrder.DESCENDING);
         } else {
-            List logData = LiveStatusManager.INSTANCE.getLogData(inlayMark);
+            List logData = LiveStatusManager.getInstance(inlayMark.getProject()).getLogData(inlayMark);
             if (logData.isEmpty()) {
                 liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
             } else {
@@ -641,9 +642,9 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             latestTime = null;
             latestLog = null;
 
-            INSTANCE.getLiveInstrument().removeLiveInstrument(oldLiveLog.getId()).onComplete(it -> {
+            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(oldLiveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(oldLiveLog);
+                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(oldLiveLog);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -700,11 +701,11 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         displayTimeField();
         wrapper.grabFocus();
 
-        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
+        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveLog = (LiveLog) it.result();
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), it.result().getId());
-                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveLog);
+                LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveLog);
 
                 inlayMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR())
                         .addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
@@ -724,10 +725,10 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         }
 
         if (liveLog != null) {
-            LiveStatusManager.INSTANCE.removeLogData(inlayMark);
-            INSTANCE.getLiveInstrument().removeLiveInstrument(liveLog.getId()).onComplete(it -> {
+            LiveStatusManager.getInstance(inlayMark.getProject()).removeLogData(inlayMark);
+            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveLog);
+                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveLog);
                 } else {
                     it.cause().printStackTrace();
                 }

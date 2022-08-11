@@ -21,6 +21,7 @@ import com.intellij.codeInsight.hints.presentation.*
 import com.intellij.ide.ui.AntialiasingType
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.INLINE_PARAMETER_HINT
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorFontType
@@ -33,9 +34,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.ui.paint.EffectPainter
 import org.joor.Reflect
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarker.getSourceFileMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.MARK_REMOVED
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -60,7 +59,7 @@ import javax.swing.JPanel
 abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
-        private val log = LoggerFactory.getLogger(SourceInlayHintProvider::class.java)
+        private val log = logger<SourceInlayHintProvider>()
 
         val EVENT_LISTENER = SourceMarkEventListener { event ->
             when (event.eventCode) {
@@ -140,17 +139,17 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
         settings: NoSettings,
         sink: InlayHintsSink
     ): InlayHintsCollector? {
-        if (!SourceMarker.enabled) {
+        if (!SourceMarker.getInstance(editor.project!!).enabled) {
             log.warn("SourceMarker is disabled. Skipping inlay hints.")
             return null
         }
 
         return object : FactoryInlayHintsCollector(editor) {
             override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
-                val fileMarker = getSourceFileMarker(element.containingFile) ?: return true
+                val fileMarker = SourceMarker.getInstance(editor.project!!).getSourceFileMarker(element.containingFile) ?: return true
                 var inlayMark = element.getUserData(SourceKey.InlayMark)
                 if (inlayMark == null) {
-                    if (SourceMarker.configuration.inlayMarkConfiguration.strictlyManualCreation) return true else {
+                    if (SourceMarker.getInstance(editor.project!!).configuration.inlayMarkConfiguration.strictlyManualCreation) return true else {
                         inlayMark = createInlayMarkIfNecessary(element) ?: return true
                     }
                 }
@@ -244,6 +243,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                             descent,
                             font
                         )
+
                         EffectType.BOLD_LINE_UNDERSCORE -> EffectPainter.BOLD_LINE_UNDERSCORE.paint(
                             g,
                             0,
@@ -252,6 +252,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                             descent,
                             font
                         )
+
                         EffectType.STRIKEOUT -> EffectPainter.STRIKE_THROUGH.paint(g, 0, ascent, width, height, font)
                         EffectType.WAVE_UNDERSCORE -> EffectPainter.WAVE_UNDERSCORE.paint(
                             g,
@@ -261,6 +262,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                             descent,
                             font
                         )
+
                         EffectType.BOLD_DOTTED_LINE -> EffectPainter.BOLD_DOTTED_UNDERSCORE.paint(
                             g,
                             0,
@@ -269,6 +271,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                             descent,
                             font
                         )
+
                         else -> {
                         }
                     }

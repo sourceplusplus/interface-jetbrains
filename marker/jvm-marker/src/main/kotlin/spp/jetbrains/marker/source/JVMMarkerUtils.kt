@@ -16,11 +16,11 @@
  */
 package spp.jetbrains.marker.source
 
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
 import org.jetbrains.uast.*
 import org.joor.Reflect
-import org.slf4j.LoggerFactory
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -42,7 +42,7 @@ import java.util.*
 @Suppress("TooManyFunctions")
 object JVMMarkerUtils {
 
-    private val log = LoggerFactory.getLogger(JVMMarkerUtils::class.java)
+    private val log = logger<JVMMarkerUtils>()
 
     /**
      * todo: description.
@@ -445,7 +445,7 @@ object JVMMarkerUtils {
         if (gutterMark == null) {
             val uClass = element.parent.toUElement() as UClass
             if (uClass.qualifiedName == null) {
-                log.warn("Could not determine qualified name of class: {}", uClass)
+                log.warn("Could not determine qualified name of class: $uClass")
                 return null
             }
             gutterMark = fileMarker.createClassSourceMark(
@@ -611,7 +611,7 @@ object JVMMarkerUtils {
                     it.type.canonicalText
                 }
             } else {
-                log.warn("Unable to detect element type: {}", it)
+                log.warn("Unable to detect element type: $it")
             }
         }
         return "$methodName($methodParams)"

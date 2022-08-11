@@ -35,5 +35,5 @@ open class ClassGuideMark(
 ) : ClassSourceMark(sourceFileMarker, psiClass), GuideMark {
 
     override val id: String = UUID.randomUUID().toString()
-    override val configuration: GuideMarkConfiguration = SourceMarker.configuration.guideMarkConfiguration
+    override val configuration: GuideMarkConfiguration = SourceMarker.getInstance(project).configuration.guideMarkConfiguration.copy()
 }

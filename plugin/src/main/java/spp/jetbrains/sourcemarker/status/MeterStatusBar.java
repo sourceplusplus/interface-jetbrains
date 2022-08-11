@@ -28,6 +28,7 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
+import liveplugin.implementation.plugin.LiveStatusManager;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
@@ -60,11 +61,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
-import static spp.protocol.SourceServices.Instance.INSTANCE;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
@@ -141,7 +142,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     private void setupAsActive() {
-        LiveStatusManager.INSTANCE.addStatusBar(inlayMark, event -> {
+        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, event -> {
             if (statusPanel == null) return;
             if (event.getEventType() == METER_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
@@ -391,17 +392,17 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 null,
                 meta
         );
-        INSTANCE.getLiveInstrument().addLiveInstrument(instrument).onComplete(it -> {
+        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveMeter = (LiveMeter) it.result();
-                LiveStatusManager.INSTANCE.addActiveLiveInstrument(liveMeter);
+                LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveMeter);
 
                 ApplicationManager.getApplication().invokeLater(() -> {
                     inlayMark.dispose(); //dispose this bar
 
                     //create gutter popup
                     ApplicationManager.getApplication().runReadAction(()
-                            -> LiveStatusManager.showMeterStatusIcon(liveMeter, inlayMark.getSourceFileMarker()));
+                            -> LiveStatusManager.getInstance(inlayMark.getProject()).showMeterStatusIcon(liveMeter, inlayMark.getSourceFileMarker()));
                 });
             } else {
                 it.cause().printStackTrace();
@@ -422,9 +423,9 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveMeter != null) {
-            INSTANCE.getLiveInstrument().removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
+            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.INSTANCE.removeActiveLiveInstrument(liveMeter);
+                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveMeter);
                 } else {
                     it.cause().printStackTrace();
                 }

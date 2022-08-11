@@ -17,13 +17,15 @@
 package spp.jetbrains.sourcemarker.status
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
+import liveplugin.implementation.plugin.LiveStatusManager
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.impl.ArtifactScopeService
@@ -36,8 +38,8 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.monitor.skywalking.SkywalkingMonitor.Companion.LIVE_VIEW_SERVICE
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin.vertx
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
@@ -46,15 +48,14 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_ID
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
-import spp.jetbrains.sourcemarker.service.InstrumentEventListener
-import spp.jetbrains.sourcemarker.service.ViewEventListener
 import spp.jetbrains.sourcemarker.status.util.CircularList
-import spp.protocol.SourceServices
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*
 import spp.protocol.instrument.meter.MeterType
+import spp.protocol.service.listen.LiveInstrumentEventListener
+import spp.protocol.service.listen.LiveViewEventListener
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewEvent
 import spp.protocol.view.LiveViewSubscription
@@ -73,9 +74,11 @@ import javax.swing.JPanel
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object LiveStatusManager : SourceMarkEventListener {
+class LiveStatusManagerImpl(val project: Project) : LiveStatusManager, SourceMarkEventListener {
 
-    private val log = LoggerFactory.getLogger(LiveStatusManager::class.java)
+    companion object {
+        private val log = logger<LiveStatusManagerImpl>()
+    }
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
     private val logData = ConcurrentHashMap<String, List<*>>()
 
@@ -119,11 +122,11 @@ object LiveStatusManager : SourceMarkEventListener {
      * Invoked via control bar. Force visible.
      */
     @Suppress("unused")
-    fun showBreakpointStatusBar(editor: Editor, lineNumber: Int) {
+    override fun showBreakpointStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -132,7 +135,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = SourceMarkerPlugin.getConfig(editor.project!!)
+            val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = BreakpointStatusBar(
                 LiveSourceLocation(
                     ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
@@ -163,11 +166,11 @@ object LiveStatusManager : SourceMarkEventListener {
      * Invoked via control bar. Force visible.
      */
     @Suppress("unused")
-    fun showLogStatusBar(editor: Editor, lineNumber: Int, watchExpression: Boolean) {
+    override fun showLogStatusBar(editor: Editor, lineNumber: Int, watchExpression: Boolean) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -176,7 +179,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = SourceMarkerPlugin.getConfig(editor.project!!)
+            val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
                     ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier,
@@ -204,7 +207,7 @@ object LiveStatusManager : SourceMarkEventListener {
                     }
                 }
 
-                SourceServices.Instance.liveView!!.addLiveViewSubscription(
+                project.getUserData(LIVE_VIEW_SERVICE)!!.addLiveViewSubscription(
                     LiveViewSubscription(
                         null,
                         logPatterns,
@@ -223,12 +226,13 @@ object LiveStatusManager : SourceMarkEventListener {
                     if (it.succeeded()) {
                         val subscriptionId = it.result().subscriptionId!!
                         inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
-                        vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
-                            statusBar.accept(Json.decodeValue(it.body().toString(), LiveViewEvent::class.java))
-                        }
+                        SourceMarkerPlugin.getInstance(editor.project!!).vertx.eventBus()
+                            .consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
+                                statusBar.accept(Json.decodeValue(it.body().toString(), LiveViewEvent::class.java))
+                            }
                         inlayMark.addEventListener { event ->
                             if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
-                                SourceServices.Instance.liveView!!.removeLiveViewSubscription(subscriptionId)
+                                project.getUserData(LIVE_VIEW_SERVICE)!!.removeLiveViewSubscription(subscriptionId)
                             }
                         }
                     } else {
@@ -257,11 +261,11 @@ object LiveStatusManager : SourceMarkEventListener {
     }
 
     @Suppress("unused")
-    fun showMeterStatusBar(editor: Editor, lineNumber: Int) {
+    override fun showMeterStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -270,7 +274,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = SourceMarkerPlugin.getConfig(editor.project!!)
+            val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
                     ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
@@ -296,11 +300,11 @@ object LiveStatusManager : SourceMarkEventListener {
     }
 
     @Suppress("unused")
-    fun showSpanStatusBar(editor: Editor, lineNumber: Int) {
+    override fun showSpanStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
-            log.warn("Could not find file marker for file: {}", editor.document)
+            log.warn("Could not find file marker for file: ${editor.document}")
             return
         }
 
@@ -309,7 +313,7 @@ object LiveStatusManager : SourceMarkEventListener {
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val config = SourceMarkerPlugin.getConfig(editor.project!!)
+            val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = SpanStatusBar(
                 LiveSourceLocation(
                     inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,
@@ -334,7 +338,7 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
-    fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
+    override fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
             val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
@@ -366,12 +370,12 @@ object LiveStatusManager : SourceMarkEventListener {
                     addStatusBar(inlayMark, statusBar)
                 }
             } else {
-                log.warn("No detected expression at line {}. Inlay mark ignored", liveBreakpoint.location.line)
+                log.warn("No detected expression at line ${liveBreakpoint.location.line}. Inlay mark ignored")
             }
         }
     }
 
-    fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
+    override fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
             val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
@@ -406,13 +410,12 @@ object LiveStatusManager : SourceMarkEventListener {
                     detector.addLiveLog(editor, inlayMark, liveLog.logFormat, liveLog.location.line)
                 }
             } else {
-                log.warn("No detected expression at line {}. Inlay mark ignored", liveLog.location.line)
+                log.warn("No detected expression at line ${liveLog.location.line}. Inlay mark ignored")
             }
         }
     }
 
-    @JvmStatic
-    fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
+    override fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker) {
         //create gutter popup
         ApplicationManager.getApplication().runReadAction {
             val gutterMark = ArtifactCreationService.getOrCreateExpressionGutterMark(
@@ -441,7 +444,7 @@ object LiveStatusManager : SourceMarkEventListener {
                 gutterMark.get().apply(true)
                 addStatusBar(gutterMark.get(), statusBar)
 
-                SourceServices.Instance.liveView!!.addLiveViewSubscription(
+                project.getUserData(LIVE_VIEW_SERVICE)!!.addLiveViewSubscription(
                     LiveViewSubscription(
                         null,
                         listOf(liveMeter.toMetricId()),
@@ -462,31 +465,29 @@ object LiveStatusManager : SourceMarkEventListener {
         }
     }
 
-    @JvmStatic
-    fun addStatusBar(sourceMark: SourceMark, listener: InstrumentEventListener) {
+    override fun addStatusBar(sourceMark: SourceMark, listener: LiveInstrumentEventListener) {
         if (sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS) == null) {
             sourceMark.putUserData(INSTRUMENT_EVENT_LISTENERS, mutableSetOf())
         }
         sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS)!!.add(listener)
     }
 
-    @JvmStatic
-    fun addViewEventListener(sourceMark: SourceMark, listener: ViewEventListener) {
+    override fun addViewEventListener(sourceMark: SourceMark, listener: LiveViewEventListener) {
         if (sourceMark.getUserData(VIEW_EVENT_LISTENERS) == null) {
             sourceMark.putUserData(VIEW_EVENT_LISTENERS, mutableSetOf())
         }
         sourceMark.getUserData(VIEW_EVENT_LISTENERS)!!.add(listener)
     }
 
-    fun addActiveLiveInstrument(instrument: LiveInstrument) {
+    override fun addActiveLiveInstrument(instrument: LiveInstrument) {
         activeStatusBars.add(instrument)
     }
 
-    fun addActiveLiveInstruments(instruments: List<LiveInstrument>) {
+    override fun addActiveLiveInstruments(instruments: List<LiveInstrument>) {
         activeStatusBars.addAll(instruments)
     }
 
-    fun removeActiveLiveInstrument(instrument: LiveInstrument) {
+    override fun removeActiveLiveInstrument(instrument: LiveInstrument) {
         activeStatusBars.remove(instrument)
     }
 
@@ -494,12 +495,12 @@ object LiveStatusManager : SourceMarkEventListener {
         activeStatusBars.removeIf { it.id == instrumentId }
     }
 
-    fun getLogData(inlayMark: InlayMark): List<*> {
+    override fun getLogData(inlayMark: InlayMark): List<*> {
         val logId = inlayMark.getUserData(INSTRUMENT_ID)
         return logData.getOrPut(logId) { CircularList<Any>(1000) }
     }
 
-    fun removeLogData(inlayMark: InlayMark) {
+    override fun removeLogData(inlayMark: InlayMark) {
         val logId = inlayMark.getUserData(INSTRUMENT_ID)
         logData.remove(logId)
     }
