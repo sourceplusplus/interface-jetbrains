@@ -39,7 +39,7 @@ class SourceMarkerConfigurable(val project: Project) : Configurable {
     private var form: PluginConfigurationPanel? = null
 
     override fun getDisplayName(): String = message("plugin_name")
-    override fun isModified(): Boolean = form!!.isModified
+    override fun isModified(): Boolean = form?.isModified == true
 
     override fun apply() {
         val updatedConfig = form!!.pluginConfig
