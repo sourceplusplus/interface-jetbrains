@@ -114,7 +114,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         }
                     vertx.createNetClient(options)
                 }
-                socket = client.connect(SourceMarkerConfig.DEFAULT_TCP_SERVICE_PORT, serviceHost).await()
+                socket = client.connect(SourceMarkerConfig.DEFAULT_SERVICE_PORT, serviceHost).await()
             } catch (ex: Exception) {
                 log.error("Failed to connect to service discovery server", ex)
                 setupPromise.fail(ex)

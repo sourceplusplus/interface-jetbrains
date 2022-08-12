@@ -38,7 +38,6 @@ data class SourceMarkerConfig(
 ) {
     companion object {
         const val DEFAULT_SERVICE_PORT = 12800
-        const val DEFAULT_TCP_SERVICE_PORT = 5455
     }
 }
 
