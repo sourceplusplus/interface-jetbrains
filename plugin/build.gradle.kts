@@ -42,6 +42,7 @@ tasks.getByName<JavaExec>("runIde") {
     //systemProperty("sourcemarker.debug.unblocked_threads", true)
     systemProperty("ide.enable.slow.operations.in.edt", false)
     systemProperty("ide.browser.jcef.contextMenu.devTools.enabled", true)
+    systemProperty("idea.log.debug.categories", "#spp.jetbrains")
 }
 
 changelog {
