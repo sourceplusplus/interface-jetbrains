@@ -24,6 +24,7 @@ import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
 import org.apache.commons.lang3.EnumUtils
+import spp.jetbrains.marker.ErrorVariableSimpleNode
 import spp.protocol.instrument.variable.LiveVariable
 import spp.protocol.instrument.variable.LiveVariableScope
 
@@ -60,16 +61,20 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
     override fun getChildren(): Array<SimpleNode> {
         return if (variable.value is List<*>) {
             (variable.value as List<Map<*, *>>).map {
-                JVMVariableSimpleNode(
-                    LiveVariable(
-                        name = it["name"] as String,
-                        value = it["value"] as Any,
-                        lineNumber = it["lineNumber"] as Int,
-                        scope = EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
-                        liveClazz = it["liveClazz"] as String?,
-                        liveIdentity = it["liveIdentity"] as String?
+                if (it["@skip"] != null) {
+                    ErrorVariableSimpleNode(it as Map<String, *>)
+                } else {
+                    JVMVariableSimpleNode(
+                        LiveVariable(
+                            name = it["name"] as String,
+                            value = it["value"] as Any,
+                            lineNumber = it["lineNumber"] as Int? ?: -1,
+                            scope = EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
+                            liveClazz = it["liveClazz"] as String?,
+                            liveIdentity = it["liveIdentity"] as String?
+                        )
                     )
-                )
+                }
             }.toList().toTypedArray()
         } else {
             emptyArray()
@@ -116,6 +121,15 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                 presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
             }
             presentation.setIcon(AllIcons.Debugger.Value)
+
+            val varValue = variable.value
+            if (varValue is Map<*, *> && varValue["@skip"] != null) {
+                val skipReason = varValue["@skip"]
+                presentation.addText(
+                    " $skipReason",
+                    SimpleTextAttributes.ERROR_ATTRIBUTES
+                )
+            }
         } else {
             if (variable.value is Number) {
                 presentation.addText(
@@ -123,10 +137,23 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                     SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.NUMBER))
                 )
             } else {
-                presentation.addText(
-                    "\"" + variable.value + "\"",
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.STRING))
-                )
+                val varValue = variable.value
+                if (
+                    varValue is List<*> && varValue.size == 1 &&
+                    varValue[0] is Map<*, *> && (varValue[0] as Map<*, *>)["@skip"] != null
+                ) {
+                    val clazz = (varValue[0] as Map<*, *>)["@class"].toString().substringAfterLast(".")
+                    val id = (varValue[0] as Map<*, *>)["@id"]
+                    presentation.addText(
+                        "{ ${clazz}@${id} }",
+                        SimpleTextAttributes.GRAYED_ATTRIBUTES
+                    )
+                } else {
+                    presentation.addText(
+                        "\"" + varValue + "\"",
+                        SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.STRING))
+                    )
+                }
             }
 
             if (variable.scope != LiveVariableScope.GENERATED_METHOD) {
