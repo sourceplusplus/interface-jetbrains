@@ -17,16 +17,33 @@
 package spp.jetbrains.sourcemarker.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
+import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 
 class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
+
+    companion object {
+        lateinit var vertx: Vertx
+
+        @BeforeAll
+        @JvmStatic
+        fun startVertx() {
+            vertx = Vertx.vertx()
+        }
+
+        @BeforeAll
+        @JvmStatic
+        fun stopVertx() {
+            vertx.close()
+        }
+    }
 
     @Test
     fun `SpringMVCEndpoint RequestMapping method`() {
@@ -44,8 +61,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = JVMEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx)
-                    .determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(vertx).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("GET:/doGet", result.get().name)
             }
@@ -68,8 +84,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = JVMEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx)
-                    .determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(vertx).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("GET:/", result.get().name)
             }
@@ -92,8 +107,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = JVMEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx)
-                    .determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(vertx).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("GET:/doGet", result.get().name)
             }
@@ -116,8 +130,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = JVMEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx)
-                    .determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(vertx).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("GET:/doGet", result.get().name)
             }
@@ -140,8 +153,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = JVMEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx)
-                    .determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(vertx).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("doGet", result.get().name)
             }
@@ -164,8 +176,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             runBlocking {
-                val result = JVMEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx)
-                    .determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(vertx).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("TestController.doGet", result.get().name)
             }

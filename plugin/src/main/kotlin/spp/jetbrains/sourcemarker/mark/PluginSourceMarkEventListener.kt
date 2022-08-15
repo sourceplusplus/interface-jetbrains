@@ -17,7 +17,7 @@
 package spp.jetbrains.sourcemarker.mark
 
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.project.Project
+import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,7 +29,6 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
 
@@ -39,22 +38,22 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.LOGGER_DETECTOR
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PluginSourceMarkEventListener(val project: Project) : SynchronousSourceMarkEventListener {
+class PluginSourceMarkEventListener(val vertx: Vertx) : SynchronousSourceMarkEventListener {
 
     companion object {
         private val log = logger<PluginSourceMarkEventListener>()
     }
 
-    private val loggerDetector = LoggerDetector(SourceMarkerPlugin.getInstance(project).vertx)
+    private val loggerDetector = LoggerDetector(vertx)
     private val endpointDetectors = mutableMapOf<String, EndpointDetector<*>>()
         .apply {
-            JVMEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx).let {
+            JVMEndpointDetector(vertx).let {
                 put("JAVA", it)
                 put("kotlin", it)
                 put("Scala", it)
                 put("Groovy", it)
             }
-            put("Python", PythonEndpointDetector(SourceMarkerPlugin.getInstance(project).vertx))
+            put("Python", PythonEndpointDetector(vertx))
         }.toMap()
 
     override fun handleEvent(event: SourceMarkEvent) {
@@ -68,7 +67,7 @@ class PluginSourceMarkEventListener(val project: Project) : SynchronousSourceMar
             if (sourceMark is MethodGuideMark) {
                 //setup endpoint detector and attempt detection
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetectors[sourceMark.language.id])
-                GlobalScope.launch(SourceMarkerPlugin.getInstance(project).vertx.dispatcher()) {
+                GlobalScope.launch(vertx.dispatcher()) {
                     endpointDetectors[sourceMark.language.id]!!.getOrFindEndpointId(sourceMark)
                 }
             }

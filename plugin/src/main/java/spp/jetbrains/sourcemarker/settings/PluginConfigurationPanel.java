@@ -152,7 +152,8 @@ public class PluginConfigurationPanel {
                 currentService,
                 false,
                 new PortalConfig((Double) portalZoomSpinner.getValue()),
-                new HashMap<>()
+                new HashMap<>(),
+                false
         );
     }
 
