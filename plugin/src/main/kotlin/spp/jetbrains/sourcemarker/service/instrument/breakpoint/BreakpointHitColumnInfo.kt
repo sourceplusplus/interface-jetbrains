@@ -59,7 +59,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
     }
 
     override fun valueOf(event: LiveInstrumentEvent): String {
-        val breakpointData = mutableListOf<Map<String, Any>>()
+        val breakpointData = mutableListOf<Map<String, Any?>>()
         if (event.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
             val item = ProtocolMarshaller.deserializeLiveBreakpointHit(JsonObject(event.data))
             item.stackTrace.elements.first().variables.forEach {
