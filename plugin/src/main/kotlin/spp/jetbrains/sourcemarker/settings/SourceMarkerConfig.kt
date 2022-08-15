@@ -35,6 +35,7 @@ data class SourceMarkerConfig(
     val override: Boolean = false,
     val portalConfig: PortalConfig = PortalConfig(),
     val commandConfig: Map<String, Map<String, Any>> = emptyMap(),
+    var notifiedConnection: Boolean = false,
 ) {
     companion object {
         const val DEFAULT_SERVICE_PORT = 12800

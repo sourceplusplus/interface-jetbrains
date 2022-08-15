@@ -22,6 +22,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
+import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.runBlocking
@@ -74,11 +75,12 @@ import javax.swing.JPanel
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveStatusManagerImpl(val project: Project) : LiveStatusManager, SourceMarkEventListener {
+class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatusManager, SourceMarkEventListener {
 
     companion object {
         private val log = logger<LiveStatusManagerImpl>()
     }
+
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
     private val logData = ConcurrentHashMap<String, List<*>>()
 
@@ -226,10 +228,9 @@ class LiveStatusManagerImpl(val project: Project) : LiveStatusManager, SourceMar
                     if (it.succeeded()) {
                         val subscriptionId = it.result().subscriptionId!!
                         inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
-                        SourceMarkerPlugin.getInstance(editor.project!!).vertx.eventBus()
-                            .consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
-                                statusBar.accept(Json.decodeValue(it.body().toString(), LiveViewEvent::class.java))
-                            }
+                        vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
+                            statusBar.accept(Json.decodeValue(it.body().toString(), LiveViewEvent::class.java))
+                        }
                         inlayMark.addEventListener { event ->
                             if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
                                 project.getUserData(LIVE_VIEW_SERVICE)!!.removeLiveViewSubscription(subscriptionId)
@@ -341,7 +342,8 @@ class LiveStatusManagerImpl(val project: Project) : LiveStatusManager, SourceMar
     override fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
-            val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
+            val findInlayMark =
+                ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
@@ -378,7 +380,8 @@ class LiveStatusManagerImpl(val project: Project) : LiveStatusManager, SourceMar
     override fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
         ApplicationManager.getApplication().invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
-            val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
+            val findInlayMark =
+                ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
             if (findInlayMark.isPresent) {
                 val inlayMark = findInlayMark.get()
                 if (!fileMarker.containsSourceMark(inlayMark)) {
