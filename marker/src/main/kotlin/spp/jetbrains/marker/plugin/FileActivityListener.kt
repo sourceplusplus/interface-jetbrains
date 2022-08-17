@@ -81,7 +81,7 @@ class FileActivityListener : FileEditorManagerListener {
                 val editorMouseMotionListener = makeMouseMotionListener(editor, psiFile)
                 editor.addEditorMouseMotionListener(editorMouseMotionListener)
             } else {
-                log.error("Selected editor was null. Failed to add mouse motion listener")
+                log.warn("Selected editor was null. Failed to add mouse motion listener")
             }
         }
 
