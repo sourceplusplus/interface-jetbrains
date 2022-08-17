@@ -118,6 +118,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         }
                     vertx.createNetClient(options)
                 }
+                //todo: should connect to getServicePortNormalized() but can't behind caddy. need tcp reverse proxy
                 socket = client.connect(SourceMarkerConfig.DEFAULT_SERVICE_PORT, serviceHost).await()
             } catch (ex: Exception) {
                 log.warn("Failed to connect to service discovery server", ex)
