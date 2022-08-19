@@ -14,19 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.icons
+package spp.jetbrains.sourcemarker.actions
 
-/**
- * Defines the various visual icons SourceMarker may display.
- *
- * @since 0.1.0
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-object SourceMarkerIcons {
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
 
-    val LIVE_METER_COUNT_ICON = PluginIcons.count
-    val LIVE_METER_GAUGE_ICON = PluginIcons.gauge
-    val LIVE_METER_HISTOGRAM_ICON = PluginIcons.histogram
-    val LIVE_BREAKPOINT_ACTIVE_ICON = PluginIcons.Breakpoint.active
-    val LIVE_BREAKPOINT_DISABLED_ICON = PluginIcons.Breakpoint.disabled
+class EnableSourceAction : AnAction() {
+    override fun actionPerformed(e: AnActionEvent) {
+    }
 }

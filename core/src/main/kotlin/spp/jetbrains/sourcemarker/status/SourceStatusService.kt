@@ -14,19 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.icons
+package spp.jetbrains.sourcemarker.status
 
-/**
- * Defines the various visual icons SourceMarker may display.
- *
- * @since 0.1.0
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-object SourceMarkerIcons {
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.Pair
 
-    val LIVE_METER_COUNT_ICON = PluginIcons.count
-    val LIVE_METER_GAUGE_ICON = PluginIcons.gauge
-    val LIVE_METER_HISTOGRAM_ICON = PluginIcons.histogram
-    val LIVE_BREAKPOINT_ACTIVE_ICON = PluginIcons.Breakpoint.active
-    val LIVE_BREAKPOINT_DISABLED_ICON = PluginIcons.Breakpoint.disabled
+interface SourceStatusService {
+    companion object {
+        val KEY = Key.create<SourceStatusService>("SPP_SOURCE_STATUS_SERVICE")
+
+        fun getInstance(project: Project): SourceStatusService {
+            return project.getUserData(KEY)!!
+        }
+    }
+
+    fun getCurrentStatus(): Pair<SourceStatus, String?>
+    fun update(status: SourceStatus, message: String? = null)
 }

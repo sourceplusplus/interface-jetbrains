@@ -17,6 +17,7 @@
 package spp.jetbrains.monitor.skywalking.bridge
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -24,6 +25,8 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
+import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
+import spp.jetbrains.sourcemarker.status.SourceStatusService
 import spp.protocol.marshall.LocalMessageCodec
 
 /**
@@ -33,7 +36,10 @@ import spp.protocol.marshall.LocalMessageCodec
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class EndpointBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVerticle() {
+class EndpointBridge(
+    private val project: Project,
+    private val skywalkingClient: SkywalkingClient
+) : CoroutineVerticle() {
 
     override suspend fun start() {
         val isRegisteredMap = vertx.sharedData().getLocalMap<String, Boolean>("registered_codecs")
@@ -52,7 +58,14 @@ class EndpointBridge(private val skywalkingClient: SkywalkingClient) : Coroutine
                 }
 
                 val endpointName = it.body()
-                val endpoints = skywalkingClient.searchEndpoint(endpointName, service.id, 10, true)
+                val endpoints = try {
+                    skywalkingClient.searchEndpoint(endpointName, service.id, 10, true)
+                } catch (e: Exception) {
+                    log.warn("Unable to search for endpoint $endpointName", e)
+                    it.reply(null)
+                    SourceStatusService.getInstance(project).update(ConnectionError, e.message)
+                    return@launch
+                }
                 if (endpoints.size() != 0) {
                     val exactEndpoint = endpoints.map { it as JsonObject }.find { it.getString("name") == endpointName }
                     if (exactEndpoint != null) {

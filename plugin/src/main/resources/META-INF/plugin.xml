@@ -12,6 +12,8 @@
     <depends optional="true" config-file="withPython.xml">com.intellij.modules.python</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <statusBarWidgetFactory implementation="spp.jetbrains.sourcemarker.statusBar.SourceWidgetFactory"/>
+
         <projectService
                 serviceImplementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService"/>
         <editor.linePainter
@@ -32,7 +34,8 @@
         <indexedRootsProvider implementation="liveplugin.implementation.IndexSetContributor"/>
         <usageTypeProvider implementation="liveplugin.implementation.UsageTypeExtension" order="last"/>
         <useScopeEnlarger implementation="liveplugin.implementation.UseScopeExtension"/>
-        <createDirectoryCompletionContributor implementation="liveplugin.implementation.LivePluginDirectoryCompletionContributor"/>
+        <createDirectoryCompletionContributor
+                implementation="liveplugin.implementation.LivePluginDirectoryCompletionContributor"/>
         <intentionAction>
             <className>liveplugin.implementation.pluginrunner.AddToClassPathGroovyIntention</className>
             <category>LivePlugin</category>
@@ -52,7 +55,8 @@
     </extensions>
 
     <applicationListeners>
-        <listener class="liveplugin.implementation.LivePluginDeletedListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+        <listener class="liveplugin.implementation.LivePluginDeletedListener"
+                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
     </applicationListeners>
 
     <projectListeners>
@@ -76,13 +80,32 @@
                 text="SourcePortal Popup Action" description="SourcePortal popup action">
         </action>
 
-        <action id="spp.RunCommand" class="liveplugin.implementation.actions.RunPluginAction" text="Run Current Command">
+        <action id="spp.RunCommand" class="liveplugin.implementation.actions.RunPluginAction"
+                text="Run Current Command">
             <keyboard-shortcut keymap="$default" first-keystroke="alt c" second-keystroke="alt e"/>
             <keyboard-shortcut keymap="$default" first-keystroke="control shift l"/>
         </action>
-        <action id="spp.UnloadCommand" class="liveplugin.implementation.actions.UnloadPluginAction" text="Unload Current Command"/>
+        <action id="spp.UnloadCommand" class="liveplugin.implementation.actions.UnloadPluginAction"
+                text="Unload Current Command"/>
         <group id="spp.CommandActions" class="liveplugin.implementation.actions.RunLivePluginsGroup">
             <add-to-group group-id="RunContextGroup"/>
+        </group>
+
+        <action id="spp.enableSourcePP"
+                class="spp.jetbrains.sourcemarker.actions.EnableSourceAction">
+            <override-text place="MainMenu" text="Enable Source++"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+
+        <action id="spp.disableSourcePP" use-shortcut-of="spp.enableSourcePP"
+                class="spp.jetbrains.sourcemarker.actions.DisableSourceAction">
+            <override-text place="MainMenu" text="Disable Source++"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+
+        <group id="spp.statusBarPopup">
+            <reference id="spp.enableSourcePP"/>
+            <reference id="spp.disableSourcePP"/>
         </group>
     </actions>
 </idea-plugin>

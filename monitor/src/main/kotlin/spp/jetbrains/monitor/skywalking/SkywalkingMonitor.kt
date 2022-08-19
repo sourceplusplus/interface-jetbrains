@@ -26,14 +26,23 @@ import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
+import okhttp3.Call
+import okhttp3.EventListener
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.impl.SkywalkingMonitorServiceImpl
 import spp.jetbrains.monitor.skywalking.service.SWLiveService
 import spp.jetbrains.monitor.skywalking.service.SWLiveViewService
+import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
+import spp.jetbrains.sourcemarker.status.SourceStatusService
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
+import java.io.IOException
+import java.net.ConnectException
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
@@ -62,9 +71,11 @@ class SkywalkingMonitor(
         @JvmField
         val LIVE_SERVICE = Key.create<LiveService>("SPP_LIVE_SERVICE")
         fun getLIVE_SERVICE() = LIVE_SERVICE
+
         @JvmField
         val LIVE_VIEW_SERVICE = Key.create<LiveViewService>("SPP_LIVE_VIEW_SERVICE")
         fun getLIVE_VIEW_SERVICE() = LIVE_VIEW_SERVICE
+
         @JvmField
         val LIVE_INSTRUMENT_SERVICE = Key.create<LiveInstrumentService>("SPP_LIVE_INSTRUMENT_SERVICE")
         fun getLIVE_INSTRUMENT_SERVICE() = LIVE_INSTRUMENT_SERVICE
@@ -81,6 +92,29 @@ class SkywalkingMonitor(
         log.debug("Apache SkyWalking server: $serverUrl")
         val httpBuilder = OkHttpClient().newBuilder()
             .hostnameVerifier { _, _ -> true }
+            .eventListener(object : EventListener() {
+//                override fun callStart(call: Call) {
+//                    log.debug("Call start: ${call.request()}")
+//                }
+
+                override fun connectFailed(
+                    call: Call,
+                    inetSocketAddress: InetSocketAddress,
+                    proxy: Proxy,
+                    protocol: Protocol?,
+                    ioe: IOException
+                ) {
+                    SourceStatusService.getInstance(project).update(ConnectionError, ioe.message)
+                }
+
+                override fun callFailed(call: Call, ioe: IOException) {
+                    if (ioe is ConnectException) {
+                        SourceStatusService.getInstance(project).update(ConnectionError, ioe.message)
+                    } else {
+                        log.warn("Apache SkyWalking call failed. Request: ${call.request()}", ioe)
+                    }
+                }
+            })
         if (!jwtToken.isNullOrEmpty()) {
             httpBuilder.addInterceptor { chain ->
                 chain.proceed(
@@ -120,9 +154,9 @@ class SkywalkingMonitor(
             val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
             vertx.deployVerticle(GeneralBridge(skywalkingClient)).await()
-            vertx.deployVerticle(ServiceBridge(skywalkingClient, currentService)).await()
+            vertx.deployVerticle(ServiceBridge(project, skywalkingClient, currentService)).await()
             vertx.deployVerticle(ServiceInstanceBridge(skywalkingClient)).await()
-            vertx.deployVerticle(EndpointBridge(skywalkingClient)).await()
+            vertx.deployVerticle(EndpointBridge(project, skywalkingClient)).await()
             vertx.deployVerticle(EndpointMetricsBridge(skywalkingClient)).await()
             vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
             vertx.deployVerticle(LogsBridge(skywalkingClient)).await()

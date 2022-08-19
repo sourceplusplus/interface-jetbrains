@@ -63,7 +63,6 @@ import liveplugin.implementation.plugin.LivePluginService
 import liveplugin.implementation.plugin.LiveStatusManager
 import org.apache.commons.text.CaseUtils
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarker.Companion.VERTX_KEY
 import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -83,7 +82,11 @@ import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
+import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
+import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
+import spp.jetbrains.sourcemarker.status.SourceStatus.Pending
+import spp.jetbrains.sourcemarker.status.SourceStatusService
 import spp.protocol.SourceServices
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
@@ -129,6 +132,8 @@ class SourceMarkerPlugin(val project: Project) {
             log.info("Setting up Python marker")
             PythonMarker.setup()
         }
+
+        project.putUserData(SourceStatusService.KEY, SourceStatusServiceImpl(project))
     }
 
     suspend fun init(configInput: SourceMarkerConfig? = null) {
@@ -141,9 +146,8 @@ class SourceMarkerPlugin(val project: Project) {
         } else {
             VertxOptions()
         }
-        val vertx = Vertx.vertx(options)
+        val vertx = UserData.vertx(project, Vertx.vertx(options))
         this.vertx = vertx
-        project.putUserData(VERTX_KEY, vertx)
         LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig()
@@ -186,7 +190,9 @@ class SourceMarkerPlugin(val project: Project) {
         connectionJob = GlobalScope.launch(vertx.dispatcher()) {
             var connectedMonitor = false
             try {
+                SourceStatusService.getInstance(project).update(Pending, "Initializing services")
                 initServices(vertx, config)
+                SourceStatusService.getInstance(project).update(Pending, "Initializing monitor")
                 initMonitor(vertx, config)
                 connectedMonitor = true
 
@@ -217,6 +223,7 @@ class SourceMarkerPlugin(val project: Project) {
                             NotificationType.ERROR
                         )
                     )
+                    SourceStatusService.getInstance(project).update(ConnectionError, "Unauthorized access")
                 } else {
                     Notifications.Bus.notify(
                         Notification(
@@ -227,6 +234,7 @@ class SourceMarkerPlugin(val project: Project) {
                             NotificationType.ERROR
                         )
                     )
+                    SourceStatusService.getInstance(project).update(ConnectionError, throwable.message)
                 }
             } catch (throwable: Throwable) {
                 //todo: if first time bring up config panel automatically instead of notification
@@ -241,6 +249,7 @@ class SourceMarkerPlugin(val project: Project) {
                             NotificationType.ERROR
                         )
                     )
+                    SourceStatusService.getInstance(project).update(ConnectionError, "Unauthorized access")
                 } else if (throwable.message == "Failed to create SSL connection") {
                     Notifications.Bus.notify(
                         Notification(
@@ -251,6 +260,7 @@ class SourceMarkerPlugin(val project: Project) {
                             NotificationType.ERROR
                         )
                     )
+                    SourceStatusService.getInstance(project).update(ConnectionError, "SSL connection error")
                 } else {
                     Notifications.Bus.notify(
                         Notification(
@@ -261,6 +271,7 @@ class SourceMarkerPlugin(val project: Project) {
                             NotificationType.ERROR
                         )
                     )
+                    SourceStatusService.getInstance(project).update(ConnectionError, throwable.message)
                 }
                 log.warn("Connection failed", throwable)
             }
@@ -610,8 +621,10 @@ class SourceMarkerPlugin(val project: Project) {
 
     private fun initMarker(vertx: Vertx, config: SourceMarkerConfig) {
         log.info("Initializing marker")
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(vertx))
+        SourceMarker.getInstance(project).apply {
+            addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
+            addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(project, vertx))
+        }
 
         SourceMarker.getInstance(project).configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.strictlyManualCreation = true

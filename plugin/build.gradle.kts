@@ -57,6 +57,7 @@ dependencies {
         implementation(project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper")) {
             exclude(group = "org.jetbrains.kotlin")
         }
+        implementation(project(":interfaces:jetbrains:core"))
         implementation(project(":interfaces:jetbrains:marker"))
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
@@ -70,6 +71,7 @@ dependencies {
         implementation(project(":commander:kotlin-compiler-wrapper")) {
             exclude(group = "org.jetbrains.kotlin")
         }
+        implementation(project(":core"))
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))
@@ -82,6 +84,7 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
     implementation("org.apache.commons:commons-text:1.9")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.6.4")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")

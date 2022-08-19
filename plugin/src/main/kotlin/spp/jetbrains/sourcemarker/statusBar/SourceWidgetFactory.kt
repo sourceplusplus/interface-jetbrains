@@ -14,19 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.icons
+package spp.jetbrains.sourcemarker.statusBar
 
-/**
- * Defines the various visual icons SourceMarker may display.
- *
- * @since 0.1.0
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-object SourceMarkerIcons {
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.StatusBarWidget
+import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFactory
 
-    val LIVE_METER_COUNT_ICON = PluginIcons.count
-    val LIVE_METER_GAUGE_ICON = PluginIcons.gauge
-    val LIVE_METER_HISTOGRAM_ICON = PluginIcons.histogram
-    val LIVE_BREAKPOINT_ACTIVE_ICON = PluginIcons.Breakpoint.active
-    val LIVE_BREAKPOINT_DISABLED_ICON = PluginIcons.Breakpoint.disabled
+class SourceWidgetFactory : StatusBarEditorBasedWidgetFactory() {
+    override fun getId(): String {
+        return "spp.jetbrains.sourcemarker"
+    }
+
+    override fun getDisplayName(): String {
+        return "Source++"
+    }
+
+    override fun createWidget(project: Project): StatusBarWidget {
+        return SourceStatusBarWidget(project)
+    }
+
+    override fun disposeWidget(widget: StatusBarWidget) {
+    }
 }

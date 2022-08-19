@@ -49,7 +49,6 @@ class SourceMarker {
 
         private val log = logger<SourceMarker>()
         private val KEY = Key.create<SourceMarker>("SPP_SOURCE_MARKER")
-        val VERTX_KEY = Key.create<Vertx>("SPP_VERTX")
 
         @Synchronized
         fun getInstance(project: Project): SourceMarker {

@@ -25,7 +25,7 @@ import liveplugin.implementation.plugin.LiveStatusManager;
 import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
-import spp.jetbrains.sourcemarker.PluginIcons;
+import spp.jetbrains.sourcemarker.icons.PluginIcons;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentEventType;

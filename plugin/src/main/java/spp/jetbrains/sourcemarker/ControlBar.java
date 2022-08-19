@@ -26,6 +26,7 @@ import spp.command.LiveCommand;
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
+import spp.jetbrains.sourcemarker.icons.PluginIcons;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
 import spp.jetbrains.sourcemarker.status.util.LiveCommandFieldRow;

@@ -20,8 +20,8 @@ import com.intellij.openapi.util.ScalableIcon
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
-import spp.jetbrains.sourcemarker.PluginIcons
 import spp.jetbrains.sourcemarker.PluginUI.*
+import spp.jetbrains.sourcemarker.icons.PluginIcons
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*
