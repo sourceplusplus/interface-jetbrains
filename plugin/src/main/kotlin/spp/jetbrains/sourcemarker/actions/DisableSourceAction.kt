@@ -18,8 +18,13 @@ package spp.jetbrains.sourcemarker.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import spp.jetbrains.sourcemarker.status.SourceStatus.Disabled
+import spp.jetbrains.sourcemarker.status.SourceStatusService
 
 class DisableSourceAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
+        e.project?.let {
+            SourceStatusService.getInstance(it).update(Disabled)
+        }
     }
 }

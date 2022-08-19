@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker
 
-import com.apollographql.apollo3.exception.ApolloHttpException
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -211,68 +210,8 @@ class SourceMarkerPlugin(val project: Project) {
                     projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
                 }
             } catch (ignored: CancellationException) {
-            } catch (throwable: ApolloHttpException) {
-                val pluginName = message("plugin_name")
-                if (throwable.statusCode == 401) {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "Connection unauthorized",
-                            "Failed to authenticate with $pluginName. " +
-                                    "Please ensure the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                    SourceStatusService.getInstance(project).update(ConnectionError, "Unauthorized access")
-                } else {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "Connection failed",
-                            "Failed to connect to $pluginName. " +
-                                    "Please ensure the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                    SourceStatusService.getInstance(project).update(ConnectionError, throwable.message)
-                }
             } catch (throwable: Throwable) {
-                //todo: if first time bring up config panel automatically instead of notification
-                val pluginName = message("plugin_name")
-                if (throwable.message == "HTTP 401 Unauthorized") {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "Connection unauthorized",
-                            "Failed to authenticate with $pluginName. " +
-                                    "Please ensure the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                    SourceStatusService.getInstance(project).update(ConnectionError, "Unauthorized access")
-                } else if (throwable.message == "Failed to create SSL connection") {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "SSL connection failed",
-                            "Failed to create SSL connection to $pluginName. " +
-                                    "Please ensure the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                    SourceStatusService.getInstance(project).update(ConnectionError, "SSL connection error")
-                } else {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "Connection failed",
-                            "$pluginName failed to connect to Apache SkyWalking. " +
-                                    "Please ensure Apache SkyWalking is running and the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                    SourceStatusService.getInstance(project).update(ConnectionError, throwable.message)
-                }
+                SourceStatusService.getInstance(project).update(ConnectionError, throwable.message)
                 log.warn("Connection failed", throwable)
             }
 
@@ -449,7 +388,7 @@ class SourceMarkerPlugin(val project: Project) {
         }
     }
 
-    private suspend fun restartIfNecessary() {
+    suspend fun restartIfNecessary() {
         if (SourceMarker.getInstance(project).enabled) {
             SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
             SourceMarker.getInstance(project).clearGlobalSourceMarkEventListeners()

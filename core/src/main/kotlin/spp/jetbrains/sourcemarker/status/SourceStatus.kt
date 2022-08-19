@@ -21,25 +21,29 @@ import javax.swing.Icon
 
 enum class SourceStatus {
     Ready,
+    Enabled,
+    Disabled,
     Pending,
-    ConnectionError,
-    Unknown;
+    ConnectionError;
 
     val icon: Icon
         get() {
             return when (this) {
                 Ready -> PluginIcons.statusEnabled
+                Enabled -> PluginIcons.statusPending
+                Disabled -> PluginIcons.statusDisabled
                 Pending -> PluginIcons.statusPending
-                else -> PluginIcons.statusDisabled
+                ConnectionError -> PluginIcons.statusFailed
             }
         }
     val presentableText: String
         get() {
             return when (this) {
                 Ready -> "Click to disable Source++"
+                Enabled -> "Click to disable Source++"
+                Disabled -> "Click to enable Source++"
                 Pending -> "Booting Source++"
                 ConnectionError -> "Connection error"
-                Unknown -> "Unknown"
             }
         }
 

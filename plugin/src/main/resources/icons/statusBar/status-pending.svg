@@ -1,13 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.03 31.68">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20.67 31.68">
     <defs>
-        <style>
-            .cls-1{fill:#808080;}.cls-2{fill:none;stroke:#3c3f41;stroke-linecap:round;stroke-miterlimit:10;stroke-width:4px;}
-        </style>
+        <style>.cls-1{fill:#808080;}</style>
     </defs>
     <g id="Layer_2" data-name="Layer 2">
         <g id="Layer_1-2" data-name="Layer 1">
             <path class="cls-1" d="M19,0l0,8.4L10.65,13l10,8.12L6.57,31.68l5.84-9.5L.07,12.8,0,12.69Z"/>
-            <line class="cls-2" x1="2.65" y1="11.08" x2="19.03" y2="23.56"/>
         </g>
     </g>
 </svg>

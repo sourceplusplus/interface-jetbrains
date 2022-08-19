@@ -26,6 +26,8 @@ import com.intellij.openapi.wm.WindowManager
 import com.intellij.openapi.wm.impl.status.EditorBasedStatusBarPopup
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.status.SourceStatus
+import spp.jetbrains.sourcemarker.status.SourceStatus.Pending
+import spp.jetbrains.sourcemarker.status.SourceStatus.Ready
 import spp.jetbrains.sourcemarker.status.SourceStatusService
 
 class SourceStatusBarWidget(project: Project) : EditorBasedStatusBarPopup(project, false) {
@@ -88,39 +90,34 @@ class SourceStatusBarWidget(project: Project) : EditorBasedStatusBarPopup(projec
 
     private fun createPopup(context: DataContext, withStatusItem: Boolean): ListPopup? {
         val currentStatus = SourceStatusService.getInstance(project).getCurrentStatus().first
-        return if (currentStatus == SourceStatus.Unknown) {
+        val configuredGroup = ActionManager.getInstance().getAction(findPopupMenuId(currentStatus))
+        return if (configuredGroup !is ActionGroup) {
             null
         } else {
-            val configuredGroup = ActionManager.getInstance().getAction(findPopupMenuId(currentStatus))
-            if (configuredGroup !is ActionGroup) {
-                null
+            val group = if (withStatusItem) {
+                val statusGroup = DefaultActionGroup()
+                statusGroup.add(SourceStatusItemAction())
+                statusGroup.addSeparator()
+                statusGroup.addAll(*arrayOf<AnAction>(configuredGroup))
+                statusGroup
             } else {
-                val group = if (withStatusItem) {
-                    val statusGroup = DefaultActionGroup()
-                    statusGroup.add(SourceStatusItemAction())
-                    statusGroup.addSeparator()
-                    statusGroup.addAll(*arrayOf<AnAction>(configuredGroup))
-                    statusGroup
-                } else {
-                    configuredGroup
-                }
-                JBPopupFactory.getInstance().createActionGroupPopup(
-                    "Source++ Status",
-                    group,
-                    context,
-                    JBPopupFactory.ActionSelectionAid.SPEEDSEARCH,
-                    withStatusItem
-                )
+                configuredGroup
             }
+            JBPopupFactory.getInstance().createActionGroupPopup(
+                "Source++ Status",
+                group,
+                context,
+                JBPopupFactory.ActionSelectionAid.SPEEDSEARCH,
+                withStatusItem
+            )
         }
     }
 
     private fun findPopupMenuId(currentStatus: SourceStatus): String {
-        return if (currentStatus == SourceStatus.Ready) {
-            "spp.statusBarPopup"
+        return if (currentStatus == Ready || currentStatus == Pending) {
+            "spp.enabled.statusBarPopup"
         } else {
-            "todo"
-            //if (currentStatus.isDisablingClientRequests()) "copilot.statusBarRestartPopup" else "copilot.statusBarErrorPopup"
+            "spp.disabled.statusBarPopup"
         }
     }
 

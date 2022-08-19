@@ -17,12 +17,14 @@
 package spp.jetbrains.sourcemarker.stat
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Pair
 import kotlinx.coroutines.*
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.status.SourceStatus
+import spp.jetbrains.sourcemarker.status.SourceStatus.*
 import spp.jetbrains.sourcemarker.status.SourceStatusService
 import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import java.lang.Runnable
@@ -30,10 +32,14 @@ import javax.annotation.concurrent.GuardedBy
 
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
+    companion object {
+        private val log = logger<SourceStatusServiceImpl>()
+    }
+
     private val statusLock = Any()
 
     @GuardedBy("statusLock")
-    private var status: SourceStatus = SourceStatus.Pending
+    private var status: SourceStatus = Pending
 
     @GuardedBy("statusLock")
     private var message: String? = null
@@ -52,22 +58,49 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     override fun update(status: SourceStatus, message: String?) {
         synchronized(statusLock) {
             val oldStatus = this.status
+            if (oldStatus == Disabled && status != Enabled) {
+                log.info("Ignoring status update from $oldStatus to $status")
+                return@synchronized
+            }
             this.status = status
             this.message = message
 
             if (oldStatus != status) {
-                onStatusChanged(status)
+                log.info("Status changed from $oldStatus to $status")
+                GlobalScope.launch {
+                    try {
+                        onStatusChanged(status)
+                    } catch (e: Exception) {
+                        log.error("Error while updating status", e)
+                    }
+                }
             }
         }
 
         updateAllStatusBarIcons()
     }
 
-    private fun onStatusChanged(status: SourceStatus) = when (status) {
-        SourceStatus.ConnectionError -> {
+    private suspend fun onStatusChanged(status: SourceStatus) = when (status) {
+        ConnectionError -> {
+            SourceMarkerPlugin.getInstance(project).restartIfNecessary()
+
             //start reconnection loop
             synchronized(reconnectionLock) {
-                reconnectionJob = launchPeriodicAsync(15_000)
+                reconnectionJob = launchPeriodicInit(15_000, true)
+            }
+        }
+
+        Enabled -> {
+            SourceMarkerPlugin.getInstance(project).init()
+        }
+
+        Disabled -> {
+            SourceMarkerPlugin.getInstance(project).restartIfNecessary()
+
+            //stop reconnection loop
+            synchronized(reconnectionLock) {
+                reconnectionJob?.cancel()
+                reconnectionJob = null
             }
         }
 
@@ -95,12 +128,14 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
         }
     }
 
-    private fun launchPeriodicAsync(
-        repeatMillis: Long
+    private fun launchPeriodicInit(
+        repeatMillis: Long,
+        waitBefore: Boolean
     ) = GlobalScope.async {
         while (isActive) {
-            delay(repeatMillis)
+            if (waitBefore) delay(repeatMillis)
             SourceMarkerPlugin.getInstance(project).init()
+            if (!waitBefore) delay(repeatMillis)
         }
     }
 }

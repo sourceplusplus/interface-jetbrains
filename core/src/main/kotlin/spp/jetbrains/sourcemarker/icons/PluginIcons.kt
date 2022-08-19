@@ -151,6 +151,9 @@ object PluginIcons {
     val statusDisabled = IconLoader.getIcon("/icons/statusBar/status-disabled.svg", PluginIcons::class.java)
 
     @JvmField
+    val statusFailed = IconLoader.getIcon("/icons/statusBar/status-failed.svg", PluginIcons::class.java)
+
+    @JvmField
     val expand = IconLoader.getIcon("/icons/expand.svg", PluginIcons::class.java)
 
     @JvmField

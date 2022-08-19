@@ -103,9 +103,12 @@
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
 
-        <group id="spp.statusBarPopup">
-            <reference id="spp.enableSourcePP"/>
+        <group id="spp.enabled.statusBarPopup">
             <reference id="spp.disableSourcePP"/>
+        </group>
+
+        <group id="spp.disabled.statusBarPopup">
+            <reference id="spp.enableSourcePP"/>
         </group>
     </actions>
 </idea-plugin>
