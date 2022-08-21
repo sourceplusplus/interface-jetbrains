@@ -23,7 +23,6 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
-import io.vertx.core.Vertx
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import spp.jetbrains.marker.impl.ArtifactNamingService
