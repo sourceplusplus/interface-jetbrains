@@ -22,11 +22,11 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.util.ui.UIUtil;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import net.miginfocom.swing.MigLayout;
-import spp.command.LiveCommand;
-import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark;
+import spp.jetbrains.PluginUI;
+import spp.jetbrains.command.LiveCommand;
+import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
-import spp.jetbrains.sourcemarker.icons.PluginIcons;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
 import spp.jetbrains.sourcemarker.status.util.LiveCommandFieldRow;
@@ -43,8 +43,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.PluginUI.*;
+import static spp.jetbrains.PluginBundle.message;
+import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class ControlBar extends JPanel implements VisibleAreaListener {

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package liveplugin.implementation.plugin
+package spp.jetbrains.plugin
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project

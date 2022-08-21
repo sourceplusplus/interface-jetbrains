@@ -18,13 +18,13 @@ package spp.jetbrains.sourcemarker.element;
 
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
-import spp.jetbrains.sourcemarker.PluginUI;
+import spp.jetbrains.PluginUI;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.PANEL_BACKGROUND_COLOR;
+import static spp.jetbrains.PluginUI.LABEL_FOREGROUND_COLOR;
+import static spp.jetbrains.PluginUI.PANEL_BACKGROUND_COLOR;
 
 public class AutocompleteRow extends JPanel {
 

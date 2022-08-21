@@ -58,9 +58,8 @@ import io.vertx.servicediscovery.impl.DiscoveryImpl
 import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
 import liveplugin.implementation.LivePluginProjectLoader
-import liveplugin.implementation.plugin.LivePluginService
-import liveplugin.implementation.plugin.LiveStatusManager
 import org.apache.commons.text.CaseUtils
+import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
@@ -68,7 +67,9 @@ import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.py.PythonMarker
 import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
-import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.jetbrains.plugin.LivePluginService
+import spp.jetbrains.plugin.LiveStatusManager
+import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.command.ControlBarController
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
@@ -83,9 +84,9 @@ import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
-import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
-import spp.jetbrains.sourcemarker.status.SourceStatus.Pending
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus.ConnectionError
+import spp.jetbrains.status.SourceStatus.Pending
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.SourceServices
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService

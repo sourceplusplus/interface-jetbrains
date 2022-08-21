@@ -15,21 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package liveplugin.implementation.plugin.impl
+package spp.jetbrains.plugin.impl
 
 import com.apollographql.apollo3.exception.ApolloNetworkException
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.runBlocking
-import liveplugin.implementation.plugin.LivePluginService
-import spp.command.LiveCommand
-import spp.indicator.LiveIndicator
+import spp.jetbrains.plugin.LivePluginService
+import spp.jetbrains.command.LiveCommand
+import spp.jetbrains.indicator.LiveIndicator
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus.ConnectionError
+import spp.jetbrains.status.SourceStatusService
 
 class LivePluginServiceImpl(val project: Project) : LivePluginService {
 

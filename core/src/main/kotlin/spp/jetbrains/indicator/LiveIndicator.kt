@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.indicator
+package spp.jetbrains.indicator
 
 import com.apollographql.apollo3.exception.ApolloException
 import com.intellij.openapi.diagnostic.logger
@@ -25,10 +25,10 @@ import kotlinx.coroutines.launch
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.sourcemarker.UserData
-import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
-import spp.jetbrains.sourcemarker.status.SourceStatus.Ready
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.UserData
+import spp.jetbrains.status.SourceStatus.ConnectionError
+import spp.jetbrains.status.SourceStatus.Ready
+import spp.jetbrains.status.SourceStatusService
 
 @Suppress("unused")
 abstract class LiveIndicator(val project: Project) {

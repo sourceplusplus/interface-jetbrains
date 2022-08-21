@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.icons
+package spp.jetbrains.icons
 
 import com.intellij.openapi.util.IconLoader
 

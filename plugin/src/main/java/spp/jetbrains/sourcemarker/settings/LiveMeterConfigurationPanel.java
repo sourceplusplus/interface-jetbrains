@@ -30,18 +30,18 @@ import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.PluginUI;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.PluginUI;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.SMALLER_FONT;
+import static spp.jetbrains.PluginBundle.message;
+import static spp.jetbrains.PluginUI.DFLT_BGND_COLOR;
+import static spp.jetbrains.PluginUI.SMALLER_FONT;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.INTELLIJ_PRODUCT_CODES;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES;
 

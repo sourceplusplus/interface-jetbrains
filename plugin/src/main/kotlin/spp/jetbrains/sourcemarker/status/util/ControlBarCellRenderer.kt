@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
+import spp.jetbrains.PluginUI.BGND_FOCUS_COLOR
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component

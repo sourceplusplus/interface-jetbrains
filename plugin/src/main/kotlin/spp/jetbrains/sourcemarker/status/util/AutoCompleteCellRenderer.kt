@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
+import spp.jetbrains.PluginUI.BGND_FOCUS_COLOR
 import spp.jetbrains.sourcemarker.element.AutocompleteRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import spp.protocol.artifact.ArtifactQualifiedName

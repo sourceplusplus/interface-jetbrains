@@ -18,8 +18,8 @@ package spp.jetbrains.sourcemarker.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import spp.jetbrains.sourcemarker.status.SourceStatus.Enabled
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus.Enabled
+import spp.jetbrains.status.SourceStatusService
 
 class EnableSourceAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {

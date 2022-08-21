@@ -15,12 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package liveplugin.implementation.plugin
+package spp.jetbrains.plugin
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import spp.command.LiveCommand
-import spp.indicator.LiveIndicator
+import spp.jetbrains.command.LiveCommand
+import spp.jetbrains.indicator.LiveIndicator
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import java.io.File
 

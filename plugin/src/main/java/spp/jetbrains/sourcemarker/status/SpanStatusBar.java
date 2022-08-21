@@ -28,14 +28,14 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
-import liveplugin.implementation.plugin.LiveStatusManager;
 import net.miginfocom.swing.MigLayout;
+import spp.jetbrains.PluginUI;
+import spp.jetbrains.UserData;
+import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.PluginUI;
-import spp.jetbrains.sourcemarker.UserData;
-import spp.jetbrains.sourcemarker.icons.PluginIcons;
+import spp.jetbrains.plugin.LiveStatusManager;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
@@ -59,11 +59,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
+import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
 public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 

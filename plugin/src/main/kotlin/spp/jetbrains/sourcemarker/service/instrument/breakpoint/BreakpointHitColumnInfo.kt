@@ -20,7 +20,7 @@ import com.intellij.util.ui.ColumnInfo
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import kotlinx.datetime.Clock
-import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.jetbrains.PluginBundle.message
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
 import spp.protocol.marshall.ProtocolMarshaller

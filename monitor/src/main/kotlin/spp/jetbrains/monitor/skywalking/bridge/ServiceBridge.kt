@@ -26,9 +26,9 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.model.DurationStep
-import spp.jetbrains.sourcemarker.status.SourceStatus.Pending
-import spp.jetbrains.sourcemarker.status.SourceStatus.Ready
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus.Pending
+import spp.jetbrains.status.SourceStatus.Ready
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.general.Service
 import java.time.ZonedDateTime
 

@@ -23,9 +23,9 @@ import com.intellij.openapi.project.Project
 import io.vertx.core.json.Json
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
-import spp.jetbrains.sourcemarker.PluginBundle.message
+import spp.jetbrains.PluginBundle.message
+import spp.jetbrains.UserData
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.UserData
 import javax.swing.JComponent
 
 /**

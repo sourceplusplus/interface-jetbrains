@@ -17,16 +17,16 @@
 package spp.jetbrains.sourcemarker.settings;
 
 import net.miginfocom.swing.MigLayout;
-import spp.jetbrains.sourcemarker.PluginUI;
+import spp.jetbrains.PluginUI;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.PluginUI.DFLT_BGND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.SMALLER_FONT;
+import static spp.jetbrains.PluginBundle.message;
+import static spp.jetbrains.PluginUI.DFLT_BGND_COLOR;
+import static spp.jetbrains.PluginUI.SMALLER_FONT;
 
 public class LiveBreakpointConfigurationPanel extends JPanel {
 

@@ -29,13 +29,13 @@ import okhttp3.Call
 import okhttp3.EventListener
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
+import spp.jetbrains.UserData
 import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.impl.SkywalkingMonitorServiceImpl
 import spp.jetbrains.monitor.skywalking.service.SWLiveService
 import spp.jetbrains.monitor.skywalking.service.SWLiveViewService
-import spp.jetbrains.sourcemarker.UserData
-import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus.ConnectionError
+import spp.jetbrains.status.SourceStatusService
 import java.io.IOException
 import java.net.ConnectException
 import java.net.InetSocketAddress

@@ -49,7 +49,7 @@ class SkywalkingMonitorServiceImpl(
 
     override suspend fun searchExactEndpoint(keyword: String, cache: Boolean): JsonObject? {
         val service = getCurrentService() ?: return null
-        val endpoints = skywalkingClient.searchEndpoint(keyword, service.id, 1, cache)
+        val endpoints = skywalkingClient.searchEndpoint(keyword, service.id, 10, cache)
         return endpoints.map { it as JsonObject }.find { it.getString("name") == keyword }
     }
 

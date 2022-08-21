@@ -24,10 +24,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLocalVariable
 import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.common.toFilePath
-import liveplugin.implementation.plugin.LivePluginService
+import spp.jetbrains.plugin.LivePluginService
 import org.joor.Reflect
-import spp.command.LiveCommand
-import spp.command.LiveCommandContext
+import spp.jetbrains.command.LiveCommand
+import spp.jetbrains.command.LiveCommandContext
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark

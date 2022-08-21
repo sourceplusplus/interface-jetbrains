@@ -25,10 +25,10 @@ import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.openapi.wm.impl.status.EditorBasedStatusBarPopup
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.status.SourceStatus
-import spp.jetbrains.sourcemarker.status.SourceStatus.Pending
-import spp.jetbrains.sourcemarker.status.SourceStatus.Ready
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus
+import spp.jetbrains.status.SourceStatus.Pending
+import spp.jetbrains.status.SourceStatus.Ready
+import spp.jetbrains.status.SourceStatusService
 
 class SourceStatusBarWidget(project: Project) : EditorBasedStatusBarPopup(project, false) {
 

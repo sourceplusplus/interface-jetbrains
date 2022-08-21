@@ -21,12 +21,12 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import liveplugin.implementation.plugin.LiveStatusManager;
 import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.UserData;
+import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
-import spp.jetbrains.sourcemarker.UserData;
-import spp.jetbrains.sourcemarker.icons.PluginIcons;
+import spp.jetbrains.plugin.LiveStatusManager;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentEventType;
@@ -41,8 +41,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
 public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentEventListener, LiveViewEventListener {
