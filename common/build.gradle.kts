@@ -19,19 +19,8 @@ dependencies {
     compileOnly("plus.sourceplus:protocol:$projectVersion")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    compileOnly("org.jooq:joor:$joorVersion")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:ide-impl:$intellijVersion")
-    compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion")
-    compileOnly("com.jetbrains.intellij.platform:core-impl:$intellijVersion")
-    compileOnly("com.jetbrains.intellij.platform:core-ui:$intellijVersion")
-    compileOnly("com.jetbrains.intellij.platform:code-style:$intellijVersion")
-    compileOnly("com.jetbrains.intellij.platform:lang:$intellijVersion")
-    compileOnly("com.jetbrains.intellij.platform:lang-impl:$intellijVersion")
-    compileOnly("com.apollographql.apollo3:apollo-api:$apolloVersion")
-
-    compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
-    compileOnly("com.google.guava:guava:31.1-jre")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 }
