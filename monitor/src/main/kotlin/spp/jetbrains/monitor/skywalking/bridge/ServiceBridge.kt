@@ -25,7 +25,7 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
-import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
+import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.sourcemarker.status.SourceStatus.Pending
 import spp.jetbrains.sourcemarker.status.SourceStatus.Ready
 import spp.jetbrains.sourcemarker.status.SourceStatusService

@@ -17,8 +17,10 @@ repositories {
 
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
+        compileOnly(project(":interfaces:jetbrains:common"))
         compileOnly(project(":interfaces:jetbrains:marker"))
     } else {
+        compileOnly(project(":common"))
         compileOnly(project(":marker"))
     }
 
@@ -39,4 +41,5 @@ dependencies {
 
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
     compileOnly("com.google.guava:guava:31.1-jre")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 }

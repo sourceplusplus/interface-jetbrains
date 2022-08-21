@@ -14,22 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker
+package spp.jetbrains.monitor.skywalking.model
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
-import io.vertx.core.Vertx
+data class ServiceInstance(
+    val id: String,
+    val name: String,
+    val language: Language,
+    val instanceUUID: String,
+    val attributes: List<Attribute>,
+) {
 
-object UserData {
-
-    private val VERTX_KEY = Key.create<Vertx>("SPP_VERTX")
-
-    fun vertx(project: Project): Vertx {
-        return project.getUserData(VERTX_KEY)!!
+    enum class Language {
+        JAVA,
+        DOTNET,
+        NODEJS,
+        PYTHON,
+        RUBY,
+        GO,
+        LUA,
+        PHP
     }
 
-    fun vertx(project: Project, vertx: Vertx): Vertx {
-        project.putUserData(VERTX_KEY, vertx)
-        return vertx
-    }
+    data class Attribute(
+        val name: String,
+        val value: String,
+    )
 }

@@ -16,10 +16,10 @@
  */
 package spp.jetbrains.marker.jvm
 
+import com.intellij.openapi.project.Project
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
 import io.vertx.core.Promise
-import io.vertx.core.Vertx
 import org.jetbrains.uast.UMethod
 import spp.jetbrains.marker.jvm.JVMEndpointDetector.JVMEndpointNameDeterminer
 import spp.jetbrains.marker.jvm.psi.endpoint.SkywalkingTraceEndpoint
@@ -33,7 +33,7 @@ import java.util.*
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMEndpointDetector(vertx: Vertx) : EndpointDetector<JVMEndpointNameDeterminer>(vertx) {
+class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDeterminer>(project) {
 
     override val detectorSet: Set<JVMEndpointNameDeterminer> = setOf(
         SkywalkingTraceEndpoint(),

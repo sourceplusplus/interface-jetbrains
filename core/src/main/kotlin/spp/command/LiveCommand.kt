@@ -17,18 +17,28 @@
 package spp.command
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
 import kotlinx.coroutines.runBlocking
+import liveplugin.implementation.plugin.LiveStatusManager
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.sourcemarker.UserData
 import javax.swing.Icon
 
 @Suppress("unused")
-abstract class LiveCommand {
+abstract class LiveCommand(val project: Project) {
     abstract val name: String
     abstract val description: String
     open val params: List<String> = emptyList()
     open val aliases: Set<String> = emptySet()
     open var selectedIcon: Icon? = null
     open var unselectedIcon: Icon? = null
+
+    val vertx = UserData.vertx(project)
+    val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
+    val liveService = UserData.liveService(project)!!
+    val liveViewService = UserData.liveViewService(project)!!
+    val liveStatusManager = LiveStatusManager.getInstance(project)
+    val liveInstrumentService = UserData.liveInstrumentService(project)
 
     open fun trigger(context: LiveCommandContext) {
         ApplicationManager.getApplication().runReadAction {

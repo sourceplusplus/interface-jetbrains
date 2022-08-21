@@ -142,7 +142,7 @@ object ArtifactSearch {
                     KotlinFileType.INSTANCE, GlobalSearchScope.projectScope(project)
                 )
 
-                val endpointDetector = JVMEndpointDetector(vertx) //todo: python
+                val endpointDetector = JVMEndpointDetector(project) //todo: python
                 var keepSearching = true
                 for (virtualFile in groovySourceFiles.union(javaSourceFiles).union(kotlinSourceFiles)) {
                     val file = PsiManager.getInstance(project).findFile(virtualFile)!!

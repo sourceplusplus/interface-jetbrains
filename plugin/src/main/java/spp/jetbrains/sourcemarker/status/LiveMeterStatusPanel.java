@@ -25,6 +25,7 @@ import liveplugin.implementation.plugin.LiveStatusManager;
 import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
+import spp.jetbrains.sourcemarker.UserData;
 import spp.jetbrains.sourcemarker.icons.PluginIcons;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
@@ -40,7 +41,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
@@ -123,7 +123,7 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentEventL
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                gutterMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
+                UserData.liveInstrumentService(gutterMark.getProject()).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                     if (it.succeeded()) {
                         gutterMark.dispose();
                         LiveStatusManager.getInstance(gutterMark.getProject()).removeActiveLiveInstrument(liveMeter);

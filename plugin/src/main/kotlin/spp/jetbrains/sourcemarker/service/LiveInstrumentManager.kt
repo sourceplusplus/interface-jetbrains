@@ -27,7 +27,7 @@ import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import liveplugin.implementation.plugin.LiveStatusManager
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.monitor.skywalking.SkywalkingMonitor.Companion.LIVE_INSTRUMENT_SERVICE
+import spp.jetbrains.sourcemarker.UserData
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
@@ -87,7 +87,7 @@ class LiveInstrumentManager(
         )
 
         //show live status bars
-        project.getUserData(LIVE_INSTRUMENT_SERVICE)!!.getLiveInstruments(null).onComplete {
+        UserData.liveInstrumentService(project)!!.getLiveInstruments(null).onComplete {
             if (it.succeeded()) {
                 log.info("Found ${it.result().size} active live status bars")
                 LiveStatusManager.getInstance(project).addActiveLiveInstruments(it.result())

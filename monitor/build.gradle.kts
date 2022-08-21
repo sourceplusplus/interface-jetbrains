@@ -17,9 +17,9 @@ repositories {
 
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
-        compileOnly(project(":interfaces:jetbrains:core"))
+        compileOnly(project(":interfaces:jetbrains:common"))
     } else {
-        compileOnly(project(":core"))
+        compileOnly(project(":common"))
     }
 
     implementation("plus.sourceplus:protocol:$projectVersion")

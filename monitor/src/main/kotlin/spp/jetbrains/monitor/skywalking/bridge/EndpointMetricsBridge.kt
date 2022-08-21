@@ -26,6 +26,7 @@ import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
+import spp.jetbrains.monitor.skywalking.toDuration
 
 /**
  * todo: description.

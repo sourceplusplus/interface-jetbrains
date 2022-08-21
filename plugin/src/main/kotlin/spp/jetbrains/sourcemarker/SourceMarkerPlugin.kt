@@ -347,7 +347,7 @@ class SourceMarkerPlugin(val project: Project) {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_SERVICE)
                 .build(LiveService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_SERVICE, liveService)
+            UserData.liveService(project, liveService)
         } else {
             log.warn("Live service unavailable")
         }
@@ -361,7 +361,7 @@ class SourceMarkerPlugin(val project: Project) {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
                 .build(LiveInstrumentService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE, liveInstrument)
+            UserData.liveInstrumentService(project, liveInstrument)
 
             ApplicationManager.getApplication().invokeLater {
                 BreakpointHitWindowService.getInstance(project).showEventsWindow()
@@ -379,7 +379,7 @@ class SourceMarkerPlugin(val project: Project) {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_VIEW)
                 .build(LiveViewService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_VIEW_SERVICE, liveView)
+            UserData.liveViewService(project, liveView)
 
             val viewListener = LiveViewManager(project, config)
             vertx.deployVerticle(viewListener).await()

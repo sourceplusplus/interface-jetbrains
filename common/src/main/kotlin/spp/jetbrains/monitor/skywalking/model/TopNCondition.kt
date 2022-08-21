@@ -14,20 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.statusBar
+package spp.jetbrains.monitor.skywalking.model
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.StatusBarWidget
-import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFactory
+data class TopNCondition(
+    val name: String,
+    val parentService: String?,
+    val normal: Boolean?,
+    val scope: Scope?,
+    val topN: Int,
+    val order: Order,
+) {
 
-class SourceWidgetFactory : StatusBarEditorBasedWidgetFactory() {
-
-    override fun getId(): String = "spp.jetbrains.sourcemarker"
-    override fun getDisplayName(): String = "Source++"
-
-    override fun createWidget(project: Project): StatusBarWidget {
-        return SourceStatusBarWidget(project)
+    enum class Scope {
+        All,
+        Service,
+        ServiceInstance,
+        Endpoint,
+        ServiceRelation,
+        ServiceInstanceRelation,
+        EndpointRelation
     }
 
-    override fun disposeWidget(widget: StatusBarWidget) = Unit
+    enum class Order {
+        ASC,
+        DES
+    }
 }

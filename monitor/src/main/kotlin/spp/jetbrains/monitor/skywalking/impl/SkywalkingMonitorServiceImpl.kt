@@ -16,22 +16,17 @@
  */
 package spp.jetbrains.monitor.skywalking.impl
 
-import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
-import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
-import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
-import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
-import monitor.skywalking.protocol.type.TopNCondition
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
-import spp.jetbrains.monitor.skywalking.bridge.*
-import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
-import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
-import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
-import spp.jetbrains.monitor.skywalking.model.ZonedDuration
-import spp.protocol.artifact.log.LogResult
+import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
+import spp.jetbrains.monitor.skywalking.bridge.EndpointTracesBridge
+import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
+import spp.jetbrains.monitor.skywalking.bridge.ServiceInstanceBridge
+import spp.jetbrains.monitor.skywalking.model.*
+import spp.jetbrains.monitor.skywalking.toProtocol
+import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import spp.protocol.platform.general.Service
@@ -44,13 +39,13 @@ class SkywalkingMonitorServiceImpl(
         return skywalkingClient.getVersion()!!
     }
 
-    override suspend fun getTimeInfo(): GetTimeInfoQuery.Data {
-        return skywalkingClient.getTimeInfo()
+    override suspend fun getTimeInfo(): TimeInfo {
+        return skywalkingClient.getTimeInfo().toProtocol()
     }
 
-    override suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult> {
-        return LogsBridge.queryLogs(query, skywalkingClient.vertx)
-    }
+//    override suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult> {
+//        return LogsBridge.queryLogs(query, skywalkingClient.vertx)
+//    }
 
     override suspend fun searchExactEndpoint(keyword: String, cache: Boolean): JsonObject? {
         val service = getCurrentService() ?: return null
@@ -62,13 +57,13 @@ class SkywalkingMonitorServiceImpl(
         return skywalkingClient.searchEndpoint("", serviceId, limit, cache)
     }
 
-    override suspend fun getMetrics(request: GetEndpointMetrics): List<GetLinearIntValuesQuery.Result> {
-        return EndpointMetricsBridge.getMetrics(request, skywalkingClient.vertx)
+    override suspend fun getMetrics(request: GetEndpointMetrics): List<ArtifactMetrics> {
+        return EndpointMetricsBridge.getMetrics(request, skywalkingClient.vertx).toProtocol(request)
     }
 
-    override suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result> {
-        return EndpointMetricsBridge.getMultipleMetrics(request, skywalkingClient.vertx)
-    }
+//    override suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result> {
+//        return EndpointMetricsBridge.getMultipleMetrics(request, skywalkingClient.vertx)
+//    }
 
     override suspend fun getTraces(request: GetEndpointTraces): TraceResult {
         return EndpointTracesBridge.getTraces(request, skywalkingClient.vertx)
@@ -86,16 +81,16 @@ class SkywalkingMonitorServiceImpl(
         return ServiceBridge.getActiveServices(skywalkingClient.vertx)
     }
 
-    override suspend fun getCurrentServiceInstance(): GetServiceInstancesQuery.Result? {
-        return ServiceInstanceBridge.getCurrentServiceInstance(skywalkingClient.vertx)
-    }
+//    override suspend fun getCurrentServiceInstance(): GetServiceInstancesQuery.Result? {
+//        return ServiceInstanceBridge.getCurrentServiceInstance(skywalkingClient.vertx)
+//    }
 
-    override suspend fun getActiveServiceInstances(): List<GetServiceInstancesQuery.Result> {
-        return ServiceInstanceBridge.getActiveServiceInstances(skywalkingClient.vertx)
-    }
+//    override suspend fun getActiveServiceInstances(): List<GetServiceInstancesQuery.Result> {
+//        return ServiceInstanceBridge.getActiveServiceInstances(skywalkingClient.vertx)
+//    }
 
-    override suspend fun getServiceInstances(serviceId: String): List<GetServiceInstancesQuery.Result> {
-        return ServiceInstanceBridge.getServiceInstances(serviceId, skywalkingClient.vertx)
+    override suspend fun getServiceInstances(serviceId: String): List<ServiceInstance> {
+        return ServiceInstanceBridge.getServiceInstances(serviceId, skywalkingClient.vertx).toProtocol()
     }
 
     override suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration, cache: Boolean): JsonArray {

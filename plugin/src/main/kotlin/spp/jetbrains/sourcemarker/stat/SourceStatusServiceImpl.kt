@@ -62,10 +62,11 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
                 log.info("Ignoring status update from $oldStatus to $status")
                 return@synchronized
             }
-            this.status = status
-            this.message = message
 
             if (oldStatus != status) {
+                this.status = status
+                this.message = message
+
                 log.info("Status changed from $oldStatus to $status")
                 GlobalScope.launch {
                     try {
@@ -96,19 +97,18 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
         Disabled -> {
             SourceMarkerPlugin.getInstance(project).restartIfNecessary()
-
-            //stop reconnection loop
-            synchronized(reconnectionLock) {
-                reconnectionJob?.cancel()
-                reconnectionJob = null
-            }
+            stopReconnectionLoop()
         }
 
         else -> {
-            synchronized(reconnectionLock) {
-                reconnectionJob?.cancel()
-                reconnectionJob = null
-            }
+            stopReconnectionLoop()
+        }
+    }
+
+    private fun stopReconnectionLoop() {
+        synchronized(reconnectionLock) {
+            reconnectionJob?.cancel()
+            reconnectionJob = null
         }
     }
 

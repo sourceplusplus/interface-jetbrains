@@ -54,13 +54,13 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
     private val loggerDetector = LoggerDetector(vertx)
     private val endpointDetectors = mutableMapOf<String, EndpointDetector<*>>()
         .apply {
-            JVMEndpointDetector(vertx).let {
+            JVMEndpointDetector(project).let {
                 put("JAVA", it)
                 put("kotlin", it)
                 put("Scala", it)
                 put("Groovy", it)
             }
-            put("Python", PythonEndpointDetector(vertx))
+            put("Python", PythonEndpointDetector(project))
         }.toMap()
 
     init {

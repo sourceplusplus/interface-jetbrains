@@ -20,7 +20,6 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.okHttpClient
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -34,11 +33,9 @@ import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.impl.SkywalkingMonitorServiceImpl
 import spp.jetbrains.monitor.skywalking.service.SWLiveService
 import spp.jetbrains.monitor.skywalking.service.SWLiveViewService
+import spp.jetbrains.sourcemarker.UserData
 import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
 import spp.jetbrains.sourcemarker.status.SourceStatusService
-import spp.protocol.service.LiveInstrumentService
-import spp.protocol.service.LiveService
-import spp.protocol.service.LiveViewService
 import java.io.IOException
 import java.net.ConnectException
 import java.net.InetSocketAddress
@@ -64,21 +61,9 @@ class SkywalkingMonitor(
     private val project: Project
 ) : CoroutineVerticle() {
 
-    @Suppress("unused", "FunctionName")
+    @Suppress("unused")
     companion object {
         private val log = logger<SkywalkingMonitor>()
-
-        @JvmField
-        val LIVE_SERVICE = Key.create<LiveService>("SPP_LIVE_SERVICE")
-        fun getLIVE_SERVICE() = LIVE_SERVICE
-
-        @JvmField
-        val LIVE_VIEW_SERVICE = Key.create<LiveViewService>("SPP_LIVE_VIEW_SERVICE")
-        fun getLIVE_VIEW_SERVICE() = LIVE_VIEW_SERVICE
-
-        @JvmField
-        val LIVE_INSTRUMENT_SERVICE = Key.create<LiveInstrumentService>("SPP_LIVE_INSTRUMENT_SERVICE")
-        fun getLIVE_INSTRUMENT_SERVICE() = LIVE_INSTRUMENT_SERVICE
     }
 
     override suspend fun start() {
@@ -161,15 +146,15 @@ class SkywalkingMonitor(
             vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
             vertx.deployVerticle(LogsBridge(skywalkingClient)).await()
 
-            if (project.getUserData(LIVE_SERVICE) == null) {
+            if (UserData.liveService(project) == null) {
                 val swLiveService = SWLiveService()
                 vertx.deployVerticle(swLiveService).await()
-                project.putUserData(LIVE_SERVICE, swLiveService)
+                UserData.liveService(project, swLiveService)
             }
-            if (project.getUserData(LIVE_VIEW_SERVICE) == null) {
+            if (UserData.liveViewService(project) == null) {
                 val swLiveViewService = SWLiveViewService()
                 vertx.deployVerticle(swLiveViewService).await()
-                project.putUserData(LIVE_VIEW_SERVICE, swLiveViewService)
+                UserData.liveViewService(project, swLiveViewService)
             }
 
             project.putUserData(SkywalkingMonitorService.KEY, SkywalkingMonitorServiceImpl(skywalkingClient))

@@ -17,13 +17,13 @@
 package spp.jetbrains.marker.source.info
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import io.vertx.core.Future
-import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
-import spp.jetbrains.monitor.skywalking.bridge.EndpointBridge
+import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
 import java.util.*
 
 /**
@@ -32,7 +32,7 @@ import java.util.*
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val vertx: Vertx) {
+abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val project: Project) {
 
     companion object {
         private val log = logger<EndpointDetector<*>>()
@@ -42,6 +42,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
     }
 
     abstract val detectorSet: Set<T>
+    private val skywalkingMonitor = project.getUserData(SkywalkingMonitorService.KEY)!!
 
     fun getEndpointName(sourceMark: GuideMark): String? {
         return sourceMark.getUserData(ENDPOINT_NAME)
@@ -103,7 +104,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
 
     private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodGuideMark) {
         log.trace("Determining endpoint id")
-        val endpoint = EndpointBridge.searchExactEndpoint(endpointName, vertx)
+        val endpoint = skywalkingMonitor.searchExactEndpoint(endpointName)
         if (endpoint != null) {
             sourceMark.putUserData(ENDPOINT_ID, endpoint.getString("id"))
             log.trace("Detected endpoint id: ${endpoint.getString("id")}")

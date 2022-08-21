@@ -14,6 +14,7 @@ pluginManagement {
 
 include 'commander'
 include 'commander:kotlin-compiler-wrapper'
+include 'common'
 include 'core'
 include 'marker'
 include 'marker:jvm-marker'

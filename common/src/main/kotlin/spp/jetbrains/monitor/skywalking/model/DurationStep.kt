@@ -14,20 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.statusBar
+package spp.jetbrains.monitor.skywalking.model
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.StatusBarWidget
-import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFactory
+import java.time.format.DateTimeFormatter
 
-class SourceWidgetFactory : StatusBarEditorBasedWidgetFactory() {
-
-    override fun getId(): String = "spp.jetbrains.sourcemarker"
-    override fun getDisplayName(): String = "Source++"
-
-    override fun createWidget(project: Project): StatusBarWidget {
-        return SourceStatusBarWidget(project)
-    }
-
-    override fun disposeWidget(widget: StatusBarWidget) = Unit
+enum class DurationStep(val dateTimeFormatter: DateTimeFormatter) {
+    DAY(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+    HOUR(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
+    MINUTE(DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")),
+    SECOND(DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss"))
 }

@@ -23,9 +23,9 @@ import com.intellij.openapi.project.Project
 import io.vertx.core.json.Json
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
-import spp.jetbrains.monitor.skywalking.SkywalkingMonitor.Companion.LIVE_SERVICE
 import spp.jetbrains.sourcemarker.PluginBundle.message
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.UserData
 import javax.swing.JComponent
 
 /**
@@ -58,7 +58,7 @@ class SourceMarkerConfigurable(val project: Project) : Configurable {
         if (form == null) {
             val config = SourceMarkerPlugin.getInstance(project).getConfig()
             val availServices = runBlocking {
-                project.getUserData(LIVE_SERVICE)?.getServices()?.await() ?: emptyList()
+                UserData.liveService(project)?.getServices()?.await() ?: emptyList()
             }
             form = PluginConfigurationPanel(config, availServices)
             form!!.applySourceMarkerConfig(config)

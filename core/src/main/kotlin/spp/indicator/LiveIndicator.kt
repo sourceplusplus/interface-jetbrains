@@ -19,11 +19,9 @@ package spp.indicator
 import com.apollographql.apollo3.exception.ApolloException
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.joor.Reflect
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.guide.GuideMark
@@ -33,7 +31,7 @@ import spp.jetbrains.sourcemarker.status.SourceStatus.Ready
 import spp.jetbrains.sourcemarker.status.SourceStatusService
 
 @Suppress("unused")
-abstract class LiveIndicator {
+abstract class LiveIndicator(val project: Project) {
 
     companion object {
         private val log = logger<LiveIndicator>()
@@ -43,14 +41,9 @@ abstract class LiveIndicator {
     open val listenForEvents: List<IEventCode> = emptyList()
 
     private var periodicTimerId = -1L
-    private val project: Project
-    private val vertx: Vertx
-
-    init {
-        val plugin = Reflect.on(this).get<Any>("this\$0")
-        project = Reflect.on(plugin).get("project")
-        vertx = UserData.vertx(project)
-    }
+    val vertx = UserData.vertx(project)
+    val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
+    val liveViewService = UserData.liveViewService(project)!!
 
     open suspend fun onRegister() {
         vertx.setPeriodic(5000) { timerId ->

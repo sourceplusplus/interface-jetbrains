@@ -18,20 +18,10 @@ package spp.jetbrains.monitor.skywalking
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
-import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
-import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
-import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
-import monitor.skywalking.protocol.type.TopNCondition
-import spp.jetbrains.monitor.skywalking.bridge.LogsBridge
-import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
-import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
-import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
-import spp.jetbrains.monitor.skywalking.model.ZonedDuration
-import spp.protocol.artifact.log.LogResult
+import spp.jetbrains.monitor.skywalking.model.*
+import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpanStackQueryResult
 import spp.protocol.platform.general.Service
@@ -46,7 +36,8 @@ interface SkywalkingMonitorService {
     }
 
     suspend fun getVersion(): String
-    suspend fun getTimeInfo(): GetTimeInfoQuery.Data
+
+    suspend fun getTimeInfo(): TimeInfo
     suspend fun searchExactEndpoint(keyword: String, cache: Boolean = false): JsonObject?
     suspend fun getEndpoints(
         serviceId: String,
@@ -54,16 +45,19 @@ interface SkywalkingMonitorService {
         cache: Boolean = true
     ): JsonArray
 
-    suspend fun getMetrics(request: GetEndpointMetrics): List<GetLinearIntValuesQuery.Result>
-    suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result>
+    suspend fun getMetrics(request: GetEndpointMetrics): List<ArtifactMetrics>
+
+    //    suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result>
     suspend fun getTraces(request: GetEndpointTraces): TraceResult
     suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult
-    suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult>
+
+    //    suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult>
     suspend fun getCurrentService(): Service?
     suspend fun getActiveServices(): List<Service>
-    suspend fun getCurrentServiceInstance(): GetServiceInstancesQuery.Result?
-    suspend fun getActiveServiceInstances(): List<GetServiceInstancesQuery.Result>
-    suspend fun getServiceInstances(serviceId: String): List<GetServiceInstancesQuery.Result>
+
+    //    suspend fun getCurrentServiceInstance(): GetServiceInstancesQuery.Result?
+//    suspend fun getActiveServiceInstances(): List<GetServiceInstancesQuery.Result>
+    suspend fun getServiceInstances(serviceId: String): List<ServiceInstance>
     suspend fun sortMetrics(
         condition: TopNCondition,
         duration: ZonedDuration,
