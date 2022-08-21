@@ -3,12 +3,8 @@ plugins {
 }
 
 val vertxVersion: String by project
-val kotlinVersion: String by project
-val apolloVersion: String by project
 val projectVersion: String by project
-val slf4jVersion: String by project
 val intellijVersion: String by project
-val joorVersion: String by project
 
 repositories {
     maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }

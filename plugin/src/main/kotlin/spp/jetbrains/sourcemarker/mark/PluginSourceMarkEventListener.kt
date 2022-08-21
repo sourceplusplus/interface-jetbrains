@@ -64,6 +64,7 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
         }.toMap()
 
     init {
+        //refresh source marks on service changes
         ServiceBridge.currentServiceConsumer(vertx).handler {
             GlobalScope.launch(vertx.dispatcher()) {
                 SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()

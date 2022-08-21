@@ -78,10 +78,6 @@ class SkywalkingMonitor(
         val httpBuilder = OkHttpClient().newBuilder()
             .hostnameVerifier { _, _ -> true }
             .eventListener(object : EventListener() {
-//                override fun callStart(call: Call) {
-//                    log.debug("Call start: ${call.request()}")
-//                }
-
                 override fun connectFailed(
                     call: Call,
                     inetSocketAddress: InetSocketAddress,
