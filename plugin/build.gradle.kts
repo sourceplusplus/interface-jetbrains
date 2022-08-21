@@ -57,6 +57,8 @@ dependencies {
         implementation(project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper")) {
             exclude(group = "org.jetbrains.kotlin")
         }
+        implementation(project(":interfaces:jetbrains:common"))
+        implementation(project(":interfaces:jetbrains:core"))
         implementation(project(":interfaces:jetbrains:marker"))
         implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
         implementation(project(":interfaces:jetbrains:marker:py-marker"))
@@ -70,6 +72,8 @@ dependencies {
         implementation(project(":commander:kotlin-compiler-wrapper")) {
             exclude(group = "org.jetbrains.kotlin")
         }
+        implementation(project(":common"))
+        implementation(project(":core"))
         implementation(project(":marker"))
         implementation(project(":marker:jvm-marker"))
         implementation(project(":marker:py-marker"))

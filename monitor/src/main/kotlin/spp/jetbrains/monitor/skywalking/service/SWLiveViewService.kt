@@ -25,6 +25,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
+import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
 import spp.jetbrains.monitor.skywalking.bridge.EndpointTracesBridge
@@ -99,7 +100,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                 zonedDuration = ZonedDuration(
                     ZonedDateTime.now().minusSeconds(30),
                     ZonedDateTime.now().plusSeconds(30),
-                    SkywalkingClient.DurationStep.SECOND
+                    DurationStep.SECOND
                 )
             ), vertx
         )
@@ -133,7 +134,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                 zonedDuration = ZonedDuration(
                     ZonedDateTime.now().minusSeconds(30),
                     ZonedDateTime.now().plusSeconds(30),
-                    SkywalkingClient.DurationStep.SECOND
+                    DurationStep.SECOND
                 )
             ), vertx
         )
@@ -173,7 +174,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         val metricsRequest = GetEndpointMetrics(
             subscription.liveViewConfig.viewMetrics,
             subscription.entityIds.first(),
-            ZonedDuration(startTime, endTime, SkywalkingClient.DurationStep.MINUTE)
+            ZonedDuration(startTime, endTime, DurationStep.MINUTE)
         )
 
         val metrics = EndpointMetricsBridge.getMetrics(metricsRequest, vertx)

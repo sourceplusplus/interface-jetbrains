@@ -17,9 +17,9 @@ repositories {
 
 dependencies {
     if (findProject(":interfaces:jetbrains") != null) {
-        compileOnly(project(":interfaces:jetbrains:monitor"))
+        compileOnly(project(":interfaces:jetbrains:common"))
     } else {
-        compileOnly(project(":monitor"))
+        compileOnly(project(":common"))
     }
     compileOnly("plus.sourceplus:protocol:$projectVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")

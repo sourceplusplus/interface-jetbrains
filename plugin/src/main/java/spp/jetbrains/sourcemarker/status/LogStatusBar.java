@@ -35,8 +35,9 @@ import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
+import spp.jetbrains.sourcemarker.UserData;
+import spp.jetbrains.sourcemarker.icons.PluginIcons;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.instrument.log.LogHitColumnInfo;
@@ -88,7 +89,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
@@ -642,7 +642,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             latestTime = null;
             latestLog = null;
 
-            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(oldLiveLog.getId()).onComplete(it -> {
+            UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(oldLiveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(oldLiveLog);
                 } else {
@@ -701,7 +701,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         displayTimeField();
         wrapper.grabFocus();
 
-        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
+        UserData.liveInstrumentService(inlayMark.getProject()).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveLog = (LiveLog) it.result();
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), it.result().getId());
@@ -726,7 +726,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
         if (liveLog != null) {
             LiveStatusManager.getInstance(inlayMark.getProject()).removeLogData(inlayMark);
-            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveLog.getId()).onComplete(it -> {
+            UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(liveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveLog);
                 } else {

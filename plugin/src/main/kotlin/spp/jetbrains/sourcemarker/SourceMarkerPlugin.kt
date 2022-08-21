@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker
 
-import com.apollographql.apollo3.exception.ApolloHttpException
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -63,7 +62,6 @@ import liveplugin.implementation.plugin.LivePluginService
 import liveplugin.implementation.plugin.LiveStatusManager
 import org.apache.commons.text.CaseUtils
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarker.Companion.VERTX_KEY
 import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -83,7 +81,11 @@ import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
+import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
+import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
+import spp.jetbrains.sourcemarker.status.SourceStatus.Pending
+import spp.jetbrains.sourcemarker.status.SourceStatusService
 import spp.protocol.SourceServices
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveService
@@ -129,6 +131,8 @@ class SourceMarkerPlugin(val project: Project) {
             log.info("Setting up Python marker")
             PythonMarker.setup()
         }
+
+        project.putUserData(SourceStatusService.KEY, SourceStatusServiceImpl(project))
     }
 
     suspend fun init(configInput: SourceMarkerConfig? = null) {
@@ -141,9 +145,8 @@ class SourceMarkerPlugin(val project: Project) {
         } else {
             VertxOptions()
         }
-        val vertx = Vertx.vertx(options)
+        val vertx = UserData.vertx(project, Vertx.vertx(options))
         this.vertx = vertx
-        project.putUserData(VERTX_KEY, vertx)
         LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig()
@@ -186,7 +189,9 @@ class SourceMarkerPlugin(val project: Project) {
         connectionJob = GlobalScope.launch(vertx.dispatcher()) {
             var connectedMonitor = false
             try {
+                SourceStatusService.getInstance(project).update(Pending, "Initializing services")
                 initServices(vertx, config)
+                SourceStatusService.getInstance(project).update(Pending, "Initializing monitor")
                 initMonitor(vertx, config)
                 connectedMonitor = true
 
@@ -205,63 +210,8 @@ class SourceMarkerPlugin(val project: Project) {
                     projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
                 }
             } catch (ignored: CancellationException) {
-            } catch (throwable: ApolloHttpException) {
-                val pluginName = message("plugin_name")
-                if (throwable.statusCode == 401) {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "Connection unauthorized",
-                            "Failed to authenticate with $pluginName. " +
-                                    "Please ensure the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                } else {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "Connection failed",
-                            "Failed to connect to $pluginName. " +
-                                    "Please ensure the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                }
             } catch (throwable: Throwable) {
-                //todo: if first time bring up config panel automatically instead of notification
-                val pluginName = message("plugin_name")
-                if (throwable.message == "HTTP 401 Unauthorized") {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "Connection unauthorized",
-                            "Failed to authenticate with $pluginName. " +
-                                    "Please ensure the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                } else if (throwable.message == "Failed to create SSL connection") {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "SSL connection failed",
-                            "Failed to create SSL connection to $pluginName. " +
-                                    "Please ensure the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                } else {
-                    Notifications.Bus.notify(
-                        Notification(
-                            pluginName, "Connection failed",
-                            "$pluginName failed to connect to Apache SkyWalking. " +
-                                    "Please ensure Apache SkyWalking is running and the correct configuration " +
-                                    "is set at: Settings -> Tools -> $pluginName",
-                            NotificationType.ERROR
-                        )
-                    )
-                }
+                SourceStatusService.getInstance(project).update(ConnectionError, throwable.message)
                 log.warn("Connection failed", throwable)
             }
 
@@ -397,7 +347,7 @@ class SourceMarkerPlugin(val project: Project) {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_SERVICE)
                 .build(LiveService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_SERVICE, liveService)
+            UserData.liveService(project, liveService)
         } else {
             log.warn("Live service unavailable")
         }
@@ -411,7 +361,7 @@ class SourceMarkerPlugin(val project: Project) {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
                 .build(LiveInstrumentService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE, liveInstrument)
+            UserData.liveInstrumentService(project, liveInstrument)
 
             ApplicationManager.getApplication().invokeLater {
                 BreakpointHitWindowService.getInstance(project).showEventsWindow()
@@ -429,7 +379,7 @@ class SourceMarkerPlugin(val project: Project) {
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_VIEW)
                 .build(LiveViewService::class.java)
-            project.putUserData(SkywalkingMonitor.LIVE_VIEW_SERVICE, liveView)
+            UserData.liveViewService(project, liveView)
 
             val viewListener = LiveViewManager(project, config)
             vertx.deployVerticle(viewListener).await()
@@ -438,7 +388,7 @@ class SourceMarkerPlugin(val project: Project) {
         }
     }
 
-    private suspend fun restartIfNecessary() {
+    suspend fun restartIfNecessary() {
         if (SourceMarker.getInstance(project).enabled) {
             SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
             SourceMarker.getInstance(project).clearGlobalSourceMarkEventListeners()
@@ -610,8 +560,10 @@ class SourceMarkerPlugin(val project: Project) {
 
     private fun initMarker(vertx: Vertx, config: SourceMarkerConfig) {
         log.info("Initializing marker")
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(vertx))
+        SourceMarker.getInstance(project).apply {
+            addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
+            addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(project, vertx))
+        }
 
         SourceMarker.getInstance(project).configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.strictlyManualCreation = true

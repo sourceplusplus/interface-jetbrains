@@ -16,6 +16,12 @@ repositories {
 }
 
 dependencies {
+    if (findProject(":interfaces:jetbrains") != null) {
+        compileOnly(project(":interfaces:jetbrains:common"))
+    } else {
+        compileOnly(project(":common"))
+    }
+
     implementation("plus.sourceplus:protocol:$projectVersion")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")

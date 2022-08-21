@@ -24,7 +24,7 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
-import spp.jetbrains.monitor.skywalking.SkywalkingClient.DurationStep
+import spp.jetbrains.monitor.skywalking.model.DurationStep
 import java.time.ZonedDateTime
 
 /**

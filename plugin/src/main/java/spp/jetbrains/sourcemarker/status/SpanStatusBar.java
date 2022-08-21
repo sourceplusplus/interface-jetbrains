@@ -33,8 +33,9 @@ import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
+import spp.jetbrains.sourcemarker.UserData;
+import spp.jetbrains.sourcemarker.icons.PluginIcons;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
@@ -58,7 +59,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
@@ -377,7 +377,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
                 null,
                 meta
         );
-        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
+        UserData.liveInstrumentService(inlayMark.getProject()).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveSpan = (LiveSpan) it.result();
                 LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveSpan);
@@ -404,7 +404,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveSpan != null) {
-            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveSpan.getId()).onComplete(it -> {
+            UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(liveSpan.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveSpan);
                 } else {

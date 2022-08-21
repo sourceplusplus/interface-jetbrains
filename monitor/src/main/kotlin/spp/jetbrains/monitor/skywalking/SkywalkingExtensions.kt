@@ -16,34 +16,32 @@
  */
 package spp.jetbrains.monitor.skywalking
 
+import com.apollographql.apollo3.api.Optional
 import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
+import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
+import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
-import monitor.skywalking.protocol.type.QueryOrder
-import monitor.skywalking.protocol.type.TraceState
-import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.QueryTimeFrame
+import monitor.skywalking.protocol.type.*
+import spp.jetbrains.monitor.skywalking.model.*
+import spp.jetbrains.monitor.skywalking.model.ServiceInstance
+import spp.jetbrains.monitor.skywalking.model.TimeInfo
+import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.protocol.artifact.metrics.ArtifactMetricResult
 import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.artifact.trace.*
+import spp.protocol.artifact.trace.Trace
 import spp.protocol.platform.general.Service
 
 fun toProtocol(
-    artifactQualifiedName: ArtifactQualifiedName,
-    timeFrame: QueryTimeFrame,
-    focus: MetricType,
     metricsRequest: GetEndpointMetrics,
     metrics: List<GetLinearIntValuesQuery.Result>
 ): ArtifactMetricResult {
     return ArtifactMetricResult(
-        artifactQualifiedName = artifactQualifiedName,
-        timeFrame = timeFrame,
-        focus = focus,
         start = Instant.fromEpochMilliseconds(metricsRequest.zonedDuration.start.toInstant().toEpochMilli()),
         stop = Instant.fromEpochMilliseconds(metricsRequest.zonedDuration.stop.toInstant().toEpochMilli()),
         step = metricsRequest.zonedDuration.step.name,
@@ -138,4 +136,48 @@ fun GetMultipleLinearIntValuesQuery.Value.toProtocol(): Double {
 
 fun GetAllServicesQuery.Result.toProtocol(): Service {
     return Service(id, name)
+}
+
+fun ZonedDuration.toDuration(skywalkingClient: SkywalkingClient): Duration {
+    //minus on stop as skywalking stop is inclusive
+    return when (step) {
+        DurationStep.SECOND -> skywalkingClient.getDuration(start, stop.minusSeconds(1), step)
+        DurationStep.MINUTE -> skywalkingClient.getDuration(start, stop.minusMinutes(1), step)
+        DurationStep.HOUR -> skywalkingClient.getDuration(start, stop.minusHours(1), step)
+        DurationStep.DAY -> skywalkingClient.getDuration(start, stop.minusDays(1), step)
+    }
+}
+
+fun List<GetLinearIntValuesQuery.Result>.toProtocol(metricsRequest: GetEndpointMetrics): List<ArtifactMetrics> {
+    return mapIndexed { i, result -> result.toProtocol(metricsRequest.metricIds[i]) }
+}
+
+fun TopNCondition.fromProtocol(): monitor.skywalking.protocol.type.TopNCondition {
+    return monitor.skywalking.protocol.type.TopNCondition(
+        name,
+        Optional.presentIfNotNull(parentService),
+        Optional.presentIfNotNull(normal),
+        Optional.presentIfNotNull(scope.let { if (it == null) null else Scope.valueOf(it.name) }),
+        topN,
+        Order.valueOf(order.name)
+    )
+}
+
+fun List<GetServiceInstancesQuery.Result>.toProtocol(): List<ServiceInstance> {
+    return map {
+        ServiceInstance(
+            it.id,
+            it.name,
+            it.language.let { ServiceInstance.Language.valueOf(it.name) },
+            it.instanceUUID,
+            it.attributes.map { ServiceInstance.Attribute(it.name, it.value) }
+        )
+    }
+}
+
+fun GetTimeInfoQuery.Data.toProtocol(): TimeInfo {
+    return TimeInfo(
+        timezone = result?.timezone,
+        currentTimestamp = result?.currentTimestamp
+    )
 }

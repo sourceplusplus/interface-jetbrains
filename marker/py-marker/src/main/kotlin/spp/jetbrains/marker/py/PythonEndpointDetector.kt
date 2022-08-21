@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.marker.py
 
-import io.vertx.core.Vertx
+import com.intellij.openapi.project.Project
 import spp.jetbrains.marker.py.psi.endpoint.FlaskEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
@@ -27,7 +27,7 @@ import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonEndpointDetector(vertx: Vertx) : EndpointDetector<EndpointNameDeterminer>(vertx) {
+class PythonEndpointDetector(project: Project) : EndpointDetector<EndpointNameDeterminer>(project) {
 
     override val detectorSet: Set<EndpointNameDeterminer> = setOf(
         FlaskEndpoint()

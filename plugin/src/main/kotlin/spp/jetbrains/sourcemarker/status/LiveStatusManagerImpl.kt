@@ -39,8 +39,8 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.monitor.skywalking.SkywalkingMonitor.Companion.LIVE_VIEW_SERVICE
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.UserData
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
 import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
@@ -209,7 +209,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                     }
                 }
 
-                project.getUserData(LIVE_VIEW_SERVICE)!!.addLiveViewSubscription(
+                UserData.liveViewService(project)!!.addLiveViewSubscription(
                     LiveViewSubscription(
                         null,
                         logPatterns,
@@ -233,7 +233,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                         }
                         inlayMark.addEventListener { event ->
                             if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
-                                project.getUserData(LIVE_VIEW_SERVICE)!!.removeLiveViewSubscription(subscriptionId)
+                                UserData.liveViewService(project)!!.removeLiveViewSubscription(subscriptionId)
                             }
                         }
                     } else {
@@ -447,7 +447,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 gutterMark.get().apply(true)
                 addStatusBar(gutterMark.get(), statusBar)
 
-                project.getUserData(LIVE_VIEW_SERVICE)!!.addLiveViewSubscription(
+                UserData.liveViewService(project)!!.addLiveViewSubscription(
                     LiveViewSubscription(
                         null,
                         listOf(liveMeter.toMetricId()),

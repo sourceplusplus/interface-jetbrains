@@ -36,16 +36,13 @@ import monitor.skywalking.protocol.metrics.SortMetricsQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.*
-import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
-import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
-import spp.jetbrains.monitor.skywalking.model.GetMultipleEndpointMetrics
-import spp.jetbrains.monitor.skywalking.model.ZonedDuration
+import spp.jetbrains.monitor.skywalking.model.*
+import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.protocol.marshall.LocalMessageCodec
 import spp.protocol.platform.general.Service
 import java.io.IOException
 import java.time.ZoneOffset.ofHours
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
 /**
@@ -101,7 +98,7 @@ class SkywalkingClient(
                 GetVersionQuery()
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Get version response: ${response.data!!.result}")
@@ -120,7 +117,7 @@ class SkywalkingClient(
                 GetTimeInfoQuery()
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Get time info response: ${response.data!!.result}")
@@ -137,7 +134,7 @@ class SkywalkingClient(
 
             val response = apolloClient.query(QueryTraceQuery(traceId)).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Query trace stack response: ${response.data!!.result}")
@@ -164,7 +161,7 @@ class SkywalkingClient(
                 )
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Query basic traces response: ${response.data!!.result}")
@@ -189,7 +186,7 @@ class SkywalkingClient(
                 GetLinearIntValuesQuery(MetricCondition(metricName, Optional.Present(endpointId)), duration)
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Get endpoint metrics response: ${response.data!!.result}")
@@ -219,7 +216,7 @@ class SkywalkingClient(
                 )
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Get multiple endpoint metrics response: ${response.data!!.result}")
@@ -244,7 +241,7 @@ class SkywalkingClient(
                 SearchEndpointQuery(keyword, serviceId, limit)
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Search endpoint response: ${response.data!!.result}")
@@ -263,7 +260,7 @@ class SkywalkingClient(
                 QueryLogsQuery(Optional.Present(condition))
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Query logs response: ${response.data!!.result}")
@@ -280,7 +277,7 @@ class SkywalkingClient(
                 GetAllServicesQuery(duration)
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Get services response: ${response.data!!.result}")
@@ -299,7 +296,7 @@ class SkywalkingClient(
                 GetServiceInstancesQuery(serviceId, duration)
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Get service instances: $response.data!!.result")
@@ -321,10 +318,10 @@ class SkywalkingClient(
             }
 
             val response = apolloClient.query(
-                SortMetricsQuery(condition, duration.toDuration(this))
+                SortMetricsQuery(condition.fromProtocol(), duration.toDuration(this))
             ).execute()
             if (response.hasErrors()) {
-                response.errors!!.forEach { log.error(it.message) }
+                response.errors!!.forEach { log.warn(it.message) }
                 throw IOException(response.errors!![0].message)
             } else {
                 if (log.isTraceEnabled) log.trace("Sort metrics response: ${response.data!!.result}")
@@ -347,12 +344,5 @@ class SkywalkingClient(
             toDate.format(step.dateTimeFormatter),
             Step.valueOf(step.name)
         )
-    }
-
-    enum class DurationStep(val dateTimeFormatter: DateTimeFormatter) {
-        DAY(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-        HOUR(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
-        MINUTE(DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")),
-        SECOND(DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss"))
     }
 }

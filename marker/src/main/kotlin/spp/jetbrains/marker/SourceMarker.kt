@@ -23,7 +23,6 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
-import io.vertx.core.Vertx
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import spp.jetbrains.marker.impl.ArtifactNamingService
@@ -49,7 +48,6 @@ class SourceMarker {
 
         private val log = logger<SourceMarker>()
         private val KEY = Key.create<SourceMarker>("SPP_SOURCE_MARKER")
-        val VERTX_KEY = Key.create<Vertx>("SPP_VERTX")
 
         @Synchronized
         fun getInstance(project: Project): SourceMarker {

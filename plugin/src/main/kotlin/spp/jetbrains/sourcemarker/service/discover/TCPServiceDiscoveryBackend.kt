@@ -18,6 +18,7 @@ package spp.jetbrains.sourcemarker.service.discover
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.core.*
@@ -42,6 +43,8 @@ import kotlinx.coroutines.launch
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
+import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
+import spp.jetbrains.sourcemarker.status.SourceStatusService
 import spp.protocol.SourceServices.Utilize
 import spp.protocol.extend.TCPServiceFrameParser
 import spp.protocol.platform.PlatformAddress
@@ -61,6 +64,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         private val log = logger<TCPServiceDiscoveryBackend>()
         private val projectMap = mutableMapOf<String, TCPServiceDiscoveryBackend>()
 
+        //todo: add register function and remove this
         fun getSocket(project: Project): NetSocket? {
             return projectMap[project.locationHash]?.socket
         }
@@ -116,11 +120,33 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 }
                 socket = client.connect(SourceMarkerConfig.DEFAULT_SERVICE_PORT, serviceHost).await()
             } catch (ex: Exception) {
-                log.error("Failed to connect to service discovery server", ex)
+                log.warn("Failed to connect to service discovery server", ex)
                 setupPromise.fail(ex)
                 return@launch
             }
             socket!!.handler(FrameParser(TCPServiceFrameParser(vertx, socket!!)))
+            socket!!.exceptionHandler {
+                log.warn("Service discovery socket exception", it)
+                val project = ProjectManager.getInstance().openProjects.find {
+                    it.locationHash == config.getString("project_location_hash")
+                }
+                if (project != null) {
+                    SourceStatusService.getInstance(project).update(ConnectionError, it.message)
+                } else {
+                    log.warn("Unable to find project. Failed to report status update")
+                }
+            }
+            socket!!.closeHandler {
+                log.warn("Service discovery socket closed")
+                val project = ProjectManager.getInstance().openProjects.find {
+                    it.locationHash == config.getString("project_location_hash")
+                }
+                if (project != null) {
+                    SourceStatusService.getInstance(project).update(ConnectionError, "Service discovery socket closed")
+                } else {
+                    log.warn("Unable to find project. Failed to report status update")
+                }
+            }
 
             vertx.executeBlocking<Any> {
                 setupHandler(vertx, "get-records")

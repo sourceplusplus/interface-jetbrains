@@ -30,6 +30,7 @@ import monitor.skywalking.protocol.type.LogQueryCondition
 import monitor.skywalking.protocol.type.Pagination
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
+import spp.jetbrains.monitor.skywalking.toDuration
 import spp.protocol.artifact.exception.LiveStackTrace
 import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType

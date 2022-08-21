@@ -36,8 +36,9 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.PluginIcons;
 import spp.jetbrains.sourcemarker.PluginUI;
+import spp.jetbrains.sourcemarker.UserData;
+import spp.jetbrains.sourcemarker.icons.PluginIcons;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
@@ -71,7 +72,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static spp.jetbrains.monitor.skywalking.SkywalkingMonitor.LIVE_INSTRUMENT_SERVICE;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.PluginUI.*;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
@@ -487,7 +487,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
                 throttle,
                 meta
         );
-        inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).addLiveInstrument(instrument).onComplete(it -> {
+        UserData.liveInstrumentService(inlayMark.getProject()).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveBreakpoint = (LiveBreakpoint) it.result();
                 inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), liveBreakpoint.getId());
@@ -511,7 +511,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveBreakpoint != null) {
-            inlayMark.getProject().getUserData(LIVE_INSTRUMENT_SERVICE).removeLiveInstrument(liveBreakpoint.getId()).onComplete(it -> {
+            UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(liveBreakpoint.getId()).onComplete(it -> {
                 if (it.succeeded()) {
                     LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveBreakpoint);
                 } else {
