@@ -20,7 +20,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.DumbAware
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatusService
 
 class SourceStatusItemAction : AnAction(), DumbAware {
 

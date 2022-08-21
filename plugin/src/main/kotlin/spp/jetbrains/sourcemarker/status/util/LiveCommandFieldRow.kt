@@ -17,7 +17,7 @@
 package spp.jetbrains.sourcemarker.status.util
 
 import com.intellij.openapi.project.Project
-import spp.command.LiveCommand
+import spp.jetbrains.command.LiveCommand
 import javax.swing.Icon
 
 class LiveCommandFieldRow(val liveCommand: LiveCommand, val project: Project) : AutocompleteFieldRow {

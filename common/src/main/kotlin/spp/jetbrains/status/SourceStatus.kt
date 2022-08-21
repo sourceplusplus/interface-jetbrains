@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status
+package spp.jetbrains.status
 
-import spp.jetbrains.sourcemarker.icons.PluginIcons
+import spp.jetbrains.icons.PluginIcons
 import javax.swing.Icon
 
 enum class SourceStatus {

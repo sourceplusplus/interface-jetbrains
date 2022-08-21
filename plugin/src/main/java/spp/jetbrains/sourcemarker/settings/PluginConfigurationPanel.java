@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static spp.jetbrains.sourcemarker.PluginBundle.message;
+import static spp.jetbrains.PluginBundle.message;
 
 public class PluginConfigurationPanel {
     private JPanel myWholePanel;

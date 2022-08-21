@@ -23,9 +23,10 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import static spp.jetbrains.sourcemarker.PluginUI.*;
+import static spp.jetbrains.PluginUI.*;
 
 public class LiveControlBarRow extends JPanel {
 
@@ -48,7 +49,7 @@ public class LiveControlBarRow extends JPanel {
             }
         }
 
-        if(!matches.isEmpty()) {
+        if (!matches.isEmpty()) {
             int diff = 0;
             String updatedCommand = commandName;
             for (Map.Entry<Integer, Integer> entry : matches.entrySet()) {
@@ -58,7 +59,7 @@ public class LiveControlBarRow extends JPanel {
             }
             commandName = updatedCommand;
         }
-        commandLabel.setText("<html> <span style=\"color: "+ defaultHex + "\">" + commandName + "</span></html>");
+        commandLabel.setText("<html> <span style=\"color: " + defaultHex + "\">" + commandName + "</span></html>");
     }
 
     @NotNull

@@ -27,11 +27,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.PluginUI.EXPIRY_FOREGROUND_COLOR;
-import static spp.jetbrains.sourcemarker.PluginUI.LABEL_FOREGROUND_COLOR1;
-import static spp.jetbrains.sourcemarker.PluginUI.SELECT_COLOR_RED;
-import static spp.jetbrains.sourcemarker.PluginUI.SMALLER_FONT;
+import static spp.jetbrains.PluginBundle.message;
+import static spp.jetbrains.PluginUI.*;
 
 public class LiveBreakpointStatusPanel extends JPanel {
 

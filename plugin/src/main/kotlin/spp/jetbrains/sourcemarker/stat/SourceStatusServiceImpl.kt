@@ -23,9 +23,9 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Pair
 import kotlinx.coroutines.*
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.status.SourceStatus
-import spp.jetbrains.sourcemarker.status.SourceStatus.*
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus
+import spp.jetbrains.status.SourceStatus.*
+import spp.jetbrains.status.SourceStatusService
 import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import java.lang.Runnable
 import javax.annotation.concurrent.GuardedBy

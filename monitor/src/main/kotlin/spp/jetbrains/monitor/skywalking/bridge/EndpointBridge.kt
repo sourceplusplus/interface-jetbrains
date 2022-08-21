@@ -25,8 +25,8 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
-import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus.ConnectionError
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.marshall.LocalMessageCodec
 
 /**

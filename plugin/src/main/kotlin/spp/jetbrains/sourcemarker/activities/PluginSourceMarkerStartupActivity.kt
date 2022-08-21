@@ -24,7 +24,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.runBlocking
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
-import spp.jetbrains.sourcemarker.PluginBundle
+import spp.jetbrains.PluginBundle
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 
 /**

@@ -44,7 +44,7 @@ import org.eclipse.egit.github.core.Label
 import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
-import spp.jetbrains.sourcemarker.PluginBundle
+import spp.jetbrains.PluginBundle
 import java.awt.Component
 import java.io.PrintWriter
 import java.io.StringWriter

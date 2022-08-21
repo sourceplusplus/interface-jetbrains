@@ -16,6 +16,8 @@
  */
 package spp.jetbrains.sourcemarker.icons
 
+import spp.jetbrains.icons.PluginIcons
+
 /**
  * Defines the various visual icons SourceMarker may display.
  *

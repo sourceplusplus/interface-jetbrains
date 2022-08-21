@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.command
+package spp.jetbrains.command
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.runBlocking
-import liveplugin.implementation.plugin.LiveStatusManager
+import spp.jetbrains.UserData
 import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.sourcemarker.UserData
+import spp.jetbrains.plugin.LiveStatusManager
 import javax.swing.Icon
 
 @Suppress("unused")

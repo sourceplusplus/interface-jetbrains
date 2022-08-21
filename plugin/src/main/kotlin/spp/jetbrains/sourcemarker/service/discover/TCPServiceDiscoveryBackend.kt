@@ -43,8 +43,8 @@ import kotlinx.coroutines.launch
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
-import spp.jetbrains.sourcemarker.status.SourceStatus.ConnectionError
-import spp.jetbrains.sourcemarker.status.SourceStatusService
+import spp.jetbrains.status.SourceStatus.ConnectionError
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.SourceServices.Utilize
 import spp.protocol.extend.TCPServiceFrameParser
 import spp.protocol.platform.PlatformAddress
