@@ -42,7 +42,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
     }
 
     abstract val detectorSet: Set<T>
-    private val skywalkingMonitor = project.getUserData(SkywalkingMonitorService.KEY)!!
+    private val skywalkingMonitor by lazy { project.getUserData(SkywalkingMonitorService.KEY)!! }
 
     fun getEndpointName(sourceMark: GuideMark): String? {
         return sourceMark.getUserData(ENDPOINT_NAME)
