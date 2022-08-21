@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.sourcemarker.PluginUI.BGND_FOCUS_COLOR
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
@@ -31,8 +30,7 @@ import javax.swing.JList
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ControlBarCellRenderer(
-    private val autocompleteField: AutocompleteField<LiveCommandFieldRow>,
-    val sourceMark: ExpressionSourceMark
+    private val autocompleteField: AutocompleteField<LiveCommandFieldRow>
 ) : DefaultListCellRenderer() {
     init {
         isOpaque = false
