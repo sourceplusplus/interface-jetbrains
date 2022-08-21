@@ -49,17 +49,21 @@ class ControlBarCellRenderer(
         val row = LiveControlBarRow()
         row.setCommandName(entry.name, autocompleteField.text)
         row.setCommandIcon(rowValue.getUnselectedIcon())
-        row.setDescription(
-            entry.description
-                .replace(
-                    "*lineNumber*",
-                    autocompleteField.artifactQualifiedName.lineNumber.toString()
-                )
-                .replace(
-                    "*methodName*",
-                    getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
-                )
-        )
+
+        var formattedDescription = entry.description
+        if (formattedDescription.contains("*lineNumber*")) {
+            formattedDescription = formattedDescription.replace(
+                "*lineNumber*",
+                autocompleteField.artifactQualifiedName.lineNumber.toString()
+            )
+        }
+        if (formattedDescription.contains("*lineNumber*")) {
+            formattedDescription = formattedDescription.replace(
+                "*methodName*",
+                getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
+            )
+        }
+        row.setDescription(formattedDescription)
 
         if (isSelected) {
             row.background = BGND_FOCUS_COLOR

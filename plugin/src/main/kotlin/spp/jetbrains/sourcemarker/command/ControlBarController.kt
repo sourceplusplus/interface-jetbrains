@@ -72,36 +72,9 @@ object ControlBarController {
         }
 
         val availableCommandsAtLocation = availableCommands.toMutableSet()
-//        availableCommandsAtLocation.remove(SHOW_QUICK_STATS)
         availableCommandsAtLocation.addAll(
-            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands()
+            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(inlayMark)
         )
-
-//        val parentMark = inlayMark.getParentSourceMark()
-//        if (parentMark is MethodSourceMark) {
-//            val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
-//            if (loggerDetector != null) {
-//                runBlocking {
-//                    val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
-//                    val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
-//                    if (logOnCurrentLine != null) {
-//                        availableCommandsAtLocation.add(WATCH_LOG)
-//                    }
-//                }
-//            }
-//
-//            if (parentMark.getUserData(EndpointDetector.ENDPOINT_ID) != null) {
-//                val existingQuickStats = parentMark.sourceFileMarker.getSourceMarks().find {
-//                    it.artifactQualifiedName == parentMark.artifactQualifiedName
-//                            && it.getUserData(ActivityQuickStatsIndicator.SHOWING_QUICK_STATS) == true
-//                }
-//                if (existingQuickStats == null) {
-//                    availableCommandsAtLocation.add(SHOW_QUICK_STATS)
-//                } else {
-//                    availableCommandsAtLocation.add(HIDE_QUICK_STATS)
-//                }
-//            }
-//        }
         return availableCommandsAtLocation.toList()
     }
 
@@ -132,7 +105,7 @@ object ControlBarController {
                     null
                 }
 
-                val sourceMark = SourceMarkSearch.getClosestGuideMark(prevCommandBar.sourceFileMarker, editor)
+                val guideMark = SourceMarkSearch.getClosestGuideMark(prevCommandBar.sourceFileMarker, editor)
                 it.trigger(
                     LiveCommandContext(
                         args,
@@ -140,7 +113,7 @@ object ControlBarController {
                         prevCommandBar.lineNumber,
                         prevCommandBar.artifactQualifiedName,
                         prevCommandBar.sourceFileMarker,
-                        sourceMark,
+                        guideMark,
                         prevCommandBar.getPsiElement(),
                         variableName
                     )
