@@ -46,6 +46,4 @@ enum class SourceStatus {
                 ConnectionError -> "Connection error"
             }
         }
-
-    fun isIconAlwaysShown(): Boolean = true
 }
