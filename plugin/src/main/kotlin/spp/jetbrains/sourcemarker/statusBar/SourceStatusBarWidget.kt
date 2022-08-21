@@ -62,25 +62,9 @@ class SourceStatusBarWidget(project: Project) : EditorBasedStatusBarPopup(projec
     override fun getWidgetState(file: VirtualFile?): WidgetState {
         val statusAndMessage = SourceStatusService.getInstance(project).getCurrentStatus()
         val status = statusAndMessage.first
-        return if (status.isIconAlwaysShown()) {
-            val toolTip = statusAndMessage.second ?: status.presentableText
-            val state = WidgetState(toolTip, "", true)
-            state.icon = status.icon
-            state
-        } else {
-            if (file == null) {
-                WidgetState.HIDDEN
-            } else {
-                val enabled = true //todo: false
-                if (enabled == null) {
-                    WidgetState.HIDDEN
-                } else {
-                    val toolTip = "todothis"
-                    val state = WidgetState(toolTip, "", true)
-                    state.setIcon(if (enabled) status.icon else status.icon)
-                    state
-                }
-            }
+        val toolTip = statusAndMessage.second ?: status.presentableText
+        return WidgetState(toolTip, "", true).apply {
+            icon = status.icon
         }
     }
 
