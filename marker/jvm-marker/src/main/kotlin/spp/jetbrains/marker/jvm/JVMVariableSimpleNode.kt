@@ -67,7 +67,7 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                     JVMVariableSimpleNode(
                         LiveVariable(
                             name = it["name"] as String,
-                            value = it["value"] as Any,
+                            value = it["value"],
                             lineNumber = it["lineNumber"] as Int? ?: -1,
                             scope = EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
                             liveClazz = it["liveClazz"] as String?,
@@ -89,7 +89,11 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
             presentation.addText(variable.name + " = ", XDebuggerUIConstants.VALUE_NAME_ATTRIBUTES)
         }
 
-        if (variable.liveClazz != null && primitives.contains(variable.liveClazz)) {
+        if (variable.value == null) {
+            presentation.addText(
+                "null", SimpleTextAttributes.REGULAR_ATTRIBUTES
+            )
+        } else if (variable.liveClazz != null && primitives.contains(variable.liveClazz)) {
             if (variable.liveClazz == "java.lang.Boolean") {
                 presentation.addText(
                     variable.value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES
