@@ -23,8 +23,8 @@ import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.runBlocking
-import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.PluginBundle
+import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 
 /**
@@ -55,7 +55,8 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
                     "Unsupported product code",
                     "Unsupported product code: ${ApplicationInfo.getInstance().build.productCode}",
                     NotificationType.ERROR
-                )
+                ),
+                project
             )
             return
         }

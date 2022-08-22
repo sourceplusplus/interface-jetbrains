@@ -59,6 +59,7 @@ import io.vertx.serviceproxy.ServiceProxyBuilder
 import kotlinx.coroutines.*
 import liveplugin.implementation.LivePluginProjectLoader
 import org.apache.commons.text.CaseUtils
+import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.ArtifactSearch
@@ -69,7 +70,6 @@ import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.plugin.LiveStatusManager
-import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.command.ControlBarController
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
@@ -203,7 +203,8 @@ class SourceMarkerPlugin(val project: Project) {
                             message("plugin_name"), "Connection established",
                             "You have successfully connected. $pluginName is now fully activated.",
                             NotificationType.INFORMATION
-                        )
+                        ),
+                        project
                     )
                     config.notifiedConnection = true
 
@@ -519,7 +520,8 @@ class SourceMarkerPlugin(val project: Project) {
                     message("plugin_name"), "Connection auto-established",
                     "You have successfully auto-connected to Live Platform. ${message("plugin_name")} is now fully activated.",
                     NotificationType.INFORMATION
-                )
+                ),
+                project
             )
         } else if (resp.statusCode() == 405) {
             //found skywalking OAP server
@@ -538,7 +540,8 @@ class SourceMarkerPlugin(val project: Project) {
                     message("plugin_name"), "Connection auto-established",
                     "You have successfully auto-connected to Apache SkyWalking. ${message("plugin_name")} is now fully activated.",
                     NotificationType.INFORMATION
-                )
+                ),
+                project
             )
         }
     }
