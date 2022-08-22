@@ -18,22 +18,21 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
-import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiLocalVariable
 import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.common.toFilePath
-import spp.jetbrains.plugin.LivePluginService
 import org.joor.Reflect
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
 import spp.jetbrains.marker.impl.ArtifactCreationService
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.sourcemarker.ControlBar
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import java.awt.BorderLayout
@@ -93,17 +92,7 @@ object ControlBarController {
 
                 val argsString = substringAfterIgnoreCase(fullText, input).trim()
                 val args = if (argsString.isEmpty()) emptyList() else argsString.split(" ")
-
-                val variableName = if (prevCommandBar.getPsiElement() is PsiDeclarationStatement) {
-                    val localVar = prevCommandBar.getPsiElement().firstChild as? PsiLocalVariable
-                    if (localVar != null) {
-                        localVar.name
-                    } else {
-                        null
-                    }
-                } else {
-                    null
-                }
+                val variableName = ArtifactNamingService.getVariableName(prevCommandBar.getPsiElement())
 
                 val guideMark = SourceMarkSearch.getClosestGuideMark(prevCommandBar.sourceFileMarker, editor)
                 it.trigger(
@@ -183,6 +172,7 @@ object ControlBarController {
             "org.jetbrains.kotlin.psi.KtProperty" -> {
                 Reflect.on(psiElement).call("isLocal").get<Boolean>() == true
             }
+
             else -> true
         }
     }

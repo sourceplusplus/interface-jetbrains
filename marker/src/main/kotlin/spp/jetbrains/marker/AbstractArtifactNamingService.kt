@@ -28,6 +28,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
  */
 interface AbstractArtifactNamingService {
 
+    fun getVariableName(element: PsiElement): String?
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
     fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName>
 }

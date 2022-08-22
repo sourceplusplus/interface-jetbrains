@@ -32,17 +32,23 @@ import spp.protocol.artifact.ArtifactType
  */
 class PythonArtifactNamingService : AbstractArtifactNamingService {
 
+    override fun getVariableName(element: PsiElement): String? {
+        return null //todo: this
+    }
+
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return when (element) {
             is PyClass -> {
                 ArtifactQualifiedName(element.qualifiedName!!, null, ArtifactType.CLASS)
             }
+
             is PyFunction -> {
                 val parentQualifiedName = PyPsiFacade.getInstance(element.project)
                     .findShortestImportableName(element.containingFile.virtualFile, element)
                 val qualifiedName = element.qualifiedName ?: "$parentQualifiedName.${element.name}"
                 ArtifactQualifiedName("$qualifiedName()", null, ArtifactType.METHOD)
             }
+
             is PyStatement, is PyStatementList -> getStatementOrExpressionQualifiedName(element, ArtifactType.STATEMENT)
             else -> getStatementOrExpressionQualifiedName(element, ArtifactType.EXPRESSION)
         }

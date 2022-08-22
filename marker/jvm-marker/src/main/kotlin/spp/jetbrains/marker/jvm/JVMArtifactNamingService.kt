@@ -16,9 +16,7 @@
  */
 package spp.jetbrains.marker.jvm
 
-import com.intellij.psi.PsiClassOwner
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
+import com.intellij.psi.*
 import org.jetbrains.uast.*
 import spp.jetbrains.marker.AbstractArtifactNamingService
 import spp.jetbrains.marker.source.JVMMarkerUtils
@@ -32,6 +30,15 @@ import spp.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactNamingService : AbstractArtifactNamingService {
+
+    override fun getVariableName(element: PsiElement): String? {
+        return if (element is PsiDeclarationStatement) {
+            val localVar = element.firstChild as? PsiLocalVariable
+            localVar?.name
+        } else {
+            null
+        }
+    }
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return when (val uElement = element.toUElement()) {
@@ -48,6 +55,7 @@ class JVMArtifactNamingService : AbstractArtifactNamingService {
             is PsiClassOwner -> psiFile.classes.map {
                 ArtifactQualifiedName(it.qualifiedName!!, type = ArtifactType.CLASS)
             }.toList()
+
             else -> error("Unsupported file: $psiFile")
         }
     }
