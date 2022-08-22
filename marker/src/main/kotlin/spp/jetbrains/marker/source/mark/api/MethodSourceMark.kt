@@ -19,6 +19,7 @@ package spp.jetbrains.marker.source.mark.api
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.impl.ArtifactNamingService
@@ -136,6 +137,11 @@ abstract class MethodSourceMark(
 
     override fun getPsiElement(): PsiNameIdentifierOwner {
         return psiMethod
+    }
+
+    fun getNameIdentifier(): PsiElement {
+        return psiMethod.nameIdentifier
+            ?: throw PsiInvalidElementAccessException(psiMethod, "No name identifier. Artifact: $artifactQualifiedName")
     }
 
     fun updatePsiMethod(psiMethod: PsiNameIdentifierOwner): Boolean {

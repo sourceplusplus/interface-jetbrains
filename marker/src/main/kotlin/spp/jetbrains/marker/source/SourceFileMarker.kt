@@ -143,26 +143,11 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.MARK_BEFORE_ADDED))
             if (sourceMarks.add(sourceMark)) {
                 when (sourceMark) {
-                    is ClassGutterMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
-                        SourceKey.GutterMark,
-                        sourceMark
-                    )
-                    is ClassGuideMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
-                        SourceKey.GuideMark,
-                        sourceMark
-                    )
-                    is MethodGutterMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
-                        SourceKey.GutterMark,
-                        sourceMark
-                    )
-                    is MethodInlayMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
-                        SourceKey.InlayMark,
-                        sourceMark
-                    )
-                    is MethodGuideMark -> sourceMark.getPsiElement().nameIdentifier!!.putUserData(
-                        SourceKey.GuideMark,
-                        sourceMark
-                    )
+                    is ClassGutterMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GutterMark, sourceMark)
+                    is ClassGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
+                    is MethodGutterMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GutterMark, sourceMark)
+                    is MethodInlayMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.InlayMark, sourceMark)
+                    is MethodGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
                     is ExpressionGutterMark -> sourceMark.getPsiElement().putUserData(SourceKey.GutterMark, sourceMark)
                     is ExpressionInlayMark -> sourceMark.getPsiElement().putUserData(SourceKey.InlayMark, sourceMark)
                     is ExpressionGuideMark -> sourceMark.getPsiElement().putUserData(SourceKey.GuideMark, sourceMark)
@@ -227,43 +212,25 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     override fun createExpressionSourceMark(psiExpression: PsiElement, type: SourceMark.Type): ExpressionSourceMark {
         log.trace("Creating source mark. Expression: $psiExpression - Type: $type")
         return when (type) {
-            SourceMark.Type.GUTTER -> {
-                ExpressionGutterMark(this, psiExpression)
-            }
-            SourceMark.Type.INLAY -> {
-                ExpressionInlayMark(this, psiExpression)
-            }
-            SourceMark.Type.GUIDE -> {
-                ExpressionGuideMark(this, psiExpression)
-            }
+            SourceMark.Type.GUTTER -> ExpressionGutterMark(this, psiExpression)
+            SourceMark.Type.INLAY -> ExpressionInlayMark(this, psiExpression)
+            SourceMark.Type.GUIDE -> ExpressionGuideMark(this, psiExpression)
         }
     }
 
     override fun createMethodSourceMark(psiMethod: PsiNameIdentifierOwner, type: SourceMark.Type): MethodSourceMark {
         return when (type) {
-            SourceMark.Type.GUTTER -> {
-                MethodGutterMark(this, psiMethod)
-            }
-            SourceMark.Type.INLAY -> {
-                MethodInlayMark(this, psiMethod)
-            }
-            SourceMark.Type.GUIDE -> {
-                MethodGuideMark(this, psiMethod)
-            }
+            SourceMark.Type.GUTTER -> MethodGutterMark(this, psiMethod)
+            SourceMark.Type.INLAY -> MethodInlayMark(this, psiMethod)
+            SourceMark.Type.GUIDE -> MethodGuideMark(this, psiMethod)
         }
     }
 
     override fun createClassSourceMark(psiClass: PsiNameIdentifierOwner, type: SourceMark.Type): ClassSourceMark {
         return when (type) {
-            SourceMark.Type.GUTTER -> {
-                ClassGutterMark(this, psiClass)
-            }
-            SourceMark.Type.INLAY -> {
-                TODO("Not yet implemented")
-            }
-            SourceMark.Type.GUIDE -> {
-                ClassGuideMark(this, psiClass)
-            }
+            SourceMark.Type.GUTTER -> ClassGutterMark(this, psiClass)
+            SourceMark.Type.INLAY -> TODO("Not yet implemented")
+            SourceMark.Type.GUIDE -> ClassGuideMark(this, psiClass)
         }
     }
 
