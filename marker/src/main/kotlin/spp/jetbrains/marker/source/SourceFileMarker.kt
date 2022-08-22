@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.source
 
 import com.google.common.collect.ImmutableList
+import com.google.common.collect.MapMaker
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
@@ -63,10 +64,8 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         }
     }
 
-    private val sourceMarks: MutableSet<SourceMark> = Collections.synchronizedSet(
-        Collections.newSetFromMap(IdentityHashMap())
-    )
     val project: Project = psiFile.project
+    private val sourceMarks: MutableSet<SourceMark> = Collections.newSetFromMap(MapMaker().weakKeys().makeMap())
 
     /**
      * Gets the [SourceMark]s recognized in the current source code file.
@@ -108,7 +107,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open fun removeInvalidSourceMarks(): Boolean {
         var removedMark = false
-        sourceMarks.toList().forEach {
+        sourceMarks.forEach {
             if (!it.valid) {
                 check(removeSourceMark(it))
                 removedMark = true
