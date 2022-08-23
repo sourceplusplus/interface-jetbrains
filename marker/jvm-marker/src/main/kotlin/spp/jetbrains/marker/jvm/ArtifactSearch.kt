@@ -20,7 +20,6 @@ import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.util.Computable
 import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
@@ -50,10 +49,8 @@ object ArtifactSearch {
 
     @JvmStatic
     fun detectRootPackage(project: Project): String? {
-        var basePackages = ApplicationManager.getApplication().runReadAction(Computable {
-            JavaPsiFacade.getInstance(project).findPackage("")
-                ?.getSubPackages(ProjectScope.getProjectScope(project)) ?: emptyArray()
-        })
+        var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
+            ?.getSubPackages(ProjectScope.getProjectScope(project)) ?: emptyArray()
 
         //remove non-code packages
         basePackages = basePackages.filter {
@@ -69,9 +66,7 @@ object ArtifactSearch {
             var rootPackage: String? = null
             while (basePackages.size == 1) {
                 rootPackage = basePackages[0].qualifiedName
-                basePackages = ApplicationManager.getApplication().runReadAction(Computable {
-                    basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
-                })
+                basePackages = basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
             }
             if (rootPackage != null) {
                 return rootPackage
@@ -79,11 +74,9 @@ object ArtifactSearch {
         }
 
         //look explicitly for /src/main/ pattern
-        var srcMains = ApplicationManager.getApplication().runReadAction(Computable {
-            basePackages.flatMap { it.directories.toList() }
-                .filter { it.toString().contains("/src/main/") }
-                .filterNot { it.toString().contains("/META-INF") }
-        })
+        var srcMains = basePackages.flatMap { it.directories.toList() }
+            .filter { it.toString().contains("/src/main/") }
+            .filterNot { it.toString().contains("/META-INF") }
         val genPackage = StringBuilder()
         var commonSuffix = commonSuffix(srcMains.map { it.toString() }).replace("/", "")
         while (commonSuffix.isNotEmpty()) {

@@ -33,6 +33,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
@@ -174,7 +175,9 @@ class SourceMarkerPlugin(val project: Project) {
         //attempt to determine root source package automatically (if necessary)
         if (config.rootSourcePackages.isEmpty()) {
             if (INTELLIJ_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
-                val rootPackage = ArtifactSearch.detectRootPackage(project)
+                val rootPackage = ApplicationManager.getApplication().runReadAction(Computable {
+                    ArtifactSearch.detectRootPackage(project)
+                })
                 if (rootPackage != null) {
                     log.info("Detected root source package: $rootPackage")
                     config.rootSourcePackages = listOf(rootPackage)
