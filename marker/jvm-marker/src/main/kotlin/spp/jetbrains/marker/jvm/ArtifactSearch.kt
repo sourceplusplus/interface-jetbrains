@@ -28,9 +28,7 @@ import com.intellij.psi.search.ProjectScope
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.plugins.groovy.GroovyFileType
 import org.jetbrains.uast.UMethod
@@ -51,13 +49,11 @@ import java.util.*
 object ArtifactSearch {
 
     @JvmStatic
-    suspend fun detectRootPackage(project: Project): String? {
-        var basePackages = withContext(Dispatchers.Default) {
-            ApplicationManager.getApplication().runReadAction(Computable<Array<PsiPackage>> {
-                JavaPsiFacade.getInstance(project).findPackage("")
-                    ?.getSubPackages(ProjectScope.getProjectScope(project)) ?: emptyArray()
-            })
-        }
+    fun detectRootPackage(project: Project): String? {
+        var basePackages = ApplicationManager.getApplication().runReadAction(Computable {
+            JavaPsiFacade.getInstance(project).findPackage("")
+                ?.getSubPackages(ProjectScope.getProjectScope(project)) ?: emptyArray()
+        })
 
         //remove non-code packages
         basePackages = basePackages.filter {
@@ -73,11 +69,9 @@ object ArtifactSearch {
             var rootPackage: String? = null
             while (basePackages.size == 1) {
                 rootPackage = basePackages[0].qualifiedName
-                basePackages = withContext(Dispatchers.Default) {
-                    ApplicationManager.getApplication().runReadAction(Computable<Array<PsiPackage>> {
-                        basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
-                    })
-                }
+                basePackages = ApplicationManager.getApplication().runReadAction(Computable {
+                    basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
+                })
             }
             if (rootPackage != null) {
                 return rootPackage
@@ -85,9 +79,11 @@ object ArtifactSearch {
         }
 
         //look explicitly for /src/main/ pattern
-        var srcMains = basePackages.flatMap { it.directories.toList() }
-            .filter { it.toString().contains("/src/main/") }
-            .filterNot { it.toString().contains("/META-INF") }
+        var srcMains = ApplicationManager.getApplication().runReadAction(Computable {
+            basePackages.flatMap { it.directories.toList() }
+                .filter { it.toString().contains("/src/main/") }
+                .filterNot { it.toString().contains("/META-INF") }
+        })
         val genPackage = StringBuilder()
         var commonSuffix = commonSuffix(srcMains.map { it.toString() }).replace("/", "")
         while (commonSuffix.isNotEmpty()) {
