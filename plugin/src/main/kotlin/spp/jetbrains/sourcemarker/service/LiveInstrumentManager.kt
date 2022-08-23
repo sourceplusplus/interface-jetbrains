@@ -92,7 +92,7 @@ class LiveInstrumentManager(
                 log.info("Found ${it.result().size} active live status bars")
                 LiveStatusManager.getInstance(project).addActiveLiveInstruments(it.result())
             } else {
-                log.error("Failed to get live status bars", it.cause())
+                log.warn("Failed to get live status bars", it.cause())
             }
         }
     }
