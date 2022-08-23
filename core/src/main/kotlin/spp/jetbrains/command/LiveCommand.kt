@@ -18,9 +18,9 @@ package spp.jetbrains.command
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElement
 import kotlinx.coroutines.runBlocking
 import spp.jetbrains.UserData
-import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.plugin.LiveStatusManager
 import javax.swing.Icon
 
@@ -50,5 +50,5 @@ abstract class LiveCommand(val project: Project) {
 
     open suspend fun triggerSuspend(context: LiveCommandContext) = Unit
 
-    open fun isAvailable(sourceMark: SourceMark): Boolean = true
+    open fun isAvailable(element: PsiElement): Boolean = true
 }

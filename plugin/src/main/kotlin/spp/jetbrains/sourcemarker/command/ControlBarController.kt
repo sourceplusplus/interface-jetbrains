@@ -72,7 +72,7 @@ object ControlBarController {
 
         val availableCommandsAtLocation = availableCommands.toMutableSet()
         availableCommandsAtLocation.addAll(
-            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(inlayMark)
+            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(inlayMark.getPsiElement())
         )
         return availableCommandsAtLocation.toList()
     }

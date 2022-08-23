@@ -19,6 +19,8 @@ package spp.jetbrains.marker.jvm
 import com.intellij.psi.*
 import com.intellij.psi.scope.processor.VariablesProcessor
 import com.intellij.psi.scope.util.PsiScopesUtil
+import com.intellij.psi.util.parentOfTypes
+import com.siyeh.ig.psiutils.ControlFlowUtils
 import spp.jetbrains.marker.AbstractArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -55,5 +57,14 @@ class JVMArtifactScopeService : AbstractArtifactScopeService {
             scopeVars.add(variablesProcessor.getResult(i).name!!)
         }
         return scopeVars
+    }
+
+    override fun isInsideFunction(element: PsiElement): Boolean {
+        return element.parentOfTypes(PsiMethod::class) != null
+    }
+
+    override fun isInsideEndlessLoop(element: PsiElement): Boolean {
+        val parentLoop = element.parentOfTypes(PsiConditionalLoopStatement::class)
+        return parentLoop != null && ControlFlowUtils.isEndlessLoop(parentLoop)
     }
 }
