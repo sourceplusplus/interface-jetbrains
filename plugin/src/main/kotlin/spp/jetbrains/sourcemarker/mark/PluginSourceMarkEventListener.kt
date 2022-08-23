@@ -67,14 +67,18 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
         //refresh source marks on service changes
         ServiceBridge.currentServiceConsumer(vertx).handler {
             GlobalScope.launch(vertx.dispatcher()) {
-                SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
-                FileEditorManager.getInstance(project).allEditors.forEach {
-                    ApplicationManager.getApplication().runReadAction {
-                        PsiManager.getInstance(project).findFile(it.file)?.let {
-                            SourceMarker.getInstance(project).getSourceFileMarker(it)
-                            DaemonCodeAnalyzer.getInstance(project).restart(it)
+                try {
+                    SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
+                    FileEditorManager.getInstance(project).allEditors.forEach {
+                        ApplicationManager.getApplication().runReadAction {
+                            PsiManager.getInstance(project).findFile(it.file)?.let {
+                                SourceMarker.getInstance(project).getSourceFileMarker(it)
+                                DaemonCodeAnalyzer.getInstance(project).restart(it)
+                            }
                         }
                     }
+                } catch (throwable: Throwable) {
+                    log.error("Error refreshing source marks on service change", throwable)
                 }
             }
         }
