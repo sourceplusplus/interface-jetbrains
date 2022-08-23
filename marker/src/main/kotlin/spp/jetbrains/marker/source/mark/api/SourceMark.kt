@@ -188,6 +188,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                                         )
                                     }
                                 }
+
                                 INLAY_MARK_HIDDEN -> {
                                     ApplicationManager.getApplication().invokeLater {
                                         configuration.inlayRef?.get()?.dispose()
@@ -235,8 +236,10 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     suspend fun disposeSuspend(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
         if (this is InlayMark) {
-            configuration.inlayRef?.get()?.dispose()
-            configuration.inlayRef = null
+            ApplicationManager.getApplication().invokeAndWait {
+                configuration.inlayRef?.get()?.dispose()
+                configuration.inlayRef = null
+            }
         }
         closePopup()
 
