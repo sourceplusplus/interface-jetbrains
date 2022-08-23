@@ -94,6 +94,7 @@ import spp.protocol.service.LiveService
 import spp.protocol.service.LiveViewService
 import java.io.File
 import java.net.ConnectException
+import java.util.concurrent.locks.ReentrantLock
 import javax.net.ssl.SSLHandshakeException
 
 /**
@@ -119,6 +120,7 @@ class SourceMarkerPlugin(val project: Project) {
         }
     }
 
+    private var loadLivePluginsLock = ReentrantLock()
     private var connectionJob: Job? = null
     private var discovery: ServiceDiscovery? = null
     private var addedConfigListener = false
@@ -227,10 +229,15 @@ class SourceMarkerPlugin(val project: Project) {
                 ProgressManager.getInstance()
                     .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
                         override fun run(indicator: ProgressIndicator) {
-                            log.info("Loading live plugins for project: $project")
-                            project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
-                            log.info("Loaded live plugins for project: $project")
-                            pluginsPromise.complete()
+                            if (loadLivePluginsLock.tryLock()) {
+                                log.info("Loading live plugins for project: $project")
+                                project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
+                                log.info("Loaded live plugins for project: $project")
+                                pluginsPromise.complete()
+                                loadLivePluginsLock.unlock()
+                            } else {
+                                log.warn("Ignoring extraneous live plugins load request for project: $project")
+                            }
                         }
                     })
                 pluginsPromise.future().await()
