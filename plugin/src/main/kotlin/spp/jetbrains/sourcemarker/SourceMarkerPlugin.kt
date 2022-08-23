@@ -407,6 +407,7 @@ class SourceMarkerPlugin(val project: Project) {
         discovery = null
 
         vertx?.close()?.await()
+        UserData.clearServices(project)
 
         ControlBarController.clearAvailableCommands()
     }

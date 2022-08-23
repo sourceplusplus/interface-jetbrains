@@ -71,4 +71,12 @@ object UserData {
         project.putUserData(LIVE_INSTRUMENT_SERVICE, liveInstrumentService)
         return liveInstrumentService
     }
+
+    fun clearServices(project: Project) {
+        project.putUserData(VERTX, null)
+        project.putUserData(SkywalkingMonitorService.KEY, null)
+        project.putUserData(LIVE_SERVICE, null)
+        project.putUserData(LIVE_VIEW_SERVICE, null)
+        project.putUserData(LIVE_INSTRUMENT_SERVICE, null)
+    }
 }
