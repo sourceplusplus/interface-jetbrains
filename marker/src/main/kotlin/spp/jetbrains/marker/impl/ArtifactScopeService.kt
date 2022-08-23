@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.impl
 
+import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.AbstractArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -40,5 +41,13 @@ object ArtifactScopeService : AbstractArtifactScopeService {
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         return getService(fileMarker.psiFile.language.id).getScopeVariables(fileMarker, lineNumber)
+    }
+
+    override fun isInsideFunction(element: PsiElement): Boolean {
+        return getService(element.language.id).isInsideFunction(element)
+    }
+
+    override fun isInsideEndlessLoop(element: PsiElement): Boolean {
+        return getService(element.language.id).isInsideEndlessLoop(element)
     }
 }

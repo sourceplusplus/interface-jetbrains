@@ -18,6 +18,8 @@ package spp.jetbrains.marker.py
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
+import com.intellij.psi.util.parentOfTypes
+import com.jetbrains.python.psi.PyFunction
 import spp.jetbrains.marker.AbstractArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -43,5 +45,13 @@ class PythonArtifactScopeService : AbstractArtifactScopeService {
         val vars = Class.forName("com.jetbrains.python.codeInsight.dataflow.scope.Scope")
             .getMethod("getNamedElements").invoke(els) as Collection<PsiNamedElement>
         return vars.mapNotNull { it.name }
+    }
+
+    override fun isInsideFunction(element: PsiElement): Boolean {
+        return element.parentOfTypes(PyFunction::class) != null
+    }
+
+    override fun isInsideEndlessLoop(element: PsiElement): Boolean {
+        return false
     }
 }

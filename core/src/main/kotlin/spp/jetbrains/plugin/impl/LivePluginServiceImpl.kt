@@ -19,9 +19,9 @@ package spp.jetbrains.plugin.impl
 import com.apollographql.apollo3.exception.ApolloNetworkException
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElement
 import kotlinx.coroutines.runBlocking
 import spp.jetbrains.command.LiveCommand
-import spp.jetbrains.command.LiveCommandLocation
 import spp.jetbrains.indicator.LiveIndicator
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
@@ -98,8 +98,8 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
         return commands.toList()
     }
 
-    override fun getRegisteredLiveCommands(location: LiveCommandLocation): List<LiveCommand> {
-        return commands.filter { it.isAvailable(location) }
+    override fun getRegisteredLiveCommands(element: PsiElement): List<LiveCommand> {
+        return commands.filter { it.isAvailable(element) }
     }
 
     override fun getRegisteredLiveIndicators(): List<LiveIndicator> {

@@ -43,6 +43,8 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:lang-impl:$intellijVersion")
     compileOnly("com.jetbrains.intellij.groovy:groovy-psi:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:util:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.java:java-analysis:$intellijVersion")
+    compileOnly("com.jetbrains.intellij.java:java-analysis-impl:$intellijVersion")
     compileOnly("com.jetbrains.intellij.java:java-impl:$intellijVersion")
     compileOnly("com.jetbrains.intellij.java:java-psi:$intellijVersion")
     compileOnly("com.jetbrains.intellij.java:java-debugger:$intellijVersion")
