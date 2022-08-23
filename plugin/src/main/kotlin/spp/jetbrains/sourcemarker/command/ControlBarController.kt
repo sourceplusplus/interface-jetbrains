@@ -18,13 +18,17 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
+import com.intellij.psi.PsiConditionalLoopStatement
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.parentOfTypes
+import com.siyeh.ig.psiutils.ControlFlowUtils
 import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.common.toFilePath
 import org.joor.Reflect
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
+import spp.jetbrains.command.LiveCommandLocation
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -35,6 +39,7 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.sourcemarker.ControlBar
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
+import spp.protocol.artifact.ArtifactNameUtils
 import java.awt.BorderLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -70,9 +75,18 @@ object ControlBarController {
             runBlocking { syncAvailableCommands() }
         }
 
+        val insideFunction = ArtifactNameUtils.hasFunctionSignature(inlayMark.artifactQualifiedName)
+        val parentLoop = inlayMark.getPsiElement().parentOfTypes(PsiConditionalLoopStatement::class)
+        val inInfiniteLoop = parentLoop != null && ControlFlowUtils.isEndlessLoop(parentLoop)
+        val location = LiveCommandLocation(
+            inlayMark,
+            insideFunction,
+            inInfiniteLoop
+        )
+
         val availableCommandsAtLocation = availableCommands.toMutableSet()
         availableCommandsAtLocation.addAll(
-            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(inlayMark)
+            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(location)
         )
         return availableCommandsAtLocation.toList()
     }
