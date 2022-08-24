@@ -53,6 +53,7 @@ object ControlBarController {
     private var previousControlBar: InlayMark? = null
 
     private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveCommand> {
+        //todo: should store selfInfo locally and add a platform listener to trigger on changes
         val selfInfo = runBlocking { UserData.liveService(inlayMark.project)!!.getSelf().await() }
         val availableCommandsAtLocation = mutableSetOf<LiveCommand>()
         availableCommandsAtLocation.addAll(
