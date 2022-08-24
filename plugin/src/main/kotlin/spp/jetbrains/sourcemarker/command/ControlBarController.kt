@@ -20,9 +20,11 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import liveplugin.implementation.common.toFilePath
 import org.joor.Reflect
+import spp.jetbrains.UserData
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
 import spp.jetbrains.marker.impl.ArtifactCreationService
@@ -49,30 +51,13 @@ object ControlBarController {
 
     private val log = logger<ControlBarController>()
     private var previousControlBar: InlayMark? = null
-    private val availableCommands: MutableList<LiveCommand> = mutableListOf()
-
-    fun clearAvailableCommands() {
-        availableCommands.clear()
-    }
-
-    private suspend fun syncAvailableCommands() {
-        availableCommands.clear()
-
-//        val selfInfo = SourceServices.Instance.liveService!!.getSelf().await()
-//        availableCommands.addAll(LiveControlCommand.values().toList().filter {
-//            @Suppress("UselessCallOnCollection") //unknown enums are null
-//            selfInfo.permissions.filterNotNull().map { it.name }.contains(it.name)
-//        })
-    }
 
     private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveCommand> {
-        if (availableCommands.isEmpty()) {
-            runBlocking { syncAvailableCommands() }
-        }
-
-        val availableCommandsAtLocation = availableCommands.toMutableSet()
+        val selfInfo = runBlocking { UserData.liveService(inlayMark.project)!!.getSelf().await() }
+        val availableCommandsAtLocation = mutableSetOf<LiveCommand>()
         availableCommandsAtLocation.addAll(
-            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(inlayMark.getPsiElement())
+            LivePluginService.getInstance(inlayMark.project)
+                .getRegisteredLiveCommands(selfInfo, inlayMark.getPsiElement())
         )
         return availableCommandsAtLocation.toList()
     }
@@ -83,9 +68,8 @@ object ControlBarController {
 
     fun handleCommandInput(input: String, fullText: String, editor: Editor) {
         log.info("Processing command input: $input")
-        (availableCommands + LivePluginService.getInstance(editor.project!!)
-            .getRegisteredLiveCommands()).find { it.name == input }
-            ?.let {
+        LivePluginService.getInstance(editor.project!!).getRegisteredLiveCommands()
+            .find { it.name == input }?.let {
                 val prevCommandBar = previousControlBar!!
                 previousControlBar!!.dispose()
                 previousControlBar = null
