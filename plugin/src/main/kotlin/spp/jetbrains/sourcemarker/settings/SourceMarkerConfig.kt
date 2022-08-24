@@ -32,7 +32,7 @@ data class SourceMarkerConfig(
     var serviceToken: String? = null,
     var verifyHost: Boolean = true,
     val serviceName: String? = null,
-    val override: Boolean = false,
+    var override: Boolean = false,
     val portalConfig: PortalConfig = PortalConfig(),
     val commandConfig: Map<String, Map<String, Any>> = emptyMap(),
     var notifiedConnection: Boolean = false,

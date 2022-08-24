@@ -306,7 +306,9 @@ class SourceMarkerPlugin(val project: Project) {
             if (persistedConfig == null && fileConfig != null) {
                 fileConfig
             } else {
-                persistedConfig ?: SourceMarkerConfig()
+                persistedConfig?.apply {
+                    override = false
+                } ?: SourceMarkerConfig()
             }
         }
         return config
