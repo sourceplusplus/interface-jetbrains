@@ -415,8 +415,6 @@ class SourceMarkerPlugin(val project: Project) {
 
         vertx?.close()?.await()
         UserData.clearServices(project)
-
-        ControlBarController.clearAvailableCommands()
     }
 
     private suspend fun initServices(vertx: Vertx, config: SourceMarkerConfig) {

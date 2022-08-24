@@ -22,6 +22,7 @@ import com.intellij.psi.PsiElement
 import kotlinx.coroutines.runBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.plugin.LiveStatusManager
+import spp.protocol.platform.developer.SelfInfo
 import javax.swing.Icon
 
 @Suppress("unused")
@@ -50,5 +51,5 @@ abstract class LiveCommand(val project: Project) {
 
     open suspend fun triggerSuspend(context: LiveCommandContext) = Unit
 
-    open fun isAvailable(element: PsiElement): Boolean = true
+    open fun isAvailable(selfInfo: SelfInfo, element: PsiElement): Boolean = true
 }
