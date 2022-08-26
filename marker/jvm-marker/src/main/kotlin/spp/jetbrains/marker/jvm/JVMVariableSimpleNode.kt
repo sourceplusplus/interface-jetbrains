@@ -18,8 +18,9 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.projectView.PresentationData
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
-import com.intellij.ui.SimpleTextAttributes
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.NUMBER
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STRING
+import com.intellij.ui.SimpleTextAttributes.*
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
@@ -72,16 +73,7 @@ class JVMVariableSimpleNode(
                 if (it["@skip"] != null) {
                     ErrorVariableSimpleNode(it as Map<String, *>)
                 } else {
-                    JVMVariableSimpleNode(
-                        LiveVariable(
-                            name = it["name"] as String,
-                            value = it["value"],
-                            lineNumber = it["lineNumber"] as Int? ?: -1,
-                            scope = EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
-                            liveClazz = it["liveClazz"] as String?,
-                            liveIdentity = it["liveIdentity"] as String?
-                        ), nodeMap
-                    )
+                    JVMVariableSimpleNode(toLiveVariable(it), nodeMap)
                 }
             }.toList().toTypedArray()
         } else {
@@ -95,65 +87,73 @@ class JVMVariableSimpleNode(
         return children
     }
 
+    private fun toLiveVariable(it: Map<*, *>): LiveVariable {
+        var varValue = it["value"]
+        if (varValue is List<*> && varValue.size == 1 &&
+            varValue[0] is Map<*, *> && (varValue[0] as Map<*, *>).containsKey("liveClazz")
+        ) {
+            varValue = toLiveVariable(varValue[0] as Map<*, *>)
+        }
+        return LiveVariable(
+            name = it["name"] as String,
+            value = varValue,
+            lineNumber = it["lineNumber"] as Int? ?: -1,
+            scope = EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
+            liveClazz = it["liveClazz"] as String?,
+            liveIdentity = it["liveIdentity"] as String?
+        )
+    }
+
     override fun update(presentation: PresentationData) {
         if (variable.scope == LiveVariableScope.GENERATED_METHOD) {
-            presentation.addText(variable.name + " = ", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+            presentation.addText(variable.name + " = ", GRAYED_ATTRIBUTES)
             presentation.setIcon(AllIcons.Nodes.Method)
         } else {
             presentation.addText(variable.name + " = ", XDebuggerUIConstants.VALUE_NAME_ATTRIBUTES)
         }
 
+        setPresentationForVariable(variable, presentation)
+    }
+
+    private fun setPresentationForVariable(variable: LiveVariable, presentation: PresentationData) {
         if (variable.value == null && variable.liveIdentity == null) {
-            presentation.addText(
-                "null", SimpleTextAttributes.REGULAR_ATTRIBUTES
-            )
+            presentation.addText("null", REGULAR_ATTRIBUTES)
         } else if (variable.liveClazz != null && primitives.contains(variable.liveClazz)) {
             if (variable.liveClazz == "java.lang.Boolean") {
-                presentation.addText(
-                    variable.value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES
-                )
+                presentation.addText(variable.value.toString(), REGULAR_ATTRIBUTES)
             } else if (variable.liveClazz == "java.lang.Character") {
                 presentation.addText(
                     "'" + variable.value + "' " + (variable.value as String).toCharArray()[0].toInt(),
-                    SimpleTextAttributes.REGULAR_ATTRIBUTES
+                    REGULAR_ATTRIBUTES
                 )
             } else if (variable.liveClazz == "java.lang.String") {
-                presentation.addText(
-                    "\"" + variable.value + "\"",
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.STRING))
-                )
+                presentation.addText("\"" + variable.value + "\"", fromTextAttributes(scheme.getAttributes(STRING)))
             } else if (numerals.contains(variable.liveClazz)) {
-                presentation.addText(
-                    variable.value.toString(),
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.NUMBER))
-                )
+                presentation.addText(variable.value.toString(), fromTextAttributes(scheme.getAttributes(NUMBER)))
             }
             presentation.setIcon(AllIcons.Debugger.Db_primitive)
         } else if (variable.liveClazz != null) {
             val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
             val identity = variable.liveIdentity
             if (variable.presentation != null) {
-                presentation.addText("{ $simpleClassName@$identity } ", SimpleTextAttributes.GRAYED_ATTRIBUTES)
-                presentation.addText("\"${variable.presentation}\"", SimpleTextAttributes.REGULAR_ATTRIBUTES)
+                presentation.addText("{ $simpleClassName@$identity } ", GRAYED_ATTRIBUTES)
+                presentation.addText("\"${variable.presentation}\"", REGULAR_ATTRIBUTES)
             } else {
-                presentation.addText("{ $simpleClassName@$identity }", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+                presentation.addText("{ $simpleClassName@$identity }", GRAYED_ATTRIBUTES)
             }
             presentation.setIcon(AllIcons.Debugger.Value)
 
             val varValue = variable.value
             if (varValue is Map<*, *> && varValue["@skip"] != null) {
                 val skipReason = varValue["@skip"]
-                presentation.addText(
-                    " $skipReason",
-                    SimpleTextAttributes.ERROR_ATTRIBUTES
-                )
+                presentation.addText(" $skipReason", ERROR_ATTRIBUTES)
             }
         } else {
-            if (variable.value is Number) {
-                presentation.addText(
-                    variable.value.toString(),
-                    SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.NUMBER))
-                )
+            if (variable.value is LiveVariable) {
+                val liveVar = variable.value as LiveVariable
+                setPresentationForVariable(liveVar, presentation)
+            } else if (variable.value is Number) {
+                presentation.addText(variable.value.toString(), fromTextAttributes(scheme.getAttributes(NUMBER)))
             } else {
                 val varValue = variable.value
                 if (
@@ -162,15 +162,9 @@ class JVMVariableSimpleNode(
                 ) {
                     val clazz = (varValue[0] as Map<*, *>)["@class"].toString().substringAfterLast(".")
                     val id = (varValue[0] as Map<*, *>)["@id"]
-                    presentation.addText(
-                        "{ ${clazz}@${id} }",
-                        SimpleTextAttributes.GRAYED_ATTRIBUTES
-                    )
+                    presentation.addText("{ ${clazz}@${id} }", GRAYED_ATTRIBUTES)
                 } else {
-                    presentation.addText(
-                        "\"" + varValue + "\"",
-                        SimpleTextAttributes.fromTextAttributes(scheme.getAttributes(DefaultLanguageHighlighterColors.STRING))
-                    )
+                    presentation.addText("\"" + varValue + "\"", fromTextAttributes(scheme.getAttributes(STRING)))
                 }
             }
 
