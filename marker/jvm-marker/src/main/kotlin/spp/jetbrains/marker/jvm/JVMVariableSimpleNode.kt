@@ -76,6 +76,8 @@ class JVMVariableSimpleNode(
                     JVMVariableSimpleNode(toLiveVariable(it), nodeMap)
                 }
             }.toList().toTypedArray()
+        } else if (variable.value is LiveVariable) {
+            arrayOf(JVMVariableSimpleNode(variable.value as LiveVariable, nodeMap) as SimpleNode)
         } else {
             emptyArray()
         }
