@@ -136,12 +136,15 @@ class JVMVariableSimpleNode(
             presentation.setIcon(AllIcons.Debugger.Db_primitive)
         } else if (variable.liveClazz != null) {
             val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
-            val identity = variable.liveIdentity
+            var identity = variable.liveIdentity ?: ""
+            if (identity.isNotEmpty()) {
+                identity = "@$identity"
+            }
             if (variable.presentation != null) {
-                presentation.addText("{ $simpleClassName@$identity } ", GRAYED_ATTRIBUTES)
+                presentation.addText("{ $simpleClassName$identity } ", GRAYED_ATTRIBUTES)
                 presentation.addText("\"${variable.presentation}\"", REGULAR_ATTRIBUTES)
             } else {
-                presentation.addText("{ $simpleClassName@$identity }", GRAYED_ATTRIBUTES)
+                presentation.addText("{ $simpleClassName$identity }", GRAYED_ATTRIBUTES)
             }
             presentation.setIcon(AllIcons.Debugger.Value)
 
