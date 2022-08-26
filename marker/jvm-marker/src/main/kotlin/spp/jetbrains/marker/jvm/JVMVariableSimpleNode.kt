@@ -35,7 +35,10 @@ import spp.protocol.instrument.variable.LiveVariableScope
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
+class JVMVariableSimpleNode(
+    val variable: LiveVariable,
+    private val nodeMap: MutableMap<String, Array<SimpleNode>>
+) : SimpleNode() {
 
     private val primitives = setOf(
         "java.lang.String",
@@ -59,7 +62,12 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
     private val scheme = DebuggerUIUtil.getColorScheme(null)
 
     override fun getChildren(): Array<SimpleNode> {
-        return if (variable.value is List<*>) {
+        if (variable.value == null && variable.liveIdentity != null) {
+            //found reference, use children of referenced node
+            return nodeMap[variable.liveIdentity!!] ?: arrayOf()
+        }
+
+        val children = if (variable.value is List<*>) {
             (variable.value as List<Map<*, *>>).map {
                 if (it["@skip"] != null) {
                     ErrorVariableSimpleNode(it as Map<String, *>)
@@ -72,13 +80,19 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
                             scope = EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
                             liveClazz = it["liveClazz"] as String?,
                             liveIdentity = it["liveIdentity"] as String?
-                        )
+                        ), nodeMap
                     )
                 }
             }.toList().toTypedArray()
         } else {
             emptyArray()
         }
+
+        //add children to nodeMap for reference lookup
+        if (variable.liveIdentity != null) {
+            nodeMap[variable.liveIdentity!!] = children
+        }
+        return children
     }
 
     override fun update(presentation: PresentationData) {
@@ -89,7 +103,7 @@ class JVMVariableSimpleNode(val variable: LiveVariable) : SimpleNode() {
             presentation.addText(variable.name + " = ", XDebuggerUIConstants.VALUE_NAME_ATTRIBUTES)
         }
 
-        if (variable.value == null) {
+        if (variable.value == null && variable.liveIdentity == null) {
             presentation.addText(
                 "null", SimpleTextAttributes.REGULAR_ATTRIBUTES
             )
