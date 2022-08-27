@@ -96,6 +96,10 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
             val sourceMark = event.sourceMark
 
             if (sourceMark is GuideMark) {
+                if (log.isTraceEnabled) {
+                    log.trace("Attempting to find endpoint for ${sourceMark.language.id}")
+                }
+
                 //setup endpoint detector and attempt detection
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetectors[sourceMark.language.id])
                 GlobalScope.launch(vertx.dispatcher()) {

@@ -61,11 +61,9 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
         return if (cachedEndpointId != null) {
             log.trace("Found cached endpoint id: $cachedEndpointId")
             cachedEndpointId
-        } else if (sourceMark is MethodGuideMark) {
+        } else {
             getOrFindEndpoint(sourceMark)
             sourceMark.getUserData(ENDPOINT_ID)
-        } else {
-            null
         }
     }
 
@@ -82,7 +80,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
         }
     }
 
-    private suspend fun getOrFindEndpoint(sourceMark: MethodGuideMark) {
+    private suspend fun getOrFindEndpoint(sourceMark: GuideMark) {
         if (sourceMark.getUserData(ENDPOINT_NAME) == null || sourceMark.getUserData(ENDPOINT_ID) == null) {
             if (sourceMark.getUserData(ENDPOINT_NAME) == null) {
                 log.trace("Determining endpoint name")
@@ -102,7 +100,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
         }
     }
 
-    private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodGuideMark) {
+    private suspend fun determineEndpointId(endpointName: String, sourceMark: GuideMark) {
         log.trace("Determining endpoint id")
         val endpoint = skywalkingMonitor.searchExactEndpoint(endpointName)
         if (endpoint != null) {
@@ -113,7 +111,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
         }
     }
 
-    private suspend fun determineEndpointName(guideMark: MethodGuideMark): DetectedEndpoint? {
+    private suspend fun determineEndpointName(guideMark: GuideMark): DetectedEndpoint? {
         detectorSet.forEach {
             val detectedEndpoint = it.determineEndpointName(guideMark).await()
             if (detectedEndpoint.isPresent) return detectedEndpoint.get()
