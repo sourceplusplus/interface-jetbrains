@@ -63,6 +63,7 @@ import org.apache.commons.text.CaseUtils
 import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.js.JavascriptMarker
 import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -72,7 +73,6 @@ import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
-import spp.jetbrains.sourcemarker.command.ControlBarController
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.portal.PortalController
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
@@ -134,6 +134,10 @@ class SourceMarkerPlugin(val project: Project) {
         if (PythonMarker.canSetup()) {
             log.info("Setting up Python marker")
             PythonMarker.setup()
+        }
+        if (JavascriptMarker.canSetup()) {
+            log.info("Setting up JavaScript marker")
+            JavascriptMarker.setup()
         }
 
         project.putUserData(SourceStatusService.KEY, SourceStatusServiceImpl(project))
