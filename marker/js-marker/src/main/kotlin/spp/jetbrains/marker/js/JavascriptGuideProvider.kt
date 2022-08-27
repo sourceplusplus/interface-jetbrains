@@ -16,10 +16,13 @@
  */
 package spp.jetbrains.marker.js
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiRecursiveElementVisitor
 import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.api.SourceMark
 
 class JavascriptGuideProvider : AbstractSourceGuideProvider {
 
@@ -27,6 +30,15 @@ class JavascriptGuideProvider : AbstractSourceGuideProvider {
         fileMarker.psiFile.acceptChildren(object : PsiRecursiveElementVisitor() {
             override fun visitElement(element: PsiElement) {
                 super.visitElement(element)
+
+                //todo: should be able to instanceof JSFunction
+                if (element::class.java.name == "com.intellij.lang.javascript.psi.impl.JSFunctionImpl") {
+                    ApplicationManager.getApplication().runReadAction {
+                        fileMarker.createMethodSourceMark(
+                            element as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
+                        ).apply(true)
+                    }
+                }
             }
         })
     }
