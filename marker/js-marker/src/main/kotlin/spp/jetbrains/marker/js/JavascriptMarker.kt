@@ -16,6 +16,8 @@
  */
 package spp.jetbrains.marker.js
 
+import spp.jetbrains.marker.impl.SourceGuideProvider
+
 /**
  * Provides JavaScript support for the Marker API.
  *
@@ -38,6 +40,10 @@ object JavascriptMarker {
 //        ArtifactNamingService.addService(JavascriptArtifactNamingService(), "JavaScript")
 //        ArtifactScopeService.addService(JavascriptArtifactScopeService(), "JavaScript")
 //        InstrumentConditionParser.addService(JavascriptConditionParser(), "JavaScript")
-//        SourceGuideProvider.addProvider(JavascriptGuideProvider(), "JavaScript")
+
+        JavascriptGuideProvider().apply {
+            SourceGuideProvider.addProvider(this, "JavaScript")
+            SourceGuideProvider.addProvider(this, "ECMAScript 6")
+        }
     }
 }
