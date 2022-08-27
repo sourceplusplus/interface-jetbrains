@@ -32,7 +32,7 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:code-style:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:lang:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:lang-impl:$intellijVersion")
-    compileOnly("com.jetbrains.intellij.javascript:javascript-psi-impl:$intellijVersion") { isTransitive = false }
+    compileOnly(files("D:/Desktop/spp/JavaScriptLanguage.jar"))
     compileOnly("com.jetbrains.intellij.platform:debugger:$intellijVersion") { isTransitive = false }
     compileOnly("com.jetbrains.intellij.platform:debugger-impl:$intellijVersion") { isTransitive = false }
 

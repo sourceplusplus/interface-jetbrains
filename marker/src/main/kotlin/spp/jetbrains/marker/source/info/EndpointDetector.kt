@@ -135,6 +135,6 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
      * todo: description.
      */
     interface EndpointNameDeterminer {
-        fun determineEndpointName(guideMark: MethodGuideMark): Future<Optional<DetectedEndpoint>>
+        fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>>
     }
 }

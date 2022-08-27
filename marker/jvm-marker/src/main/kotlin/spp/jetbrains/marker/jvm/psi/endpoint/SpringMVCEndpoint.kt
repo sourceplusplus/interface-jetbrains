@@ -31,6 +31,7 @@ import org.jetbrains.uast.kotlin.KotlinUSimpleReferenceExpression
 import org.joor.Reflect
 import spp.jetbrains.marker.jvm.JVMEndpointDetector.JVMEndpointNameDeterminer
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import java.util.*
 
@@ -52,7 +53,11 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
         "org.springframework.web.bind.annotation.PatchMapping"
     )
 
-    override fun determineEndpointName(guideMark: MethodGuideMark): Future<Optional<DetectedEndpoint>> {
+    override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
+        if (!guideMark.isMethodMark) {
+            return Future.succeededFuture(Optional.empty())
+        }
+
         return ApplicationManager.getApplication().runReadAction(Computable {
             val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
                 ?: return@Computable Future.succeededFuture(Optional.empty())

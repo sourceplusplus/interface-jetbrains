@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.js
 
+import com.intellij.lang.javascript.psi.JSFunction
+import com.intellij.lang.javascript.psi.JSVariable
+import com.intellij.lang.javascript.psi.util.JSTreeUtil
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.parentOfTypes
-import com.jetbrains.python.psi.PyFunction
 import spp.jetbrains.marker.AbstractArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -30,25 +31,17 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactScopeService : AbstractArtifactScopeService {
-
-    //todo: shouldn't need to use reflection
-    private val getScopeOwnerMethod = Class.forName("com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil")
-        .getMethod("getScopeOwner", PsiElement::class.java)
-    private val getScopeMethod = Class.forName("com.jetbrains.python.codeInsight.controlflow.ControlFlowCache")
-        .getMethod("getScope", Class.forName("com.jetbrains.python.codeInsight.controlflow.ScopeOwner"))
-
+class JavascriptArtifactScopeService : AbstractArtifactScopeService {
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
-        val scope = getScopeOwnerMethod.invoke(null, position)
-        val els = getScopeMethod.invoke(null, scope)
-        val vars = Class.forName("com.jetbrains.python.codeInsight.dataflow.scope.Scope")
-            .getMethod("getNamedElements").invoke(els) as Collection<PsiNamedElement>
+        val els = JSTreeUtil.findNamedElementsInScope(position, null);
+        val vars = els.filterIsInstance<JSVariable>();
+
         return vars.mapNotNull { it.name }
     }
 
     override fun isInsideFunction(element: PsiElement): Boolean {
-        return element.parentOfTypes(PyFunction::class) != null
+        return element.parentOfTypes(JSFunction::class) != null
     }
 
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {

@@ -27,6 +27,7 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.js.JavascriptEndpointDetector
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 import spp.jetbrains.marker.jvm.psi.LoggerDetector
 import spp.jetbrains.marker.py.PythonEndpointDetector
@@ -34,6 +35,7 @@ import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
@@ -61,6 +63,7 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
                 put("Groovy", it)
             }
             put("Python", PythonEndpointDetector(project))
+            put("ECMAScript 6", JavascriptEndpointDetector(project))
         }.toMap()
 
     init {
@@ -92,7 +95,7 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
         if (event.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
             val sourceMark = event.sourceMark
 
-            if (sourceMark is MethodGuideMark) {
+            if (sourceMark is GuideMark) {
                 //setup endpoint detector and attempt detection
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetectors[sourceMark.language.id])
                 GlobalScope.launch(vertx.dispatcher()) {

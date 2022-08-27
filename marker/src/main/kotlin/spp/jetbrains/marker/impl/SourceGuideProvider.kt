@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.impl
 
+import com.intellij.lang.Language
 import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 

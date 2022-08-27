@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.js
 
 import com.intellij.openapi.project.Project
-import spp.jetbrains.marker.py.psi.endpoint.FlaskEndpoint
+import spp.jetbrains.marker.js.psi.endpoint.ExpressEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
 
@@ -27,9 +27,9 @@ import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonEndpointDetector(project: Project) : EndpointDetector<EndpointNameDeterminer>(project) {
+class JavascriptEndpointDetector(project: Project) : EndpointDetector<EndpointNameDeterminer>(project) {
 
     override val detectorSet: Set<EndpointNameDeterminer> = setOf(
-        FlaskEndpoint()
+        ExpressEndpoint()
     )
 }

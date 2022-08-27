@@ -16,7 +16,10 @@
  */
 package spp.jetbrains.marker.js
 
-import spp.jetbrains.marker.impl.SourceGuideProvider
+import com.intellij.lang.javascript.dialects.ECMA6LanguageDialect
+import com.intellij.lang.javascript.dialects.TypeScriptLanguageDialect
+import com.intellij.lang.typescript.formatter.TypeScriptLanguageCodeStyleSettingsProvider
+import spp.jetbrains.marker.impl.*
 
 /**
  * Provides JavaScript support for the Marker API.
@@ -36,10 +39,10 @@ object JavascriptMarker {
     }
 
     fun setup() {
-//        ArtifactCreationService.addService(JavascriptArtifactCreationService(), "JavaScript")
-//        ArtifactNamingService.addService(JavascriptArtifactNamingService(), "JavaScript")
-//        ArtifactScopeService.addService(JavascriptArtifactScopeService(), "JavaScript")
-//        InstrumentConditionParser.addService(JavascriptConditionParser(), "JavaScript")
+        ArtifactCreationService.addService(JavascriptArtifactCreationService(), "ECMAScript 6")
+        ArtifactNamingService.addService(JavascriptArtifactNamingService(), "ECMAScript 6")
+        ArtifactScopeService.addService(JavascriptArtifactScopeService(), "ECMAScript 6")
+        InstrumentConditionParser.addService(JavascriptConditionParser(), "ECMAScript 6")
 
         JavascriptGuideProvider().apply {
             SourceGuideProvider.addProvider(this, "JavaScript")

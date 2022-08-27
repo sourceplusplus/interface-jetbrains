@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.js
 
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.AbstractArtifactCreationService
@@ -35,7 +35,7 @@ import java.util.*
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactCreationService : AbstractArtifactCreationService {
+class JavascriptArtifactCreationService : AbstractArtifactCreationService {
 
     override fun getOrCreateExpressionGutterMark(
         fileMarker: SourceFileMarker,

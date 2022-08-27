@@ -14,15 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.js
 
+import com.intellij.lang.javascript.psi.*
+import com.intellij.lang.javascript.psi.ecmal4.JSClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.parentOfType
-import com.jetbrains.python.psi.*
 import spp.jetbrains.marker.AbstractArtifactNamingService
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
+import java.util.*
 
 /**
  * todo: description.
@@ -30,49 +33,53 @@ import spp.protocol.artifact.ArtifactType
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactNamingService : AbstractArtifactNamingService {
+class JavascriptArtifactNamingService : AbstractArtifactNamingService {
 
     override fun getVariableName(element: PsiElement): String? {
-        return null //todo: this
+        return if (element is JSVariable) {
+            element.name
+        } else {
+            null
+        }
     }
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return when (element) {
-            is PyClass -> {
+            is JSClass -> {
                 ArtifactQualifiedName(element.qualifiedName!!, null, ArtifactType.CLASS)
             }
 
-            is PyFunction -> {
-                val parentQualifiedName = PyPsiFacade.getInstance(element.project)
-                    .findShortestImportableName(element.containingFile.virtualFile, element)
-                val qualifiedName = element.qualifiedName ?: "$parentQualifiedName.${element.name}"
+            is JSFunction -> {
+                val qualifiedName = element.qualifiedName
+                    ?: element.name // TODO: Do something using the file name when the qualified name is null?
                 ArtifactQualifiedName("$qualifiedName()", null, ArtifactType.METHOD)
             }
 
-            is PyStatement, is PyStatementList -> getStatementOrExpressionQualifiedName(element, ArtifactType.STATEMENT)
+            is JSStatement, is JSStatementList -> getStatementOrExpressionQualifiedName(element, ArtifactType.STATEMENT)
             else -> getStatementOrExpressionQualifiedName(element, ArtifactType.EXPRESSION)
         }
     }
 
     private fun getStatementOrExpressionQualifiedName(element: PsiElement, type: ArtifactType): ArtifactQualifiedName {
-        val parentFunction = element.parentOfType<PyFunction>()
-        return if (parentFunction != null) {
-            val parentQualifiedName = PyPsiFacade.getInstance(element.project)
-                .findShortestImportableName(element.containingFile.virtualFile, element)
-            val qualifiedName = parentFunction.qualifiedName ?: "$parentQualifiedName.${parentFunction.name!!}"
-            ArtifactQualifiedName("$qualifiedName()", null, type)
+        val name = if (element is PsiNamedElement) {
+            element.name
         } else {
-            val qName = PyPsiFacade.getInstance(element.project)
-                .findShortestImportableName(element.containingFile.virtualFile, element)
-            ArtifactQualifiedName("$qName", null, type)
+            Base64.getEncoder().encodeToString(element.toString().toByteArray())
+        }
+
+        val parentElement = element.parentOfType<JSNamedElement>()
+        if (parentElement != null) {
+            return ArtifactQualifiedName("${getFullyQualifiedName(parentElement)}.${name}", null, type)
+        } else {
+            return ArtifactQualifiedName("${element.containingFile.virtualFile.path}:${name}", null, type)
         }
     }
 
     override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
         val classQualifiedNames = mutableListOf<ArtifactQualifiedName>()
-        psiFile.acceptChildren(object : PyRecursiveElementVisitor() {
-            override fun visitPyClass(node: PyClass) {
-                super.visitPyClass(node)
+        psiFile.acceptChildren(object : JSRecursiveWalkingElementVisitor() {
+            override fun visitJSClass(node: JSClass) { // TODO: check this also works for typescript classes, otherwise use visitTypescriptClass
+                super.visitJSClass(node)
                 classQualifiedNames.add(ArtifactQualifiedName(node.qualifiedName!!, type = ArtifactType.CLASS))
             }
         })

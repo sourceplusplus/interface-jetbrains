@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker.js
 
 import com.intellij.codeInsight.hints.InlayHintsSink
 import com.intellij.codeInsight.hints.presentation.InlayPresentation
@@ -29,7 +29,7 @@ import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonSourceInlayHintProvider : SourceInlayHintProvider() {
+class JavascriptSourceInlayHintProvider : SourceInlayHintProvider() {
 
     override fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? {
         TODO("Not yet implemented")

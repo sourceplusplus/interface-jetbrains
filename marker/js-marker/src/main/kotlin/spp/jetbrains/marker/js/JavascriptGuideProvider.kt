@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.js
 
+import com.intellij.lang.javascript.psi.JSFunction
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
@@ -31,8 +32,7 @@ class JavascriptGuideProvider : AbstractSourceGuideProvider {
             override fun visitElement(element: PsiElement) {
                 super.visitElement(element)
 
-                //todo: should be able to instanceof JSFunction
-                if (element::class.java.name == "com.intellij.lang.javascript.psi.impl.JSFunctionImpl") {
+                if (element is JSFunction) {
                     ApplicationManager.getApplication().runReadAction {
                         fileMarker.createMethodSourceMark(
                             element as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
