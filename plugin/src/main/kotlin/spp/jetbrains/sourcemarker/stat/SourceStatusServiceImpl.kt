@@ -23,12 +23,11 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Pair
 import kotlinx.coroutines.*
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusService
-import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import java.lang.Runnable
-import javax.annotation.concurrent.GuardedBy
 
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
@@ -37,16 +36,9 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     }
 
     private val statusLock = Any()
-
-    @GuardedBy("statusLock")
     private var status: SourceStatus = Pending
-
-    @GuardedBy("statusLock")
     private var message: String? = null
-
     private val reconnectionLock = Any()
-
-    @GuardedBy("reconnectionLock")
     private var reconnectionJob: Job? = null
 
     override fun getCurrentStatus(): Pair<SourceStatus, String?> {
