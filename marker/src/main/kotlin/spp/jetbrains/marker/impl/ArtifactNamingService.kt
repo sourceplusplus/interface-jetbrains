@@ -40,6 +40,10 @@ object ArtifactNamingService : AbstractArtifactNamingService {
         return services[language] ?: throw IllegalArgumentException("No service for language $language")
     }
 
+    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+        return getService(language).getLocation(language, artifactQualifiedName)
+    }
+
     override fun getVariableName(element: PsiElement): String? {
         return getService(element.language.id).getVariableName(element)
     }

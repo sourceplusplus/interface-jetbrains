@@ -20,6 +20,7 @@ import com.intellij.psi.*
 import org.jetbrains.uast.*
 import spp.jetbrains.marker.AbstractArtifactNamingService
 import spp.jetbrains.marker.source.JVMMarkerUtils
+import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 
@@ -30,6 +31,22 @@ import spp.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactNamingService : AbstractArtifactNamingService {
+
+    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+        var fullyQualified = artifactQualifiedName.identifier
+        if (fullyQualified.contains("#")) {
+            fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"));
+        }
+        val className = ArtifactNameUtils.getClassName(fullyQualified)!!
+        return if (fullyQualified.contains("(")) {
+            val shortFuncName = ArtifactNameUtils.getShortFunctionSignature(
+                ArtifactNameUtils.removePackageNames(fullyQualified)!!
+            )
+            "$className.$shortFuncName"
+        } else {
+            className
+        }
+    }
 
     override fun getVariableName(element: PsiElement): String? {
         return if (element is PsiDeclarationStatement) {

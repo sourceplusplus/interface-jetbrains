@@ -32,6 +32,10 @@ import spp.protocol.artifact.ArtifactType
  */
 class PythonArtifactNamingService : AbstractArtifactNamingService {
 
+    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+        return artifactQualifiedName.identifier
+    }
+
     override fun getVariableName(element: PsiElement): String? {
         return null //todo: this
     }

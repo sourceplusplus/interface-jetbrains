@@ -23,8 +23,10 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.parentOfType
 import spp.jetbrains.marker.AbstractArtifactNamingService
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
+import java.io.File
 import java.util.*
 
 /**
@@ -34,6 +36,14 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptArtifactNamingService : AbstractArtifactNamingService {
+
+    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+        return if (artifactQualifiedName.identifier.contains("(")) {
+            artifactQualifiedName.identifier
+        } else {
+            artifactQualifiedName.identifier.substringAfterLast(File.separatorChar).substringBefore("#")
+        }
+    }
 
     override fun getVariableName(element: PsiElement): String? {
         return if (element is JSVariable) {
@@ -49,10 +59,10 @@ class JavascriptArtifactNamingService : AbstractArtifactNamingService {
                 ArtifactQualifiedName(element.qualifiedName!!, null, ArtifactType.CLASS)
             }
 
+            is JSFunctionExpression -> getStatementOrExpressionQualifiedName(element, ArtifactType.EXPRESSION)
+
             is JSFunction -> {
-                val qualifiedName = element.qualifiedName
-                    ?: element.name // TODO: Do something using the file name when the qualified name is null?
-                ArtifactQualifiedName("$qualifiedName()", null, ArtifactType.METHOD)
+                ArtifactQualifiedName(element.qualifiedName!!, null, ArtifactType.METHOD)
             }
 
             is JSStatement, is JSStatementList -> getStatementOrExpressionQualifiedName(element, ArtifactType.STATEMENT)
@@ -68,10 +78,16 @@ class JavascriptArtifactNamingService : AbstractArtifactNamingService {
         }
 
         val parentElement = element.parentOfType<JSNamedElement>()
-        if (parentElement != null) {
-            return ArtifactQualifiedName("${getFullyQualifiedName(parentElement)}.${name}", null, type)
+        return if (parentElement != null) {
+            ArtifactQualifiedName(
+                "${getFullyQualifiedName(parentElement).identifier}.${name}", null, type,
+                lineNumber = SourceMarkerUtils.getLineNumber(element)
+            )
         } else {
-            return ArtifactQualifiedName("${element.containingFile.virtualFile.path}:${name}", null, type)
+            ArtifactQualifiedName(
+                "${element.containingFile.virtualFile.path}#$name", null, type,
+                lineNumber = SourceMarkerUtils.getLineNumber(element)
+            )
         }
     }
 

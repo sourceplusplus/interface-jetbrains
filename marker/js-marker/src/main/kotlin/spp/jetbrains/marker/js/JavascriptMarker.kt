@@ -16,9 +16,6 @@
  */
 package spp.jetbrains.marker.js
 
-import com.intellij.lang.javascript.dialects.ECMA6LanguageDialect
-import com.intellij.lang.javascript.dialects.TypeScriptLanguageDialect
-import com.intellij.lang.typescript.formatter.TypeScriptLanguageCodeStyleSettingsProvider
 import spp.jetbrains.marker.impl.*
 
 /**
@@ -39,14 +36,10 @@ object JavascriptMarker {
     }
 
     fun setup() {
-        ArtifactCreationService.addService(JavascriptArtifactCreationService(), "ECMAScript 6")
-        ArtifactNamingService.addService(JavascriptArtifactNamingService(), "ECMAScript 6")
-        ArtifactScopeService.addService(JavascriptArtifactScopeService(), "ECMAScript 6")
-        InstrumentConditionParser.addService(JavascriptConditionParser(), "ECMAScript 6")
-
-        JavascriptGuideProvider().apply {
-            SourceGuideProvider.addProvider(this, "JavaScript")
-            SourceGuideProvider.addProvider(this, "ECMAScript 6")
-        }
+        ArtifactCreationService.addService(JavascriptArtifactCreationService(), "JavaScript", "ECMAScript 6")
+        ArtifactNamingService.addService(JavascriptArtifactNamingService(), "JavaScript", "ECMAScript 6")
+        ArtifactScopeService.addService(JavascriptArtifactScopeService(), "JavaScript", "ECMAScript 6")
+        InstrumentConditionParser.addService(JavascriptConditionParser(), "JavaScript", "ECMAScript 6")
+        SourceGuideProvider.addProvider(JavascriptGuideProvider(), "JavaScript", "ECMAScript 6")
     }
 }
