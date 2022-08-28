@@ -56,7 +56,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
                 return@runReadAction
             }
             val endpointType = method.children[2].text
-            val endpointName = expression.arguments[0].text
+            val endpointName = getArgumentValue(expression.arguments[0])
 
             if (endpointType == "get" ||
                 endpointType == "post" ||
@@ -139,9 +139,9 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
                 return@map null
             }
 
-            val pathExpression = argumentList.arguments[0] as JSLiteralExpression
+            val path = getArgumentValue(argumentList.arguments[0])
 
-            return@map superPath + pathExpression.value
+            return@map superPath + path
         }.filter { it != null }.map { it!! }
 
         if (routes.size > 1) {
@@ -189,5 +189,16 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
             return isExpress(resolved)
         }
         return false
+    }
+
+    private fun getArgumentValue(element: PsiElement): Any? {
+        if (element is JSLiteralExpression) {
+            return element.value
+        }
+        if (element is JSReferenceExpression) {
+            val resolved = element.resolve() ?: return element
+            return getArgumentValue(resolved)
+        }
+        return null
     }
 }
