@@ -18,8 +18,14 @@ package spp.jetbrains.marker.source.info
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import io.vertx.core.Future
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import spp.jetbrains.UserData
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
@@ -39,10 +45,39 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
         val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
         val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
         val ENDPOINT_INTERNAL = SourceKey<Boolean>("ENDPOINT_INTERNAL")
+        val ENDPOINT_FOUND = SourceKey<Boolean>("ENDPOINT_FOUND")
+        private val REDETECTOR_SETUP = Key.create<Boolean>("SPP_REDETECTOR_SETUP")
     }
 
     abstract val detectorSet: Set<T>
     private val skywalkingMonitor by lazy { project.getUserData(SkywalkingMonitorService.KEY)!! }
+
+    init {
+        if (project.getUserData(REDETECTOR_SETUP) != true) {
+            project.putUserData(REDETECTOR_SETUP, true)
+            log.info("Setting up endpoint re-detector for project ${project.name}")
+
+            val vertx = UserData.vertx(project)
+            vertx.setPeriodic(5000) {
+                GlobalScope.launch(vertx.dispatcher()) {
+                    try {
+                        redetectEndpoints()
+                    } catch (e: Exception) {
+                        log.error("Error detecting endpoints", e)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun redetectEndpoints() {
+        log.debug("Redetecting endpoints for project ${project.name}")
+        SourceMarker.getInstance(project).getSourceMarks().forEach {
+            if (it is MethodGuideMark && it.getUserData(ENDPOINT_FOUND) == false) {
+                getOrFindEndpoint(it)
+            }
+        }
+    }
 
     fun getEndpointName(sourceMark: GuideMark): String? {
         return sourceMark.getUserData(ENDPOINT_NAME)
@@ -102,13 +137,22 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
         }
     }
 
-    private suspend fun determineEndpointId(endpointName: String, sourceMark: MethodGuideMark) {
-        log.trace("Determining endpoint id")
+    private suspend fun determineEndpointId(endpointName: String, guideMark: MethodGuideMark) {
+        if (guideMark.getUserData(ENDPOINT_INTERNAL) == true) {
+            log.trace("Internal endpoint, skipping endpoint id lookup")
+            return
+        }
+
+        log.trace("Determining endpoint id for endpoint name: $endpointName")
         val endpoint = skywalkingMonitor.searchExactEndpoint(endpointName)
         if (endpoint != null) {
-            sourceMark.putUserData(ENDPOINT_ID, endpoint.getString("id"))
+            guideMark.putUserData(ENDPOINT_ID, endpoint.getString("id"))
+            guideMark.putUserData(ENDPOINT_FOUND, true)
             log.trace("Detected endpoint id: ${endpoint.getString("id")}")
         } else {
+            if (guideMark.getUserData(ENDPOINT_FOUND) != false) {
+                guideMark.putUserData(ENDPOINT_FOUND, false)
+            }
             log.trace("Could not find endpoint id for: $endpointName")
         }
     }
