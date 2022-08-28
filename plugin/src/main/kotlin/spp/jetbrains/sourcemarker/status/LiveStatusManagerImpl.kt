@@ -140,7 +140,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = BreakpointStatusBar(
                 LiveSourceLocation(
-                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,
                     service = config.serviceName
                 ),
                 ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),

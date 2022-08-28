@@ -28,6 +28,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
  */
 interface AbstractArtifactNamingService {
 
+    //todo: return LiveSourceLocation
     fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String
     fun getVariableName(element: PsiElement): String?
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName

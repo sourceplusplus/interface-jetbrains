@@ -33,9 +33,10 @@ import spp.jetbrains.marker.source.SourceFileMarker
  */
 class JavascriptArtifactScopeService : AbstractArtifactScopeService {
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
+        return emptyList() //todo: this
         val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
-        val els = JSTreeUtil.findNamedElementsInScope(position, null);
-        val vars = els.filterIsInstance<JSVariable>();
+        val els = JSTreeUtil.findNamedElementsInScope(position, null)
+        val vars = els.filterIsInstance<JSVariable>()
 
         return vars.mapNotNull { it.name }
     }
