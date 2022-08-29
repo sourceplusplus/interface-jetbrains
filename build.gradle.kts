@@ -1,3 +1,5 @@
+import java.util.Calendar
+
 buildscript {
     repositories {
         mavenCentral()
@@ -11,6 +13,7 @@ plugins {
     id("com.diffplug.spotless") apply false
     id("org.jetbrains.kotlin.jvm") apply false
     id("io.gitlab.arturbosch.detekt") apply false
+    id("org.jetbrains.intellij") version "1.8.1"
 }
 
 val pluginGroup: String by project
@@ -20,10 +23,41 @@ val pluginSinceBuild: String by project
 val vertxVersion: String by project
 
 val platformType: String by project
+val ideVersion: String by project
+val platformPlugins: String by project
 val platformDownloadSources: String by project
 
 group = pluginGroup
 version = projectVersion
+
+allprojects {
+    repositories {
+        mavenCentral()
+        maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
+        maven(url = "https://cache-redirector.jetbrains.com/intellij-dependencies/") { name = "intellij-dependencies" }
+    }
+
+    apply(plugin = "org.jetbrains.intellij")
+
+    intellij {
+        pluginName.set("interface-jetbrains")
+        version.set(ideVersion)
+        type.set(platformType)
+        downloadSources.set(platformDownloadSources.toBoolean())
+        updateSinceUntilBuild.set(false)
+
+        plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
+        //plugins.add("com.intellij.zh:202.413") //test chinese locale
+    }
+
+    tasks {
+        // All these tasks don't make sense for non-root subprojects
+        // Root project (i.e. `:plugin`) enables them itself if needed
+        runIde { enabled = false }
+        prepareSandbox { enabled = false }
+        buildSearchableOptions { enabled = false }
+    }
+}
 
 subprojects {
     repositories {
@@ -99,7 +133,7 @@ subprojects {
             targetExclude("**/generated/**", "**/liveplugin/**")
 
             val startYear = 2022
-            val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
             val copyrightYears = if (startYear == currentYear) {
                 "$startYear"
             } else {

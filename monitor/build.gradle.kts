@@ -4,16 +4,8 @@ plugins {
 }
 
 val vertxVersion: String by project
-val kotlinVersion: String by project
 val apolloVersion: String by project
 val projectVersion: String by project
-val slf4jVersion: String by project
-val intellijVersion: String by project
-
-repositories {
-    maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
-    maven(url = "https://cache-redirector.jetbrains.com/intellij-dependencies/") { name = "intellij-dependencies" }
-}
 
 dependencies {
     compileOnly(projectDependency(":common"))
@@ -30,7 +22,6 @@ dependencies {
     implementation("io.dropwizard.metrics:metrics-core:4.2.11")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 
-    compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
     compileOnly("com.google.guava:guava:31.1-jre")
 }
 

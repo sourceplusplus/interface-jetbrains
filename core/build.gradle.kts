@@ -5,12 +5,6 @@ plugins {
 val vertxVersion: String by project
 val apolloVersion: String by project
 val projectVersion: String by project
-val intellijVersion: String by project
-
-repositories {
-    maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
-    maven(url = "https://cache-redirector.jetbrains.com/intellij-dependencies/") { name = "intellij-dependencies" }
-}
 
 dependencies {
     compileOnly(projectDependency(":common"))
@@ -19,8 +13,6 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("com.apollographql.apollo3:apollo-api:$apolloVersion")
-
-    compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
 }
 
 fun projectDependency(name: String): ProjectDependency {

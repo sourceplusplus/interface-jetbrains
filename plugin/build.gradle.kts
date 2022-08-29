@@ -4,7 +4,6 @@ import java.net.URL
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "1.8.1"
     id("org.jetbrains.changelog") version "1.3.1"
 }
 
@@ -27,17 +26,12 @@ val platformDownloadSources: String by project
 group = pluginGroup
 version = projectVersion
 
-intellij {
-    pluginName.set("interface-jetbrains")
-    version.set(ideVersion)
-    type.set(platformType)
-    downloadSources.set(platformDownloadSources.toBoolean())
-    updateSinceUntilBuild.set(false)
-
-    plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
-    //plugins.add("com.intellij.zh:202.413") //test chinese locale
+tasks {
+    runIde { enabled = true }
+    prepareSandbox { enabled = true }
+    buildSearchableOptions { enabled = true }
 }
-tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
+
 tasks.getByName<JavaExec>("runIde") {
     //systemProperty("sourcemarker.debug.unblocked_threads", true)
     systemProperty("ide.enable.slow.operations.in.edt", false)
@@ -88,6 +82,7 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
     implementation("info.debatty:java-string-similarity:2.0.0")
+    compileOnly("org.jetbrains:annotations:23.0.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 }
