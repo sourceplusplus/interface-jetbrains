@@ -4,7 +4,6 @@ import java.net.URL
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij") version "1.8.1"
     id("org.jetbrains.changelog") version "1.3.1"
 }
 
@@ -27,17 +26,30 @@ val platformDownloadSources: String by project
 group = pluginGroup
 version = projectVersion
 
+//todo: move tests to language specific modules and this can be removed
 intellij {
-    pluginName.set("interface-jetbrains")
-    version.set(ideVersion)
-    type.set(platformType)
-    downloadSources.set(platformDownloadSources.toBoolean())
-    updateSinceUntilBuild.set(false)
-
-    plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
-    //plugins.add("com.intellij.zh:202.413") //test chinese locale
+    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13"))
 }
-tasks.getByName("buildSearchableOptions").onlyIf { false } //todo: figure out how to remove
+
+tasks {
+    buildPlugin { enabled = true }
+    buildSearchableOptions { enabled = true }
+    downloadRobotServerPlugin { enabled = true }
+    jarSearchableOptions { enabled = true }
+    patchPluginXml { enabled = true }
+    prepareSandbox { enabled = true }
+    prepareTestingSandbox { enabled = true }
+    prepareUiTestingSandbox { enabled = true }
+    publishPlugin { enabled = true }
+    runIde { enabled = true }
+    runIdeForUiTests { enabled = true }
+    runPluginVerifier { enabled = true }
+    signPlugin { enabled = true }
+    verifyPlugin { enabled = true }
+    listProductsReleases { enabled = true }
+    instrumentCode { enabled = true }
+}
+
 tasks.getByName<JavaExec>("runIde") {
     //systemProperty("sourcemarker.debug.unblocked_threads", true)
     systemProperty("ide.enable.slow.operations.in.edt", false)
@@ -50,39 +62,20 @@ changelog {
 }
 
 dependencies {
-    if (findProject(":interfaces:jetbrains") != null) {
-        implementation(project(":interfaces:jetbrains:commander")) {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-        implementation(project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper")) {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-        implementation(project(":interfaces:jetbrains:common"))
-        implementation(project(":interfaces:jetbrains:core"))
-        implementation(project(":interfaces:jetbrains:marker"))
-        implementation(project(":interfaces:jetbrains:marker:js-marker"))
-        implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
-        implementation(project(":interfaces:jetbrains:marker:py-marker"))
-        implementation(project(":interfaces:jetbrains:monitor"))
-        implementation(project(":interfaces:booster-ui"))
-        implementation(project(":protocol"))
-    } else {
-        implementation(project(":commander")) {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-        implementation(project(":commander:kotlin-compiler-wrapper")) {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-        implementation(project(":common"))
-        implementation(project(":core"))
-        implementation(project(":marker"))
-        implementation(project(":marker:js-marker"))
-        implementation(project(":marker:jvm-marker"))
-        implementation(project(":marker:py-marker"))
-        implementation(project(":monitor"))
-        implementation("plus.sourceplus.interface:interface-booster-ui:$projectVersion")
-        implementation("plus.sourceplus:protocol:$projectVersion")
+    implementation(projectDependency(":commander")) {
+        exclude(group = "org.jetbrains.kotlin")
     }
+    implementation(projectDependency(":commander:kotlin-compiler-wrapper")) {
+        exclude(group = "org.jetbrains.kotlin")
+    }
+    implementation(projectDependency(":common"))
+    implementation(projectDependency(":core"))
+    implementation(projectDependency(":marker"))
+    implementation(projectDependency(":marker:jvm-marker"))
+    implementation(projectDependency(":marker:py-marker"))
+    implementation(projectDependency(":monitor"))
+    implementation("plus.sourceplus.interface:interface-booster-ui:$projectVersion")
+    implementation("plus.sourceplus:protocol:$projectVersion")
 
     implementation("org.jooq:joor:$joorVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
@@ -99,7 +92,6 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.3")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:2.13.3")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("io.dropwizard.metrics:metrics-core:4.2.11")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("org.jooq:joor:$joorVersion")
@@ -190,5 +182,13 @@ tasks {
 
     test {
         useJUnitPlatform()
+    }
+}
+
+fun projectDependency(name: String): ProjectDependency {
+    return if (rootProject.name.contains("jetbrains")) {
+        DependencyHandlerScope.of(rootProject.dependencies).project(name)
+    } else {
+        DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
     }
 }

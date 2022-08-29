@@ -1,3 +1,5 @@
+import java.util.Calendar
+
 buildscript {
     repositories {
         mavenCentral()
@@ -11,6 +13,7 @@ plugins {
     id("com.diffplug.spotless") apply false
     id("org.jetbrains.kotlin.jvm") apply false
     id("io.gitlab.arturbosch.detekt") apply false
+    id("org.jetbrains.intellij") version "1.8.1"
 }
 
 val pluginGroup: String by project
@@ -20,10 +23,53 @@ val pluginSinceBuild: String by project
 val vertxVersion: String by project
 
 val platformType: String by project
+val ideVersion: String by project
+val platformPlugins: String by project
 val platformDownloadSources: String by project
 
 group = pluginGroup
 version = projectVersion
+
+allprojects {
+    repositories {
+        mavenCentral()
+        maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
+        maven(url = "https://cache-redirector.jetbrains.com/intellij-dependencies/") { name = "intellij-dependencies" }
+    }
+
+    apply(plugin = "org.jetbrains.intellij")
+
+    intellij {
+        pluginName.set("interface-jetbrains")
+        version.set(ideVersion)
+        type.set(platformType)
+        downloadSources.set(platformDownloadSources.toBoolean())
+        updateSinceUntilBuild.set(false)
+
+        plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
+        //plugins.add("com.intellij.zh:202.413") //test chinese locale
+    }
+
+    tasks {
+        // Disable all Gradle Tasks for the gradle-intellij-plugin as we only use the plugin for the dependencies
+        buildPlugin { enabled = false }
+        buildSearchableOptions { enabled = false }
+        downloadRobotServerPlugin { enabled = false }
+        jarSearchableOptions { enabled = false }
+        patchPluginXml { enabled = false }
+        prepareSandbox { enabled = false }
+        prepareTestingSandbox { enabled = false }
+        prepareUiTestingSandbox { enabled = false }
+        publishPlugin { enabled = false }
+        runIde { enabled = false }
+        runIdeForUiTests { enabled = false }
+        runPluginVerifier { enabled = false }
+        signPlugin { enabled = false }
+        verifyPlugin { enabled = false }
+        listProductsReleases { enabled = false }
+        instrumentCode { enabled = false }
+    }
+}
 
 subprojects {
     repositories {
@@ -74,8 +120,7 @@ subprojects {
             targetCompatibility = "1.8"
         }
         withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-            kotlinOptions.apiVersion = "1.4"
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.jvmTarget = "11"
             kotlinOptions.freeCompilerArgs +=
                 listOf(
                     "-Xno-optimized-callable-references",
@@ -100,7 +145,7 @@ subprojects {
             targetExclude("**/generated/**", "**/liveplugin/**")
 
             val startYear = 2022
-            val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
             val copyrightYears = if (startYear == currentYear) {
                 "$startYear"
             } else {
@@ -132,6 +177,14 @@ subprojects {
                 append("/")
             }
             licenseHeader(formattedLicenseHeader)
+        }
+    }
+
+    fun projectDependency(name: String): ProjectDependency {
+        return if (rootProject.name.contains("jetbrains")) {
+            DependencyHandlerScope.of(rootProject.dependencies).project(name)
+        } else {
+            DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
         }
     }
 }
