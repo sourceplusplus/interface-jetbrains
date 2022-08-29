@@ -24,7 +24,6 @@ dependencies {
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
-    compileOnly("com.jetbrains.intellij.platform:util:$intellijVersion")
 }
 
 fun projectDependency(name: String): ProjectDependency {

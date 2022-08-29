@@ -16,6 +16,7 @@ dependencies {
 }
 
 fun projectDependency(name: String): ProjectDependency {
+    println("root project: " + rootProject.name)
     return if (rootProject.name != "jetbrains") {
         DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
     } else {
