@@ -169,10 +169,10 @@ subprojects {
     }
 
     fun projectDependency(name: String): ProjectDependency {
-        return if (rootProject.name != "jetbrains") {
-            DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
-        } else {
+        return if (rootProject.name.contains("jetbrains")) {
             DependencyHandlerScope.of(rootProject.dependencies).project(name)
+        } else {
+            DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
         }
     }
 }
