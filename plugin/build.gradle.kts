@@ -32,9 +32,20 @@ intellij {
 }
 
 tasks {
-    runIde { enabled = true }
-    prepareSandbox { enabled = true }
+    buildPlugin { enabled = true }
     buildSearchableOptions { enabled = true }
+    downloadRobotServerPlugin { enabled = true }
+    jarSearchableOptions { enabled = true }
+    patchPluginXml { enabled = true }
+    prepareSandbox { enabled = true }
+    prepareTestingSandbox { enabled = true }
+    prepareUiTestingSandbox { enabled = true }
+    publishPlugin { enabled = true }
+    runIde { enabled = true }
+    runIdeForUiTests { enabled = true }
+    runPluginVerifier { enabled = true }
+    signPlugin { enabled = true }
+    verifyPlugin { enabled = true }
 }
 
 tasks.getByName<JavaExec>("runIde") {

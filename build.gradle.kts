@@ -51,11 +51,21 @@ allprojects {
     }
 
     tasks {
-        // All these tasks don't make sense for non-root subprojects
-        // Root project (i.e. `:plugin`) enables them itself if needed
-        runIde { enabled = false }
-        prepareSandbox { enabled = false }
+        // Disable all Gradle Tasks for the gradle-intellij-plugin as we only use the plugin for the dependencies
+        buildPlugin { enabled = false }
         buildSearchableOptions { enabled = false }
+        downloadRobotServerPlugin { enabled = false }
+        jarSearchableOptions { enabled = false }
+        patchPluginXml { enabled = false }
+        prepareSandbox { enabled = false }
+        prepareTestingSandbox { enabled = false }
+        prepareUiTestingSandbox { enabled = false }
+        publishPlugin { enabled = false }
+        runIde { enabled = false }
+        runIdeForUiTests { enabled = false }
+        runPluginVerifier { enabled = false }
+        signPlugin { enabled = false }
+        verifyPlugin { enabled = false }
     }
 }
 
