@@ -71,6 +71,7 @@ dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":core"))
     implementation(projectDependency(":marker"))
+    implementation(projectDependency(":marker:js-marker"))
     implementation(projectDependency(":marker:jvm-marker"))
     implementation(projectDependency(":marker:py-marker"))
     implementation(projectDependency(":monitor"))
