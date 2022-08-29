@@ -46,6 +46,8 @@ tasks {
     runPluginVerifier { enabled = true }
     signPlugin { enabled = true }
     verifyPlugin { enabled = true }
+    listProductsReleases { enabled = true }
+    instrumentCode { enabled = true }
 }
 
 tasks.getByName<JavaExec>("runIde") {

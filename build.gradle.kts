@@ -66,6 +66,8 @@ allprojects {
         runPluginVerifier { enabled = false }
         signPlugin { enabled = false }
         verifyPlugin { enabled = false }
+        listProductsReleases { enabled = false }
+        instrumentCode { enabled = false }
     }
 }
 
