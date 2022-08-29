@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.source.info
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -53,6 +54,12 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
     private val skywalkingMonitor by lazy { project.getUserData(SkywalkingMonitorService.KEY)!! }
 
     init {
+        if (!ApplicationManager.getApplication().isUnitTestMode) {
+            setupRedetector()
+        }
+    }
+
+    private fun setupRedetector() {
         if (project.getUserData(REDETECTOR_SETUP) != true) {
             project.putUserData(REDETECTOR_SETUP, true)
             log.info("Setting up endpoint re-detector for project ${project.name}")
