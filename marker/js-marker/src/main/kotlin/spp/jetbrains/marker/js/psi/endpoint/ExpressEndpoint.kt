@@ -18,6 +18,10 @@ package spp.jetbrains.marker.js.psi.endpoint
 
 import com.intellij.lang.javascript.psi.*
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.searches.ReferencesSearch
 import io.vertx.core.Future
@@ -119,30 +123,29 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
             return null
         }
 
-        val routes = ReferencesSearch.search(routerVariable).map {
-            if (it.element.parent !is JSArgumentList) {
-                return@map null
-            }
-            val argumentList = it.element.parent as JSArgumentList
-            if (argumentList.arguments.size != 2) { // TODO: Is there any situation where this isn't the case?
-                return@map null
-            }
-            if (argumentList.arguments[1] != it.element) {
-                return@map null
-            }
+        val indicator = EmptyProgressIndicator(ModalityState.defaultModalityState())
+        val routes = ProgressManager.getInstance().runProcess(Computable {
+            ReferencesSearch.search(routerVariable).map {
+                if (it.element.parent !is JSArgumentList) {
+                    return@map null
+                }
+                val argumentList = it.element.parent as JSArgumentList
+                if (argumentList.arguments.size != 2) { // TODO: Is there any situation where this isn't the case?
+                    return@map null
+                }
+                if (argumentList.arguments[1] != it.element) {
+                    return@map null
+                }
 
-            val callExpression = it.element.parent.parent
-            val useReference = callExpression.firstChild as JSReferenceExpression
-            val superRouter = (useReference.firstChild as JSReferenceExpression).resolve() as JSVariable
-            val superPath = locateRouter(superRouter)
-            if (superPath == null) {
-                return@map null
-            }
+                val callExpression = it.element.parent.parent
+                val useReference = callExpression.firstChild as JSReferenceExpression
+                val superRouter = (useReference.firstChild as JSReferenceExpression).resolve() as JSVariable
+                val superPath = locateRouter(superRouter) ?: return@map null
+                val path = getArgumentValue(argumentList.arguments[0])
 
-            val path = getArgumentValue(argumentList.arguments[0])
-
-            return@map superPath + path
-        }.filter { it != null }.map { it!! }
+                return@map superPath + path
+            }.filterNotNull().map { it }
+        }, indicator)
 
         if (routes.size > 1) {
             // TODO: Handle multiple routes
