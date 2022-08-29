@@ -65,7 +65,7 @@ jobs:
         id: properties
         shell: bash
         run: |
-          PROPERTIES="$(./gradlew --stacktrace properties --console=plain -q)"
+          PROPERTIES="$(./gradlew properties --console=plain -q)"
           VERSION="$(echo "$PROPERTIES" | grep "^version:" | cut -f2- -d ' ')"
           SPP_RELEASE_VERSION=${VERSION/-SNAPSHOT/}
           NAME="$(echo "$PROPERTIES" | grep "^pluginName:" | cut -f2- -d ' ')"
