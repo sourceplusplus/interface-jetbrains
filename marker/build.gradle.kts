@@ -16,14 +16,10 @@ repositories {
 }
 
 dependencies {
-    if (findProject(":interfaces:jetbrains") != null) {
-        compileOnly(project(":interfaces:jetbrains:common"))
-    } else {
-        compileOnly(project(":common"))
-    }
+    compileOnly(projectDependency(":common"))
     compileOnly("plus.sourceplus:protocol:$projectVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
@@ -43,4 +39,12 @@ dependencies {
     compileOnly("com.jetbrains.intellij.platform:lang:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:lang-impl:$intellijVersion")
     testImplementation("junit:junit:4.13.2")
+}
+
+fun projectDependency(name: String): ProjectDependency {
+    return if (rootProject.name != "jetbrains") {
+        DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
+    } else {
+        DependencyHandlerScope.of(rootProject.dependencies).project(name)
+    }
 }

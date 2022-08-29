@@ -74,8 +74,7 @@ subprojects {
             targetCompatibility = "1.8"
         }
         withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-            kotlinOptions.apiVersion = "1.4"
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.jvmTarget = "11"
             kotlinOptions.freeCompilerArgs +=
                 listOf(
                     "-Xno-optimized-callable-references",
@@ -132,6 +131,14 @@ subprojects {
                 append("/")
             }
             licenseHeader(formattedLicenseHeader)
+        }
+    }
+
+    fun projectDependency(name: String): ProjectDependency {
+        return if (rootProject.name != "jetbrains") {
+            DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
+        } else {
+            DependencyHandlerScope.of(rootProject.dependencies).project(name)
         }
     }
 }

@@ -14,17 +14,13 @@ repositories {
 }
 
 dependencies {
-    if (findProject(":interfaces:jetbrains") != null) {
-        compileOnly(project(":interfaces:jetbrains:marker"))
-    } else {
-        compileOnly(project(":marker"))
-    }
+    compileOnly(projectDependency(":marker"))
     compileOnly("plus.sourceplus:protocol:$projectVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.google.guava:guava:31.1-jre")
-    implementation("org.jetbrains:annotations:23.0.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compileOnly("com.google.guava:guava:31.1-jre")
+    compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("com.jetbrains.intellij.platform:ide:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:ide-impl:$intellijVersion")
     compileOnly("com.jetbrains.intellij.platform:core:$intellijVersion")
@@ -43,4 +39,12 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
+}
+
+fun projectDependency(name: String): ProjectDependency {
+    return if (rootProject.name != "jetbrains") {
+        DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
+    } else {
+        DependencyHandlerScope.of(rootProject.dependencies).project(name)
+    }
 }

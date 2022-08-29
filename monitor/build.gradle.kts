@@ -16,11 +16,7 @@ repositories {
 }
 
 dependencies {
-    if (findProject(":interfaces:jetbrains") != null) {
-        compileOnly(project(":interfaces:jetbrains:common"))
-    } else {
-        compileOnly(project(":common"))
-    }
+    compileOnly(projectDependency(":common"))
 
     implementation("plus.sourceplus:protocol:$projectVersion")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
@@ -40,4 +36,12 @@ dependencies {
 
 apollo {
     packageNamesFromFilePaths("monitor.skywalking.protocol")
+}
+
+fun projectDependency(name: String): ProjectDependency {
+    return if (rootProject.name != "jetbrains") {
+        DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
+    } else {
+        DependencyHandlerScope.of(rootProject.dependencies).project(name)
+    }
 }
