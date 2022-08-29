@@ -50,37 +50,20 @@ changelog {
 }
 
 dependencies {
-    if (findProject(":interfaces:jetbrains") != null) {
-        implementation(project(":interfaces:jetbrains:commander")) {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-        implementation(project(":interfaces:jetbrains:commander:kotlin-compiler-wrapper")) {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-        implementation(project(":interfaces:jetbrains:common"))
-        implementation(project(":interfaces:jetbrains:core"))
-        implementation(project(":interfaces:jetbrains:marker"))
-        implementation(project(":interfaces:jetbrains:marker:jvm-marker"))
-        implementation(project(":interfaces:jetbrains:marker:py-marker"))
-        implementation(project(":interfaces:jetbrains:monitor"))
-        implementation(project(":interfaces:booster-ui"))
-        implementation(project(":protocol"))
-    } else {
-        implementation(project(":commander")) {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-        implementation(project(":commander:kotlin-compiler-wrapper")) {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-        implementation(project(":common"))
-        implementation(project(":core"))
-        implementation(project(":marker"))
-        implementation(project(":marker:jvm-marker"))
-        implementation(project(":marker:py-marker"))
-        implementation(project(":monitor"))
-        implementation("plus.sourceplus.interface:interface-booster-ui:$projectVersion")
-        implementation("plus.sourceplus:protocol:$projectVersion")
+    implementation(projectDependency(":commander")) {
+        exclude(group = "org.jetbrains.kotlin")
     }
+    implementation(projectDependency(":commander:kotlin-compiler-wrapper")) {
+        exclude(group = "org.jetbrains.kotlin")
+    }
+    implementation(projectDependency(":common"))
+    implementation(projectDependency(":core"))
+    implementation(projectDependency(":marker"))
+    implementation(projectDependency(":marker:jvm-marker"))
+    implementation(projectDependency(":marker:py-marker"))
+    implementation(projectDependency(":monitor"))
+    implementation("plus.sourceplus.interface:interface-booster-ui:$projectVersion")
+    implementation("plus.sourceplus:protocol:$projectVersion")
 
     implementation("org.jooq:joor:$joorVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
@@ -188,5 +171,13 @@ tasks {
 
     test {
         useJUnitPlatform()
+    }
+}
+
+fun projectDependency(name: String): ProjectDependency {
+    return if (rootProject.name != "jetbrains") {
+        DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
+    } else {
+        DependencyHandlerScope.of(rootProject.dependencies).project(name)
     }
 }
