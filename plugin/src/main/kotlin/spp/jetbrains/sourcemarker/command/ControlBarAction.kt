@@ -21,7 +21,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import org.jetbrains.annotations.NotNull
 
 /**
  * todo: description.
@@ -31,7 +30,7 @@ import org.jetbrains.annotations.NotNull
  */
 class ControlBarAction : AnAction() {
 
-    override fun update(@NotNull e: AnActionEvent) {
+    override fun update(e: AnActionEvent) {
         val project: Project? = e.project
         e.presentation.isEnabledAndVisible = project != null
     }

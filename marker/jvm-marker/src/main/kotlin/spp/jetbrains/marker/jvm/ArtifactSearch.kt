@@ -28,8 +28,6 @@ import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.kotlin.idea.KotlinFileType
-import org.jetbrains.plugins.groovy.GroovyFileType
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
@@ -121,19 +119,21 @@ object ArtifactSearch {
                 promise.tryComplete(Optional.empty())
             } else {
                 //todo: should be saving endpoints somewhere so don't always have to scan entire application
-                val groovySourceFiles = FileTypeIndex.getFiles(
-                    GroovyFileType.GROOVY_FILE_TYPE, GlobalSearchScope.projectScope(project)
-                )
+//                val groovySourceFiles = FileTypeIndex.getFiles(
+//                    GroovyFileType.GROOVY_FILE_TYPE, GlobalSearchScope.projectScope(project)
+//                )
+                //todo: can't search here, need language specific search then combine
                 val javaSourceFiles = FileTypeIndex.getFiles(
                     JavaFileType.INSTANCE, GlobalSearchScope.projectScope(project)
                 )
-                val kotlinSourceFiles = FileTypeIndex.getFiles(
-                    KotlinFileType.INSTANCE, GlobalSearchScope.projectScope(project)
-                )
+//                val kotlinSourceFiles = FileTypeIndex.getFiles(
+//                    KotlinFileType.INSTANCE, GlobalSearchScope.projectScope(project)
+//                )
 
                 val endpointDetector = JVMEndpointDetector(project) //todo: python
                 var keepSearching = true
-                for (virtualFile in groovySourceFiles.union(javaSourceFiles).union(kotlinSourceFiles)) {
+//                for (virtualFile in groovySourceFiles.union(javaSourceFiles).union(kotlinSourceFiles)) {
+                for (virtualFile in javaSourceFiles) {
                     val file = PsiManager.getInstance(project).findFile(virtualFile)!!
                     file.accept(object : PsiRecursiveElementVisitor(true) {
                         override fun visitElement(element: PsiElement) {
