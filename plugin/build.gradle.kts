@@ -26,6 +26,11 @@ val platformDownloadSources: String by project
 group = pluginGroup
 version = projectVersion
 
+//todo: move tests to language specific modules and this can be removed
+intellij {
+    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13"))
+}
+
 tasks {
     runIde { enabled = true }
     prepareSandbox { enabled = true }
@@ -82,7 +87,6 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
     implementation("info.debatty:java-string-similarity:2.0.0")
-    compileOnly("org.jetbrains:annotations:23.0.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 }
