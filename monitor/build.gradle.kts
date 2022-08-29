@@ -10,17 +10,17 @@ val projectVersion: String by project
 dependencies {
     compileOnly(projectDependency(":common"))
 
-    implementation("plus.sourceplus:protocol:$projectVersion")
+    compileOnly("plus.sourceplus:protocol:$projectVersion")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("io.vertx:vertx-core:$vertxVersion")
-    implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
-    implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-    implementation("io.dropwizard.metrics:metrics-core:4.2.11")
-    implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    compileOnly("io.vertx:vertx-core:$vertxVersion")
+    compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
+    compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+    compileOnly("io.dropwizard.metrics:metrics-core:4.2.11")
+    compileOnly("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 
     compileOnly("com.google.guava:guava:31.1-jre")
 }
