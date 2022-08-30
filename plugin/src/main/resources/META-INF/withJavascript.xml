@@ -2,7 +2,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language="JavaScript"
                                         implementationClass="spp.jetbrains.marker.js.JavascriptLineMarkerProvider"/>
-<!--        <codeInsight.inlayProvider language="JavaScript"-->
-<!--                                   implementationClass="spp.jetbrains.marker.js.JavascriptSourceInlayHintProvider"/>-->
+        <codeInsight.inlayProvider language="JavaScript"
+                                   implementationClass="spp.jetbrains.marker.js.JavascriptSourceInlayHintProvider"/>
     </extensions>
 </idea-plugin>
