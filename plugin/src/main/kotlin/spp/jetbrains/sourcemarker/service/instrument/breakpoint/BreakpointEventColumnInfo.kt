@@ -19,7 +19,7 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.table.IconTableCellRenderer
 import kotlinx.datetime.toJavaInstant
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons
+import spp.jetbrains.icons.PluginIcons
 import spp.protocol.artifact.exception.methodName
 import spp.protocol.artifact.exception.qualifiedClassName
 import spp.protocol.artifact.exception.shortQualifiedClassName
@@ -50,7 +50,7 @@ class BreakpointEventColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, St
 
     override fun getCustomizedRenderer(o: LiveBreakpointHit, renderer: TableCellRenderer): TableCellRenderer {
         return when (name) {
-            "Breakpoint Data" -> IconTableCellRenderer.create(SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON)
+            "Breakpoint Data" -> IconTableCellRenderer.create(PluginIcons.Breakpoint.active)
             else -> super.getCustomizedRenderer(o, renderer)
         }
     }
