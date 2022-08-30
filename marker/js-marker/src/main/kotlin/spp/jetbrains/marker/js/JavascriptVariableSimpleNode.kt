@@ -28,7 +28,7 @@ import spp.protocol.instrument.variable.LiveVariable
 /**
  * todo: description.
  *
- * @since 0.2.1
+ * @since 0.6.9
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")

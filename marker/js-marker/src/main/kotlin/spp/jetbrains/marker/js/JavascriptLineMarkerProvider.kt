@@ -28,7 +28,7 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
 /**
  * Associates JavaScript [GutterMark]s to PSI elements.
  *
- * @since 0.6.8
+ * @since 0.6.9
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptLineMarkerProvider : SourceLineMarkerProvider() {

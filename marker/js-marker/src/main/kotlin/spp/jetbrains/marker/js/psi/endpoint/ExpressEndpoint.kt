@@ -34,7 +34,7 @@ import java.util.*
 /**
  * todo: description.
  *
- * @since 0.5.5
+ * @since 0.6.9
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {

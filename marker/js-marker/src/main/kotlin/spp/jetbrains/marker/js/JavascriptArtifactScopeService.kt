@@ -28,7 +28,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
 /**
  * todo: description.
  *
- * @since 0.4.0
+ * @since 0.6.9
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptArtifactScopeService : AbstractArtifactScopeService {

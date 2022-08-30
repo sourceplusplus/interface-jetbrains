@@ -21,7 +21,7 @@ import spp.jetbrains.marker.impl.*
 /**
  * Provides JavaScript support for the Marker API.
  *
- * @since 0.6.8
+ * @since 0.6.9
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object JavascriptMarker {

@@ -25,7 +25,14 @@ import com.intellij.psi.PsiRecursiveElementVisitor
 import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 
+/**
+ * Locates [GuideMark]s for the given [SourceFileMarker].
+ *
+ * @since 0.6.9
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class JavascriptGuideProvider : AbstractSourceGuideProvider {
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
