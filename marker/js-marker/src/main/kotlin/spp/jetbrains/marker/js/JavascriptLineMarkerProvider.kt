@@ -18,7 +18,6 @@ package spp.jetbrains.marker.js
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.lang.javascript.psi.JSFile
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceLineMarkerProvider
@@ -34,14 +33,9 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
 class JavascriptLineMarkerProvider : SourceLineMarkerProvider() {
 
     companion object {
-        private val log = logger<JavascriptLineMarkerProvider>()
 
         init {
-            try {
-                SourceFileMarker.SUPPORTED_FILE_TYPES.add(JSFile::class.java)
-            } catch (e: NoClassDefFoundError) {
-                log.warn("Javascript support is not available")
-            }
+            SourceFileMarker.SUPPORTED_FILE_TYPES.add(JSFile::class.java)
         }
     }
 
