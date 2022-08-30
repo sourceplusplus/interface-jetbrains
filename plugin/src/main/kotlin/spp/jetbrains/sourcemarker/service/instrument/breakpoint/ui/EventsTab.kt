@@ -24,8 +24,8 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
+import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_ACTIVE_ICON
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointEventColumnInfo
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.protocol.instrument.event.LiveBreakpointHit
@@ -70,7 +70,7 @@ class EventsTab(val project: Project) : Disposable {
         val table = JBTable(model)
         table.isStriped = true
         table.setShowColumns(true)
-        table.setDefaultRenderer(Icon::class.java, IconTableCellRenderer.create(LIVE_BREAKPOINT_ACTIVE_ICON))
+        table.setDefaultRenderer(Icon::class.java, IconTableCellRenderer.create(PluginIcons.Breakpoint.active))
         table.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(mouseEvent: MouseEvent) {
                 val point: Point = mouseEvent.point

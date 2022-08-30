@@ -29,7 +29,7 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_BREAKPOINT_DISABLED_ICON
+import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.LiveBreakpointConstants.LIVE_BREAKPOINT_NAME
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui.BreakpointHitWindow
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui.EventsWindow
@@ -61,11 +61,11 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         try {
             _toolWindow = ToolWindowManager.getInstance(project) //2019.3+
                 .registerToolWindow(LIVE_BREAKPOINT_NAME, true, ToolWindowAnchor.BOTTOM, this, true)
-            _toolWindow!!.setIcon(LIVE_BREAKPOINT_DISABLED_ICON)
+            _toolWindow!!.setIcon(PluginIcons.Breakpoint.disabled)
         } catch (ignored: Throwable) {
             _toolWindow = ToolWindowManager.getInstance(project) //2020+
                 .registerToolWindow(
-                    RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, LIVE_BREAKPOINT_DISABLED_ICON)
+                    RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, PluginIcons.Breakpoint.disabled)
                 )
         }
 
