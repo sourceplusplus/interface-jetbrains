@@ -17,9 +17,9 @@
 package spp.jetbrains.marker.js
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo
+import com.intellij.lang.javascript.psi.JSFile
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceLineMarkerProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -38,7 +38,7 @@ class JavascriptLineMarkerProvider : SourceLineMarkerProvider() {
 
         init {
             try {
-                SourceFileMarker.SUPPORTED_FILE_TYPES.add(Class.forName("com.intellij.lang.javascript.psi.JSFile") as Class<out PsiFile>)
+                SourceFileMarker.SUPPORTED_FILE_TYPES.add(JSFile::class.java)
             } catch (e: NoClassDefFoundError) {
                 log.warn("Javascript support is not available")
             }
