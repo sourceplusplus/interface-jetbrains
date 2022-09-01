@@ -28,12 +28,10 @@ import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElementOfType
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -66,7 +64,7 @@ class LoggerDetector(val vertx: Vertx) {
         ApplicationManager.getApplication().runReadAction {
             val methodSourceMark = findMethodSourceMark(editor, inlayMark.sourceFileMarker, lineLocation)
             if (methodSourceMark != null) {
-                runBlocking {
+                safeRunBlocking {
                     getOrFindLoggerStatements(methodSourceMark)
                 }
                 val loggerStatements = methodSourceMark.getUserData(LOGGER_STATEMENTS)!! as MutableList<DetectedLogger>
@@ -104,7 +102,7 @@ class LoggerDetector(val vertx: Vertx) {
 
     fun getOrFindLoggerStatements(uMethod: UMethod): Future<List<DetectedLogger>> {
         val promise = Promise.promise<List<DetectedLogger>>()
-        GlobalScope.launch(vertx.dispatcher()) {
+        vertx.safeLaunch {
             val loggerStatements = mutableListOf<DetectedLogger>()
             try {
                 loggerStatements.addAll(determineLoggerStatements(uMethod).await())

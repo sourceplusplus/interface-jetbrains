@@ -35,7 +35,6 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 //import spp.jetbrains.marker.jvm.psi.LoggerDetector
 //import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 //import io.vertx.kotlin.coroutines.await
-//import kotlinx.coroutines.runBlocking
 //import org.intellij.lang.annotations.Language
 //import org.jetbrains.uast.UFile
 //import org.jetbrains.uast.toUElement
@@ -141,7 +140,7 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 //            assertEquals(1, uFile.classes.size)
 //            assertEquals(1, uFile.classes[0].methods.size)
 //
-//            runBlocking {
+//            safeRunBlocking {
 //                val result = LoggerDetector(SourceMarkerPlugin.vertx)
 //                    .getOrFindLoggerStatements(uFile.classes[0].methods[0]).await()
 //                    .map { it.logPattern }

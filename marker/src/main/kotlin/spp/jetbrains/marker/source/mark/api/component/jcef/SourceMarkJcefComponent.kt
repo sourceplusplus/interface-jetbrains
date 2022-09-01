@@ -21,11 +21,10 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.jcef.JBCefApp
 import com.intellij.ui.jcef.JBCefBrowser
 import com.intellij.ui.jcef.JBCefClient
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.joor.Reflect
 import org.joor.ReflectException
+import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
 import java.awt.Dimension
@@ -68,7 +67,7 @@ class SourceMarkJcefComponent(
             browser = JBCefBrowser(client, configuration.initialUrl)
 
             //periodically update zoom level
-            GlobalScope.launch {
+            safeGlobalLaunch {
                 while (browser != null) {
                     delay(50)
                     try {

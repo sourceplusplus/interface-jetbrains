@@ -22,8 +22,8 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import kotlinx.coroutines.runBlocking
 import spp.jetbrains.PluginBundle
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 
@@ -62,7 +62,7 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
         }
 
         //setup plugin
-        runBlocking {
+        safeRunBlocking {
             SourceMarkerPlugin.getInstance(project).init()
         }
         super.runActivity(project)

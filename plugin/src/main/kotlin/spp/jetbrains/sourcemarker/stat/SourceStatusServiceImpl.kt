@@ -21,7 +21,11 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Pair
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import spp.jetbrains.ScopeExtensions.safeGlobalAsync
+import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
@@ -68,12 +72,8 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
                 this.message = message
 
                 log.info("Status changed from $oldStatus to $status")
-                GlobalScope.launch {
-                    try {
-                        onStatusChanged(status)
-                    } catch (e: Exception) {
-                        log.error("Error while updating status", e)
-                    }
+                safeGlobalLaunch {
+                    onStatusChanged(status)
                 }
             }
         }
@@ -131,7 +131,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     private fun launchPeriodicInit(
         repeatMillis: Long,
         waitBefore: Boolean
-    ) = GlobalScope.async {
+    ) = safeGlobalAsync {
         while (isActive) {
             if (waitBefore) delay(repeatMillis)
             SourceMarkerPlugin.getInstance(project).init()

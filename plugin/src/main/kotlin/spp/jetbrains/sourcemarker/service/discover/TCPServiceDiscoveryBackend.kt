@@ -35,11 +35,9 @@ import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
 import io.vertx.kotlin.coroutines.await
-import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.servicediscovery.Record
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
@@ -93,7 +91,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         val certificatePins = mutableListOf<String>()
         certificatePins.addAll(pluginConfig.certificatePins)
 
-        GlobalScope.launch(vertx.dispatcher()) {
+        vertx.safeLaunch {
             try {
                 client = if (certificatePins.isNotEmpty()) {
                     val options = NetClientOptions()
@@ -123,7 +121,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             } catch (ex: Exception) {
                 log.warn("Failed to connect to service discovery server", ex)
                 setupPromise.fail(ex)
-                return@launch
+                return@safeLaunch
             }
             socket!!.handler(FrameParser(TCPServiceFrameParser(vertx, socket!!)))
             socket!!.exceptionHandler {

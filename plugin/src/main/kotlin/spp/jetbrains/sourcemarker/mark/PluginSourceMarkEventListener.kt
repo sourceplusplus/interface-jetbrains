@@ -23,9 +23,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiManager
 import io.vertx.core.Vertx
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 import spp.jetbrains.marker.jvm.psi.LoggerDetector
@@ -66,19 +64,15 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
     init {
         //refresh source marks on service changes
         ServiceBridge.currentServiceConsumer(vertx).handler {
-            GlobalScope.launch(vertx.dispatcher()) {
-                try {
-                    SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
-                    FileEditorManager.getInstance(project).allEditors.forEach {
-                        ApplicationManager.getApplication().runReadAction {
-                            PsiManager.getInstance(project).findFile(it.file)?.let {
-                                SourceMarker.getInstance(project).getSourceFileMarker(it)
-                                DaemonCodeAnalyzer.getInstance(project).restart(it)
-                            }
+            vertx.safeLaunch {
+                SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
+                FileEditorManager.getInstance(project).allEditors.forEach {
+                    ApplicationManager.getApplication().runReadAction {
+                        PsiManager.getInstance(project).findFile(it.file)?.let {
+                            SourceMarker.getInstance(project).getSourceFileMarker(it)
+                            DaemonCodeAnalyzer.getInstance(project).restart(it)
                         }
                     }
-                } catch (throwable: Throwable) {
-                    log.error("Error refreshing source marks on service change", throwable)
                 }
             }
         }
@@ -95,12 +89,8 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
             if (sourceMark is MethodGuideMark) {
                 //setup endpoint detector and attempt detection
                 sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetectors[sourceMark.language.id])
-                GlobalScope.launch(vertx.dispatcher()) {
-                    try {
-                        endpointDetectors[sourceMark.language.id]!!.getOrFindEndpointId(sourceMark)
-                    } catch (e: Exception) {
-                        log.warn("Error detecting endpoint for ${sourceMark.language.id}", e)
-                    }
+                vertx.safeLaunch {
+                    endpointDetectors[sourceMark.language.id]!!.getOrFindEndpointId(sourceMark)
                 }
             }
 
