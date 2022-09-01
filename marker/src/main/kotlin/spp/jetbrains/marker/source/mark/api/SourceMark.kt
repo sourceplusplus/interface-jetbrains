@@ -38,8 +38,8 @@ import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
-import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
