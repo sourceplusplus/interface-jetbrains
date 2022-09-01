@@ -6,7 +6,7 @@ val vertxVersion: String by project
 val projectVersion: String by project
 
 intellij {
-    plugins.set(listOf("PythonCore:222.3739.67"))
+    plugins.set(listOf("PythonCore:222.3739.68"))
 }
 
 dependencies {
