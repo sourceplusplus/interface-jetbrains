@@ -30,7 +30,7 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import kotlinx.coroutines.runBlocking
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
@@ -60,7 +60,7 @@ class FileActivityListener : FileEditorManagerListener {
             val psiFile = PsiManager.getInstance(source.project).findFile(file)
             val fileMarker = psiFile?.getUserData(SourceFileMarker.KEY)
             if (fileMarker != null) {
-                runBlocking {
+                safeRunBlocking {
                     SourceMarker.getInstance(source.project).deactivateSourceFileMarker(fileMarker)
                 }
             }

@@ -38,9 +38,8 @@ import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -276,7 +275,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             .forEach { it.handleEvent(event) }
 
         //async listeners
-        GlobalScope.launch {
+        safeGlobalLaunch {
             eventListeners.forEach {
                 if (it !is SynchronousSourceMarkEventListener) {
                     it.handleEvent(event)
@@ -293,7 +292,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             .forEach { it.handleEvent(event) }
 
         //async listeners
-        runBlocking {
+        safeRunBlocking {
             getEventListeners().forEach {
                 if (it !is SynchronousSourceMarkEventListener) {
                     it.handleEvent(event)

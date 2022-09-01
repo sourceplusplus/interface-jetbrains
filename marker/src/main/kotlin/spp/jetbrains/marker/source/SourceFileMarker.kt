@@ -27,7 +27,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
-import kotlinx.coroutines.runBlocking
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
@@ -87,7 +87,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open suspend fun clearSourceMarks() {
         val removed = sourceMarks.removeIf {
-            runBlocking {
+            safeRunBlocking {
                 it.disposeSuspend(false)
             }
             true

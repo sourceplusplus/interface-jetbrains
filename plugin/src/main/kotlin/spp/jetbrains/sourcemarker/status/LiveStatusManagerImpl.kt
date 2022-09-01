@@ -25,7 +25,7 @@ import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import kotlinx.coroutines.runBlocking
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.plugin.LiveStatusManager
@@ -197,7 +197,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 if (parentMark is MethodSourceMark) {
                     val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
                     if (loggerDetector != null) {
-                        runBlocking {
+                        safeRunBlocking {
                             val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
                             val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
                             if (logOnCurrentLine != null) {

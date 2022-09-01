@@ -22,10 +22,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import io.vertx.core.Future
 import io.vertx.kotlin.coroutines.await
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import spp.jetbrains.UserData
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
@@ -66,12 +64,8 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
 
             val vertx = UserData.vertx(project)
             vertx.setPeriodic(5000) {
-                GlobalScope.launch(vertx.dispatcher()) {
-                    try {
-                        redetectEndpoints()
-                    } catch (e: Exception) {
-                        log.error("Error detecting endpoints", e)
-                    }
+                vertx.safeLaunch {
+                    redetectEndpoints()
                 }
             }
         }

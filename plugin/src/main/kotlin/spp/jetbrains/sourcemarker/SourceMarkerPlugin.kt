@@ -52,16 +52,18 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.TrustOptions
 import io.vertx.kotlin.coroutines.await
-import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.impl.DiscoveryImpl
 import io.vertx.serviceproxy.ServiceProxyBuilder
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import liveplugin.implementation.LivePluginProjectLoader
 import org.apache.commons.text.CaseUtils
 import spp.jetbrains.PluginBundle.message
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
@@ -72,7 +74,6 @@ import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
-import spp.jetbrains.sourcemarker.command.ControlBarController
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.portal.PortalController
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
@@ -165,7 +166,7 @@ class SourceMarkerPlugin(val project: Project) {
                         DumbService.getInstance(project).smartInvokeLater {
                             val localConfig = loadSppPluginFileConfiguration()
                             if (localConfig != null && localConfig.override) {
-                                runBlocking { init(localConfig) }
+                                safeRunBlocking { init(localConfig) }
                             }
                         }
                     }
@@ -192,7 +193,7 @@ class SourceMarkerPlugin(val project: Project) {
         connectionJob?.cancel()
         connectionJob = null
 
-        connectionJob = GlobalScope.launch(vertx.dispatcher()) {
+        connectionJob = vertx.safeLaunch {
             var connectedMonitor = false
             try {
                 SourceStatusService.getInstance(project).update(Pending, "Initializing services")

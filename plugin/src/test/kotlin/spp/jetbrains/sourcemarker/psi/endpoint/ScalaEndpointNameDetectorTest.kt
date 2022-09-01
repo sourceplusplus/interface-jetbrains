@@ -18,11 +18,11 @@ package spp.jetbrains.sourcemarker.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
 import io.vertx.kotlin.coroutines.await
-import kotlinx.coroutines.runBlocking
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import org.junit.jupiter.api.Test
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 
 class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
@@ -42,7 +42,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            runBlocking {
+            safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("GET:/doGet", result.get().name)
@@ -65,7 +65,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            runBlocking {
+            safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("GET:/", result.get().name)
@@ -88,7 +88,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            runBlocking {
+            safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("GET:/doGet", result.get().name)
@@ -111,7 +111,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            runBlocking {
+            safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("GET:/doGet", result.get().name)
@@ -134,7 +134,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            runBlocking {
+            safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("doGet", result.get().name)
@@ -157,7 +157,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            runBlocking {
+            safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
                 assertTrue(result.isPresent)
                 assertEquals("TestController.doGet", result.get().name)

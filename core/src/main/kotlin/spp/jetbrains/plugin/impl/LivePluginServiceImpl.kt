@@ -20,7 +20,7 @@ import com.apollographql.apollo3.exception.ApolloNetworkException
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import kotlinx.coroutines.runBlocking
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.indicator.LiveIndicator
 import spp.jetbrains.marker.SourceMarker
@@ -58,14 +58,12 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
     override fun registerLiveIndicator(indicator: LiveIndicator) {
         val eventListener = SourceMarkEventListener {
             if ((indicator.listenForAllEvents || indicator.listenForEvents.contains(it.eventCode)) && it.sourceMark is GuideMark) {
-                runBlocking {
+                safeRunBlocking {
                     try {
                         indicator.trigger(it.sourceMark as GuideMark, it)
                     } catch (e: ApolloNetworkException) {
-                        log.warn("Error while triggering indicator $indicator", e)
+                        log.warn("Network error while triggering indicator $indicator", e)
                         SourceStatusService.getInstance(project).update(ConnectionError, e.message)
-                    } catch (e: Exception) {
-                        log.warn("Error while triggering indicator $indicator", e)
                     }
                 }
             }
@@ -73,7 +71,7 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
         SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(eventListener)
         indicators[indicator] = eventListener
 
-        runBlocking {
+        safeRunBlocking {
             indicator.onRegister()
         }
         log.debug("Registered indicator: $indicator - Current indicators: ${indicators.size}")
@@ -88,7 +86,7 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
             SourceMarker.getInstance(project).removeGlobalSourceMarkEventListener(it.value)
             indicators.remove(it.key)
 
-            runBlocking {
+            safeRunBlocking {
                 indicator.onUnregister()
             }
             log.debug("Unregistered indicator: $indicator - Current indicators: ${indicators.size}")
