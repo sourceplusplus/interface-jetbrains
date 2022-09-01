@@ -91,7 +91,7 @@ import spp.jetbrains.status.SourceStatus.Pending
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.SourceServices
 import spp.protocol.service.LiveInstrumentService
-import spp.protocol.service.LiveService
+import spp.protocol.service.LiveManagementService
 import spp.protocol.service.LiveViewService
 import java.io.File
 import java.net.ConnectException
@@ -355,14 +355,14 @@ class SourceMarkerPlugin(val project: Project) {
         log.info("Discovered $availableRecords.size services")
 
         //live service
-        if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_SERVICE }) {
+        if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_MANAGEMENT_SERVICE }) {
             log.info("Live service available")
 
-            val liveService = ServiceProxyBuilder(vertx)
+            val liveManagementService = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
-                .setAddress(SourceServices.Utilize.LIVE_SERVICE)
-                .build(LiveService::class.java)
-            UserData.liveService(project, liveService)
+                .setAddress(SourceServices.Utilize.LIVE_MANAGEMENT_SERVICE)
+                .build(LiveManagementService::class.java)
+            UserData.liveManagementService(project, liveManagementService)
         } else {
             log.warn("Live service unavailable")
         }

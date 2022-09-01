@@ -149,7 +149,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
             vertx.executeBlocking<Any> {
                 setupHandler(vertx, "get-records")
-                setupHandler(vertx, Utilize.LIVE_SERVICE)
+                setupHandler(vertx, Utilize.LIVE_MANAGEMENT_SERVICE)
                 setupHandler(vertx, Utilize.LIVE_INSTRUMENT)
                 setupHandler(vertx, Utilize.LIVE_VIEW)
 

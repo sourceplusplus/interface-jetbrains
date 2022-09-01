@@ -58,7 +58,7 @@ class SourceMarkerConfigurable(val project: Project) : Configurable {
         if (form == null) {
             val config = SourceMarkerPlugin.getInstance(project).getConfig()
             val availServices = safeRunBlocking {
-                UserData.liveService(project)?.getServices()?.await() ?: emptyList()
+                UserData.liveManagementService(project)?.getServices()?.await() ?: emptyList()
             }
             form = PluginConfigurationPanel(config, availServices)
             form!!.applySourceMarkerConfig(config)
