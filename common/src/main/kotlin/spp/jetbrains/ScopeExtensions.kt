@@ -29,9 +29,9 @@ object ScopeExtensions {
         return runBlocking {
             try {
                 return@runBlocking action()
-            } catch (e: Exception) {
-                log.error(e)
-                throw e
+            } catch (throwable: Throwable) {
+                log.error(throwable)
+                throw throwable
             }
         }
     }
