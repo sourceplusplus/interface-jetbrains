@@ -25,12 +25,11 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
-import spp.jetbrains.monitor.skywalking.model.DurationStep
-import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
 import spp.jetbrains.monitor.skywalking.bridge.EndpointTracesBridge
 import spp.jetbrains.monitor.skywalking.bridge.LogsBridge
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
+import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
