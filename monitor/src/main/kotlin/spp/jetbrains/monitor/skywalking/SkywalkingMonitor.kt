@@ -32,7 +32,7 @@ import okhttp3.Protocol
 import spp.jetbrains.UserData
 import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.impl.SkywalkingMonitorServiceImpl
-import spp.jetbrains.monitor.skywalking.service.SWLiveService
+import spp.jetbrains.monitor.skywalking.service.SWLiveManagementService
 import spp.jetbrains.monitor.skywalking.service.SWLiveViewService
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatusService
@@ -142,10 +142,10 @@ class SkywalkingMonitor(
             vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
             vertx.deployVerticle(LogsBridge(skywalkingClient)).await()
 
-            if (UserData.liveService(project) == null) {
-                val swLiveService = SWLiveService()
-                vertx.deployVerticle(swLiveService).await()
-                UserData.liveService(project, swLiveService)
+            if (UserData.liveManagementService(project) == null) {
+                val swLiveManagementService = SWLiveManagementService()
+                vertx.deployVerticle(swLiveManagementService).await()
+                UserData.liveManagementService(project, swLiveManagementService)
             }
             if (UserData.liveViewService(project) == null) {
                 val swLiveViewService = SWLiveViewService()

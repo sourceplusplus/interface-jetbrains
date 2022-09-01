@@ -27,11 +27,10 @@ import kotlinx.coroutines.isActive
 import spp.jetbrains.ScopeExtensions.safeGlobalAsync
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusService
-import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
-import java.lang.Runnable
 import javax.annotation.concurrent.GuardedBy
 
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
