@@ -535,6 +535,9 @@ class SourceMarkerPlugin(val project: Project) {
                 ),
                 project
             )
+
+            config.notifiedConnection = true
+            projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
         } else if (resp.statusCode() == 405) {
             //found skywalking OAP server
             if (ssl) {
