@@ -36,7 +36,7 @@ abstract class LiveCommand(val project: Project) {
 
     val vertx = UserData.vertx(project)
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
-    val liveService = UserData.liveManagementService(project)!!
+    val liveManagementService = UserData.liveManagementService(project)!!
     val liveViewService = UserData.liveViewService(project)!!
     val liveStatusManager = LiveStatusManager.getInstance(project)
     val liveInstrumentService = UserData.liveInstrumentService(project)
