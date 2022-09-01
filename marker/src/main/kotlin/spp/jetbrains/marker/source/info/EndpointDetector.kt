@@ -23,12 +23,12 @@ import com.intellij.openapi.util.Key
 import io.vertx.core.Future
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
-import spp.jetbrains.safeLaunch
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
+import spp.jetbrains.safeLaunch
 import java.util.*
 
 /**
