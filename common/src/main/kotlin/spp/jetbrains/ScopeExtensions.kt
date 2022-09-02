@@ -57,7 +57,12 @@ object ScopeExtensions {
     ): Deferred<*> {
         return GlobalScope.async {
             safeExecute {
-                action()
+                try {
+                    action()
+                } catch (ignored: CancellationException) {
+                } catch (throwable: Throwable) {
+                    log.error(throwable)
+                }
             }
         }
     }
