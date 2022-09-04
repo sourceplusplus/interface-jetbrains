@@ -72,7 +72,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
     }
 
     private suspend fun redetectEndpoints() {
-        log.debug("Redetecting endpoints for project ${project.name}")
+        log.trace("Redetecting endpoints for project ${project.name}")
         SourceMarker.getInstance(project).getSourceMarks().forEach {
             if (it is MethodGuideMark && it.getUserData(ENDPOINT_FOUND) == false) {
                 getOrFindEndpoint(it)
