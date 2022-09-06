@@ -19,7 +19,7 @@ dependencies {
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-    compileOnly("io.dropwizard.metrics:metrics-core:4.2.11")
+    compileOnly("io.dropwizard.metrics:metrics-core:4.2.12")
     compileOnly("eu.geekplace.javapinning:java-pinning-core:1.2.0")
 
     compileOnly("com.google.guava:guava:31.1-jre")
