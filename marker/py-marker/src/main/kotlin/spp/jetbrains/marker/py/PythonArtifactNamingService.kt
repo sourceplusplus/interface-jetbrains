@@ -73,7 +73,9 @@ class PythonArtifactNamingService : AbstractArtifactNamingService {
         psiFile.acceptChildren(object : PyRecursiveElementVisitor() {
             override fun visitPyClass(node: PyClass) {
                 super.visitPyClass(node)
-                classQualifiedNames.add(ArtifactQualifiedName(node.qualifiedName!!, type = ArtifactType.CLASS))
+                node.qualifiedName?.let {
+                    classQualifiedNames.add(ArtifactQualifiedName(it, type = ArtifactType.CLASS))
+                }
             }
         })
         return classQualifiedNames
