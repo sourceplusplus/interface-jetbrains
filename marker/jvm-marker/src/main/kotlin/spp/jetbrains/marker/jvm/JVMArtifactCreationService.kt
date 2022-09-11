@@ -120,7 +120,7 @@ class JVMArtifactCreationService : AbstractArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean
     ): MethodGutterMark {
-        return JVMMarkerUtils.createMethodGutterMark(fileMarker, element, autoApply)
+        return fileMarker.createMethodGutterMark(element.parent as PsiNameIdentifierOwner, autoApply)
     }
 
     override fun createMethodInlayMark(
@@ -128,7 +128,7 @@ class JVMArtifactCreationService : AbstractArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean
     ): MethodInlayMark {
-        return JVMMarkerUtils.createMethodInlayMark(fileMarker, element, autoApply)
+        return fileMarker.createMethodInlayMark(element.parent as PsiNameIdentifierOwner, autoApply)
     }
 
     override fun createExpressionInlayMark(

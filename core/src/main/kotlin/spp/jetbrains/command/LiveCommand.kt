@@ -19,7 +19,7 @@ package spp.jetbrains.command
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import kotlinx.coroutines.runBlocking
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.protocol.platform.developer.SelfInfo
@@ -36,14 +36,14 @@ abstract class LiveCommand(val project: Project) {
 
     val vertx = UserData.vertx(project)
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
-    val liveService = UserData.liveService(project)!!
+    val liveManagementService = UserData.liveManagementService(project)!!
     val liveViewService = UserData.liveViewService(project)!!
     val liveStatusManager = LiveStatusManager.getInstance(project)
     val liveInstrumentService = UserData.liveInstrumentService(project)
 
     open fun trigger(context: LiveCommandContext) {
         ApplicationManager.getApplication().runReadAction {
-            runBlocking {
+            safeRunBlocking {
                 triggerSuspend(context)
             }
         }

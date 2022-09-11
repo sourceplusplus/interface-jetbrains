@@ -25,9 +25,9 @@ import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import kotlinx.coroutines.runBlocking
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
-import spp.jetbrains.plugin.LiveStatusManager
+import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.impl.ArtifactScopeService
@@ -40,10 +40,8 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_COUNT_ICON
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_GAUGE_ICON
-import spp.jetbrains.sourcemarker.icons.SourceMarkerIcons.LIVE_METER_HISTOGRAM_ICON
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_ID
@@ -137,12 +135,15 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+            val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                classNames[0].identifier
+            } else {
+                fileMarker.psiFile.virtualFile.name
+            }
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = BreakpointStatusBar(
-                LiveSourceLocation(
-                    inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,
-                    service = config.serviceName
-                ),
+                LiveSourceLocation(qualifiedClassNameOrFilename, lineNumber, service = config.serviceName),
                 ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
@@ -181,11 +182,16 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+            val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                classNames[0].identifier
+            } else {
+                fileMarker.psiFile.virtualFile.name
+            }
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier,
-                    lineNumber,
+                    qualifiedClassNameOrFilename, lineNumber,
                     service = config.serviceName
                 ),
                 if (watchExpression) emptyList() else ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
@@ -199,7 +205,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 if (parentMark is MethodSourceMark) {
                     val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
                     if (loggerDetector != null) {
-                        runBlocking {
+                        safeRunBlocking {
                             val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
                             val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
                             if (logOnCurrentLine != null) {
@@ -275,10 +281,16 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+            val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                classNames[0].identifier
+            } else {
+                fileMarker.psiFile.virtualFile.name
+            }
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
-                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    qualifiedClassNameOrFilename, lineNumber,
                     service = config.serviceName
                 ),
                 inlayMark
@@ -314,10 +326,16 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+            val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                classNames[0].identifier
+            } else {
+                fileMarker.psiFile.virtualFile.name
+            }
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = SpanStatusBar(
                 LiveSourceLocation(
-                    inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,
+                    qualifiedClassNameOrFilename, lineNumber,
                     service = config.serviceName
                 ),
                 inlayMark
@@ -427,9 +445,9 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             if (gutterMark.isPresent) {
                 gutterMark.get().putUserData(INSTRUMENT_ID, liveMeter.id!!)
                 when (liveMeter.meterType) {
-                    MeterType.COUNT -> gutterMark.get().configuration.icon = LIVE_METER_COUNT_ICON
-                    MeterType.GAUGE -> gutterMark.get().configuration.icon = LIVE_METER_GAUGE_ICON
-                    MeterType.HISTOGRAM -> gutterMark.get().configuration.icon = LIVE_METER_HISTOGRAM_ICON
+                    MeterType.COUNT -> gutterMark.get().configuration.icon = PluginIcons.count
+                    MeterType.GAUGE -> gutterMark.get().configuration.icon = PluginIcons.gauge
+                    MeterType.HISTOGRAM -> gutterMark.get().configuration.icon = PluginIcons.histogram
                 }
                 gutterMark.get().configuration.activateOnMouseHover = true
                 gutterMark.get().configuration.activateOnMouseClick = true

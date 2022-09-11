@@ -12,6 +12,7 @@ intellij {
 }
 
 dependencies {
+    compileOnly(projectDependency(":common"))
     compileOnly(projectDependency(":marker"))
     compileOnly("plus.sourceplus:protocol:$projectVersion")
 

@@ -21,13 +21,13 @@ import com.intellij.openapi.util.Key
 import io.vertx.core.Vertx
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
 import spp.protocol.service.LiveInstrumentService
-import spp.protocol.service.LiveService
+import spp.protocol.service.LiveManagementService
 import spp.protocol.service.LiveViewService
 
 object UserData {
 
     private val VERTX = Key.create<Vertx>("SPP_VERTX")
-    private val LIVE_SERVICE = Key.create<LiveService>("SPP_LIVE_SERVICE")
+    private val LIVE_MANAGEMENT_SERVICE = Key.create<LiveManagementService>("SPP_LIVE_MANAGEMENT_SERVICE")
     private val LIVE_VIEW_SERVICE = Key.create<LiveViewService>("SPP_LIVE_VIEW_SERVICE")
     private val LIVE_INSTRUMENT_SERVICE = Key.create<LiveInstrumentService>("SPP_LIVE_INSTRUMENT_SERVICE")
 
@@ -44,13 +44,13 @@ object UserData {
         return project.getUserData(SkywalkingMonitorService.KEY)!!
     }
 
-    fun liveService(project: Project): LiveService? {
-        return project.getUserData(LIVE_SERVICE)
+    fun liveManagementService(project: Project): LiveManagementService? {
+        return project.getUserData(LIVE_MANAGEMENT_SERVICE)
     }
 
-    fun liveService(project: Project, liveService: LiveService): LiveService {
-        project.putUserData(LIVE_SERVICE, liveService)
-        return liveService
+    fun liveManagementService(project: Project, liveManagementService: LiveManagementService): LiveManagementService {
+        project.putUserData(LIVE_MANAGEMENT_SERVICE, liveManagementService)
+        return liveManagementService
     }
 
     fun liveViewService(project: Project): LiveViewService? {
@@ -75,7 +75,7 @@ object UserData {
     fun clearServices(project: Project) {
         project.putUserData(VERTX, null)
         project.putUserData(SkywalkingMonitorService.KEY, null)
-        project.putUserData(LIVE_SERVICE, null)
+        project.putUserData(LIVE_MANAGEMENT_SERVICE, null)
         project.putUserData(LIVE_VIEW_SERVICE, null)
         project.putUserData(LIVE_INSTRUMENT_SERVICE, null)
     }

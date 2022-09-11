@@ -60,12 +60,8 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
                 this.message = message
 
                 log.info("Status changed from $oldStatus to $status")
-                GlobalScope.launch {
-                    try {
-                        onStatusChanged(status)
-                    } catch (e: Exception) {
-                        log.error("Error while updating status", e)
-                    }
+                safeGlobalLaunch {
+                    onStatusChanged(status)
                 }
             }
         }
@@ -123,7 +119,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     private fun launchPeriodicInit(
         repeatMillis: Long,
         waitBefore: Boolean
-    ) = GlobalScope.async {
+    ) = safeGlobalAsync {
         while (isActive) {
             if (waitBefore) delay(repeatMillis)
             SourceMarkerPlugin.getInstance(project).init()

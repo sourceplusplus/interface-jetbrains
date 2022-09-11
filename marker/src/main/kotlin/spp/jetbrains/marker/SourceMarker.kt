@@ -23,8 +23,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.impl.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -101,18 +100,19 @@ class SourceMarker {
         fileMarker = availableSourceFileMarkers[psiFile.hashCode()]!!
         psiFile.putUserData(SourceFileMarker.KEY, fileMarker)
 
-        GlobalScope.launch {
+        safeGlobalLaunch {
             SourceGuideProvider.determineGuideMarks(fileMarker)
         }
         return fileMarker
     }
 
-    fun getSourceFileMarker(classQualifiedName: String): SourceFileMarker? {
+    fun getSourceFileMarker(qualifiedClassNameOrFilename: String): SourceFileMarker? {
         check(enabled) { "SourceMarker disabled" }
 
         return availableSourceFileMarkers.values.find {
-            ArtifactNamingService.getQualifiedClassNames(it.psiFile)
-                .find { it.identifier.contains(classQualifiedName) } != null
+            ArtifactNamingService.getQualifiedClassNames(it.psiFile).find {
+                it.identifier.contains(qualifiedClassNameOrFilename)
+            } != null || it.psiFile.virtualFile.name == qualifiedClassNameOrFilename
         }
     }
 

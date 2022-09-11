@@ -19,13 +19,11 @@ package spp.jetbrains.indicator
 import com.apollographql.apollo3.exception.ApolloException
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import spp.jetbrains.UserData
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.UserData
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Ready
 import spp.jetbrains.status.SourceStatusService
@@ -48,10 +46,10 @@ abstract class LiveIndicator(val project: Project) {
     open suspend fun onRegister() {
         vertx.setPeriodic(5000) { timerId ->
             periodicTimerId = timerId
-            GlobalScope.launch(vertx.dispatcher()) {
+            vertx.safeLaunch {
                 if (SourceStatusService.getInstance(project).getCurrentStatus().first != Ready) {
                     log.debug("Not ready, ignoring indicator refresh")
-                    return@launch
+                    return@safeLaunch
                 }
 
                 try {

@@ -23,18 +23,60 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
+import spp.protocol.platform.auth.ClientAccess
 import spp.protocol.platform.auth.CommandType
 import spp.protocol.platform.auth.RolePermission
 import spp.protocol.platform.developer.Developer
 import spp.protocol.platform.developer.SelfInfo
 import spp.protocol.platform.general.Service
-import spp.protocol.platform.status.ActiveInstance
-import spp.protocol.service.LiveService
+import spp.protocol.platform.status.InstanceConnection
+import spp.protocol.service.LiveManagementService
 
 /**
- * Implements [LiveService] for SkyWalking-only environments.
+ * Implements [LiveManagementService] for SkyWalking-only environments.
  */
-class SWLiveService : CoroutineVerticle(), LiveService {
+class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun getRolePermissions(role: String): Future<List<RolePermission>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun getClientAccessors(): Future<List<ClientAccess>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun getClientAccess(id: String): Future<ClientAccess?> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun addClientAccess(): Future<ClientAccess> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun removeClientAccess(id: String): Future<Boolean> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun updateClientAccess(id: String): Future<ClientAccess> {
+        return Future.failedFuture("Illegal operation")
+    }
 
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
@@ -70,7 +112,7 @@ class SWLiveService : CoroutineVerticle(), LiveService {
         return promise.future()
     }
 
-    override fun getActiveProbes(): Future<List<ActiveInstance>> {
+    override fun getActiveProbes(): Future<List<InstanceConnection>> {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
     }
 }

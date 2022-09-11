@@ -17,10 +17,14 @@
 package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.util.Key
+import com.intellij.ui.ClientProperty
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.tree.AsyncTreeModel
 import com.intellij.ui.tree.StructureTreeModel
+import com.intellij.ui.tree.ui.DefaultTreeUI
 import com.intellij.ui.treeStructure.Tree
+import org.joor.Reflect
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.tree.VariableSimpleTreeStructure
@@ -48,6 +52,11 @@ class VariableTab : DebugStackFrameListener, Disposable {
         tree.isRootVisible = false
         component = JPanel(BorderLayout())
         component.add(JBScrollPane(tree), "Center")
+
+        //todo: temporary fix for #575
+        val AUTO_EXPAND_ALLOWED = Reflect.onClass(DefaultTreeUI::class.java)
+            .get<Key<Boolean>>("AUTO_EXPAND_ALLOWED")
+        ClientProperty.put(tree, AUTO_EXPAND_ALLOWED, false)
     }
 
     override fun onChanged(stackFrameManager: StackFrameManager) {

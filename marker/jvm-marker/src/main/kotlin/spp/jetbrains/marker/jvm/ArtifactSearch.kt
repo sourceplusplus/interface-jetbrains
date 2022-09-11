@@ -27,10 +27,10 @@ import com.intellij.psi.search.ProjectScope
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.toUElementOfType
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -138,7 +138,7 @@ object ArtifactSearch {
                     file.accept(object : PsiRecursiveElementVisitor(true) {
                         override fun visitElement(element: PsiElement) {
                             if (element is PsiMethod) {
-                                runBlocking {
+                                safeRunBlocking {
                                     val endpointName =
                                         endpointDetector.determineEndpointName(element.toUElementOfType()!!).await()
                                     if (endpointName.isPresent && endpointName.get().name == artifact.identifier) {

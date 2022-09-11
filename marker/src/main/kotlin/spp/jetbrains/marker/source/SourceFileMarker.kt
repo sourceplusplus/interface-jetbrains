@@ -27,7 +27,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
-import kotlinx.coroutines.runBlocking
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
@@ -87,7 +87,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     open suspend fun clearSourceMarks() {
         val removed = sourceMarks.removeIf {
-            runBlocking {
+            safeRunBlocking {
                 it.disposeSuspend(false)
             }
             true
@@ -223,6 +223,48 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             SourceMark.Type.GUTTER -> MethodGutterMark(this, psiMethod)
             SourceMark.Type.INLAY -> MethodInlayMark(this, psiMethod)
             SourceMark.Type.GUIDE -> MethodGuideMark(this, psiMethod)
+        }
+    }
+
+    fun createMethodGutterMark(
+        element: PsiNameIdentifierOwner,
+        autoApply: Boolean = false
+    ): MethodGutterMark {
+        log.trace("createMethodGutterMark: $element")
+        val gutterMark = createMethodSourceMark(
+            element,
+            SourceMark.Type.GUTTER
+        ) as MethodGutterMark
+        return if (autoApply) {
+            if (gutterMark.canApply()) {
+                gutterMark.apply(true)
+                gutterMark
+            } else {
+                error("Could not apply gutter mark: $gutterMark")
+            }
+        } else {
+            gutterMark
+        }
+    }
+
+    fun createMethodInlayMark(
+        element: PsiNameIdentifierOwner,
+        autoApply: Boolean = false
+    ): MethodInlayMark {
+        log.trace("createMethodInlayMark: $element")
+        val inlayMark = createMethodSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as MethodInlayMark
+        return if (autoApply) {
+            if (inlayMark.canApply()) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                error("Could not apply inlay mark: $inlayMark")
+            }
+        } else {
+            inlayMark
         }
     }
 

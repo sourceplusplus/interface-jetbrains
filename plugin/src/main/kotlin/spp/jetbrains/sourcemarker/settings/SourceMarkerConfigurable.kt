@@ -22,8 +22,8 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import io.vertx.core.json.Json
 import io.vertx.kotlin.coroutines.await
-import kotlinx.coroutines.runBlocking
 import spp.jetbrains.PluginBundle.message
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import javax.swing.JComponent
@@ -48,7 +48,7 @@ class SourceMarkerConfigurable(val project: Project) : Configurable {
         form!!.applySourceMarkerConfig(updatedConfig)
 
         DumbService.getInstance(project).smartInvokeLater {
-            runBlocking {
+            safeRunBlocking {
                 SourceMarkerPlugin.getInstance(project).init()
             }
         }
@@ -57,8 +57,8 @@ class SourceMarkerConfigurable(val project: Project) : Configurable {
     override fun createComponent(): JComponent {
         if (form == null) {
             val config = SourceMarkerPlugin.getInstance(project).getConfig()
-            val availServices = runBlocking {
-                UserData.liveService(project)?.getServices()?.await() ?: emptyList()
+            val availServices = safeRunBlocking {
+                UserData.liveManagementService(project)?.getServices()?.await() ?: emptyList()
             }
             form = PluginConfigurationPanel(config, availServices)
             form!!.applySourceMarkerConfig(config)

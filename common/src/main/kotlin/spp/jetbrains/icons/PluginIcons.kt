@@ -18,6 +18,11 @@ package spp.jetbrains.icons
 
 import com.intellij.openapi.util.IconLoader
 
+/**
+ * Defines the various visual icons Source++ may display.
+ *
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 object PluginIcons {
     object Nodes {
         @JvmField
@@ -27,90 +32,6 @@ object PluginIcons {
     object Command {
         @JvmField
         val logo = IconLoader.getIcon("/icons/command/logo.svg", PluginIcons::class.java)
-
-        @JvmField
-        val clearInstrumentSelected =
-            IconLoader.getIcon("/icons/command/clear-instruments_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val clearInstrumentUnSelected =
-            IconLoader.getIcon("/icons/command/clear-instruments_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val liveBreakpointSelected =
-            IconLoader.getIcon("/icons/command/live-breakpoint_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val liveBreakpointUnSelected =
-            IconLoader.getIcon("/icons/command/live-breakpoint_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val liveLogSelected = IconLoader.getIcon("/icons/command/live-log_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val liveLogUnSelected =
-            IconLoader.getIcon("/icons/command/live-log_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val liveMeterSelected =
-            IconLoader.getIcon("/icons/command/live-meter_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val liveMeterUnSelected =
-            IconLoader.getIcon("/icons/command/live-meter_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val liveSpanSelected = IconLoader.getIcon("/icons/command/live-span_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val liveSpanUnSelected =
-            IconLoader.getIcon("/icons/command/live-span_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val viewOverviewSelected =
-            IconLoader.getIcon("/icons/command/view-overview_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val viewOverviewUnSelected =
-            IconLoader.getIcon("/icons/command/view-overview_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val viewActivitySelected =
-            IconLoader.getIcon("/icons/command/view-activity_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val viewActivityUnSelected =
-            IconLoader.getIcon("/icons/command/view-activity_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val viewTracesSelected =
-            IconLoader.getIcon("/icons/command/view-traces_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val viewTracesUnSelected =
-            IconLoader.getIcon("/icons/command/view-traces_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val viewLogsSelected = IconLoader.getIcon("/icons/command/view-logs_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val viewLogsUnSelected =
-            IconLoader.getIcon("/icons/command/view-logs_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val quickStatsSelected =
-            IconLoader.getIcon("/icons/command/quick-stats_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val quickStatsUnSelected =
-            IconLoader.getIcon("/icons/command/quick-stats_unselected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val watchLogSelected = IconLoader.getIcon("/icons/command/watch-log_selected.svg", PluginIcons::class.java)
-
-        @JvmField
-        val watchLogUnSelected =
-            IconLoader.getIcon("/icons/command/watch-log_unselected.svg", PluginIcons::class.java)
     }
 
     object Instrument {
@@ -193,24 +114,6 @@ object PluginIcons {
     val spanConfig = IconLoader.getIcon("/icons/span-config.svg", PluginIcons::class.java)
 
     @JvmField
-    val config = IconLoader.getIcon("/icons/configIcon.svg", PluginIcons::class.java)
-
-    @JvmField
-    val configHovered = IconLoader.getIcon("/icons/configIconHovered.svg", PluginIcons::class.java)
-
-    @JvmField
-    val configPressed = IconLoader.getIcon("/icons/configIconPressed.svg", PluginIcons::class.java)
-
-    @JvmField
-    val exclamationTriangle = IconLoader.getIcon("/icons/exclamation-triangle.svg", PluginIcons::class.java)
-
-    @JvmField
-    val performanceRamp = IconLoader.getIcon("/icons/sort-amount-up.svg", PluginIcons::class.java)
-
-    @JvmField
-    val activeException = IconLoader.getIcon("/icons/map-marker-exclamation.svg", PluginIcons::class.java)
-
-    @JvmField
     val count = IconLoader.getIcon("/icons/count.svg", PluginIcons::class.java)
 
     @JvmField
@@ -218,10 +121,4 @@ object PluginIcons {
 
     @JvmField
     val histogram = IconLoader.getIcon("/icons/histogram.svg", PluginIcons::class.java)
-
-    @JvmField
-    val code = IconLoader.getIcon("/icons/code.svg", PluginIcons::class.java)
-
-    @JvmField
-    val tachometer = IconLoader.getIcon("/icons/tachometer-alt.svg", PluginIcons::class.java)
 }
