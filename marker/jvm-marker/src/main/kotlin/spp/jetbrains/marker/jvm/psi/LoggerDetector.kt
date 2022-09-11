@@ -91,7 +91,7 @@ class LoggerDetector(val vertx: Vertx) {
         } else {
             if (sourceMark.language.id == "Python") {
                 //todo: issue #625
-                val emptyList = emptyList<DetectedLogger>()
+                val emptyList = mutableListOf<DetectedLogger>()
                 sourceMark.putUserData(LOGGER_STATEMENTS, emptyList)
                 return emptyList
             }
