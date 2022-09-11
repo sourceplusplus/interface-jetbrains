@@ -29,7 +29,7 @@ import spp.protocol.platform.auth.RolePermission
 import spp.protocol.platform.developer.Developer
 import spp.protocol.platform.developer.SelfInfo
 import spp.protocol.platform.general.Service
-import spp.protocol.platform.status.ActiveInstance
+import spp.protocol.platform.status.InstanceConnection
 import spp.protocol.service.LiveManagementService
 
 /**
@@ -112,7 +112,7 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
         return promise.future()
     }
 
-    override fun getActiveProbes(): Future<List<ActiveInstance>> {
+    override fun getActiveProbes(): Future<List<InstanceConnection>> {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
     }
 }
