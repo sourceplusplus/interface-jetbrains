@@ -106,12 +106,13 @@ class SourceMarker {
         return fileMarker
     }
 
-    fun getSourceFileMarker(classQualifiedName: String): SourceFileMarker? {
+    fun getSourceFileMarker(qualifiedClassNameOrFilename: String): SourceFileMarker? {
         check(enabled) { "SourceMarker disabled" }
 
         return availableSourceFileMarkers.values.find {
-            ArtifactNamingService.getQualifiedClassNames(it.psiFile)
-                .find { it.identifier.contains(classQualifiedName) } != null
+            ArtifactNamingService.getQualifiedClassNames(it.psiFile).find {
+                it.identifier.contains(qualifiedClassNameOrFilename)
+            } != null || it.psiFile.virtualFile.name == qualifiedClassNameOrFilename
         }
     }
 

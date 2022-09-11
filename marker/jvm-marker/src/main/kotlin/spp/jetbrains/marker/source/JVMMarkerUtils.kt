@@ -26,7 +26,6 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
-import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -305,66 +304,6 @@ object JVMMarkerUtils {
             statementExpression = statementExpression.firstChild
         }
         return statementExpression
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.4.3
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun createMethodGutterMark(
-        fileMarker: SourceFileMarker,
-        element: PsiElement,
-        autoApply: Boolean = false
-    ): MethodGutterMark {
-        log.trace("createMethodGutterMark: $element")
-        val gutterMark = fileMarker.createMethodSourceMark(
-            element.parent as PsiNameIdentifierOwner,
-            SourceMark.Type.GUTTER
-        ) as MethodGutterMark
-        return if (autoApply) {
-            if (gutterMark.canApply()) {
-                gutterMark.apply(true)
-                gutterMark
-            } else {
-                error("Could not apply gutter mark: $gutterMark")
-            }
-        } else {
-            gutterMark
-        }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.4.2
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun createMethodInlayMark(
-        fileMarker: SourceFileMarker,
-        element: PsiElement,
-        autoApply: Boolean = false
-    ): MethodInlayMark {
-        log.trace("createMethodInlayMark: $element")
-        val inlayMark = fileMarker.createMethodSourceMark(
-            element.parent as PsiNameIdentifierOwner,
-            SourceMark.Type.INLAY
-        ) as MethodInlayMark
-        return if (autoApply) {
-            if (inlayMark.canApply()) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                error("Could not apply inlay mark: $inlayMark")
-            }
-        } else {
-            inlayMark
-        }
     }
 
     /**

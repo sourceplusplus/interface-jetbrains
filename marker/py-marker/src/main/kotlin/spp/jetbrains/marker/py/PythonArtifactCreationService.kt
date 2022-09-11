@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.py
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.AbstractArtifactCreationService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.impl.ArtifactNamingService
@@ -119,7 +120,7 @@ class PythonArtifactCreationService : AbstractArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean
     ): MethodGutterMark {
-        TODO("Not yet implemented")
+        return fileMarker.createMethodGutterMark(element.parent as PsiNameIdentifierOwner, autoApply)
     }
 
     override fun createMethodInlayMark(
@@ -127,7 +128,7 @@ class PythonArtifactCreationService : AbstractArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean
     ): MethodInlayMark {
-        TODO("Not yet implemented")
+        return fileMarker.createMethodInlayMark(element.parent as PsiNameIdentifierOwner, autoApply)
     }
 
     override fun createExpressionInlayMark(
