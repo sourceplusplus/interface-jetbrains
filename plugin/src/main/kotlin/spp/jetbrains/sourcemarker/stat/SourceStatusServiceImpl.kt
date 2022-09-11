@@ -21,13 +21,16 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Pair
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import spp.jetbrains.ScopeExtensions.safeGlobalAsync
+import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusService
-import java.lang.Runnable
 
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
