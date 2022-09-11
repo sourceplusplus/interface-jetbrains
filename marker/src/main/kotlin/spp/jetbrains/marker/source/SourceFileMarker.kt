@@ -226,6 +226,48 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         }
     }
 
+    fun createMethodGutterMark(
+        element: PsiNameIdentifierOwner,
+        autoApply: Boolean = false
+    ): MethodGutterMark {
+        log.trace("createMethodGutterMark: $element")
+        val gutterMark = createMethodSourceMark(
+            element,
+            SourceMark.Type.GUTTER
+        ) as MethodGutterMark
+        return if (autoApply) {
+            if (gutterMark.canApply()) {
+                gutterMark.apply(true)
+                gutterMark
+            } else {
+                error("Could not apply gutter mark: $gutterMark")
+            }
+        } else {
+            gutterMark
+        }
+    }
+
+    fun createMethodInlayMark(
+        element: PsiNameIdentifierOwner,
+        autoApply: Boolean = false
+    ): MethodInlayMark {
+        log.trace("createMethodInlayMark: $element")
+        val inlayMark = createMethodSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as MethodInlayMark
+        return if (autoApply) {
+            if (inlayMark.canApply()) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                error("Could not apply inlay mark: $inlayMark")
+            }
+        } else {
+            inlayMark
+        }
+    }
+
     override fun createClassSourceMark(psiClass: PsiNameIdentifierOwner, type: SourceMark.Type): ClassSourceMark {
         return when (type) {
             SourceMark.Type.GUTTER -> ClassGutterMark(this, psiClass)
