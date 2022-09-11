@@ -31,11 +31,11 @@ import io.vertx.kotlin.coroutines.await
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElementOfType
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
-import spp.jetbrains.safeLaunch
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.safeLaunch
 
 /**
  * Detects the presence of log statements within methods and saves log patterns.
@@ -89,6 +89,13 @@ class LoggerDetector(val vertx: Vertx) {
             log.trace("Found logger statements: $loggerStatements")
             loggerStatements
         } else {
+            if (sourceMark.language.id == "Python") {
+                //todo: issue #625
+                val emptyList = emptyList<DetectedLogger>()
+                sourceMark.putUserData(LOGGER_STATEMENTS, emptyList)
+                return emptyList
+            }
+
             val uMethod = sourceMark.getPsiMethod().toUElementOfType<UMethod>()
             if (uMethod != null) {
                 val foundLoggerStatements = getOrFindLoggerStatements(uMethod).await()
