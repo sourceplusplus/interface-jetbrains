@@ -135,12 +135,15 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+            val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                classNames[0].identifier
+            } else {
+                fileMarker.psiFile.virtualFile.name
+            }
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = BreakpointStatusBar(
-                LiveSourceLocation(
-                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
-                    service = config.serviceName
-                ),
+                LiveSourceLocation(qualifiedClassNameOrFilename, lineNumber, service = config.serviceName),
                 ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
@@ -179,11 +182,16 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+            val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                classNames[0].identifier
+            } else {
+                fileMarker.psiFile.virtualFile.name
+            }
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = LogStatusBar(
                 LiveSourceLocation(
-                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier,
-                    lineNumber,
+                    qualifiedClassNameOrFilename, lineNumber,
                     service = config.serviceName
                 ),
                 if (watchExpression) emptyList() else ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
@@ -273,10 +281,16 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+            val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                classNames[0].identifier
+            } else {
+                fileMarker.psiFile.virtualFile.name
+            }
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(
-                    ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)[0].identifier, lineNumber,
+                    qualifiedClassNameOrFilename, lineNumber,
                     service = config.serviceName
                 ),
                 inlayMark
@@ -312,10 +326,16 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
+            val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+            val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                classNames[0].identifier
+            } else {
+                fileMarker.psiFile.virtualFile.name
+            }
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = SpanStatusBar(
                 LiveSourceLocation(
-                    inlayMark.artifactQualifiedName.identifier.substringBefore("#"), lineNumber,
+                    qualifiedClassNameOrFilename, lineNumber,
                     service = config.serviceName
                 ),
                 inlayMark
