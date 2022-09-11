@@ -268,6 +268,48 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         }
     }
 
+    fun createExpressionGutterMark(
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): ExpressionGutterMark {
+        log.trace("createExpressionGutterMark: $element")
+        val inlayMark = createExpressionSourceMark(
+            element,
+            SourceMark.Type.GUTTER
+        ) as ExpressionGutterMark
+        return if (autoApply) {
+            if (inlayMark.canApply()) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                error("Could not apply inlay mark: $inlayMark")
+            }
+        } else {
+            inlayMark
+        }
+    }
+
+    fun createExpressionInlayMark(
+        element: PsiNameIdentifierOwner,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark {
+        log.trace("createExpressionInlayMark: $element")
+        val inlayMark = createExpressionSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as ExpressionInlayMark
+        return if (autoApply) {
+            if (inlayMark.canApply()) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                error("Could not apply inlay mark: $inlayMark")
+            }
+        } else {
+            inlayMark
+        }
+    }
+
     override fun createClassSourceMark(psiClass: PsiNameIdentifierOwner, type: SourceMark.Type): ClassSourceMark {
         return when (type) {
             SourceMark.Type.GUTTER -> ClassGutterMark(this, psiClass)
