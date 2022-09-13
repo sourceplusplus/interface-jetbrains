@@ -63,7 +63,6 @@ import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
-import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
 public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
@@ -144,7 +143,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             if (event.getEventType() == METER_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
 
-                LiveInstrumentRemoved removed = deserializeLiveInstrumentRemoved(new JsonObject(event.getData()));
+                LiveInstrumentRemoved removed = new LiveInstrumentRemoved(new JsonObject(event.getData()));
                 if (removed.getCause() == null) {
                     statusPanel.setStatus("Complete", COMPLETE_COLOR_PURPLE);
                 } else {

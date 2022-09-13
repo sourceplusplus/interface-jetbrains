@@ -18,7 +18,6 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.table.IconTableCellRenderer
-import kotlinx.datetime.toJavaInstant
 import spp.jetbrains.icons.PluginIcons
 import spp.protocol.artifact.exception.methodName
 import spp.protocol.artifact.exception.qualifiedClassName
@@ -75,7 +74,7 @@ class BreakpointEventColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, St
 
     override fun valueOf(item: LiveBreakpointHit): String {
         return when (name) {
-            "Time" -> formatter.format(item.occurredAt.toJavaInstant())
+            "Time" -> formatter.format(item.occurredAt)
             "Host Name" -> item.serviceInstance.substringAfter("@")
             "Service" -> item.service
             "Class Name" -> item.stackTrace.first().shortQualifiedClassName()

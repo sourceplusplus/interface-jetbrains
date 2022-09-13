@@ -53,7 +53,6 @@ import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
-import spp.protocol.marshall.ProtocolMarshaller;
 import spp.protocol.service.listen.LiveInstrumentEventListener;
 
 import javax.swing.*;
@@ -77,7 +76,6 @@ import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
-import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
 public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstrumentEventListener, VisibleAreaListener {
 
@@ -211,7 +209,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
             } else if (event.getEventType() == BREAKPOINT_REMOVED) {
                 configLabel.setIcon(PluginIcons.eyeSlash);
 
-                LiveInstrumentRemoved removed = deserializeLiveInstrumentRemoved(new JsonObject(event.getData()));
+                LiveInstrumentRemoved removed = new LiveInstrumentRemoved(new JsonObject(event.getData()));
                 if (removed.getCause() == null) {
                     statusPanel.setStatus(message("complete"), COMPLETE_COLOR_PURPLE);
                 } else {
@@ -267,7 +265,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
                                         table.convertRowIndexToModel(table.getSelectedRow())
                                 );
                                 if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
-                                LiveBreakpointHit selectedValue = ProtocolMarshaller.deserializeLiveBreakpointHit(
+                                LiveBreakpointHit selectedValue = new LiveBreakpointHit(
                                         new JsonObject(selectedEvent.getData())
                                 );
                                 if (selectedValue.equals(shownBreakpointHit.getAndSet(selectedValue))) return;

@@ -24,6 +24,8 @@ import com.intellij.ui.SimpleTextAttributes.*
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import org.apache.commons.lang3.EnumUtils
 import spp.jetbrains.marker.ErrorVariableSimpleNode
 import spp.protocol.instrument.variable.LiveVariable
@@ -68,10 +70,10 @@ class JVMVariableSimpleNode(
             return nodeMap[variable.liveIdentity!!] ?: arrayOf()
         }
 
-        val children = if (variable.value is List<*>) {
-            (variable.value as List<Map<*, *>>).map {
-                if (it["@skip"] != null) {
-                    ErrorVariableSimpleNode(it as Map<String, *>)
+        val children = if (variable.value is JsonArray) {
+            (variable.value as JsonArray).map { JsonObject.mapFrom(it) }.map {
+                if (it.getString("@skip") != null) {
+                    ErrorVariableSimpleNode(JsonObject.mapFrom(it).map)
                 } else {
                     JVMVariableSimpleNode(toLiveVariable(it), nodeMap)
                 }
@@ -89,20 +91,20 @@ class JVMVariableSimpleNode(
         return children
     }
 
-    private fun toLiveVariable(it: Map<*, *>): LiveVariable {
-        var varValue = it["value"]
-        if (varValue is List<*> && varValue.size == 1 &&
-            varValue[0] is Map<*, *> && (varValue[0] as Map<*, *>).containsKey("liveClazz")
+    private fun toLiveVariable(it: JsonObject): LiveVariable {
+        var varValue = it.getValue("value")
+        if (varValue is JsonArray && varValue.size() == 1 &&
+            (varValue.first() as JsonObject).containsKey("liveClazz")
         ) {
-            varValue = toLiveVariable(varValue[0] as Map<*, *>)
+            varValue = toLiveVariable(varValue.first() as JsonObject)
         }
         return LiveVariable(
-            name = it["name"] as String,
+            name = it.getString("name"),
             value = varValue,
-            lineNumber = it["lineNumber"] as Int? ?: -1,
-            scope = EnumUtils.getEnum(LiveVariableScope::class.java, it["scope"] as String?),
-            liveClazz = it["liveClazz"] as String?,
-            liveIdentity = it["liveIdentity"] as String?
+            lineNumber = it.getInteger("lineNumber") ?: -1,
+            scope = EnumUtils.getEnum(LiveVariableScope::class.java, it.getString("scope")),
+            liveClazz = it.getString("liveClazz"),
+            liveIdentity = it.getString("liveIdentity")
         )
     }
 
@@ -149,8 +151,8 @@ class JVMVariableSimpleNode(
             presentation.setIcon(AllIcons.Debugger.Value)
 
             val varValue = variable.value
-            if (varValue is Map<*, *> && varValue["@skip"] != null) {
-                val skipReason = varValue["@skip"]
+            if (varValue is JsonObject && varValue.getString("@skip") != null) {
+                val skipReason = varValue.getString("@skip")
                 presentation.addText(" $skipReason", ERROR_ATTRIBUTES)
             }
         } else {
@@ -162,11 +164,11 @@ class JVMVariableSimpleNode(
             } else {
                 val varValue = variable.value
                 if (
-                    varValue is List<*> && varValue.size == 1 &&
-                    varValue[0] is Map<*, *> && (varValue[0] as Map<*, *>)["@skip"] != null
+                    varValue is JsonArray && varValue.size() == 1 &&
+                    varValue.first() is JsonObject && (varValue.first() as JsonObject).getString("@skip") != null
                 ) {
-                    val clazz = (varValue[0] as Map<*, *>)["@class"].toString().substringAfterLast(".")
-                    val id = (varValue[0] as Map<*, *>)["@id"]
+                    val clazz = (varValue.first() as JsonObject).getString("@class").substringAfterLast(".")
+                    val id = (varValue.first() as JsonObject).getString("@id")
                     presentation.addText("{ ${clazz}@${id} }", GRAYED_ATTRIBUTES)
                 } else {
                     presentation.addText("\"" + varValue + "\"", fromTextAttributes(scheme.getAttributes(STRING)))

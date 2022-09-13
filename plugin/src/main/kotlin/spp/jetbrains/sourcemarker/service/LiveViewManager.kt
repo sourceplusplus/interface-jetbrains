@@ -18,7 +18,6 @@ package spp.jetbrains.sourcemarker.service
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.ext.bridge.BridgeEventType
@@ -48,7 +47,7 @@ class LiveViewManager(
         }
 
         vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developer)) {
-            val event = Json.decodeValue(it.body().toString(), LiveViewEvent::class.java)
+            val event = LiveViewEvent(it.body())
             if (log.isTraceEnabled) log.trace("Received live event: $event")
             if (!SourceMarker.getInstance(project).enabled) {
                 log.warn("SourceMarker is not enabled, ignoring live event: $event")

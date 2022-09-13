@@ -36,10 +36,7 @@ import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
-import spp.protocol.instrument.event.LiveInstrumentEvent
-import spp.protocol.instrument.event.LiveInstrumentEventType
-import spp.protocol.marshall.ProtocolMarshaller
-import spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved
+import spp.protocol.instrument.event.*
 
 /**
  * todo: description.
@@ -131,7 +128,7 @@ class LiveInstrumentManager(
     }
 
     private fun handleInstrumentRemovedEvent(liveEvent: LiveInstrumentEvent) {
-        val instrumentRemoved = deserializeLiveInstrumentRemoved(JsonObject(liveEvent.data))
+        val instrumentRemoved = LiveInstrumentRemoved(JsonObject(liveEvent.data)) //todo: can be multiple events
         ApplicationManager.getApplication().invokeLater {
             val inlayMark = SourceMarkSearch.findByInstrumentId(project, instrumentRemoved.liveInstrument.id!!)
             if (inlayMark != null) {
@@ -149,7 +146,7 @@ class LiveInstrumentManager(
             return
         }
 
-        val bpHit = ProtocolMarshaller.deserializeLiveBreakpointHit(JsonObject(liveEvent.data))
+        val bpHit = LiveBreakpointHit(JsonObject(liveEvent.data))
         ApplicationManager.getApplication().invokeLater {
             BreakpointHitWindowService.getInstance(project).addBreakpointHit(bpHit)
 
@@ -164,7 +161,7 @@ class LiveInstrumentManager(
             return
         }
 
-        val logHit = ProtocolMarshaller.deserializeLiveLogHit(JsonObject(liveEvent.data))
+        val logHit = LiveLogHit(JsonObject(liveEvent.data))
         SourceMarkSearch.findByInstrumentId(project, logHit.logId)
             ?.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.accept(liveEvent) }
     }

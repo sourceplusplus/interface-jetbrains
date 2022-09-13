@@ -24,8 +24,6 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.type.LogQueryCondition
 import monitor.skywalking.protocol.type.Pagination
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
@@ -36,6 +34,7 @@ import spp.protocol.artifact.log.Log
 import spp.protocol.artifact.log.LogOrderType
 import spp.protocol.artifact.log.LogResult
 import spp.protocol.marshall.LocalMessageCodec
+import java.time.Instant
 
 /**
  * todo: description.
@@ -67,7 +66,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                     it.reply(
                         LogResult(
                             orderType = request.orderType,
-                            timestamp = Clock.System.now(),
+                            timestamp = Instant.now(),
                             logs = logs.logs.map {
                                 val exceptionStr = it.tags?.find { it.key == "exception" }?.value
                                 val epoch = if (it.timestamp is String) {
@@ -76,7 +75,7 @@ class LogsBridge(private val skywalkingClient: SkywalkingClient) : CoroutineVert
                                     it.timestamp as Long
                                 }
                                 Log(
-                                    Instant.fromEpochMilliseconds(epoch),
+                                    Instant.ofEpochMilli(epoch),
                                     it.content.orEmpty(),
                                     level = it.tags!!.find { it.key == "level" }?.value!!,
                                     logger = it.tags.find { it.key == "logger" }?.value,

@@ -235,7 +235,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                         val subscriptionId = it.result().subscriptionId!!
                         inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
                         vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
-                            statusBar.accept(Json.decodeValue(it.body().toString(), LiveViewEvent::class.java))
+                            statusBar.accept(LiveViewEvent(it.body()))
                         }
                         inlayMark.addEventListener { event ->
                             if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
