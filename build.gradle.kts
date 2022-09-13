@@ -82,7 +82,6 @@ subprojects {
         apply(plugin = "app.cash.licensee")
         configure<app.cash.licensee.LicenseeExtension> {
             ignoreDependencies("plus.sourceplus", "protocol")
-            ignoreDependencies("plus.sourceplus", "protocol-jvm")
             ignoreDependencies("plus.sourceplus.interface", "interface-booster-ui")
             allow("Apache-2.0")
             allow("MIT")

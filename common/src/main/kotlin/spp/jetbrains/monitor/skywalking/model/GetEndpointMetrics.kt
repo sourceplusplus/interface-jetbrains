@@ -16,8 +16,8 @@
  */
 package spp.jetbrains.monitor.skywalking.model
 
-import kotlinx.datetime.Instant
 import java.time.Duration
+import java.time.Instant
 import java.time.Period
 import java.time.ZonedDateTime
 
@@ -50,6 +50,6 @@ data class GetEndpointMetrics(
     }
 
     fun toInstantTimes(): List<Instant> {
-        return toZonedTimes().map { Instant.fromEpochMilliseconds(it.toInstant().toEpochMilli()) }
+        return toZonedTimes().map { it.toInstant() }
     }
 }

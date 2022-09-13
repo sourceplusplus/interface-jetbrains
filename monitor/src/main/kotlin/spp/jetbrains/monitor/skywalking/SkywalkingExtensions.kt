@@ -17,7 +17,6 @@
 package spp.jetbrains.monitor.skywalking
 
 import com.apollographql.apollo3.api.Optional
-import kotlinx.datetime.Instant
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
@@ -36,14 +35,15 @@ import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.artifact.trace.*
 import spp.protocol.artifact.trace.Trace
 import spp.protocol.platform.general.Service
+import java.time.Instant
 
 fun toProtocol(
     metricsRequest: GetEndpointMetrics,
     metrics: List<GetLinearIntValuesQuery.Result>
 ): ArtifactMetricResult {
     return ArtifactMetricResult(
-        start = Instant.fromEpochMilliseconds(metricsRequest.zonedDuration.start.toInstant().toEpochMilli()),
-        stop = Instant.fromEpochMilliseconds(metricsRequest.zonedDuration.stop.toInstant().toEpochMilli()),
+        start = metricsRequest.zonedDuration.start.toInstant(),
+        stop = metricsRequest.zonedDuration.stop.toInstant(),
         step = metricsRequest.zonedDuration.step.name,
         artifactMetrics = metrics.mapIndexed { i, result -> result.toProtocol(metricsRequest.metricIds[i]) }
     )
@@ -61,7 +61,7 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
         segmentId = segmentId,
         operationNames = endpointNames,
         duration = duration,
-        start = Instant.fromEpochMilliseconds(start.toLong()),
+        start = Instant.ofEpochMilli(start.toLong()),
         error = isError,
         traceIds = traceIds
     )
@@ -71,12 +71,12 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
 fun QueryTraceQuery.Log.toProtocol(): TraceSpanLogEntry {
     if (data!!.find { it.key == "stack" } != null) {
         return TraceSpanLogEntry(
-            time = Instant.fromEpochMilliseconds(time as Long),
+            time = Instant.ofEpochMilli(time as Long),
             data = data.find { it.key == "stack" }!!.value!! //todo: correctly
         )
     }
     return TraceSpanLogEntry(
-        time = Instant.fromEpochMilliseconds(time as Long),
+        time = Instant.ofEpochMilli(time as Long),
         data = data.joinToString(separator = "\n") { it.key + " : " + it.value!! }
     )
 }
@@ -99,8 +99,8 @@ fun QueryTraceQuery.Span.toProtocol(): TraceSpan {
         refs = refs.map { it.toProtocol() },
         serviceCode = serviceCode,
         //serviceInstanceName = serviceInstanceName, //todo: this
-        startTime = Instant.fromEpochMilliseconds(startTime as Long),
-        endTime = Instant.fromEpochMilliseconds(endTime as Long),
+        startTime = Instant.ofEpochMilli(startTime as Long),
+        endTime = Instant.ofEpochMilli(endTime as Long),
         endpointName = endpointName,
         type = type,
         peer = peer,

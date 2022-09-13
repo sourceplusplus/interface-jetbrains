@@ -24,7 +24,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toJavaInstant
 import spp.jetbrains.monitor.skywalking.bridge.EndpointMetricsBridge
 import spp.jetbrains.monitor.skywalking.bridge.EndpointTracesBridge
 import spp.jetbrains.monitor.skywalking.bridge.LogsBridge
@@ -110,13 +109,13 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                 .put("multiMetrics", false)
                 .put("artifactQualifiedName", JsonObject.mapFrom(subscription.artifactQualifiedName))
                 .put("entityId", endpointId)
-                .put("timeBucket", formatter.format(trace.start.toJavaInstant()))
+                .put("timeBucket", formatter.format(trace.start))
                 .put("trace", JsonObject.mapFrom(trace))
             val event = LiveViewEvent(
                 subscription.subscriptionId!!,
                 endpointId,
                 subscription.artifactQualifiedName,
-                formatter.format(trace.start.toJavaInstant()),
+                formatter.format(trace.start),
                 subscription.liveViewConfig,
                 eventData.toString()
             )
@@ -146,7 +145,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                         subscription.subscriptionId!!,
                         "entityId",
                         subscription.artifactQualifiedName,
-                        formatter.format(it.timestamp.toJavaInstant()),
+                        formatter.format(it.timestamp),
                         subscription.liveViewConfig,
                         JsonObject().put("log", JsonObject.mapFrom(it)).toString()
                     )
