@@ -409,7 +409,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
                     val statusBar = LogStatusBar(
                         liveLog.location,
-                        emptyList(),
+                        ArtifactScopeService.getScopeVariables(fileMarker, liveLog.location.line),
                         inlayMark,
                         false
                     )
