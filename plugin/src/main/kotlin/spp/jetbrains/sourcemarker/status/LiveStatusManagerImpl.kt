@@ -23,7 +23,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.Vertx
-import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
@@ -53,7 +52,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*
 import spp.protocol.instrument.meter.MeterType
-import spp.protocol.service.listen.LiveInstrumentEventListener
+import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewEvent
@@ -486,7 +485,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
         }
     }
 
-    override fun addStatusBar(sourceMark: SourceMark, listener: LiveInstrumentEventListener) {
+    override fun addStatusBar(sourceMark: SourceMark, listener: LiveInstrumentListener) {
         if (sourceMark.getUserData(INSTRUMENT_EVENT_LISTENERS) == null) {
             sourceMark.putUserData(INSTRUMENT_EVENT_LISTENERS, mutableSetOf())
         }

@@ -18,12 +18,11 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
 import spp.jetbrains.PluginBundle.message
 import spp.protocol.instrument.event.LiveBreakpointHit
-import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
 import spp.protocol.instrument.event.LiveInstrumentRemoved
+import spp.protocol.instrument.event.TrackedLiveEvent
 import spp.protocol.utils.toPrettyDuration
 import java.time.Instant
 
@@ -33,22 +32,22 @@ import java.time.Instant
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(name) {
+class BreakpointHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, String>(name) {
 
-    override fun getComparator(): Comparator<LiveInstrumentEvent>? {
+    override fun getComparator(): Comparator<TrackedLiveEvent>? {
         return when (name) {
-            "Time" -> Comparator { t: LiveInstrumentEvent, t2: LiveInstrumentEvent ->
+            "Time" -> Comparator { t: TrackedLiveEvent, t2: TrackedLiveEvent ->
                 val obj1 = if (t.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
-                    LiveBreakpointHit(JsonObject(t.data))
+                    t as LiveBreakpointHit
                 } else if (t.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
-                    LiveInstrumentRemoved(JsonObject(t.data))
+                    t as LiveInstrumentRemoved
                 } else {
                     throw IllegalArgumentException(t.eventType.name)
                 }
                 val obj2 = if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
-                    LiveBreakpointHit(JsonObject(t2.data))
+                    t2 as LiveBreakpointHit
                 } else if (t2.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
-                    LiveInstrumentRemoved(JsonObject(t2.data))
+                    t2 as LiveInstrumentRemoved
                 } else {
                     throw IllegalArgumentException(t2.eventType.name)
                 }
@@ -58,10 +57,10 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
         }
     }
 
-    override fun valueOf(event: LiveInstrumentEvent): String {
+    override fun valueOf(event: TrackedLiveEvent): String {
         val breakpointData = mutableListOf<Map<String, Any?>>()
         if (event.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
-            val item = LiveBreakpointHit(JsonObject(event.data))
+            val item = event as LiveBreakpointHit
             item.stackTrace.elements.first().variables.forEach {
                 breakpointData.add(mapOf(it.name to it.value))
             }
@@ -73,7 +72,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, St
                 else -> item.toString()
             }
         } else {
-            val item = LiveInstrumentRemoved(JsonObject(event.data))
+            val item = event as LiveInstrumentRemoved
             return when (name) {
                 "Breakpoint Data" -> item.cause!!.message ?: item.cause!!.exceptionType
                 "Time" -> (Instant.now().toEpochMilli() - item.occurredAt.toEpochMilli())

@@ -31,7 +31,7 @@ import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentEventType;
 import spp.protocol.instrument.meter.MeterType;
-import spp.protocol.service.listen.LiveInstrumentEventListener;
+import spp.protocol.service.listen.LiveInstrumentListener;
 import spp.protocol.service.listen.LiveViewEventListener;
 import spp.protocol.view.LiveViewEvent;
 
@@ -45,7 +45,7 @@ import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 
-public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentEventListener, LiveViewEventListener {
+public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListener, LiveViewEventListener {
 
     private final LiveMeter liveMeter;
     private final GutterMark gutterMark;
@@ -83,7 +83,6 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentEventL
         LiveStatusManager.getInstance(gutterMark.getProject()).addViewEventListener(gutterMark, this);
     }
 
-    @Override
     public void accept(@NotNull LiveInstrumentEvent event) {
         JsonObject rawMetrics = new JsonObject(new JsonObject(event.getData()).getString("metricsData"));
         minuteValueLabel.setText(getShortNumber(rawMetrics.getString("last_minute")));

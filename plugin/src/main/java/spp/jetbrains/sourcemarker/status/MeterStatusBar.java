@@ -27,8 +27,8 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
@@ -47,6 +47,7 @@ import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.meter.MeterType;
 import spp.protocol.instrument.meter.MetricValue;
 import spp.protocol.instrument.meter.MetricValueType;
+import spp.protocol.service.listen.LiveInstrumentListener;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -65,7 +66,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.instrument.event.LiveInstrumentEventType.METER_REMOVED;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
@@ -141,13 +141,13 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
     }
 
     private void setupAsActive() {
-        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, event -> {
-            if (statusPanel == null) return;
-            if (event.getEventType() == METER_REMOVED) {
+        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, new LiveInstrumentListener() {
+            @Override
+            public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
+                if (statusPanel == null) return;
                 configLabel.setIcon(PluginIcons.eyeSlash);
 
-                LiveInstrumentRemoved removed = new LiveInstrumentRemoved(new JsonObject(event.getData()));
-                if (removed.getCause() == null) {
+                if (event.getCause() == null) {
                     statusPanel.setStatus(message("complete"), COMPLETE_COLOR_PURPLE);
                 } else {
                     commandModel.insertRow(0, event);

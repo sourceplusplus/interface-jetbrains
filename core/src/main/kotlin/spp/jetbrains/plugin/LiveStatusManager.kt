@@ -26,7 +26,7 @@ import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveInstrument
 import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.LiveMeter
-import spp.protocol.service.listen.LiveInstrumentEventListener
+import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
 
 interface LiveStatusManager {
@@ -38,7 +38,7 @@ interface LiveStatusManager {
     fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker)
     fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker)
 
-    fun addStatusBar(sourceMark: SourceMark, listener: LiveInstrumentEventListener)
+    fun addStatusBar(sourceMark: SourceMark, listener: LiveInstrumentListener)
     fun addViewEventListener(sourceMark: SourceMark, listener: LiveViewEventListener)
     fun addActiveLiveInstrument(instrument: LiveInstrument)
     fun addActiveLiveInstruments(instruments: List<LiveInstrument>)
