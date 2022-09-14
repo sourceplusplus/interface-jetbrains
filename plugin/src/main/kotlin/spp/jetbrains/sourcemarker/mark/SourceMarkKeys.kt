@@ -22,7 +22,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.sourcemarker.status.StatusBar
 import spp.protocol.portal.PortalConfiguration
-import spp.protocol.service.listen.LiveInstrumentEventListener
+import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
 
 /**
@@ -38,7 +38,7 @@ object SourceMarkKeys {
     val INSTRUMENT_ID = SourceKey<String>("INSTRUMENT_ID")
     val VIEW_SUBSCRIPTION_ID = SourceKey<String>("VIEW_SUBSCRIPTION_ID")
     val GROUPED_MARKS = SourceKey<MutableList<SourceMark>>("GROUPED_MARKS")
-    val INSTRUMENT_EVENT_LISTENERS = SourceKey<MutableSet<LiveInstrumentEventListener>>("INSTRUMENT_EVENT_LISTENERS")
+    val INSTRUMENT_EVENT_LISTENERS = SourceKey<MutableSet<LiveInstrumentListener>>("INSTRUMENT_EVENT_LISTENERS")
     val VIEW_EVENT_LISTENERS = SourceKey<MutableSet<LiveViewEventListener>>("LIVE_VIEW_EVENT_LISTENERS")
     val STATUS_BAR = SourceKey<StatusBar>("STATUS_BAR")
 }

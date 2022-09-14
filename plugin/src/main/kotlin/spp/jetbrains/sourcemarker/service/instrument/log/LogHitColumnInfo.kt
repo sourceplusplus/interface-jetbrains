@@ -17,12 +17,8 @@
 package spp.jetbrains.sourcemarker.service.instrument.log
 
 import com.intellij.util.ui.ColumnInfo
-import io.vertx.core.json.JsonObject
 import spp.jetbrains.PluginBundle.message
-import spp.protocol.instrument.event.LiveInstrumentEvent
-import spp.protocol.instrument.event.LiveInstrumentEventType
-import spp.protocol.instrument.event.LiveInstrumentRemoved
-import spp.protocol.instrument.event.LiveLogHit
+import spp.protocol.instrument.event.*
 import spp.protocol.utils.toPrettyDuration
 import java.time.Instant
 
@@ -32,22 +28,22 @@ import java.time.Instant
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LogHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(name) {
+class LogHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, String>(name) {
 
-    override fun getComparator(): Comparator<LiveInstrumentEvent>? {
+    override fun getComparator(): Comparator<TrackedLiveEvent>? {
         return when (name) {
-            "Time" -> Comparator { t: LiveInstrumentEvent, t2: LiveInstrumentEvent ->
+            "Time" -> Comparator { t: TrackedLiveEvent, t2: TrackedLiveEvent ->
                 val obj1 = if (t.eventType == LiveInstrumentEventType.LOG_HIT) {
-                    LiveLogHit(JsonObject(t.data))
+                    t as LiveLogHit
                 } else if (t.eventType == LiveInstrumentEventType.LOG_REMOVED) {
-                    LiveInstrumentRemoved(JsonObject(t.data))
+                    t as LiveInstrumentRemoved
                 } else {
                     throw IllegalArgumentException(t.eventType.name)
                 }
                 val obj2 = if (t2.eventType == LiveInstrumentEventType.LOG_HIT) {
-                    LiveLogHit(JsonObject(t2.data))
+                    t2 as LiveLogHit
                 } else if (t2.eventType == LiveInstrumentEventType.LOG_REMOVED) {
-                    LiveInstrumentRemoved(JsonObject(t2.data))
+                    t2 as LiveInstrumentRemoved
                 } else {
                     throw IllegalArgumentException(t2.eventType.name)
                 }
@@ -57,9 +53,9 @@ class LogHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(n
         }
     }
 
-    override fun valueOf(event: LiveInstrumentEvent): String {
+    override fun valueOf(event: TrackedLiveEvent): String {
         if (event.eventType == LiveInstrumentEventType.LOG_HIT) {
-            val item = LiveLogHit(JsonObject(event.data))
+            val item = event as LiveLogHit
             return when (name) {
                 "Message" -> item.logResult.logs.first().toFormattedMessage()
                 "Time" ->
@@ -68,7 +64,7 @@ class LogHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(n
                 else -> item.toString()
             }
         } else {
-            val item = LiveInstrumentRemoved(JsonObject(event.data))
+            val item = event as LiveInstrumentRemoved
             return when (name) {
                 "Message" -> item.cause!!.message ?: item.cause!!.exceptionType
                 "Time" -> (Instant.now().toEpochMilli() - item.occurredAt.toEpochMilli())
