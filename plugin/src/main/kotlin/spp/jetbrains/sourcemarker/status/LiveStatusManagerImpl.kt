@@ -38,6 +38,7 @@ import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkCompo
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
@@ -84,26 +85,28 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
     override fun handleEvent(event: SourceMarkEvent) {
         when (event.eventCode) {
             SourceMarkEventCode.MARK_ADDED -> {
-                if (event.sourceMark !is MethodSourceMark) return
-                //todo: shouldn't need to wait for method mark added to add inlay/gutter marks
-                //  should have events that just mean a method is visible
+                //wait for method guide marks as they indicate a method currently is or may become visible
+                if (event.sourceMark !is MethodGuideMark) return
 
+                //display status bar(s) for method
                 ApplicationManager.getApplication().runReadAction {
-                    val methodSourceMark = event.sourceMark as MethodSourceMark
-                    val qualifiedClassNames = ArtifactNamingService.getQualifiedClassNames(
-                        methodSourceMark.sourceFileMarker.psiFile
-                    )
-                    if (qualifiedClassNames.isEmpty()) return@runReadAction
+                    val methodSourceMark = event.sourceMark as MethodGuideMark
+                    val fileMarker = event.sourceMark.sourceFileMarker
 
-                    val qualifiedClassName = qualifiedClassNames[0].identifier
                     val textRange = methodSourceMark.getPsiElement().textRange
                     val document = PsiDocumentManager.getInstance(methodSourceMark.project)
                         .getDocument(methodSourceMark.sourceFileMarker.psiFile)!!
                     val startLine = document.getLineNumber(textRange.startOffset) + 1
                     val endLine = document.getLineNumber(textRange.endOffset) + 1
 
+                    val classNames = ArtifactNamingService.getQualifiedClassNames(fileMarker.psiFile)
+                    val qualifiedClassNameOrFilename = if (classNames.isNotEmpty()) {
+                        classNames[0].identifier
+                    } else {
+                        fileMarker.psiFile.virtualFile.name
+                    }
                     activeStatusBars.forEach {
-                        if (qualifiedClassName == it.location.source && it.location.line in startLine..endLine) {
+                        if (qualifiedClassNameOrFilename == it.location.source && it.location.line in startLine..endLine) {
                             when (it) {
                                 is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
                                 is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
