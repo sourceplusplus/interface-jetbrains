@@ -26,7 +26,6 @@ import org.jetbrains.uast.toUElementOfType
 import spp.jetbrains.marker.jvm.JVMEndpointDetector.JVMEndpointNameDeterminer
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import java.util.*
 
 /**

@@ -33,7 +33,6 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR

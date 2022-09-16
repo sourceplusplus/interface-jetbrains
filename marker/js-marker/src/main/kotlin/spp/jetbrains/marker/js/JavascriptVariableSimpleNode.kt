@@ -17,12 +17,8 @@
 package spp.jetbrains.marker.js
 
 import com.intellij.ide.projectView.PresentationData
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
-import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
-import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
-import io.vertx.core.json.JsonObject
 import spp.protocol.instrument.variable.LiveVariable
 
 /**
