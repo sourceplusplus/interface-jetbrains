@@ -32,7 +32,6 @@ import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 
 /**
@@ -44,10 +43,10 @@ import java.util.*
 @Suppress("TooManyFunctions")
 abstract class MethodSourceMark(
     override val sourceFileMarker: SourceFileMarker,
-    internal open var psiMethod: PsiNameIdentifierOwner,
-    override var artifactQualifiedName: ArtifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiMethod)
+    internal var psiMethod: PsiNameIdentifierOwner,
 ) : SourceMark {
 
+    override var artifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiMethod)
     override var editor: Editor? = null
     override lateinit var sourceMarkComponent: SourceMarkComponent
     override var visiblePopup: Disposable? = null
