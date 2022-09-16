@@ -52,6 +52,10 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
 
             val expression = guideMark.getPsiElement() as JSCallExpression
             val method = expression.firstChild as JSReferenceExpression
+            if (method.firstChild !is JSReferenceExpression) {
+                promise.complete(Optional.empty())
+                return@runReadAction
+            }
             val router = method.firstChild as JSReferenceExpression
             val routerVariable = router.resolve() as JSVariable
 
@@ -60,6 +64,10 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
                 return@runReadAction
             }
             val endpointType = method.children[2].text
+            if (expression.arguments.isEmpty()) {
+                promise.complete(Optional.empty())
+                return@runReadAction
+            }
             val endpointName = getArgumentValue(expression.arguments[0])
 
             if (endpointType == "get" ||
