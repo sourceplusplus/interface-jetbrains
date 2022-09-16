@@ -28,7 +28,6 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -39,22 +38,21 @@ import spp.jetbrains.marker.impl.InstrumentConditionParser;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService;
 import spp.jetbrains.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
+import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.protocol.instrument.LiveBreakpoint;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.event.LiveBreakpointHit;
-import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
+import spp.protocol.instrument.event.TrackedLiveEvent;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
-import spp.protocol.marshall.ProtocolMarshaller;
-import spp.protocol.service.listen.LiveInstrumentEventListener;
+import spp.protocol.service.listen.LiveInstrumentListener;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -75,11 +73,9 @@ import java.util.stream.Collectors;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_HIT;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
-import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
-public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstrumentEventListener, VisibleAreaListener {
+public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstrumentListener, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -153,10 +149,8 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
     }
 
     @Override
-    public void accept(@NotNull LiveInstrumentEvent event) {
-        if (event.getEventType() == BREAKPOINT_REMOVED) {
-            this.liveBreakpoint = null;
-        }
+    public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
+        this.liveBreakpoint = null;
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
@@ -203,16 +197,20 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
     }
 
     private void setupAsActive() {
-        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, event -> {
-            if (statusPanel == null) return;
-            if (event.getEventType() == BREAKPOINT_HIT) {
+        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, new LiveInstrumentListener() {
+            @Override
+            public void onBreakpointHitEvent(@NotNull LiveBreakpointHit event) {
+                if (statusPanel == null) return;
                 commandModel.insertRow(0, event);
                 statusPanel.incrementHits();
-            } else if (event.getEventType() == BREAKPOINT_REMOVED) {
+            }
+
+            @Override
+            public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
+                if (statusPanel == null) return;
                 configLabel.setIcon(PluginIcons.eyeSlash);
 
-                LiveInstrumentRemoved removed = deserializeLiveInstrumentRemoved(new JsonObject(event.getData()));
-                if (removed.getCause() == null) {
+                if (event.getCause() == null) {
                     statusPanel.setStatus(message("complete"), COMPLETE_COLOR_PURPLE);
                 } else {
                     commandModel.insertRow(0, event);
@@ -263,13 +261,11 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
                         AtomicReference<LiveBreakpointHit> shownBreakpointHit = new AtomicReference<>();
                         table.getSelectionModel().addListSelectionListener(event -> ApplicationManager.getApplication().invokeLater(() -> {
                             if (table.getSelectedRow() > -1) {
-                                LiveInstrumentEvent selectedEvent = (LiveInstrumentEvent) commandModel.getItem(
+                                TrackedLiveEvent selectedEvent = (TrackedLiveEvent) commandModel.getItem(
                                         table.convertRowIndexToModel(table.getSelectedRow())
                                 );
                                 if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
-                                LiveBreakpointHit selectedValue = ProtocolMarshaller.deserializeLiveBreakpointHit(
-                                        new JsonObject(selectedEvent.getData())
-                                );
+                                LiveBreakpointHit selectedValue = (LiveBreakpointHit) selectedEvent;
                                 if (selectedValue.equals(shownBreakpointHit.getAndSet(selectedValue))) return;
 
                                 SwingUtilities.invokeLater(() -> {

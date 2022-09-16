@@ -21,6 +21,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Pair
+import com.intellij.serviceContainer.AlreadyDisposedException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -125,7 +126,12 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     ) = safeGlobalAsync {
         while (isActive) {
             if (waitBefore) delay(repeatMillis)
-            SourceMarkerPlugin.getInstance(project).init()
+            try {
+                SourceMarkerPlugin.getInstance(project).init()
+            } catch (ex: AlreadyDisposedException) {
+                log.info("${project.name} is disposed, stopping reconnection loop")
+                break
+            }
             if (!waitBefore) delay(repeatMillis)
         }
     }

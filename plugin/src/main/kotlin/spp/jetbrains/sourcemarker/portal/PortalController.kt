@@ -16,17 +16,14 @@
  */
 package spp.jetbrains.sourcemarker.portal
 
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.intellij.ide.ui.laf.IntelliJLaf
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import io.vertx.core.json.JsonObject
-import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
-import kotlinx.datetime.Instant
 import spp.booster.PortalServer
 import spp.booster.SourcePortal
 import spp.jetbrains.marker.SourceMarker
@@ -42,7 +39,6 @@ import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
 import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
-import spp.protocol.marshall.KSerializers
 import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.UIManager
@@ -57,13 +53,6 @@ class PortalController(
     private val log = logger<PortalController>()
 
     override suspend fun start() {
-        log.info("Initializing portal")
-
-        val module = SimpleModule()
-        module.addSerializer(Instant::class.java, KSerializers.KotlinInstantSerializer())
-        module.addDeserializer(Instant::class.java, KSerializers.KotlinInstantDeserializer())
-        DatabindCodec.mapper().registerModule(module)
-
         log.info("Initializing portal server")
         val portalServer = PortalServer(
             skywalkingHost = markerConfig.serviceHostNormalized,

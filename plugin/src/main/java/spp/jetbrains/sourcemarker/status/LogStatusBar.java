@@ -28,7 +28,6 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
@@ -55,8 +54,7 @@ import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.event.LiveLogHit;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
-import spp.protocol.marshall.ProtocolMarshaller;
-import spp.protocol.service.listen.LiveInstrumentEventListener;
+import spp.protocol.service.listen.LiveInstrumentListener;
 import spp.protocol.service.listen.LiveViewEventListener;
 import spp.protocol.view.LiveViewEvent;
 
@@ -85,11 +83,9 @@ import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
-import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_REMOVED;
-import static spp.protocol.marshall.ProtocolMarshaller.deserializeLiveInstrumentRemoved;
 
 public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener,
-        LiveInstrumentEventListener, LiveViewEventListener {
+        LiveInstrumentListener, LiveViewEventListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
@@ -212,9 +208,8 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             if (logData.isEmpty()) {
                 liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
             } else {
-                LiveInstrumentEvent event = (LiveInstrumentEvent) logData.get(0);
-                LiveLogHit logHit = Json.decodeValue(event.getData(), LiveLogHit.class);
-                Instant logTime = ((kotlinx.datetime.Instant) logHit.getOccurredAt()).getValue$kotlinx_datetime();
+                LiveLogHit logHit = (LiveLogHit) logData.get(0);
+                Instant logTime = logHit.getOccurredAt();
                 setLatestLog(logTime, logHit.getLogResult().getLogs().get(0));
             }
             commandModel = new ListTableModel(
@@ -289,39 +284,38 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     }
 
     @Override
-    public void accept(@NotNull LiveInstrumentEvent event) {
-        if (event.getEventType() == LOG_HIT) {
+    public void onLogHitEvent(@NotNull LiveLogHit event) {
+        commandModel.insertRow(0, event);
+
+        setLatestLog(
+                event.getLogResult().getTimestamp(),
+                event.getLogResult().getLogs().get(0)
+        );
+    }
+
+    @Override
+    public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
+        removed = true;
+
+        if (event.getCause() != null) {
             commandModel.insertRow(0, event);
 
-            LiveLogHit logHit = ProtocolMarshaller.deserializeLiveLogHit(new JsonObject(event.getData()));
-            setLatestLog(
-                    Instant.ofEpochMilli(logHit.getLogResult().getTimestamp().toEpochMilliseconds()),
-                    logHit.getLogResult().getLogs().get(0)
-            );
-        } else if (event.getEventType() == LOG_REMOVED) {
-            removed = true;
-
-            LiveInstrumentRemoved removed = deserializeLiveInstrumentRemoved(new JsonObject(event.getData()));
-            if (removed.getCause() != null) {
-                commandModel.insertRow(0, event);
-
-                errored = true;
-                liveLogTextField.setText(VariableParser.EMPTY);
-                liveLogTextField.setPlaceHolderText(removed.getCause().getMessage());
-                liveLogTextField.setPlaceHolderTextColor(SELECT_COLOR_RED);
-            }
-
-            liveLogTextField.setEditMode(false);
-            configDropdownLabel.setVisible(false);
-            removeActiveDecorations();
-            repaint();
+            errored = true;
+            liveLogTextField.setText(VariableParser.EMPTY);
+            liveLogTextField.setPlaceHolderText(event.getCause().getMessage());
+            liveLogTextField.setPlaceHolderTextColor(SELECT_COLOR_RED);
         }
+
+        liveLogTextField.setEditMode(false);
+        configDropdownLabel.setVisible(false);
+        removeActiveDecorations();
+        repaint();
     }
 
     @Override
     public void accept(@NotNull LiveViewEvent event) {
         JsonObject rawMetrics = new JsonObject(event.getMetricsData());
-        Log logData = ProtocolMarshaller.deserializeLog(rawMetrics.getJsonObject("log"));
+        Log logData = new Log(rawMetrics.getJsonObject("log"));
         LogResult logResult = new LogResult(
             event.getArtifactQualifiedName(),
             LogOrderType.NEWEST_LOGS,

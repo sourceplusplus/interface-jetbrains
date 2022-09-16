@@ -21,7 +21,6 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.toProtocol
@@ -51,8 +50,8 @@ class EndpointTracesBridge(private val skywalkingClient: SkywalkingClient) : Cor
                     TraceResult(
                         artifactQualifiedName = request.artifactQualifiedName,
                         orderType = request.orderType,
-                        start = Instant.fromEpochMilliseconds(request.zonedDuration.start.toInstant().toEpochMilli()),
-                        stop = Instant.fromEpochMilliseconds(request.zonedDuration.start.toInstant().toEpochMilli()),
+                        start = request.zonedDuration.start.toInstant(),
+                        stop = request.zonedDuration.start.toInstant(),
                         step = request.zonedDuration.step.name.toLowerCase(),
                         total = traceStack.size,
                         traces = traceStack

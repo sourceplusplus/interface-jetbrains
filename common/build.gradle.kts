@@ -9,5 +9,4 @@ dependencies {
     compileOnly("plus.sourceplus:protocol:$projectVersion")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 }
