@@ -31,6 +31,7 @@ import javax.swing.Icon
  */
 data class GutterMarkConfiguration(
     override var applySourceMarkFilter: ApplySourceMarkFilter = ApplySourceMarkFilter.ALL,
+    var tooltipText: (() -> String)? = null,
     var icon: Icon? = null,
     var activateOnMouseHover: Boolean = true,
     var activateOnMouseClick: Boolean = false,
