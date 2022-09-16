@@ -30,7 +30,7 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
 /**
  * Locates [GuideMark]s for the given [SourceFileMarker].
  *
- * @since 0.6.9
+ * @since 0.6.10
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptGuideProvider : AbstractSourceGuideProvider {

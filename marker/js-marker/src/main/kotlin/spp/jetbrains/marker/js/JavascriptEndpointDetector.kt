@@ -24,7 +24,7 @@ import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
 /**
  * todo: description.
  *
- * @since 0.6.9
+ * @since 0.6.10
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptEndpointDetector(project: Project) : EndpointDetector<EndpointNameDeterminer>(project) {
