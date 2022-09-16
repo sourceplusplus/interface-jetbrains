@@ -131,6 +131,15 @@ class PythonArtifactCreationService : AbstractArtifactCreationService {
         return fileMarker.createMethodInlayMark(element.parent as PsiNameIdentifierOwner, autoApply)
     }
 
+    override fun createExpressionGutterMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean
+    ): ExpressionGutterMark {
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiElement
+        return fileMarker.createExpressionGutterMark(element, autoApply)
+    }
+
     override fun createExpressionInlayMark(
         fileMarker: SourceFileMarker,
         lineNumber: Int,

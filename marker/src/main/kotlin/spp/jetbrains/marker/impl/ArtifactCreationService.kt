@@ -19,6 +19,8 @@ package spp.jetbrains.marker.impl
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.AbstractArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
+import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
@@ -71,6 +73,13 @@ object ArtifactCreationService : AbstractArtifactCreationService {
             .getOrCreateExpressionInlayMark(fileMarker, lineNumber, autoApply)
     }
 
+    fun createMethodGutterMark(
+        sourceMark: MethodSourceMark,
+        autoApply: Boolean
+    ): MethodGutterMark {
+        return createMethodGutterMark(sourceMark.sourceFileMarker, sourceMark.getNameIdentifier(), autoApply)
+    }
+
     override fun createMethodGutterMark(
         fileMarker: SourceFileMarker,
         element: PsiElement,
@@ -87,6 +96,22 @@ object ArtifactCreationService : AbstractArtifactCreationService {
     ): MethodInlayMark {
         return getService(fileMarker.psiFile.language.id)
             .createMethodInlayMark(fileMarker, element, autoApply)
+    }
+
+    fun createExpressionGutterMark(
+        sourceMark: ExpressionSourceMark,
+        autoApply: Boolean
+    ): ExpressionGutterMark {
+        return createExpressionGutterMark(sourceMark.sourceFileMarker, sourceMark.lineNumber, autoApply)
+    }
+
+    override fun createExpressionGutterMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean
+    ): ExpressionGutterMark {
+        return getService(fileMarker.psiFile.language.id)
+            .createExpressionGutterMark(fileMarker, lineNumber, autoApply)
     }
 
     override fun createExpressionInlayMark(
