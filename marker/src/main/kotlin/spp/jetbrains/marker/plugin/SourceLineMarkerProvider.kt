@@ -21,6 +21,7 @@ import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
 import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment.CENTER
 import com.intellij.psi.PsiElement
+import com.intellij.util.Function
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
@@ -61,7 +62,13 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                     getFirstLeaf(element),
                     element.textRange,
                     gutterMark.configuration.icon,
-                    null,
+                    gutterMark.configuration.tooltipText.let { tooltipText ->
+                        if (tooltipText != null) {
+                            Function { tooltipText.invoke() }
+                        } else {
+                            null
+                        }
+                    },
                     navigationHandler,
                     CENTER
                 )
