@@ -21,7 +21,6 @@ import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
-import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkConfiguration
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -31,12 +30,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-open class MethodInlayMark constructor(
+class MethodInlayMark constructor(
     override val sourceFileMarker: SourceFileMarker,
-    override var psiMethod: PsiNameIdentifierOwner
+    psiMethod: PsiNameIdentifierOwner
 ) : MethodSourceMark(sourceFileMarker, psiMethod), InlayMark {
 
-    override val id: String = UUID.randomUUID().toString()
-    override val configuration: InlayMarkConfiguration = SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.copy()
-    override var visible: AtomicBoolean = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
+    override val id = UUID.randomUUID().toString()
+    override val configuration = SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.copy()
+    override var visible = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
 }

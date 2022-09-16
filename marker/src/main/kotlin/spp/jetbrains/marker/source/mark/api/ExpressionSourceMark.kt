@@ -44,10 +44,10 @@ import java.util.*
 @Suppress("TooManyFunctions")
 abstract class ExpressionSourceMark(
     override val sourceFileMarker: SourceFileMarker,
-    internal open var psiExpression: PsiElement,
-    override var artifactQualifiedName: ArtifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiExpression)
+    internal var psiExpression: PsiElement,
 ) : SourceMark {
 
+    override var artifactQualifiedName = ArtifactNamingService.getFullyQualifiedName(psiExpression)
     override var editor: Editor? = null
     override lateinit var sourceMarkComponent: SourceMarkComponent
     override var visiblePopup: Disposable? = null
