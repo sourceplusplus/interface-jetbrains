@@ -20,10 +20,10 @@ import com.apollographql.apollo3.exception.ApolloException
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import spp.jetbrains.UserData
-import spp.jetbrains.safeLaunch
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Ready
 import spp.jetbrains.status.SourceStatusService
