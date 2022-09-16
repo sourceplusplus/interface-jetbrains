@@ -20,7 +20,6 @@ import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ClassSourceMark
-import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import java.util.*
 
 /**
@@ -29,11 +28,11 @@ import java.util.*
  * @since 0.4.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-open class ClassGuideMark(
+class ClassGuideMark(
     override val sourceFileMarker: SourceFileMarker,
-    override var psiClass: PsiNameIdentifierOwner
+    psiClass: PsiNameIdentifierOwner
 ) : ClassSourceMark(sourceFileMarker, psiClass), GuideMark {
 
-    override val id: String = UUID.randomUUID().toString()
-    override val configuration: GuideMarkConfiguration = SourceMarker.getInstance(project).configuration.guideMarkConfiguration.copy()
+    override val id = UUID.randomUUID().toString()
+    override val configuration = SourceMarker.getInstance(project).configuration.guideMarkConfiguration.copy()
 }

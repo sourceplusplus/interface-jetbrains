@@ -62,6 +62,12 @@ interface AbstractArtifactCreationService {
         autoApply: Boolean = false
     ): MethodInlayMark
 
+    fun createExpressionGutterMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean = false
+    ): ExpressionGutterMark
+
     fun createExpressionInlayMark(
         fileMarker: SourceFileMarker,
         lineNumber: Int,

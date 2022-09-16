@@ -22,7 +22,6 @@ import spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
-import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
 import spp.jetbrains.marker.source.mark.gutter.event.GutterMarkEventCode
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -33,13 +32,13 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-open class ExpressionGutterMark(
+class ExpressionGutterMark(
     override val sourceFileMarker: SourceFileMarker,
-    override var psiExpression: PsiElement
+    psiExpression: PsiElement
 ) : ExpressionSourceMark(sourceFileMarker, psiExpression), GutterMark {
 
-    override val id: String = UUID.randomUUID().toString()
-    override val configuration: GutterMarkConfiguration = SourceMarker.getInstance(project).configuration.gutterMarkConfiguration.copy()
+    override val id = UUID.randomUUID().toString()
+    override val configuration = SourceMarker.getInstance(project).configuration.gutterMarkConfiguration.copy()
     private var visible: AtomicBoolean = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
 
     override fun isVisible(): Boolean {
